@@ -42,9 +42,8 @@ namespace VirtoCommerce.PricingModule.Web.Controllers.Api
         /// <param name="evalContext">Pricing evaluation context</param>
         /// <returns>Prices array</returns>
         [HttpPost]
-        [ProducesResponseType(typeof(Price[]), 200)]
         [Route("api/pricing/evaluate")]
-        public async Task<IActionResult> EvaluatePrices([FromBody]PriceEvaluationContext evalContext)
+        public async Task<ActionResult<Price[]>> EvaluatePrices([FromBody]PriceEvaluationContext evalContext)
         {
             var retVal = (await _pricingService.EvaluateProductPricesAsync(evalContext)).ToArray();
 
@@ -58,9 +57,8 @@ namespace VirtoCommerce.PricingModule.Web.Controllers.Api
         /// <param name="evalContext">Pricing evaluation context</param>
         /// <returns>Pricelist array</returns>
         [HttpPost]
-        [ProducesResponseType(typeof(Pricelist[]), 200)]
         [Route("api/pricing/pricelists/evaluate")]
-        public async Task<IActionResult> EvaluatePriceLists([FromBody]PriceEvaluationContext evalContext)
+        public async Task<ActionResult<Pricelist[]>> EvaluatePriceLists([FromBody]PriceEvaluationContext evalContext)
         {
             var retVal = (await _pricingService.EvaluatePriceListsAsync(evalContext)).ToArray();
             return Ok(retVal);
@@ -70,9 +68,8 @@ namespace VirtoCommerce.PricingModule.Web.Controllers.Api
         /// </summary>
         /// <param name="id">Pricelist assignment id</param>
         [HttpGet]
-        [ProducesResponseType(typeof(PricelistAssignment), 200)]
         [Route("api/pricing/assignments/{id}")]
-        public async Task<IActionResult> GetPricelistAssignmentById(string id)
+        public async Task<ActionResult<PricelistAssignment>> GetPricelistAssignmentById(string id)
         {
             var assignment = (await _pricingService.GetPricelistAssignmentsByIdAsync(new[] { id })).FirstOrDefault();
             return Ok(assignment);
@@ -83,9 +80,8 @@ namespace VirtoCommerce.PricingModule.Web.Controllers.Api
         /// </summary>
         /// <remarks>Get a new pricelist assignment object. Create new pricelist assignment, but does not save one.</remarks>
         [HttpGet]
-        [ProducesResponseType(typeof(PricelistAssignment), 200)]
         [Route("api/pricing/assignments/new")]
-        public IActionResult GetNewPricelistAssignments()
+        public ActionResult<PricelistAssignment> GetNewPricelistAssignments()
         {
             var result = AbstractTypeFactory<PricelistAssignment>.TryCreateInstance();
             result.Priority = 1;
@@ -98,9 +94,8 @@ namespace VirtoCommerce.PricingModule.Web.Controllers.Api
         /// </summary>
         /// <remarks>Get all pricelists for all catalogs.</remarks>
         [HttpGet]
-        [ProducesResponseType(typeof(GenericSearchResult<Pricelist>), 200)]
         [Route("api/pricing/pricelists")]
-        public async Task<IActionResult> SearchPricelists(PricelistSearchCriteria criteria)
+        public async Task<ActionResult<PricelistSearchResult>> SearchPricelists(PricelistSearchCriteria criteria)
         {
             if (criteria == null)
             {
@@ -115,9 +110,8 @@ namespace VirtoCommerce.PricingModule.Web.Controllers.Api
         /// </summary>
         /// <remarks>Search price list assignments by given criteria</remarks>
         [HttpGet]
-        [ProducesResponseType(typeof(GenericSearchResult<PricelistAssignment>), 200)]
         [Route("api/pricing/assignments")]
-        public async Task<IActionResult> SearchPricelistAssignments(PricelistAssignmentsSearchCriteria criteria)
+        public async Task<ActionResult<PricelistAssignmentSearchResult>> SearchPricelistAssignments(PricelistAssignmentsSearchCriteria criteria)
         {
             if (criteria == null)
             {
@@ -132,23 +126,21 @@ namespace VirtoCommerce.PricingModule.Web.Controllers.Api
         /// </summary>
         /// <remarks>Search product prices</remarks>
         [HttpGet]
-        [ProducesResponseType(typeof(GenericSearchResult<ProductPrice>), 200)]
         [Route("api/catalog/products/prices/search")]
-        public async Task<IActionResult> SearchProductPrices(PricesSearchCriteria criteria)
+        public async Task<ActionResult<ProductPriceSearchResult>> SearchProductPrices(PricesSearchCriteria criteria)
         {
             if (criteria == null)
             {
                 criteria = new PricesSearchCriteria();
             }
-            var result = await _pricingSearchService.SearchPricesAsync(criteria);
-            var retVal = new GenericSearchResult<ProductPrice>
-            {
-                TotalCount = result.TotalCount,
-                Results = new List<ProductPrice>()
-            };
 
-            var products = await _itemService.GetByIdsAsync(result.Results.Select(x => x.ProductId).Distinct().ToArray(), ItemResponseGroup.ItemInfo.ToString());
-            foreach (var productPricesGroup in result.Results.GroupBy(x => x.ProductId))
+            var result = AbstractTypeFactory<ProductPriceSearchResult>.TryCreateInstance();
+            var searchResult = await _pricingSearchService.SearchPricesAsync(criteria);
+            result.TotalCount = searchResult.TotalCount;
+            result.Results = new List<ProductPrice>();
+
+            var products = await _itemService.GetByIdsAsync(searchResult.Results.Select(x => x.ProductId).Distinct().ToArray(), ItemResponseGroup.ItemInfo.ToString());
+            foreach (var productPricesGroup in searchResult.Results.GroupBy(x => x.ProductId))
             {
                 var productPrice = new ProductPrice
                 {
@@ -169,10 +161,10 @@ namespace VirtoCommerce.PricingModule.Web.Controllers.Api
 
                     productPrice.Product = product;
                 }
-                retVal.Results.Add(productPrice);
+                result.Results.Add(productPrice);
             }
 
-            return Ok(retVal);
+            return Ok(result);
         }
 
         /// <summary>
@@ -181,9 +173,8 @@ namespace VirtoCommerce.PricingModule.Web.Controllers.Api
         /// <remarks>Get an array of valid product prices for each currency.</remarks>
         /// <param name="productId">Product id</param>
         [HttpGet]
-        [ProducesResponseType(typeof(Price[]), 200)]
         [Route("api/products/{productId}/prices")]
-        public async Task<IActionResult> EvaluateProductPrices(string productId)
+        public async Task<ActionResult<Price[]>> EvaluateProductPrices(string productId)
         {
             var priceEvalContext = AbstractTypeFactory<PriceEvaluationContext>.TryCreateInstance();
             priceEvalContext.ProductIds = new[] { productId };
@@ -203,9 +194,8 @@ namespace VirtoCommerce.PricingModule.Web.Controllers.Api
         /// <param name="productId">Product id</param>
         /// <param name="catalogId">Catalog id</param>
         [HttpGet]
-        [ProducesResponseType(typeof(Price[]), 200)]
         [Route("api/products/{productId}/{catalogId}/pricesWidget")]
-        public async Task<IActionResult> EvaluateProductPricesForCatalog(string productId, string catalogId)
+        public async Task<ActionResult<Price[]>> EvaluateProductPricesForCatalog(string productId, string catalogId)
         {
             var priceEvalContext = AbstractTypeFactory<PriceEvaluationContext>.TryCreateInstance();
             priceEvalContext.ProductIds = new[] { productId };
@@ -219,10 +209,9 @@ namespace VirtoCommerce.PricingModule.Web.Controllers.Api
         /// </summary>
         /// <param name="assignment">PricelistAssignment</param>
         [HttpPost]
-        [ProducesResponseType(typeof(PricelistAssignment), 200)]
         [Route("api/pricing/assignments")]
         [Authorize(ModuleConstants.Security.Permissions.Create)]
-        public async Task<IActionResult> CreatePricelistAssignment([FromBody]PricelistAssignment assignment)
+        public async Task<ActionResult<PricelistAssignment>> CreatePricelistAssignment([FromBody]PricelistAssignment assignment)
         {
             await _pricingService.SavePricelistAssignmentsAsync(new[] { assignment });
             return Ok(assignment);
@@ -234,20 +223,18 @@ namespace VirtoCommerce.PricingModule.Web.Controllers.Api
         /// <param name="assignment">PricelistAssignment</param>
         /// <todo>Return no any reason if can't update</todo>
         [HttpPut]
-        [ProducesResponseType(typeof(void), 204)]
         [Route("api/pricing/assignments")]
         [Authorize(ModuleConstants.Security.Permissions.Update)]
-        public async Task<IActionResult> UpdatePriceListAssignment([FromBody]PricelistAssignment assignment)
+        public async Task<ActionResult> UpdatePriceListAssignment([FromBody]PricelistAssignment assignment)
         {
             await _pricingService.SavePricelistAssignmentsAsync(new[] { assignment });
             return NoContent();
         }
 
         [HttpPut]
-        [ProducesResponseType(typeof(void), 204)]
         [Route("api/products/prices")]
         [Authorize(ModuleConstants.Security.Permissions.Update)]
-        public async Task<IActionResult> UpdateProductsPrices([FromBody]ProductPrice[] productPrices)
+        public async Task<ActionResult> UpdateProductsPrices([FromBody]ProductPrice[] productPrices)
         {
             var result = await _pricingSearchService.SearchPricesAsync(new PricesSearchCriteria
             {
@@ -293,10 +280,9 @@ namespace VirtoCommerce.PricingModule.Web.Controllers.Api
         }
 
         [HttpPut]
-        [ProducesResponseType(typeof(void), 204)]
         [Route("api/products/{productId}/prices")]
         [Authorize(ModuleConstants.Security.Permissions.Update)]
-        public async Task<IActionResult> UpdateProductPrices([FromBody]ProductPrice productPrice)
+        public async Task<ActionResult> UpdateProductPrices([FromBody]ProductPrice productPrice)
         {
             return await UpdateProductsPrices(new[] { productPrice });
         }
@@ -307,9 +293,8 @@ namespace VirtoCommerce.PricingModule.Web.Controllers.Api
         /// <remarks>Get all price lists for given product.</remarks>
         /// <param name="productId">Product id</param>
         [HttpGet]
-        [ProducesResponseType(typeof(Pricelist[]), 200)]
         [Route("api/catalog/products/{productId}/pricelists")]
-        public async Task<IActionResult> GetProductPriceLists(string productId)
+        public async Task<ActionResult<Pricelist[]>> GetProductPriceLists(string productId)
         {
             var productPrices = (await _pricingSearchService.SearchPricesAsync(new PricesSearchCriteria { Take = int.MaxValue, ProductId = productId })).Results;
             var priceLists = (await _pricingSearchService.SearchPricelistsAsync(new PricelistSearchCriteria { Take = int.MaxValue })).Results;
@@ -325,9 +310,8 @@ namespace VirtoCommerce.PricingModule.Web.Controllers.Api
         /// </summary>
         /// <param name="id">Pricelist id</param>
         [HttpGet]
-        [ProducesResponseType(typeof(Pricelist), 200)]
         [Route("api/pricing/pricelists/{id}")]
-        public async Task<IActionResult> GetPriceListById(string id)
+        public async Task<ActionResult<Pricelist>> GetPriceListById(string id)
         {
             var pricelist = (await _pricingService.GetPricelistsByIdAsync(new[] { id })).FirstOrDefault();
             return Ok(pricelist);
@@ -338,10 +322,9 @@ namespace VirtoCommerce.PricingModule.Web.Controllers.Api
         /// Create pricelist
         /// </summary>
         [HttpPost]
-        [ProducesResponseType(typeof(Pricelist), 200)]
         [Route("api/pricing/pricelists")]
         [Authorize(ModuleConstants.Security.Permissions.Create)]
-        public async Task<IActionResult> CreatePriceList([FromBody]Pricelist priceList)
+        public async Task<ActionResult<Pricelist>> CreatePriceList([FromBody]Pricelist priceList)
         {
             await _pricingService.SavePricelistsAsync(new[] { priceList });
             return Ok(priceList);
@@ -351,10 +334,9 @@ namespace VirtoCommerce.PricingModule.Web.Controllers.Api
         /// Update pricelist
         /// </summary>
         [HttpPut]
-        [ProducesResponseType(typeof(void), 204)]
         [Route("api/pricing/pricelists")]
         [Authorize(ModuleConstants.Security.Permissions.Update)]
-        public async Task<IActionResult> UpdatePriceList([FromBody]Pricelist priceList)
+        public async Task<ActionResult> UpdatePriceList([FromBody]Pricelist priceList)
         {
             await _pricingService.SavePricelistsAsync(new[] { priceList });
             return NoContent();
@@ -367,10 +349,9 @@ namespace VirtoCommerce.PricingModule.Web.Controllers.Api
         /// <param name="ids">An array of pricelist assignment ids</param>
         /// <todo>Return no any reason if can't update</todo>
         [HttpDelete]
-        [ProducesResponseType(typeof(void), 204)]
         [Route("api/pricing/assignments")]
         [Authorize(ModuleConstants.Security.Permissions.Delete)]
-        public async Task<IActionResult> DeleteAssignments(string[] ids)
+        public async Task<ActionResult> DeleteAssignments(string[] ids)
         {
             await _pricingService.DeletePricelistsAssignmentsAsync(ids);
             return NoContent();
@@ -383,10 +364,9 @@ namespace VirtoCommerce.PricingModule.Web.Controllers.Api
         /// <param name="productIds"></param>
         /// <returns></returns>
         [HttpDelete]
-        [ProducesResponseType(typeof(void), 204)]
         [Route("api/pricing/pricelists/{pricelistId}/products/prices")]
         [Authorize(ModuleConstants.Security.Permissions.Update)]
-        public async Task<IActionResult> DeleteProductPrices(string pricelistId, string[] productIds)
+        public async Task<ActionResult> DeleteProductPrices(string pricelistId, string[] productIds)
         {
             var result = await _pricingSearchService.SearchPricesAsync(new PricesSearchCriteria { PriceListId = pricelistId, ProductIds = productIds, Take = int.MaxValue });
             await _pricingService.DeletePricesAsync(result.Results.Select(x => x.Id).ToArray());
@@ -399,10 +379,9 @@ namespace VirtoCommerce.PricingModule.Web.Controllers.Api
         /// <param name="priceIds"></param>
         /// <returns></returns>
         [HttpDelete]
-        [ProducesResponseType(typeof(void), 204)]
         [Route("api/pricing/products/prices")]
         [Authorize(ModuleConstants.Security.Permissions.Delete)]
-        public async Task<IActionResult> DeleteProductPrice(string[] priceIds)
+        public async Task<ActionResult> DeleteProductPrice(string[] priceIds)
         {
             await _pricingService.DeletePricesAsync(priceIds);
             return NoContent();
@@ -414,10 +393,9 @@ namespace VirtoCommerce.PricingModule.Web.Controllers.Api
         /// <remarks>Delete pricelists by given array of pricelist ids.</remarks>
         /// <param name="ids">An array of pricelist ids</param>
         [HttpDelete]
-        [ProducesResponseType(typeof(void), 204)]
         [Route("api/pricing/pricelists")]
         [Authorize(ModuleConstants.Security.Permissions.Delete)]
-        public async Task<IActionResult> DeletePricelists(string[] ids)
+        public async Task<ActionResult> DeletePricelists(string[] ids)
         {
             await _pricingService.DeletePricelistsAsync(ids);
             return NoContent();

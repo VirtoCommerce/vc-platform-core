@@ -42,7 +42,7 @@ namespace VirtoCommerce.CatalogModule.Web.Controllers.Api
         [HttpPost]
         [Route("")]
         [Authorize(ModuleConstants.Security.Permissions.CatalogCreate)]
-        public async Task<IActionResult> SaveChanges([FromBody]PropertyDictionaryItem[] propertyDictItems)
+        public async Task<ActionResult> SaveChanges([FromBody]PropertyDictionaryItem[] propertyDictItems)
         {
             await _propertyDictionaryService.SaveChangesAsync(propertyDictItems);
             return Ok();
@@ -55,7 +55,7 @@ namespace VirtoCommerce.CatalogModule.Web.Controllers.Api
         [HttpDelete]
         [Route("")]
         [Authorize(ModuleConstants.Security.Permissions.CatalogDelete)]
-        public async Task<IActionResult> Delete([FromQuery] string[] ids)
+        public async Task<ActionResult> Delete([FromQuery] string[] ids)
         {
             await _propertyDictionaryService.DeleteAsync(ids);
             return Ok();

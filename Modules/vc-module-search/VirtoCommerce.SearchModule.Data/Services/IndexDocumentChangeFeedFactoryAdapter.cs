@@ -14,17 +14,17 @@ namespace VirtoCommerce.SearchModule.Data.Services
     /// </summary>
     public class IndexDocumentChangeFeedFactoryAdapter : IIndexDocumentChangeFeedFactory
     {
-        protected IIndexDocumentChangesProvider Provider { get; }
+        private readonly IIndexDocumentChangesProvider _provider;
 
         public IndexDocumentChangeFeedFactoryAdapter(IIndexDocumentChangesProvider provider)
         {
-            Provider = provider ?? throw new ArgumentNullException(nameof(provider));
+            _provider = provider ?? throw new ArgumentNullException(nameof(provider));
         }
 
         public virtual async Task<IIndexDocumentChangeFeed> CreateFeed(DateTime? startDate, DateTime? endDate, int batchSize)
         {
-            var totalCount = await Provider.GetTotalChangesCountAsync(startDate, endDate);
-            return new IndexDocumentChangeFeedForProvider(Provider, startDate, endDate, totalCount, batchSize);
+            var totalCount = await _provider.GetTotalChangesCountAsync(startDate, endDate);
+            return new IndexDocumentChangeFeedForProvider(_provider, startDate, endDate, totalCount, batchSize);
         }
 
         protected class IndexDocumentChangeFeedForProvider : IIndexDocumentChangeFeed

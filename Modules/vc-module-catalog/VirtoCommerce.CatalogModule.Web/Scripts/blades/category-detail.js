@@ -1,4 +1,4 @@
-﻿angular.module('virtoCommerce.catalogModule')
+angular.module('virtoCommerce.catalogModule')
 .controller('virtoCommerce.catalogModule.categoryDetailController', ['$rootScope', '$scope', 'platformWebApp.bladeNavigationService', 'platformWebApp.settings', 'virtoCommerce.catalogModule.categories', 'virtoCommerce.catalogModule.catalogs', 'platformWebApp.metaFormsService', function ($rootScope, $scope, bladeNavigationService, settings, categories, catalogs, metaFormsService) {
     var blade = $scope.blade;
     blade.updatePermission = 'catalog:update';
@@ -38,7 +38,7 @@
     };
 
     blade.codeValidator = function (value) {
-        var pattern = /[$+;=%{}[\]|\\\/@ ~!^*&()?:'<>,]/;
+        var pattern = /[$+;=%{}[\]|@~!^*&()?'<>,]/;
         return !pattern.test(value);
     };
 

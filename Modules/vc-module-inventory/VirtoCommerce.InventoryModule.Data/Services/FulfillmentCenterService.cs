@@ -18,16 +18,16 @@ namespace VirtoCommerce.InventoryModule.Data.Services
 {
     public class FulfillmentCenterService : IFulfillmentCenterService
     {
+        private readonly Func<IInventoryRepository> _repositoryFactory;
+        private readonly IEventPublisher _eventPublisher;
+        private readonly IPlatformMemoryCache _platformMemoryCache;
+
         public FulfillmentCenterService(Func<IInventoryRepository> repositoryFactory, IEventPublisher eventPublisher, IPlatformMemoryCache platformMemoryCache)
         {
-            RepositoryFactory = repositoryFactory;
-            EventPublisher = eventPublisher;
-            PlatformMemoryCache = platformMemoryCache;
+            _repositoryFactory = repositoryFactory;
+            _eventPublisher = eventPublisher;
+            _platformMemoryCache = platformMemoryCache;
         }
-
-        protected Func<IInventoryRepository> RepositoryFactory { get; }
-        protected IEventPublisher EventPublisher { get; }
-        protected IPlatformMemoryCache PlatformMemoryCache { get; }
 
         #region IFulfillmentCenterService members
         public virtual async Task<IEnumerable<FulfillmentCenter>> GetByIdsAsync(IEnumerable<string> ids)
@@ -37,11 +37,11 @@ namespace VirtoCommerce.InventoryModule.Data.Services
                 throw new ArgumentNullException(nameof(ids));
             }
             var cacheKey = CacheKey.With(GetType(), "GetByIdsAsync", string.Join("-", ids.OrderBy(x => x)));
-            return await PlatformMemoryCache.GetOrCreateExclusiveAsync(cacheKey, async (cacheEntry) =>
+            return await _platformMemoryCache.GetOrCreateExclusiveAsync(cacheKey, async (cacheEntry) =>
             {
                 cacheEntry.AddExpirationToken(FulfillmentCenterCacheRegion.CreateChangeToken());
                 IEnumerable<FulfillmentCenter> result = null;
-                using (var repository = RepositoryFactory())
+                using (var repository = _repositoryFactory())
                 {
                     repository.DisableChangesTracking();
 
@@ -62,7 +62,7 @@ namespace VirtoCommerce.InventoryModule.Data.Services
 
             var pkMap = new PrimaryKeyResolvingMap();
             var changedEntries = new List<GenericChangedEntry<FulfillmentCenter>>();
-            using (var repository = RepositoryFactory())
+            using (var repository = _repositoryFactory())
             {
                 var existEntities = await repository.GetFulfillmentCentersAsync(fulfillmentCenters.Where(x => !x.IsTransient()).Select(x => x.Id).ToArray());
                 foreach (var changedCenter in fulfillmentCenters)
@@ -81,10 +81,10 @@ namespace VirtoCommerce.InventoryModule.Data.Services
                     }
                 }
 
-                await EventPublisher.Publish(new FulfillmentCenterChangingEvent(changedEntries));
+                await _eventPublisher.Publish(new FulfillmentCenterChangingEvent(changedEntries));
                 await repository.UnitOfWork.CommitAsync();
                 pkMap.ResolvePrimaryKeys();
-                await EventPublisher.Publish(new FulfillmentCenterChangedEvent(changedEntries));
+                await _eventPublisher.Publish(new FulfillmentCenterChangedEvent(changedEntries));
 
                 FulfillmentCenterCacheRegion.ExpireRegion();
             }
@@ -92,7 +92,7 @@ namespace VirtoCommerce.InventoryModule.Data.Services
 
         public virtual async Task DeleteAsync(IEnumerable<string> ids)
         {
-            using (var repository = RepositoryFactory())
+            using (var repository = _repositoryFactory())
             {
                 var changedEntries = new List<GenericChangedEntry<FulfillmentCenter>>();
                 var dbCenters = await repository.GetFulfillmentCentersAsync(ids);
@@ -102,9 +102,9 @@ namespace VirtoCommerce.InventoryModule.Data.Services
                     changedEntries.Add(new GenericChangedEntry<FulfillmentCenter>(dbCenter.ToModel(AbstractTypeFactory<FulfillmentCenter>.TryCreateInstance()), EntryState.Deleted));
                 }
 
-                await EventPublisher.Publish(new FulfillmentCenterChangingEvent(changedEntries));
+                await _eventPublisher.Publish(new FulfillmentCenterChangingEvent(changedEntries));
                 await repository.UnitOfWork.CommitAsync();
-                await EventPublisher.Publish(new FulfillmentCenterChangedEvent(changedEntries));
+                await _eventPublisher.Publish(new FulfillmentCenterChangedEvent(changedEntries));
 
                 FulfillmentCenterCacheRegion.ExpireRegion();
             }

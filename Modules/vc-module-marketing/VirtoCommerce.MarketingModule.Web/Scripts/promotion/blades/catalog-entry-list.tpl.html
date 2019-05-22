@@ -1,0 +1,39 @@
+<div class="blade-static __bottom" ng-include="'$(Platform)/Scripts/common/templates/ok-cancel.tpl.html'"></div>
+<div class="blade-content __medium-wide">
+    <div class="blade-inner">
+        <div class="inner-block">
+            <div class="table-wrapper" ng-init="setGridOptions('catalogConditionsGrid', {
+                data: objects,
+                rowTemplate: 'catalog-conditions-item-list-row.tpl.html',
+                rowHeight: 48,
+                columnDefs: [
+                    { name: 'imgSrc', displayName: 'catalog.blades.catalog-items-select.labels.picture', cellTemplate: 'catalog-conditions-item-list-image-cell.tpl.html', enableColumnResizing: false, enableSorting: false, width: 60 },
+                    { name: 'name', displayName: 'catalog.blades.catalog-items-select.labels.name' },
+                    { name: 'code', displayName: 'catalog.blades.catalog-items-select.labels.sku', width: 170, cellTemplate: 'catalog-conditions-item-list-SKU.cell.html' }]})">
+                <div ui-grid="gridOptions" ui-grid-pinning ui-grid-auto-resize ui-grid-save-state ui-grid-selection ui-grid-resize-columns ui-grid-move-columns ui-grid-height></div>
+            </div>
+        </div>
+    </div>
+</div>
+<script id="catalog-conditions-item-list-row.tpl.html" type="text/ng-template">
+    <div ng-repeat="(colRenderIndex, col) in colContainer.renderedColumns track by col.uid"
+         ui-grid-one-bind-id-grid="rowRenderIndex + '-' + col.uid + '-cell'"
+         class="ui-grid-cell"
+         ng-class="{
+             'ui-grid-row-header-cell': col.isRowHeader,
+             '__hovered': grid.appScope.contextMenuEntity === row.entity }"
+         role="{{ col.isRowHeader ? 'rowheader' : 'gridcell' }}"
+         ui-grid-cell
+         context-menu="grid.appScope.contextMenuEntity = row.entity">
+    </div>
+</script>
+<script id="catalog-conditions-item-list-image-cell.tpl.html" type="text/ng-template">
+    <div class="ui-grid-cell-contents">
+        <div class="product-img">
+            <div class="image" style="background-image: url('{{COL_FIELD}}')" ng-if="COL_FIELD"></div>
+        </div>
+    </div>
+</script>
+<script type="text/ng-template" id="catalog-conditions-item-list-SKU.cell.html">
+    <div class="ui-grid-cell-contents">{{row.entity.type!=='category'?COL_FIELD:''}}</div>
+</script>

@@ -3,8 +3,6 @@ using System.IO;
 using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
-using Microsoft.AspNetCore.Mvc;
-using Microsoft.Extensions.Options;
 using Newtonsoft.Json;
 using VirtoCommerce.ImageToolsModule.Core.Models;
 using VirtoCommerce.ImageToolsModule.Core.Services;
@@ -52,12 +50,13 @@ namespace VirtoCommerce.ImageToolsModule.Data.ExportImport
                     progressCallback(progressInfo);
 
                     await writer.WritePropertyNameAsync("Options");
-                    await writer.SerializeJsonArrayWithPagingAsync(_jsonSerializer, _batchSize, (skip, take) =>
+                    await writer.SerializeJsonArrayWithPagingAsync(_jsonSerializer, _batchSize, async (skip, take) =>
                     {
                         var searchCriteria = AbstractTypeFactory<ThumbnailOptionSearchCriteria>.TryCreateInstance();
                         searchCriteria.Take = take;
                         searchCriteria.Skip = skip;
-                        return _optionSearchService.SearchAsync(searchCriteria);
+                        var searchResult = await _optionSearchService.SearchAsync(searchCriteria);
+                        return (GenericSearchResult<ThumbnailOption>)searchResult;
                     }, (processedCount, totalCount) =>
                     {
                         progressInfo.Description = $"{processedCount} of {totalCount} Options have been exported";
@@ -68,12 +67,13 @@ namespace VirtoCommerce.ImageToolsModule.Data.ExportImport
                     progressCallback(progressInfo);
 
                     await writer.WritePropertyNameAsync("Tasks");
-                    await writer.SerializeJsonArrayWithPagingAsync(_jsonSerializer, _batchSize, (skip, take) =>
+                    await writer.SerializeJsonArrayWithPagingAsync(_jsonSerializer, _batchSize, async (skip, take) =>
                     {
                         var searchCriteria = AbstractTypeFactory<ThumbnailTaskSearchCriteria>.TryCreateInstance();
                         searchCriteria.Take = take;
                         searchCriteria.Skip = skip;
-                        return _taskSearchService.SearchAsync(searchCriteria);
+                        var searchResult = await _taskSearchService.SearchAsync(searchCriteria);
+                        return (GenericSearchResult<ThumbnailTask>)searchResult;
                     }, (processedCount, totalCount) =>
                     {
                         progressInfo.Description = $"{processedCount} of {totalCount} Tasks have been exported";

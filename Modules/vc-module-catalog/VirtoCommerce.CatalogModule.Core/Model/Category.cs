@@ -151,7 +151,7 @@ namespace VirtoCommerce.CatalogModule.Core.Model
         public virtual void ReduceDetails(string responseGroup)
         {
             //Reduce details according to response group
-            var categoryResponseGroup = EnumUtility.SafeParse(responseGroup, CategoryResponseGroup.Full);
+            var categoryResponseGroup = EnumUtility.SafeParseFlags(responseGroup, CategoryResponseGroup.Full);
 
             if (!categoryResponseGroup.HasFlag(CategoryResponseGroup.WithImages))
             {

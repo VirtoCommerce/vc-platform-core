@@ -17,8 +17,9 @@ namespace VirtoCommerce.NotificationsModule.Data.Services
             _repositoryFactory = repositoryFactory;
         }
 
-        public async Task<GenericSearchResult<Notification>> SearchNotificationsAsync(NotificationSearchCriteria criteria)
+        public async Task<NotificationSearchResult> SearchNotificationsAsync(NotificationSearchCriteria criteria)
         {
+            var result = AbstractTypeFactory<NotificationSearchResult>.TryCreateInstance();
             var query = AbstractTypeFactory<Notification>.AllTypeInfos
                 .Where(t => t.AllSubclasses.Any(s => s != t.Type && s.IsSubclassOf(typeof(Notification))))
                 .Select(n => n.Type)
@@ -49,9 +50,9 @@ namespace VirtoCommerce.NotificationsModule.Data.Services
 
             var notifications = collection.Select(t =>
             {
-                var result = AbstractTypeFactory<Notification>.TryCreateInstance(t.Name);
+                var notification = AbstractTypeFactory<Notification>.TryCreateInstance(t.Name);
                 var notificationEntity = entities.FirstOrDefault(e => e.Type.EqualsInvariant(t.Name));
-                return notificationEntity != null ? notificationEntity.ToModel(result) : result;
+                return notificationEntity != null ? notificationEntity.ToModel(notification) : notification;
             });
 
             if (criteria.IsActive)
@@ -59,11 +60,10 @@ namespace VirtoCommerce.NotificationsModule.Data.Services
                 notifications = notifications.Where(n => n.IsActive);
             }
 
-            return new GenericSearchResult<Notification>
-            {
-                Results = notifications.ToList(),
-                TotalCount = totalCount
-            };
+            result.Results = notifications.ToList();
+            result.TotalCount = totalCount;
+
+            return result;
         }
     }
 }

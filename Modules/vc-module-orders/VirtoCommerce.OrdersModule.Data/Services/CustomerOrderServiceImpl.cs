@@ -62,7 +62,7 @@ namespace VirtoCommerce.OrdersModule.Data.Services
             return await _platformMemoryCache.GetOrCreateExclusiveAsync(cacheKey, async (cacheEntry) =>
             {
                 var retVal = new List<CustomerOrder>();
-                var orderResponseGroup = EnumUtility.SafeParse(responseGroup, CustomerOrderResponseGroup.Full);
+                var orderResponseGroup = EnumUtility.SafeParseFlags(responseGroup, CustomerOrderResponseGroup.Full);
 
                 using (var repository = _repositoryFactory())
                 {

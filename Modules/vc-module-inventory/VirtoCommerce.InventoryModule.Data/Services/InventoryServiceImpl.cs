@@ -1,5 +1,4 @@
 using System;
-using System.Collections;
 using System.Collections.Generic;
 using System.Linq;
 using System.Threading.Tasks;
@@ -20,23 +19,23 @@ namespace VirtoCommerce.InventoryModule.Data.Services
 {
     public class InventoryServiceImpl : IInventoryService
     {
+        private readonly Func<IInventoryRepository> _repositoryFactory;
+        private readonly IEventPublisher _eventPublisher;
+        private readonly IPlatformMemoryCache _platformMemoryCache;
+
         public InventoryServiceImpl(Func<IInventoryRepository> repositoryFactory, IEventPublisher eventPublisher, IPlatformMemoryCache platformMemoryCache)
         {
-            RepositoryFactory = repositoryFactory;
-            EventPublisher = eventPublisher;
-            PlatformMemoryCache = platformMemoryCache;
+            _repositoryFactory = repositoryFactory;
+            _eventPublisher = eventPublisher;
+            _platformMemoryCache = platformMemoryCache;
         }
-
-        protected Func<IInventoryRepository> RepositoryFactory { get; }
-        protected IEventPublisher EventPublisher { get; }
-        protected IPlatformMemoryCache PlatformMemoryCache { get; }
 
         public virtual async Task<IEnumerable<InventoryInfo>> GetByIdsAsync(string[] itemIds, string responseGroup = null)
         {
             var cacheKey = CacheKey.With(GetType(), "GetByIdsAsync", string.Join("-", itemIds), responseGroup);
-            return await PlatformMemoryCache.GetOrCreateExclusiveAsync(cacheKey, async (cacheEntry) =>
+            return await _platformMemoryCache.GetOrCreateExclusiveAsync(cacheKey, async (cacheEntry) =>
             {
-                using (var repository = RepositoryFactory())
+                using (var repository = _repositoryFactory())
                 {
                     repository.DisableChangesTracking();
                     var entries = await repository.Inventories.ToArrayAsync();
@@ -52,14 +51,14 @@ namespace VirtoCommerce.InventoryModule.Data.Services
         }
 
         #region IInventoryService Members
-        
+
         public virtual async Task<IEnumerable<InventoryInfo>> GetProductsInventoryInfosAsync(IEnumerable<string> productIds, string responseGroup = null)
         {
             var cacheKey = CacheKey.With(GetType(), "GetProductsInventoryInfosAsync", string.Join("-", productIds), responseGroup);
-            return await PlatformMemoryCache.GetOrCreateExclusiveAsync(cacheKey, async (cacheEntry) =>
+            return await _platformMemoryCache.GetOrCreateExclusiveAsync(cacheKey, async (cacheEntry) =>
             {
                 var retVal = new List<InventoryInfo>();
-                using (var repository = RepositoryFactory())
+                using (var repository = _repositoryFactory())
                 {
                     repository.DisableChangesTracking();
                     var entities = await repository.GetProductsInventoriesAsync(productIds.ToArray(), responseGroup);
@@ -82,7 +81,7 @@ namespace VirtoCommerce.InventoryModule.Data.Services
             }
 
             var changedEntries = new List<GenericChangedEntry<InventoryInfo>>();
-            using (var repository = RepositoryFactory())
+            using (var repository = _repositoryFactory())
             {
                 var dataExistInventories = await repository.GetProductsInventoriesAsync(inventoryInfos.Select(x => x.ProductId));
                 foreach (var changedInventory in inventoryInfos)
@@ -103,9 +102,9 @@ namespace VirtoCommerce.InventoryModule.Data.Services
                 }
 
                 //Raise domain events
-                await EventPublisher.Publish(new InventoryChangingEvent(changedEntries));
+                await _eventPublisher.Publish(new InventoryChangingEvent(changedEntries));
                 await repository.UnitOfWork.CommitAsync();
-                await EventPublisher.Publish(new InventoryChangedEvent(changedEntries));
+                await _eventPublisher.Publish(new InventoryChangedEvent(changedEntries));
 
                 ClearCache(inventoryInfos);
             }

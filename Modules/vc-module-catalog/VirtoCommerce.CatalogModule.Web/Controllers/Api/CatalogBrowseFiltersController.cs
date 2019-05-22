@@ -77,7 +77,7 @@ namespace VirtoCommerce.CatalogModule.Web.Controllers.Api
         /// <param name="browseFilterProperties"></param>
         [HttpPut]
         [Route("{storeId}/properties")]
-        public async Task<IActionResult> SetAggregationProperties(string storeId, [FromBody]AggregationProperty[] browseFilterProperties)
+        public async Task<ActionResult> SetAggregationProperties(string storeId, [FromBody]AggregationProperty[] browseFilterProperties)
         {
             var store = await _storeService.GetByIdAsync(storeId);
             if (store == null)

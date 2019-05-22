@@ -65,8 +65,8 @@ namespace VirtoCommerce.PricingModule.Data.ExportImport
 
                 await writer.WritePropertyNameAsync("Pricelists");
 
-                await writer.SerializeJsonArrayWithPagingAsync(_jsonSerializer, BatchSize, (skip, take) =>
-                    _pricingSearchService.SearchPricelistsAsync(new PricelistSearchCriteria { Skip = skip, Take = take })
+                await writer.SerializeJsonArrayWithPagingAsync(_jsonSerializer, BatchSize, async (skip, take) =>
+                    (GenericSearchResult<Pricelist>)await _pricingSearchService.SearchPricelistsAsync(new PricelistSearchCriteria { Skip = skip, Take = take })
                 , (processedCount, totalCount) =>
                 {
                     progressInfo.Description = $"{ processedCount } of { totalCount } pricelits have been exported";
@@ -79,8 +79,8 @@ namespace VirtoCommerce.PricingModule.Data.ExportImport
 
                 await writer.WritePropertyNameAsync("Assignments");
 
-                await writer.SerializeJsonArrayWithPagingAsync(_jsonSerializer, BatchSize, (skip, take) =>
-                    _pricingSearchService.SearchPricelistAssignmentsAsync(new PricelistAssignmentsSearchCriteria { Skip = skip, Take = take })
+                await writer.SerializeJsonArrayWithPagingAsync(_jsonSerializer, BatchSize, async (skip, take) =>
+                    (GenericSearchResult<PricelistAssignment>)await _pricingSearchService.SearchPricelistAssignmentsAsync(new PricelistAssignmentsSearchCriteria { Skip = skip, Take = take })
                 , (processedCount, totalCount) =>
                 {
                     progressInfo.Description = $"{ processedCount } of { totalCount } pricelits assignments have been exported";
@@ -93,8 +93,8 @@ namespace VirtoCommerce.PricingModule.Data.ExportImport
 
                 await writer.WritePropertyNameAsync("Prices");
 
-                await writer.SerializeJsonArrayWithPagingAsync(_jsonSerializer, BatchSize, (skip, take) =>
-                    _pricingSearchService.SearchPricesAsync(new PricesSearchCriteria { Skip = skip, Take = take })
+                await writer.SerializeJsonArrayWithPagingAsync(_jsonSerializer, BatchSize, async (skip, take) =>
+                    (GenericSearchResult<Price>)await _pricingSearchService.SearchPricesAsync(new PricesSearchCriteria { Skip = skip, Take = take })
                 , (processedCount, totalCount) =>
                 {
                     progressInfo.Description = $"{ processedCount } of { totalCount } prices have been exported";

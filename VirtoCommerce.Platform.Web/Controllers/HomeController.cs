@@ -26,7 +26,7 @@ namespace VirtoCommerce.Platform.Web.Controllers
             _hostEnv = hostEnv;
         }
 
-        public IActionResult Index()
+        public ActionResult Index()
         {
             var model = new IndexModel
             {
@@ -67,21 +67,21 @@ namespace VirtoCommerce.Platform.Web.Controllers
             return View(model);
         }
 
-        public IActionResult About()
+        public ActionResult About()
         {
             ViewData["Message"] = "Your application description page.";
 
             return View();
         }
 
-        public IActionResult Contact()
+        public ActionResult Contact()
         {
             ViewData["Message"] = "Your contact page.";
 
             return View();
         }
 
-        public IActionResult Error()
+        public ActionResult Error()
         {
             return View(new ErrorModel { RequestId = Activity.Current?.Id ?? HttpContext.TraceIdentifier });
         }

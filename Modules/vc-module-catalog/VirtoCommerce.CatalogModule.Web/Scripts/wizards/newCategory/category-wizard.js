@@ -1,4 +1,4 @@
-﻿angular.module('virtoCommerce.catalogModule')
+angular.module('virtoCommerce.catalogModule')
 .controller('virtoCommerce.catalogModule.newCategoryWizardController', ['$scope', 'platformWebApp.bladeNavigationService', 'platformWebApp.dialogService', 'virtoCommerce.catalogModule.categories', function ($scope, bladeNavigationService, dialogService, categories) {
     var blade = $scope.blade;
 
@@ -46,7 +46,7 @@
     }
 
     $scope.codeValidator = function (value) {
-        var pattern = /[$+;=%{}[\]|\\\/@ ~!^*&()?:'<>,]/;
+        var pattern = /[$+;=%{}[\]|@~!^*&()?'<>,]/;
         return !pattern.test(value);
     };
 
