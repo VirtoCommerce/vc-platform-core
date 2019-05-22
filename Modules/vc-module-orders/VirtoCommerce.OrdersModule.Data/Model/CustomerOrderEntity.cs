@@ -18,7 +18,6 @@ namespace VirtoCommerce.OrdersModule.Data.Model
         [StringLength(64)]
         public string CustomerId { get; set; }
         [StringLength(255)]
-
         public string CustomerName { get; set; }
 
         [Required]
@@ -28,7 +27,6 @@ namespace VirtoCommerce.OrdersModule.Data.Model
         public string StoreName { get; set; }
 
         [StringLength(64)]
-
         public string ChannelId { get; set; }
         [StringLength(64)]
         public string OrganizationId { get; set; }
@@ -36,7 +34,6 @@ namespace VirtoCommerce.OrdersModule.Data.Model
         public string OrganizationName { get; set; }
 
         [StringLength(64)]
-
         public string EmployeeId { get; set; }
         [StringLength(255)]
         public string EmployeeName { get; set; }
