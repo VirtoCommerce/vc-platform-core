@@ -58,6 +58,8 @@ namespace VirtoCommerce.Platform.Modules
                 services.Configure(setupAction);
             }
 
+            services.AddSingleton<IPlatformRestarter, ProcessPlatformRestarter>();
+
             return services;
         }
     }
