@@ -2,25 +2,27 @@ using System.Collections.Generic;
 using System.Linq;
 using System.Threading.Tasks;
 using Microsoft.AspNetCore.Identity;
-using VirtoCommerce.CoreModule.Core.Payment;
 using VirtoCommerce.CustomerModule.Core.Services;
+using VirtoCommerce.NotificationsModule.Core.Extensions;
 using VirtoCommerce.NotificationsModule.Core.Model;
 using VirtoCommerce.NotificationsModule.Core.Services;
 using VirtoCommerce.OrdersModule.Core;
 using VirtoCommerce.OrdersModule.Core.Events;
 using VirtoCommerce.OrdersModule.Core.Model;
 using VirtoCommerce.OrdersModule.Core.Notifications;
+using VirtoCommerce.PaymentModule.Core.Model;
 using VirtoCommerce.Platform.Core.Common;
 using VirtoCommerce.Platform.Core.Events;
 using VirtoCommerce.Platform.Core.Security;
 using VirtoCommerce.Platform.Core.Settings;
+using VirtoCommerce.StoreModule.Core.Model;
 using VirtoCommerce.StoreModule.Core.Services;
 
 namespace VirtoCommerce.OrdersModule.Data.Handlers
 {
     public class SendNotificationsOrderChangedEventHandler : IEventHandler<OrderChangedEvent>
     {
-        private readonly INotificationService _notificationService;
+        private readonly INotificationSearchService _notificationSearchService;
         private readonly INotificationSender _notificationSender;
         private readonly IStoreService _storeService;
         private readonly IMemberService _memberService;
@@ -28,13 +30,13 @@ namespace VirtoCommerce.OrdersModule.Data.Handlers
         private readonly UserManager<ApplicationUser> _userManager;
 
         public SendNotificationsOrderChangedEventHandler(INotificationSender notificationSender, IStoreService storeService, IMemberService memberService,
-                                                        ISettingsManager settingsManager, UserManager<ApplicationUser> userManager, INotificationService notificationService)
+                                                        ISettingsManager settingsManager, UserManager<ApplicationUser> userManager, INotificationSearchService notificationSearchService)
         {
             _notificationSender = notificationSender;
             _storeService = storeService;
             _memberService = memberService;
             _settingsManager = settingsManager;
-            _notificationService = notificationService;
+            _notificationSearchService = notificationSearchService;
             _userManager = userManager;
         }
 
@@ -56,8 +58,8 @@ namespace VirtoCommerce.OrdersModule.Data.Handlers
 
             if (IsOrderCanceled(changedEntry))
             {
-                var originalNotification = await _notificationService.GetByTypeAsync(nameof(CancelOrderEmailNotification));
-                if (originalNotification is CancelOrderEmailNotification notification)
+                var notification = await _notificationSearchService.GetNotificationAsync<CancelOrderEmailNotification>(new TenantIdentity(changedEntry.NewEntry.StoreId, nameof(Store)));
+                if (notification != null)
                 {
                     notification.CustomerOrder = changedEntry.NewEntry;
                     notifications.Add(notification);
@@ -66,8 +68,8 @@ namespace VirtoCommerce.OrdersModule.Data.Handlers
 
             if (changedEntry.EntryState == EntryState.Added && !changedEntry.NewEntry.IsPrototype)
             {
-                var originalNotification = await _notificationService.GetByTypeAsync(nameof(OrderCreateEmailNotification));
-                if (originalNotification is OrderCreateEmailNotification notification)
+                var notification = await _notificationSearchService.GetNotificationAsync<OrderCreateEmailNotification>(new TenantIdentity(changedEntry.NewEntry.StoreId, nameof(Store)));
+                if (notification != null)
                 {
                     notification.CustomerOrder = changedEntry.NewEntry;
                     notifications.Add(notification);
@@ -76,8 +78,8 @@ namespace VirtoCommerce.OrdersModule.Data.Handlers
 
             if (HasNewStatus(changedEntry))
             {
-                var originalNotification = await _notificationService.GetByTypeAsync(nameof(NewOrderStatusEmailNotification));
-                if (originalNotification is NewOrderStatusEmailNotification notification)
+                var notification = await _notificationSearchService.GetNotificationAsync<NewOrderStatusEmailNotification>(new TenantIdentity(changedEntry.NewEntry.StoreId, nameof(Store)));
+                if (notification != null)
                 {
                     notification.CustomerOrder = changedEntry.NewEntry;
                     notification.NewStatus = changedEntry.NewEntry.Status;
@@ -88,8 +90,8 @@ namespace VirtoCommerce.OrdersModule.Data.Handlers
 
             if (IsOrderPaid(changedEntry))
             {
-                var originalNotification = await _notificationService.GetByTypeAsync(nameof(OrderPaidEmailNotification));
-                if (originalNotification is OrderCreateEmailNotification notification)
+                var notification = await _notificationSearchService.GetNotificationAsync<OrderPaidEmailNotification>(new TenantIdentity(changedEntry.NewEntry.StoreId, nameof(Store)));
+                if (notification != null)
                 {
                     notification.CustomerOrder = changedEntry.NewEntry;
                     notifications.Add(notification);
@@ -98,8 +100,8 @@ namespace VirtoCommerce.OrdersModule.Data.Handlers
 
             if (IsOrderSent(changedEntry))
             {
-                var originalNotification = await _notificationService.GetByTypeAsync(nameof(OrderSentEmailNotification));
-                if (originalNotification is OrderCreateEmailNotification notification)
+                var notification = await _notificationSearchService.GetNotificationAsync<OrderSentEmailNotification>(new TenantIdentity(changedEntry.NewEntry.StoreId, nameof(Store)));
+                if (notification != null)
                 {
                     notification.CustomerOrder = changedEntry.NewEntry;
                     notifications.Add(notification);

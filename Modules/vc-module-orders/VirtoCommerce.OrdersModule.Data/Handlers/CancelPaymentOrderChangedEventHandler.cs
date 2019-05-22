@@ -2,10 +2,13 @@ using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Threading.Tasks;
-using VirtoCommerce.CoreModule.Core.Payment;
 using VirtoCommerce.OrdersModule.Core.Events;
 using VirtoCommerce.OrdersModule.Core.Model;
 using VirtoCommerce.OrdersModule.Core.Services;
+using VirtoCommerce.PaymentModule.Core.Model;
+using VirtoCommerce.PaymentModule.Core.Model.Search;
+using VirtoCommerce.PaymentModule.Core.Services;
+using VirtoCommerce.PaymentModule.Model.Requests;
 using VirtoCommerce.Platform.Core.Common;
 using VirtoCommerce.Platform.Core.Events;
 using VirtoCommerce.StoreModule.Core.Services;
@@ -16,11 +19,17 @@ namespace VirtoCommerce.OrdersModule.Data.Handlers
     {
         private readonly IStoreService _storeService;
         private readonly ICustomerOrderService _orderService;
+        private readonly IPaymentMethodsSearchService _paymentMethodsSearchService;
 
-        public CancelPaymentOrderChangedEventHandler(IStoreService storeService, ICustomerOrderService customerOrderService)
+        public CancelPaymentOrderChangedEventHandler(
+            IStoreService storeService,
+            ICustomerOrderService customerOrderService,
+            IPaymentMethodsSearchService paymentMethodsSearchService
+            )
         {
             _storeService = storeService;
             _orderService = customerOrderService;
+            _paymentMethodsSearchService = paymentMethodsSearchService;
         }
 
 
@@ -35,10 +44,13 @@ namespace VirtoCommerce.OrdersModule.Data.Handlers
         protected virtual async Task TryToCancelOrder(GenericChangedEntry<CustomerOrder> changedEntry)
         {
             var store = await _storeService.GetByIdAsync(changedEntry.NewEntry.StoreId);
+
             //Try to load payment methods for payments
+            var gatewayCodes = changedEntry.NewEntry.InPayments.Select(x => x.GatewayCode).ToArray();
+            var paymentMethods = await GetPaymentMethodsAsync(store.Id, gatewayCodes);
             foreach (var payment in changedEntry.NewEntry.InPayments)
             {
-                payment.PaymentMethod = store.PaymentMethods.FirstOrDefault(p => p.Code.EqualsInvariant(payment.GatewayCode));
+                payment.PaymentMethod = paymentMethods.FirstOrDefault(x => x.Code == payment.GatewayCode);
             }
 
             var toCancelPayments = new List<PaymentIn>();
@@ -49,7 +61,7 @@ namespace VirtoCommerce.OrdersModule.Data.Handlers
             }
             else
             {
-                foreach (var canceledPayment in changedEntry.NewEntry?.InPayments.Where(x => x.IsCancelled) ?? Enumerable.Empty<PaymentIn>())
+                foreach (var canceledPayment in changedEntry.NewEntry?.InPayments.Where(x => x.IsCancelled))
                 {
                     var oldSamePayment = changedEntry.OldEntry?.InPayments.FirstOrDefault(x => x == canceledPayment);
                     if (oldSamePayment != null && !oldSamePayment.IsCancelled)
@@ -84,6 +96,22 @@ namespace VirtoCommerce.OrdersModule.Data.Handlers
                     payment.CancelledDate = DateTime.UtcNow;
                 }
             }
+        }
+
+        protected virtual async Task<ICollection<PaymentMethod>> GetPaymentMethodsAsync(string storeId, string[] codes)
+        {
+            var criteria = new PaymentMethodsSearchCriteria
+            {
+                IsActive = true,
+                StoreId = storeId,
+                Codes = codes,
+                Take = int.MaxValue
+            };
+
+            var searchResult = await _paymentMethodsSearchService.SearchPaymentMethodsAsync(criteria);
+            var paymentMethod = searchResult.Results;
+
+            return paymentMethod;
         }
     }
 }

@@ -1,53 +1,53 @@
 using System;
 using System.ComponentModel.DataAnnotations;
-using VirtoCommerce.Platform.Core.Common;
 using VirtoCommerce.InventoryModule.Core.Model;
+using VirtoCommerce.Platform.Core.Common;
 
 namespace VirtoCommerce.InventoryModule.Data.Model
 {
-	public class InventoryEntity : AuditableEntity
-	{	
-		[Required]
-		public decimal InStockQuantity { get; set; }
+    public class InventoryEntity : AuditableEntity
+    {
+        [Required]
+        public decimal InStockQuantity { get; set; }
 
-		[Required]
-		public decimal ReservedQuantity { get; set; }
+        [Required]
+        public decimal ReservedQuantity { get; set; }
 
-		[Required]
-		public decimal ReorderMinQuantity { get; set; }
+        [Required]
+        public decimal ReorderMinQuantity { get; set; }
 
-		public decimal PreorderQuantity { get; set; }
+        public decimal PreorderQuantity { get; set; }
 
-		public decimal BackorderQuantity { get; set; }
+        public decimal BackorderQuantity { get; set; }
 
-		public bool AllowBackorder { get; set; }
+        public bool AllowBackorder { get; set; }
 
-		public bool AllowPreorder { get; set; }
+        public bool AllowPreorder { get; set; }
 
 
-		[Required]
-		public int Status { get; set; }
+        [Required]
+        public int Status { get; set; }
 
-		/// <summary>
-		/// The date from when the preorder is allowed. 
-		/// If not set AllowPreorder has no effect and not available
-		/// </summary>
-		public DateTime? PreorderAvailabilityDate { get; set; }
+        /// <summary>
+        /// The date from when the preorder is allowed. 
+        /// If not set AllowPreorder has no effect and not available
+        /// </summary>
+        public DateTime? PreorderAvailabilityDate { get; set; }
 
-		/// <summary>
-		/// The date from when the backorder is allowed. 
-		/// If not set AllowBackorder has no effect and not available
-		/// </summary>
-		public DateTime? BackorderAvailabilityDate { get; set; }
+        /// <summary>
+        /// The date from when the backorder is allowed. 
+        /// If not set AllowBackorder has no effect and not available
+        /// </summary>
+        public DateTime? BackorderAvailabilityDate { get; set; }
 
-		[Required]
-		[StringLength(128)]
-		public string Sku { get; set; }
+        [Required]
+        [StringLength(128)]
+        public string Sku { get; set; }
 
 
         #region Navigation properties
         public string FulfillmentCenterId { get; set; }
-        public FulfillmentCenterEntity FulfillmentCenter { get; set; } 
+        public FulfillmentCenterEntity FulfillmentCenter { get; set; }
         #endregion
 
 
@@ -70,13 +70,13 @@ namespace VirtoCommerce.InventoryModule.Data.Model
             inventory.ReorderMinQuantity = (long)ReorderMinQuantity;
             inventory.ProductId = Sku;
             inventory.ReservedQuantity = (long)ReservedQuantity;
-            inventory.Status = EnumUtility.SafeParseFlags(Status.ToString(), InventoryStatus.Enabled);
+            inventory.Status = EnumUtility.SafeParse(Status.ToString(), InventoryStatus.Enabled);
 
-            if(FulfillmentCenter != null)
+            if (FulfillmentCenter != null)
             {
                 inventory.FulfillmentCenter = FulfillmentCenter.ToModel(AbstractTypeFactory<FulfillmentCenter>.TryCreateInstance());
             }
-           
+
             return inventory;
         }
 
