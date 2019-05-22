@@ -49,8 +49,7 @@ namespace VirtoCommerce.StoreModule.Data.ExportImport
                     searchCriteria.Skip = skip;
 
                     var searchResult = await _storeSearchService.SearchStoresAsync(searchCriteria);
-                    var result = await _storeService.GetByIdsAsync(searchResult.Results.Select(r => r.Id).ToArray());
-                    return new GenericSearchResult<Store> { Results = result, TotalCount = result.Length };
+                    return (GenericSearchResult<Store>)searchResult;
                 }, (processedCount, totalCount) =>
                 {
                     progressInfo.Description = $"{processedCount} of {totalCount} stores have been exported";

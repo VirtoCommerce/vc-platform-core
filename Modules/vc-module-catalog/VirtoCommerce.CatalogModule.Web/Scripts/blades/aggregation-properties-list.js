@@ -1,4 +1,4 @@
-﻿angular.module('virtoCommerce.catalogModule')
+angular.module('virtoCommerce.catalogModule')
     .controller('virtoCommerce.catalogModule.aggregationPropertiesController', ['$scope', 'platformWebApp.dialogService', 'platformWebApp.bladeNavigationService', 'virtoCommerce.catalogModule.aggregationProperties', function ($scope, dialogService, bladeNavigationService, aggregationProperties) {
     var blade = $scope.blade;
     blade.updatePermission = 'store:update';
@@ -27,7 +27,7 @@
             property: node
         };
         bladeNavigationService.showBlade(newBlade, blade);
-    }
+    };
 
     blade.select = function (node) {
         node.isSelected = true;
@@ -55,6 +55,7 @@
             angular.copy(blade.selectedEntities, blade.origSelected);
             // $scope.bladeClose();
             blade.isLoading = false;
+            blade.parentBlade.refresh();
         }, function (error) {
             bladeNavigationService.setError('Error: ' + error.status, blade);
         });

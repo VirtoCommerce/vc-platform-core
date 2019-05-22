@@ -13,12 +13,12 @@ namespace VirtoCommerce.ImageToolsModule.Data.ThumbnailGeneration
 {
     public class ImageService : IImageService
     {
+        private readonly IBlobStorageProvider _storageProvider;
         public ImageService(IBlobStorageProvider storageProvider)
         {
-            StorageProvider = storageProvider;
+            _storageProvider = storageProvider;
         }
 
-        protected IBlobStorageProvider StorageProvider { get; }
 
         #region Implementation of IImageService
 
@@ -32,7 +32,7 @@ namespace VirtoCommerce.ImageToolsModule.Data.ThumbnailGeneration
         {
             try
             {
-                using (var blobStream = StorageProvider.OpenRead(imageUrl))
+                using (var blobStream = _storageProvider.OpenRead(imageUrl))
                 {
                     var result = Image.Load(blobStream, out format);
                     return Task.FromResult(result);
@@ -55,7 +55,7 @@ namespace VirtoCommerce.ImageToolsModule.Data.ThumbnailGeneration
         /// <param name="jpegQuality">Target image quality.</param>
         public virtual async Task SaveImageAsync(string imageUrl, Image<Rgba32> image, IImageFormat format, JpegQuality jpegQuality)
         {
-            using (var blobStream = StorageProvider.OpenWrite(imageUrl))
+            using (var blobStream = _storageProvider.OpenWrite(imageUrl))
             using (var stream = new MemoryStream())
             {
                 if (format.DefaultMimeType == "image/jpeg")

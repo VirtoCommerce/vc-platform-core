@@ -17,9 +17,11 @@ namespace VirtoCommerce.CatalogModule.Core
                   CatalogUpdate = "catalog:update",
                   CatalogDelete = "catalog:delete",
                   CatalogExport = "catalog:export",
-                  CatalogImport = "catalog:import";
+                  CatalogImport = "catalog:import",
+                  CatalogBrowseFiltersRead = "catalog:BrowseFilters:Read",
+                  CatalogBrowseFiltersUpdate = "atalog:BrowseFilters:Update";
 
-                public static string[] AllPermissions = new[] { CatalogAccess, CatalogCreate, CatalogRead, CatalogUpdate, CatalogDelete, CatalogExport, CatalogImport };
+                public static string[] AllPermissions = new[] { CatalogAccess, CatalogCreate, CatalogRead, CatalogUpdate, CatalogDelete, CatalogExport, CatalogImport, CatalogBrowseFiltersRead, CatalogBrowseFiltersUpdate };
             }
         }
 

@@ -10,7 +10,7 @@ using VirtoCommerce.CatalogModule.Data.Repositories;
 namespace VirtoCommerce.CatalogModule.Data.Migrations
 {
     [DbContext(typeof(CatalogDbContext))]
-    [Migration("20190510073242_InitialCatalog")]
+    [Migration("20190515064457_InitialCatalog")]
     partial class InitialCatalog
     {
         protected override void BuildTargetModel(ModelBuilder modelBuilder)
@@ -580,6 +580,8 @@ namespace VirtoCommerce.CatalogModule.Data.Migrations
                     b.Property<DateTime>("CreatedDate");
 
                     b.Property<bool>("IsEnum");
+
+                    b.Property<bool>("IsHidden");
 
                     b.Property<bool>("IsInput");
 

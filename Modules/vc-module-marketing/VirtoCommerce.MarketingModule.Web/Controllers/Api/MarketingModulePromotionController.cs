@@ -164,7 +164,7 @@ namespace VirtoCommerce.MarketingModule.Web.Controllers.Api
         [HttpPut]
         [Route("")]
         [Authorize(ModuleConstants.Security.Permissions.Update)]
-        public async Task<IActionResult> UpdatePromotions([FromBody]Promotion promotion)
+        public async Task<ActionResult> UpdatePromotions([FromBody]Promotion promotion)
         {
             //TODO
             //var scopes = _permissionScopeService.GetObjectPermissionScopeStrings(promotion).ToArray();
@@ -183,7 +183,7 @@ namespace VirtoCommerce.MarketingModule.Web.Controllers.Api
         [HttpDelete]
         [Route("")]
         [Authorize(ModuleConstants.Security.Permissions.Delete)]
-        public async Task<IActionResult> DeletePromotions([FromQuery] string[] ids)
+        public async Task<ActionResult> DeletePromotions([FromQuery] string[] ids)
         {
             await _promotionService.DeletePromotionsAsync(ids);
             return Ok();
@@ -219,7 +219,7 @@ namespace VirtoCommerce.MarketingModule.Web.Controllers.Api
 
         [HttpPost]
         [Route("coupons/add")]
-        public async Task<IActionResult> AddCoupons([FromBody]Coupon[] coupons)
+        public async Task<ActionResult> AddCoupons([FromBody]Coupon[] coupons)
         {
             await _couponService.SaveCouponsAsync(coupons);
 
@@ -228,7 +228,7 @@ namespace VirtoCommerce.MarketingModule.Web.Controllers.Api
 
         [HttpDelete]
         [Route("coupons/delete")]
-        public async Task<IActionResult> DeleteCoupons([FromQuery] string[] ids)
+        public async Task<ActionResult> DeleteCoupons([FromQuery] string[] ids)
         {
             await _couponService.DeleteCouponsAsync(ids);
 

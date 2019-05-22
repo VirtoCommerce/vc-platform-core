@@ -49,7 +49,7 @@ namespace Mvc.Server
         // you must provide your own token endpoint action:
 
         [HttpPost("~/connect/token"), Produces("application/json")]
-        public async Task<IActionResult> Exchange(OpenIdConnectRequest request)
+        public async Task<ActionResult> Exchange(OpenIdConnectRequest request)
         {
             Debug.Assert(request.IsTokenRequest(),
                 "The OpenIddict binder for ASP.NET Core MVC is not registered. " +

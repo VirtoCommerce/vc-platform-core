@@ -27,7 +27,6 @@ namespace VirtoCommerce.CustomerModule.Data.Services
         private readonly IDynamicPropertyService _dynamicPropertyService;
         private readonly IPlatformMemoryCache _platformMemoryCache;
 
-
         protected MemberServiceBase(Func<IMemberRepository> repositoryFactory, IEventPublisher eventPublisher, IDynamicPropertyService dynamicPropertyService, IPlatformMemoryCache platformMemoryCache)
         {
             _repositoryFactory = repositoryFactory;

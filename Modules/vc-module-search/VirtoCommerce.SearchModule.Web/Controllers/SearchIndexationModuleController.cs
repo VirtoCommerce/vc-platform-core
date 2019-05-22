@@ -33,8 +33,7 @@ namespace VirtoCommerce.SearchModule.Web.Controllers
 
         [HttpGet]
         [Route("")]
-        [ProducesResponseType(typeof(IndexState[]), 200)]
-        public async Task<IActionResult> GetAllIndexes()
+        public async Task<ActionResult<IndexState[]>> GetAllIndexes()
         {
             var documentTypes = _documentConfigs.Select(c => c.DocumentType).Distinct().ToList();
             var result = await Task.WhenAll(documentTypes.Select(_indexingManager.GetIndexStateAsync));
@@ -47,8 +46,7 @@ namespace VirtoCommerce.SearchModule.Web.Controllers
         /// <returns></returns>
         [HttpGet]
         [Route("index/{documentType}/{documentId}")]
-        [ProducesResponseType(typeof(IndexDocument[]), 200)]
-        public async Task<IActionResult> GetDocumentIndexAsync(string documentType, string documentId)
+        public async Task<ActionResult<IndexDocument[]>> GetDocumentIndexAsync(string documentType, string documentId)
         {
             var request = new SearchRequest
             {
@@ -68,9 +66,8 @@ namespace VirtoCommerce.SearchModule.Web.Controllers
         /// <returns></returns>
         [HttpPost]
         [Route("index")]
-        [ProducesResponseType(typeof(IndexProgressPushNotification), 200)]
         [Authorize(ModuleConstants.Security.Permissions.IndexRebuild)]
-        public IActionResult IndexDocuments([FromBody] IndexingOptions[] options)
+        public ActionResult<IndexProgressPushNotification> IndexDocuments([FromBody] IndexingOptions[] options)
         {
             var currentUserName = _userNameResolver.GetCurrentUserName();
             var notification = IndexingJobs.Enqueue(currentUserName, options);
@@ -81,7 +78,7 @@ namespace VirtoCommerce.SearchModule.Web.Controllers
 
         [HttpGet]
         [Route("tasks/{taskId}/cancel")]
-        public IActionResult CancelIndexationProcess(string taskId)
+        public ActionResult CancelIndexationProcess(string taskId)
         {
             IndexingJobs.CancelIndexation();
             return Ok();

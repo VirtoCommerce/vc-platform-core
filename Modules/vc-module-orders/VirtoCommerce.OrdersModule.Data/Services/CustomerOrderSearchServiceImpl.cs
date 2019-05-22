@@ -29,7 +29,7 @@ namespace VirtoCommerce.OrdersModule.Data.Services
             _customerOrderService = customerOrderService;
         }
 
-        public virtual async Task<GenericSearchResult<CustomerOrder>> SearchCustomerOrdersAsync(CustomerOrderSearchCriteria criteria)
+        public virtual async Task<CustomerOrderSearchResult> SearchCustomerOrdersAsync(CustomerOrderSearchCriteria criteria)
         {
             var cacheKey = CacheKey.With(GetType(), "SearchCustomerOrdersAsync", criteria.GetCacheKey());
             return await _platformMemoryCache.GetOrCreateExclusiveAsync(cacheKey, async (cacheEntry) =>
@@ -38,8 +38,8 @@ namespace VirtoCommerce.OrdersModule.Data.Services
                 using (var repository = _repositoryFactory())
                 {
                     repository.DisableChangesTracking();
-                    var retVal = new GenericSearchResult<CustomerOrder>();
-                    var orderResponseGroup = EnumUtility.SafeParse(criteria.ResponseGroup, CustomerOrderResponseGroup.Full);
+                    var result = AbstractTypeFactory<CustomerOrderSearchResult>.TryCreateInstance();
+                    var orderResponseGroup = EnumUtility.SafeParseFlags(criteria.ResponseGroup, CustomerOrderResponseGroup.Full);
 
                     var query = GetOrdersQuery(repository, criteria);
 
@@ -57,14 +57,13 @@ namespace VirtoCommerce.OrdersModule.Data.Services
                     }
                     query = query.OrderBySortInfos(sortInfos);
 
-                    retVal.TotalCount = await query.CountAsync();
+                    result.TotalCount = await query.CountAsync();
                     var orderIds = await query.Select(x => x.Id).Skip(criteria.Skip).Take(criteria.Take).ToArrayAsync();
 
                     retVal.Results = (await _customerOrderService.GetByIdsAsync(orderIds, criteria.ResponseGroup)).AsQueryable()
                                                    .OrderBySortInfos(sortInfos)
-                                                   .ToArray();
-
-                    return retVal;
+                                                   .ToList();
+                    return result;
                 }
             });
         }

@@ -1,4 +1,4 @@
-﻿using System;
+using System;
 using System.ComponentModel.DataAnnotations;
 using VirtoCommerce.Platform.Core.ChangeLog;
 using VirtoCommerce.Platform.Core.Common;
@@ -6,19 +6,19 @@ using VirtoCommerce.Platform.Core.Common;
 namespace VirtoCommerce.Platform.Data.Model
 {
     public class OperationLogEntity : AuditableEntity
-	{
+    {
 
-		[StringLength(50)]
+        [StringLength(50)]
         public string ObjectType { get; set; }
 
-		[StringLength(200)]
+        [StringLength(200)]
         public string ObjectId { get; set; }
 
-		[Required]
-		[StringLength(20)]
-		public string OperationType { get; set; }
+        [Required]
+        [StringLength(20)]
+        public string OperationType { get; set; }
 
-        
+
         [StringLength(1024)]
         public string Detail { get; set; }
 
@@ -43,7 +43,7 @@ namespace VirtoCommerce.Platform.Data.Model
         {
             if (operation == null)
                 throw new ArgumentNullException(nameof(operation));
-      
+
             pkMap.AddPair(operation, this);
 
             CreatedBy = operation.CreatedBy;
@@ -61,7 +61,7 @@ namespace VirtoCommerce.Platform.Data.Model
 
         public virtual void Patch(OperationLogEntity target)
         {
-            target.Detail = Detail;            
+            target.Detail = Detail;
         }
     }
 

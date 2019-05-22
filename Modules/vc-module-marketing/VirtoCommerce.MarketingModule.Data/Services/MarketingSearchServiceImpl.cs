@@ -4,6 +4,7 @@ using System.Threading.Tasks;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.Caching.Memory;
 using VirtoCommerce.MarketingModule.Core.Model;
+using VirtoCommerce.MarketingModule.Core.Model.DynamicContent.Search;
 using VirtoCommerce.MarketingModule.Core.Model.Promotions;
 using VirtoCommerce.MarketingModule.Core.Model.Promotions.Search;
 using VirtoCommerce.MarketingModule.Core.Services;
@@ -31,13 +32,13 @@ namespace VirtoCommerce.MarketingModule.Data.Services
         }
 
         #region IPromotionSearchService Members
-        public virtual async Task<GenericSearchResult<Promotion>> SearchPromotionsAsync(PromotionSearchCriteria criteria)
+        public virtual async Task<PromotionSearchResult> SearchPromotionsAsync(PromotionSearchCriteria criteria)
         {
             var cacheKey = CacheKey.With(GetType(), "SearchPromotionsAsync", criteria.GetCacheKey());
             return await _platformMemoryCache.GetOrCreateExclusiveAsync(cacheKey, async (cacheEntry) =>
             {
                 cacheEntry.AddExpirationToken(PromotionCacheRegion.CreateChangeToken());
-                var retVal = new GenericSearchResult<Promotion>();
+                var retVal = AbstractTypeFactory<PromotionSearchResult>.TryCreateInstance();
                 using (var repository = _repositoryFactory())
                 {
                     var query = GetPromotionsQuery(repository, criteria);
@@ -94,13 +95,13 @@ namespace VirtoCommerce.MarketingModule.Data.Services
         #endregion
 
         #region IDynamicContentSearchService Members
-        public async Task<GenericSearchResult<DynamicContentItem>> SearchContentItemsAsync(DynamicContentItemSearchCriteria criteria)
+        public async Task<DynamicContentItemSearchResult> SearchContentItemsAsync(DynamicContentItemSearchCriteria criteria)
         {
             var cacheKey = CacheKey.With(GetType(), "SearchContentItemsAsync", criteria.GetCacheKey());
             return await _platformMemoryCache.GetOrCreateExclusiveAsync(cacheKey, async (cacheEntry) =>
             {
                 cacheEntry.AddExpirationToken(DynamicContentItemCacheRegion.CreateChangeToken());
-                var retVal = new GenericSearchResult<DynamicContentItem>();
+                var retVal = AbstractTypeFactory<DynamicContentItemSearchResult>.TryCreateInstance();
                 using (var repository = _repositoryFactory())
                 {
                     var query = repository.Items;
@@ -133,13 +134,13 @@ namespace VirtoCommerce.MarketingModule.Data.Services
             });
         }
 
-        public async Task<GenericSearchResult<DynamicContentPlace>> SearchContentPlacesAsync(DynamicContentPlaceSearchCriteria criteria)
+        public async Task<DynamicContentPlaceSearchResult> SearchContentPlacesAsync(DynamicContentPlaceSearchCriteria criteria)
         {
             var cacheKey = CacheKey.With(GetType(), "SearchContentPlacesAsync", criteria.GetCacheKey());
             return await _platformMemoryCache.GetOrCreateExclusiveAsync(cacheKey, async (cacheEntry) =>
             {
                 cacheEntry.AddExpirationToken(DynamicContentPlaceCacheRegion.CreateChangeToken());
-                var retVal = new GenericSearchResult<DynamicContentPlace>();
+                var retVal = AbstractTypeFactory<DynamicContentPlaceSearchResult>.TryCreateInstance();
                 using (var repository = _repositoryFactory())
                 {
                     var query = repository.Places;
@@ -169,13 +170,13 @@ namespace VirtoCommerce.MarketingModule.Data.Services
             });
         }
 
-        public async Task<GenericSearchResult<DynamicContentPublication>> SearchContentPublicationsAsync(DynamicContentPublicationSearchCriteria criteria)
+        public async Task<DynamicContentPublicationSearchResult> SearchContentPublicationsAsync(DynamicContentPublicationSearchCriteria criteria)
         {
             var cacheKey = CacheKey.With(GetType(), "SearchContentPublicationsAsync", criteria.GetCacheKey());
             return await _platformMemoryCache.GetOrCreateExclusiveAsync(cacheKey, async (cacheEntry) =>
             {
                 cacheEntry.AddExpirationToken(DynamicContentPublicationCacheRegion.CreateChangeToken());
-                var retVal = new GenericSearchResult<DynamicContentPublication>();
+                var retVal = AbstractTypeFactory<DynamicContentPublicationSearchResult>.TryCreateInstance();
                 using (var repository = _repositoryFactory())
                 {
                     var query = repository.PublishingGroups;
@@ -210,13 +211,13 @@ namespace VirtoCommerce.MarketingModule.Data.Services
             });
         }
 
-        public async Task<GenericSearchResult<DynamicContentFolder>> SearchFoldersAsync(DynamicContentFolderSearchCriteria criteria)
+        public async Task<DynamicContentFolderSearchResult> SearchFoldersAsync(DynamicContentFolderSearchCriteria criteria)
         {
             var cacheKey = CacheKey.With(GetType(), "SearchFoldersAsync", criteria.GetCacheKey());
             return await _platformMemoryCache.GetOrCreateExclusiveAsync(cacheKey, async (cacheEntry) =>
             {
                 cacheEntry.AddExpirationToken(DynamicContentFolderCacheRegion.CreateChangeToken());
-                var retVal = new GenericSearchResult<DynamicContentFolder>();
+                var retVal = AbstractTypeFactory<DynamicContentFolderSearchResult>.TryCreateInstance();
                 using (var repository = _repositoryFactory())
                 {
                     var query = repository.Folders.Where(x => x.ParentFolderId == criteria.FolderId);
