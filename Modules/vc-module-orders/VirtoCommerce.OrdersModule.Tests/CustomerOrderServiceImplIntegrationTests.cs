@@ -8,15 +8,14 @@ using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Primitives;
 using Moq;
 using VirtoCommerce.CoreModule.Core.Common;
-using VirtoCommerce.CoreModule.Core.Payment;
 using VirtoCommerce.CoreModule.Core.Shipping;
-using VirtoCommerce.NotificationsModule.Core.Services;
 using VirtoCommerce.OrdersModule.Core.Model;
 using VirtoCommerce.OrdersModule.Core.Model.Search;
 using VirtoCommerce.OrdersModule.Core.Services;
 using VirtoCommerce.OrdersModule.Data.Repositories;
 using VirtoCommerce.OrdersModule.Data.Services;
-using VirtoCommerce.OrdersModule.Web.Controllers.Api;
+using VirtoCommerce.PaymentModule.Core.Model;
+using VirtoCommerce.PaymentModule.Core.Services;
 using VirtoCommerce.Platform.Core.Bus;
 using VirtoCommerce.Platform.Core.Caching;
 using VirtoCommerce.Platform.Core.ChangeLog;
@@ -24,12 +23,9 @@ using VirtoCommerce.Platform.Core.Common;
 using VirtoCommerce.Platform.Core.Domain;
 using VirtoCommerce.Platform.Core.DynamicProperties;
 using VirtoCommerce.Platform.Core.Events;
-using VirtoCommerce.Platform.Data.Infrastructure;
-using VirtoCommerce.Platform.Data.Repositories;
 using VirtoCommerce.StoreModule.Core.Services;
 using Xunit;
 using Address = VirtoCommerce.OrdersModule.Core.Model.Address;
-using DesignTimeDbContextFactory = VirtoCommerce.OrdersModule.Data.Repositories.DesignTimeDbContextFactory;
 
 namespace VirtoCommerce.OrdersModule.Tests
 {
@@ -49,7 +45,7 @@ namespace VirtoCommerce.OrdersModule.Tests
         private static IUnitOfWork _unitOfWorkMock;
         private readonly ICustomerOrderService _customerOrderService;
         private readonly ICustomerOrderSearchService _customerOrderSearchService;
-        
+
         public CustomerOrderServiceImplIntegrationTests()
         {
             _storeServiceMock = new Mock<IStoreService>();
@@ -109,7 +105,7 @@ namespace VirtoCommerce.OrdersModule.Tests
         {
             //Arrange
             var criteria = new CustomerOrderSearchCriteria() { Take = 1, Status = "Pending" };
-            var cacheKeySearch = CacheKey.With(_customerOrderSearchService.GetType(), "SearchCustomerOrdersAsync", criteria.GetCacheKey()); 
+            var cacheKeySearch = CacheKey.With(_customerOrderSearchService.GetType(), "SearchCustomerOrdersAsync", criteria.GetCacheKey());
             _platformMemoryCacheMock.Setup(pmc => pmc.CreateEntry(cacheKeySearch)).Returns(_cacheEntryMock.Object);
             var orders = await _customerOrderSearchService.SearchCustomerOrdersAsync(criteria);
             var order = orders.Results.FirstOrDefault();
@@ -119,7 +115,7 @@ namespace VirtoCommerce.OrdersModule.Tests
 
             //Act
             await _customerOrderService.SaveChangesAsync(new[] { order });
-            
+
 
             //Assert
             Assert.NotNull(order);

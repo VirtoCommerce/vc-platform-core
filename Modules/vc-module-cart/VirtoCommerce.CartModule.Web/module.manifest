@@ -6,6 +6,7 @@
     <dependencies>
         <dependency id="VirtoCommerce.Core" version="3.0.0" />
         <dependency id="VirtoCommerce.Store" version="3.0.0" />
+        <dependency id="VirtoCommerce.Payment" version="3.0.0" />
     </dependencies>
     
     <title>Shopping cart module</title>
