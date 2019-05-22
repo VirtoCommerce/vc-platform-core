@@ -195,7 +195,8 @@ namespace VirtoCommerce.SubscriptionModule.Test
             {
                 Take = 0,
             };
-            var firstPaymentPlanResult = new PaymentPlanSearchResult()
+
+            var firstPaymentPlanResult = new PaymentPlanSearchResult
             {
                 TotalCount = TestPaymentPlans.Count
             };
@@ -207,7 +208,8 @@ namespace VirtoCommerce.SubscriptionModule.Test
                 Skip = 0,
                 Take = ExpectedBatchSize
             };
-            var secondPaymentPlanResult = new PaymentPlanSearchResult()
+
+            var secondPaymentPlanResult = new PaymentPlanSearchResult
             {
                 TotalCount = TestPaymentPlans.Count,
                 Results = TestPaymentPlans

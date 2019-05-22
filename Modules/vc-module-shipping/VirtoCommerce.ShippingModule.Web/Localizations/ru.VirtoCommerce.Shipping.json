@@ -1,0 +1,55 @@
+{
+    "shipping": {
+        "blades": {
+            "shipping-method-detail": {
+                "subtitle": "Изменить метод доставки",
+                "labels": {
+                    "is-active": "Активен",
+                    "name": "Название",
+                    "code": "Код",
+                    "tax-type": "Тип налога",
+                    "description": "Описание",
+                    "settings": "Настройки"
+                },
+                "placeholders": {
+                    "tax-type": "Выбрать...",
+                    "description": "Введите описание"
+                }
+            },
+            "shipping-method-list": {
+                "subtitle": "",
+                "labels": {
+                    "is-active": "Активен",
+                    "shipping-method": "Метод доставки",
+                    "note": "Укажите порядок отображения методов доставки в интернет-магазине. Перетащите элементы, чтобы изменить порядок"
+                }
+            }
+        },
+        "dialogs": {
+        },
+        "widgets": {
+            "store-shipping-widget": {
+                "title": "Способы доставки",
+                "blade-subtitle": "Способы доставки"
+            }
+        },
+        "labels": {
+            "FixedRateShippingMethod": {
+                "name": "Фиксированная стоимость доставки",
+                "description": "Фиксированный способ доставки"
+            }
+        }
+    },
+    "settings": {
+        "VirtoCommerce.Shipping.FixedRateShippingMethod": {
+            "Air.Rate": {
+                "title": "Стоимость доставки по воздуху",
+                "description": "Фиксированная стоимость доставки по воздуху"
+            },
+            "Ground.Rate": {
+                "title": "Стоимость доставки по земле",
+                "description": "Фиксированная стоимость доставки по земле"
+            }
+        }
+    }
+}

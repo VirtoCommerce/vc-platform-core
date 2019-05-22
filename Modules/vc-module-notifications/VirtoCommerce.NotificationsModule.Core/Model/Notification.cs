@@ -12,7 +12,7 @@ namespace VirtoCommerce.NotificationsModule.Core.Model
         /// <summary>
         /// For detecting owner
         /// </summary>
-        public TenantIdentity TenantIdentity { get; set; }
+        public TenantIdentity TenantIdentity { get; set; } = TenantIdentity.Empty;
         public bool IsActive { get; set; }
 
         /// <summary>

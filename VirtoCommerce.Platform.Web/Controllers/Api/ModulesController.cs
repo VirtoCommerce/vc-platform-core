@@ -6,7 +6,6 @@ using System.Linq;
 using System.Threading.Tasks;
 using Hangfire;
 using Microsoft.AspNetCore.Authorization;
-using Microsoft.AspNetCore.Hosting;
 using Microsoft.AspNetCore.Http.Features;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.AspNetCore.WebUtilities;
@@ -33,11 +32,11 @@ namespace VirtoCommerce.Platform.Web.Controllers.Api
         private readonly ISettingsManager _settingsManager;
         private readonly PlatformOptions _platformOptions;
         private readonly ExternalModuleCatalogOptions _externalModuleCatalogOptions;
+        private readonly IPlatformRestarter _platformRestarter;
         private static readonly object _lockObject = new object();
         private static readonly FormOptions _defaultFormOptions = new FormOptions();
-        private readonly IApplicationLifetime _applicationLifetime;
 
-        public ModulesController(IExternalModuleCatalog externalModuleCatalog, IModuleInstaller moduleInstaller, IPushNotificationManager pushNotifier, IUserNameResolver userNameResolver, ISettingsManager settingsManager, IOptions<PlatformOptions> platformOptions, IOptions<ExternalModuleCatalogOptions> externalModuleCatalogOptions, IApplicationLifetime applicationLifetime)
+        public ModulesController(IExternalModuleCatalog externalModuleCatalog, IModuleInstaller moduleInstaller, IPushNotificationManager pushNotifier, IUserNameResolver userNameResolver, ISettingsManager settingsManager, IOptions<PlatformOptions> platformOptions, IOptions<ExternalModuleCatalogOptions> externalModuleCatalogOptions, IPlatformRestarter platformRestarter)
         {
             _externalModuleCatalog = externalModuleCatalog;
             _moduleInstaller = moduleInstaller;
@@ -46,7 +45,7 @@ namespace VirtoCommerce.Platform.Web.Controllers.Api
             _settingsManager = settingsManager;
             _platformOptions = platformOptions.Value;
             _externalModuleCatalogOptions = externalModuleCatalogOptions.Value;
-            _applicationLifetime = applicationLifetime;
+            _platformRestarter = platformRestarter;
         }
 
         /// <summary>
@@ -254,7 +253,8 @@ namespace VirtoCommerce.Platform.Web.Controllers.Api
         [Authorize(PlatformConstants.Security.Permissions.ModuleManage)]
         public ActionResult Restart()
         {
-            _applicationLifetime.StopApplication();
+            _platformRestarter.Restart();
+
             return NoContent();
         }
 

@@ -42,12 +42,12 @@ namespace VirtoCommerce.NotificationsModule.Data.Model
         public string Kind { get; set; }
 
         public virtual ObservableCollection<NotificationTemplateEntity> Templates { get; set; } = new NullCollection<NotificationTemplateEntity>();
-        
+
         public virtual Notification ToModel(Notification notification)
         {
             if (notification == null) throw new ArgumentNullException(nameof(notification));
             notification.Id = Id;
-            notification.TenantIdentity = new TenantIdentity(TenantId, TenantType);
+            notification.TenantIdentity = string.IsNullOrEmpty(TenantId) ? TenantIdentity.Empty : new TenantIdentity(TenantId, TenantType);
             notification.IsActive = IsActive;
             notification.Type = Type;
             notification.CreatedBy = CreatedBy;
@@ -69,8 +69,8 @@ namespace VirtoCommerce.NotificationsModule.Data.Model
             pkMap.AddPair(notification, this);
 
             Id = notification.Id;
-            TenantId = notification.TenantIdentity.Id;
-            TenantType = notification.TenantIdentity.Type;
+            TenantId = notification.TenantIdentity?.Id;
+            TenantType = notification.TenantIdentity?.Type;
             Type = notification.Type;
             IsActive = notification.IsActive;
             CreatedBy = notification.CreatedBy;
@@ -93,7 +93,7 @@ namespace VirtoCommerce.NotificationsModule.Data.Model
             notification.Type = Type;
             notification.Kind = Kind;
             notification.IsActive = IsActive;
-            
+
             if (!Templates.IsNullCollection())
             {
                 Templates.Patch(notification.Templates, (sourceTemplate, templateEntity) => sourceTemplate.Patch(templateEntity));

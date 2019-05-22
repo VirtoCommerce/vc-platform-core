@@ -16,7 +16,7 @@ namespace VirtoCommerce.CoreModule.Core
                 public const string CurrencyUpdate = "core:currency:update";
                 public const string CurrencyDelete = "core:currency:delete";
 
-                public static string[] AllPermissions = new[] { PackageTypeCreate, PackageTypeUpdate, PackageTypeDelete, CurrencyCreate, CurrencyUpdate, CurrencyDelete };
+                public static string[] AllPermissions = { PackageTypeCreate, PackageTypeUpdate, PackageTypeDelete, CurrencyCreate, CurrencyUpdate, CurrencyDelete };
             }
         }
 
@@ -39,7 +39,7 @@ namespace VirtoCommerce.CoreModule.Core
                     ValueType = SettingValueType.ShortText,
                     DefaultValue = "gram",
                     IsDictionary = true,
-                    AllowedValues = new string[] { "gram", "ounce", "pound" }
+                    AllowedValues = new[] { "gram", "ounce", "pound" }
                 };
 
                 public static SettingDescriptor MeasureUnits = new SettingDescriptor
@@ -49,7 +49,7 @@ namespace VirtoCommerce.CoreModule.Core
                     ValueType = SettingValueType.ShortText,
                     DefaultValue = "mm",
                     IsDictionary = true,
-                    AllowedValues = new string[] { "m", "mm", "ft", "in" }
+                    AllowedValues = new[] { "m", "mm", "ft", "in" }
                 };
 
                 public static SettingDescriptor Languages = new SettingDescriptor
@@ -59,23 +59,7 @@ namespace VirtoCommerce.CoreModule.Core
                     ValueType = SettingValueType.ShortText,
                     DefaultValue = "en-US",
                     IsDictionary = true,
-                    AllowedValues = new string[] { "en-US", "fr-FR", "de-DE", "ja-JP" }
-                };
-
-                public static SettingDescriptor FixedRateShippingMethodGroundRate = new SettingDescriptor
-                {
-                    Name = "VirtoCommerce.Core.FixedRateShippingMethod.Ground.Rate",
-                    GroupName = "Core|General",
-                    ValueType = SettingValueType.Decimal,
-                    DefaultValue = 0.00m,
-                };
-
-                public static SettingDescriptor FixedRateShippingMethodAirRate = new SettingDescriptor
-                {
-                    Name = "VirtoCommerce.Core.FixedRateShippingMethod.Air.Rate",
-                    GroupName = "Core|General",
-                    ValueType = SettingValueType.Decimal,
-                    DefaultValue = 0.00m,
+                    AllowedValues = new[] { "en-US", "fr-FR", "de-DE", "ja-JP" }
                 };
 
                 public static SettingDescriptor FixedTaxRateProviderRate = new SettingDescriptor
@@ -94,8 +78,6 @@ namespace VirtoCommerce.CoreModule.Core
                         yield return WeightUnits;
                         yield return MeasureUnits;
                         yield return Languages;
-                        yield return FixedRateShippingMethodGroundRate;
-                        yield return FixedRateShippingMethodAirRate;
                         yield return FixedTaxRateProviderRate;
                     }
                 }

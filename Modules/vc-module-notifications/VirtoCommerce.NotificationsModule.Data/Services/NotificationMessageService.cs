@@ -31,7 +31,7 @@ namespace VirtoCommerce.NotificationsModule.Data.Services
         {
             using (var repository = _repositoryFactory())
             {
-                var messages = await repository.GetMessageByIdAsync(ids);
+                var messages = await repository.GetMessagesByIdsAsync(ids);
                 return messages.Select(n =>
                 {
                     var notification = _notificationService.GetByIdsAsync(new[] { n.NotificationId }).GetAwaiter().GetResult().FirstOrDefault();
@@ -49,7 +49,7 @@ namespace VirtoCommerce.NotificationsModule.Data.Services
 
             using (var repository = _repositoryFactory())
             {
-                var existingMessageEntities = await repository.GetMessageByIdAsync(messages.Select(m => m.Id).ToArray());
+                var existingMessageEntities = await repository.GetMessagesByIdsAsync(messages.Select(m => m.Id).ToArray());
                 foreach (var message in messages)
                 {
                     var originalEntity = existingMessageEntities.FirstOrDefault(n => n.Id.Equals(message.Id));
