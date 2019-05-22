@@ -194,6 +194,10 @@
         "Pricing.ExportImport.PageSize": {
             "title": "The page size being used for Export / Import",
             "description": "High value may cause slow performance"
+        },
+        "Pricing.Indexing.Enable": {
+            "title": "Enable product price indexing (requires restart)",
+            "description": "If this setting is turned on, product price will be included to the product index. This will also cause product re-indexing after changing its prices."
         }
     },
     "module": {
