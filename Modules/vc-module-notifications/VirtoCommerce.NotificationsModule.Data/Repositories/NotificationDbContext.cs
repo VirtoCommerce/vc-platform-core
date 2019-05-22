@@ -66,6 +66,8 @@ namespace VirtoCommerce.NotificationsModule.Data.Repositories
             modelBuilder.Entity<NotificationMessageEntity>().Property(x => x.CreatedBy).HasMaxLength(64);
             modelBuilder.Entity<NotificationMessageEntity>().Property(x => x.ModifiedBy).HasMaxLength(64);
 
+            modelBuilder.Entity<EmailNotificationMessageEntity>();
+
             #endregion
 
             #region EmailAttachment

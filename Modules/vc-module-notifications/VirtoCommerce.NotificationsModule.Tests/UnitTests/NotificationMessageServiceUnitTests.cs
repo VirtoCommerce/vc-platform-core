@@ -20,6 +20,7 @@ namespace VirtoCommerce.NotificationsModule.Tests.UnitTests
         private readonly Mock<INotificationRepository> _repositoryMock;
         private readonly Mock<IUnitOfWork> _mockUnitOfWork;
         private readonly Mock<IEventPublisher> _eventPublisherMock;
+        private readonly Mock<INotificationService> _notificationServiceMock;
         private readonly NotificationMessageService _notificationMessageService;
 
         public NotificationMessageServiceUnitTests()
@@ -29,7 +30,8 @@ namespace VirtoCommerce.NotificationsModule.Tests.UnitTests
             _mockUnitOfWork = new Mock<IUnitOfWork>();
             _repositoryMock.Setup(ss => ss.UnitOfWork).Returns(_mockUnitOfWork.Object);
             _eventPublisherMock = new Mock<IEventPublisher>();
-            _notificationMessageService = new NotificationMessageService(factory, _eventPublisherMock.Object);
+            _notificationServiceMock = new Mock<INotificationService>();
+            _notificationMessageService = new NotificationMessageService(factory, _eventPublisherMock.Object, _notificationServiceMock.Object);
             //todo
             if (!AbstractTypeFactory<Notification>.AllTypeInfos.Any(t => t.IsAssignableTo(nameof(EmailNotification))))
             {
@@ -51,13 +53,13 @@ namespace VirtoCommerce.NotificationsModule.Tests.UnitTests
         public async Task GetNotificationsMessageByIds_GetMessage()
         {
             //Arrange
-            string id = Guid.NewGuid().ToString();
-            var message = new NotificationMessageEntity { Id = id, NotificationType = nameof(EmailNotificationMessage)};
-            var messages = new List<NotificationMessageEntity> {message};
-            _repositoryMock.Setup(n => n.GetMessageByIdAsync(new []{ id })).ReturnsAsync(messages.ToArray());
+            var id = Guid.NewGuid().ToString();
+            var message = new NotificationMessageEntity { Id = id, NotificationType = nameof(EmailNotificationMessage) };
+            var messages = new List<NotificationMessageEntity> { message };
+            _repositoryMock.Setup(n => n.GetMessageByIdAsync(new[] { id })).ReturnsAsync(messages.ToArray());
 
             //Act
-            var result = await _notificationMessageService.GetNotificationsMessageByIds(new [] { id });
+            var result = await _notificationMessageService.GetNotificationsMessageByIds(new[] { id });
 
             //Assert
             Assert.NotNull(result);
@@ -68,7 +70,7 @@ namespace VirtoCommerce.NotificationsModule.Tests.UnitTests
         public async Task SaveNotificationMessages_SaveMessage()
         {
             //Arrange
-            string id = Guid.NewGuid().ToString();
+            var id = Guid.NewGuid().ToString();
             var messages = new List<EmailNotificationMessage>
             {
                 new EmailNotificationMessage()

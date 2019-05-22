@@ -134,6 +134,9 @@ namespace VirtoCommerce.NotificationsModule.Data.Migrations
 
                     b.Property<DateTime>("CreatedDate");
 
+                    b.Property<string>("Discriminator")
+                        .IsRequired();
+
                     b.Property<string>("LanguageCode")
                         .HasMaxLength(10);
 
@@ -175,6 +178,8 @@ namespace VirtoCommerce.NotificationsModule.Data.Migrations
                     b.HasIndex("NotificationId");
 
                     b.ToTable("NotificationMessage");
+
+                    b.HasDiscriminator<string>("Discriminator").HasValue("NotificationMessageEntity");
                 });
 
             modelBuilder.Entity("VirtoCommerce.NotificationsModule.Data.Model.NotificationTemplateEntity", b =>
@@ -225,6 +230,13 @@ namespace VirtoCommerce.NotificationsModule.Data.Migrations
                         .HasMaxLength(128);
 
                     b.HasDiscriminator().HasValue("EmailNotificationEntity");
+                });
+
+            modelBuilder.Entity("VirtoCommerce.NotificationsModule.Data.Model.EmailNotificationMessageEntity", b =>
+                {
+                    b.HasBaseType("VirtoCommerce.NotificationsModule.Data.Model.NotificationMessageEntity");
+
+                    b.HasDiscriminator().HasValue("EmailNotificationMessageEntity");
                 });
 
             modelBuilder.Entity("VirtoCommerce.NotificationsModule.Data.Model.EmailAttachmentEntity", b =>

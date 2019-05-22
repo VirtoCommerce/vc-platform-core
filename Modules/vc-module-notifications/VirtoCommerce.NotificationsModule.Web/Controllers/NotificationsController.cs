@@ -1,5 +1,6 @@
 using System;
 using System.Collections.Generic;
+using System.Linq;
 using System.Net;
 using System.Threading.Tasks;
 using Microsoft.AspNetCore.Authorization;
@@ -18,6 +19,7 @@ namespace VirtoCommerce.NotificationsModule.Web.Controllers
     [Produces("application/json")]
     [Route("api/notifications")]
     [Route("api/platform/notification")]
+    //[Authorize(ModuleConstants.Security.Permissions.Access)]
     public class NotificationsController : Controller
     {
         private readonly INotificationSearchService _notificationSearchService;
@@ -25,18 +27,20 @@ namespace VirtoCommerce.NotificationsModule.Web.Controllers
         private readonly INotificationTemplateRenderer _notificationTemplateRender;
         private readonly INotificationSender _notificationSender;
         private readonly INotificationMessageSearchService _notificationMessageSearchService;
+        private readonly INotificationMessageService _notificationMessageService;
 
         public NotificationsController(INotificationSearchService notificationSearchService
             , INotificationService notificationService
             , INotificationTemplateRenderer notificationTemplateRender
             , INotificationSender notificationSender
-            , INotificationMessageSearchService notificationMessageSearchService)
+            , INotificationMessageSearchService notificationMessageSearchService, INotificationMessageService notificationMessageService)
         {
             _notificationSearchService = notificationSearchService;
             _notificationService = notificationService;
             _notificationTemplateRender = notificationTemplateRender;
             _notificationSender = notificationSender;
             _notificationMessageSearchService = notificationMessageSearchService;
+            _notificationMessageService = notificationMessageService;
         }
 
         /// <summary>
@@ -120,6 +124,12 @@ namespace VirtoCommerce.NotificationsModule.Web.Controllers
         public async Task<ActionResult<NotificationSendResult>> SendNotification([FromBody]NotificationRequest request)
         {
             var notification = await _notificationService.GetByTypeAsync(request.Type);
+
+            if (notification == null)
+            {
+                return new NotificationSendResult { ErrorMessage = $"{request.Type} isn't registered", IsSuccess = false };
+            }
+
             PopulateNotification(request, notification);
             var result = await _notificationSender.SendNotificationAsync(notification, request.Language);
 
@@ -150,6 +160,14 @@ namespace VirtoCommerce.NotificationsModule.Web.Controllers
             return Ok(result);
         }
 
+        [HttpGet]
+        [Route("journal/{id}")]
+        public async Task<ActionResult<NotificationMessage>> GetObjectNotificationJournal(string id)
+        {
+            var result = (await _notificationMessageService.GetNotificationsMessageByIds(new[] { id })).FirstOrDefault();
+
+            return Ok(result);
+        }
 
 
         private void PopulateNotification(NotificationRequest request, Notification notification)

@@ -10,7 +10,6 @@ using VirtoCommerce.NotificationsModule.Data.Model;
 using VirtoCommerce.NotificationsModule.Data.Repositories;
 using VirtoCommerce.NotificationsModule.Data.Validation;
 using VirtoCommerce.Platform.Core.Common;
-using VirtoCommerce.Platform.Core.Domain;
 using VirtoCommerce.Platform.Core.Events;
 
 namespace VirtoCommerce.NotificationsModule.Data.Services
@@ -33,7 +32,11 @@ namespace VirtoCommerce.NotificationsModule.Data.Services
             using (var repository = _repositoryFactory())
             {
                 var messages = await repository.GetMessageByIdAsync(ids);
-                return messages.Select(n => n.ToModel(AbstractTypeFactory<NotificationMessage>.TryCreateInstance())).ToArray();
+                return messages.Select(n =>
+                {
+                    var notification = _notificationService.GetByIdsAsync(new[] { n.NotificationId }).GetAwaiter().GetResult().FirstOrDefault();
+                    return n.ToModel(AbstractTypeFactory<NotificationMessage>.TryCreateInstance($"{notification?.Kind}Message"));
+                }).ToArray();
             }
         }
 
@@ -42,6 +45,7 @@ namespace VirtoCommerce.NotificationsModule.Data.Services
             ValidateMessageProperties(messages);
 
             var changedEntries = new List<GenericChangedEntry<NotificationMessage>>();
+            var pkMap = new PrimaryKeyResolvingMap();
 
             using (var repository = _repositoryFactory())
             {
@@ -49,8 +53,8 @@ namespace VirtoCommerce.NotificationsModule.Data.Services
                 foreach (var message in messages)
                 {
                     var originalEntity = existingMessageEntities.FirstOrDefault(n => n.Id.Equals(message.Id));
-                    var notification = (await _notificationService.GetByIdsAsync(new[] {message.NotificationId})).FirstOrDefault();
-                    var modifiedEntity = AbstractTypeFactory<NotificationMessageEntity>.TryCreateInstance($"{notification?.Kind}MessageEntity").FromModel(message);
+                    var notification = (await _notificationService.GetByIdsAsync(new[] { message.NotificationId })).FirstOrDefault();
+                    var modifiedEntity = AbstractTypeFactory<NotificationMessageEntity>.TryCreateInstance($"{notification?.Kind}MessageEntity").FromModel(message, pkMap);
 
                     if (originalEntity != null)
                     {
@@ -66,6 +70,7 @@ namespace VirtoCommerce.NotificationsModule.Data.Services
 
                 await _eventPublisher.Publish(new NotificationMessageChangingEvent(changedEntries));
                 await repository.UnitOfWork.CommitAsync();
+                pkMap.ResolvePrimaryKeys();
                 await _eventPublisher.Publish(new NotificationMessageChangedEvent(changedEntries));
             }
         }

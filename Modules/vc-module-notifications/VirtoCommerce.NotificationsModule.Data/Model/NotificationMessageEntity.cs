@@ -109,9 +109,11 @@ namespace VirtoCommerce.NotificationsModule.Data.Model
             return message;
         }
 
-        public virtual NotificationMessageEntity FromModel(NotificationMessage message)
+        public virtual NotificationMessageEntity FromModel(NotificationMessage message, PrimaryKeyResolvingMap pkMap)
         {
             if (message == null) throw new ArgumentNullException(nameof(message));
+
+            pkMap.AddPair(message, this);
 
             Id = message.Id;
             TenantId = message.TenantIdentity?.Id;

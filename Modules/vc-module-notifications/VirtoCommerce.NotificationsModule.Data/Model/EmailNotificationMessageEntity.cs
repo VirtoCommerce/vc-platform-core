@@ -17,7 +17,7 @@ namespace VirtoCommerce.NotificationsModule.Data.Model
             return base.ToModel(message);
         }
 
-        public override NotificationMessageEntity FromModel(NotificationMessage message)
+        public override NotificationMessageEntity FromModel(NotificationMessage message, PrimaryKeyResolvingMap pkMap)
         {
             if (message is EmailNotificationMessage emailNotificationMessage)
             {
@@ -25,7 +25,7 @@ namespace VirtoCommerce.NotificationsModule.Data.Model
                 Body = emailNotificationMessage.Body;
             }
 
-            return base.FromModel(message);
+            return base.FromModel(message, pkMap);
         }
 
         public override void Patch(NotificationMessageEntity message)

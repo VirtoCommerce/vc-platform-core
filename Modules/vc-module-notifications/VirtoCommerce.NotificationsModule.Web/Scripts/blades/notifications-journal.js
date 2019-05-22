@@ -40,7 +40,7 @@ angular.module('virtoCommerce.notificationsModule')
                 count: $scope.pageSettings.itemsPerPageCount,
                 sort: uiGridHelper.getSortExpression($scope)
             }, function (data) {
-                blade.currentEntities = data.notifications;
+                blade.currentEntities = data.results;
                 $scope.pageSettings.totalItems = data.totalCount;
                 blade.isLoading = false;
             });

@@ -35,22 +35,22 @@ namespace VirtoCommerce.NotificationsModule.Data.Senders
                 throw new ArgumentNullException(nameof(notification));
             }
 
-            NotificationSendResult result = new NotificationSendResult();
+            var result = new NotificationSendResult();
 
             var message = AbstractTypeFactory<NotificationMessage>.TryCreateInstance($"{notification.Kind}Message");
             message.LanguageCode = language;
             message.MaxSendAttemptCount = _maxRetryAttempts + 1;
             notification.ToMessage(message, _notificationTemplateRender);
 
-            NotificationMessage[] messages = { message };
-            await _notificationMessageService.SaveNotificationMessagesAsync(messages);
+            await _notificationMessageService.SaveNotificationMessagesAsync(new[] { message });
 
             var policy = Policy.Handle<SentNotificationException>().WaitAndRetryAsync(_maxRetryAttempts, retryAttempt => TimeSpan.FromSeconds(Math.Pow(2, retryAttempt))
-                , (exception, timeSpan, retryCount, context) => {
+                , (exception, timeSpan, retryCount, context) =>
+                {
                     _logger.LogError(exception, $"Retry {retryCount} of {context.PolicyKey}, due to: {exception}.");
                     message.LastSendError = exception?.Message;
                 });
-            
+
             var policyResult = await policy.ExecuteAndCaptureAsync(() =>
             {
                 message.LastSendAttemptDate = DateTime.Now;
@@ -68,7 +68,7 @@ namespace VirtoCommerce.NotificationsModule.Data.Senders
                 result.ErrorMessage = policyResult.FinalException?.Message;
             }
 
-            await _notificationMessageService.SaveNotificationMessagesAsync(messages);
+            await _notificationMessageService.SaveNotificationMessagesAsync(new[] { message });
 
             return result;
         }

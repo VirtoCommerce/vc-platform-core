@@ -1,4 +1,4 @@
-﻿using System;
+using System;
 using Microsoft.EntityFrameworkCore.Migrations;
 
 namespace VirtoCommerce.NotificationsModule.Data.Migrations
@@ -98,7 +98,8 @@ namespace VirtoCommerce.NotificationsModule.Data.Migrations
                     LanguageCode = table.Column<string>(maxLength: 10, nullable: true),
                     Subject = table.Column<string>(maxLength: 512, nullable: true),
                     Body = table.Column<string>(nullable: true),
-                    Message = table.Column<string>(maxLength: 1600, nullable: true)
+                    Message = table.Column<string>(maxLength: 1600, nullable: true),
+                    Discriminator = table.Column<string>(defaultValue: ""),
                 },
                 constraints: table =>
                 {
