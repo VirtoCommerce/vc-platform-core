@@ -168,7 +168,7 @@ namespace VirtoCommerce.SubscriptionModule.Test
                 Take = 0,
                 ResponseGroup = SubscriptionResponseGroup.Default.ToString()
             };
-            var firstSubscriptionResult = new GenericSearchResult<Subscription>
+            var firstSubscriptionResult = new SubscriptionSearchResult()
             {
                 TotalCount = TestSubscriptions.Count
             };
@@ -182,7 +182,7 @@ namespace VirtoCommerce.SubscriptionModule.Test
                 Take = ExpectedBatchSize,
                 ResponseGroup = SubscriptionResponseGroup.Default.ToString()
             };
-            var secondSubscriptionResult = new GenericSearchResult<Subscription>
+            var secondSubscriptionResult = new SubscriptionSearchResult()
             {
                 TotalCount = TestSubscriptions.Count,
                 Results = TestSubscriptions
@@ -195,7 +195,7 @@ namespace VirtoCommerce.SubscriptionModule.Test
             {
                 Take = 0,
             };
-            var firstPaymentPlanResult = new GenericSearchResult<PaymentPlan>
+            var firstPaymentPlanResult = new PaymentPlanSearchResult()
             {
                 TotalCount = TestPaymentPlans.Count
             };
@@ -207,7 +207,7 @@ namespace VirtoCommerce.SubscriptionModule.Test
                 Skip = 0,
                 Take = ExpectedBatchSize
             };
-            var secondPaymentPlanResult = new GenericSearchResult<PaymentPlan>
+            var secondPaymentPlanResult = new PaymentPlanSearchResult()
             {
                 TotalCount = TestPaymentPlans.Count,
                 Results = TestPaymentPlans

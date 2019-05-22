@@ -5,7 +5,6 @@ using Microsoft.AspNetCore.Mvc;
 using VirtoCommerce.LicensingModule.Core;
 using VirtoCommerce.LicensingModule.Core.Model;
 using VirtoCommerce.LicensingModule.Core.Services;
-using VirtoCommerce.Platform.Core.Common;
 
 namespace VirtoCommerce.LicensingModule.Web.Controllers.Api
 {
@@ -21,9 +20,8 @@ namespace VirtoCommerce.LicensingModule.Web.Controllers.Api
 
         [HttpPost]
         [Route("search")]
-        [ProducesResponseType(typeof(GenericSearchResult<License>), 200)]
         [Authorize(ModuleConstants.Security.Permissions.Read)]
-        public async Task<IActionResult> SearchLicenses(LicenseSearchCriteria request)
+        public async Task<ActionResult<LicenseSearchResult>> SearchLicenses(LicenseSearchCriteria request)
         {
             if (request == null)
             {
@@ -37,9 +35,8 @@ namespace VirtoCommerce.LicensingModule.Web.Controllers.Api
 
         [HttpGet]
         [Route("{id}")]
-        [ProducesResponseType(typeof(License), 200)]
         [Authorize(ModuleConstants.Security.Permissions.Read)]
-        public async Task<IActionResult> GetLicenseById(string id)
+        public async Task<ActionResult<License>> GetLicenseById(string id)
         {
             var retVal = await _licenseService.GetByIdsAsync(new[] { id });
             return Ok(retVal.FirstOrDefault());
@@ -47,9 +44,8 @@ namespace VirtoCommerce.LicensingModule.Web.Controllers.Api
 
         [HttpPost]
         [Route("")]
-        [ProducesResponseType(typeof(License), 200)]
         [Authorize(ModuleConstants.Security.Permissions.Create)]
-        public async Task<IActionResult> CreateLicense([FromBody]License license)
+        public async Task<ActionResult<License>> CreateLicense([FromBody]License license)
         {
             await _licenseService.SaveChangesAsync(new[] { license });
             return Ok(license);
@@ -57,9 +53,8 @@ namespace VirtoCommerce.LicensingModule.Web.Controllers.Api
 
         [HttpPut]
         [Route("")]
-        [ProducesResponseType(typeof(License), 200)]
         [Authorize(ModuleConstants.Security.Permissions.Update)]
-        public async Task<IActionResult> UpdateLicense([FromBody]License license)
+        public async Task<ActionResult<License>> UpdateLicense([FromBody]License license)
         {
             await _licenseService.SaveChangesAsync(new[] { license });
             return Ok(license);
@@ -71,9 +66,8 @@ namespace VirtoCommerce.LicensingModule.Web.Controllers.Api
         /// <param name="ids">Licenses' ids for delete</param>
         [HttpDelete]
         [Route("")]
-        [ProducesResponseType(typeof(void), 200)]
         [Authorize(ModuleConstants.Security.Permissions.Delete)]
-        public async Task<IActionResult> DeleteLicensesByIds([FromQuery] string[] ids)
+        public async Task<ActionResult> DeleteLicensesByIds([FromQuery] string[] ids)
         {
             await _licenseService.DeleteAsync(ids);
             return Ok();
@@ -81,9 +75,8 @@ namespace VirtoCommerce.LicensingModule.Web.Controllers.Api
 
         [HttpGet]
         [Route("download/{activationCode}")]
-        [ProducesResponseType(typeof(ContentResult), 200)]
         [Authorize(ModuleConstants.Security.Permissions.Issue)]
-        public async Task<IActionResult> Download(string activationCode)
+        public async Task<ActionResult<ContentResult>> Download(string activationCode)
         {
             var remoteIpAddress = Request.HttpContext.Connection.RemoteIpAddress;
             return await GetSignedLicenseAsync(activationCode, false, remoteIpAddress.ToString());
@@ -91,16 +84,15 @@ namespace VirtoCommerce.LicensingModule.Web.Controllers.Api
 
         [HttpGet]
         [Route("activate/{activationCode}")]
-        [ProducesResponseType(typeof(ContentResult), 200)]
         [AllowAnonymous]
-        public async Task<IActionResult> Activate(string activationCode)
+        public async Task<ActionResult<ContentResult>> Activate(string activationCode)
         {
             var remoteIpAddress = HttpContext.Connection.RemoteIpAddress;
             return await GetSignedLicenseAsync(activationCode, true, remoteIpAddress.ToString());
         }
 
 
-        private async Task<IActionResult> GetSignedLicenseAsync(string activationCode, bool isActivated, string ip)
+        private async Task<ActionResult> GetSignedLicenseAsync(string activationCode, bool isActivated, string ip)
         {
             var signedLicense = await _licenseService.GetSignedLicenseAsync(activationCode, ip, isActivated);
 

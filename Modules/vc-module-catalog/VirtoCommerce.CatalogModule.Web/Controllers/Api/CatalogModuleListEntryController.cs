@@ -1,4 +1,3 @@
-using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Threading.Tasks;
@@ -11,7 +10,6 @@ using VirtoCommerce.CatalogModule.Core.Search;
 using VirtoCommerce.CatalogModule.Core.Services;
 using VirtoCommerce.CatalogModule.Web.Model;
 using VirtoCommerce.Platform.Core.Common;
-using VirtoCommerce.Platform.Core.Exceptions;
 using VirtoCommerce.Platform.Core.Settings;
 using VirtoCommerce.SearchModule.Core.Model;
 
@@ -89,7 +87,6 @@ namespace VirtoCommerce.CatalogModule.Web.Controllers.Api
         /// <param name="links">The links.</param>
         [HttpPost]
         [Route("~/api/catalog/listentrylinks")]
-        [ProducesResponseType(200)]
         public async Task<ActionResult> CreateLinks([FromBody] CategoryLink[] links)
         {
             //TODO:
@@ -200,7 +197,7 @@ namespace VirtoCommerce.CatalogModule.Web.Controllers.Api
         /// <param name="moveInfo">Move operation details</param>
         [HttpPost]
         [Route("move")]
-        public async Task<IActionResult> Move([FromBody]MoveInfo moveInfo)
+        public async Task<ActionResult> Move([FromBody]MoveInfo moveInfo)
         {
             var dstCatalog = (await _catalogService.GetByIdsAsync(new[] { moveInfo.Catalog })).FirstOrDefault();
             if (dstCatalog.IsVirtual)

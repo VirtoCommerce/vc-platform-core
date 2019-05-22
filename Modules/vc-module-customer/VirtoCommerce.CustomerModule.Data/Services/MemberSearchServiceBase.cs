@@ -18,16 +18,16 @@ namespace VirtoCommerce.CustomerModule.Data.Services
 {
     public class MemberSearchServiceBase
     {
+        private readonly Func<IMemberRepository> _repositoryFactory;
+        private readonly IMemberService _memberService;
+        private readonly IPlatformMemoryCache _platformMemoryCache;
+
         public MemberSearchServiceBase(Func<IMemberRepository> repositoryFactory, IMemberService memberService, IPlatformMemoryCache platformMemoryCache)
         {
-            RepositoryFactory = repositoryFactory;
-            MemberService = memberService;
-            PlatformMemoryCache = platformMemoryCache;
+            _repositoryFactory = repositoryFactory;
+            _memberService = memberService;
+            _platformMemoryCache = platformMemoryCache;
         }
-
-        protected Func<IMemberRepository> RepositoryFactory { get; }
-        protected IMemberService MemberService { get; }
-        protected IPlatformMemoryCache PlatformMemoryCache { get; }
 
         #region IMemberSearchService Members
         /// <summary>
@@ -35,16 +35,16 @@ namespace VirtoCommerce.CustomerModule.Data.Services
         /// </summary>
         /// <param name="criteria"></param>
         /// <returns></returns>
-        public virtual async Task<GenericSearchResult<Member>> SearchMembersAsync(MembersSearchCriteria criteria)
+        public virtual async Task<MemberSearchResult> SearchMembersAsync(MembersSearchCriteria criteria)
         {
             var cacheKey = CacheKey.With(GetType(), "SearchMembersAsync", criteria.GetCacheKey());
-            return await PlatformMemoryCache.GetOrCreateExclusiveAsync(cacheKey, async (cacheEntry) =>
+            return await _platformMemoryCache.GetOrCreateExclusiveAsync(cacheKey, async (cacheEntry) =>
             {
                 cacheEntry.AddExpirationToken(CustomerSearchCacheRegion.CreateChangeToken());
-                using (var repository = RepositoryFactory())
+                using (var repository = _repositoryFactory())
                 {
                     repository.DisableChangesTracking();
-                    var result = new GenericSearchResult<Member>();
+                    var result = AbstractTypeFactory<MemberSearchResult>.TryCreateInstance();
 
                     var query = LinqKit.Extensions.AsExpandable(repository.Members);
 
@@ -87,7 +87,7 @@ namespace VirtoCommerce.CustomerModule.Data.Services
                     if (criteria.Take > 0)
                     {
                         var memberIds = await query.Select(x => x.Id).Skip(criteria.Skip).Take(criteria.Take).ToArrayAsync();
-                        result.Results = (await MemberService.GetByIdsAsync(memberIds, criteria.ResponseGroup)).AsQueryable().OrderBySortInfos(sortInfos).ToList();
+                        result.Results = (await _memberService.GetByIdsAsync(memberIds, criteria.ResponseGroup)).AsQueryable().OrderBySortInfos(sortInfos).ToList();
                     }
                     return result;
                 }

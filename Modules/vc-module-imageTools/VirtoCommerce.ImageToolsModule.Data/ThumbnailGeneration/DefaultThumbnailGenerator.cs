@@ -14,14 +14,14 @@ namespace VirtoCommerce.ImageToolsModule.Data.ThumbnailGeneration
     /// </summary>
     public class DefaultThumbnailGenerator : IThumbnailGenerator
     {
-        public DefaultThumbnailGenerator(IImageService storageProvider, IImageResizer imageResizer)
-        {
-            ImageService = storageProvider;
-            ImageResizer = imageResizer;
-        }
+        private readonly IImageService _imageService;
+        private readonly IImageResizer _imageResizer;
 
-        protected IImageService ImageService { get; }
-        protected IImageResizer ImageResizer { get; }
+        public DefaultThumbnailGenerator(IImageService imageService, IImageResizer imageResizer)
+        {
+            _imageService = imageService;
+            _imageResizer = imageResizer;
+        }
 
         /// <summary>
         /// Generates thumbnails asynchronously
@@ -35,7 +35,7 @@ namespace VirtoCommerce.ImageToolsModule.Data.ThumbnailGeneration
         {
             token?.ThrowIfCancellationRequested();
 
-            var originalImage = await ImageService.LoadImageAsync(sourcePath, out var format);
+            var originalImage = await _imageService.LoadImageAsync(sourcePath, out var format);
             if (originalImage == null)
             {
                 return new ThumbnailGenerationResult
@@ -53,7 +53,7 @@ namespace VirtoCommerce.ImageToolsModule.Data.ThumbnailGeneration
 
                 if (thumbnail != null)
                 {
-                    await ImageService.SaveImageAsync(thumbnailUrl, thumbnail, format, option.JpegQuality);
+                    await _imageService.SaveImageAsync(thumbnailUrl, thumbnail, format, option.JpegQuality);
                 }
                 else
                 {
@@ -87,16 +87,16 @@ namespace VirtoCommerce.ImageToolsModule.Data.ThumbnailGeneration
             switch (option.ResizeMethod)
             {
                 case ResizeMethod.FixedSize:
-                    result = ImageResizer.FixedSize(image, width, height, color);
+                    result = _imageResizer.FixedSize(image, width, height, color);
                     break;
                 case ResizeMethod.FixedWidth:
-                    result = ImageResizer.FixedWidth(image, width, color);
+                    result = _imageResizer.FixedWidth(image, width, color);
                     break;
                 case ResizeMethod.FixedHeight:
-                    result = ImageResizer.FixedHeight(image, height, color);
+                    result = _imageResizer.FixedHeight(image, height, color);
                     break;
                 case ResizeMethod.Crop:
-                    result = ImageResizer.Crop(image, width, height, option.AnchorPosition);
+                    result = _imageResizer.Crop(image, width, height, option.AnchorPosition);
                     break;
                 default:
                     throw new ArgumentOutOfRangeException($"ResizeMethod {option.ResizeMethod.ToString()} not supported.");

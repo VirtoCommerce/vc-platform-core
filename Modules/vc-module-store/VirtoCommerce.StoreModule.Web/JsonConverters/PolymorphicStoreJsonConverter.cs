@@ -2,7 +2,6 @@ using System;
 using System.Linq;
 using Newtonsoft.Json;
 using Newtonsoft.Json.Linq;
-using VirtoCommerce.CoreModule.Core.Payment;
 using VirtoCommerce.CoreModule.Core.Shipping;
 using VirtoCommerce.Platform.Core.Common;
 using VirtoCommerce.StoreModule.Core.Model;
@@ -12,18 +11,16 @@ namespace VirtoCommerce.StoreModule.Web.JsonConverters
 {
     public class PolymorphicStoreJsonConverter : JsonConverter
     {
-        private static Type[] _knowTypes = new[] { typeof(Store), typeof(StoreSearchCriteria), typeof(PaymentMethod), typeof(ShippingMethod) };
+        private static Type[] _knowTypes = { typeof(Store), typeof(StoreSearchCriteria), typeof(ShippingMethod) };
 
-        private readonly IPaymentMethodsRegistrar _paymentMethodsService;
         private readonly IShippingMethodsRegistrar _shippingMethodsService;
-        public PolymorphicStoreJsonConverter(IPaymentMethodsRegistrar paymentMethodsService, IShippingMethodsRegistrar shippingMethodsService)
+        public PolymorphicStoreJsonConverter(IShippingMethodsRegistrar shippingMethodsService)
         {
-            _paymentMethodsService = paymentMethodsService;
             _shippingMethodsService = shippingMethodsService;
         }
 
-        public override bool CanWrite { get { return false; } }
-        public override bool CanRead { get { return true; } }
+        public override bool CanWrite => false;
+        public override bool CanRead => true;
 
         public override bool CanConvert(Type objectType)
         {
@@ -42,11 +39,6 @@ namespace VirtoCommerce.StoreModule.Web.JsonConverters
             else if (typeof(StoreSearchCriteria).IsAssignableFrom(objectType))
             {
                 retVal = AbstractTypeFactory<StoreSearchCriteria>.TryCreateInstance();
-            }
-            else if (objectType == typeof(PaymentMethod))
-            {
-                var paymentGatewayCode = obj["code"].Value<string>();
-                retVal = _paymentMethodsService.GetAllPaymentMethods().FirstOrDefault(x => x.Code.EqualsInvariant(paymentGatewayCode));
             }
             else if (objectType == typeof(ShippingMethod))
             {

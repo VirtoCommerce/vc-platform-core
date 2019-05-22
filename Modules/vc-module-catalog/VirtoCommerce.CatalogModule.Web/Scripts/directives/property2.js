@@ -41,13 +41,26 @@ angular.module('virtoCommerce.catalogModule')
 
             scope.$watch('context.currentPropValues', function (newValues) {
                 //reflect only real changes
-                if (isValuesDifferent(newValues, scope.currentEntity.values)) {
+                var currentValues = angular.copy(scope.currentEntity.values);
+
+                if (scope.currentEntity.dictionary) {
+                    currentValues = _.uniq(_.map(currentValues, function (x) {
+                        return {
+                            id: x.id,
+                            alias: x.alias,
+                            valueId: x.valueId,
+                            value: x.alias
+                        };
+                    }), function (x) { return x.valueId; });
+                }
+
+                if (isValuesDifferent(newValues, currentValues)) {
                     if (newValues[0] === undefined) {
                         scope.currentEntity.values = null;
                     } else {
                         scope.currentEntity.values = newValues;
                     }
-                	//reset inherited status to force property value override
+                    //reset inherited status to force property value override
                     _.each(scope.currentEntity.values, function (x) { x.isInherited = false; });
 
                     ngModelController.$setViewValue(scope.currentEntity);

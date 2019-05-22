@@ -4,7 +4,6 @@ using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 using VirtoCommerce.ImageToolsModule.Core.Models;
 using VirtoCommerce.ImageToolsModule.Core.Services;
-using VirtoCommerce.Platform.Core.Common;
 using Permission = VirtoCommerce.ImageToolsModule.Core.ModuleConstants.Security.Permissions;
 
 namespace VirtoCommerce.ImageToolsModule.Web.Controllers.Api
@@ -36,9 +35,8 @@ namespace VirtoCommerce.ImageToolsModule.Web.Controllers.Api
         /// <returns></returns>
         [HttpPost]
         [Route("")]
-        [ProducesResponseType(typeof(ThumbnailOption), 200)]
         [Authorize(Permission.Create)]
-        public async Task<IActionResult> Create([FromBody]ThumbnailOption option)
+        public async Task<ActionResult<ThumbnailOption>> Create([FromBody]ThumbnailOption option)
         {
             await _thumbnailOptionService.SaveOrUpdateAsync(new[] { option });
             return Ok(option);
@@ -51,9 +49,8 @@ namespace VirtoCommerce.ImageToolsModule.Web.Controllers.Api
         /// <returns></returns>
         [HttpDelete]
         [Route("")]
-        [ProducesResponseType(typeof(void), 200)]
         [Authorize(Permission.Delete)]
-        public async Task<IActionResult> Delete([FromQuery] string[] ids)
+        public async Task<ActionResult> Delete([FromQuery] string[] ids)
         {
             await _thumbnailOptionService.RemoveByIdsAsync(ids);
             return Ok();
@@ -66,9 +63,8 @@ namespace VirtoCommerce.ImageToolsModule.Web.Controllers.Api
         /// <returns></returns>
         [HttpGet]
         [Route("{id}")]
-        [ProducesResponseType(typeof(ThumbnailOption), 200)]
         [Authorize(Permission.Read)]
-        public async Task<IActionResult> Get([FromRoute]string id)
+        public async Task<ActionResult<ThumbnailOption>> Get([FromRoute]string id)
         {
             var options = await _thumbnailOptionService.GetByIdsAsync(new[] { id });
             return Ok(options.FirstOrDefault());
@@ -81,9 +77,8 @@ namespace VirtoCommerce.ImageToolsModule.Web.Controllers.Api
         /// <returns></returns>
         [HttpPost]
         [Route("search")]
-        [ProducesResponseType(typeof(GenericSearchResult<ThumbnailTask>), 200)]
         [Authorize(Permission.Read)]
-        public async Task<IActionResult> Search([FromBody]ThumbnailOptionSearchCriteria criteria)
+        public async Task<ActionResult<ThumbnailOptionSearchResult>> Search([FromBody]ThumbnailOptionSearchCriteria criteria)
         {
             var result = await _thumbnailOptionSearchService.SearchAsync(criteria);
             return Ok(result);
@@ -96,9 +91,8 @@ namespace VirtoCommerce.ImageToolsModule.Web.Controllers.Api
         /// <returns></returns>
         [HttpPut]
         [Route("")]
-        [ProducesResponseType(typeof(void), 200)]
         [Authorize(Permission.Update)]
-        public async Task<IActionResult> Update([FromBody]ThumbnailOption option)
+        public async Task<ActionResult> Update([FromBody]ThumbnailOption option)
         {
             await _thumbnailOptionService.SaveOrUpdateAsync(new[] { option });
             return Ok();
