@@ -23,7 +23,7 @@ namespace VirtoCommerce.NotificationsModule.Tests.UnitTests
 {
     public class NotificationSenderUnitTests
     {
-        
+
         private readonly NotificationSender _sender;
         private readonly Mock<INotificationService> _serviceMock;
         private readonly INotificationTemplateRenderer _templateRender;
@@ -78,10 +78,13 @@ namespace VirtoCommerce.NotificationsModule.Tests.UnitTests
                           "<br><strong>{{ shipment.number}}</strong> {% endfor %}<br><br>Sent date - <strong>{{ customer_order.modified_date }}</strong>.";
             var notification = new OrderSentEmailNotification()
             {
-                CustomerOrder = new CustomerOrder() {
+                CustomerOrder = new CustomerOrder()
+                {
                     Number = "123"
-                    , Shipments = new []{ new Shipment(){Number = "some_number"} }
-                    , ModifiedDate = DateTime.Now
+                    ,
+                    Shipments = new[] { new Shipment() { Number = "some_number" } }
+                    ,
+                    ModifiedDate = DateTime.Now
                 },
                 Templates = new List<NotificationTemplate>()
                 {
@@ -103,9 +106,9 @@ namespace VirtoCommerce.NotificationsModule.Tests.UnitTests
                 Body = body,
                 SendDate = date
             };
-            _serviceMock.Setup(serv => serv.GetByTypeAsync(nameof(OrderSentEmailNotification), null, null, null)).ReturnsAsync(notification);
-            _messageServiceMock.Setup(ms => ms.SaveNotificationMessagesAsync(new NotificationMessage[] {message}));
-            
+            //_serviceMock.Setup(serv => serv.GetByTypeAsync(nameof(OrderSentEmailNotification), null, null, null)).ReturnsAsync(notification);
+            _messageServiceMock.Setup(ms => ms.SaveNotificationMessagesAsync(new NotificationMessage[] { message }));
+
             //Act
             var result = await _sender.SendNotificationAsync(notification, language);
 
@@ -124,10 +127,17 @@ namespace VirtoCommerce.NotificationsModule.Tests.UnitTests
             {
                 CustomerOrder = new CustomerOrder()
                 {
-                    Id = "adsffads", Number = "123", ShippingTotal = 123456.789m, CreatedDate = DateTime.Now, Status = "Paid",
-                    Total = 123456.789m, FeeTotal = 123456.789m, SubTotal = 123456.789m, TaxTotal = 123456.789m,
+                    Id = "adsffads",
+                    Number = "123",
+                    ShippingTotal = 123456.789m,
+                    CreatedDate = DateTime.Now,
+                    Status = "Paid",
+                    Total = 123456.789m,
+                    FeeTotal = 123456.789m,
+                    SubTotal = 123456.789m,
+                    TaxTotal = 123456.789m,
                     Currency = "USD",
-                    Items = new []{ new LineItem
+                    Items = new[]{ new LineItem
                     {
                         Name = "some",
                         Sku = "sku",
@@ -155,9 +165,9 @@ namespace VirtoCommerce.NotificationsModule.Tests.UnitTests
                 Body = body,
                 SendDate = date
             };
-            _serviceMock.Setup(serv => serv.GetByTypeAsync(nameof(InvoiceEmailNotification), null, null, null)).ReturnsAsync(notification);
+            //_serviceMock.Setup(serv => serv.GetByTypeAsync(nameof(InvoiceEmailNotification), null, null, null)).ReturnsAsync(notification);
             _messageServiceMock.Setup(ms => ms.SaveNotificationMessagesAsync(new NotificationMessage[] { message }));
-            
+
 
             //Act
             var result = await _sender.SendNotificationAsync(notification, language);
@@ -197,7 +207,7 @@ namespace VirtoCommerce.NotificationsModule.Tests.UnitTests
                 Body = body,
                 SendDate = date
             };
-            _serviceMock.Setup(serv => serv.GetByTypeAsync(nameof(RegistrationEmailNotification), null, null, null)).ReturnsAsync(notification);
+            //_serviceMock.Setup(serv => serv.GetByTypeAsync(nameof(RegistrationEmailNotification), null, null, null)).ReturnsAsync(notification);
             _messageServiceMock.Setup(ms => ms.SaveNotificationMessagesAsync(new NotificationMessage[] { message }));
 
             //Act
@@ -220,7 +230,10 @@ namespace VirtoCommerce.NotificationsModule.Tests.UnitTests
             {
                 CustomerOrder = new CustomerOrder()
                 {
-                    Number = "123", Total = 1234.56m, Currency = "USD", ModifiedDate = DateTime.Now
+                    Number = "123",
+                    Total = 1234.56m,
+                    Currency = "USD",
+                    ModifiedDate = DateTime.Now
                 },
                 Templates = new List<NotificationTemplate>()
                 {
@@ -241,7 +254,7 @@ namespace VirtoCommerce.NotificationsModule.Tests.UnitTests
                 Body = body,
                 SendDate = date
             };
-            _serviceMock.Setup(serv => serv.GetByTypeAsync(nameof(OrderPaidEmailNotification), null, null, null)).ReturnsAsync(notification);
+            //_serviceMock.Setup(serv => serv.GetByTypeAsync(nameof(OrderPaidEmailNotification), null, null, null)).ReturnsAsync(notification);
             _messageServiceMock.Setup(ms => ms.SaveNotificationMessagesAsync(new NotificationMessage[] { message }));
 
             //Act
@@ -270,7 +283,7 @@ namespace VirtoCommerce.NotificationsModule.Tests.UnitTests
                 },
                 TenantIdentity = new TenantIdentity(null, null)
             };
-            
+
             var message = new EmailNotificationMessage()
             {
                 Id = "1",
@@ -281,7 +294,7 @@ namespace VirtoCommerce.NotificationsModule.Tests.UnitTests
                 SendDate = DateTime.Now,
                 TenantIdentity = new TenantIdentity(null, null)
             };
-            _serviceMock.Setup(serv => serv.GetByTypeAsync(nameof(EmailNotification), null, null, null)).ReturnsAsync(notification);
+            //_serviceMock.Setup(serv => serv.GetByTypeAsync(nameof(EmailNotification), null, null, null)).ReturnsAsync(notification);
 
             _messageServiceMock.Setup(ms => ms.SaveNotificationMessagesAsync(new NotificationMessage[] { message }));
 
@@ -320,7 +333,7 @@ namespace VirtoCommerce.NotificationsModule.Tests.UnitTests
                 Body = body,
                 SendDate = DateTime.Now
             };
-            _serviceMock.Setup(serv => serv.GetByTypeAsync(nameof(EmailNotification), null, null, null)).ReturnsAsync(notification);
+            //_serviceMock.Setup(serv => serv.GetByTypeAsync(nameof(EmailNotification), null, null, null)).ReturnsAsync(notification);
             _messageServiceMock.Setup(ms => ms.SaveNotificationMessagesAsync(new NotificationMessage[] { message }));
             _messageSenderMock.Setup(ms => ms.SendNotificationAsync(It.IsAny<NotificationMessage>())).Throws(new SmtpException());
 
@@ -330,7 +343,7 @@ namespace VirtoCommerce.NotificationsModule.Tests.UnitTests
             //Assert
             Assert.False(result.IsSuccess);
         }
-        
+
         [Fact]
         public async Task EmailNotification_ArgumentNullException()
         {
@@ -371,10 +384,10 @@ namespace VirtoCommerce.NotificationsModule.Tests.UnitTests
                 Body = body,
                 SendDate = DateTime.Now
             };
-            _serviceMock.Setup(serv => serv.GetByTypeAsync(nameof(EmailNotification), null, null, null)).ReturnsAsync(notification);
+            //_serviceMock.Setup(serv => serv.GetByTypeAsync(nameof(EmailNotification), null, null, null)).ReturnsAsync(notification);
             _messageServiceMock.Setup(ms => ms.SaveNotificationMessagesAsync(new NotificationMessage[] { message }));
             _messageSenderMock.Setup(ms => ms.SendNotificationAsync(It.IsAny<NotificationMessage>())).Throws(new SmtpException());
-            
+
             var sender = new NotificationSender(_templateRender, _messageServiceMock.Object, _logNotificationSenderMock.Object, _senderFactory);
 
             //Act

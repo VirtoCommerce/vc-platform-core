@@ -28,7 +28,7 @@ namespace VirtoCommerce.NotificationsModule.Tests.UnitTests
             _eventPublisherMock = new Mock<IEventPublisher>();
             _notificationRegistrar = new NotificationService(_repositoryFactoryMock.Object, _eventPublisherMock.Object);
             _repositoryFactory = () => _repositoryMock.Object;
-            _notificationSearchService = new NotificationSearchService(_repositoryFactory);
+            //_notificationSearchService = new NotificationSearchService(_repositoryFactory);
         }
 
         [Fact]
@@ -77,14 +77,14 @@ namespace VirtoCommerce.NotificationsModule.Tests.UnitTests
 
             var responseGroup = NotificationResponseGroup.Default.ToString();
             var searchCriteria = new NotificationSearchCriteria() { ResponseGroup = responseGroup };
-            _repositoryMock.Setup(n => n.GetByTypesAsync(
-                new[]
-                {
-                    nameof(RegistrationEmailNotification),
-                    nameof(InvoiceEmailNotification),
-                    nameof(OrderSentEmailNotification)
-                }, null, null, responseGroup, true))
-                .ReturnsAsync(new NotificationEntity[] { new EmailNotificationEntity { IsActive = true, Type = nameof(OrderSentEmailNotification) } });
+            //_repositoryMock.Setup(n => n.GetByTypesAsync(
+            //    new[]
+            //    {
+            //        nameof(RegistrationEmailNotification),
+            //        nameof(InvoiceEmailNotification),
+            //        nameof(OrderSentEmailNotification)
+            //    }, null, null, responseGroup, true))
+            //    .ReturnsAsync(new NotificationEntity[] { new EmailNotificationEntity { IsActive = true, Type = nameof(OrderSentEmailNotification) } });
 
             //Act
             var result = await _notificationSearchService.SearchNotificationsAsync(searchCriteria);
