@@ -46,7 +46,7 @@ angular.module('virtoCommerce.paymentModule').controller('virtoCommerce.paymentM
             paymentMethod: node,
             storeId: blade.storeId,
             title: blade.title,
-            subtitle: 'payment.blades.paymentMethod-detail.subtitle',
+            subtitle: 'payment.blades.payment-method-detail.subtitle',
             controller: 'virtoCommerce.paymentModule.paymentMethodDetailController',
             template: 'Modules/$(VirtoCommerce.Payment)/Scripts/blades/paymentMethod-detail.tpl.html'
         };
