@@ -1,6 +1,5 @@
 using System;
 using System.Collections.Generic;
-using System.Linq;
 using System.Threading.Tasks;
 using Microsoft.Extensions.Logging;
 using Microsoft.Extensions.Options;
@@ -56,23 +55,9 @@ namespace VirtoCommerce.NotificationsModule.Tests.IntegrationTests
             _notificationRegistrar = new NotificationService(RepositoryFactory, _eventPulisherMock.Object);
 
 
-
-            //todo
-            if (!AbstractTypeFactory<Notification>.AllTypeInfos.Any(t => t.IsAssignableTo(nameof(EmailNotification))))
-            {
-                AbstractTypeFactory<Notification>.RegisterType<EmailNotification>().MapToType<NotificationEntity>();
-            }
-
-            if (!AbstractTypeFactory<NotificationTemplate>.AllTypeInfos.Any(t => t.IsAssignableTo(nameof(EmailNotificationTemplate))))
-            {
-                AbstractTypeFactory<NotificationTemplate>.RegisterType<EmailNotificationTemplate>().MapToType<NotificationTemplateEntity>();
-            }
-
-            if (!AbstractTypeFactory<NotificationMessage>.AllTypeInfos.Any(t => t.IsAssignableTo(nameof(EmailNotificationMessage))))
-            {
-                AbstractTypeFactory<NotificationMessage>.RegisterType<EmailNotificationMessage>().MapToType<NotificationMessageEntity>();
-            }
-
+            _notificationRegistrar.RegisterNotification<EmailNotification, NotificationEntity>();
+            _notificationRegistrar.RegisterNotificationTemplate<EmailNotificationTemplate, NotificationTemplateEntity>();
+            _notificationRegistrar.RegisterNotificationMessage<EmailNotificationMessage, NotificationMessageEntity>();
             _notificationRegistrar.RegisterNotification<RegistrationEmailNotification>();
         }
 

@@ -23,14 +23,14 @@ namespace VirtoCommerce.NotificationsModule.Data.Repositories
 
             modelBuilder.Entity<NotificationEntity>().ToTable("Notification").HasKey(x => x.Id);
             modelBuilder.Entity<NotificationEntity>().Property(x => x.Id).HasMaxLength(128);
-            
+
             modelBuilder.Entity<NotificationEntity>()
                 .HasMany(n => n.Templates)
                 .WithOne()
                 .HasForeignKey(n => n.NotificationId)
                 .IsRequired(false)
                 .OnDelete(DeleteBehavior.Cascade);
-                        
+
             modelBuilder.Entity<NotificationEntity>().Property(x => x.CreatedBy).HasMaxLength(64);
             modelBuilder.Entity<NotificationEntity>().Property(x => x.ModifiedBy).HasMaxLength(64);
 

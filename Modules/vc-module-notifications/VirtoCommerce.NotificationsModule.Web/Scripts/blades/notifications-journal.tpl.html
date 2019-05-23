@@ -1,6 +1,5 @@
 <div class="blade-static __collapsed">
     <div class="form-group">
-        <vc-journal-search blade="blade"></vc-journal-search>
         <p class="form-count">{{ 'platform.list.count' | translate }}: <span class="count">{{pageSettings.totalItems | number:0}}</span></p>
     </div>
 </div>
@@ -14,7 +13,7 @@
                             { name: 'actions', displayName: '', enableColumnResizing: false, enableSorting: false, width: 30, cellTemplate: 'list-actions.cell.html', pinnedLeft:true },
                             { name: 'notificationType', displayName: 'notifications.blades.notifications-journal.labels.notification', cellTemplate: 'notification.cell.html' },
                             { name: 'createdDate', displayName: 'notifications.blades.notifications-journal.labels.created' },
-                            { name: 'sendAttemptCount', displayName: 'Send attempt', cellTemplate: 'status.cell.html' }
+                            { name: 'status', displayName: 'notifications.blades.notifications-journal.labels.status', cellTemplate: 'status.cell.html' }
                 ]})">
             <div class="table-wrapper" ng-if="blade.currentEntities.length">
                 <div ui-grid="gridOptions" ui-grid-auto-resize ui-grid-save-state ui-grid-selection ui-grid-resize-columns ui-grid-move-columns ui-grid-pinning ui-grid-height></div>
@@ -53,9 +52,9 @@
 <script type="text/ng-template" id="status.cell.html">
     <div class="ui-grid-cell-contents">
         <div class="inner-contents">
-            <span class="table-status" ng-if="!row.entity.isActive && !row.entity.isSuccessSend" style="background:red">{{ 'notifications.blades.notifications-journal.labels.error' | translate }}</span>
-            <span class="table-status" ng-if="row.entity.isActive && !row.entity.isSuccessSend" style="max-width:60px;">{{ 'notifications.blades.notifications-journal.labels.processing' | translate }}</span>
-            <span class="table-status __active" ng-if="row.entity.isSuccessSend">{{ 'notifications.blades.notifications-journal.labels.success' | translate }}</span>
+            <span class="table-status" ng-if="!row.entity.sendDate && row.entity.sendAttemptCount === row.entity.maxSendAttemptCount" style="background:red">{{ 'notifications.blades.notifications-journal.labels.error' | translate }}</span>
+            <span class="table-status" ng-if="!row.entity.sendDate && row.entity.sendAttemptCount < row.entity.maxSendAttemptCount" style="max-width:60px;">{{ 'notifications.blades.notifications-journal.labels.processing' | translate }}</span>
+            <span class="table-status __active" ng-if="row.entity.sendDate">{{ 'notifications.blades.notifications-journal.labels.success' | translate }}</span>
         </div>
     </div>
 </script>

@@ -57,7 +57,11 @@ namespace VirtoCommerce.NotificationsModule.Data.Repositories
 
         public async Task<NotificationMessageEntity[]> GetMessagesByIdsAsync(string[] ids)
         {
-            return await NotifcationMessages.Where(x => ids.Contains(x.Id)).ToArrayAsync();
+            var result = await NotifcationMessages.Where(x => ids.Contains(x.Id)).ToArrayAsync();
+            var notificationIds = result.Select(m => m.NotificationId).ToArray();
+            var notifications = await Notifications.Where(x => notificationIds.Contains(x.Id)).OrderBy(x => x.Type).ToArrayAsync();
+
+            return result;
         }
     }
 }

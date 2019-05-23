@@ -75,7 +75,8 @@ namespace VirtoCommerce.NotificationsModule.Tests.IntegrationTests
         public async Task SearchNotifications_ContainsTwitterNotification()
         {
             //Arrange
-            var criteria = new NotificationSearchCriteria() { Take = int.MaxValue };
+            var criteria = AbstractTypeFactory<NotificationSearchCriteria>.TryCreateInstance();
+            criteria.Take = int.MaxValue;
 
             //Act
             var result = await _notificationSearchService.SearchNotificationsAsync(criteria);
@@ -88,7 +89,8 @@ namespace VirtoCommerce.NotificationsModule.Tests.IntegrationTests
         public async Task SaveChangesAsync_UpdateTwitterNotification()
         {
             //Arrange
-            var criteria = new NotificationSearchCriteria() { Take = int.MaxValue };
+            var criteria = AbstractTypeFactory<NotificationSearchCriteria>.TryCreateInstance();
+            criteria.Take = int.MaxValue;
             var notifications = await _notificationSearchService.SearchNotificationsAsync(criteria);
             var notification = notifications.Results.FirstOrDefault();
             if (notification is TwitterNotification twitterNotification)

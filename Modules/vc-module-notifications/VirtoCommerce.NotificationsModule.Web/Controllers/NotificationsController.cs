@@ -1,17 +1,16 @@
 using System;
-using System.Collections.Generic;
 using System.Linq;
 using System.Net;
 using System.Threading.Tasks;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
-using Newtonsoft.Json.Linq;
 using VirtoCommerce.NotificationsModule.Core;
 using VirtoCommerce.NotificationsModule.Core.Extensions;
 using VirtoCommerce.NotificationsModule.Core.Model;
 using VirtoCommerce.NotificationsModule.Core.Model.Search;
 using VirtoCommerce.NotificationsModule.Core.Services;
 using VirtoCommerce.NotificationsModule.Data.Model;
+using VirtoCommerce.NotificationsModule.Web.Extensions;
 using VirtoCommerce.NotificationsModule.Web.Model;
 using VirtoCommerce.Platform.Core.Common;
 
@@ -112,7 +111,19 @@ namespace VirtoCommerce.NotificationsModule.Web.Controllers
         }
 
         /// <summary>
-        /// Sending test notification
+        /// Sending notification
+        /// </summary>
+        [HttpPost]
+        [Route("send")]
+        public async Task<ActionResult<NotificationSendResult>> SendNotification([FromBody]Notification notification, string language)
+        {
+            var result = await _notificationSender.SendNotificationAsync(notification, language);
+
+            return Ok(result);
+        }
+
+        /// <summary>
+        /// Sending notification
         /// </summary>
         /// <remarks>
         /// Method sending notification, that based on notification template. Template for rendering chosen by type, objectId, objectTypeId, language.
@@ -122,6 +133,7 @@ namespace VirtoCommerce.NotificationsModule.Web.Controllers
         /// <param name="request">Notification request</param>
         [HttpPost]
         [Route("template/sendnotification")]
+        [Obsolete("for backward compatibility")]
         public async Task<ActionResult<NotificationSendResult>> SendNotification([FromBody]NotificationRequest request)
         {
             var notification = await _notificationSearchService.GetNotificationAsync(request.Type, new TenantIdentity(request.ObjectId, request.ObjectTypeId));
@@ -144,19 +156,12 @@ namespace VirtoCommerce.NotificationsModule.Web.Controllers
         /// Method returns notification journal page with array of notification, that was send, sending or will be send in future. Result contains total count, that can be used
         /// for paging.
         /// </remarks>
-        /// <param name="start">Page setting start</param>
-        /// <param name="count">Page setting count</param>
-        /// <param name="sort">Sort expression</param>
-        [HttpGet]
+        /// <param name="criteria"></param>
+        [HttpPost]
         [Route("journal")]
-        public async Task<ActionResult<NotificationMessageSearchResult>> GetNotificationJournal([FromQuery]int start, [FromQuery]int count, [FromQuery]string sort)
+        public async Task<ActionResult<NotificationMessageSearchResult>> GetNotificationJournal([FromBody]NotificationMessageSearchCriteria criteria)
         {
-            var searchCriteria = AbstractTypeFactory<NotificationMessageSearchCriteria>.TryCreateInstance();
-            searchCriteria.Skip = start;
-            searchCriteria.Take = count;
-            searchCriteria.Sort = sort;
-
-            var result = await _notificationMessageSearchService.SearchMessageAsync(searchCriteria);
+            var result = await _notificationMessageSearchService.SearchMessageAsync(criteria);
 
             return Ok(result);
         }
@@ -177,75 +182,8 @@ namespace VirtoCommerce.NotificationsModule.Web.Controllers
 
             foreach (var parameter in request.NotificationParameters)
             {
-                SetValue(notification, parameter);
+                notification.SetValue(parameter);
             }
-        }
-
-        private void SetValue(Notification notification, NotificationParameter param)
-        {
-            var property = notification.GetType().GetProperty(ConvertPropertyName(param.ParameterName));
-            if (property == null) return;
-
-            var jObject = param.Value as JObject;
-            var jArray = param.Value as JArray;
-            if (jObject != null && param.IsDictionary)
-            {
-                property.SetValue(notification, jObject.ToObject<Dictionary<string, string>>());
-            }
-            else
-            {
-                switch (param.Type)
-                {
-                    case NotificationParameterValueType.Boolean:
-                        if (jArray != null && param.IsArray)
-                            property.SetValue(notification, jArray.ToObject<Boolean[]>());
-                        else
-                            property.SetValue(notification, param.Value.ToNullable<Boolean>());
-                        break;
-
-                    case NotificationParameterValueType.DateTime:
-                        if (jArray != null && param.IsArray)
-                            property.SetValue(notification, jArray.ToObject<DateTime[]>());
-                        else
-                            property.SetValue(notification, param.Value.ToNullable<DateTime>());
-                        break;
-
-                    case NotificationParameterValueType.Decimal:
-                        if (jArray != null && param.IsArray)
-                            property.SetValue(notification, jArray.ToObject<Decimal[]>());
-                        else
-                            property.SetValue(notification, Convert.ToDecimal(param.Value));
-                        break;
-
-                    case NotificationParameterValueType.Integer:
-                        if (jArray != null && param.IsArray)
-                            property.SetValue(notification, jArray.ToObject<Int32[]>());
-                        else
-                            property.SetValue(notification, param.Value.ToNullable<Int32>());
-                        break;
-
-                    case NotificationParameterValueType.String:
-                        if (jArray != null && param.IsArray)
-                            property.SetValue(notification, jArray.ToObject<String[]>());
-                        else
-                            property.SetValue(notification, (string)param.Value);
-                        break;
-
-                    default:
-                        if (jArray != null && param.IsArray)
-                            property.SetValue(notification, jArray.ToObject<String[]>());
-                        else
-                            property.SetValue(notification, (string)param.Value);
-                        break;
-                }
-            }
-        }
-
-        private string ConvertPropertyName(string propertyName)
-        {
-            return propertyName
-                .Replace("Sender", "From")
-                .Replace("Recipient", "To");
         }
     }
 }

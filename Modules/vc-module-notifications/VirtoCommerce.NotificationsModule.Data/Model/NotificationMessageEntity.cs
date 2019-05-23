@@ -138,11 +138,8 @@ namespace VirtoCommerce.NotificationsModule.Data.Model
         {
             message.TenantId = TenantId;
             message.TenantType = TenantType;
-            message.Notification = Notification;
             message.Body = Body;
             message.LanguageCode = LanguageCode;
-            message.NotificationId = NotificationId;
-            message.NotificationType = NotificationType;
             message.SendAttemptCount = SendAttemptCount;
             message.MaxSendAttemptCount = MaxSendAttemptCount;
             message.LastSendError = LastSendError;

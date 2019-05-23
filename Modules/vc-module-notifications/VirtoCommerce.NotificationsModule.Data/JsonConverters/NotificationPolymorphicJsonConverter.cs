@@ -25,7 +25,7 @@ namespace VirtoCommerce.NotificationsModule.Data.JsonConverters
             var obj = JObject.Load(reader);
             if (objectType == typeof(Notification))
             {
-                var type = obj["type"].Value<string>();
+                var type = obj.GetValue("type", StringComparison.InvariantCultureIgnoreCase).Value<string>();
                 result = AbstractTypeFactory<Notification>.TryCreateInstance(type);
             }
             else if (objectType == typeof(NotificationTemplate))

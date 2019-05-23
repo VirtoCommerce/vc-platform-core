@@ -45,11 +45,6 @@ namespace VirtoCommerce.NotificationsModule.Data.Services
                     query = query.Where(n => criteria.ObjectTypes.Contains(n.TenantType));
                 }
 
-                if (criteria.IsActive)
-                {
-                    query = query.Where(n => n.SendDate == null && (!n.LastSendAttemptDate.HasValue || n.LastSendAttemptDate.Value.AddHours(criteria.RepeatHoursIntervalForFail) < DateTime.UtcNow)
-                                             && (!n.SendDate.HasValue || n.SendDate < DateTime.UtcNow));
-                }
                 result.TotalCount = await query.CountAsync();
 
                 var sortInfos = criteria.SortInfos;

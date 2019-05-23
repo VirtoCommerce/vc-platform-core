@@ -2,15 +2,14 @@ using System;
 using System.Collections.Generic;
 using System.Collections.ObjectModel;
 using System.IO;
-using System.Linq;
 using System.Threading;
 using System.Threading.Tasks;
-using Microsoft.AspNetCore.Mvc;
 using Moq;
 using Newtonsoft.Json;
 using VirtoCommerce.NotificationsModule.Core.Model;
 using VirtoCommerce.NotificationsModule.Core.Services;
 using VirtoCommerce.NotificationsModule.Data.ExportImport;
+using VirtoCommerce.NotificationsModule.Data.JsonConverters;
 using VirtoCommerce.NotificationsModule.Data.Model;
 using VirtoCommerce.NotificationsModule.Data.Repositories;
 using VirtoCommerce.NotificationsModule.Data.Services;
@@ -48,22 +47,9 @@ namespace VirtoCommerce.NotificationsModule.Tests.IntegrationTests
             _notificationRegistrar = new NotificationService(RepositoryFactory, _eventPulisherMock.Object);
 
 
-            if (!AbstractTypeFactory<Notification>.AllTypeInfos.Any(t => t.IsAssignableTo(nameof(EmailNotification))))
-            {
-                AbstractTypeFactory<Notification>.RegisterType<EmailNotification>().MapToType<NotificationEntity>();
-                AbstractTypeFactory<NotificationEntity>.RegisterType<EmailNotificationEntity>();
-            }
-
-            if (!AbstractTypeFactory<NotificationTemplate>.AllTypeInfos.Any(t => t.IsAssignableTo(nameof(EmailNotificationTemplate))))
-            {
-                AbstractTypeFactory<NotificationTemplate>.RegisterType<EmailNotificationTemplate>().MapToType<NotificationTemplateEntity>();
-            }
-
-            if (!AbstractTypeFactory<NotificationMessage>.AllTypeInfos.Any(t => t.IsAssignableTo(nameof(EmailNotificationMessage))))
-            {
-                AbstractTypeFactory<NotificationMessage>.RegisterType<EmailNotificationMessage>().MapToType<NotificationMessageEntity>();
-            }
-
+            _notificationRegistrar.RegisterNotification<EmailNotification, NotificationEntity>();
+            _notificationRegistrar.RegisterNotificationTemplate<EmailNotificationTemplate, NotificationTemplateEntity>();
+            _notificationRegistrar.RegisterNotificationMessage<EmailNotificationMessage, NotificationMessageEntity>();
             _notificationRegistrar.RegisterNotification<RegistrationEmailNotification>();
         }
 
@@ -73,7 +59,8 @@ namespace VirtoCommerce.NotificationsModule.Tests.IntegrationTests
             {
                 ReferenceLoopHandling = ReferenceLoopHandling.Ignore,
                 NullValueHandling = NullValueHandling.Ignore,
-                Formatting = Formatting.Indented
+                Formatting = Formatting.Indented,
+                Converters = new List<JsonConverter> { new NotificationPolymorphicJsonConverter() }
             });
         }
 
@@ -95,7 +82,7 @@ namespace VirtoCommerce.NotificationsModule.Tests.IntegrationTests
 
             _notificationSearchServiceMock
                 .Setup(nss => nss.SearchNotificationsAsync(It.IsAny<NotificationSearchCriteria>()))
-                .ReturnsAsync(new NotificationSearchResult {Results = new List<Notification> { entity } , TotalCount = 1});
+                .ReturnsAsync(new NotificationSearchResult { Results = new List<Notification> { entity }, TotalCount = 1 });
 
             //Act
             await _notificationsExportImportManager.DoExportAsync(fileStream, exportImportProgressInfo => { }, new CancellationTokenWrapper(CancellationToken.None));

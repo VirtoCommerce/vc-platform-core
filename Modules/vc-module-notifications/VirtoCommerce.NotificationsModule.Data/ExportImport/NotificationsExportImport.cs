@@ -77,7 +77,7 @@ namespace VirtoCommerce.NotificationsModule.Data.ExportImport
                     {
                         if (reader.Value.ToString() == "Notifications")
                         {
-                            await reader.DeserializeJsonArrayWithPagingAsync<EmailNotification>(_jsonSerializer, _batchSize, items => _notificationService.SaveChangesAsync(items.ToArray()), processedCount =>
+                            await reader.DeserializeJsonArrayWithPagingAsync<Notification>(_jsonSerializer, _batchSize, items => _notificationService.SaveChangesAsync(items.ToArray()), processedCount =>
                             {
                                 progressInfo.Description = $"{ processedCount } notifications have been imported";
                                 progressCallback(progressInfo);
