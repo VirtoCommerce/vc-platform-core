@@ -22,7 +22,7 @@
   - Modularity
     - Completely reworked assembly and dependency loading into platform process
     - Changed IModule abstraction to have only two methods Initialize and PostInitialize.
-    - Changed module.manifest file structure (removed settings and presmissions sections)
+    - Changed module.manifest file structure (removed settings and persmissions sections)
  - Security
     - Completely migrate authentification and authorization to the default ASP.NET Identity without any extension
     - OpenIddict server to support  all OAuth flows also used for token based authorization

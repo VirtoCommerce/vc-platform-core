@@ -1,5 +1,5 @@
 angular.module('virtoCommerce.inventoryModule')
-    .controller('virtoCommerce.inventoryModule.fulfillmentAddressesWidgetController', ['$scope', 'platformWebApp.bladeNavigationService', function ($scope, bladeNavigationService) {
+    .controller('virtoCommerce.inventoryModule.fulfillmentAddressesWidgetController', ['$scope', 'platformWebApp.bladeNavigationService', 'platformWebApp.metaFormsService', function ($scope, bladeNavigationService, metaFormsService) {
         var blade = $scope.widget.blade;
 
         $scope.address = blade.currentEntity.address;
@@ -40,6 +40,11 @@ angular.module('virtoCommerce.inventoryModule')
                 valueType: 'ShortText',
                 priority: 11
             }];
+
+        var metaFields = metaFormsService.getMetaFields('fulfillmentAddressesWidget');
+        if (metaFields && metaFields.length) {
+            addressMetaFields = _.sortBy(addressMetaFields.concat(metaFields), 'priority');
+        }
 
         $scope.openBlade = function () {
             var newBlade = {

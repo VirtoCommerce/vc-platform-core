@@ -3,10 +3,12 @@ using System.Linq;
 using System.Threading.Tasks;
 using Microsoft.AspNetCore.Identity;
 using VirtoCommerce.CustomerModule.Core.Services;
+using VirtoCommerce.NotificationsModule.Core.Extensions;
 using VirtoCommerce.NotificationsModule.Core.Services;
 using VirtoCommerce.Platform.Core.Common;
 using VirtoCommerce.Platform.Core.Events;
 using VirtoCommerce.Platform.Core.Security;
+using VirtoCommerce.StoreModule.Core.Model;
 using VirtoCommerce.StoreModule.Core.Services;
 using VirtoCommerce.SubscriptionModule.Core.Events;
 using VirtoCommerce.SubscriptionModule.Core.Model;
@@ -16,16 +18,16 @@ namespace VirtoCommerce.SubscriptionModule.Data.Handlers
 {
     public class SendNotificationsSubscriptionChangedEventHandler : IEventHandler<SubscriptionChangedEvent>
     {
-        private readonly INotificationService _notificationService;
+        private readonly INotificationSearchService _notificationSearchService;
         private readonly INotificationSender _notificationSender;
         private readonly IStoreService _storeService;
         private readonly UserManager<ApplicationUser> _userManager;
         private readonly IMemberService _memberService;
 
-        public SendNotificationsSubscriptionChangedEventHandler(INotificationService notificationService, INotificationSender notificationSender,
+        public SendNotificationsSubscriptionChangedEventHandler(INotificationSearchService notificationSearchService, INotificationSender notificationSender,
             IStoreService storeService, UserManager<ApplicationUser> userManager, IMemberService memberService)
         {
-            _notificationService = notificationService;
+            _notificationSearchService = notificationSearchService;
             _notificationSender = notificationSender;
             _storeService = storeService;
             _userManager = userManager;
@@ -48,20 +50,20 @@ namespace VirtoCommerce.SubscriptionModule.Data.Handlers
             if (IsSubscriptionCanceled(changedEntry))
             {
                 //Resolve SubscriptionCanceledEmailNotification with template defined on store level
-                var notification = await _notificationService.GetByTypeAsync(nameof(SubscriptionCanceledEmailNotification), changedEntry.NewEntry.StoreId, "Store");
-                if (notification is SubscriptionEmailNotificationBase subscriptionNotification)
+                var notification = await _notificationSearchService.GetNotificationAsync<SubscriptionCanceledEmailNotification>(new TenantIdentity(changedEntry.NewEntry.StoreId, nameof(Store)));
+                if (notification != null)
                 {
-                    notifications.Add(subscriptionNotification);
+                    notifications.Add(notification);
                 }
             }
 
             if (changedEntry.EntryState == EntryState.Added)
             {
                 //Resolve NewSubscriptionEmailNotification with template defined on store level
-                var notification = await _notificationService.GetByTypeAsync(nameof(NewSubscriptionEmailNotification), changedEntry.NewEntry.StoreId, "Store");
-                if (notification is SubscriptionEmailNotificationBase subscriptionNotification)
+                var notification = await _notificationSearchService.GetNotificationAsync<NewSubscriptionEmailNotification>(new TenantIdentity(changedEntry.NewEntry.StoreId, nameof(Store)));
+                if (notification != null)
                 {
-                    notifications.Add(subscriptionNotification);
+                    notifications.Add(notification);
                 }
             }
 
@@ -91,9 +93,9 @@ namespace VirtoCommerce.SubscriptionModule.Data.Handlers
 
         protected virtual bool IsSubscriptionCanceled(GenericChangedEntry<Subscription> changedEntry)
         {
-           var result = changedEntry.OldEntry != null &&
-                     changedEntry.OldEntry.IsCancelled != changedEntry.NewEntry.IsCancelled &&
-                     changedEntry.NewEntry.IsCancelled;
+            var result = changedEntry.OldEntry != null &&
+                      changedEntry.OldEntry.IsCancelled != changedEntry.NewEntry.IsCancelled &&
+                      changedEntry.NewEntry.IsCancelled;
 
             return result;
         }

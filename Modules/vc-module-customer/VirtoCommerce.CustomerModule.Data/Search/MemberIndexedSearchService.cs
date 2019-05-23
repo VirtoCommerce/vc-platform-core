@@ -24,7 +24,7 @@ namespace VirtoCommerce.CustomerModule.Data.Search
             _memberService = memberService;
         }
 
-        public virtual async Task<GenericSearchResult<Member>> SearchAsync(MembersSearchCriteria criteria)
+        public virtual async Task<MemberSearchResult> SearchAsync(MembersSearchCriteria criteria)
         {
             var requestBuilder = GetRequestBuilder(criteria);
             var request = await requestBuilder?.BuildRequestAsync(criteria);
@@ -47,9 +47,9 @@ namespace VirtoCommerce.CustomerModule.Data.Search
             return requestBuilder;
         }
 
-        protected virtual async Task<GenericSearchResult<Member>> ConvertResponseAsync(SearchResponse response, MembersSearchCriteria criteria)
+        protected virtual async Task<MemberSearchResult> ConvertResponseAsync(SearchResponse response, MembersSearchCriteria criteria)
         {
-            var result = AbstractTypeFactory<GenericSearchResult<Member>>.TryCreateInstance();
+            var result = AbstractTypeFactory<MemberSearchResult>.TryCreateInstance();
 
             if (response != null)
             {

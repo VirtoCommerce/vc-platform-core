@@ -1,10 +1,12 @@
 using System.Threading.Tasks;
+using Hangfire;
 using VirtoCommerce.CoreModule.Core.Seo;
 using VirtoCommerce.Platform.Core.Common;
 using VirtoCommerce.Platform.Core.DynamicProperties;
 using VirtoCommerce.Platform.Core.Events;
 using VirtoCommerce.Platform.Core.Settings;
 using VirtoCommerce.StoreModule.Core.Events;
+using VirtoCommerce.StoreModule.Core.Model;
 
 namespace VirtoCommerce.StoreModule.Data.Handlers
 {
@@ -19,29 +21,52 @@ namespace VirtoCommerce.StoreModule.Data.Handlers
             _dynamicPropertyService = dynamicPropertyService;
         }
 
-        public virtual async Task Handle(StoreChangedEvent message)
+        public virtual Task Handle(StoreChangedEvent message)
         {
             foreach (var changedEntry in message.ChangedEntries)
             {
                 if (changedEntry.EntryState == EntryState.Added)
                 {
-                    var taskSaveDynamicPropertyValues = _dynamicPropertyService.SaveDynamicPropertyValuesAsync(changedEntry.NewEntry);
-                    var taskSaveEntitySettingsValues = _settingManager.DeepSaveSettingsAsync(changedEntry.NewEntry);
-                    await Task.WhenAll(taskSaveDynamicPropertyValues, taskSaveEntitySettingsValues);
+                    BackgroundJob.Enqueue(() => SaveDynamicPropertyValuesInBackground(changedEntry.NewEntry));
                 }
                 else if (changedEntry.EntryState == EntryState.Modified)
                 {
-                    var taskSaveDynamicPropertyValues = _dynamicPropertyService.SaveDynamicPropertyValuesAsync(changedEntry.NewEntry);
-                    var taskSaveEntitySettingsValues = _settingManager.DeepSaveSettingsAsync(changedEntry.NewEntry);
-                    await Task.WhenAll(taskSaveDynamicPropertyValues, taskSaveEntitySettingsValues);
+                    BackgroundJob.Enqueue(() => SaveDynamicPropertyValuesInBackground(changedEntry.NewEntry));
                 }
                 else if (changedEntry.EntryState == EntryState.Deleted)
                 {
-                    var taskDeleteDynamicPropertyValues = _dynamicPropertyService.DeleteDynamicPropertyValuesAsync(changedEntry.NewEntry);
-                    var taskRemoveEntitySettingsValues = _settingManager.DeepRemoveSettingsAsync(changedEntry.NewEntry);
-                    await Task.WhenAll(taskDeleteDynamicPropertyValues, taskRemoveEntitySettingsValues);
+                    BackgroundJob.Enqueue(() => DeleteDynamicPropertyValuesInBackground(changedEntry.NewEntry));
                 }
             }
+
+            return Task.CompletedTask;
+        }
+
+
+        [DisableConcurrentExecution(60 * 60 * 24)]
+        public void SaveDynamicPropertyValuesInBackground(Store entry)
+        {
+            SaveDynamicPropertyValuesAsync(entry).GetAwaiter().GetResult();
+        }
+
+        protected virtual async Task SaveDynamicPropertyValuesAsync(Store entry)
+        {
+            var taskSaveDynamicPropertyValues = _dynamicPropertyService.SaveDynamicPropertyValuesAsync(entry);
+            var taskSaveEntitySettingsValues = _settingManager.DeepSaveSettingsAsync(entry);
+            await Task.WhenAll(taskSaveDynamicPropertyValues, taskSaveEntitySettingsValues);
+        }
+
+        [DisableConcurrentExecution(60 * 60 * 24)]
+        public void DeleteDynamicPropertyValuesInBackground(Store entry)
+        {
+            DeleteDynamicPropertyValuesAsync(entry).GetAwaiter().GetResult();
+        }
+
+        protected virtual async Task DeleteDynamicPropertyValuesAsync(Store entry)
+        {
+            var taskDeleteDynamicPropertyValues = _dynamicPropertyService.DeleteDynamicPropertyValuesAsync(entry);
+            var taskRemoveEntitySettingsValues = _settingManager.DeepRemoveSettingsAsync(entry);
+            await Task.WhenAll(taskDeleteDynamicPropertyValues, taskRemoveEntitySettingsValues);
         }
     }
 }

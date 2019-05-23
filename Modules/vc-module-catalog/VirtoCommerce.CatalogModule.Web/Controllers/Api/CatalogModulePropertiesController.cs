@@ -126,7 +126,7 @@ namespace VirtoCommerce.CatalogModule.Web.Controllers.Api
         /// <param name="property">The property.</param>
         [HttpPost]
         [Route("")]
-        public async Task<IActionResult> SaveProperty([FromBody]Property property)
+        public async Task<ActionResult> SaveProperty([FromBody]Property property)
         {
             await _propertyService.SaveChangesAsync(new[] { property });
 
@@ -142,7 +142,7 @@ namespace VirtoCommerce.CatalogModule.Web.Controllers.Api
         /// <returns></returns>
         [HttpDelete]
         [Route("")]
-        public async Task<IActionResult> Delete(string id, bool doDeleteValues = false)
+        public async Task<ActionResult> Delete(string id, bool doDeleteValues = false)
         {
             //var property = _propertyService.GetById(id);
 

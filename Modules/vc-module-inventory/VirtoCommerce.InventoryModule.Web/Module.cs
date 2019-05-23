@@ -47,6 +47,8 @@ namespace VirtoCommerce.InventoryModule.Web
             serviceCollection.AddSingleton<IFulfillmentCenterSearchService, FulfillmentCenterSearchService>();
             serviceCollection.AddSingleton<IFulfillmentCenterService, FulfillmentCenterService>();
             serviceCollection.AddSingleton<InventoryExportImport>();
+            serviceCollection.AddTransient<ProductAvailabilityChangesProvider>();
+            serviceCollection.AddTransient<ProductAvailabilityDocumentBuilder>();
             serviceCollection.AddSingleton<LogChangesChangedEventHandler>();
         }
 

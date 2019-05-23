@@ -30,7 +30,7 @@ namespace VirtoCommerce.SubscriptionModule.Data.Model
             paymentPlan.ModifiedDate = ModifiedDate;
             paymentPlan.IntervalCount = IntervalCount;
             paymentPlan.TrialPeriodDays = TrialPeriodDays;
-            paymentPlan.Interval = EnumUtility.SafeParse<PaymentInterval>(Interval, PaymentInterval.Months);
+            paymentPlan.Interval = EnumUtility.SafeParse(Interval, PaymentInterval.Months);
 
             return paymentPlan;
         }
@@ -61,7 +61,7 @@ namespace VirtoCommerce.SubscriptionModule.Data.Model
             target.Interval = Interval;
             target.IntervalCount = IntervalCount;
             target.ProductId = ProductId;
-            target.TrialPeriodDays = TrialPeriodDays;        
+            target.TrialPeriodDays = TrialPeriodDays;
         }
 
     }

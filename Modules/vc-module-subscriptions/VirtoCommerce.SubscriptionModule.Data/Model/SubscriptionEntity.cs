@@ -90,8 +90,8 @@ namespace VirtoCommerce.SubscriptionModule.Data.Model
             subscription.TrialSart = TrialSart;
             subscription.Comment = Comment;
 
-            subscription.SubscriptionStatus = EnumUtility.SafeParse<SubscriptionStatus>(Status, SubscriptionStatus.Active);
-            subscription.Interval = EnumUtility.SafeParse<PaymentInterval>(Interval, PaymentInterval.Months);
+            subscription.SubscriptionStatus = EnumUtility.SafeParse(Status, SubscriptionStatus.Active);
+            subscription.Interval = EnumUtility.SafeParse(Interval, PaymentInterval.Months);
             return subscription;
         }
 

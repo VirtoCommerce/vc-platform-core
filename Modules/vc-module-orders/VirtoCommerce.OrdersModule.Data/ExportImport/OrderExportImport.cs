@@ -42,12 +42,13 @@ namespace VirtoCommerce.OrdersModule.Data.ExportImport
                 progressCallback(progressInfo);
 
                 await writer.WritePropertyNameAsync("CustomerOrders");
-                await writer.SerializeJsonArrayWithPagingAsync(_jsonSerializer, _batchSize, (skip, take) =>
+                await writer.SerializeJsonArrayWithPagingAsync(_jsonSerializer, _batchSize, async (skip, take) =>
                 {
                     var searchCriteria = AbstractTypeFactory<CustomerOrderSearchCriteria>.TryCreateInstance();
                     searchCriteria.Take = take;
                     searchCriteria.Skip = skip;
-                    return _customerOrderSearchService.SearchCustomerOrdersAsync(searchCriteria);
+                    var searchResult = await _customerOrderSearchService.SearchCustomerOrdersAsync(searchCriteria);
+                    return (GenericSearchResult<CustomerOrder>)searchResult;
                 }, (processedCount, totalCount) =>
                 {
                     progressInfo.Description = $"{ processedCount } of { totalCount } orders have been exported";

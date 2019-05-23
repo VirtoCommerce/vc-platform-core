@@ -123,8 +123,7 @@ namespace VirtoCommerce.MarketingModule.Web.JsonConverters
             IConditionTree result = null;
 
             var dynamicPromotion = value as DynamicPromotion;
-            if (dynamicPromotion?.IsTransient() == true ||
-                dynamicPromotion?.PredicateVisualTreeSerialized != null && dynamicPromotion.PredicateSerialized != null && dynamicPromotion.RewardsSerialized != null)
+            if (dynamicPromotion?.PredicateVisualTreeSerialized != null)
             {
                 result = JsonConvert.DeserializeObject<PromotionConditionAndRewardTree>(
                     dynamicPromotion.PredicateVisualTreeSerialized,

@@ -121,7 +121,7 @@ namespace VirtoCommerce.MarketingModule.Data.Promotions
                         if (couponIsValid && coupon.MaxUsesNumber > 0)
                         {
                             var usage = await _usageService.SearchUsagesAsync(new PromotionUsageSearchCriteria { PromotionId = Id, CouponCode = coupon.Code, Take = 0 });
-                            couponIsValid = usage.TotalCount <= coupon.MaxUsesNumber;
+                            couponIsValid = usage.TotalCount < coupon.MaxUsesNumber;
                         }
                         if (couponIsValid && coupon.MaxUsesPerUser > 0 && !string.IsNullOrWhiteSpace(userId))
                         {

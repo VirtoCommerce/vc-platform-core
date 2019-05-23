@@ -1,0 +1,53 @@
+<div class="blade-content">
+    <div class="blade-inner">
+        <div class="inner-block">
+            <form class="form" name="detailForm">
+                <div class="form-group clearfix" ng-init="setForm(detailForm)">
+                    <div class="column">
+                        <ul class="list __info">
+                            <li class="list-item">
+                                <div class="list-t">{{ 'shipping.blades.shipping-method-detail.labels.name' | translate }}</div>
+                                <div class="list-descr">{{ 'shipping.labels.' + blade.currentEntity.typeName + '.name' | translate }}</div>
+                            </li>
+                        </ul>
+                    </div>
+                    <div class="column">
+                        <ul class="list __info">
+                            <li class="list-item">
+                                <div class="list-t">{{ 'shipping.blades.shipping-method-detail.labels.code' | translate }}</div>
+                                <div class="list-descr">{{ 'shipping.labels.' + blade.currentEntity.typeName + '.name' | translate }}</div>
+                            </li>
+                        </ul>
+                    </div>
+                </div>
+                <div class="form-group clearfix">
+                    <div class="column">
+                        <div class="form-group __info list">
+                            <label class="form-label">{{ 'shipping.blades.shipping-method-detail.labels.is-active' | translate }}</label>
+                            <div class="form-input">
+                                <label class="form-label __switch">
+                                    <input type="checkbox" ng-model="blade.currentEntity.isActive" />
+                                    <span class="switch"></span>
+                                </label>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+                <div class="form-group clearfix">
+                    <div class="form-group">
+                        <label class="form-label">{{ 'shipping.blades.shipping-method-detail.labels.tax-type' | translate }} <a href="" ng-click="blade.openDictionarySettingManagement('TaxTypes')" class="form-edit"><i class="form-ico fa fa-pencil"></i></a></label>
+                        <div class="form-input">
+                            <ui-select ng-model="blade.currentEntity.taxType">
+                                <ui-select-match allow-clear="true" placeholder="{{ 'shipping.blades.shipping-method-detail.placeholders.tax-type' | translate }}">{{$select.selected}}</ui-select-match>
+                                <ui-select-choices repeat="x in blade.taxTypes | filter: $select.search">
+                                    <span ng-bind-html="x | highlight: $select.search"></span>
+                                </ui-select-choices>
+                            </ui-select>
+                        </div>                       
+                    </div>
+                </div>
+            </form>
+            <va-widget-container group="shippingMethodDetail" blade="blade"></va-widget-container>
+        </div>
+    </div>
+</div>

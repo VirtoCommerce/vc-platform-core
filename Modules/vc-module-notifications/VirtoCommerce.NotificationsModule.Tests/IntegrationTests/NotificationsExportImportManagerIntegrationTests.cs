@@ -39,7 +39,7 @@ namespace VirtoCommerce.NotificationsModule.Tests.IntegrationTests
             INotificationRepository RepositoryFactory() => _repositoryMock.Object;
             _mockUnitOfWork = new Mock<IUnitOfWork>();
             _repositoryMock.Setup(ss => ss.UnitOfWork).Returns(_mockUnitOfWork.Object);
-            _notificationSearchService = new NotificationSearchService(RepositoryFactory);
+            //_notificationSearchService = new NotificationSearchService(RepositoryFactory);
             _notificationService = new NotificationService(RepositoryFactory, _eventPulisherMock.Object);
             _notificationsExportImportManager = new NotificationsExportImport(_notificationSearchService, _notificationService, GetJsonSerializer());
 
@@ -104,11 +104,11 @@ namespace VirtoCommerce.NotificationsModule.Tests.IntegrationTests
                 new NotificationTemplateEntity() { Body = "test", LanguageCode = "en-US" },
             };
 
-            _repositoryMock.Setup(r => r.GetByTypesAsync(new[] { nameof(RegistrationEmailNotification) }, null, null, NotificationResponseGroup.Default.ToString(), true))
-                           .ReturnsAsync(new[] { entity });
+            //_repositoryMock.Setup(r => r.GetByTypesAsync(new[] { nameof(RegistrationEmailNotification) }, null, null, NotificationResponseGroup.Default.ToString(), true))
+            //               .ReturnsAsync(new[] { entity });
 
-            _repositoryMock.Setup(r => r.GetByTypesAsync(new[] { nameof(RegistrationEmailNotification) }, null, null, NotificationResponseGroup.Full.ToString(), true))
-                           .ReturnsAsync(new[] { entity });
+            //_repositoryMock.Setup(r => r.GetByTypesAsync(new[] { nameof(RegistrationEmailNotification) }, null, null, NotificationResponseGroup.Full.ToString(), true))
+            //               .ReturnsAsync(new[] { entity });
 
             //Act
             await _notificationsExportImportManager.DoExportAsync(fileStream, exportImportProgressInfo => { }, new CancellationTokenWrapper(CancellationToken.None));

@@ -11,17 +11,18 @@ namespace VirtoCommerce.ImageToolsModule.Data.Services
 {
     public class ThumbnailOptionSearchService : IThumbnailOptionSearchService
     {
-        public ThumbnailOptionSearchService(Func<IThumbnailRepository> thumbnailRepositoryFactory)
+        private readonly Func<IThumbnailRepository> _thumbnailRepositoryFactor;
+
+        public ThumbnailOptionSearchService(Func<IThumbnailRepository> thumbnailRepositoryFactor)
         {
-            ThumbnailRepositoryFactory = thumbnailRepositoryFactory;
+            _thumbnailRepositoryFactor = thumbnailRepositoryFactor;
         }
 
-        protected Func<IThumbnailRepository> ThumbnailRepositoryFactory { get; }
-
-        public virtual async Task<GenericSearchResult<ThumbnailOption>> SearchAsync(ThumbnailOptionSearchCriteria criteria)
+        public virtual async Task<ThumbnailOptionSearchResult> SearchAsync(ThumbnailOptionSearchCriteria criteria)
         {
-            using (var repository = ThumbnailRepositoryFactory())
+            using (var repository = _thumbnailRepositoryFactor())
             {
+                var result = AbstractTypeFactory<ThumbnailOptionSearchResult>.TryCreateInstance();
                 var sortInfos = criteria.SortInfos;
                 if (sortInfos.IsNullOrEmpty())
                     sortInfos = new[]
@@ -44,13 +45,10 @@ namespace VirtoCommerce.ImageToolsModule.Data.Services
                     results = thumbnailOptions.Select(t => t.ToModel(AbstractTypeFactory<ThumbnailOption>.TryCreateInstance())).ToArray();
                 }
 
-                var retVal = new GenericSearchResult<ThumbnailOption>
-                {
-                    TotalCount = totalCount,
-                    Results = results.AsQueryable().OrderBySortInfos(sortInfos).ToList()
-                };
+                result.TotalCount = totalCount;
+                result.Results = results.AsQueryable().OrderBySortInfos(sortInfos).ToList();
 
-                return retVal;
+                return result;
             }
         }
     }

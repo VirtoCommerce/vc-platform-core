@@ -1,4 +1,4 @@
-﻿angular.module('virtoCommerce.subscriptionModule')
+angular.module('virtoCommerce.subscriptionModule')
 .controller('virtoCommerce.subscriptionModule.subscriptionListController', ['$scope', '$localStorage', 'virtoCommerce.subscriptionModule.subscriptionAPI', 'virtoCommerce.orderModule.knownOperations', 'platformWebApp.bladeNavigationService', 'platformWebApp.dialogService', 'platformWebApp.uiGridHelper', 'platformWebApp.bladeUtils', 'dateFilter',
 function ($scope, $localStorage, subscriptionAPI, knownOperations, bladeNavigationService, dialogService, uiGridHelper, bladeUtils, dateFilter) {
     $scope.uiGridConstants = uiGridHelper.uiGridConstants;
@@ -19,7 +19,7 @@ function ($scope, $localStorage, subscriptionAPI, knownOperations, bladeNavigati
 
         subscriptionAPI.search(criteria, function (data) {
             $scope.pageSettings.totalItems = data.totalCount;
-            blade.currentEntities = data.subscriptions;
+            blade.currentEntities = data.results;
 
             blade.isLoading = false;
         });

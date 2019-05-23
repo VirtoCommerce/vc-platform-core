@@ -64,6 +64,11 @@ namespace VirtoCommerce.CatalogModule.Core.Model.ListEntry
         /// </summary>
         public IList<string> Path { get; set; }
 
+        /// <summary>
+        /// Gets or sets the catalog id.
+        /// </summary>
+        public string CatalogId { get; set; }
+
         #region ISeoSupport members
         public virtual string SeoObjectType { get; set; }
 

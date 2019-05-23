@@ -19,7 +19,7 @@ namespace VirtoCommerce.Platform.Web.Swagger
 {
     public static class SwaggerServiceCollectionExtensions
     {
-        private static string platformDocName = "v1";
+        private static string platformDocName = "VirtoCommerce.Platform";
         /// <summary>
         /// 
         /// </summary>
@@ -70,7 +70,7 @@ namespace VirtoCommerce.Platform.Web.Swagger
                 c.MapType<object>(() => new Schema { Type = "object" });
                 c.AddModulesXmlComments(services);
                 //TODO for working swagger use FriendlyId(true) / for working autorest use FriendlyId()
-                c.CustomSchemaIds(x => x.FriendlyId());
+                c.CustomSchemaIds(x => x.FriendlyId(true));
                 c.AddSecurityDefinition("OAuth2", new OAuth2Scheme
                 {
                     Type = "oauth2",
@@ -89,6 +89,7 @@ namespace VirtoCommerce.Platform.Web.Swagger
                 });
                 c.ResolveConflictingActions(apiDescriptions => apiDescriptions.First());
 
+
             });
         }
 
@@ -103,10 +104,16 @@ namespace VirtoCommerce.Platform.Web.Swagger
                 c.RouteTemplate = "docs/{documentName}/swagger.json";
             });
 
+            var modules = applicationBuilder.ApplicationServices.GetService<IModuleCatalog>().Modules.OfType<ManifestModuleInfo>().Where(m => m.ModuleInstance != null).ToArray();
+
             // Enable middleware to serve swagger-ui (HTML, JS, CSS, etc.), specifying the Swagger JSON endpoint.
             applicationBuilder.UseSwaggerUI(c =>
             {
-                c.SwaggerEndpoint("v1/swagger.json", "v1");
+                c.SwaggerEndpoint($"{platformDocName}/swagger.json", platformDocName);
+                foreach (var module in modules)
+                {
+                    c.SwaggerEndpoint($"{module.Id}/swagger.json", module.Id);
+                }
                 c.RoutePrefix = "docs";
                 c.EnableValidator();
                 c.IndexStream = () =>
