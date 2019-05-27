@@ -5,7 +5,6 @@ using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 using VirtoCommerce.Platform.Core;
 using VirtoCommerce.Platform.Core.ChangeLog;
-using VirtoCommerce.Platform.Core.Common;
 using VirtoCommerce.Platform.Web.Model;
 
 namespace VirtoCommerce.Platform.Web.Controllers.Api
@@ -31,7 +30,7 @@ namespace VirtoCommerce.Platform.Web.Controllers.Api
         public ActionResult ForceChanges(ForceChangesRequest forceRequest)
         {
             _lastTimestamp = DateTime.UtcNow;
-            return Ok();
+            return NoContent();
         }
 
         /// <summary>

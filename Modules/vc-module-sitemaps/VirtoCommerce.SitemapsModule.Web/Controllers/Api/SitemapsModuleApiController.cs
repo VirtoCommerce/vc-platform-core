@@ -141,7 +141,7 @@ namespace VirtoCommerce.SitemapsModule.Web.Controllers.Api
 
             await _sitemapService.RemoveAsync(ids);
 
-            return Ok();
+            return NoContent();
         }
 
         [HttpPost]
@@ -177,7 +177,7 @@ namespace VirtoCommerce.SitemapsModule.Web.Controllers.Api
             }
             await _sitemapItemService.SaveChangesAsync(items);
 
-            return Ok();
+            return NoContent();
         }
 
         [HttpDelete]
@@ -191,7 +191,7 @@ namespace VirtoCommerce.SitemapsModule.Web.Controllers.Api
 
             await _sitemapItemService.RemoveAsync(itemIds);
 
-            return Ok();
+            return NoContent();
         }
 
         [HttpGet]

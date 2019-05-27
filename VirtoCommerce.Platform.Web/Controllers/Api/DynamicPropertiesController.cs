@@ -71,7 +71,7 @@ namespace VirtoCommerce.Platform.Web.Controllers.Api
         public async Task<ActionResult> UpdatePropertyAsync([FromBody]DynamicProperty property)
         {
             await _dynamicPropertyService.SaveDynamicPropertiesAsync(new[] { property });
-            return Ok();
+            return NoContent();
         }
 
         /// <summary>
@@ -84,7 +84,7 @@ namespace VirtoCommerce.Platform.Web.Controllers.Api
         public async Task<ActionResult> DeletePropertyAsync([FromQuery] string[] propertyIds)
         {
             await _dynamicPropertyService.DeleteDynamicPropertiesAsync(propertyIds);
-            return Ok();
+            return NoContent();
         }
 
         /// <summary>
@@ -112,7 +112,7 @@ namespace VirtoCommerce.Platform.Web.Controllers.Api
         public async Task<ActionResult> SaveDictionaryItemsAsync([FromBody]DynamicPropertyDictionaryItem[] items)
         {
             await _dynamicPropertyService.SaveDictionaryItemsAsync(items);
-            return Ok();
+            return NoContent();
         }
 
         /// <summary>
@@ -126,7 +126,7 @@ namespace VirtoCommerce.Platform.Web.Controllers.Api
         public async Task<ActionResult> DeleteDictionaryItemAsync([FromQuery] string[] ids)
         {
             await _dynamicPropertyService.DeleteDictionaryItemsAsync(ids);
-            return Ok();
+            return NoContent();
         }
 
 
@@ -172,7 +172,7 @@ namespace VirtoCommerce.Platform.Web.Controllers.Api
                 property.ObjectType = typeName;
             }
             await _dynamicPropertyService.SaveDynamicPropertiesAsync(new[] { property });
-            return Ok();
+            return NoContent();
         }
 
         [ApiExplorerSettings(IgnoreApi = true)]
@@ -183,7 +183,7 @@ namespace VirtoCommerce.Platform.Web.Controllers.Api
         public async Task<ActionResult> DeleteProperty([FromRoute] string typeName, [FromRoute] string propertyId)
         {
             await _dynamicPropertyService.DeleteDynamicPropertiesAsync(new[] { propertyId });
-            return Ok();
+            return NoContent();
         }
 
         [ApiExplorerSettings(IgnoreApi = true)]
@@ -208,7 +208,7 @@ namespace VirtoCommerce.Platform.Web.Controllers.Api
                 item.PropertyId = propertyId;
             }
             await _dynamicPropertyService.SaveDictionaryItemsAsync(items);
-            return Ok();
+            return NoContent();
         }
 
         [ApiExplorerSettings(IgnoreApi = true)]
@@ -219,7 +219,7 @@ namespace VirtoCommerce.Platform.Web.Controllers.Api
         public async Task<ActionResult> DeleteDictionaryItem([FromRoute] string typeName, [FromRoute] string propertyId, [FromQuery] string[] ids)
         {
             await _dynamicPropertyService.DeleteDictionaryItemsAsync(ids);
-            return Ok();
+            return NoContent();
         }
         #endregion
     }

@@ -106,7 +106,7 @@ namespace VirtoCommerce.CatalogModule.Web.Controllers.Api
             {
                 await SaveListCatalogEntitiesAsync(hasLinkEntries.ToArray());
             }
-            return Ok();
+            return NoContent();
         }
 
 
@@ -147,7 +147,7 @@ namespace VirtoCommerce.CatalogModule.Web.Controllers.Api
 
             } while (haveProducts);
 
-            return Ok();
+            return NoContent();
         }
 
         [ApiExplorerSettings(IgnoreApi = true)]
@@ -188,7 +188,7 @@ namespace VirtoCommerce.CatalogModule.Web.Controllers.Api
                 await SaveListCatalogEntitiesAsync(hasLinkEntries.ToArray());
             }
 
-            return Ok();
+            return NoContent();
         }
 
         /// <summary>
@@ -230,7 +230,7 @@ namespace VirtoCommerce.CatalogModule.Web.Controllers.Api
             //CheckCurrentUserHasPermissionForObjects(CatalogPredefinedPermissions.Create, categories);
             //CheckCurrentUserHasPermissionForObjects(CatalogPredefinedPermissions.Create, products);
             await SaveListCatalogEntitiesAsync(catalogEntries.ToArray());
-            return Ok();
+            return NoContent();
         }
 
         private async Task SaveListCatalogEntitiesAsync(IEntity[] entities)

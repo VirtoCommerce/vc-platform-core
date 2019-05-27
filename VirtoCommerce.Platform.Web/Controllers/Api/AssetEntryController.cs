@@ -59,7 +59,7 @@ namespace VirtoCommerce.Platform.Web.Controllers.Api
         public async Task<ActionResult> Update([FromBody]AssetEntry item)
         {
             await _assetService.SaveChangesAsync(new[] { item });
-            return Ok();
+            return NoContent();
         }
 
         /// <summary>
@@ -73,7 +73,7 @@ namespace VirtoCommerce.Platform.Web.Controllers.Api
         public async Task<ActionResult> Delete([FromQuery] string[] ids)
         {
             await _assetService.DeleteAsync(ids);
-            return Ok();
+            return NoContent();
         }
     }
 }

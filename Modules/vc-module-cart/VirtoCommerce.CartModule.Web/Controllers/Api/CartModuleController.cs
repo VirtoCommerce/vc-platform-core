@@ -64,7 +64,7 @@ namespace VirtoCommerce.CartModule.Web.Controllers.Api
                 var cart = await _shoppingCartService.GetByIdAsync(cartId, CartResponseGroup.Full.ToString());
                 await _cartBuilder.TakeCart(cart).AddItem(lineItem).SaveAsync();
             }
-            return Ok();
+            return NoContent();
         }
 
         [HttpPut]
@@ -82,7 +82,7 @@ namespace VirtoCommerce.CartModule.Web.Controllers.Api
                 }
             }
 
-            return Ok();
+            return NoContent();
         }
 
         [HttpDelete]
@@ -106,7 +106,7 @@ namespace VirtoCommerce.CartModule.Web.Controllers.Api
                 var cart = await _shoppingCartService.GetByIdAsync(cartId, CartResponseGroup.Full.ToString());
                 await _cartBuilder.TakeCart(cart).Clear().SaveAsync();
             }
-            return Ok();
+            return NoContent();
         }
 
         [HttpPatch]
@@ -119,7 +119,7 @@ namespace VirtoCommerce.CartModule.Web.Controllers.Api
                 var builder = await _cartBuilder.TakeCart(cart).MergeWithCartAsync(otherCart);
                 await builder.SaveAsync();
             }
-            return Ok();
+            return NoContent();
         }
 
         [HttpGet]
@@ -159,7 +159,7 @@ namespace VirtoCommerce.CartModule.Web.Controllers.Api
                 var cart = await _shoppingCartService.GetByIdAsync(cartId, CartResponseGroup.Default.ToString());
                 await _cartBuilder.TakeCart(cart).AddCoupon(couponCode).SaveAsync();
             }
-            return Ok();
+            return NoContent();
         }
 
         [HttpDelete]
@@ -171,7 +171,7 @@ namespace VirtoCommerce.CartModule.Web.Controllers.Api
                 var cart = await _shoppingCartService.GetByIdAsync(cartId, CartResponseGroup.Default.ToString());
                 await _cartBuilder.TakeCart(cart).RemoveCoupon().SaveAsync();
             }
-            return Ok();
+            return NoContent();
         }
 
         [HttpPost]
@@ -183,7 +183,7 @@ namespace VirtoCommerce.CartModule.Web.Controllers.Api
                 var cart = await _shoppingCartService.GetByIdAsync(cartId, CartResponseGroup.WithShipments.ToString());
                 await (await _cartBuilder.TakeCart(cart).AddOrUpdateShipmentAsync(shipment)).SaveAsync();
             }
-            return Ok();
+            return NoContent();
         }
 
         [HttpPost]
@@ -196,7 +196,7 @@ namespace VirtoCommerce.CartModule.Web.Controllers.Api
                 await (await _cartBuilder.TakeCart(cart).AddOrUpdatePaymentAsync(payment)).SaveAsync();
             }
 
-            return Ok();
+            return NoContent();
         }
 
         /// <summary>
@@ -263,7 +263,7 @@ namespace VirtoCommerce.CartModule.Web.Controllers.Api
         public async Task<ActionResult> DeleteCarts([FromRoute] string[] ids)
         {
             await _shoppingCartService.DeleteAsync(ids);
-            return Ok();
+            return NoContent();
         }
 
         /// <summary>

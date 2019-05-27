@@ -173,7 +173,7 @@ namespace VirtoCommerce.MarketingModule.Web.Controllers.Api
             //    throw new HttpResponseException(HttpStatusCode.Unauthorized);
             //}
             await _promotionService.SavePromotionsAsync(new[] { promotion });
-            return Ok();
+            return NoContent();
         }
 
         /// <summary>
@@ -186,7 +186,7 @@ namespace VirtoCommerce.MarketingModule.Web.Controllers.Api
         public async Task<ActionResult> DeletePromotions([FromQuery] string[] ids)
         {
             await _promotionService.DeletePromotionsAsync(ids);
-            return Ok();
+            return NoContent();
         }
 
         [HttpPost]
@@ -223,7 +223,7 @@ namespace VirtoCommerce.MarketingModule.Web.Controllers.Api
         {
             await _couponService.SaveCouponsAsync(coupons);
 
-            return Ok();
+            return NoContent();
         }
 
         [HttpDelete]
@@ -232,7 +232,7 @@ namespace VirtoCommerce.MarketingModule.Web.Controllers.Api
         {
             await _couponService.DeleteCouponsAsync(ids);
 
-            return Ok();
+            return NoContent();
         }
 
         [HttpPost]

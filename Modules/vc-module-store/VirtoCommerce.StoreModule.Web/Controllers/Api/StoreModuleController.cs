@@ -122,7 +122,7 @@ namespace VirtoCommerce.StoreModule.Web.Controllers.Api
             //TODO
             //CheckCurrentUserHasPermissionForObjects(StorePredefinedPermissions.Update, store);
             await _storeService.SaveChangesAsync(new[] { store });
-            return Ok();
+            return NoContent();
         }
 
         /// <summary>
@@ -136,7 +136,7 @@ namespace VirtoCommerce.StoreModule.Web.Controllers.Api
             //TODO
             //CheckCurrentUserHasPermissionForObjects(StorePredefinedPermissions.Delete, stores);
             await _storeService.DeleteAsync(ids);
-            return Ok();
+            return NoContent();
         }
 
         /// <summary>
@@ -163,7 +163,7 @@ namespace VirtoCommerce.StoreModule.Web.Controllers.Api
             };
             await _notificationSender.SendNotificationAsync(notification, request.Language);
 
-            return Ok();
+            return NoContent();
         }
 
         /// <summary>

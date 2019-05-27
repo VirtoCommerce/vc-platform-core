@@ -94,7 +94,7 @@ namespace VirtoCommerce.Platform.Web.Controllers.Api
                 await _eventPublisher.Publish(new UserLogoutEvent(user));
             }
 
-            return Ok();
+            return NoContent();
         }
 
         /// <summary>
@@ -234,7 +234,7 @@ namespace VirtoCommerce.Platform.Web.Controllers.Api
                     }
                 }
             }
-            return Ok();
+            return NoContent();
         }
 
         /// <summary>

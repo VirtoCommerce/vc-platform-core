@@ -1,4 +1,3 @@
-using System;
 using System.Linq;
 using System.Threading.Tasks;
 using Microsoft.AspNetCore.Authorization;
@@ -81,7 +80,7 @@ namespace VirtoCommerce.Platform.Web.Controllers.Api
             {
                 await _settingsManager.SaveObjectSettingsAsync(objectSettings);
             }
-            return Ok();
+            return NoContent();
         }
 
         /// <summary>

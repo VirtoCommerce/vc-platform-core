@@ -138,7 +138,7 @@ namespace VirtoCommerce.CustomerModule.Web.Controllers.Api
         public async Task<ActionResult> UpdateMember([FromBody] Member member)
         {
             await _memberService.SaveChangesAsync(new[] { member });
-            return Ok();
+            return NoContent();
         }
 
         /// <summary>
@@ -165,7 +165,7 @@ namespace VirtoCommerce.CustomerModule.Web.Controllers.Api
         public async Task<ActionResult> DeleteMembers([FromQuery] string[] ids)
         {
             await _memberService.DeleteAsync(ids);
-            return Ok();
+            return NoContent();
         }
 
         /// <summary>
@@ -202,7 +202,7 @@ namespace VirtoCommerce.CustomerModule.Web.Controllers.Api
             });
 
 
-            return Ok();
+            return NoContent();
         }
 
         #region Special members for storefront C# API client  (because it not support polymorph types)
@@ -489,7 +489,7 @@ namespace VirtoCommerce.CustomerModule.Web.Controllers.Api
                 member.Addresses = addresses.ToList();
                 await _memberService.SaveChangesAsync(new[] { member });
             }
-            return Ok();
+            return NoContent();
         }
 
         /// <summary>

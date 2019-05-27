@@ -250,7 +250,7 @@ namespace VirtoCommerce.CatalogModule.Web.Controllers.Api
         public async Task<ActionResult> SaveProducts([FromBody] CatalogProduct[] products)
         {
             await InnerSaveProducts(products);
-            return Ok();
+            return NoContent();
         }
 
 

@@ -12,7 +12,7 @@ using VirtoCommerce.Platform.Core.Common;
 
 namespace VirtoCommerce.InventoryModule.Web.Controllers.Api
 {
-    [Route("api/inventory")]
+    [Route("api")]
     public class InventoryModuleController : Controller
     {
         private readonly IInventoryService _inventoryService;
@@ -32,7 +32,7 @@ namespace VirtoCommerce.InventoryModule.Web.Controllers.Api
         /// </summary>
         [HttpPost]
         [AllowAnonymous]
-        [Route("fulfillmentcenters/search")]
+        [Route("inventory/fulfillmentcenters/search")]
         public async Task<ActionResult<FulfillmentCenterSearchResult>> SearchFulfillmentCenters([FromBody] FulfillmentCenterSearchCriteria searchCriteria)
         {
             var retVal = await _fulfillmentCenterSearchService.SearchCentersAsync(searchCriteria);
@@ -45,7 +45,7 @@ namespace VirtoCommerce.InventoryModule.Web.Controllers.Api
         /// </summary>
         /// <param name="id">fulfillment center id</param>
         [HttpGet]
-        [Route("fulfillmentcenters/{id}")]
+        [Route("inventory/fulfillmentcenters/{id}")]
         public async Task<ActionResult<FulfillmentCenter>> GetFulfillmentCenter([FromRoute]string id)
         {
             var retVal = await _fulfillmentCenterService.GetByIdsAsync(new[] { id });
@@ -57,7 +57,7 @@ namespace VirtoCommerce.InventoryModule.Web.Controllers.Api
         /// </summary>
         /// <param name="center">fulfillment center</param>
         [HttpPut]
-        [Route("fulfillmentcenters")]
+        [Route("inventory/fulfillmentcenters")]
         [Authorize(ModuleConstants.Security.Permissions.FulfillmentEdit)]
         public async Task<ActionResult<FulfillmentCenter>> SaveFulfillmentCenter([FromBody]FulfillmentCenter center)
         {
@@ -69,12 +69,13 @@ namespace VirtoCommerce.InventoryModule.Web.Controllers.Api
         /// Delete  fulfillment centers registered in the system
         /// </summary>
         [HttpDelete]
-        [Route("fulfillmentcenters")]
+        [Route("inventory/fulfillmentcenters")]
+        [Route("fulfillment/centers")]
         [Authorize(ModuleConstants.Security.Permissions.FulfillmentDelete)]
         public async Task<ActionResult> DeleteFulfillmentCenters([FromQuery] string[] ids)
         {
             await _fulfillmentCenterService.DeleteAsync(ids);
-            return Ok();
+            return NoContent();
         }
 
 
@@ -84,7 +85,7 @@ namespace VirtoCommerce.InventoryModule.Web.Controllers.Api
         /// <remarks>Get inventory of products for each fulfillment center.</remarks>
         /// <param name="ids">Products ids</param>
         [HttpGet]
-        [Route("products")]
+        [Route("inventory/products")]
         public async Task<ActionResult<InventoryInfo[]>> GetProductsInventories([FromQuery] string[] ids)
         {
             var result = new List<InventoryInfo>();
@@ -115,7 +116,7 @@ namespace VirtoCommerce.InventoryModule.Web.Controllers.Api
         /// <remarks>Get inventory of products for each fulfillment center.</remarks>
         /// <param name="ids">Products ids</param>
         [HttpPost]
-        [Route("products/plenty")]
+        [Route("inventory/products/plenty")]
         public async Task<ActionResult<InventoryInfo[]>> GetProductsInventoriesByPlentyIds([FromQuery] string[] ids)
         {
             return await GetProductsInventories(ids);
@@ -127,7 +128,7 @@ namespace VirtoCommerce.InventoryModule.Web.Controllers.Api
         /// <remarks>Get inventories of product for each fulfillment center.</remarks>
         /// <param name="productId">Product id</param>
         [HttpGet]
-        [Route("products/{productId}")]
+        [Route("inventory/products/{productId}")]
         public async Task<ActionResult<InventoryInfo[]>> GetProductInventories([FromRoute]string productId)
         {
             return await GetProductsInventories(new[] { productId });
@@ -139,7 +140,7 @@ namespace VirtoCommerce.InventoryModule.Web.Controllers.Api
         /// <remarks>Update given inventory of product.</remarks>
         /// <param name="inventory">Inventory to update</param>
         [HttpPut]
-        [Route("products/{productId}")]
+        [Route("inventory/products/{productId}")]
         [Authorize(ModuleConstants.Security.Permissions.Update)]
         public async Task<ActionResult<InventoryInfo>> UpdateProductInventory([FromBody]InventoryInfo inventory)
         {
