@@ -32,12 +32,12 @@ namespace VirtoCommerce.OrdersModule.Data.Repositories
             var orderTaxDetails = TaxDetails.Where(x => ids.Contains(x.CustomerOrderId)).ToArrayAsync();
             await Task.WhenAll(orderDiscounts, orderTaxDetails);
 
-            if ((responseGroup & CustomerOrderResponseGroup.WithAddresses) == CustomerOrderResponseGroup.WithAddresses)
+            if (responseGroup.HasFlag(CustomerOrderResponseGroup.WithAddresses))
             {
                 var addresses = await Addresses.Where(x => ids.Contains(x.CustomerOrderId)).ToArrayAsync();
             }
 
-            if ((responseGroup & CustomerOrderResponseGroup.WithInPayments) == CustomerOrderResponseGroup.WithInPayments)
+            if (responseGroup.HasFlag(CustomerOrderResponseGroup.WithInPayments))
             {
                 var inPayments = await InPayments.Where(x => ids.Contains(x.CustomerOrderId)).ToArrayAsync();
                 var paymentsIds = inPayments.Select(x => x.Id).ToArray();
@@ -48,7 +48,7 @@ namespace VirtoCommerce.OrdersModule.Data.Repositories
                 await Task.WhenAll(paymentDiscounts, paymentTaxDetails, paymentAddresses, transactions);
             }
 
-            if ((responseGroup & CustomerOrderResponseGroup.WithItems) == CustomerOrderResponseGroup.WithItems)
+            if (responseGroup.HasFlag(CustomerOrderResponseGroup.WithItems))
             {
                 var lineItems = await LineItems.Where(x => ids.Contains(x.CustomerOrderId))
                                          .OrderByDescending(x => x.CreatedDate).ToArrayAsync();
@@ -58,7 +58,7 @@ namespace VirtoCommerce.OrdersModule.Data.Repositories
                 await Task.WhenAll(lineItemDiscounts, lineItemTaxDetails);
             }
 
-            if ((responseGroup & CustomerOrderResponseGroup.WithShipments) == CustomerOrderResponseGroup.WithShipments)
+            if (responseGroup.HasFlag(CustomerOrderResponseGroup.WithShipments))
             {
                 var shipments = await Shipments.Where(x => ids.Contains(x.CustomerOrderId)).ToArrayAsync();
                 var shipmentIds = shipments.Select(x => x.Id).ToArray();
@@ -69,6 +69,15 @@ namespace VirtoCommerce.OrdersModule.Data.Repositories
                 var packages = ShipmentPackagesPackages.Include(x => x.Items).Where(x => shipmentIds.Contains(x.ShipmentId)).ToArrayAsync();
                 await Task.WhenAll(shipmentDiscounts, shipmentTaxDetails, addresses, shipmentItems, packages);
             }
+
+            if (!responseGroup.HasFlag(CustomerOrderResponseGroup.WithPrices))
+            {
+                foreach (var customerOrder in result)
+                {
+                    customerOrder.ResetPrices();
+                }
+            }
+
             return result;
         }
 
@@ -80,7 +89,5 @@ namespace VirtoCommerce.OrdersModule.Data.Repositories
                 Remove(order);
             }
         }
-
-        
     }
 }
