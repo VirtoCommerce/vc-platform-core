@@ -52,7 +52,7 @@ namespace VirtoCommerce.CustomerModule.Web.Controllers.Api
         [HttpPost]
         [Route("members/search")]
         [Authorize(ModuleConstants.Security.Permissions.Access)]
-        public async Task<ActionResult<GenericSearchResult<Member>>> Search([FromBody]MembersSearchCriteria criteria)
+        public async Task<ActionResult<MemberSearchResult>> Search([FromBody]MembersSearchCriteria criteria)
         {
             var result = await _memberSearchService.SearchMembersAsync(criteria);
             return Ok(result);
@@ -458,7 +458,7 @@ namespace VirtoCommerce.CustomerModule.Web.Controllers.Api
         [HttpPost]
         [Route("vendors/search")]
         [Authorize(ModuleConstants.Security.Permissions.Read)]
-        public async Task<ActionResult<GenericSearchResult<Vendor>>> SearchVendors([FromBody]MembersSearchCriteria criteria)
+        public async Task<ActionResult<VenderSearchResult>> SearchVendors([FromBody]MembersSearchCriteria criteria)
         {
             if (criteria == null)
             {
@@ -469,11 +469,9 @@ namespace VirtoCommerce.CustomerModule.Web.Controllers.Api
             criteria.MemberTypes = new[] { criteria.MemberType };
             var searchResult = await _memberSearchService.SearchMembersAsync(criteria);
 
-            var result = new GenericSearchResult<Vendor>
-            {
-                TotalCount = searchResult.TotalCount,
-                Results = searchResult.Results.OfType<Vendor>().ToList()
-            };
+            var result = AbstractTypeFactory<VenderSearchResult>.TryCreateInstance();
+            result.TotalCount = searchResult.TotalCount;
+            result.Results = searchResult.Results.OfType<Vendor>().ToList();
 
             return Ok(result);
         }
