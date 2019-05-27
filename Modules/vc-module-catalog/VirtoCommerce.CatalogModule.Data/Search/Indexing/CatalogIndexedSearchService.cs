@@ -69,7 +69,7 @@ namespace VirtoCommerce.CatalogModule.Data.Search.Indexing
 
         protected virtual async Task<TItem[]> ConvertDocuments(IList<SearchDocument> documents, TCriteria criteria)
         {
-            TItem[] result = null;
+            var result = new TItem[0];
 
             if (documents?.Any() == true)
             {
