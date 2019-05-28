@@ -315,8 +315,7 @@ namespace VirtoCommerce.Platform.Web
                 services.AddHangfire(config => config.UseMemoryStorage());
             }
 
-            var mvcJsonOptions = services.
-                BuildServiceProvider().GetService<IOptions<MvcJsonOptions>>();
+            var mvcJsonOptions = services.BuildServiceProvider().GetService<IOptions<MvcJsonOptions>>();
             JobHelper.SetSerializerSettings(mvcJsonOptions.Value.SerializerSettings);
         }
 
@@ -407,9 +406,9 @@ namespace VirtoCommerce.Platform.Web
 
             //Setup SignalR hub
             app.UseSignalR(routes =>
-        {
-            routes.MapHub<PushNotificationHub>("/pushNotificationHub");
-        });
+            {
+                routes.MapHub<PushNotificationHub>("/pushNotificationHub");
+            });
 
             //Seed default users
             app.UseDefaultUsersAsync().GetAwaiter().GetResult();
