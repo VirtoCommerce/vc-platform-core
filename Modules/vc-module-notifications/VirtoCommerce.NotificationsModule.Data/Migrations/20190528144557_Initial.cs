@@ -1,9 +1,9 @@
-using System;
+﻿using System;
 using Microsoft.EntityFrameworkCore.Migrations;
 
 namespace VirtoCommerce.NotificationsModule.Data.Migrations
 {
-    public partial class InitialNotifications : Migration
+    public partial class Initial : Migration
     {
         protected override void Up(MigrationBuilder migrationBuilder)
         {
@@ -23,7 +23,8 @@ namespace VirtoCommerce.NotificationsModule.Data.Migrations
                     Kind = table.Column<string>(maxLength: 128, nullable: true),
                     Discriminator = table.Column<string>(nullable: false),
                     From = table.Column<string>(maxLength: 128, nullable: true),
-                    To = table.Column<string>(maxLength: 128, nullable: true)
+                    To = table.Column<string>(maxLength: 128, nullable: true),
+                    Number = table.Column<string>(maxLength: 128, nullable: true)
                 },
                 constraints: table =>
                 {
@@ -44,7 +45,7 @@ namespace VirtoCommerce.NotificationsModule.Data.Migrations
                     MimeType = table.Column<string>(maxLength: 50, nullable: true),
                     Size = table.Column<string>(maxLength: 128, nullable: true),
                     LanguageCode = table.Column<string>(maxLength: 10, nullable: true),
-                    NotificationId = table.Column<string>(maxLength: 128, nullable: true)
+                    NotificationId = table.Column<string>(nullable: true)
                 },
                 constraints: table =>
                 {
@@ -64,7 +65,7 @@ namespace VirtoCommerce.NotificationsModule.Data.Migrations
                     Id = table.Column<string>(maxLength: 128, nullable: false),
                     EmailAddress = table.Column<string>(maxLength: 128, nullable: true),
                     RecipientType = table.Column<int>(nullable: false),
-                    NotificationId = table.Column<string>(maxLength: 128, nullable: true)
+                    NotificationId = table.Column<string>(nullable: true)
                 },
                 constraints: table =>
                 {
@@ -88,7 +89,6 @@ namespace VirtoCommerce.NotificationsModule.Data.Migrations
                     ModifiedBy = table.Column<string>(maxLength: 64, nullable: true),
                     TenantId = table.Column<string>(maxLength: 128, nullable: true),
                     TenantType = table.Column<string>(maxLength: 128, nullable: true),
-                    NotificationId = table.Column<string>(maxLength: 128, nullable: true),
                     NotificationType = table.Column<string>(maxLength: 128, nullable: true),
                     SendAttemptCount = table.Column<int>(nullable: false),
                     MaxSendAttemptCount = table.Column<int>(nullable: false),
@@ -96,10 +96,12 @@ namespace VirtoCommerce.NotificationsModule.Data.Migrations
                     LastSendAttemptDate = table.Column<DateTime>(nullable: true),
                     SendDate = table.Column<DateTime>(nullable: true),
                     LanguageCode = table.Column<string>(maxLength: 10, nullable: true),
+                    NotificationId = table.Column<string>(nullable: true),
+                    Discriminator = table.Column<string>(nullable: false),
                     Subject = table.Column<string>(maxLength: 512, nullable: true),
                     Body = table.Column<string>(nullable: true),
                     Message = table.Column<string>(maxLength: 1600, nullable: true),
-                    Discriminator = table.Column<string>(defaultValue: ""),
+                    Number = table.Column<string>(maxLength: 128, nullable: true)
                 },
                 constraints: table =>
                 {
@@ -122,10 +124,11 @@ namespace VirtoCommerce.NotificationsModule.Data.Migrations
                     CreatedBy = table.Column<string>(maxLength: 64, nullable: true),
                     ModifiedBy = table.Column<string>(maxLength: 64, nullable: true),
                     LanguageCode = table.Column<string>(maxLength: 10, nullable: true),
+                    NotificationId = table.Column<string>(maxLength: 128, nullable: true),
+                    Discriminator = table.Column<string>(nullable: false),
                     Subject = table.Column<string>(maxLength: 512, nullable: true),
                     Body = table.Column<string>(nullable: true),
-                    Message = table.Column<string>(maxLength: 1600, nullable: true),
-                    NotificationId = table.Column<string>(maxLength: 128, nullable: true)
+                    Message = table.Column<string>(maxLength: 1600, nullable: true)
                 },
                 constraints: table =>
                 {

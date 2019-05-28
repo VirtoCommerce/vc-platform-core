@@ -46,10 +46,6 @@ namespace VirtoCommerce.NotificationsModule.Tests.IntegrationTests
 
             _notificationRegistrar = new NotificationService(RepositoryFactory, _eventPulisherMock.Object);
 
-
-            _notificationRegistrar.RegisterNotification<EmailNotification, NotificationEntity>();
-            _notificationRegistrar.RegisterNotificationTemplate<EmailNotificationTemplate, NotificationTemplateEntity>();
-            _notificationRegistrar.RegisterNotificationMessage<EmailNotificationMessage, NotificationMessageEntity>();
             _notificationRegistrar.RegisterNotification<RegistrationEmailNotification>();
         }
 
@@ -73,7 +69,7 @@ namespace VirtoCommerce.NotificationsModule.Tests.IntegrationTests
             var entity = AbstractTypeFactory<Notification>.TryCreateInstance(nameof(EmailNotification));
             entity.Id = Guid.NewGuid().ToString();
             entity.Type = nameof(RegistrationEmailNotification);
-            entity.Kind = nameof(EmailNotification);
+
             entity.TenantIdentity = new TenantIdentity(Guid.NewGuid().ToString(), nameof(Notification));
             entity.Templates = new ObservableCollection<NotificationTemplate>()
             {

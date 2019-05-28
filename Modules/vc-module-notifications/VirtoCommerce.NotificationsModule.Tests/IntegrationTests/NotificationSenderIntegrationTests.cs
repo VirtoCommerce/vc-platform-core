@@ -55,9 +55,7 @@ namespace VirtoCommerce.NotificationsModule.Tests.IntegrationTests
             _notificationRegistrar = new NotificationService(RepositoryFactory, _eventPulisherMock.Object);
 
 
-            _notificationRegistrar.RegisterNotification<EmailNotification, NotificationEntity>();
-            _notificationRegistrar.RegisterNotificationTemplate<EmailNotificationTemplate, NotificationTemplateEntity>();
-            _notificationRegistrar.RegisterNotificationMessage<EmailNotificationMessage, NotificationMessageEntity>();
+
             _notificationRegistrar.RegisterNotification<RegistrationEmailNotification>();
         }
 

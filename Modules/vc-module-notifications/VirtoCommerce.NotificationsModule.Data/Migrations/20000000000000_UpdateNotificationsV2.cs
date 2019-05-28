@@ -9,6 +9,13 @@ namespace VirtoCommerce.NotificationsModule.Data.Migrations
             migrationBuilder.Sql(@"IF (EXISTS (SELECT * 
                  FROM INFORMATION_SCHEMA.TABLES 
                  WHERE TABLE_NAME = '__MigrationHistory'))
+                 BEGIN
+                    INSERT INTO [dbo].[__EFMigrationsHistory] ([MigrationId], [ProductVersion]) VALUES ('20190528144557_Initial', '2.2.3-servicing-35854')
+                END");
+
+            migrationBuilder.Sql(@"IF (EXISTS (SELECT * 
+                 FROM INFORMATION_SCHEMA.TABLES 
+                 WHERE TABLE_NAME = '__MigrationHistory'))
                     BEGIN
                         BEGIN
 	                        INSERT INTO [dbo].[Notification]
@@ -51,8 +58,9 @@ namespace VirtoCommerce.NotificationsModule.Data.Migrations
                                        ,[Subject]
                                        ,[Body]
                                        ,[Message]
-                                       ,[NotificationId])
-                            SELECT TOP (1000) [Id]
+                                       ,[NotificationId]
+                                       ,[Discriminator])
+                            SELECT [Id]
                                   ,[CreatedDate]
                                   ,[ModifiedDate]
                                   ,[CreatedBy]
@@ -62,6 +70,7 @@ namespace VirtoCommerce.NotificationsModule.Data.Migrations
                                   , CASE WHEN [NotificationTypeId] LIKE '%EmailNotification%' THEN [Body] ELSE '' END
 	                              , CASE WHEN [NotificationTypeId] LIKE '%SmsNotification%' THEN [Body] ELSE '' END
                                   , (SELECT TOP 1 n.Id FROM [dbo].[Notification] n WHERE n.[Type] = pnt.[NotificationTypeId])
+                                  , CASE WHEN [NotificationTypeId] LIKE '%EmailNotification%' THEN 'EmailNotificationTemplateEntity' ELSE 'SmsNotificationTemplateEntity' END
                               FROM [PlatformNotificationTemplate] pnt
                         END
 
@@ -84,8 +93,9 @@ namespace VirtoCommerce.NotificationsModule.Data.Migrations
                                        ,[LanguageCode]
                                        ,[Subject]
                                        ,[Body]
-                                       ,[Message])
-                            SELECT TOP (1000) [Id]
+                                       ,[Message],
+                                        [Discriminator])
+                            SELECT [Id]
 	                              ,[CreatedDate]
                                   ,[ModifiedDate]
                                   ,[CreatedBy]
@@ -93,7 +103,7 @@ namespace VirtoCommerce.NotificationsModule.Data.Migrations
 	                              ,[ObjectId]
                                   ,[ObjectTypeId]
                                   , (SELECT TOP 1 n.Id FROM [dbo].[Notification] n WHERE n.[Type] = pn.[Type])
-	                              , CASE WHEN pn.[Type] LIKE '%EmailNotification%' THEN 'EmailNotification' ELSE 'SmsNotification' END
+	                              , [Type]
                                   ,[AttemptCount]
 	                              ,[MaxAttemptCount]
 	                              ,[LastFailAttemptMessage]
@@ -103,6 +113,7 @@ namespace VirtoCommerce.NotificationsModule.Data.Migrations
 	                              ,[Subject]
                                   , CASE WHEN pn.[Type] LIKE '%EmailNotification%' THEN [Body] ELSE '' END
 	                              , CASE WHEN pn.[Type] LIKE '%SmsNotification%' THEN [Body] ELSE '' END
+                                  , CASE WHEN [Type] LIKE '%EmailNotification%' THEN 'EmailNotificationMessageEntity' ELSE 'SmsNotificationMessageEntity' END
                               FROM [PlatformNotification] pn
                         END
                         

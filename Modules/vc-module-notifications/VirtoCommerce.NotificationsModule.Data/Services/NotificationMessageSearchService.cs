@@ -47,18 +47,21 @@ namespace VirtoCommerce.NotificationsModule.Data.Services
 
                 result.TotalCount = await query.CountAsync();
 
-                var sortInfos = criteria.SortInfos;
-                if (sortInfos.IsNullOrEmpty())
+                if (criteria.Take > 0)
                 {
-                    sortInfos = new[] { new SortInfo { SortColumn = "CreatedDate", SortDirection = SortDirection.Descending } };
-                }
-                query = query.OrderBySortInfos(sortInfos).ThenBy(x => x.Id);
+                    var sortInfos = criteria.SortInfos;
+                    if (sortInfos.IsNullOrEmpty())
+                    {
+                        sortInfos = new[] { new SortInfo { SortColumn = "CreatedDate", SortDirection = SortDirection.Descending } };
+                    }
+                    query = query.OrderBySortInfos(sortInfos).ThenBy(x => x.Id);
 
-                result.Results = query.Skip(criteria.Skip)
-                    .Take(criteria.Take)
-                    .ToArray()
-                    .Select(nm => nm.ToModel(AbstractTypeFactory<NotificationMessage>.TryCreateInstance()))
-                    .ToList();
+                    result.Results = query.Skip(criteria.Skip)
+                        .Take(criteria.Take)
+                        .ToArray()
+                        .Select(nm => nm.ToModel(AbstractTypeFactory<NotificationMessage>.TryCreateInstance()))
+                        .ToList();
+                }
             }
 
             return result;

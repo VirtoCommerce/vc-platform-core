@@ -31,9 +31,7 @@ namespace VirtoCommerce.NotificationsSampleModule.Web
         {
             AbstractTypeFactory<NotificationEntity>.RegisterType<TwitterNotificationEntity>();
             var registrar = appBuilder.ApplicationServices.GetService<INotificationRegistrar>();
-            registrar.RegisterNotification<TwitterNotification, NotificationEntity>();
-            registrar.RegisterNotificationTemplate<TwitterNotificationTemplate, NotificationTemplateEntity>();
-            registrar.RegisterNotificationMessage<TwitterNotificationMessage, NotificationMessageEntity>();
+            registrar.RegisterNotification<TwitterNotification>();
             registrar.RegisterNotification<PostTwitterNotification>();
             registrar.RegisterNotification<RegistrationEmailNotification>();
             registrar.RegisterNotification<ResetPasswordEmailNotification>();

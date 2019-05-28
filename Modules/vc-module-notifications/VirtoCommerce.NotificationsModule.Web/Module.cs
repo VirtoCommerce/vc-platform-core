@@ -42,8 +42,8 @@ namespace VirtoCommerce.NotificationsModule.Web
             serviceCollection.AddTransient<INotificationRepository, NotificationRepository>();
             serviceCollection.AddSingleton<Func<INotificationRepository>>(provider => () => provider.CreateScope().ServiceProvider.GetService<INotificationRepository>());
             serviceCollection.AddSingleton<INotificationService, NotificationService>();
-            serviceCollection.AddSingleton<INotificationRegistrar, NotificationService>();
             serviceCollection.AddSingleton<INotificationSearchService, NotificationSearchService>();
+            serviceCollection.AddSingleton<INotificationRegistrar, NotificationService>();
             serviceCollection.AddSingleton<INotificationMessageService, NotificationMessageService>();
             serviceCollection.AddSingleton<INotificationMessageSearchService, NotificationMessageSearchService>();
             serviceCollection.AddSingleton<INotificationSender, NotificationSender>();
@@ -61,17 +61,14 @@ namespace VirtoCommerce.NotificationsModule.Web
         public void PostInitialize(IApplicationBuilder appBuilder)
         {
             _appBuilder = appBuilder;
-            var registrar = appBuilder.ApplicationServices.GetService<INotificationRegistrar>();
-            registrar.RegisterNotification<EmailNotification, NotificationEntity>();
-            registrar.RegisterNotification<SmsNotification, NotificationEntity>();
-            registrar.RegisterNotificationTemplate<EmailNotificationTemplate, NotificationTemplateEntity>();
-            registrar.RegisterNotificationTemplate<SmsNotificationTemplate, NotificationTemplateEntity>();
-            registrar.RegisterNotificationMessage<EmailNotificationMessage, NotificationMessageEntity>();
-            registrar.RegisterNotificationMessage<SmsNotificationMessage, NotificationMessageEntity>();
 
             AbstractTypeFactory<NotificationEntity>.RegisterType<EmailNotificationEntity>();
             AbstractTypeFactory<NotificationEntity>.RegisterType<SmsNotificationEntity>();
+            AbstractTypeFactory<NotificationTemplateEntity>.RegisterType<EmailNotificationTemplateEntity>();
+            AbstractTypeFactory<NotificationTemplateEntity>.RegisterType<SmsNotificationTemplateEntity>();
             AbstractTypeFactory<NotificationMessageEntity>.RegisterType<EmailNotificationMessageEntity>();
+            AbstractTypeFactory<NotificationMessageEntity>.RegisterType<SmsNotificationMessageEntity>();
+
 
             var settingsRegistrar = appBuilder.ApplicationServices.GetRequiredService<ISettingsRegistrar>();
             settingsRegistrar.RegisterSettings(ModuleConstants.Settings.AllSettings, ModuleInfo.Id);
@@ -97,7 +94,7 @@ namespace VirtoCommerce.NotificationsModule.Web
                 }
             }
 
-            //TODO move to impl. projects
+            //TODO move out from here to projects
             var configuration = appBuilder.ApplicationServices.GetService<IConfiguration>();
             var notificationGateway = configuration.GetSection("Notifications:Gateway").Value;
             var notificationMessageSenderProviderFactory = appBuilder.ApplicationServices.GetService<INotificationMessageSenderProviderFactory>();

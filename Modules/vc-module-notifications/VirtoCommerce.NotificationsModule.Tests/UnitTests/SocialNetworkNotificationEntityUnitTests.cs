@@ -58,13 +58,16 @@ namespace VirtoCommerce.NotificationsModule.Tests.UnitTests
         }
     }
 
-    public class SocialNetworkNotification : Notification
+    public abstract class SocialNetworkNotification : Notification
     {
-        [StringLength(128)]
         public string Token { get; set; }
+        public override string Kind => nameof(SocialNetworkNotification);
     }
     public class SocialNetworkTemplate : NotificationTemplate { }
-    public class SocialNetworkMessage : NotificationMessage { }
+    public class SocialNetworkMessage : NotificationMessage
+    {
+        public override string Kind => nameof(SocialNetworkNotification);
+    }
     public class RegistrationSocialNetworkNotification : SocialNetworkNotification { }
 
     public class SocialNetworkNotificationEntityUnitTests
@@ -90,9 +93,8 @@ namespace VirtoCommerce.NotificationsModule.Tests.UnitTests
             _notificationServiceMock = new Mock<INotificationService>();
             _notificationSearchService = new NotificationSearchService(_repositoryFactory, _notificationServiceMock.Object);
 
-            _notificationService.RegisterNotification<SocialNetworkNotification, NotificationEntity>();
-            _notificationService.RegisterNotificationTemplate<SocialNetworkTemplate, NotificationTemplateEntity>();
-            _notificationService.RegisterNotificationMessage<SocialNetworkMessage, NotificationMessageEntity>();
+            _notificationService.RegisterNotification<SocialNetworkNotification>();
+            AbstractTypeFactory<NotificationEntity>.RegisterType<SocialNetworkNotificationEntity>();
 
             if (AbstractTypeFactory<NotificationEntity>.AllTypeInfos.All(t => t.Type != typeof(SocialNetworkNotificationEntity)))
             {

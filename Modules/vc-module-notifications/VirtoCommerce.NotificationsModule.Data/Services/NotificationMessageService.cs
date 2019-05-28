@@ -32,11 +32,7 @@ namespace VirtoCommerce.NotificationsModule.Data.Services
             using (var repository = _repositoryFactory())
             {
                 var messages = await repository.GetMessagesByIdsAsync(ids);
-                return messages.Select(n =>
-                {
-                    var notification = _notificationService.GetByIdsAsync(new[] { n.NotificationId }).GetAwaiter().GetResult().FirstOrDefault();
-                    return n.ToModel(AbstractTypeFactory<NotificationMessage>.TryCreateInstance($"{notification?.Kind}Message"));
-                }).ToArray();
+                return messages.Select(x => x.ToModel(AbstractTypeFactory<NotificationMessage>.TryCreateInstance($"{x.Kind}Message"))).ToArray();
             }
         }
 
@@ -50,12 +46,10 @@ namespace VirtoCommerce.NotificationsModule.Data.Services
             using (var repository = _repositoryFactory())
             {
                 var existingMessageEntities = await repository.GetMessagesByIdsAsync(messages.Select(m => m.Id).ToArray());
-                var notifications = await _notificationService.GetByIdsAsync(messages.Select(m => m.NotificationId).ToArray());
                 foreach (var message in messages)
                 {
                     var originalEntity = existingMessageEntities.FirstOrDefault(n => n.Id.Equals(message.Id));
-                    var notification = notifications.FirstOrDefault(n => n.Id.EqualsInvariant(message.NotificationId));
-                    var modifiedEntity = AbstractTypeFactory<NotificationMessageEntity>.TryCreateInstance($"{notification?.Kind}MessageEntity").FromModel(message, pkMap);
+                    var modifiedEntity = AbstractTypeFactory<NotificationMessageEntity>.TryCreateInstance($"{message.Kind}MessageEntity").FromModel(message, pkMap);
 
                     if (originalEntity != null)
                     {

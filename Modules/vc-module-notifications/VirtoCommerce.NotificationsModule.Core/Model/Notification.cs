@@ -19,7 +19,7 @@ namespace VirtoCommerce.NotificationsModule.Core.Model
         /// Type of notifications, like Identifier
         /// </summary>
         private string _type;
-        public string Type
+        public virtual string Type
         {
             get => !string.IsNullOrEmpty(_type) ? _type : GetType().Name;
             set => _type = value;
@@ -28,7 +28,7 @@ namespace VirtoCommerce.NotificationsModule.Core.Model
         /// <summary>
         /// For detecting kind of notifications (email, sms and etc.)
         /// </summary>
-        public string Kind { get; set; }
+        public abstract string Kind { get; }
         public IList<NotificationTemplate> Templates { get; set; }
 
         public virtual NotificationMessage ToMessage(NotificationMessage message, INotificationTemplateRenderer render)

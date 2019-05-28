@@ -37,9 +37,9 @@ namespace VirtoCommerce.NotificationsModule.Tests.UnitTests
             _notificationRegistrar = _notificationService;
 
 
-            _notificationService.RegisterNotification<EmailNotification, NotificationEntity>();
-            _notificationService.RegisterNotificationTemplate<EmailNotificationTemplate, NotificationTemplateEntity>();
-            _notificationService.RegisterNotificationMessage<EmailNotificationMessage, NotificationMessageEntity>();
+            //_notificationService.RegisterNotification<EmailNotification, NotificationEntity>();
+            //_notificationService.RegisterNotificationTemplate<EmailNotificationTemplate, NotificationTemplateEntity>();
+            //_notificationService.RegisterNotificationMessage<EmailNotificationMessage, NotificationMessageEntity>();
 
             if (AbstractTypeFactory<NotificationEntity>.AllTypeInfos.All(t => t.Type != typeof(EmailNotificationEntity)))
             {
