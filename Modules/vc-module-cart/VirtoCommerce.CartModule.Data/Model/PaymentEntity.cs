@@ -88,6 +88,7 @@ namespace VirtoCommerce.CartModule.Data.Model
             //TODO
             //payment.Purpose = Purpose;
             payment.OuterId = OuterId;
+            payment.Currency = Currency;
 
             if (!TaxDetails.IsNullOrEmpty())
             {
@@ -132,6 +133,7 @@ namespace VirtoCommerce.CartModule.Data.Model
             Total = payment.Total;
             TotalWithTax = payment.TotalWithTax;
             OuterId = payment.OuterId;
+            Currency = payment.Currency;
             //TODO
             //Purpose = payment.Purpose;
 
@@ -171,6 +173,7 @@ namespace VirtoCommerce.CartModule.Data.Model
             target.TotalWithTax = TotalWithTax;
             target.Purpose = Purpose;
             target.OuterId = OuterId;
+            target.Currency = Currency;
 
             if (!Addresses.IsNullCollection())
             {

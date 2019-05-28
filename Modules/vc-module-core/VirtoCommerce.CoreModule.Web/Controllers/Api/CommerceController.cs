@@ -81,7 +81,7 @@ namespace VirtoCommerce.CoreModule.Web.Controllers.Api
         public async Task<ActionResult> UpdateCurrency([FromBody]Currency currency)
         {
             await _currencyService.SaveChangesAsync(new[] { currency });
-            return Ok();
+            return NoContent();
         }
 
         /// <summary>
@@ -94,7 +94,7 @@ namespace VirtoCommerce.CoreModule.Web.Controllers.Api
         public async Task<ActionResult> CreateCurrency([FromBody]Currency currency)
         {
             await _currencyService.SaveChangesAsync(new[] { currency });
-            return Ok();
+            return NoContent();
         }
 
         /// <summary>
@@ -107,7 +107,7 @@ namespace VirtoCommerce.CoreModule.Web.Controllers.Api
         public async Task<ActionResult> DeleteCurrencies([FromQuery] string[] codes)
         {
             await _currencyService.DeleteCurrenciesAsync(codes);
-            return Ok();
+            return NoContent();
         }
 
 
@@ -132,7 +132,7 @@ namespace VirtoCommerce.CoreModule.Web.Controllers.Api
         public async Task<ActionResult> UpdatePackageType([FromBody]PackageType packageType)
         {
             await _packageTypesService.SaveChangesAsync(new[] { packageType });
-            return Ok();
+            return NoContent();
         }
 
         /// <summary>
@@ -145,7 +145,7 @@ namespace VirtoCommerce.CoreModule.Web.Controllers.Api
         public async Task<ActionResult> CreatePackageType(PackageType packageType)
         {
             await _packageTypesService.SaveChangesAsync(new[] { packageType });
-            return Ok();
+            return NoContent();
         }
 
         /// <summary>
@@ -158,7 +158,7 @@ namespace VirtoCommerce.CoreModule.Web.Controllers.Api
         public async Task<ActionResult> DeletePackageTypes([FromQuery] string[] ids)
         {
             await _packageTypesService.DeletePackageTypesAsync(ids);
-            return Ok();
+            return NoContent();
         }
     }
 }

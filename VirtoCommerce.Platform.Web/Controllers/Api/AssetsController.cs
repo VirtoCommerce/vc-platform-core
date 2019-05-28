@@ -64,7 +64,7 @@ namespace VirtoCommerce.Platform.Web.Controllers.Api
             var section = await reader.ReadNextSectionAsync();
             if (section != null)
             {
-                var hasContentDispositionHeader = ContentDispositionHeaderValue.TryParse(section.ContentDisposition, out ContentDispositionHeaderValue contentDisposition);
+                var hasContentDispositionHeader = ContentDispositionHeaderValue.TryParse(section.ContentDisposition, out var contentDisposition);
 
                 if (hasContentDispositionHeader)
                 {
@@ -145,7 +145,7 @@ namespace VirtoCommerce.Platform.Web.Controllers.Api
                 var section = await reader.ReadNextSectionAsync();
                 if (section != null)
                 {
-                    var hasContentDispositionHeader = ContentDispositionHeaderValue.TryParse(section.ContentDisposition, out ContentDispositionHeaderValue contentDisposition);
+                    var hasContentDispositionHeader = ContentDispositionHeaderValue.TryParse(section.ContentDisposition, out var contentDisposition);
 
                     if (hasContentDispositionHeader)
                     {
@@ -186,7 +186,7 @@ namespace VirtoCommerce.Platform.Web.Controllers.Api
         public async Task<ActionResult> DeleteBlobsAsync([FromQuery] string[] urls)
         {
             await _blobProvider.RemoveAsync(urls);
-            return Ok();
+            return NoContent();
         }
 
         /// <summary>
@@ -215,7 +215,7 @@ namespace VirtoCommerce.Platform.Web.Controllers.Api
         public async Task<ActionResult> CreateBlobFolderAsync([FromBody]BlobFolder folder)
         {
             await _blobProvider.CreateFolderAsync(folder);
-            return Ok();
+            return NoContent();
         }
     }
 }

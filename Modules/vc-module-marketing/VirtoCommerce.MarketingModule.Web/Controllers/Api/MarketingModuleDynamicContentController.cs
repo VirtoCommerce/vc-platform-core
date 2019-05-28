@@ -182,7 +182,7 @@ namespace VirtoCommerce.MarketingModule.Web.Controllers.Api
         public ActionResult UpdateDynamicContent([FromBody]coreModel.DynamicContentItem contentItem)
         {
             _dynamicContentService.SaveContentItemsAsync(new[] { contentItem });
-            return Ok();
+            return NoContent();
         }
 
         /// <summary>
@@ -195,7 +195,7 @@ namespace VirtoCommerce.MarketingModule.Web.Controllers.Api
         public async Task<ActionResult> DeleteDynamicContents([FromQuery] string[] ids)
         {
             await _dynamicContentService.DeleteContentItemsAsync(ids);
-            return Ok();
+            return NoContent();
         }
 
 
@@ -242,7 +242,7 @@ namespace VirtoCommerce.MarketingModule.Web.Controllers.Api
         public async Task<ActionResult> UpdateDynamicContentPlace([FromBody]coreModel.DynamicContentPlace contentPlace)
         {
             await _dynamicContentService.SavePlacesAsync(new[] { contentPlace });
-            return Ok();
+            return NoContent();
         }
 
         /// <summary>
@@ -255,7 +255,7 @@ namespace VirtoCommerce.MarketingModule.Web.Controllers.Api
         public async Task<ActionResult> DeleteDynamicContentPlaces([FromQuery] string[] ids)
         {
             await _dynamicContentService.DeletePlacesAsync(ids);
-            return Ok();
+            return NoContent();
         }
 
         /// <summary>
@@ -321,7 +321,7 @@ namespace VirtoCommerce.MarketingModule.Web.Controllers.Api
         public async Task<ActionResult> UpdateDynamicContentPublication([FromBody]coreModel.DynamicContentPublication publication)
         {
             await _dynamicContentService.SavePublicationsAsync(new[] { publication });
-            return Ok();
+            return NoContent();
         }
 
         /// <summary>
@@ -334,7 +334,7 @@ namespace VirtoCommerce.MarketingModule.Web.Controllers.Api
         public async Task<ActionResult> DeleteDynamicContentPublications([FromQuery] string[] ids)
         {
             await _dynamicContentService.DeletePublicationsAsync(ids);
-            return Ok();
+            return NoContent();
         }
 
         /// <summary>
@@ -379,7 +379,7 @@ namespace VirtoCommerce.MarketingModule.Web.Controllers.Api
         public async Task<ActionResult> UpdateDynamicContentFolder([FromBody]coreModel.DynamicContentFolder folder)
         {
             await _dynamicContentService.SaveFoldersAsync(new[] { folder });
-            return Ok();
+            return NoContent();
         }
 
         /// <summary>
@@ -392,7 +392,7 @@ namespace VirtoCommerce.MarketingModule.Web.Controllers.Api
         public async Task<ActionResult> DeleteDynamicContentFolders([FromQuery] string[] ids)
         {
             await _dynamicContentService.DeleteFoldersAsync(ids);
-            return Ok();
+            return NoContent();
         }
 
         private void FillConditions(coreModel.DynamicContentPublication publication)

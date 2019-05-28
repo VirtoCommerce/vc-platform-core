@@ -29,6 +29,7 @@ using VirtoCommerce.Platform.Core.ChangeLog;
 using VirtoCommerce.Platform.Core.Common;
 using VirtoCommerce.Platform.Core.Settings;
 using VirtoCommerce.StoreModule.Core.Services;
+using CustomerOrderSearchResult = VirtoCommerce.OrdersModule.Core.Model.Search.CustomerOrderSearchResult;
 
 namespace VirtoCommerce.OrdersModule.Web.Controllers.Api
 {
@@ -86,7 +87,7 @@ namespace VirtoCommerce.OrdersModule.Web.Controllers.Api
         /// <param name="criteria">criteria</param>
         [HttpPost]
         [Route("search")]
-        public async Task<ActionResult<GenericSearchResult<CustomerOrder>>> Search([FromBody]CustomerOrderSearchCriteria criteria)
+        public async Task<ActionResult<CustomerOrderSearchResult>> Search([FromBody]CustomerOrderSearchCriteria criteria)
         {
             //Scope bound ACL filtration
             criteria = FilterOrderSearchCriteria(User.Identity.Name, criteria);
@@ -283,7 +284,7 @@ namespace VirtoCommerce.OrdersModule.Web.Controllers.Api
             //}
 
             await _customerOrderService.SaveChangesAsync(new[] { customerOrder });
-            return Ok();
+            return NoContent();
         }
 
         /// <summary>
@@ -364,7 +365,7 @@ namespace VirtoCommerce.OrdersModule.Web.Controllers.Api
         public async Task<ActionResult> DeleteOrdersByIds([FromQuery] string[] ids)
         {
             await _customerOrderService.DeleteAsync(ids);
-            return Ok();
+            return NoContent();
         }
 
         /// <summary>

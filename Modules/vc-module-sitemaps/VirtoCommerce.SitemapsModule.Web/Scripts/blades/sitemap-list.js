@@ -1,5 +1,4 @@
-﻿angular.module('virtoCommerce.sitemapsModule')
-.controller('virtoCommerce.sitemapsModule.sitemapListController', ['$window', '$scope', '$modal', 'platformWebApp.bladeUtils', 'platformWebApp.bladeNavigationService', 'platformWebApp.dialogService', 'platformWebApp.uiGridHelper', 'virtoCommerce.sitemapsModule.sitemapApi', function ($window, $scope, $modal, bladeUtils, bladeNavigationService, dialogService, uiGridHelper, sitemapApi) {
+﻿angular.module('virtoCommerce.sitemapsModule').controller('virtoCommerce.sitemapsModule.sitemapListController', ['$window', '$scope', '$modal', 'platformWebApp.bladeUtils', 'platformWebApp.bladeNavigationService', 'platformWebApp.dialogService', 'platformWebApp.uiGridHelper', 'virtoCommerce.sitemapsModule.sitemapApi', function ($window, $scope, $modal, bladeUtils, bladeNavigationService, dialogService, uiGridHelper, sitemapApi) {
     var blade = $scope.blade;
 
     blade.refresh = function () {
@@ -23,7 +22,6 @@
             isNew: isNew,
             currentEntity: node,
             parentRefresh: blade.refresh,
-            parentSelectNode: blade.selectNode,
             controller: 'virtoCommerce.sitemapsModule.sitemapDetailController',
             template: 'Modules/$(VirtoCommerce.Sitemaps)/Scripts/blades/sitemap-detail.tpl.html'
         };
@@ -32,41 +30,41 @@
 
     blade.headIcon = 'fa fa-sitemap';
     blade.toolbarCommands = [
-            {
-                name: "platform.commands.refresh", icon: 'fa fa-refresh',
-                executeMethod: blade.refresh,
-                canExecuteMethod: function () { return true; }
+        {
+            name: "platform.commands.refresh", icon: 'fa fa-refresh',
+            executeMethod: blade.refresh,
+            canExecuteMethod: function () { return true; }
+        },
+        {
+            name: "platform.commands.add", icon: 'fa fa-plus',
+            executeMethod: function () {
+                blade.selectNode({
+                    location: 'sitemap/',
+                    urlTemplate: '{slug}',
+                    storeId: blade.store.id,
+                    items: []
+                }, true);
             },
-            {
-                name: "platform.commands.add", icon: 'fa fa-plus',
-                executeMethod: function () {
-                    blade.selectNode({
-                        location: 'sitemap/',
-                        urlTemplate: '{slug}',
-                        storeId: blade.store.id,
-                        items: []
-                    }, true);
-                },
-                canExecuteMethod: function () { return true; },
-                permission: 'sitemaps:create'
+            canExecuteMethod: function () { return true; },
+            permission: 'sitemaps:create'
+        },
+        {
+            name: "platform.commands.delete", icon: 'fa fa-trash-o',
+            executeMethod: function () {
+                deleteList($scope.gridApi.selection.getSelectedRows());
             },
-            {
-                name: "platform.commands.delete", icon: 'fa fa-trash-o',
-                executeMethod: function () {
-                    deleteList($scope.gridApi.selection.getSelectedRows());
-                },
-                canExecuteMethod: function () {
-                    return $scope.gridApi && _.any($scope.gridApi.selection.getSelectedRows());
-                },
-                permission: 'sitemaps:delete'
+            canExecuteMethod: function () {
+                return $scope.gridApi && _.any($scope.gridApi.selection.getSelectedRows());
             },
-            {
-                name: 'sitemapsModule.blades.sitemapList.toolbar.download', icon: 'fa fa-download',
-                executeMethod: showDownloadDialog,
-                canExecuteMethod: function () {
-                    return !blade.isLoading && $scope.pageSettings.totalItems > 0;
-                }
-            }];
+            permission: 'sitemaps:delete'
+        },
+        {
+            name: 'sitemapsModule.blades.sitemapList.toolbar.download', icon: 'fa fa-download',
+            executeMethod: showDownloadDialog,
+            canExecuteMethod: function () {
+                return !blade.isLoading && $scope.pageSettings.totalItems > 0;
+            }
+        }];
 
     function deleteList(selection) {
         bladeNavigationService.closeChildrenBlades(blade, function () {
