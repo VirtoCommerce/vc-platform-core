@@ -102,8 +102,8 @@
                     "no-stores": "No Stores yet"
                 },
                 "validations": {
-                    "secure-url-missing": "Secure URL is missing. Click to open Store details.",
-                    "default-language-missing": "Default language is missing. Click to open Store details."
+                    "secure-url-missing": "Secure URL is missing. Click to enter Store secure URL manually.",
+                    "default-language-missing": "Default language is missing. Click to enter Store secure URL manually."
                 }
             },
             "account-detail": {
@@ -147,37 +147,47 @@
             "store-save": {
                 "title": "Save changes",
                 "message": "The Store has been modified. Do you want to save changes?"
+            },
+            "enter-store-url": {
+                "title": "Login on behalf",
+                "labels": {
+                    "enter-store-url": "Please enter store secure URL"
+                },
+                "placeholders": {
+                    "secure-url": "https://vcshop.com"
+                }
             }
         },
-        "commands": {
-            "login-on-behalf": "Login on behalf"
-        }
-    },
-    "permissions": {
-        "store:access": "Open stores menu",
-        "store:create": "Create store related data",
-        "store:read": "View store related data",
-        "store:update": "Update store related data",
-        "store:delete": "Delete store related data",
-        "store:loginOnBehalf": "Login on behalf of a customer"
-    },
-    "settings": {
-        "Stores.States": {
-            "title": "States",
-            "description": "States that a store can be in"
+        "permissions": {
+            "store:access": "Open stores menu",
+            "store:create": "Create store related data",
+            "store:read": "View store related data",
+            "store:update": "Update store related data",
+            "store:delete": "Delete store related data",
+            "store:loginOnBehalf": "Login on behalf of a customer"
         },
-        "Stores.TaxCalculationEnabled": {
-            "title": "Enable Tax Calculation",
-            "description": "Setting to off prevents tax calculation on storefront"
+        "settings": {
+            "Stores.States": {
+                "title": "States",
+                "description": "States that a store can be in"
+            },
+            "Stores.TaxCalculationEnabled": {
+                "title": "Enable Tax Calculation",
+                "description": "Setting to off prevents tax calculation on storefront"
+            },
+            "Stores.AllowAnonymousUsers": {
+                "title": "Allow anonymous user for store",
+                "description": "Set to false to prevent anonymous user access to store"
+            },
+            "Stores.SeoLinksType": {
+                "title": "SEO Links",
+                "description": "Determines how to generate links for products and categories. Long: /virtual-parent-category/physical-parent-category/my-cool-category/my-cool-product, Collapsed: /virtual-parent-category/my-cool-category/my-cool-product, Short: /my-cool-product, None: /product/123"
+            }
         },
-        "Stores.SeoLinksType": {
-            "title": "SEO Links",
-            "description": "Determines how to generate links for products and categories. Long: /virtual-parent-category/physical-parent-category/my-cool-category/my-cool-product, Collapsed: /virtual-parent-category/my-cool-category/my-cool-product, Short: /my-cool-product, None: /product/123"
-        }
-    },
-    "module": {
-        "VirtoCommerce.Store": {
-            "description": "Export/Import stores with all related informations"
+        "module": {
+            "VirtoCommerce.Store": {
+                "description": "Export/Import stores with all related informations"
+            }
         }
     }
 }
