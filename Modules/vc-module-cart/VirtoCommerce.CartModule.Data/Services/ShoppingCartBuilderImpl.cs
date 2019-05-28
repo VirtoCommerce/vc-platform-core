@@ -260,7 +260,10 @@ namespace VirtoCommerce.CartModule.Data.Services
         public virtual async Task<ICollection<ShippingRate>> GetAvailableShippingRatesAsync()
         {
             // TODO: Remake with shipmentId
-            var shippingEvaluationContext = new ShippingEvaluationContext(Cart);
+            var shippingEvaluationContext = new ShippingRateEvaluationContext
+            {
+                Currency = Cart.Currency
+            };
 
             var criteria = new ShippingMethodsSearchCriteria
             {
