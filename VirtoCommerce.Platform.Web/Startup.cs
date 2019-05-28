@@ -145,7 +145,6 @@ namespace VirtoCommerce.Platform.Web
             });
 
             services.AddAuthentication().AddCookie();
-
             services.AddSecurityServices();
 
             services.AddIdentity<ApplicationUser, Role>(options => options.Stores.MaxLengthForKeys = 128)
