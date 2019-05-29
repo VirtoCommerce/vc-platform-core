@@ -1,7 +1,7 @@
 <div class="blade-content __medium-wide">
     <div class="blade-inner">
         <div class="inner-block">
-            <p class="note">{{ 'stores.blades.paymentMethod-list.labels.note' | translate }}</p>
+            <p class="note">{{ 'tax.blades.tax-provider-list.labels.note' | translate }}</p>
             <div class="table-wrapper">
                 <table class="table __normal">
                     <thead>
@@ -14,13 +14,13 @@
                         <tr class="table-item" ng-repeat="data in blade.currentEntities track by data.typeName" ng-class="{'__selected': data.typeName === selectedNodeId}">
                             <td class="table-col __product-control">
                                 <label class="form-control __checkbox">
-                                    <input type="checkbox" ng-model="data.isActive">
+                                    <input type="checkbox" disabled ng-model="data.isActive">
                                     <span class="check"></span>
                                 </label>
                             </td>
                             <td class="table-col __product-control" ng-click='selectNode(data)'>
                                 <div class="product-img">
-                                    <img class="image" fallback-src="Modules/$(VirtoCommerce.Tax)/Content/logo.png" ng-src="data.logoUrl">          
+                                    <img class="image" fallback-src="Modules/$(VirtoCommerce.Tax)/Content/logo.png" ng-src="{{data.logoUrl ? data.logoUrl : 'Modules/$(VirtoCommerce.Tax)/Content/logo.png' }}">
                                 </div>
                             </td>
                             <td class="table-col __product-name" ng-click='selectNode(data)'>
