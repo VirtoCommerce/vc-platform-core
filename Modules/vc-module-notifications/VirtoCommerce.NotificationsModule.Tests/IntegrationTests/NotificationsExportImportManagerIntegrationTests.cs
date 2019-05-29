@@ -2,6 +2,7 @@ using System;
 using System.Collections.Generic;
 using System.Collections.ObjectModel;
 using System.IO;
+using System.Linq;
 using System.Threading;
 using System.Threading.Tasks;
 using Moq;
@@ -9,10 +10,10 @@ using Newtonsoft.Json;
 using VirtoCommerce.NotificationsModule.Core.Model;
 using VirtoCommerce.NotificationsModule.Core.Services;
 using VirtoCommerce.NotificationsModule.Data.ExportImport;
-using VirtoCommerce.NotificationsModule.Data.JsonConverters;
 using VirtoCommerce.NotificationsModule.Data.Model;
 using VirtoCommerce.NotificationsModule.Data.Repositories;
 using VirtoCommerce.NotificationsModule.Data.Services;
+using VirtoCommerce.NotificationsModule.Web.JsonConverters;
 using VirtoCommerce.Platform.Core.Common;
 using VirtoCommerce.Platform.Core.Domain;
 using VirtoCommerce.Platform.Core.Events;
@@ -44,8 +45,13 @@ namespace VirtoCommerce.NotificationsModule.Tests.IntegrationTests
 
             _notificationsExportImportManager = new NotificationsExportImport(_notificationSearchServiceMock.Object, _notificationServiceMock.Object, GetJsonSerializer());
 
-            _notificationRegistrar = new NotificationService(RepositoryFactory, _eventPulisherMock.Object);
+            if (!AbstractTypeFactory<NotificationTemplate>.AllTypeInfos.SelectMany(x => x.AllSubclasses).Contains(typeof(EmailNotificationTemplate)))
+                AbstractTypeFactory<NotificationTemplate>.RegisterType<EmailNotificationTemplate>().MapToType<NotificationTemplateEntity>();
 
+            if (!AbstractTypeFactory<NotificationMessage>.AllTypeInfos.SelectMany(x => x.AllSubclasses).Contains(typeof(EmailNotificationMessage)))
+                AbstractTypeFactory<NotificationMessage>.RegisterType<EmailNotificationMessage>().MapToType<NotificationMessageEntity>();
+
+            _notificationRegistrar = new NotificationService(RepositoryFactory, _eventPulisherMock.Object);
             _notificationRegistrar.RegisterNotification<RegistrationEmailNotification>();
         }
 
@@ -91,7 +97,6 @@ namespace VirtoCommerce.NotificationsModule.Tests.IntegrationTests
         public async Task DoImport_SuccessImport()
         {
             //Arrange
-            var manifest = new PlatformExportManifest();
             var fileStream = new FileStream(Path.GetFullPath("export_test.json"), FileMode.Open);
 
             //Act

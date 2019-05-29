@@ -46,7 +46,8 @@ angular.module('virtoCommerce.notificationsModule')
                     tenantId: blade.tenantId,
                     tenantType: blade.tenantType,
                     controller: foundTemplate.detailBlade.controller,
-                    template: foundTemplate.detailBlade.template
+                    template: foundTemplate.detailBlade.template,
+                    kind: blade.currentEntity.kind
                 };
 
                 bladeNavigationService.showBlade(newBlade, blade);

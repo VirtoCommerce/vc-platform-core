@@ -1,4 +1,5 @@
 using System.ComponentModel.DataAnnotations;
+using System.ComponentModel.DataAnnotations.Schema;
 using VirtoCommerce.NotificationsModule.Core.Model;
 using VirtoCommerce.Platform.Core.Common;
 
@@ -6,6 +7,7 @@ namespace VirtoCommerce.NotificationsModule.Data.Model
 {
     public class EmailNotificationTemplateEntity : NotificationTemplateEntity
     {
+        [NotMapped]
         public override string Kind => nameof(EmailNotification);
 
         /// <summary>

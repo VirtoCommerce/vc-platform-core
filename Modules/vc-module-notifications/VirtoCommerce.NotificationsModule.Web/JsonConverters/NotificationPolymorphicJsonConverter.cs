@@ -5,11 +5,11 @@ using Newtonsoft.Json.Linq;
 using VirtoCommerce.NotificationsModule.Core.Model;
 using VirtoCommerce.Platform.Core.Common;
 
-namespace VirtoCommerce.NotificationsModule.Data.JsonConverters
+namespace VirtoCommerce.NotificationsModule.Web.JsonConverters
 {
     public class NotificationPolymorphicJsonConverter : JsonConverter
     {
-        private static readonly Type[] _knowTypes = { typeof(Notification), typeof(NotificationTemplate), typeof(NotificationSearchCriteria) };
+        private static readonly Type[] _knowTypes = { typeof(Notification), typeof(NotificationTemplate), typeof(NotificationMessage), typeof(NotificationSearchCriteria) };
 
         public override bool CanWrite => false;
         public override bool CanRead => true;
@@ -28,11 +28,15 @@ namespace VirtoCommerce.NotificationsModule.Data.JsonConverters
                 var type = obj.GetValue("type", StringComparison.InvariantCultureIgnoreCase).Value<string>();
                 result = AbstractTypeFactory<Notification>.TryCreateInstance(type);
             }
-            else if (objectType == typeof(NotificationTemplate))
+            else if (objectType.IsAssignableFrom(typeof(NotificationTemplate)))
             {
-                var tryCreateInstance = typeof(AbstractTypeFactory<>).MakeGenericType(objectType).GetMethods()
-                    .FirstOrDefault(x => x.Name.EqualsInvariant("TryCreateInstance") && x.GetParameters().Length == 0);
-                result = tryCreateInstance?.Invoke(null, null);
+                var kind = obj.GetValue("kind", StringComparison.InvariantCultureIgnoreCase).Value<string>();
+                result = AbstractTypeFactory<NotificationTemplate>.TryCreateInstance($"{kind}Template");
+            }
+            else if (objectType.IsAssignableFrom(typeof(NotificationMessage)))
+            {
+                var kind = obj.GetValue("kind", StringComparison.InvariantCultureIgnoreCase).Value<string>();
+                result = AbstractTypeFactory<NotificationMessage>.TryCreateInstance($"{kind}Message");
             }
             else if (objectType == typeof(NotificationSearchCriteria))
             {

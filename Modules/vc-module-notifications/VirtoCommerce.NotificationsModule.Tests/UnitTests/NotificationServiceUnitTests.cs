@@ -36,15 +36,8 @@ namespace VirtoCommerce.NotificationsModule.Tests.UnitTests
             _notificationService = new NotificationService(_repositoryFactory, _eventPublisherMock.Object);
             _notificationRegistrar = _notificationService;
 
-
-            //_notificationService.RegisterNotification<EmailNotification, NotificationEntity>();
-            //_notificationService.RegisterNotificationTemplate<EmailNotificationTemplate, NotificationTemplateEntity>();
-            //_notificationService.RegisterNotificationMessage<EmailNotificationMessage, NotificationMessageEntity>();
-
-            if (AbstractTypeFactory<NotificationEntity>.AllTypeInfos.All(t => t.Type != typeof(EmailNotificationEntity)))
-            {
+            if (!AbstractTypeFactory<NotificationEntity>.AllTypeInfos.SelectMany(x => x.AllSubclasses).Contains(typeof(EmailNotificationEntity)))
                 AbstractTypeFactory<NotificationEntity>.RegisterType<EmailNotificationEntity>();
-            }
         }
 
         [Fact]
