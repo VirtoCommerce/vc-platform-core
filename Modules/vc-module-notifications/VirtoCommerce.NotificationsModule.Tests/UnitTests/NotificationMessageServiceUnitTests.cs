@@ -37,9 +37,6 @@ namespace VirtoCommerce.NotificationsModule.Tests.UnitTests
             if (!AbstractTypeFactory<NotificationMessageEntity>.AllTypeInfos.SelectMany(x => x.AllSubclasses).Contains(typeof(EmailNotificationMessageEntity)))
                 AbstractTypeFactory<NotificationMessageEntity>.RegisterType<EmailNotificationMessageEntity>();
 
-            //if (!AbstractTypeFactory<Notification>.AllTypeInfos.SelectMany(x => x.AllSubclasses).Contains(typeof(EmailNotification)))
-            //    AbstractTypeFactory<Notification>.RegisterType<EmailNotification>().MapToType<NotificationEntity>();
-
             if (!AbstractTypeFactory<NotificationTemplate>.AllTypeInfos.SelectMany(x => x.AllSubclasses).Contains(typeof(EmailNotificationTemplate)))
                 AbstractTypeFactory<NotificationTemplate>.RegisterType<EmailNotificationTemplate>().MapToType<NotificationTemplateEntity>();
 
