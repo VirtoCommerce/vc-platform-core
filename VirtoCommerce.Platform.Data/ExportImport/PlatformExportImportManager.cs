@@ -304,8 +304,8 @@ namespace VirtoCommerce.Platform.Data.ExportImport
                         foreach (var module in manifest.Modules)
                         {
                             var moduleSettings = await _settingsManager.GetObjectSettingsAsync(_settingsManager.AllRegisteredSettings.Where(x => x.ModuleId == module.Id).Select(x => x.Name));
-
-                            foreach (var setting in moduleSettings)
+                            //Export only settings with set values
+                            foreach (var setting in moduleSettings.Where(x => x.ItHasValues))
                             {
                                 serializer.Serialize(writer, setting);
                             }

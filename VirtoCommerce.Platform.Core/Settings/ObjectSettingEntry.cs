@@ -1,4 +1,5 @@
 using System.Collections.Generic;
+using VirtoCommerce.Platform.Core.Common;
 
 namespace VirtoCommerce.Platform.Core.Settings
 {
@@ -18,6 +19,7 @@ namespace VirtoCommerce.Platform.Core.Settings
             DefaultValue = descriptor.DefaultValue;
             IsDictionary = descriptor.IsDictionary;
         }
+        public bool ItHasValues => Value != null || !AllowedValues.IsNullOrEmpty();
         /// <summary>
         /// Setting may belong to any object in system
         /// </summary>

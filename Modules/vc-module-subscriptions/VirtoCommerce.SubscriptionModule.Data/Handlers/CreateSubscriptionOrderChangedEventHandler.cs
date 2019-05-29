@@ -33,7 +33,7 @@ namespace VirtoCommerce.SubscriptionModule.Data.Handlers
         }
 
         [DisableConcurrentExecution(60 * 60 * 24)]
-        protected virtual void HandleOrderChangesInBackground(CustomerOrder[] orders)
+        public virtual void HandleOrderChangesInBackground(CustomerOrder[] orders)
         {
             foreach (var order in orders)
             {

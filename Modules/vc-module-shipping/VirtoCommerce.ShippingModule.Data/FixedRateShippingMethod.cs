@@ -9,7 +9,7 @@ namespace VirtoCommerce.ShippingModule.Data
 {
     public class FixedRateShippingMethod : ShippingMethod
     {
-        public FixedRateShippingMethod() : base("FixedRateShippingMethod")
+        public FixedRateShippingMethod() : base("FixedRate")
         {
         }
 

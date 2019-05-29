@@ -62,10 +62,18 @@ namespace VirtoCommerce.NotificationsModule.Web
         {
             _appBuilder = appBuilder;
 
+            AbstractTypeFactory<NotificationTemplate>.RegisterType<EmailNotificationTemplate>();
+            AbstractTypeFactory<NotificationTemplate>.RegisterType<SmsNotificationTemplate>();
+
+            AbstractTypeFactory<NotificationMessage>.RegisterType<EmailNotificationMessage>();
+            AbstractTypeFactory<NotificationMessage>.RegisterType<SmsNotificationMessage>();
+
             AbstractTypeFactory<NotificationEntity>.RegisterType<EmailNotificationEntity>();
             AbstractTypeFactory<NotificationEntity>.RegisterType<SmsNotificationEntity>();
+
             AbstractTypeFactory<NotificationTemplateEntity>.RegisterType<EmailNotificationTemplateEntity>();
             AbstractTypeFactory<NotificationTemplateEntity>.RegisterType<SmsNotificationTemplateEntity>();
+
             AbstractTypeFactory<NotificationMessageEntity>.RegisterType<EmailNotificationMessageEntity>();
             AbstractTypeFactory<NotificationMessageEntity>.RegisterType<SmsNotificationMessageEntity>();
 

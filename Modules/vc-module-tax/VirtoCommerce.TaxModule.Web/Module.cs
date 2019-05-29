@@ -42,8 +42,8 @@ namespace VirtoCommerce.TaxModule.Web
             settingsRegistrar.RegisterSettings(Core.ModuleConstants.Settings.AllSettings, ModuleInfo.Id);
 
             var taxProviderRegistrar = applicationBuilder.ApplicationServices.GetRequiredService<ITaxProviderRegistrar>();
-            taxProviderRegistrar.RegisterTaxProvider<FixedTaxRateProvider>();
-            settingsRegistrar.RegisterSettingsForType(Core.ModuleConstants.Settings.FixedTaxProviderSettings.AllSettings, typeof(FixedTaxRateProvider).Name);
+            taxProviderRegistrar.RegisterTaxProvider<FixedRateTaxProvider>();
+            settingsRegistrar.RegisterSettingsForType(Core.ModuleConstants.Settings.FixedTaxProviderSettings.AllSettings, typeof(FixedRateTaxProvider).Name);
 
 
             var mvcJsonOptions = applicationBuilder.ApplicationServices.GetService<IOptions<MvcJsonOptions>>();

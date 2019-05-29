@@ -8,9 +8,9 @@ using VirtoCommerce.TaxModule.Core.Model;
 
 namespace VirtoCommerce.TaxModule.Data.Provider
 {
-    public class FixedTaxRateProvider : TaxProvider
+    public class FixedRateTaxProvider : TaxProvider
     {
-        public FixedTaxRateProvider()
+        public FixedRateTaxProvider()
         {
             Code = "FixedRate";
         }
