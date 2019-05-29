@@ -2,9 +2,11 @@ using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Threading.Tasks;
+using Microsoft.EntityFrameworkCore;
 using VirtoCommerce.Platform.Core.ChangeLog;
 using VirtoCommerce.Platform.Core.Common;
 using VirtoCommerce.Platform.Core.Settings;
+using VirtoCommerce.PricingModule.Core;
 using VirtoCommerce.PricingModule.Core.Model;
 using VirtoCommerce.PricingModule.Core.Services;
 using VirtoCommerce.PricingModule.Data.Repositories;
@@ -96,8 +98,7 @@ namespace VirtoCommerce.PricingModule.Data.Search
                 var workTake = (int)(take - Math.Min(take, Math.Max(0, result.Count - skip)));
 
                 //Re-index calendar prices only once per defined time interval
-                var lastIndexDate =
-                    _settingsManager.GetValue("VirtoCommerce.Search.IndexingJobs.IndexationDate.Pricing.Calendar",
+                var lastIndexDate = _settingsManager.GetValue(ModuleConstants.Settings.General.IndexationDatePricingCalendar.Name,
                         (DateTime?)null) ?? DateTime.MinValue;
                 if (DateTime.UtcNow - lastIndexDate > CalendarChangesInterval && startDate != null && endDate != null)
                 {
@@ -106,7 +107,7 @@ namespace VirtoCommerce.PricingModule.Data.Search
 
                     if (workTake > 0)
                     {
-                        _settingsManager.SetValue("VirtoCommerce.Search.IndexingJobs.IndexationDate.Pricing.Calendar", DateTime.UtcNow);
+                        _settingsManager.SetValue(ModuleConstants.Settings.General.IndexationDatePricingCalendar.Name, DateTime.UtcNow);
                         result.AddRange(calendarChanges);
                     }
                 }
@@ -115,15 +116,19 @@ namespace VirtoCommerce.PricingModule.Data.Search
         }
 
         #region IPricingDocumentChangesProvider Members
-        public virtual Task<IList<IndexDocumentChange>> GetCalendarChangesAsync(DateTime? startDate, DateTime? endDate, int skip = 0, int take = 0)
+        public virtual async Task<IList<IndexDocumentChange>> GetCalendarChangesAsync(DateTime? startDate, DateTime? endDate, int skip = 0, int take = 0)
         {
             IList<IndexDocumentChange> result = null;
 
             using (var repository = _repositoryFactory())
             {
                 //Return calendar changes only for prices that have at least one specific date range.
-                var priceLists = repository.PricelistAssignments.Where(x => x.StartDate != null || x.EndDate != null)
-                    .Where(x => (x.StartDate == null || x.StartDate <= endDate) && (x.EndDate == null || x.EndDate > startDate)).Select(x => x.PricelistId).Distinct();
+                var priceLists = await repository.PricelistAssignments
+                    .Where(x => x.StartDate != null || x.EndDate != null)
+                    .Where(x => (x.StartDate == null || x.StartDate <= endDate) && (x.EndDate == null || x.EndDate > startDate))
+                    .Select(x => x.PricelistId)
+                    .Distinct()
+                    .ToArrayAsync();
 
                 if (priceLists.Any())
                 {
@@ -136,7 +141,7 @@ namespace VirtoCommerce.PricingModule.Data.Search
                         .ToList();
                 }
             }
-            return Task.FromResult(result);
+            return result;
         }
         #endregion
 

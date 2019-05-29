@@ -92,7 +92,7 @@ namespace VirtoCommerce.PricingModule.Web
             var mvcJsonOptions = appBuilder.ApplicationServices.GetService<IOptions<MvcJsonOptions>>();
             mvcJsonOptions.Value.SerializerSettings.Converters.Add(appBuilder.ApplicationServices.GetService<PolymorphicPricingJsonConverter>());
 
-            var priceIndexingEnabled = settingsManager.GetValue("Pricing.Indexing.Enable", true);
+            var priceIndexingEnabled = settingsManager.GetValue(ModuleConstants.Settings.General.PricingIndexing.Name, true);
             if (priceIndexingEnabled)
             {
                 // Add price document source to the product indexing configuration
