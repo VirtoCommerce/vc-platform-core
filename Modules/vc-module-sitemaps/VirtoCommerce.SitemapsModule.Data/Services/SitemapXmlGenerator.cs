@@ -14,6 +14,7 @@ using VirtoCommerce.SitemapsModule.Core.Services;
 using VirtoCommerce.SitemapsModule.Data.Models.Xml;
 using VirtoCommerce.StoreModule.Core.Model;
 using VirtoCommerce.StoreModule.Core.Services;
+using VirtoCommerce.SitemapsModule.Core;
 
 namespace VirtoCommerce.SitemapsModule.Data.Services
 {
@@ -77,8 +78,8 @@ namespace VirtoCommerce.SitemapsModule.Data.Services
         {
             var stream = new MemoryStream();
 
-            var filenameSeparator = _settingsManager.GetValue("Sitemap.FilenameSeparator", "--");
-            var recordsLimitPerFile = _settingsManager.GetValue("Sitemap.RecordsLimitPerFile", 10000);
+            var filenameSeparator = _settingsManager.GetValue(ModuleConstants.Settings.General.FilenameSeparator.Name, "--");
+            var recordsLimitPerFile = _settingsManager.GetValue(ModuleConstants.Settings.General.RecordsLimitPerFile.Name, 10000);
 
             var xmlNamespaces = new XmlSerializerNamespaces();
             xmlNamespaces.Add("", "http://www.sitemaps.org/schemas/sitemap/0.9");
@@ -151,8 +152,8 @@ namespace VirtoCommerce.SitemapsModule.Data.Services
 
         private async Task LoadSitemapRecords(Store store, Sitemap sitemap, string baseUrl, Action<ExportImportProgressInfo> progressCallback = null)
         {
-            var recordsLimitPerFile = _settingsManager.GetValue("Sitemap.RecordsLimitPerFile", 10000);
-            var filenameSeparator = _settingsManager.GetValue("Sitemap.FilenameSeparator", "--");
+            var recordsLimitPerFile = _settingsManager.GetValue(ModuleConstants.Settings.General.RecordsLimitPerFile.Name, 10000);
+            var filenameSeparator = _settingsManager.GetValue(ModuleConstants.Settings.General.FilenameSeparator.Name, "--");
 
             var sitemapItemSearchCriteria = new SitemapItemSearchCriteria
             {

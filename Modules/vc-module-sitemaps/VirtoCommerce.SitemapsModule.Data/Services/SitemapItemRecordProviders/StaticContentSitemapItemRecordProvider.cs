@@ -14,6 +14,7 @@ using VirtoCommerce.SitemapsModule.Core.Services;
 using VirtoCommerce.StoreModule.Core.Model;
 using VirtoCommerce.Tools;
 using YamlDotNet.RepresentationModel;
+using VirtoCommerce.SitemapsModule.Core;
 
 namespace VirtoCommerce.SitemapsModule.Data.Services.SitemapItemRecordProviders
 {
@@ -45,7 +46,7 @@ namespace VirtoCommerce.SitemapsModule.Data.Services.SitemapItemRecordProviders
             {
                 var processedCount = 0;
 
-                var acceptedFilenameExtensions = SettingsManager.GetValue("Sitemap.AcceptedFilenameExtensions", ".md,.html")
+                var acceptedFilenameExtensions = SettingsManager.GetValue(ModuleConstants.Settings.General.AcceptedFilenameExtensions.Name, ".md,.html")
                     .Split(',')
                     .Select(i => i.Trim())
                     .Where(i => !string.IsNullOrEmpty(i))

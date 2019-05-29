@@ -2,6 +2,7 @@ using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Threading.Tasks;
+using VirtoCommerce.CatalogModule.Core;
 using VirtoCommerce.CatalogModule.Core.Model;
 using VirtoCommerce.CatalogModule.Core.Model.Search;
 using VirtoCommerce.Platform.Core.Common;
@@ -69,11 +70,11 @@ namespace VirtoCommerce.CatalogModule.Data.Search.Indexing
 
         protected virtual async Task<TItem[]> ConvertDocuments(IList<SearchDocument> documents, TCriteria criteria)
         {
-            TItem[] result = null;
+            TItem[] result = Array.Empty<TItem>();
 
             if (documents?.Any() == true)
             {
-                var returnObjectsFromIndex = _settingsManager.GetValue("Catalog.Search.UseFullObjectIndexStoring", false);
+                var returnObjectsFromIndex = _settingsManager.GetValue(ModuleConstants.Settings.Search.UseFullObjectIndexStoring.Name, false);
                 var itemsMap = documents.ToDictionary(doc => doc.Id.ToString(), doc => returnObjectsFromIndex ? doc.GetObjectFieldValue<TItem>() : null);
 
                 var missingObjectIds = itemsMap
