@@ -165,8 +165,9 @@ angular.module('platformWebApp', AppDependencies).controller('platformWebApp.app
             return $q.when({});
         };
     })
-    .factory('fileUploaderOptions', ["platformWebApp.authDataStorage", function (authDataStorage) {
-        var authData = authDataStorage.getStoredData();
+    .factory('fileUploaderOptions', function () {
+        // do not add dynamic headers here, as the service is initialized once and no updates will be made
+        // for file uploads/downloads we use cookies, not Authorization header
         return {
             url: '/',
             alias: 'file',
@@ -178,10 +179,9 @@ angular.module('platformWebApp', AppDependencies).controller('platformWebApp.app
             filters: [],
             formData: [],
             queueLimit: Number.MAX_VALUE,
-            withCredentials: false,
-            headers: authData ? { Authorization: 'Bearer ' + authData.token } : {}
+            withCredentials: false
         };
-    }])
+    })
     .config(['$stateProvider', '$httpProvider', 'uiSelectConfig', 'datepickerConfig', 'datepickerPopupConfig', 'tagsInputConfigProvider', '$compileProvider',
         function ($stateProvider, $httpProvider, uiSelectConfig, datepickerConfig, datepickerPopupConfig, tagsInputConfigProvider, $compileProvider) {
 
