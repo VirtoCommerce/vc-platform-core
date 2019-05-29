@@ -9,13 +9,6 @@ namespace VirtoCommerce.NotificationsModule.Data.Migrations
             migrationBuilder.Sql(@"IF (EXISTS (SELECT * 
                  FROM INFORMATION_SCHEMA.TABLES 
                  WHERE TABLE_NAME = '__MigrationHistory'))
-                 BEGIN
-                    INSERT INTO [dbo].[__EFMigrationsHistory] ([MigrationId], [ProductVersion]) VALUES ('20190528144557_Initial', '2.2.3-servicing-35854')
-                END");
-
-            migrationBuilder.Sql(@"IF (EXISTS (SELECT * 
-                 FROM INFORMATION_SCHEMA.TABLES 
-                 WHERE TABLE_NAME = '__MigrationHistory'))
                     BEGIN
                         BEGIN
 	                        INSERT INTO [dbo].[Notification]

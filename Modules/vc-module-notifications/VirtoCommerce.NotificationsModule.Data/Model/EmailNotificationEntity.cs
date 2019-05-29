@@ -26,6 +26,8 @@ namespace VirtoCommerce.NotificationsModule.Data.Model
 
         public override Notification ToModel(Notification notification)
         {
+            base.ToModel(notification);
+
             var emailNotification = notification as EmailNotification;
 
             if (emailNotification != null)
@@ -47,7 +49,7 @@ namespace VirtoCommerce.NotificationsModule.Data.Model
                 }
             }
 
-            return base.ToModel(notification);
+            return notification;
         }
 
         public override NotificationEntity FromModel(Notification notification, PrimaryKeyResolvingMap pkMap)

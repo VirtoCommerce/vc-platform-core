@@ -12,7 +12,6 @@ using VirtoCommerce.NotificationsModule.Core;
 using VirtoCommerce.NotificationsModule.Core.Model;
 using VirtoCommerce.NotificationsModule.Core.Services;
 using VirtoCommerce.NotificationsModule.Data.ExportImport;
-using VirtoCommerce.NotificationsModule.Data.JsonConverters;
 using VirtoCommerce.NotificationsModule.Data.Model;
 using VirtoCommerce.NotificationsModule.Data.Repositories;
 using VirtoCommerce.NotificationsModule.Data.Senders;
@@ -20,6 +19,7 @@ using VirtoCommerce.NotificationsModule.Data.Services;
 using VirtoCommerce.NotificationsModule.LiquidRenderer;
 using VirtoCommerce.NotificationsModule.SendGrid;
 using VirtoCommerce.NotificationsModule.Smtp;
+using VirtoCommerce.NotificationsModule.Web.JsonConverters;
 using VirtoCommerce.Platform.Core.Common;
 using VirtoCommerce.Platform.Core.ExportImport;
 using VirtoCommerce.Platform.Core.Modularity;
@@ -68,6 +68,11 @@ namespace VirtoCommerce.NotificationsModule.Web
             AbstractTypeFactory<NotificationTemplateEntity>.RegisterType<SmsNotificationTemplateEntity>();
             AbstractTypeFactory<NotificationMessageEntity>.RegisterType<EmailNotificationMessageEntity>();
             AbstractTypeFactory<NotificationMessageEntity>.RegisterType<SmsNotificationMessageEntity>();
+
+            AbstractTypeFactory<NotificationTemplate>.RegisterType<EmailNotificationTemplate>();
+            AbstractTypeFactory<NotificationTemplate>.RegisterType<SmsNotificationTemplate>();
+            AbstractTypeFactory<NotificationMessage>.RegisterType<EmailNotificationMessage>();
+            AbstractTypeFactory<NotificationMessage>.RegisterType<SmsNotificationMessage>();
 
 
             var settingsRegistrar = appBuilder.ApplicationServices.GetRequiredService<ISettingsRegistrar>();

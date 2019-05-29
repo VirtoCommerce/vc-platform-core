@@ -9,7 +9,7 @@ using VirtoCommerce.NotificationsModule.Data.Repositories;
 namespace VirtoCommerce.NotificationsModule.Data.Migrations
 {
     [DbContext(typeof(NotificationDbContext))]
-    [Migration("20000000000000_UpdateNotificationsV2")]
+    [Migration("20190528154557_UpdateNotificationsV2")]
     partial class UpdateNotificationsV2
     {
         protected override void BuildTargetModel(ModelBuilder modelBuilder)

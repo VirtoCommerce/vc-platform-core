@@ -59,8 +59,11 @@
         }
     });
      
-    function setTemplate(data) {
-        
+    function setTemplate() {
+        if (!blade.currentEntity) {
+            blade.currentEntity = { kind: blade.notification.kind }
+        }
+
 		blade.isLoading = false;
         if (blade.currentEntity && blade.currentEntity.languageCode === undefined) { 
             blade.currentEntity.languageCode = null; 
@@ -86,7 +89,7 @@
             blade.orightml = blade.currentEntity.body;
         }
 
-        setTemplate(blade.currentEntity);
+        setTemplate();
 	};
 
      blade.renderTemplate = function () {

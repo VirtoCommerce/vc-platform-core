@@ -1,6 +1,5 @@
 using System;
 using System.Linq;
-using System.Net;
 using System.Threading.Tasks;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
@@ -91,7 +90,7 @@ namespace VirtoCommerce.NotificationsModule.Web.Controllers
         {
             await _notificationService.SaveChangesAsync(new[] { notification });
 
-            return StatusCode((int)HttpStatusCode.NoContent);
+            return NoContent();
         }
 
 
