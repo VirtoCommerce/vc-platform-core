@@ -87,6 +87,8 @@ namespace VirtoCommerce.CoreModule.Web
                 dbContext.Database.MigrateIfNotApplied(MigrationName.GetUpdateV2MigrationName(ModuleInfo.Id));
                 dbContext.Database.EnsureCreated();
                 dbContext.Database.Migrate();
+
+                AddDefaultCurrency(serviceScope);
             }
         }
 
@@ -104,6 +106,24 @@ namespace VirtoCommerce.CoreModule.Web
             ICancellationToken cancellationToken)
         {
             await _appBuilder.ApplicationServices.GetRequiredService<CoreExportImport>().ImportAsync(inputStream, options, progressCallback, cancellationToken);
+        }
+
+        private void AddDefaultCurrency(IServiceScope serviceScope)
+        {
+            var currencyService = serviceScope.ServiceProvider.GetRequiredService<ICurrencyService>();
+            var currencies = currencyService.GetAllCurrenciesAsync().Result;
+            if (!currencies.Any())
+            {
+                var defaultCurrency = new Currency
+                {
+                    Code = "USD",
+                    IsPrimary = true,
+                    ExchangeRate = 1,
+                    Symbol = "$",
+                    Name = "US dollar"
+                };
+                currencyService.SaveChangesAsync(new[] { defaultCurrency }).Wait();
+            }
         }
     }
 }
