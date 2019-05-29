@@ -18,7 +18,7 @@ namespace VirtoCommerce.TaxModule.Data.Migrations
                  FROM INFORMATION_SCHEMA.TABLES 
                  WHERE TABLE_NAME = '__MigrationHistory'))
                     BEGIN
-                        UPDATE StoreTaxProvider SET [TypeName] = 'FixedTaxRateProvider' WHERE [Code] = 'FixedRate'
+                        UPDATE StoreTaxProvider SET [TypeName] = 'FixedRateTaxProvider' WHERE [Code] = 'FixedRate'
 				    END");
         }
 

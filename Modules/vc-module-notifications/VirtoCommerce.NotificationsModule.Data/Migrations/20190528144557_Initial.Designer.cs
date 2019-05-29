@@ -10,8 +10,8 @@ using VirtoCommerce.NotificationsModule.Data.Repositories;
 namespace VirtoCommerce.NotificationsModule.Data.Migrations
 {
     [DbContext(typeof(NotificationDbContext))]
-    [Migration("20190409083950_InitialNotifications")]
-    partial class InitialNotifications
+    [Migration("20190528144557_Initial")]
+    partial class Initial
     {
         protected override void BuildTargetModel(ModelBuilder modelBuilder)
         {
@@ -46,8 +46,7 @@ namespace VirtoCommerce.NotificationsModule.Data.Migrations
 
                     b.Property<DateTime?>("ModifiedDate");
 
-                    b.Property<string>("NotificationId")
-                        .HasMaxLength(128);
+                    b.Property<string>("NotificationId");
 
                     b.Property<string>("Size")
                         .HasMaxLength(128);
@@ -71,8 +70,7 @@ namespace VirtoCommerce.NotificationsModule.Data.Migrations
                     b.Property<string>("EmailAddress")
                         .HasMaxLength(128);
 
-                    b.Property<string>("NotificationId")
-                        .HasMaxLength(128);
+                    b.Property<string>("NotificationId");
 
                     b.Property<int>("RecipientType");
 
@@ -129,12 +127,13 @@ namespace VirtoCommerce.NotificationsModule.Data.Migrations
                         .ValueGeneratedOnAdd()
                         .HasMaxLength(128);
 
-                    b.Property<string>("Body");
-
                     b.Property<string>("CreatedBy")
                         .HasMaxLength(64);
 
                     b.Property<DateTime>("CreatedDate");
+
+                    b.Property<string>("Discriminator")
+                        .IsRequired();
 
                     b.Property<string>("LanguageCode")
                         .HasMaxLength(10);
@@ -145,16 +144,12 @@ namespace VirtoCommerce.NotificationsModule.Data.Migrations
 
                     b.Property<int>("MaxSendAttemptCount");
 
-                    b.Property<string>("Message")
-                        .HasMaxLength(1600);
-
                     b.Property<string>("ModifiedBy")
                         .HasMaxLength(64);
 
                     b.Property<DateTime?>("ModifiedDate");
 
-                    b.Property<string>("NotificationId")
-                        .HasMaxLength(128);
+                    b.Property<string>("NotificationId");
 
                     b.Property<string>("NotificationType")
                         .HasMaxLength(128);
@@ -162,9 +157,6 @@ namespace VirtoCommerce.NotificationsModule.Data.Migrations
                     b.Property<int>("SendAttemptCount");
 
                     b.Property<DateTime?>("SendDate");
-
-                    b.Property<string>("Subject")
-                        .HasMaxLength(512);
 
                     b.Property<string>("TenantId")
                         .HasMaxLength(128);
@@ -177,6 +169,8 @@ namespace VirtoCommerce.NotificationsModule.Data.Migrations
                     b.HasIndex("NotificationId");
 
                     b.ToTable("NotificationMessage");
+
+                    b.HasDiscriminator<string>("Discriminator").HasValue("NotificationMessageEntity");
                 });
 
             modelBuilder.Entity("VirtoCommerce.NotificationsModule.Data.Model.NotificationTemplateEntity", b =>
@@ -185,18 +179,16 @@ namespace VirtoCommerce.NotificationsModule.Data.Migrations
                         .ValueGeneratedOnAdd()
                         .HasMaxLength(128);
 
-                    b.Property<string>("Body");
-
                     b.Property<string>("CreatedBy")
                         .HasMaxLength(64);
 
                     b.Property<DateTime>("CreatedDate");
 
+                    b.Property<string>("Discriminator")
+                        .IsRequired();
+
                     b.Property<string>("LanguageCode")
                         .HasMaxLength(10);
-
-                    b.Property<string>("Message")
-                        .HasMaxLength(1600);
 
                     b.Property<string>("ModifiedBy")
                         .HasMaxLength(64);
@@ -206,14 +198,13 @@ namespace VirtoCommerce.NotificationsModule.Data.Migrations
                     b.Property<string>("NotificationId")
                         .HasMaxLength(128);
 
-                    b.Property<string>("Subject")
-                        .HasMaxLength(512);
-
                     b.HasKey("Id");
 
                     b.HasIndex("NotificationId");
 
                     b.ToTable("NotificationTemplate");
+
+                    b.HasDiscriminator<string>("Discriminator").HasValue("NotificationTemplateEntity");
                 });
 
             modelBuilder.Entity("VirtoCommerce.NotificationsModule.Data.Model.EmailNotificationEntity", b =>
@@ -229,9 +220,66 @@ namespace VirtoCommerce.NotificationsModule.Data.Migrations
                     b.HasDiscriminator().HasValue("EmailNotificationEntity");
                 });
 
+            modelBuilder.Entity("VirtoCommerce.NotificationsModule.Data.Model.SmsNotificationEntity", b =>
+                {
+                    b.HasBaseType("VirtoCommerce.NotificationsModule.Data.Model.NotificationEntity");
+
+                    b.Property<string>("Number")
+                        .HasMaxLength(128);
+
+                    b.HasDiscriminator().HasValue("SmsNotificationEntity");
+                });
+
+            modelBuilder.Entity("VirtoCommerce.NotificationsModule.Data.Model.EmailNotificationMessageEntity", b =>
+                {
+                    b.HasBaseType("VirtoCommerce.NotificationsModule.Data.Model.NotificationMessageEntity");
+
+                    b.Property<string>("Body");
+
+                    b.Property<string>("Subject")
+                        .HasMaxLength(512);
+
+                    b.HasDiscriminator().HasValue("EmailNotificationMessageEntity");
+                });
+
+            modelBuilder.Entity("VirtoCommerce.NotificationsModule.Data.Model.SmsNotificationMessageEntity", b =>
+                {
+                    b.HasBaseType("VirtoCommerce.NotificationsModule.Data.Model.NotificationMessageEntity");
+
+                    b.Property<string>("Message")
+                        .HasMaxLength(1600);
+
+                    b.Property<string>("Number")
+                        .HasMaxLength(128);
+
+                    b.HasDiscriminator().HasValue("SmsNotificationMessageEntity");
+                });
+
+            modelBuilder.Entity("VirtoCommerce.NotificationsModule.Data.Model.EmailNotificationTemplateEntity", b =>
+                {
+                    b.HasBaseType("VirtoCommerce.NotificationsModule.Data.Model.NotificationTemplateEntity");
+
+                    b.Property<string>("Body");
+
+                    b.Property<string>("Subject")
+                        .HasMaxLength(512);
+
+                    b.HasDiscriminator().HasValue("EmailNotificationTemplateEntity");
+                });
+
+            modelBuilder.Entity("VirtoCommerce.NotificationsModule.Data.Model.SmsNotificationTemplateEntity", b =>
+                {
+                    b.HasBaseType("VirtoCommerce.NotificationsModule.Data.Model.NotificationTemplateEntity");
+
+                    b.Property<string>("Message")
+                        .HasMaxLength(1600);
+
+                    b.HasDiscriminator().HasValue("SmsNotificationTemplateEntity");
+                });
+
             modelBuilder.Entity("VirtoCommerce.NotificationsModule.Data.Model.EmailAttachmentEntity", b =>
                 {
-                    b.HasOne("VirtoCommerce.NotificationsModule.Data.Model.EmailNotificationEntity")
+                    b.HasOne("VirtoCommerce.NotificationsModule.Data.Model.EmailNotificationEntity", "Notification")
                         .WithMany("Attachments")
                         .HasForeignKey("NotificationId")
                         .OnDelete(DeleteBehavior.Cascade);
@@ -239,7 +287,7 @@ namespace VirtoCommerce.NotificationsModule.Data.Migrations
 
             modelBuilder.Entity("VirtoCommerce.NotificationsModule.Data.Model.NotificationEmailRecipientEntity", b =>
                 {
-                    b.HasOne("VirtoCommerce.NotificationsModule.Data.Model.EmailNotificationEntity")
+                    b.HasOne("VirtoCommerce.NotificationsModule.Data.Model.EmailNotificationEntity", "Notification")
                         .WithMany("Recipients")
                         .HasForeignKey("NotificationId")
                         .OnDelete(DeleteBehavior.Cascade);
@@ -249,12 +297,13 @@ namespace VirtoCommerce.NotificationsModule.Data.Migrations
                 {
                     b.HasOne("VirtoCommerce.NotificationsModule.Data.Model.NotificationEntity", "Notification")
                         .WithMany()
-                        .HasForeignKey("NotificationId");
+                        .HasForeignKey("NotificationId")
+                        .OnDelete(DeleteBehavior.Restrict);
                 });
 
             modelBuilder.Entity("VirtoCommerce.NotificationsModule.Data.Model.NotificationTemplateEntity", b =>
                 {
-                    b.HasOne("VirtoCommerce.NotificationsModule.Data.Model.NotificationEntity")
+                    b.HasOne("VirtoCommerce.NotificationsModule.Data.Model.NotificationEntity", "Notification")
                         .WithMany("Templates")
                         .HasForeignKey("NotificationId")
                         .OnDelete(DeleteBehavior.Cascade);

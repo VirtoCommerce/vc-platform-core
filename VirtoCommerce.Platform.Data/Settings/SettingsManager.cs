@@ -163,7 +163,7 @@ namespace VirtoCommerce.Platform.Data.Settings
                     .Where(x => settingNames.Contains(x.Name))
                     .ToListAsync());
 
-                foreach (var setting in objectSettings)
+                foreach (var setting in objectSettings.Where(x => x.ItHasValues))
                 {
                     var modifiedEntity = AbstractTypeFactory<SettingEntity>.TryCreateInstance().FromModel(setting);
                     //we need to convert resulting DB entities to model to use valueObject equals

@@ -55,7 +55,7 @@ namespace VirtoCommerce.TaxModule.Data.Services
                     var existEntities = await repository.GetStoreTaxProviderByIdsAsync(ids, responseGroup);
                     foreach (var existEntity in existEntities)
                     {
-                        var taxProvider = AbstractTypeFactory<TaxProvider>.TryCreateInstance(existEntity.TypeName);
+                        var taxProvider = AbstractTypeFactory<TaxProvider>.TryCreateInstance(string.IsNullOrEmpty(existEntity.TypeName) ? $"{existEntity.Code}TaxProvider" : existEntity.TypeName);
                         if (taxProvider != null)
                         {
                             existEntity.ToModel(taxProvider);

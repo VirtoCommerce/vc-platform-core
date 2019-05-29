@@ -1,6 +1,5 @@
 using System;
 using System.Collections.Generic;
-using System.Linq;
 using System.Threading.Tasks;
 using Moq;
 using VirtoCommerce.NotificationsModule.Core.Model;
@@ -20,6 +19,7 @@ namespace VirtoCommerce.NotificationsModule.Tests.UnitTests
         private readonly Mock<INotificationRepository> _repositoryMock;
         private readonly Mock<IUnitOfWork> _mockUnitOfWork;
         private readonly Mock<IEventPublisher> _eventPublisherMock;
+        private readonly Mock<INotificationService> _notificationServiceMock;
         private readonly NotificationMessageService _notificationMessageService;
 
         public NotificationMessageServiceUnitTests()
@@ -29,32 +29,28 @@ namespace VirtoCommerce.NotificationsModule.Tests.UnitTests
             _mockUnitOfWork = new Mock<IUnitOfWork>();
             _repositoryMock.Setup(ss => ss.UnitOfWork).Returns(_mockUnitOfWork.Object);
             _eventPublisherMock = new Mock<IEventPublisher>();
-            _notificationMessageService = new NotificationMessageService(factory, _eventPublisherMock.Object);
-            //todo
-            if (!AbstractTypeFactory<Notification>.AllTypeInfos.Any(t => t.IsAssignableTo(nameof(EmailNotification))))
-            {
-                AbstractTypeFactory<Notification>.RegisterType<EmailNotification>().MapToType<NotificationEntity>();
-            }
+            _notificationServiceMock = new Mock<INotificationService>();
+            _notificationMessageService = new NotificationMessageService(factory, _eventPublisherMock.Object, _notificationServiceMock.Object);
 
-            if (!AbstractTypeFactory<NotificationTemplate>.AllTypeInfos.Any(t => t.IsAssignableTo(nameof(EmailNotificationTemplate))))
-            {
-                AbstractTypeFactory<NotificationTemplate>.RegisterType<EmailNotificationTemplate>().MapToType<NotificationTemplateEntity>();
-            }
+            var notificationService = new NotificationService(null, null);
+            //notificationService.RegisterNotification<EmailNotification, NotificationEntity>();
+            //notificationService.RegisterNotificationTemplate<EmailNotificationTemplate, NotificationTemplateEntity>();
+            //notificationService.RegisterNotificationMessage<EmailNotificationMessage, NotificationMessageEntity>();
 
-            if (!AbstractTypeFactory<NotificationMessage>.AllTypeInfos.Any(t => t.IsAssignableTo(nameof(EmailNotificationMessage))))
-            {
-                AbstractTypeFactory<NotificationMessage>.RegisterType<EmailNotificationMessage>().MapToType<NotificationMessageEntity>();
-            }
         }
 
         [Fact]
         public async Task GetNotificationsMessageByIds_GetMessage()
         {
             //Arrange
-            string id = Guid.NewGuid().ToString();
-            var message = new NotificationMessageEntity { Id = id, NotificationType = nameof(EmailNotificationMessage) };
+            var id = Guid.NewGuid().ToString();
+            var notificationId = Guid.NewGuid().ToString();
+            var message = new EmailNotificationMessageEntity { Id = id, NotificationType = nameof(EmailNotificationMessage), NotificationId = notificationId };
             var messages = new List<NotificationMessageEntity> { message };
-            //  _repositoryMock.Setup(n => n.GetMessagesByIdsAsync(new []{ id })).ReturnsAsync(messages.ToArray());
+            _repositoryMock.Setup(n => n.GetMessagesByIdsAsync(new[] { id })).ReturnsAsync(messages.ToArray());
+            var notification = AbstractTypeFactory<Notification>.TryCreateInstance(nameof(EmailNotification));
+            notification.Id = notificationId;
+            _notificationServiceMock.Setup(n => n.GetByIdsAsync(new[] { notificationId }, null)).ReturnsAsync(new[] { notification });
 
             //Act
             var result = await _notificationMessageService.GetNotificationsMessageByIds(new[] { id });
@@ -68,7 +64,7 @@ namespace VirtoCommerce.NotificationsModule.Tests.UnitTests
         public async Task SaveNotificationMessages_SaveMessage()
         {
             //Arrange
-            string id = Guid.NewGuid().ToString();
+            var id = Guid.NewGuid().ToString();
             var messages = new List<EmailNotificationMessage>
             {
                 new EmailNotificationMessage()
@@ -78,7 +74,7 @@ namespace VirtoCommerce.NotificationsModule.Tests.UnitTests
                     NotificationType = nameof(EmailNotification)
                 }
             };
-            var messageEntity = new NotificationMessageEntity() { Id = id, NotificationType = nameof(EmailNotificationMessage) };
+            var messageEntity = new EmailNotificationMessageEntity() { Id = id, NotificationType = nameof(EmailNotificationMessage) };
             var messageEntities = new List<NotificationMessageEntity> { messageEntity };
             _repositoryMock.Setup(n => n.GetMessagesByIdsAsync(new[] { id })).ReturnsAsync(messageEntities.ToArray());
 

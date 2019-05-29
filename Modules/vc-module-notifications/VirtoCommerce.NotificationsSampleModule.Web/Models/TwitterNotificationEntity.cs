@@ -23,7 +23,7 @@ namespace VirtoCommerce.NotificationsSampleModule.Web.Models
             {
                 Post = entity.Post;
             }
-            return base.FromModel(notification, pkMap); ;
+            return base.FromModel(notification, pkMap);
         }
 
         public override void Patch(NotificationEntity notification)

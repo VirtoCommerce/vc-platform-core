@@ -7,7 +7,7 @@ using VirtoCommerce.Platform.Core.Common;
 
 namespace VirtoCommerce.NotificationsModule.Data.JsonConverters
 {
-    public class PolymorphicJsonConverter : JsonConverter
+    public class NotificationPolymorphicJsonConverter : JsonConverter
     {
         private static readonly Type[] _knowTypes = { typeof(Notification), typeof(NotificationTemplate), typeof(NotificationSearchCriteria) };
 
@@ -21,27 +21,27 @@ namespace VirtoCommerce.NotificationsModule.Data.JsonConverters
 
         public override object ReadJson(JsonReader reader, Type objectType, object existingValue, JsonSerializer serializer)
         {
-            object retVal = null;
+            object result = null;
             var obj = JObject.Load(reader);
             if (objectType == typeof(Notification))
             {
-                var type = obj["type"].Value<string>();
-                retVal = AbstractTypeFactory<Notification>.TryCreateInstance(type);
+                var type = obj.GetValue("type", StringComparison.InvariantCultureIgnoreCase).Value<string>();
+                result = AbstractTypeFactory<Notification>.TryCreateInstance(type);
             }
             else if (objectType == typeof(NotificationTemplate))
             {
                 var tryCreateInstance = typeof(AbstractTypeFactory<>).MakeGenericType(objectType).GetMethods()
                     .FirstOrDefault(x => x.Name.EqualsInvariant("TryCreateInstance") && x.GetParameters().Length == 0);
-                retVal = tryCreateInstance?.Invoke(null, null);
+                result = tryCreateInstance?.Invoke(null, null);
             }
             else if (objectType == typeof(NotificationSearchCriteria))
             {
-                retVal = AbstractTypeFactory<NotificationSearchCriteria>.TryCreateInstance();
+                result = AbstractTypeFactory<NotificationSearchCriteria>.TryCreateInstance();
             }
-            serializer.Populate(obj.CreateReader(), retVal);
+            serializer.Populate(obj.CreateReader(), result);
 
 
-            return retVal;
+            return result;
         }
 
         public override bool CanConvert(Type objectType)

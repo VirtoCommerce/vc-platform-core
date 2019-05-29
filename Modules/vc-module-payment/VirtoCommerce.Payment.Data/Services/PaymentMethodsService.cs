@@ -58,7 +58,7 @@ namespace VirtoCommerce.PaymentModule.Data.Services
                     var existEntities = await repository.GetStorePaymentMethodsByIdsAsync(ids, responseGroup);
                     foreach (var existEntity in existEntities)
                     {
-                        var paymentMethod = AbstractTypeFactory<PaymentMethod>.TryCreateInstance(existEntity.TypeName);
+                        var paymentMethod = AbstractTypeFactory<PaymentMethod>.TryCreateInstance(string.IsNullOrEmpty(existEntity.TypeName) ? existEntity.Code : existEntity.TypeName);
                         if (paymentMethod != null)
                         {
                             existEntity.ToModel(paymentMethod);

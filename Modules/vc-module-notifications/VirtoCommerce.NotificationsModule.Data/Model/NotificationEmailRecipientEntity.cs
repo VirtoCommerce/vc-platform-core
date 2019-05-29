@@ -22,8 +22,8 @@ namespace VirtoCommerce.NotificationsModule.Data.Model
         /// <summary>
         /// Id of notification
         /// </summary>
-        [StringLength(128)]
         public string NotificationId { get; set; }
+        public EmailNotificationEntity Notification { get; set; }
 
         public virtual NotificationEmailRecipientEntity FromModel(string emailAddress, NotificationRecipientType recipientType)
         {

@@ -46,8 +46,6 @@ namespace VirtoCommerce.NotificationsModule.Tests.IntegrationTests
             }
 
             var registrar = serviceProvider.GetService<INotificationRegistrar>();
-            registrar.RegisterNotification<TwitterNotification>();
-            registrar.RegisterNotification<TwitterNotification, NotificationEntity>();
             registrar.RegisterNotification<PostTwitterNotification>();
         }
 
@@ -57,12 +55,12 @@ namespace VirtoCommerce.NotificationsModule.Tests.IntegrationTests
             //Arrange
             var notifications = new List<TwitterNotification>()
             {
-                new TwitterNotification
-                {
-                    Type = nameof(PostTwitterNotification), IsActive = true,
-                    TenantIdentity = new TenantIdentity("Platform", null),
-                    Post = $"Post {DateTime.Now}"
-                }
+                //new TwitterNotification
+                //{
+                //    Type = nameof(PostTwitterNotification), IsActive = true,
+                //    TenantIdentity = new TenantIdentity("Platform", null),
+                //    Post = $"Post {DateTime.Now}"
+                //}
             };
 
             //Act
@@ -75,7 +73,8 @@ namespace VirtoCommerce.NotificationsModule.Tests.IntegrationTests
         public async Task SearchNotifications_ContainsTwitterNotification()
         {
             //Arrange
-            var criteria = new NotificationSearchCriteria() { Take = int.MaxValue };
+            var criteria = AbstractTypeFactory<NotificationSearchCriteria>.TryCreateInstance();
+            criteria.Take = int.MaxValue;
 
             //Act
             var result = await _notificationSearchService.SearchNotificationsAsync(criteria);
@@ -88,7 +87,8 @@ namespace VirtoCommerce.NotificationsModule.Tests.IntegrationTests
         public async Task SaveChangesAsync_UpdateTwitterNotification()
         {
             //Arrange
-            var criteria = new NotificationSearchCriteria() { Take = int.MaxValue };
+            var criteria = AbstractTypeFactory<NotificationSearchCriteria>.TryCreateInstance();
+            criteria.Take = int.MaxValue;
             var notifications = await _notificationSearchService.SearchNotificationsAsync(criteria);
             var notification = notifications.Results.FirstOrDefault();
             if (notification is TwitterNotification twitterNotification)

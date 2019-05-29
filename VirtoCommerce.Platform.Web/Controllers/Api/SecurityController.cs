@@ -313,7 +313,7 @@ namespace VirtoCommerce.Platform.Web.Controllers.Api
         }
 
         /// <summary>
-        /// Get user details by user ID
+        /// Get user details by user email
         /// </summary>
         /// <param name="email"></param>
         [HttpGet]
@@ -321,8 +321,8 @@ namespace VirtoCommerce.Platform.Web.Controllers.Api
         [Authorize(PlatformConstants.Security.Permissions.SecurityQuery)]
         public async Task<ActionResult<ApplicationUser>> GetUserByEmailAsync([FromRoute] string email)
         {
-            var retVal = await _userManager.FindByEmailAsync(email);
-            return Ok(retVal);
+            var result = await _userManager.FindByEmailAsync(email);
+            return Ok(result);
         }
 
         /// <summary>

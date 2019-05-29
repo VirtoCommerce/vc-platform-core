@@ -54,7 +54,6 @@ namespace VirtoCommerce.NotificationsModule.Data.Model
             notification.CreatedDate = CreatedDate;
             notification.ModifiedBy = ModifiedBy;
             notification.ModifiedDate = ModifiedDate;
-            notification.Kind = Kind;
 
             notification.Templates = Templates
                 .Select(t => t.ToModel(AbstractTypeFactory<NotificationTemplate>.TryCreateInstance($"{Kind}Template"))).ToList();
@@ -82,7 +81,7 @@ namespace VirtoCommerce.NotificationsModule.Data.Model
             if (notification.Templates != null && notification.Templates.Any())
             {
                 Templates = new ObservableCollection<NotificationTemplateEntity>(notification.Templates
-                        .Select(x => AbstractTypeFactory<NotificationTemplateEntity>.TryCreateInstance().FromModel(x)));
+                        .Select(x => AbstractTypeFactory<NotificationTemplateEntity>.TryCreateInstance($"{Kind}TemplateEntity").FromModel(x, pkMap)));
             }
 
             return this;
@@ -90,8 +89,6 @@ namespace VirtoCommerce.NotificationsModule.Data.Model
 
         public virtual void Patch(NotificationEntity notification)
         {
-            notification.Type = Type;
-            notification.Kind = Kind;
             notification.IsActive = IsActive;
 
             if (!Templates.IsNullCollection())
@@ -99,15 +96,5 @@ namespace VirtoCommerce.NotificationsModule.Data.Model
                 Templates.Patch(notification.Templates, (sourceTemplate, templateEntity) => sourceTemplate.Patch(templateEntity));
             }
         }
-    }
-
-    [Flags]
-    public enum NotificationResponseGroup
-    {
-        Default = 0,
-        WithTemplates = 1,
-        WithAttachments = 2,
-        WithRecipients = 4,
-        Full = 7
     }
 }
