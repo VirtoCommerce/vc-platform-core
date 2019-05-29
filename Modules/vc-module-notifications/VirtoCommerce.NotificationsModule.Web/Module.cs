@@ -77,12 +77,6 @@ namespace VirtoCommerce.NotificationsModule.Web
             AbstractTypeFactory<NotificationMessageEntity>.RegisterType<EmailNotificationMessageEntity>();
             AbstractTypeFactory<NotificationMessageEntity>.RegisterType<SmsNotificationMessageEntity>();
 
-            AbstractTypeFactory<NotificationTemplate>.RegisterType<EmailNotificationTemplate>();
-            AbstractTypeFactory<NotificationTemplate>.RegisterType<SmsNotificationTemplate>();
-            AbstractTypeFactory<NotificationMessage>.RegisterType<EmailNotificationMessage>();
-            AbstractTypeFactory<NotificationMessage>.RegisterType<SmsNotificationMessage>();
-
-
             var settingsRegistrar = appBuilder.ApplicationServices.GetRequiredService<ISettingsRegistrar>();
             settingsRegistrar.RegisterSettings(ModuleConstants.Settings.AllSettings, ModuleInfo.Id);
 

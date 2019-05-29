@@ -1,6 +1,6 @@
 using System;
 using System.Collections.Generic;
-using System.Net.Mail;
+using System.Linq;
 using System.Threading.Tasks;
 using Microsoft.Extensions.Logging;
 using Microsoft.Extensions.Options;
@@ -9,7 +9,6 @@ using VirtoCommerce.NotificationsModule.Core.Model;
 using VirtoCommerce.NotificationsModule.Core.Services;
 using VirtoCommerce.NotificationsModule.Data.Model;
 using VirtoCommerce.NotificationsModule.Data.Senders;
-using VirtoCommerce.NotificationsModule.Data.Services;
 using VirtoCommerce.NotificationsModule.LiquidRenderer;
 using VirtoCommerce.NotificationsModule.Smtp;
 using VirtoCommerce.NotificationsModule.Tests.Common;
@@ -49,10 +48,11 @@ namespace VirtoCommerce.NotificationsModule.Tests.UnitTests
 
             _sender = new NotificationSender(_templateRender, _messageServiceMock.Object, _logNotificationSenderMock.Object, _senderFactoryMock.Object);
 
-            var notificationService = new NotificationService(null, null);
-            //notificationService.RegisterNotification<EmailNotification, NotificationEntity>();
-            //notificationService.RegisterNotificationTemplate<EmailNotificationTemplate, NotificationTemplateEntity>();
-            //notificationService.RegisterNotificationMessage<EmailNotificationMessage, NotificationMessageEntity>();
+            if (!AbstractTypeFactory<NotificationTemplate>.AllTypeInfos.SelectMany(x => x.AllSubclasses).Contains(typeof(EmailNotificationTemplate)))
+                AbstractTypeFactory<NotificationTemplate>.RegisterType<EmailNotificationTemplate>().MapToType<NotificationTemplateEntity>();
+
+            if (!AbstractTypeFactory<NotificationMessage>.AllTypeInfos.SelectMany(x => x.AllSubclasses).Contains(typeof(EmailNotificationMessage)))
+                AbstractTypeFactory<NotificationMessage>.RegisterType<EmailNotificationMessage>().MapToType<NotificationMessageEntity>();
 
         }
 

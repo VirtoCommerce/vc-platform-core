@@ -40,10 +40,14 @@ namespace VirtoCommerce.NotificationsModule.Tests.IntegrationTests
             _notificationService = serviceProvider.GetService<INotificationService>();
             _notificationSearchService = serviceProvider.GetService<INotificationSearchService>();
 
-            if (AbstractTypeFactory<NotificationEntity>.AllTypeInfos.All(t => t.Type != typeof(TwitterNotificationEntity)))
-            {
+            if (!AbstractTypeFactory<NotificationEntity>.AllTypeInfos.SelectMany(x => x.AllSubclasses).Contains(typeof(TwitterNotificationEntity)))
                 AbstractTypeFactory<NotificationEntity>.RegisterType<TwitterNotificationEntity>();
-            }
+
+            if (!AbstractTypeFactory<NotificationTemplate>.AllTypeInfos.SelectMany(x => x.AllSubclasses).Contains(typeof(EmailNotificationTemplate)))
+                AbstractTypeFactory<NotificationTemplate>.RegisterType<EmailNotificationTemplate>().MapToType<NotificationTemplateEntity>();
+
+            if (!AbstractTypeFactory<NotificationMessage>.AllTypeInfos.SelectMany(x => x.AllSubclasses).Contains(typeof(EmailNotificationMessage)))
+                AbstractTypeFactory<NotificationMessage>.RegisterType<EmailNotificationMessage>().MapToType<NotificationMessageEntity>();
 
             var registrar = serviceProvider.GetService<INotificationRegistrar>();
             registrar.RegisterNotification<PostTwitterNotification>();
@@ -55,12 +59,12 @@ namespace VirtoCommerce.NotificationsModule.Tests.IntegrationTests
             //Arrange
             var notifications = new List<TwitterNotification>()
             {
-                //new TwitterNotification
-                //{
-                //    Type = nameof(PostTwitterNotification), IsActive = true,
-                //    TenantIdentity = new TenantIdentity("Platform", null),
-                //    Post = $"Post {DateTime.Now}"
-                //}
+                new PostTwitterNotification
+                {
+                    Type = nameof(PostTwitterNotification), IsActive = true,
+                    TenantIdentity = new TenantIdentity("Platform", null),
+                    Post = $"Post {DateTime.Now}"
+                }
             };
 
             //Act
