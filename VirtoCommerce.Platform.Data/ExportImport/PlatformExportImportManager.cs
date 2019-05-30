@@ -62,7 +62,7 @@ namespace VirtoCommerce.Platform.Data.ExportImport
         public PlatformExportManifest ReadExportManifest(Stream stream)
         {
             PlatformExportManifest retVal;
-            using (var package = new ZipArchive(stream))
+            using (var package = new ZipArchive(stream, ZipArchiveMode.Read, true))
             {
                 var manifestPart = package.GetEntry(ManifestZipEntryName);
                 using (var manifestStream = manifestPart.Open())
@@ -109,7 +109,7 @@ namespace VirtoCommerce.Platform.Data.ExportImport
             progressInfo.Description = "Starting platform import...";
             progressCallback(progressInfo);
 
-            using (var zipArchive = new ZipArchive(stream))
+            using (var zipArchive = new ZipArchive(stream, ZipArchiveMode.Read, true))
             using (EventSuppressor.SupressEvents())
             {
                 //Import selected platform entries
