@@ -75,6 +75,8 @@
                     "pricelist": "Preisliste",
                     "pricelist-currency": "Währung",
                     "priority": "Priorität",
+                    "activation": "Aktivierung",
+                    "expiration": "Ablauf",
                     "last-modified": "Geändert",
                     "modified-by": "Geändert von"
                 }
@@ -127,6 +129,12 @@
             "assignments-delete": {
                 "title": "Bestätigung löschen",
                 "message": "Sind Sie sicher, dass Sie ausgewählte Preislistenzuordnungen löschen möchten?"
+            },
+            "assignments-delete-all": {
+                "title": "Bestätigung löschen",
+                "warning": "Warnung Diese Änderung ist endgültig und kann nicht rückgängig gemacht werden. Es kann zu Datenverlust führen.",
+                "message": "Alle gefilterte Elemente werden gelöscht",
+                "instruction": "Geben Sie 'yes', um den Löschvorgang zu aktivieren:"
             },
             "pricelists-delete": {
                 "title": "Bestätigung löschen",

@@ -40,11 +40,21 @@ namespace VirtoCommerce.PricingModule.Core
                     DefaultValue = default(DateTime)
                 };
 
+                public static SettingDescriptor PricingIndexing = new SettingDescriptor
+                {
+                    Name = "Pricing.Indexing.Enable",
+                    GroupName = "Pricing|Search",
+                    ValueType = SettingValueType.Boolean,
+                    DefaultValue = true
+                };
+
                 public static IEnumerable<SettingDescriptor> AllSettings
                 {
                     get
                     {
                         yield return ExportImportPageSize;
+                        yield return IndexationDatePricingCalendar;
+                        yield return PricingIndexing;
                     }
                 }
             }

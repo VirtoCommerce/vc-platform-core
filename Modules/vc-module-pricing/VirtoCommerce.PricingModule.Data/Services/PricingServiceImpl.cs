@@ -13,6 +13,7 @@ using VirtoCommerce.CoreModule.Core.Conditions;
 using VirtoCommerce.Platform.Core.Caching;
 using VirtoCommerce.Platform.Core.Common;
 using VirtoCommerce.Platform.Core.Events;
+using VirtoCommerce.Platform.Data.Infrastructure;
 using VirtoCommerce.PricingModule.Core.Events;
 using VirtoCommerce.PricingModule.Core.Model;
 using VirtoCommerce.PricingModule.Core.Model.Conditions;
@@ -57,23 +58,20 @@ namespace VirtoCommerce.PricingModule.Data.Services
             {
                 cacheEntry.AddExpirationToken(PricingCacheRegion.CreateChangeToken());
 
-                using (var repository = _repositoryFactory())
+                var allAssignments = await GetAllPricelistAssignments();
+                foreach (var assignment in allAssignments.Where(x => !string.IsNullOrEmpty(x.ConditionExpression)))
                 {
-                    var allAssignments = (await repository.PricelistAssignments.Include(x => x.Pricelist).ToArrayAsync()).Select(x => x.ToModel(AbstractTypeFactory<PricelistAssignment>.TryCreateInstance())).ToArray();
-                    foreach (var assignment in allAssignments.Where(x => !string.IsNullOrEmpty(x.ConditionExpression)))
+                    try
                     {
-                        try
-                        {
-                            //Deserialize conditions
-                            assignment.Conditions = JsonConvert.DeserializeObject<IConditionTree[]>(assignment.ConditionExpression, new ConditionJsonConverter());
-                        }
-                        catch (Exception ex)
-                        {
-                            _logger.LogError(ex, "Failed to deserialize an expression.");
-                        }
+                        //Deserialize conditions
+                        assignment.Conditions = JsonConvert.DeserializeObject<IConditionTree[]>(assignment.ConditionExpression, new ConditionJsonConverter());
                     }
-                    return allAssignments;
+                    catch (Exception ex)
+                    {
+                        _logger.LogError(ex, "Failed to deserialize an expression.");
+                    }
                 }
+                return allAssignments;
             });
 
             var query = priceListAssignments.AsQueryable();
@@ -119,6 +117,15 @@ namespace VirtoCommerce.PricingModule.Data.Services
             return assignmentsToReturn.OrderByDescending(x => x.Priority).ThenByDescending(x => x.Name).Select(x => x.Pricelist);
         }
 
+        public virtual async Task<PricelistAssignment[]> GetAllPricelistAssignments()
+        {
+            using (var repository = _repositoryFactory())
+            {
+                repository.DisableChangesTracking();
+
+                return (await repository.PricelistAssignments.Include(x => x.Pricelist).ToArrayAsync()).Select(x => x.ToModel(AbstractTypeFactory<PricelistAssignment>.TryCreateInstance())).ToArray();
+            }
+        }
         /// <summary>
         /// Evaluation product prices.
         /// Will get either all prices or one price per currency depending on the settings in evalContext.

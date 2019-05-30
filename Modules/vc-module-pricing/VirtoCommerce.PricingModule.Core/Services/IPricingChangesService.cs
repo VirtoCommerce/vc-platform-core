@@ -1,6 +1,7 @@
 using System;
 using System.Collections.Generic;
-using VirtoCommerce.PricingModule.Core.Model;
+using System.Threading.Tasks;
+using VirtoCommerce.SearchModule.Core.Model;
 
 namespace VirtoCommerce.PricingModule.Core.Services
 {
@@ -19,7 +20,7 @@ namespace VirtoCommerce.PricingModule.Core.Services
         /// <param name="skip">Optional count of price changes to skip for the pagination.</param>
         /// <param name="take">Optional count of price changes to take for the pagination.</param>
         /// <returns></returns>
-        IEnumerable<PriceCalendarChange> GetCalendarChanges(DateTime? lastEvaluationTimestamp,
-            DateTime? evaluationTimestamp, int? skip = null, int? take = null);
+        Task<IList<IndexDocumentChange>> GetCalendarChangesAsync(DateTime? lastEvaluationTimestamp,
+            DateTime? evaluationTimestamp, int skip, int take);
     }
 }

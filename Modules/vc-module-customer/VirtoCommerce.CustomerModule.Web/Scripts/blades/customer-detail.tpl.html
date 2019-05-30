@@ -1,4 +1,4 @@
-﻿<div class="blade-static __bottom" ng-include="'$(Platform)/Scripts/common/templates/create.tpl.html'" ng-if="blade.isNew"></div>
+<div class="blade-static __bottom" ng-include="'$(Platform)/Scripts/common/templates/create.tpl.html'" ng-if="blade.isNew"></div>
 <div class="blade-content">
     <div class="blade-inner">
         <div class="inner-block clearfix" ng-controller="virtoCommerce.customerModule.customerDetailController">
@@ -97,7 +97,7 @@
                         <div class="form-group">
                             <label class="form-label">{{'customer.blades.contact-detail.labels.taxpayerId' | translate }}</label>
                             <div class="form-input">
-                                <input ng-model="blade.currentEntity.taxpayerId" placeholder="{{ 'customer.blades.contact-detail.placeholders.taxpayerId' | translate }}">
+                                <input ng-model="blade.currentEntity.taxPayerId" placeholder="{{ 'customer.blades.contact-detail.placeholders.taxpayerId' | translate }}">
                             </div>
                         </div>
                     </div>

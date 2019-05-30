@@ -238,20 +238,7 @@ namespace VirtoCommerce.Platform.Web.Controllers.Api
         }
 
         /// <summary>
-        /// Add a new role role
-        /// </summary>
-        /// <param name="role"></param>
-        [HttpPost]
-        [Route("roles")]
-        [Authorize(PlatformConstants.Security.Permissions.SecurityUpdate)]
-        public async Task<ActionResult<IdentityResult>> CreateRoleAsync([FromBody] Role role)
-        {
-            var result = await _roleManager.CreateAsync(role);
-            return Ok(result);
-        }
-
-        /// <summary>
-        /// Update an existing role
+        /// Update an existing role or create new
         /// </summary>
         /// <param name="role"></param>
         [HttpPut]
@@ -638,6 +625,19 @@ namespace VirtoCommerce.Platform.Web.Controllers.Api
             return Ok(IdentityResult.Failed());
         }
 
+        //TODO: Remove later
+        #region Obsolete methods
+        [Obsolete("user /roles/search instead")]
+        [HttpPost]
+        [Route("roles")]
+        [Authorize(PlatformConstants.Security.Permissions.SecurityQuery)]
+        public async Task<ActionResult<RoleSearchResult>> SearchRolesObsolete([FromBody] RoleSearchCriteria request)
+        {
+            var result = await _roleSearchService.SearchRolesAsync(request);
+            return Ok(result);
+        }
+
+        #endregion
 
         private bool IsUserEditable(string userName)
         {
