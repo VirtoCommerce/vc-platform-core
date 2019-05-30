@@ -1,4 +1,4 @@
-﻿angular.module('platformWebApp')
+angular.module('platformWebApp')
 .controller('platformWebApp.settingGroupListController', ['$window', 'platformWebApp.modules', '$scope', 'platformWebApp.settings', 'platformWebApp.bladeNavigationService', 'platformWebApp.dialogService',
 function ($window, modules, $scope, settings, bladeNavigationService, dialogService) {
     var settingsTree;
@@ -138,9 +138,16 @@ function ($window, modules, $scope, settings, bladeNavigationService, dialogServ
             callback: function (confirm) {
                 if (confirm) {
                     blade.isLoading = true;
-                    modules.restart(function () {
+                    try {
+                        modules.restart(function () {
+                            //$window.location.reload(); returns 400 bad request due server restarts
+                        });
+                    }
+                    catch{
+                    }
+                    finally {
                         $window.location.reload();
-                    });
+                    }
                 }
             }
         }

@@ -97,7 +97,19 @@ namespace VirtoCommerce.Platform.Web.Controllers.Api
             object[] result = null;
             if (setting != null)
             {
-                result = setting.AllowedValues ?? new[] { setting.Value };
+                if (!setting.AllowedValues.IsNullOrEmpty())
+                {
+                    result = setting.AllowedValues;
+                }
+                else if (setting.Value != null)
+                {
+                    result = new[] { setting.Value };
+                }
+                else if (setting.DefaultValue != null)
+                {
+                    result = new[] { setting.DefaultValue };
+                }
+
             }
             return Ok(result);
         }

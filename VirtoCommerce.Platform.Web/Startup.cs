@@ -338,7 +338,11 @@ namespace VirtoCommerce.Platform.Web
             //Return all errors as Json response
             app.UseMiddleware<ApiErrorWrappingMiddleware>();
 
-            app.UseHttpsRedirection();
+            var requireHttps = bool.Parse(Configuration.GetSection("VirtoCommerce:RequireHttps").Value ?? false.ToString());
+            if (requireHttps)
+            {
+                app.UseHttpsRedirection();
+            }
             app.UseStaticFiles();
             app.UseCookiePolicy();
 
@@ -409,6 +413,8 @@ namespace VirtoCommerce.Platform.Web
 
             //Seed default users
             app.UseDefaultUsersAsync().GetAwaiter().GetResult();
+
+
         }
     }
 }
