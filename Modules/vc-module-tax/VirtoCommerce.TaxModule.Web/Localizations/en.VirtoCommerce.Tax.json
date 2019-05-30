@@ -1,7 +1,6 @@
 {
     "tax": {
         "blades": {
-
             "tax-provider-detail": {
                 "subtitle": "Edit tax provider",
                 "labels": {
@@ -20,7 +19,8 @@
                 "labels": {
                     "is-active": "Is active",
                     "tax-provider": "Tax provider",
-                    "no-tax-providers": "No tax providers are registered"
+                    "no-tax-providers": "No tax providers are registered",
+                    "note": "Set the order how tax providers appear sorted in web store. Drag and drop to change the order."
                 }
             }
 

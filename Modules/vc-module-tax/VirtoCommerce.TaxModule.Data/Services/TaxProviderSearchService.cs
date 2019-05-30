@@ -39,24 +39,14 @@ namespace VirtoCommerce.TaxModule.Data.Services
                 cacheEntry.AddExpirationToken(TaxCacheRegion.CreateChangeToken());
                 var result = AbstractTypeFactory<TaxProviderSearchResult>.TryCreateInstance();
 
-                var sortInfos = criteria.SortInfos;
-                if (sortInfos.IsNullOrEmpty())
-                {
-                    sortInfos = new[]
-                    {
-                            new SortInfo
-                            {
-                                SortColumn = "Name"
-                            }
-                        };
-                }
+                var sortInfos = GetSortInfos(criteria);
 
                 var tmpSkip = 0;
                 var tmpTake = 0;
 
                 using (var repository = _repositoryFactory())
                 {
-                    var query = GetTaxProvidersQuery(repository, criteria, sortInfos);
+                    var query = GetQuery(repository, criteria, sortInfos);
 
                     result.TotalCount = await query.CountAsync();
                     if (criteria.Take > 0)
@@ -95,7 +85,7 @@ namespace VirtoCommerce.TaxModule.Data.Services
             });
         }
 
-        protected virtual IQueryable<StoreTaxProviderEntity> GetTaxProvidersQuery(ITaxRepository repository, TaxProviderSearchCriteria criteria, IEnumerable<SortInfo> sortInfos)
+        protected virtual IQueryable<StoreTaxProviderEntity> GetQuery(ITaxRepository repository, TaxProviderSearchCriteria criteria, IEnumerable<SortInfo> sortInfos)
         {
             var query = repository.StoreTaxProviders;
             if (!string.IsNullOrEmpty(criteria.Keyword))
@@ -108,6 +98,23 @@ namespace VirtoCommerce.TaxModule.Data.Services
             }
             query = query.OrderBySortInfos(sortInfos);
             return query;
+        }
+
+        protected virtual IList<SortInfo> GetSortInfos(TaxProviderSearchCriteria criteria)
+        {
+            var sortInfos = criteria.SortInfos;
+            if (sortInfos.IsNullOrEmpty())
+            {
+                sortInfos = new[]
+                {
+                    new SortInfo
+                    {
+                        SortColumn = "Name"
+                    }
+                };
+            }
+
+            return sortInfos;
         }
     }
 }
