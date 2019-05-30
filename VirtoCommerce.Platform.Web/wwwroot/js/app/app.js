@@ -182,6 +182,24 @@ angular.module('platformWebApp', AppDependencies).controller('platformWebApp.app
             withCredentials: false
         };
     })
+    .config(['$provide', function ($provide) {
+        $provide.decorator('FileUploader', ['$delegate', 'platformWebApp.authDataStorage', function (FileUploader, authDataStorage) {
+            // inject auth header for all FileUploader instance
+            FileUploader.prototype._onAfterAddingFile = function (item) {
+                var authData = authDataStorage.getStoredData();
+                var authHeaders = authData ? { Authorization: 'Bearer ' + authData.token } : {};
+
+                if (item.headers) {
+                    angular.extend(item.headers, authHeaders);
+                } else {
+                    item.headers = authHeaders;
+                }
+
+                FileUploader.prototype.onAfterAddingFile(item);
+            }
+            return FileUploader;
+        }])
+    }])
     .config(['$stateProvider', '$httpProvider', 'uiSelectConfig', 'datepickerConfig', 'datepickerPopupConfig', 'tagsInputConfigProvider', '$compileProvider',
         function ($stateProvider, $httpProvider, uiSelectConfig, datepickerConfig, datepickerPopupConfig, tagsInputConfigProvider, $compileProvider) {
 
