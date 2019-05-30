@@ -24,10 +24,16 @@ angular.module('platformWebApp')
             }
 
             // transform to va-generic-value-input suitable structure
+            if (!setting.value && setting.defaultValue) {
+                setting.value = setting.defaultValue;
+            }
+
+            setting.isDictionary = _.any(setting.allowedValues);
             setting.values = setting.isDictionary ? [{ value: { id: setting.value, name: setting.value } }] : [{ id: setting.value, value: setting.value }];
+            
             if (setting.allowedValues) {
                 setting.allowedValues = _.map(setting.allowedValues, function (x) {
-                    return { value: x };
+                    return { id: x, name: x };
                 });
             }
         });
