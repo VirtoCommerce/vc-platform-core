@@ -72,7 +72,7 @@ angular.module("platformWebApp")
         var selectedSettings = _.where(settings, { isDictionary: true });
         _.forEach(selectedSettings, function (setting) {
             if (setting.allowedValues) {
-                setting.allowedValues = _.pluck(setting.allowedValues, 'value');
+                setting.allowedValues = _.pluck(setting.allowedValues, 'id');
             }
         });
     };

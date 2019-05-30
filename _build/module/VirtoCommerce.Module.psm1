@@ -8,7 +8,6 @@ function Compress-Module
 	$env:Path += ";C:\Program Files\nodejs\"
 
 	$InputDir = ""
-	$OutputDir = ""
 
 	if (Get-Module -ListAvailable -Name Get-Project) {
 		if ($ProjectName) {
@@ -42,11 +41,15 @@ function Compress-Module
 		$VCModuleId = (Select-Xml -Xml $xml -XPath "//module/id" | Select-Object -ExpandProperty Node).InnerText
 		$VCModuleVersion = (Select-Xml -Xml $xml -XPath "//module/version" | Select-Object -ExpandProperty Node).InnerText
 		$VCModuleZip = "$VCModuleId" + "_" + "$VCModuleVersion.zip"
+				
+		New-Item -ItemType Directory -Path "$OutputDir\$tmp"
 	
-		npm i
-	
-		npm run webpack:build
-	
+		if(Test-Path "$InputDir\package.json" -PathType Leaf) {	
+			npm i
+			
+			npm run webpack:build
+		}
+		
 		if(Test-Path "$InputDir\dist") {
 			Copy-Item "$InputDir\dist" -Destination "$OutputDir\$tmp\dist" -Recurse
 		}
