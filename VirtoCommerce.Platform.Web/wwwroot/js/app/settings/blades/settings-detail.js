@@ -70,6 +70,9 @@ angular.module('platformWebApp')
         var objects = _.flatten(_.map(blade.currentEntities, _.values));
         objects = _.map(objects, function (x) {
             x.value = x.isDictionary ? x.values[0].value.id : x.values[0].value;
+            if (x.defaultValue) {
+                x.defaultValue = x.value;
+            }
             return x;
         });
 
