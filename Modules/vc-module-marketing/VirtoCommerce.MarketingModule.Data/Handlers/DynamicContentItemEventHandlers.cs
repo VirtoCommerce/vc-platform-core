@@ -1,6 +1,7 @@
 using System.Threading.Tasks;
 using Hangfire;
 using VirtoCommerce.MarketingModule.Core.Events;
+using VirtoCommerce.MarketingModule.Core.Model;
 using VirtoCommerce.Platform.Core.Common;
 using VirtoCommerce.Platform.Core.DynamicProperties;
 using VirtoCommerce.Platform.Core.Events;
@@ -36,15 +37,17 @@ namespace VirtoCommerce.MarketingModule.Data.Handlers
         }
 
         [DisableConcurrentExecution(60 * 60 * 24)]
-        public void SaveDynamicPropertyValuesInBackground(IHasDynamicProperties entry)
+        public void SaveDynamicPropertyValuesInBackground(DynamicContentItem newEntry)
         {
-            _dynamicPropertyService.SaveDynamicPropertyValuesAsync(entry).GetAwaiter().GetResult();
+            var dynamicProperties = (IHasDynamicProperties)newEntry;
+            _dynamicPropertyService.SaveDynamicPropertyValuesAsync(dynamicProperties).GetAwaiter().GetResult();
         }
 
         [DisableConcurrentExecution(60 * 60 * 24)]
-        public void DeleteDynamicPropertyValuesInBackground(IHasDynamicProperties entry)
+        public void DeleteDynamicPropertyValuesInBackground(DynamicContentItem newEntry)
         {
-            _dynamicPropertyService.DeleteDynamicPropertyValuesAsync(entry).GetAwaiter().GetResult();
+            var dynamicProperties = (IHasDynamicProperties)newEntry;
+            _dynamicPropertyService.DeleteDynamicPropertyValuesAsync(dynamicProperties).GetAwaiter().GetResult();
         }
     }
 }
