@@ -60,7 +60,7 @@ namespace VirtoCommerce.TaxModule.Data.Services
 
                 criteria.Skip = criteria.Skip - tmpSkip;
                 criteria.Take = criteria.Take - tmpTake;
-                if (criteria.Take > 0)
+                if (criteria.Take > 0 && !criteria.WithoutTransient)
                 {
                     var transientProvidersQuery = AbstractTypeFactory<TaxProvider>.AllTypeInfos.Select(x => AbstractTypeFactory<TaxProvider>.TryCreateInstance(x.Type.Name))
                                                                                   .OfType<TaxProvider>().AsQueryable();
