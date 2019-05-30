@@ -352,7 +352,7 @@ namespace VirtoCommerce.PricingModule.Web.Controllers.Api
         [ProducesResponseType(typeof(void), 204)]
         [Route("api/pricing/filteredAssignments")]
         [Authorize(ModuleConstants.Security.Permissions.Delete)]
-        public async Task<IActionResult> DeleteFilteredAssignments([FromQuery]PricelistAssignmentsSearchCriteria criteria)
+        public async Task<ActionResult> DeleteFilteredAssignments([FromQuery]PricelistAssignmentsSearchCriteria criteria)
         {
             if (criteria == null)
             {
