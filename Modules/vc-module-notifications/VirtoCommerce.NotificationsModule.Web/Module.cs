@@ -11,6 +11,7 @@ using Microsoft.Extensions.Options;
 using VirtoCommerce.NotificationsModule.Core;
 using VirtoCommerce.NotificationsModule.Core.Model;
 using VirtoCommerce.NotificationsModule.Core.Services;
+using VirtoCommerce.NotificationsModule.Core.Types;
 using VirtoCommerce.NotificationsModule.Data.ExportImport;
 using VirtoCommerce.NotificationsModule.Data.Model;
 using VirtoCommerce.NotificationsModule.Data.Repositories;
@@ -114,6 +115,10 @@ namespace VirtoCommerce.NotificationsModule.Web
                     notificationMessageSenderProviderFactory.RegisterSenderForType<EmailNotification, SmtpEmailNotificationMessageSender>();
                     break;
             }
+
+            var registrar = appBuilder.ApplicationServices.GetService<INotificationRegistrar>();
+            registrar.RegisterNotification<ResetPasswordEmailNotification>();
+            registrar.RegisterNotification<ConfirmationEmailNotification>();
 
         }
 
