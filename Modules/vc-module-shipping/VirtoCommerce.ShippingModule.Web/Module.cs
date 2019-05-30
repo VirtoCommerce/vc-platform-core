@@ -1,4 +1,6 @@
 using System;
+using System.IO;
+using System.Threading.Tasks;
 using Microsoft.AspNetCore.Builder;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.EntityFrameworkCore;
@@ -6,22 +8,25 @@ using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Options;
 using VirtoCommerce.Platform.Core.Common;
+using VirtoCommerce.Platform.Core.ExportImport;
 using VirtoCommerce.Platform.Core.Modularity;
 using VirtoCommerce.Platform.Core.Settings;
 using VirtoCommerce.Platform.Data.Extensions;
 using VirtoCommerce.ShippingModule.Core;
 using VirtoCommerce.ShippingModule.Core.Services;
 using VirtoCommerce.ShippingModule.Data;
+using VirtoCommerce.ShippingModule.Data.ExportImport;
 using VirtoCommerce.ShippingModule.Data.Repositories;
 using VirtoCommerce.ShippingModule.Data.Services;
 using VirtoCommerce.ShippingModule.Web.JsonConverters;
 
 namespace VirtoCommerce.ShippingModule.Web
 {
-    public class Module : IModule
+    public class Module : IModule, IExportSupport, IImportSupport
     {
         public ManifestModuleInfo ModuleInfo { get; set; }
 
+        private IApplicationBuilder _appBuilder;
         public void Initialize(IServiceCollection serviceCollection)
         {
             var snapshot = serviceCollection.BuildServiceProvider();
@@ -34,10 +39,13 @@ namespace VirtoCommerce.ShippingModule.Web
             serviceCollection.AddSingleton<IShippingMethodsService, ShippingMethodsService>();
             serviceCollection.AddSingleton<IShippingMethodsRegistrar, ShippingMethodsService>();
             serviceCollection.AddSingleton<IShippingMethodsSearchService, ShippingMethodsSearchService>();
+            serviceCollection.AddSingleton<ShippingExportImport>();
         }
 
         public void PostInitialize(IApplicationBuilder applicationBuilder)
         {
+            _appBuilder = applicationBuilder;
+
             var settingsRegistrar = applicationBuilder.ApplicationServices.GetRequiredService<ISettingsRegistrar>();
             settingsRegistrar.RegisterSettings(ModuleConstants.Settings.AllSettings, ModuleInfo.Id);
             settingsRegistrar.RegisterSettingsForType(ModuleConstants.Settings.FixedRateShippingMethod.AllSettings, typeof(FixedRateShippingMethod).Name);
@@ -59,6 +67,18 @@ namespace VirtoCommerce.ShippingModule.Web
 
         public void Uninstall()
         {
+        }
+
+        public async Task ExportAsync(Stream outStream, ExportImportOptions options, Action<ExportImportProgressInfo> progressCallback,
+          ICancellationToken cancellationToken)
+        {
+            await _appBuilder.ApplicationServices.GetRequiredService<ShippingExportImport>().DoExportAsync(outStream, progressCallback, cancellationToken);
+        }
+
+        public async Task ImportAsync(Stream inputStream, ExportImportOptions options, Action<ExportImportProgressInfo> progressCallback,
+            ICancellationToken cancellationToken)
+        {
+            await _appBuilder.ApplicationServices.GetRequiredService<ShippingExportImport>().DoImportAsync(inputStream, progressCallback, cancellationToken);
         }
     }
 }

@@ -7,7 +7,7 @@
                     <legend>{{groupName==='undefined'?'General':groupName}}</legend>
                     <div class="list __info form-group" ng-repeat="data in blade.currentEntities[groupName]">
                         <label class="form-label">{{ 'settings.' + data.name + '.title' | translate }} <a href="" ng-click="editArray(data);" ng-if="data.isDictionary" class="form-edit"><i class="form-ico fa fa-pencil"></i></a></label>
-                        <va-generic-value-input ng-model="data" get-dictionary-values="getDictionaryValues" ng-if="!data.isDictionary"></va-generic-value-input>
+                        <va-generic-value-input ng-model="data" get-dictionary-values="getDictionaryValues" ></va-generic-value-input>
                         <div class="list-descr"> {{ 'settings.' + data.name + '.description' | translate }} </div>
                     </div>
                 </fieldset>

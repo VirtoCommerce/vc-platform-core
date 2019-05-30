@@ -1,4 +1,6 @@
 using System;
+using System.IO;
+using System.Threading.Tasks;
 using Microsoft.AspNetCore.Builder;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.EntityFrameworkCore;
@@ -6,11 +8,13 @@ using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Options;
 using VirtoCommerce.Platform.Core.Common;
+using VirtoCommerce.Platform.Core.ExportImport;
 using VirtoCommerce.Platform.Core.Modularity;
 using VirtoCommerce.Platform.Core.Settings;
 using VirtoCommerce.Platform.Data.Extensions;
 using VirtoCommerce.TaxModule.Core.Model;
 using VirtoCommerce.TaxModule.Core.Services;
+using VirtoCommerce.TaxModule.Data.ExportImport;
 using VirtoCommerce.TaxModule.Data.Provider;
 using VirtoCommerce.TaxModule.Data.Repositories;
 using VirtoCommerce.TaxModule.Data.Services;
@@ -18,10 +22,11 @@ using VirtoCommerce.TaxModule.Web.JsonConverters;
 
 namespace VirtoCommerce.TaxModule.Web
 {
-    public class Module : IModule
+    public class Module : IModule, IExportSupport, IImportSupport
     {
         public ManifestModuleInfo ModuleInfo { get; set; }
 
+        private IApplicationBuilder _appBuilder;
         public void Initialize(IServiceCollection serviceCollection)
         {
             var snapshot = serviceCollection.BuildServiceProvider();
@@ -34,10 +39,13 @@ namespace VirtoCommerce.TaxModule.Web
             serviceCollection.AddSingleton<ITaxProviderService, TaxProviderService>();
             serviceCollection.AddSingleton<ITaxProviderRegistrar, TaxProviderService>();
             serviceCollection.AddSingleton<ITaxProviderSearchService, TaxProviderSearchService>();
+            serviceCollection.AddSingleton<TaxExportImport>();
         }
 
         public void PostInitialize(IApplicationBuilder applicationBuilder)
         {
+            _appBuilder = applicationBuilder;
+
             var settingsRegistrar = applicationBuilder.ApplicationServices.GetRequiredService<ISettingsRegistrar>();
             settingsRegistrar.RegisterSettings(Core.ModuleConstants.Settings.AllSettings, ModuleInfo.Id);
 
@@ -61,5 +69,19 @@ namespace VirtoCommerce.TaxModule.Web
         public void Uninstall()
         {
         }
+
+
+        public async Task ExportAsync(Stream outStream, ExportImportOptions options, Action<ExportImportProgressInfo> progressCallback,
+            ICancellationToken cancellationToken)
+        {
+            await _appBuilder.ApplicationServices.GetRequiredService<TaxExportImport>().DoExportAsync(outStream, progressCallback, cancellationToken);
+        }
+
+        public async Task ImportAsync(Stream inputStream, ExportImportOptions options, Action<ExportImportProgressInfo> progressCallback,
+            ICancellationToken cancellationToken)
+        {
+            await _appBuilder.ApplicationServices.GetRequiredService<TaxExportImport>().DoImportAsync(inputStream, progressCallback, cancellationToken);
+        }
+
     }
 }
