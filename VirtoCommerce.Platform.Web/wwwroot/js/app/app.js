@@ -167,7 +167,6 @@ angular.module('platformWebApp', AppDependencies).controller('platformWebApp.app
     })
     .factory('fileUploaderOptions', function () {
         // do not add dynamic headers here, as the service is initialized once and no updates will be made
-        // for file uploads/downloads we use cookies, not Authorization header
         return {
             url: '/',
             alias: 'file',
@@ -188,13 +187,7 @@ angular.module('platformWebApp', AppDependencies).controller('platformWebApp.app
             FileUploader.prototype._onAfterAddingFile = function (item) {
                 var authData = authDataStorage.getStoredData();
                 var authHeaders = authData ? { Authorization: 'Bearer ' + authData.token } : {};
-
-                if (item.headers) {
-                    angular.extend(item.headers, authHeaders);
-                } else {
-                    item.headers = authHeaders;
-                }
-
+                item.headers = angular.extend({}, item.headers, authHeaders);
                 FileUploader.prototype.onAfterAddingFile(item);
             }
             return FileUploader;

@@ -1,4 +1,6 @@
 using System;
+using System.IO;
+using System.Threading.Tasks;
 using Microsoft.AspNetCore.Builder;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.EntityFrameworkCore;
@@ -8,19 +10,22 @@ using Microsoft.Extensions.Options;
 using VirtoCommerce.PaymentModule.Core;
 using VirtoCommerce.PaymentModule.Core.Services;
 using VirtoCommerce.PaymentModule.Data;
+using VirtoCommerce.PaymentModule.Data.ExportImport;
 using VirtoCommerce.PaymentModule.Data.Repositories;
 using VirtoCommerce.PaymentModule.Data.Services;
 using VirtoCommerce.PaymentModule.Web.JsonConverters;
 using VirtoCommerce.Platform.Core.Common;
+using VirtoCommerce.Platform.Core.ExportImport;
 using VirtoCommerce.Platform.Core.Modularity;
 using VirtoCommerce.Platform.Core.Settings;
 using VirtoCommerce.Platform.Data.Extensions;
 
 namespace VirtoCommerce.PaymentModule.Web
 {
-    public class Module : IModule
+    public class Module : IModule, IExportSupport, IImportSupport
     {
         public ManifestModuleInfo ModuleInfo { get; set; }
+        private IApplicationBuilder _appBuilder;
 
         public void Initialize(IServiceCollection serviceCollection)
         {
@@ -34,21 +39,24 @@ namespace VirtoCommerce.PaymentModule.Web
             serviceCollection.AddSingleton<IPaymentMethodsService, PaymentMethodsService>();
             serviceCollection.AddSingleton<IPaymentMethodsRegistrar, PaymentMethodsService>();
             serviceCollection.AddSingleton<IPaymentMethodsSearchService, PaymentMethodsSearchService>();
+            serviceCollection.AddSingleton<PaymentExportImport>();
         }
 
-        public void PostInitialize(IApplicationBuilder applicationBuilder)
+        public void PostInitialize(IApplicationBuilder appBuilder)
         {
-            var settingsRegistrar = applicationBuilder.ApplicationServices.GetRequiredService<ISettingsRegistrar>();
+            _appBuilder = appBuilder;
+
+            var settingsRegistrar = appBuilder.ApplicationServices.GetRequiredService<ISettingsRegistrar>();
             settingsRegistrar.RegisterSettings(ModuleConstants.Settings.AllSettings, ModuleInfo.Id);
 
-            var paymentMethodsRegistrar = applicationBuilder.ApplicationServices.GetRequiredService<IPaymentMethodsRegistrar>();
+            var paymentMethodsRegistrar = appBuilder.ApplicationServices.GetRequiredService<IPaymentMethodsRegistrar>();
             paymentMethodsRegistrar.RegisterPaymentMethod<DefaultManualPaymentMethod>();
             settingsRegistrar.RegisterSettingsForType(Core.ModuleConstants.Settings.DefaultManualPaymentMethod.AllSettings, typeof(DefaultManualPaymentMethod).Name);
 
-            var mvcJsonOptions = applicationBuilder.ApplicationServices.GetService<IOptions<MvcJsonOptions>>();
+            var mvcJsonOptions = appBuilder.ApplicationServices.GetService<IOptions<MvcJsonOptions>>();
             mvcJsonOptions.Value.SerializerSettings.Converters.Add(new PolymorphicJsonConverter(paymentMethodsRegistrar));
 
-            using (var serviceScope = applicationBuilder.ApplicationServices.CreateScope())
+            using (var serviceScope = appBuilder.ApplicationServices.CreateScope())
             {
                 var dbContext = serviceScope.ServiceProvider.GetRequiredService<PaymentDbContext>();
                 dbContext.Database.MigrateIfNotApplied(MigrationName.GetUpdateV2MigrationName(ModuleInfo.Id));
@@ -59,6 +67,20 @@ namespace VirtoCommerce.PaymentModule.Web
 
         public void Uninstall()
         {
+        }
+
+        public async Task ExportAsync(Stream outStream, ExportImportOptions options, Action<ExportImportProgressInfo> progressCallback,
+            ICancellationToken cancellationToken)
+        {
+            await _appBuilder.ApplicationServices.GetRequiredService<PaymentExportImport>().DoExportAsync(outStream,
+                progressCallback, cancellationToken);
+        }
+
+        public async Task ImportAsync(Stream inputStream, ExportImportOptions options, Action<ExportImportProgressInfo> progressCallback,
+            ICancellationToken cancellationToken)
+        {
+            await _appBuilder.ApplicationServices.GetRequiredService<PaymentExportImport>().DoImportAsync(inputStream,
+                progressCallback, cancellationToken);
         }
     }
 }
