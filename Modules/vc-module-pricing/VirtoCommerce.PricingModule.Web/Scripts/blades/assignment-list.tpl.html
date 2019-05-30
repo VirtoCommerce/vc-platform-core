@@ -1,5 +1,16 @@
-﻿<div class="blade-static __bottom" ng-if="pageSettings.itemsPerPageCount < pageSettings.totalItems" ng-include="'pagerTemplate.html'"></div>
-<div class="blade-content __medium-wide">
+<div class="blade-static">
+    <div class="form-group">
+        <div class="form-input __search">
+            <input placeholder="{{ 'platform.placeholders.search-keyword' | translate }}" ng-model="filter.keyword" ng-keyup="$event.which === 13 && filter.criteriaChanged()">
+            <button class="btn __other" style="position: relative;right: 45px;">
+                <em class="btn-ico fa fa-remove" title="Clear" ng-click="filter.keyword=null;filter.criteriaChanged()"></em>
+            </button>
+        </div>
+        <p class="form-count">{{ 'platform.list.count' | translate }}: <span class="count">{{pageSettings.totalItems | number:0}}</span></p>
+    </div>
+</div>
+<div class="blade-static __bottom" ng-if="pageSettings.itemsPerPageCount < pageSettings.totalItems" ng-include="'pagerTemplate.html'"></div>
+<div class="blade-content __xlarge-wide">
     <div class="blade-inner">
         <div class="inner-block" ng-init="setGridOptions({
                     data: 'blade.currentEntities',
@@ -12,6 +23,8 @@
                         { name: 'pricelist.name', displayName: 'pricing.blades.assignment-list.labels.pricelist' },
                         { name: 'pricelist.currency', displayName: 'pricing.blades.assignment-list.labels.pricelist-currency' },
                         { name: 'priority', displayName: 'pricing.blades.assignment-list.labels.priority', width: 72, sort: { direction: uiGridConstants.DESC } },
+                        { name: 'startDate', displayName: 'pricing.blades.assignment-list.labels.activation', width: 87 },
+                        { name: 'endDate', displayName: 'pricing.blades.assignment-list.labels.expiration', width: 87 },
                         { name: 'modifiedDate', displayName: 'pricing.blades.assignment-list.labels.last-modified', width: 87 },
                         { name: 'modifiedBy', displayName: 'pricing.blades.assignment-list.labels.modified-by', width: 87, headerTooltip: true }
                     ]})">

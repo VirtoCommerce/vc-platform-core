@@ -345,6 +345,39 @@ namespace VirtoCommerce.PricingModule.Web.Controllers.Api
         /// <summary>
         /// Delete pricelist assignments
         /// </summary>
+        /// <remarks>Delete pricelist assignments by given criteria.</remarks>
+        /// <param name="criteria">Filter criteria</param>
+        /// <todo>Return no any reason if can't update</todo>
+        [HttpDelete]
+        [ProducesResponseType(typeof(void), 204)]
+        [Route("api/pricing/filteredAssignments")]
+        [Authorize(ModuleConstants.Security.Permissions.Delete)]
+        public async Task<IActionResult> DeleteFilteredAssignments([FromQuery]PricelistAssignmentsSearchCriteria criteria)
+        {
+            if (criteria == null)
+            {
+                criteria = new PricelistAssignmentsSearchCriteria();
+            }
+
+            var result = await _pricingSearchService.SearchPricelistAssignmentsAsync(criteria);
+
+            var pricelistAssignmentsIds = result.Results.Select(x => x.Id);
+            const int BATCH_SIZE = 20;
+            var skip = 0;
+            IEnumerable<string> batch;
+            while ((batch = pricelistAssignmentsIds.Skip(skip).Take(BATCH_SIZE)).Count() > 0)
+            {
+                await _pricingService.DeletePricelistsAssignmentsAsync(batch.ToArray());
+
+                skip += BATCH_SIZE;
+            }
+
+            return NoContent();
+        }
+
+        /// <summary>
+        /// Delete pricelist assignments
+        /// </summary>
         /// <remarks>Delete pricelist assignment by given array of ids.</remarks>
         /// <param name="ids">An array of pricelist assignment ids</param>
         /// <todo>Return no any reason if can't update</todo>
