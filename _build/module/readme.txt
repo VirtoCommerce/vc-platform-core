@@ -6,3 +6,5 @@ Please use with windows powershell only.
 2. Change current directory to _build\module
 3. Run ./init.ps1 for load build module to execution context
 4. Run Compress-Module "<path-to-module-with-web>" "<artifact-path>". Artifact path argument is optional
+
+If you want to buld all modules at once please run build-all-modules.cmd with optional parameter <path-to-artifact-directory> (where will be placed builded and packed modules)
