@@ -103,13 +103,40 @@ Our development efforts were focused on moving to ASP.NET Core, performance, arc
 -  ~~**VirtoCommerce.Cache**~~
 - ~~**VirtoCommerce.DynamicExpressions**~~
 
-**Whats next**:
+**Next steps**:
 - Implement cache synchronization logic between multiple platform instances use `Redis` cache for this purposes 
 - Resource based authorization (scope bounded permissions)
+- Move projects of modules to GitHub repostiories
 - Remaining modules
     - ElasticSearch
     - AzureSearch
     
+# Getting started:
+## Precompiled binary getting started
+- Download archive with platform precompiled version (VirtoCommerce.Platform.3.0.0.beta.zip
+)[https://github.com/VirtoCommerce/vc-platform-core/releases/tag/v3.0.0.beta]
+- Unpack follow zip to local disk to path `C:\vc-platform-3`. In result you should get the folder which contains platform precompiled code. 
+- Run platform by command `dotnet.exe C:\vc-platform-3\VirtoCommerce.Platform.Web.dll`
+- Open in your browser follow url `https://localhost:5001` in the warning for not private connections that appears click advanced and continue work.
+- On the first request the application will create and initialize database. After that you should see the sign in page. Use the following credentials: `admin/store`
+
+## Source code  getting started
+   - Get the latest source code from `master` branch
+   - Make a symlink for Modules folder 
+   ```cmd 
+   mklink /d C:\vc-platform-3\VirtoCommerce.Platform.Web\Modules C:\vc-platform-3\Modules
+   ```
+   - Open and compile platform solution `VirtoCommerce.Platform.sln` in any preffered IDE
+   - Install Node.js dependencies. 
+   ```
+   npm install
+   ```
+   - build and pack js scripts and css for platform 
+   ```
+   npm run webpack:dev
+   ```
+   - repeat previous command for each module in `Modules` folder
+   
 # License
 Copyright (c) Virto Solutions LTD.  All rights reserved.
 
