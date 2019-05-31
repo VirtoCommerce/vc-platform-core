@@ -10,7 +10,7 @@ using VirtoCommerce.CartModule.Data.Repositories;
 namespace VirtoCommerce.CartModule.Data.Migrations
 {
     [DbContext(typeof(CartDbContext))]
-    [Migration("20190410111538_InitialCart")]
+    [Migration("20190530172311_InitialCart")]
     partial class InitialCart
     {
         protected override void BuildTargetModel(ModelBuilder modelBuilder)
@@ -641,17 +641,17 @@ namespace VirtoCommerce.CartModule.Data.Migrations
                     b.HasOne("VirtoCommerce.CartModule.Data.Model.PaymentEntity", "Payment")
                         .WithMany("Addresses")
                         .HasForeignKey("PaymentId")
-                        .OnDelete(DeleteBehavior.Restrict);
+                        .OnDelete(DeleteBehavior.Cascade);
 
                     b.HasOne("VirtoCommerce.CartModule.Data.Model.ShipmentEntity", "Shipment")
                         .WithMany("Addresses")
                         .HasForeignKey("ShipmentId")
-                        .OnDelete(DeleteBehavior.Restrict);
+                        .OnDelete(DeleteBehavior.Cascade);
 
                     b.HasOne("VirtoCommerce.CartModule.Data.Model.ShoppingCartEntity", "ShoppingCart")
                         .WithMany("Addresses")
                         .HasForeignKey("ShoppingCartId")
-                        .OnDelete(DeleteBehavior.Restrict);
+                        .OnDelete(DeleteBehavior.Cascade);
                 });
 
             modelBuilder.Entity("VirtoCommerce.CartModule.Data.Model.CouponEntity", b =>
@@ -667,22 +667,22 @@ namespace VirtoCommerce.CartModule.Data.Migrations
                     b.HasOne("VirtoCommerce.CartModule.Data.Model.LineItemEntity", "LineItem")
                         .WithMany("Discounts")
                         .HasForeignKey("LineItemId")
-                        .OnDelete(DeleteBehavior.Restrict);
+                        .OnDelete(DeleteBehavior.Cascade);
 
                     b.HasOne("VirtoCommerce.CartModule.Data.Model.PaymentEntity", "Payment")
                         .WithMany("Discounts")
                         .HasForeignKey("PaymentId")
-                        .OnDelete(DeleteBehavior.Restrict);
+                        .OnDelete(DeleteBehavior.Cascade);
 
                     b.HasOne("VirtoCommerce.CartModule.Data.Model.ShipmentEntity", "Shipment")
                         .WithMany("Discounts")
                         .HasForeignKey("ShipmentId")
-                        .OnDelete(DeleteBehavior.Restrict);
+                        .OnDelete(DeleteBehavior.Cascade);
 
                     b.HasOne("VirtoCommerce.CartModule.Data.Model.ShoppingCartEntity", "ShoppingCart")
                         .WithMany("Discounts")
                         .HasForeignKey("ShoppingCartId")
-                        .OnDelete(DeleteBehavior.Restrict);
+                        .OnDelete(DeleteBehavior.Cascade);
                 });
 
             modelBuilder.Entity("VirtoCommerce.CartModule.Data.Model.LineItemEntity", b =>
@@ -719,7 +719,7 @@ namespace VirtoCommerce.CartModule.Data.Migrations
                     b.HasOne("VirtoCommerce.CartModule.Data.Model.ShipmentEntity", "Shipment")
                         .WithMany("Items")
                         .HasForeignKey("ShipmentId")
-                        .OnDelete(DeleteBehavior.Restrict);
+                        .OnDelete(DeleteBehavior.Cascade);
                 });
 
             modelBuilder.Entity("VirtoCommerce.CartModule.Data.Model.TaxDetailEntity", b =>
@@ -732,17 +732,17 @@ namespace VirtoCommerce.CartModule.Data.Migrations
                     b.HasOne("VirtoCommerce.CartModule.Data.Model.PaymentEntity", "Payment")
                         .WithMany("TaxDetails")
                         .HasForeignKey("PaymentId")
-                        .OnDelete(DeleteBehavior.Restrict);
+                        .OnDelete(DeleteBehavior.Cascade);
 
                     b.HasOne("VirtoCommerce.CartModule.Data.Model.ShipmentEntity", "Shipment")
                         .WithMany("TaxDetails")
                         .HasForeignKey("ShipmentId")
-                        .OnDelete(DeleteBehavior.Restrict);
+                        .OnDelete(DeleteBehavior.Cascade);
 
                     b.HasOne("VirtoCommerce.CartModule.Data.Model.ShoppingCartEntity", "ShoppingCart")
                         .WithMany("TaxDetails")
                         .HasForeignKey("ShoppingCartId")
-                        .OnDelete(DeleteBehavior.Restrict);
+                        .OnDelete(DeleteBehavior.Cascade);
                 });
 #pragma warning restore 612, 618
         }

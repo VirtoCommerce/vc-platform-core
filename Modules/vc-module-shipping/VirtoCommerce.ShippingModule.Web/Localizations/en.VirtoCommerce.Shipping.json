@@ -51,5 +51,10 @@
                 "description": "Fixed Ground shipping rate"
             }
         }
+    },
+    "module": {
+        "VirtoCommerce.Shipping": {
+            "description": "Export/Import shipping methods settings"
+        }
     }
 }

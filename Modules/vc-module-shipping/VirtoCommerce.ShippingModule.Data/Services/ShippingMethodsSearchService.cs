@@ -74,7 +74,7 @@ namespace VirtoCommerce.ShippingModule.Data.Services
                 tmpTake = Math.Min(criteria.Take, Math.Max(0, result.TotalCount - criteria.Skip));
                 criteria.Skip = criteria.Skip - tmpSkip;
                 criteria.Take = criteria.Take - tmpTake;
-                if (criteria.Take > 0)
+                if (criteria.Take > 0 && !criteria.WithoutTransient)
                 {
                     var transientMethodsQuery = AbstractTypeFactory<ShippingMethod>.AllTypeInfos.Select(x => AbstractTypeFactory<ShippingMethod>.TryCreateInstance(x.Type.Name))
                                                                                   .OfType<ShippingMethod>().AsQueryable();

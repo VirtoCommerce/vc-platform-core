@@ -53,5 +53,10 @@
                 "description": "Payment method logo url"
             }
         }
-    }
+    },
+    "module": {
+        "VirtoCommerce.Payment": {
+            "description": "Export/Import payment methods"
+        } 
+    } 
 }

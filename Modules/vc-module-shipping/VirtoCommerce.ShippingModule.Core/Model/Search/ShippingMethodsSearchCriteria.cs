@@ -12,5 +12,8 @@ namespace VirtoCommerce.ShippingModule.Core.Model.Search
         public bool? IsActive { get; set; }
 
         public string TaxType { get; set; }
+
+        //Search only within methods that have changes and persisted
+        public bool WithoutTransient { get; set; } = false;
     }
 }
