@@ -24,16 +24,10 @@ angular.module('platformWebApp')
             }
 
             // transform to va-generic-value-input suitable structure
-            if (!setting.value && setting.defaultValue) {
-                setting.value = setting.defaultValue;
-            }
-
-            setting.isDictionary = _.any(setting.allowedValues);
             setting.values = setting.isDictionary ? [{ value: { id: setting.value, name: setting.value } }] : [{ id: setting.value, value: setting.value }];
-            
             if (setting.allowedValues) {
                 setting.allowedValues = _.map(setting.allowedValues, function (x) {
-                    return { id: x, name: x };
+                    return { value: x };
                 });
             }
         });
@@ -70,9 +64,6 @@ angular.module('platformWebApp')
         var objects = _.flatten(_.map(blade.currentEntities, _.values));
         objects = _.map(objects, function (x) {
             x.value = x.isDictionary ? x.values[0].value.id : x.values[0].value;
-            if (x.defaultValue) {
-                x.defaultValue = x.value;
-            }
             return x;
         });
 
