@@ -1,4 +1,4 @@
-# Meet the new  major version of  Virto Commerce platform 3.0
+# Meet the new 3.0 major version of Virto Commerce platform 
 Our development efforts were focused on moving to ASP.NET Core, performance, architecture improvements, further enhancements and fixing arhitectural bugs. 
 
 ## What were our objective when starting development project on VC platform v3? 
