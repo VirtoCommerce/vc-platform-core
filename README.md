@@ -12,7 +12,7 @@ Our development efforts were focused on moving to ASP.NET Core, performance, arc
 - *We inspire you to try and investigate the new version of the system and give us your feedback*
 - *This is a beta release, which hasn't been verified on a production project yet*
 - *We have delivered a simple migration from 2.x version by preserving complete backward compatibility for API and Database schema, while you need for additional efforts in case there are custom changes in your current 2.X system. Please follow our migration guide during the migration project*
-- *We cannot guarantee the backward compatibility of current the beta version with the final 3.X release*
+- **_We cannot guarantee the backward compatibility of current the beta version with the final 3.X release_**
 
 ## These Virto Commerce Release Notes below are a subset of the larger list of changes in migration to ASP.NET Core. 
 
@@ -136,6 +136,20 @@ Our development efforts were focused on moving to ASP.NET Core, performance, arc
    ```
    - repeat previous command for each module in `Modules` folder
    
+   
+## Run [storefront](https://github.com/VirtoCommerce/vc-storefront-core) with new platform version
+- Deploy  the latest storefront version from `dev` branch by any of preffered way described there https://virtocommerce.com/docs/vc2devguide/deployment/storefront-deployment
+- Make changes  in  `appsettings.json`    
+```json
+...
+//Comment the follow settings
+// "AppId": "...",
+// "SecretKey": "..."
+...
+//Uncomment the follow settings
+"UserName": "admin",
+"Password": "store"
+```    
 # License
 Copyright (c) Virto Solutions LTD.  All rights reserved.
 
