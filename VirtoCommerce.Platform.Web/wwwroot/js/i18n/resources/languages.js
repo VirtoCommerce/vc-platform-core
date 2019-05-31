@@ -1,4 +1,4 @@
-﻿// Full list of languages defined by ISO 639-1
+// Full list of languages defined by ISO 639-1
 // based on https://en.wikipedia.org/wiki/List_of_ISO_639-1_codes
 angular.module('platformWebApp')
 .factory('platformWebApp.common.languages', function () {
@@ -151,7 +151,7 @@ angular.module('platformWebApp')
       { id: "rm", name: "Romansh", nativeName: "rumantsch grischun" },
       { id: "rn", name: "Kirundi", nativeName: "kiRundi" },
       { id: "ro", name: "Romanian, Moldavian, Moldovan", nativeName: "română" },
-      { id: "ru", name: "Russian", nativeName: "русский язык" },
+      { id: "ru", name: "Russian", nativeName: "Русский язык" },
       { id: "sa", name: "Sanskrit (Saṁskṛta)", nativeName: "संस्कृतम्" },
       { id: "sc", name: "Sardinian", nativeName: "sardu" },
       { id: "sd", name: "Sindhi", nativeName: "सिन्धी, سنڌي، سندھی‎" },
