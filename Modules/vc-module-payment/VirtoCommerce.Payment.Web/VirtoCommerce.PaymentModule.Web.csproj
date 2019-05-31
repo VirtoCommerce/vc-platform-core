@@ -1,8 +1,10 @@
-﻿<Project Sdk="Microsoft.NET.Sdk">
+<Project Sdk="Microsoft.NET.Sdk">
 
     <PropertyGroup>
         <TargetFramework>netcoreapp2.2</TargetFramework>
         <GenerateDocumentationFile>true</GenerateDocumentationFile>
+        <AssemblyVersion>3.0.0.0</AssemblyVersion>
+        <Version>3.0.0</Version>
     </PropertyGroup>
 
     <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Debug|AnyCPU'">
@@ -10,9 +12,9 @@
     </PropertyGroup>
 
     <ItemGroup>
-      <Compile Remove="node_modules\**" />
-      <EmbeddedResource Remove="node_modules\**" />
-      <None Remove="node_modules\**" />
+        <Compile Remove="node_modules\**" />
+        <EmbeddedResource Remove="node_modules\**" />
+        <None Remove="node_modules\**" />
     </ItemGroup>
 
     <ItemGroup>
@@ -22,10 +24,10 @@
     </ItemGroup>
 
     <ItemGroup>
-      <ProjectReference Include="..\..\..\VirtoCommerce.Platform.Core\VirtoCommerce.Platform.Core.csproj" />
-      <ProjectReference Include="..\VirtoCommerce.Payment.Core\VirtoCommerce.PaymentModule.Core.csproj" />
-      <ProjectReference Include="..\VirtoCommerce.Payment.Data\VirtoCommerce.PaymentModule.Data.csproj" />
+        <ProjectReference Include="..\..\..\VirtoCommerce.Platform.Core\VirtoCommerce.Platform.Core.csproj" />
+        <ProjectReference Include="..\VirtoCommerce.Payment.Core\VirtoCommerce.PaymentModule.Core.csproj" />
+        <ProjectReference Include="..\VirtoCommerce.Payment.Data\VirtoCommerce.PaymentModule.Data.csproj" />
     </ItemGroup>
 
-    
+
 </Project>

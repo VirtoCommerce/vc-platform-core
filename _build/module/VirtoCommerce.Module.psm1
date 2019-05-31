@@ -57,6 +57,14 @@ function Compress-Module
 		if(Test-Path "$InputDir\Localizations") {
 			Copy-Item "$InputDir\Localizations" -Destination "$OutputDir\$tmp\Localizations" -Recurse
 		}
+		
+		if(Test-Path "$InputDir\Scripts") {
+			Copy-Item "$InputDir\Scripts" -Destination "$OutputDir\$tmp\Scripts" -Recurse
+		}
+		
+		if(Test-Path "$InputDir\Content") {
+			Copy-Item "$InputDir\Content" -Destination "$OutputDir\$tmp\Content" -Recurse
+		}
 	
 		Copy-Item "$InputDir\module.manifest" -Destination "$OutputDir\$tmp"
 	
@@ -70,8 +78,12 @@ function Compress-Module
 	
 		$platformDlls = 
 "AspNet.Security.OAuth.Validation.dll",
+"CoContra.dll",
+"Dapper.dll",
+"EntityFrameworkCore.TypedOriginalValues.dll",
 "EntityFrameworkCore.Triggers.dll", 
 "Hangfire.AspNetCore.dll",
+"Hangfire.Core.dll",
 "Hangfire.MemoryStorage.dll",
 "HangFire.SqlServer.dll",
 "Microsoft.AspNetCore.dll", 
@@ -92,10 +104,12 @@ function Compress-Module
 "Microsoft.AspNetCore.SignalR.dll", 
 "Microsoft.AspNetCore.SignalR.Client.dll", 
 "Microsoft.AspNetCore.SignalR.Core.dll",
+"Microsoft.AspNetCore.SignalR.Client.Core.dll",
 "Microsoft.EntityFrameworkCore.dll", 
 "Microsoft.EntityFrameworkCore.Design.dll", 
 "Microsoft.EntityFrameworkCore.Relational.dll",
 "Microsoft.EntityFrameworkCore.SqlServer.dll", 
+"Microsoft.EntityFrameworkCore.Abstractions.dll",
 "Microsoft.Net.Http.Headers.dll", 
 "Microsoft.AspNetCore.Mvc.Core.dll", 
 "Microsoft.Extensions.Logging.Abstractions.dll",
@@ -103,6 +117,7 @@ function Compress-Module
 "Microsoft.AspNetCore.Identity.dll",
 "Microsoft.AspNetCore.Identity.EntityFrameworkCore.dll",
 "Microsoft.EntityFrameworkCore.Design.dll",
+"Microsoft.AspNetCore.Http.Connections.Client.dll",
 "Newtonsoft.Json.dll", 
 "OpenIddict.dll",
 "OpenIddict.EntityFrameworkCore.dll",
@@ -110,6 +125,7 @@ function Compress-Module
 "Serialize.Linq.dll", 
 "Swashbuckle.AspNetCore.dll",
 "System.Security.Cryptography.Algorithms.dll",
+"System.Interactive.Async.dll",
 "VirtoCommerce.Smidge.dll",
 "VirtoCommerce.Smidge.Nuglify.dll",
 "WindowsAzure.Storage.dll"

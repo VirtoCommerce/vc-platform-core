@@ -1,6 +1,6 @@
 using VirtoCommerce.NotificationsModule.Core.Model;
 
-namespace VirtoCommerce.NotificationsModule.Tests.NotificationTypes
+namespace VirtoCommerce.Notifications.Core.Types
 {
     public class TwoFactorEmailNotification : EmailNotification
     {
