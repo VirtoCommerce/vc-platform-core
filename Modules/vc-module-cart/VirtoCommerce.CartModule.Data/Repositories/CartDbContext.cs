@@ -46,18 +46,18 @@ namespace VirtoCommerce.CartModule.Data.Repositories
             modelBuilder.Entity<ShipmentItemEntity>().HasOne(x => x.LineItem).WithMany()
                         .HasForeignKey(x => x.LineItemId).IsRequired().OnDelete(DeleteBehavior.Cascade);
             modelBuilder.Entity<ShipmentItemEntity>().HasOne(x => x.Shipment).WithMany(x => x.Items)
-                        .HasForeignKey(x => x.ShipmentId).IsRequired().OnDelete(DeleteBehavior.Restrict);
+                        .HasForeignKey(x => x.ShipmentId).IsRequired().OnDelete(DeleteBehavior.Cascade);
             #endregion
 
             #region Address
             modelBuilder.Entity<AddressEntity>().ToTable("CartAddress").HasKey(x => x.Id);
             modelBuilder.Entity<AddressEntity>().Property(x => x.Id).HasMaxLength(128);
             modelBuilder.Entity<AddressEntity>().HasOne(x => x.ShoppingCart).WithMany(x => x.Addresses)
-                        .HasForeignKey(x => x.ShoppingCartId).OnDelete(DeleteBehavior.Restrict);
+                        .HasForeignKey(x => x.ShoppingCartId).OnDelete(DeleteBehavior.Cascade);
             modelBuilder.Entity<AddressEntity>().HasOne(x => x.Shipment).WithMany(x => x.Addresses)
-                        .HasForeignKey(x => x.ShipmentId).OnDelete(DeleteBehavior.Restrict);
+                        .HasForeignKey(x => x.ShipmentId).OnDelete(DeleteBehavior.Cascade);
             modelBuilder.Entity<AddressEntity>().HasOne(x => x.Payment).WithMany(x => x.Addresses)
-                        .HasForeignKey(x => x.PaymentId).OnDelete(DeleteBehavior.Restrict);
+                        .HasForeignKey(x => x.PaymentId).OnDelete(DeleteBehavior.Cascade);
 
             modelBuilder.Entity<AddressEntity>().ToTable("CartAddress");
             #endregion
@@ -77,26 +77,26 @@ namespace VirtoCommerce.CartModule.Data.Repositories
             modelBuilder.Entity<TaxDetailEntity>().ToTable("CartTaxDetail").HasKey(x => x.Id);
             modelBuilder.Entity<TaxDetailEntity>().Property(x => x.Id).HasMaxLength(128);
             modelBuilder.Entity<TaxDetailEntity>().HasOne(x => x.ShoppingCart).WithMany(x => x.TaxDetails)
-                        .HasForeignKey(x => x.ShoppingCartId).OnDelete(DeleteBehavior.Restrict);
+                        .HasForeignKey(x => x.ShoppingCartId).OnDelete(DeleteBehavior.Cascade);
             modelBuilder.Entity<TaxDetailEntity>().HasOne(x => x.Shipment).WithMany(x => x.TaxDetails)
-                        .HasForeignKey(x => x.ShipmentId).OnDelete(DeleteBehavior.Restrict);
+                        .HasForeignKey(x => x.ShipmentId).OnDelete(DeleteBehavior.Cascade);
             modelBuilder.Entity<TaxDetailEntity>().HasOne(x => x.LineItem).WithMany(x => x.TaxDetails)
                         .HasForeignKey(x => x.LineItemId).OnDelete(DeleteBehavior.Cascade);
             modelBuilder.Entity<TaxDetailEntity>().HasOne(x => x.Payment).WithMany(x => x.TaxDetails)
-                        .HasForeignKey(x => x.PaymentId).OnDelete(DeleteBehavior.Restrict);
+                        .HasForeignKey(x => x.PaymentId).OnDelete(DeleteBehavior.Cascade);
             #endregion
 
             #region Discount
             modelBuilder.Entity<DiscountEntity>().ToTable("CartDiscount").HasKey(x => x.Id);
             modelBuilder.Entity<DiscountEntity>().Property(x => x.Id).HasMaxLength(128);
             modelBuilder.Entity<DiscountEntity>().HasOne(x => x.ShoppingCart).WithMany(x => x.Discounts)
-                        .HasForeignKey(x => x.ShoppingCartId).OnDelete(DeleteBehavior.Restrict);
+                        .HasForeignKey(x => x.ShoppingCartId).OnDelete(DeleteBehavior.Cascade);
             modelBuilder.Entity<DiscountEntity>().HasOne(x => x.Shipment).WithMany(x => x.Discounts)
-                        .HasForeignKey(x => x.ShipmentId).OnDelete(DeleteBehavior.Restrict);
+                        .HasForeignKey(x => x.ShipmentId).OnDelete(DeleteBehavior.Cascade);
             modelBuilder.Entity<DiscountEntity>().HasOne(x => x.LineItem).WithMany(x => x.Discounts)
-                        .HasForeignKey(x => x.LineItemId).OnDelete(DeleteBehavior.Restrict);
+                        .HasForeignKey(x => x.LineItemId).OnDelete(DeleteBehavior.Cascade);
             modelBuilder.Entity<DiscountEntity>().HasOne(x => x.Payment).WithMany(x => x.Discounts)
-                        .HasForeignKey(x => x.PaymentId).OnDelete(DeleteBehavior.Restrict);
+                        .HasForeignKey(x => x.PaymentId).OnDelete(DeleteBehavior.Cascade);
             #endregion
 
             #region Coupons

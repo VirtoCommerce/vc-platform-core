@@ -10,5 +10,8 @@ namespace VirtoCommerce.PaymentModule.Core.Model.Search
         public IList<string> Codes { get; set; } = new List<string>();
 
         public bool? IsActive { get; set; }
+
+        //Search only within tax providers that have changes and persisted
+        public bool WithoutTransient { get; set; } = false;
     }
 }

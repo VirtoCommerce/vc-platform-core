@@ -1,4 +1,4 @@
-﻿using System;
+using System;
 using Microsoft.EntityFrameworkCore.Migrations;
 
 namespace VirtoCommerce.OrdersModule.Data.Migrations
@@ -286,7 +286,7 @@ namespace VirtoCommerce.OrdersModule.Data.Migrations
                         column: x => x.CustomerOrderId,
                         principalTable: "CustomerOrder",
                         principalColumn: "Id",
-                        onDelete: ReferentialAction.Cascade);
+                        onDelete: ReferentialAction.Restrict);
                     table.ForeignKey(
                         name: "FK_OrderAddress_OrderPaymentIn_PaymentInId",
                         column: x => x.PaymentInId,
@@ -326,7 +326,7 @@ namespace VirtoCommerce.OrdersModule.Data.Migrations
                         column: x => x.CustomerOrderId,
                         principalTable: "CustomerOrder",
                         principalColumn: "Id",
-                        onDelete: ReferentialAction.Cascade);
+                        onDelete: ReferentialAction.Restrict);
                     table.ForeignKey(
                         name: "FK_OrderDiscount_OrderLineItem_LineItemId",
                         column: x => x.LineItemId,
@@ -447,7 +447,7 @@ namespace VirtoCommerce.OrdersModule.Data.Migrations
                         column: x => x.LineItemId,
                         principalTable: "OrderLineItem",
                         principalColumn: "Id",
-                        onDelete: ReferentialAction.Cascade);
+                        onDelete: ReferentialAction.Restrict);
                     table.ForeignKey(
                         name: "FK_OrderShipmentItem_OrderShipment_ShipmentId",
                         column: x => x.ShipmentId,

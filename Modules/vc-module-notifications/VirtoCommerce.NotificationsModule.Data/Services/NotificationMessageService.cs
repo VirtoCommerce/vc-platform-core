@@ -77,7 +77,7 @@ namespace VirtoCommerce.NotificationsModule.Data.Services
                 throw new ArgumentNullException(nameof(messages));
             }
 
-            var validator = new NotificationMessageValidator();
+            var validator = AbstractTypeFactory<NotificationMessageValidator>.TryCreateInstance();
             foreach (var notification in messages)
             {
                 validator.ValidateAndThrow(notification);

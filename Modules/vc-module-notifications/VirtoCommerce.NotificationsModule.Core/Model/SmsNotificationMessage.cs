@@ -6,6 +6,7 @@ namespace VirtoCommerce.NotificationsModule.Core.Model
     public class SmsNotificationMessage : NotificationMessage
     {
         public override string Kind => nameof(SmsNotification);
+
         /// <summary>
         /// Number of recipient Sms notification
         /// </summary>

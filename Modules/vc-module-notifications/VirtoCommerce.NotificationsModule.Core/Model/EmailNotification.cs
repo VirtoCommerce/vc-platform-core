@@ -48,12 +48,13 @@ namespace VirtoCommerce.NotificationsModule.Core.Model
             {
                 emailMessage.Subject = render.Render(template.Subject, this);
                 emailMessage.Body = render.Render(template.Body, this);
-                emailMessage.From = From;
-                emailMessage.To = To;
-                emailMessage.CC = CC;
-                emailMessage.BCC = BCC;
-                emailMessage.Attachments = Attachments;
             }
+
+            emailMessage.From = From;
+            emailMessage.To = To;
+            emailMessage.CC = CC;
+            emailMessage.BCC = BCC;
+            emailMessage.Attachments = Attachments;
 
             return base.ToMessage(message, render);
         }
