@@ -301,9 +301,14 @@ angular.module('platformWebApp', AppDependencies).controller('platformWebApp.app
                     if (!authContext.isAuthenticated) {
                         $state.go('loginDialog');
                     } else if (authContext.passwordExpired) {
+                        var currentState = $state.current;
                         $state.go('changePasswordDialog', {
                             onClose: function () {
-                                $state.go('workspace');
+                                if (currentState && !currentState.abstract) {
+                                    $state.go(currentState);
+                                } else {
+                                    $state.go('workspace');
+                                }
                             }
                         });
                     } else if (!$state.current.name || $state.current.name === 'loginDialog') {
