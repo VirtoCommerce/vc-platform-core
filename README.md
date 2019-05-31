@@ -99,9 +99,9 @@ Our development efforts were focused on moving to ASP.NET Core, performance, arc
     - The new module is a single integration point for search engines integration and provides a generic UI and program components for indexed search
     
 **Removed modules**: 
--  **VirtoCommerce.Domain** project and nuget package (now each module defines self domain model and abstractions in Core project)
--  **VirtoCommerce.Cache**
-- **VirtoCommerce.DynamicExpressions**
+-  ~~**VirtoCommerce.Domain**~~ project and nuget package (now each module defines self domain model and abstractions in Core project)
+-  ~~**VirtoCommerce.Cache**~~
+- ~~**VirtoCommerce.DynamicExpressions**~~
 
 **Whats next**:
 - Implement cache synchronization logic between multiple platform instances use `Redis` cache for this purposes 
