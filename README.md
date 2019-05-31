@@ -106,7 +106,7 @@ Our development efforts were focused on moving to ASP.NET Core, performance, arc
 **Next steps**:
 - Implement cache synchronization logic between multiple platform instances use `Redis` cache for this purposes 
 - Resource based authorization (scope bounded permissions)
-- Move projects of modules to GitHub repostiories
+- Move projects of modules to GitHub repositiories
 - Remaining modules
     - ElasticSearch
     - AzureSearch
