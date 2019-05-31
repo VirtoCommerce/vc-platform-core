@@ -8,6 +8,7 @@ using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Options;
+using VirtoCommerce.Notifications.Core.Types;
 using VirtoCommerce.NotificationsModule.Core;
 using VirtoCommerce.NotificationsModule.Core.Model;
 using VirtoCommerce.NotificationsModule.Core.Services;
@@ -119,7 +120,13 @@ namespace VirtoCommerce.NotificationsModule.Web
             var registrar = appBuilder.ApplicationServices.GetService<INotificationRegistrar>();
             registrar.RegisterNotification<ResetPasswordEmailNotification>();
             registrar.RegisterNotification<ConfirmationEmailNotification>();
-
+            registrar.RegisterNotification<RegistrationEmailNotification>();
+            registrar.RegisterNotification<RegistrationInvitationEmailNotification>();
+            registrar.RegisterNotification<RemindUserNameEmailNotification>();
+            registrar.RegisterNotification<ResetPasswordSmsNotification>();
+            registrar.RegisterNotification<TwoFactorEmailNotification>();
+            registrar.RegisterNotification<TwoFactorSmsNotification>();
+            registrar.RegisterNotification<ChangePhoneNumberSmsNotification>();
         }
 
         public void Uninstall()
