@@ -10,7 +10,7 @@ namespace VirtoCommerce.OrdersModule.Data.Migrations
                  FROM INFORMATION_SCHEMA.TABLES 
                  WHERE TABLE_NAME = '__MigrationHistory'))
                     BEGIN
-                        INSERT INTO [dbo].[__EFMigrationsHistory] ([MigrationId],[ProductVersion]) VALUES ('20190411192159_InitialOrders', '2.2.3-servicing-35854')
+                        INSERT INTO [dbo].[__EFMigrationsHistory] ([MigrationId],[ProductVersion]) VALUES ('20190530163834_InitialOrders', '2.2.3-servicing-35854')
 
 	                    BEGIN
                             ALTER TABLE [CustomerOrder] ADD [Status] nvarchar(64) NULL

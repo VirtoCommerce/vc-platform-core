@@ -1,4 +1,4 @@
-﻿using System;
+using System;
 using Microsoft.EntityFrameworkCore.Migrations;
 
 namespace VirtoCommerce.CartModule.Data.Migrations
@@ -327,7 +327,7 @@ namespace VirtoCommerce.CartModule.Data.Migrations
                         column: x => x.LineItemId,
                         principalTable: "CartLineItem",
                         principalColumn: "Id",
-                        onDelete: ReferentialAction.Cascade);
+                        onDelete: ReferentialAction.Restrict);
                     table.ForeignKey(
                         name: "FK_CartShipmentItem_CartShipment_ShipmentId",
                         column: x => x.ShipmentId,
@@ -357,7 +357,7 @@ namespace VirtoCommerce.CartModule.Data.Migrations
                         column: x => x.LineItemId,
                         principalTable: "CartLineItem",
                         principalColumn: "Id",
-                        onDelete: ReferentialAction.Cascade);
+                        onDelete: ReferentialAction.Restrict);
                     table.ForeignKey(
                         name: "FK_CartTaxDetail_CartPayment_PaymentId",
                         column: x => x.PaymentId,

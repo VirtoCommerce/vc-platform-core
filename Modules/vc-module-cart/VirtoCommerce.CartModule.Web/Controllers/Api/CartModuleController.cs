@@ -260,7 +260,7 @@ namespace VirtoCommerce.CartModule.Web.Controllers.Api
         [HttpDelete]
         [Route("")]
         [Authorize(ModuleConstants.Security.Permissions.Delete)]
-        public async Task<ActionResult> DeleteCarts([FromRoute] string[] ids)
+        public async Task<ActionResult> DeleteCarts([FromQuery] string[] ids)
         {
             await _shoppingCartService.DeleteAsync(ids);
             return NoContent();
