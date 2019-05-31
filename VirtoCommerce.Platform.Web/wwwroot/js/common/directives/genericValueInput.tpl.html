@@ -121,6 +121,17 @@
     </div>
 </script>
 
+<script type="text/ng-template" id="dShortText-array.html">
+    <div class="form-input">
+        <ui-select ng-model="context.currentPropValues[0]">
+            <ui-select-match placeholder="{{ 'platform.genericValueInput.placeholders.short-text-dictionary' | translate}}">{{$select.selected.name}}</ui-select-match>
+            <ui-select-choices repeat="propValue in context.allDictionaryValues | filter: {name: $select.search} | orderBy: 'value'">
+                <span ng-bind-html="propValue.name | highlight: $select.search"></span>
+            </ui-select-choices>
+        </ui-select>
+    </div>
+</script>
+
 <script type="text/ng-template" id="dShortText-dictionary-multivalue.html">
     <div class="form-input">
         <ui-select multiple ng-model="context.currentPropValues">

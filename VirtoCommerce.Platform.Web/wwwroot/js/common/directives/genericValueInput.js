@@ -60,7 +60,7 @@ function ($compile, $templateCache, $http, objComparer, bladeNavigationService) 
                     }
                 }
 
-                if (scope.currentEntity.isDictionary) {
+                if (scope.currentEntity.isDictionary || scope.currentEntity.isArray) {
                     scope.getDictionaryValues()(scope.currentEntity, setDictionaryValues);
                 }
 
@@ -124,7 +124,10 @@ function ($compile, $templateCache, $http, objComparer, bladeNavigationService) 
                 if (property.isDictionary) {
                     result += '-dictionary';
                 }
-                if (property.isArray) {
+                if (property.isArray && property.allowedValues) {
+                    result += '-array';
+                }
+                if (property.isArray && !property.allowedValues) {
                     result += '-multivalue';
                 }
                 if (property.isMultilingual) {
