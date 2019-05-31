@@ -7,7 +7,8 @@ namespace VirtoCommerce.Platform.Core.Modularity
     {
         public void Restart()
         {
-            ProcessExtensions.StartPlatformProcess();
+            //Temporary commented
+            // ProcessExtensions.StartPlatformProcess();
 
             Process.GetCurrentProcess()
                 .KillTree();
