@@ -9,15 +9,13 @@ Our development efforts were focused on moving to ASP.NET Core, performance, arc
 - The platform and 18 core modules were planned to be migrated. 
 
 ## Release status note 
-    We inspire you to try and investigate the new version of the system and give us your feedback 
+- *We inspire you to try and investigate the new version of the system and give us your feedback*
+- *This is a beta release, which hasn't been verified on a production project yet*
+- *We have delivered a simple migration from 2.x version by preserving complete backward compatibility for API and Database schema, while you need for additional efforts in case there are custom changes in your current 2.X system. Please follow our migration guide during the migration project*
+- *We cannot guarantee the backward compatibility of current the beta version with the final 3.X release*
 
-    This is a beta release, which hasn't been verified on a production project yet 
+## These Virto Commerce Release Notes below are a subset of the larger list of changes in migration to ASP.NET Core. 
 
-    We have delivered a simple migration from 2.x version by preserving complete backward compatibility for API and Database schema, while you need for additional efforts in case there are custom changes in your current 2.X system. Please follow our migration guide during the migration project. 
-
-    We cannot guarantee the backward compatibility of current the beta version with the final 3.X release 
-
-# These Virto Commerce Release Notes below are a subset of the larger list of changes in migration to ASP.NET Core. 
 ## What does Virto V3 provide to developers and architects?
 - Improved extensibility and unification increase the development speed and decrease time to market. 
 - Unified architecture and usage of good architecture practices leads to shorter learning curve for developers who are new to working with Virto Commerce. 
