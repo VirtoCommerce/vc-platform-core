@@ -1,10 +1,31 @@
-# VirtoCommerce Platform Core - COMING SOON!
-**List of changes**
+# Meet the new  major version of  Virto Commerce platform 3.0
+Our development efforts were focused on moving to ASP.NET Core, performance, architecture improvements, further enhancements and fixing arhitectural bugs. 
 
-**Tecnology stack**
-- **ASP.NET Core 2.1.6** as base platform 
-- **EF Core 2.1.4** as primary ORM
-- **ASP.NET Core Identity 2.1.6** for authentification and authorization
+## What were our objective when starting development project on VC platform v3? 
+
+- Change primary technology stack to .NET Core for the platform application and all key modules. 
+- Eliminate known technical and architecture design issues of 2.x version (Caching, Overloaded core module, Asynchronous code, Platform simplification, Extensibility, Performance, Authentication and Authorization) 
+- Provide easy and clear migration from 2.x version by preserving complete backward compatibility for API and Database schema 
+- The platform and 18 core modules were planned to be migrated. 
+
+## Release status note 
+    We inspire you to try and investigate the new version of the system and give us your feedback 
+
+    This is a beta release, which hasn't been verified on a production project yet 
+
+    We have delivered a simple migration from 2.x version by preserving complete backward compatibility for API and Database schema, while you need for additional efforts in case there are custom changes in your current 2.X system. Please follow our migration guide during the migration project. 
+
+    We cannot guarantee the backward compatibility of current the beta version with the final 3.X release 
+
+# These Virto Commerce Release Notes below are a subset of the larger list of changes in migration to ASP.NET Core. 
+## What does Virto V3 provide to developers and architects?
+- Improved extensibility and unification increase the development speed and decrease time to market. 
+- Unified architecture and usage of good architecture practices leads to shorter learning curve for developers who are new to working with Virto Commerce. 
+
+## Used technological stack 
+- **ASP.NET Core 2.2.0** as base platform 
+- **EF Core 2.2.0** as primary ORM
+- **ASP.NET Core Identity 2.2.0** for authentification and authorization
 - **OpenIddict 2.0.0** for OAuth authorization
 - **WebPack** as primary design/runtime bundler and minifier
 - **Swashbuckle.AspNetCore.SwaggerGen** for Swagger docs and UI
@@ -12,7 +33,7 @@
 - **AngularJS 1.4** as primary framework for SPA
 - **HangFire 1.6.21** for run background tasks
 
-**Platform**
+**Platform changes**:
   - Configuration
     - Use NET Core configuration paradigm (configuration providers and strongly types IOptions)
   - Solution structure
@@ -52,30 +73,45 @@
  - UI
     - Replaced Gulp + Bower to Webpack + npm 
      
-**Modules**
+**Modules changes**:
 - Changed module solution structure (Core project, Constants, Caching)
 - Switched all DAL into asynchronous operations
-- the new Notifications module (written from scratch)
-- Removed **VirtoCommerce.Domain** project and nuget package (now each module defines self domain model and abstractions in Core project)
-- Removed **CacheModule**
 - Export/Import now is streamed for all modules
 
-TODO check list:
-- Implement cache synchronization logic between multiple platform instances use Redis cache for this purposes 
+**New modules**:
+- `Notifications module` (written from scratch) key features:
+    - Functionality which was spread across the system is shifted to dedicated module 
+    - Manage notification availability for each store
+    - Unlimited cannels types for sending notifications (Email, Sms, Social networks etc)
+    - Possibility to activate/deactivate each notification individually for each store 
+    - New flexible extendibility model 
+    - Allows to preview a notification template with data
+    - Support of LIQUID syntax for templates based on Scriban engine 
+    - The new notification messaged feed allows to search and preview individual messages 
+- `Tax module` key features:
+    - The tax calculation functionality which was spread across the system is shifted to a dedicated module which is now responsible for tax settings and calculation 
+    - The new module is a single integration point for third party software and custom extensions 
+- `Shipping module` key features:
+    -  The shipping costs calculation functionality which was spread across the system is shifted to a dedicated module which is now responsible for shipping methods, related settings and shipping costs calculation
+    - The new module is a single integration point for third party software and custom extensions 
+- `Payment module` key features:
+    - The payment methods functionality and integrations which were spread across the system are shifted to a dedicated module which is now responsible for payment methods and related settings 
+    - The new module is a single integration point for payment gateways integration
+- `Search module` key features:
+    - The new module is a single integration point for search engines integration and provides a generic UI and program components for indexed search
+    
+**Removed modules**: 
+-  **VirtoCommerce.Domain** project and nuget package (now each module defines self domain model and abstractions in Core project)
+-  **VirtoCommerce.Cache**
+- **VirtoCommerce.DynamicExpressions**
+
+**Whats next**:
+- Implement cache synchronization logic between multiple platform instances use `Redis` cache for this purposes 
 - Resource based authorization (scope bounded permissions)
 - Remaining modules
-    - Catalog (eliminated webmodel and improved extensibility model)
-    - Marketing (rework expressions serialization design)
     - ElasticSearch
-    - Azure
-    - Personalization ???
-    - Publishing ??? need to improve design and extensibility
+    - AzureSearch
     
-- Migration script from 2.x -> 3.x
-
-![8ea72ae0c3d511e7a1325bdfb85b1215 map](https://user-images.githubusercontent.com/7566324/32503635-68fa4a8c-c3e6-11e7-910a-88af3fec87e1.png)
-
-
 # License
 Copyright (c) Virto Solutions LTD.  All rights reserved.
 
