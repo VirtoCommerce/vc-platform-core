@@ -9,6 +9,7 @@ using Moq;
 using Newtonsoft.Json;
 using VirtoCommerce.NotificationsModule.Core.Model;
 using VirtoCommerce.NotificationsModule.Core.Services;
+using VirtoCommerce.NotificationsModule.Core.Types;
 using VirtoCommerce.NotificationsModule.Data.ExportImport;
 using VirtoCommerce.NotificationsModule.Data.Model;
 using VirtoCommerce.NotificationsModule.Data.Repositories;
@@ -19,7 +20,6 @@ using VirtoCommerce.Platform.Core.Domain;
 using VirtoCommerce.Platform.Core.Events;
 using VirtoCommerce.Platform.Core.ExportImport;
 using Xunit;
-using RegistrationEmailNotification = VirtoCommerce.NotificationsModule.Tests.NotificationTypes.RegistrationEmailNotification;
 
 namespace VirtoCommerce.NotificationsModule.Tests.IntegrationTests
 {
