@@ -151,6 +151,9 @@ Our development efforts were focused on moving to ASP.NET Core, performance, arc
 "UserName": "admin",
 "Password": "store"
 ```    
+# How to migrate your solution from 2.x to 3.0 platform version
+- If your solution doesn't have any custom modules and extensions you just need to use the connection string to the old database for the new 3.0 platfrom version and after first run the update scripts will transfer all your data to the new scheme otherwise, you need to convert your models according to this instruction (Coomig soon).
+
 # License
 Copyright (c) Virto Solutions LTD.  All rights reserved.
 
