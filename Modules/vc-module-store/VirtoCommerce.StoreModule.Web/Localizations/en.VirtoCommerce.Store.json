@@ -9,7 +9,6 @@
                     "name": "Name"
                 }
             },
-         
             "store-advanced": {
                 "subtitle": "",
                 "labels": {
@@ -157,37 +156,39 @@
                     "secure-url": "https://vcshop.com"
                 }
             }
-        },
-        "permissions": {
-            "store:access": "Open stores menu",
-            "store:create": "Create store related data",
-            "store:read": "View store related data",
-            "store:update": "Update store related data",
-            "store:delete": "Delete store related data",
-            "store:loginOnBehalf": "Login on behalf of a customer"
-        },
-        "settings": {
-            "Stores.States": {
+        }
+    },
+    "permissions": {
+        "store:access": "Open stores menu",
+        "store:create": "Create store related data",
+        "store:read": "View store related data",
+        "store:update": "Update store related data",
+        "store:delete": "Delete store related data",
+        "store:loginOnBehalf": "Login on behalf of a customer"
+    },
+    "settings": {
+        "Stores": {
+            "States": {
                 "title": "States",
                 "description": "States that a store can be in"
             },
-            "Stores.TaxCalculationEnabled": {
+            "TaxCalculationEnabled": {
                 "title": "Enable Tax Calculation",
                 "description": "Setting to off prevents tax calculation on storefront"
             },
-            "Stores.AllowAnonymousUsers": {
+            "AllowAnonymousUsers": {
                 "title": "Allow anonymous user for store",
                 "description": "Set to false to prevent anonymous user access to store"
             },
-            "Stores.SeoLinksType": {
+            "SeoLinksType": {
                 "title": "SEO Links",
                 "description": "Determines how to generate links for products and categories. Long: /virtual-parent-category/physical-parent-category/my-cool-category/my-cool-product, Collapsed: /virtual-parent-category/my-cool-category/my-cool-product, Short: /my-cool-product, None: /product/123"
             }
-        },
-        "module": {
-            "VirtoCommerce.Store": {
-                "description": "Export/Import stores with all related informations"
-            }
+        }
+    },
+    "module": {
+        "VirtoCommerce.Store": {
+            "description": "Export/Import stores with all related informations"
         }
     }
 }

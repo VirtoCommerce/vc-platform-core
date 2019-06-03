@@ -161,7 +161,6 @@
             "add-selected": "Ausgewählte hinzufügen"
         }
     },
-
     "permissions": {
         "pricing:access": "Öffnen Sie das Preismenü",
         "pricing:create": "Erstellen Sie Preisdaten",
@@ -169,11 +168,14 @@
         "pricing:update": "Preisdaten aktualisieren",
         "pricing:delete": "Löschen Sie die Preisdaten"
     },
-
     "settings": {
-        "Pricing.ExportImport.PageSize": {
-            "title": "Die Seitengröße wird für den Export / Import verwendet",
-            "description": "Hoher Wert kann zu langsamer Leistung führen"
+        "Pricing": {
+            "ExportImport": {
+                "PageSize": {
+                    "title": "Die Seitengröße wird für den Export / Import verwendet",
+                    "description": "Hoher Wert kann zu langsamer Leistung führen"
+                }
+            }
         }
     }
 }

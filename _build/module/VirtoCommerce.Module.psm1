@@ -134,7 +134,7 @@ function Compress-Module
 
 		foreach ($_ in $dlls) {                                                                                                             
 			if($_.StartsWith("VirtoCommerce")) {
-				if(!$_.StartsWith($VCModuleId)) {			
+				if(($_.Contains("Module") -And !$_.StartsWith($VCModuleId)) -Or $_.StartsWith("VirtoCommerce.Platform")) {			
 					Remove-Item ("$OutputDir\$tmp\bin\" + $_)
 				}
 			}
