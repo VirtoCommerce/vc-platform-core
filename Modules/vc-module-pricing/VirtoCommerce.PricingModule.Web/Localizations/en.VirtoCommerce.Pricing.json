@@ -75,6 +75,8 @@
                     "pricelist": "Price list",
                     "pricelist-currency": "Currency",
                     "priority": "Priority",
+                    "activation": "Activation",
+                    "expiration": "Expiration",
                     "last-modified": "Modified",
                     "modified-by": "Modified by"
                 }
@@ -145,6 +147,12 @@
                 "title": "Delete confirmation",
                 "message": "Are you sure you want to delete selected price list assignments?"
             },
+            "assignments-delete-all": {
+                "title": "Delete confirmation",
+                "warning": "WARNING: this change is permanent and can't be undone afterwards. It can lead to data loss.",
+                "message": "All filtered items will be deleted",
+                "instruction": "Enter 'yes' to enable deletion:"
+            },
             "pricelists-delete": {
                 "title": "Delete confirmation",
                 "message": "Are you sure you want to delete selected Price lists?"
@@ -171,7 +179,8 @@
             }
         },
         "commands": {
-            "add-selected": "Add selected"
+            "add-selected": "Add selected",
+            "delete-all-filtered": "Delete all filtered"
         }
     },
     "permissions": {
@@ -182,9 +191,33 @@
         "pricing:delete": "Delete pricing data"
     },
     "settings": {
-        "Pricing.ExportImport.PageSize": {
-            "title": "The page size being used for Export / Import",
-            "description": "High value may cause slow performance"
+        "VirtoCommerce": {
+            "Search": {
+                "IndexingJobs": {
+                    "IndexationDate": {
+                        "Pricing": {
+                            "Calendar": {
+                                "title": "Pricing indexation date and time",
+                                "description": "Date and time of the pricing indexation task to start"
+                            }
+                        }
+                    }
+                }
+            }
+        },
+        "Pricing": {
+            "ExportImport": {
+                "PageSize": {
+                    "title": "The page size being used for Export / Import",
+                    "description": "High value may cause slow performance"
+                }
+            },
+            "Indexing": {
+                "Enable": {
+                    "title": "Enable product price indexing (requires restart)",
+                    "description": "If this setting is turned on, product price will be included to the product index. This will also cause product re-indexing after changing its prices."
+                }
+            }
         }
     },
     "module": {

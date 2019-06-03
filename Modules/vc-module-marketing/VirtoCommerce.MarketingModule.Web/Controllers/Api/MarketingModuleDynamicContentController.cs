@@ -179,10 +179,10 @@ namespace VirtoCommerce.MarketingModule.Web.Controllers.Api
         [HttpPut]
         [Route("contentitems")]
         [Authorize(ModuleConstants.Security.Permissions.Update)]
-        public IActionResult UpdateDynamicContent([FromBody]coreModel.DynamicContentItem contentItem)
+        public ActionResult UpdateDynamicContent([FromBody]coreModel.DynamicContentItem contentItem)
         {
             _dynamicContentService.SaveContentItemsAsync(new[] { contentItem });
-            return Ok();
+            return NoContent();
         }
 
         /// <summary>
@@ -192,10 +192,10 @@ namespace VirtoCommerce.MarketingModule.Web.Controllers.Api
         [HttpDelete]
         [Route("contentitems")]
         [Authorize(ModuleConstants.Security.Permissions.Delete)]
-        public async Task<IActionResult> DeleteDynamicContents([FromQuery] string[] ids)
+        public async Task<ActionResult> DeleteDynamicContents([FromQuery] string[] ids)
         {
             await _dynamicContentService.DeleteContentItemsAsync(ids);
-            return Ok();
+            return NoContent();
         }
 
 
@@ -239,10 +239,10 @@ namespace VirtoCommerce.MarketingModule.Web.Controllers.Api
         [HttpPut]
         [Route("contentplaces")]
         [Authorize(ModuleConstants.Security.Permissions.Update)]
-        public async Task<IActionResult> UpdateDynamicContentPlace([FromBody]coreModel.DynamicContentPlace contentPlace)
+        public async Task<ActionResult> UpdateDynamicContentPlace([FromBody]coreModel.DynamicContentPlace contentPlace)
         {
             await _dynamicContentService.SavePlacesAsync(new[] { contentPlace });
-            return Ok();
+            return NoContent();
         }
 
         /// <summary>
@@ -252,10 +252,10 @@ namespace VirtoCommerce.MarketingModule.Web.Controllers.Api
         [HttpDelete]
         [Route("contentplaces")]
         [Authorize(ModuleConstants.Security.Permissions.Delete)]
-        public async Task<IActionResult> DeleteDynamicContentPlaces([FromQuery] string[] ids)
+        public async Task<ActionResult> DeleteDynamicContentPlaces([FromQuery] string[] ids)
         {
             await _dynamicContentService.DeletePlacesAsync(ids);
-            return Ok();
+            return NoContent();
         }
 
         /// <summary>
@@ -318,10 +318,10 @@ namespace VirtoCommerce.MarketingModule.Web.Controllers.Api
         [HttpPut]
         [Route("contentpublications")]
         [Authorize(ModuleConstants.Security.Permissions.Update)]
-        public async Task<IActionResult> UpdateDynamicContentPublication([FromBody]coreModel.DynamicContentPublication publication)
+        public async Task<ActionResult> UpdateDynamicContentPublication([FromBody]coreModel.DynamicContentPublication publication)
         {
             await _dynamicContentService.SavePublicationsAsync(new[] { publication });
-            return Ok();
+            return NoContent();
         }
 
         /// <summary>
@@ -331,10 +331,10 @@ namespace VirtoCommerce.MarketingModule.Web.Controllers.Api
         [HttpDelete]
         [Route("contentpublications")]
         [Authorize(ModuleConstants.Security.Permissions.Delete)]
-        public async Task<IActionResult> DeleteDynamicContentPublications([FromQuery] string[] ids)
+        public async Task<ActionResult> DeleteDynamicContentPublications([FromQuery] string[] ids)
         {
             await _dynamicContentService.DeletePublicationsAsync(ids);
-            return Ok();
+            return NoContent();
         }
 
         /// <summary>
@@ -376,10 +376,10 @@ namespace VirtoCommerce.MarketingModule.Web.Controllers.Api
         [HttpPut]
         [Route("contentfolders")]
         [Authorize(ModuleConstants.Security.Permissions.Update)]
-        public async Task<IActionResult> UpdateDynamicContentFolder([FromBody]coreModel.DynamicContentFolder folder)
+        public async Task<ActionResult> UpdateDynamicContentFolder([FromBody]coreModel.DynamicContentFolder folder)
         {
             await _dynamicContentService.SaveFoldersAsync(new[] { folder });
-            return Ok();
+            return NoContent();
         }
 
         /// <summary>
@@ -389,10 +389,10 @@ namespace VirtoCommerce.MarketingModule.Web.Controllers.Api
         [HttpDelete]
         [Route("contentfolders")]
         [Authorize(ModuleConstants.Security.Permissions.Delete)]
-        public async Task<IActionResult> DeleteDynamicContentFolders([FromQuery] string[] ids)
+        public async Task<ActionResult> DeleteDynamicContentFolders([FromQuery] string[] ids)
         {
             await _dynamicContentService.DeleteFoldersAsync(ids);
-            return Ok();
+            return NoContent();
         }
 
         private void FillConditions(coreModel.DynamicContentPublication publication)

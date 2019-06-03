@@ -8,6 +8,8 @@ namespace VirtoCommerce.NotificationsModule.Core.Model
     /// </summary>
     public abstract class NotificationMessage : AuditableEntity, IHasLanguageCode
     {
+        public abstract string Kind { get; }
+
         /// <summary>
         /// For detecting owner
         /// </summary>

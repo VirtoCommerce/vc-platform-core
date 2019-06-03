@@ -22,4 +22,5 @@ namespace VirtoCommerce.Platform.Core
         public string DefaultExportFolder = "App_Data/Export/";
         public string DefaultExportFileName = "exported_data.zip";
     }
+
 }

@@ -31,12 +31,14 @@ using VirtoCommerce.PricingModule.Data.Search;
 using VirtoCommerce.PricingModule.Data.Services;
 using VirtoCommerce.PricingModule.Web.JsonConverters;
 using VirtoCommerce.SearchModule.Core.Model;
+using VirtoCommerce.SearchModule.Core.Services;
 
 namespace VirtoCommerce.PricingModule.Web
 {
     public class Module : IModule, IExportSupport, IImportSupport
     {
         private IApplicationBuilder _applicationBuilder;
+        private ServiceProvider _serviceProvider;
 
         #region IModule Members
 
@@ -44,7 +46,8 @@ namespace VirtoCommerce.PricingModule.Web
 
         public void Initialize(IServiceCollection serviceCollection)
         {
-            var configuration = serviceCollection.BuildServiceProvider().GetRequiredService<IConfiguration>();
+            _serviceProvider = serviceCollection.BuildServiceProvider();
+            var configuration = _serviceProvider.GetRequiredService<IConfiguration>();
             var connectionString = configuration.GetConnectionString("VirtoCommerce.Pricing") ?? configuration.GetConnectionString("VirtoCommerce");
             serviceCollection.AddDbContext<PricingDbContext>(options => options.UseSqlServer(connectionString));
             serviceCollection.AddTransient<IPricingRepository, PricingRepositoryImpl>();
@@ -63,6 +66,7 @@ namespace VirtoCommerce.PricingModule.Web
         public void PostInitialize(IApplicationBuilder appBuilder)
         {
             _applicationBuilder = appBuilder;
+            var settingsManager = _serviceProvider.GetService<ISettingsManager>();
 
             var settingsRegistrar = appBuilder.ApplicationServices.GetRequiredService<ISettingsRegistrar>();
             settingsRegistrar.RegisterSettings(ModuleConstants.Settings.AllSettings, ModuleInfo.Id);
@@ -88,24 +92,30 @@ namespace VirtoCommerce.PricingModule.Web
             var mvcJsonOptions = appBuilder.ApplicationServices.GetService<IOptions<MvcJsonOptions>>();
             mvcJsonOptions.Value.SerializerSettings.Converters.Add(appBuilder.ApplicationServices.GetService<PolymorphicPricingJsonConverter>());
 
-            // Add price document source to the product indexing configuration
-            var productIndexingConfigurations = appBuilder.ApplicationServices.GetServices<IndexDocumentConfiguration>();
-            if (productIndexingConfigurations != null)
+            var priceIndexingEnabled = settingsManager.GetValue(ModuleConstants.Settings.General.PricingIndexing.Name, true);
+            if (priceIndexingEnabled)
             {
-                var productPriceDocumentSource = new IndexDocumentSource
-                {
-                    ChangesProvider = appBuilder.ApplicationServices.GetService<ProductPriceDocumentChangesProvider>(),
-                    DocumentBuilder = appBuilder.ApplicationServices.GetService<ProductPriceDocumentBuilder>()
-                };
+                // Add price document source to the product indexing configuration
+                var productIndexingConfigurations = _serviceProvider.GetService<IndexDocumentConfiguration[]>();
 
-                foreach (var configuration in productIndexingConfigurations.Where(c => c.DocumentType == KnownDocumentTypes.Product))
+                if (productIndexingConfigurations != null)
                 {
-                    if (configuration.RelatedSources == null)
+                    var productPriceDocumentSource = new IndexDocumentSource
                     {
-                        configuration.RelatedSources = new List<IndexDocumentSource>();
-                    }
+                        ChangesProvider = _serviceProvider.GetService<IIndexDocumentChangesProvider>(),
+                        DocumentBuilder = _serviceProvider.GetService<ProductPriceDocumentBuilder>(),
+                    };
 
-                    configuration.RelatedSources.Add(productPriceDocumentSource);
+                    foreach (var configuration in productIndexingConfigurations.Where(c =>
+                        c.DocumentType == KnownDocumentTypes.Product))
+                    {
+                        if (configuration.RelatedSources == null)
+                        {
+                            configuration.RelatedSources = new List<IndexDocumentSource>();
+                        }
+
+                        configuration.RelatedSources.Add(productPriceDocumentSource);
+                    }
                 }
             }
 

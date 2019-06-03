@@ -113,7 +113,6 @@ namespace VirtoCommerce.Platform.Web.Controllers.Api
         /// <returns></returns>
         [HttpGet]
         [Route("sampledata/state")]
-        [ProducesResponseType(typeof(SampleDataState), 200)]
         [ApiExplorerSettings(IgnoreApi = true)]
         [AllowAnonymous]
         public ActionResult<SampleDataState> GetSampleDataState()
@@ -204,8 +203,7 @@ namespace VirtoCommerce.Platform.Web.Controllers.Api
             using (var stream = System.IO.File.Open(localPath, FileMode.Open))
             {
                 var provider = new FileExtensionContentTypeProvider();
-                string contentType;
-                if (!provider.TryGetContentType(localPath, out contentType))
+                if (!provider.TryGetContentType(localPath, out var contentType))
                 {
                     contentType = "application/octet-stream";
                 }
@@ -371,6 +369,10 @@ namespace VirtoCommerce.Platform.Web.Controllers.Api
                 if (!Directory.Exists(localTmpFolder))
                 {
                     Directory.CreateDirectory(localTmpFolder);
+                }
+                if (System.IO.File.Exists(localTmpPath))
+                {
+                    System.IO.File.Delete(localTmpPath);
                 }
                 //Import first to local tmp folder because Azure blob storage doesn't support some special file access mode 
                 using (var stream = System.IO.File.OpenWrite(localTmpPath))

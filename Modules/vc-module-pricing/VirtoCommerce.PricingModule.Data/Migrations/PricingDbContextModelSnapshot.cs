@@ -15,7 +15,7 @@ namespace VirtoCommerce.PricingModule.Data.Migrations
         {
 #pragma warning disable 612, 618
             modelBuilder
-                .HasAnnotation("ProductVersion", "2.2.3-servicing-35854")
+                .HasAnnotation("ProductVersion", "2.2.4-servicing-10062")
                 .HasAnnotation("Relational:MaxIdentifierLength", 128)
                 .HasAnnotation("SqlServer:ValueGenerationStrategy", SqlServerValueGenerationStrategy.IdentityColumn);
 
@@ -30,7 +30,8 @@ namespace VirtoCommerce.PricingModule.Data.Migrations
 
                     b.Property<DateTime>("CreatedDate");
 
-                    b.Property<decimal>("List");
+                    b.Property<decimal>("List")
+                        .HasColumnType("Money");
 
                     b.Property<decimal>("MinQuantity");
 
@@ -48,7 +49,8 @@ namespace VirtoCommerce.PricingModule.Data.Migrations
                     b.Property<string>("ProductName")
                         .HasMaxLength(1024);
 
-                    b.Property<decimal?>("Sale");
+                    b.Property<decimal?>("Sale")
+                        .HasColumnType("Money");
 
                     b.HasKey("Id");
 

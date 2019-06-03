@@ -1,25 +1,25 @@
 using System.Collections.Generic;
 using VirtoCommerce.CoreModule.Core.Common;
-using VirtoCommerce.CoreModule.Core.Shipping;
 using VirtoCommerce.CoreModule.Core.Tax;
+using VirtoCommerce.ShippingModule.Core.Model;
 
 namespace VirtoCommerce.OrdersModule.Core.Model
 {
-	public class Shipment : OrderOperation, IHasTaxDetalization, ISupportCancellation, ITaxable, IHasDiscounts
-	{
-		public string OrganizationId { get; set; }
-		public string OrganizationName { get; set; }
+    public class Shipment : OrderOperation, IHasTaxDetalization, ISupportCancellation, ITaxable, IHasDiscounts
+    {
+        public string OrganizationId { get; set; }
+        public string OrganizationName { get; set; }
 
-		public string FulfillmentCenterId { get; set; }
-		public string FulfillmentCenterName { get; set; }
+        public string FulfillmentCenterId { get; set; }
+        public string FulfillmentCenterName { get; set; }
 
-		public string EmployeeId { get; set; }
-		public string EmployeeName { get; set; }
+        public string EmployeeId { get; set; }
+        public string EmployeeName { get; set; }
 
         /// <summary>
         /// Current shipment method code 
         /// </summary>
-		public string ShipmentMethodCode { get; set; }
+        public string ShipmentMethodCode { get; set; }
 
         /// <summary>
         /// Current shipment option code 
@@ -32,22 +32,21 @@ namespace VirtoCommerce.OrdersModule.Core.Model
         public ShippingMethod ShippingMethod { get; set; }
 
         public string CustomerOrderId { get; set; }
-		public CustomerOrder CustomerOrder { get; set; }
+        public CustomerOrder CustomerOrder { get; set; }
 
-		public ICollection<ShipmentItem> Items { get; set; } 
+        public ICollection<ShipmentItem> Items { get; set; }
 
-		public ICollection<ShipmentPackage> Packages { get; set; }
+        public ICollection<ShipmentPackage> Packages { get; set; }
 
-		public ICollection<PaymentIn> InPayments { get; set; }
+        public ICollection<PaymentIn> InPayments { get; set; }
 
-		public string WeightUnit { get; set; }
-		public decimal? Weight { get; set; }
+        public string WeightUnit { get; set; }
+        public decimal? Weight { get; set; }
 
-		public string MeasureUnit { get; set; }
-		public decimal? Height { get; set; }
-		public decimal? Length { get; set; }
-		public decimal? Width { get; set; }
-
+        public string MeasureUnit { get; set; }
+        public decimal? Height { get; set; }
+        public decimal? Length { get; set; }
+        public decimal? Width { get; set; }
 
         #region IHasDiscounts
         public ICollection<Discount> Discounts { get; set; }
@@ -70,7 +69,6 @@ namespace VirtoCommerce.OrdersModule.Core.Model
 
         public virtual decimal FeeWithTax { get; set; }
 
-
         #region ITaxable Members
 
         /// <summary>
@@ -84,12 +82,10 @@ namespace VirtoCommerce.OrdersModule.Core.Model
 
         #endregion
 
-
-
         #region ITaxDetailSupport Members
 
         public ICollection<TaxDetail> TaxDetails { get; set; }
 
-		#endregion
-	}
+        #endregion
+    }
 }

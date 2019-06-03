@@ -1,6 +1,8 @@
 using System;
+using System.Collections.Generic;
 using System.Linq;
 using System.Threading.Tasks;
+using Microsoft.EntityFrameworkCore;
 using VirtoCommerce.NotificationsModule.Core.Model;
 using VirtoCommerce.NotificationsModule.Core.Services;
 using VirtoCommerce.NotificationsModule.Data.Model;
@@ -12,58 +14,92 @@ namespace VirtoCommerce.NotificationsModule.Data.Services
     public class NotificationSearchService : INotificationSearchService
     {
         private readonly Func<INotificationRepository> _repositoryFactory;
-        public NotificationSearchService(Func<INotificationRepository> repositoryFactory)
+        private readonly INotificationService _notificationService;
+        public NotificationSearchService(Func<INotificationRepository> repositoryFactory, INotificationService notificationService)
         {
             _repositoryFactory = repositoryFactory;
+            _notificationService = notificationService;
         }
 
-        public async Task<GenericSearchResult<Notification>> SearchNotificationsAsync(NotificationSearchCriteria criteria)
+        public async Task<NotificationSearchResult> SearchNotificationsAsync(NotificationSearchCriteria criteria)
         {
-            var query = AbstractTypeFactory<Notification>.AllTypeInfos
-                .Where(t => t.AllSubclasses.Any(s => s != t.Type && s.IsSubclassOf(typeof(Notification))))
-                .Select(n => n.Type)
-                .AsQueryable();
-
-            if (!string.IsNullOrEmpty(criteria.Keyword))
-            {
-                query = query.Where(n => n.Name.Contains(criteria.Keyword));
-            }
-
-            var totalCount = query.Count();
+            var result = AbstractTypeFactory<NotificationSearchResult>.TryCreateInstance();
 
             var sortInfos = criteria.SortInfos;
             if (sortInfos.IsNullOrEmpty())
             {
-                sortInfos = new[] { new SortInfo { SortColumn = ReflectionUtility.GetPropertyName<Notification>(x => x.Type), SortDirection = SortDirection.Ascending } };
+                sortInfos = new[]
+                {
+                            new SortInfo
+                            {
+                                SortColumn = "Name"
+                            }
+                        };
             }
 
-            var collection = query.OrderBySortInfos(sortInfos).Skip(criteria.Skip).Take(criteria.Take).ToList();
-
-            NotificationEntity[] entities;
+            var tmpSkip = 0;
+            var tmpTake = 0;
 
             using (var repository = _repositoryFactory())
             {
-                entities = await repository.GetByTypesAsync(collection.Select(c => c.Name).ToArray(), criteria.TenantId,
-                    criteria.TenantType, criteria.ResponseGroup, criteria.IsActive);
+                var query = GetNotificationsQuery(repository, criteria, sortInfos);
+
+                result.TotalCount = await query.CountAsync();
+                if (criteria.Take > 0)
+                {
+                    var notificationIds = await query.Select(x => x.Id).Skip(criteria.Skip).Take(criteria.Take).ToArrayAsync();
+                    result.Results = (await _notificationService.GetByIdsAsync(notificationIds, criteria.ResponseGroup)).AsQueryable().OrderBySortInfos(sortInfos).ToList();
+                }
+            }
+            tmpSkip = Math.Min(result.TotalCount, criteria.Skip);
+            tmpTake = Math.Min(criteria.Take, Math.Max(0, result.TotalCount - criteria.Skip));
+
+            criteria.Skip = criteria.Skip - tmpSkip;
+            criteria.Take = criteria.Take - tmpTake;
+
+            if (criteria.Take > 0)
+            {
+                var transientNotificationsQuery = AbstractTypeFactory<Notification>.AllTypeInfos.Select(x => AbstractTypeFactory<Notification>.TryCreateInstance(x.Type.Name))
+                                                                              .OfType<Notification>().AsQueryable();
+                if (!string.IsNullOrEmpty(criteria.NotificationType))
+                {
+                    transientNotificationsQuery = transientNotificationsQuery.Where(x => x.Type.EqualsInvariant(criteria.NotificationType));
+                }
+
+                var allPersistentProvidersTypes = result.Results.Select(x => x.GetType()).Distinct();
+                transientNotificationsQuery = transientNotificationsQuery.Where(x => !allPersistentProvidersTypes.Contains(x.GetType()));
+
+                transientNotificationsQuery = transientNotificationsQuery.Where(x => !x.Kind.EqualsInvariant(x.Type));
+
+                result.TotalCount += transientNotificationsQuery.Count();
+                var transientNotifications = transientNotificationsQuery.Skip(criteria.Skip).Take(criteria.Take).ToList();
+
+                result.Results = result.Results.Concat(transientNotifications).AsQueryable().OrderBySortInfos(sortInfos).ToList();
+            }
+            return result;
+        }
+
+        protected virtual IQueryable<NotificationEntity> GetNotificationsQuery(INotificationRepository repository, NotificationSearchCriteria criteria, IEnumerable<SortInfo> sortInfos)
+        {
+            var query = repository.Notifications;
+
+            if (!string.IsNullOrEmpty(criteria.NotificationType))
+            {
+                query = query.Where(x => x.Type == criteria.NotificationType);
             }
 
-            var notifications = collection.Select(t =>
+            if (!string.IsNullOrEmpty(criteria.TenantId))
             {
-                var result = AbstractTypeFactory<Notification>.TryCreateInstance(t.Name);
-                var notificationEntity = entities.FirstOrDefault(e => e.Type.EqualsInvariant(t.Name));
-                return notificationEntity != null ? notificationEntity.ToModel(result) : result;
-            });
-
-            if (criteria.IsActive)
-            {
-                notifications = notifications.Where(n => n.IsActive);
+                query = query.Where(x => x.TenantId == criteria.TenantId);
             }
 
-            return new GenericSearchResult<Notification>
+            if (!string.IsNullOrEmpty(criteria.TenantType))
             {
-                Results = notifications.ToList(),
-                TotalCount = totalCount
-            };
+                query = query.Where(x => x.TenantType == criteria.TenantType);
+            }
+
+            query = query.OrderBySortInfos(sortInfos);
+            return query;
         }
     }
 }

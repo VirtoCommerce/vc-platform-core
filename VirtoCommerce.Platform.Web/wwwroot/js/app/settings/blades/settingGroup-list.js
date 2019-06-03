@@ -1,6 +1,5 @@
-﻿angular.module('platformWebApp')
-.controller('platformWebApp.settingGroupListController', ['$window', 'platformWebApp.modules', '$scope', 'platformWebApp.settings', 'platformWebApp.bladeNavigationService', 'platformWebApp.dialogService',
-function ($window, modules, $scope, settings, bladeNavigationService, dialogService) {
+angular.module('platformWebApp').controller('platformWebApp.settingGroupListController', ['$window', 'platformWebApp.modules', '$scope', 'platformWebApp.settings', 'platformWebApp.bladeNavigationService', 'platformWebApp.dialogService',
+    function ($window, modules, $scope, settings, bladeNavigationService, dialogService) {
     var settingsTree;
     var blade = $scope.blade;
 
@@ -8,8 +7,10 @@ function ($window, modules, $scope, settings, bladeNavigationService, dialogServ
         blade.isLoading = true;
 
         settings.query({}, function (results) {
+            results = _.sortBy(results, 'groupName');
             blade.allSettings = results;
             settingsTree = {};
+
             _.each(results, function (setting) {
                 var paths = (setting.groupName ? setting.groupName : 'General').split('|');
                 var lastParent = settingsTree;
@@ -52,7 +53,7 @@ function ($window, modules, $scope, settings, bladeNavigationService, dialogServ
                 $scope.selectNode({ groupName: $scope.selectedNodeId }, disableOpenAnimation);
             }
         },
-        function (error) { bladeNavigationService.setError('Error ' + error.status, blade); });
+            function (error) { bladeNavigationService.setError('Error ' + error.status, blade); });
     };
 
     $scope.selectNode = function (node, disableOpenAnimation) {
@@ -122,12 +123,12 @@ function ($window, modules, $scope, settings, bladeNavigationService, dialogServ
     });
 
     blade.toolbarCommands = [
-          {
-              name: "platform.commands.restart", icon: 'fa fa-bolt',
-              executeMethod: function () { restart(); },
-              canExecuteMethod: function () { return !blade.isLoading; },
-              permission: 'platform:module:manage'
-          }
+        {
+            name: "platform.commands.restart", icon: 'fa fa-bolt',
+            executeMethod: function () { restart(); },
+            canExecuteMethod: function () { return !blade.isLoading; },
+            permission: 'platform:module:manage'
+        }
     ];
 
     function restart() {
@@ -138,9 +139,16 @@ function ($window, modules, $scope, settings, bladeNavigationService, dialogServ
             callback: function (confirm) {
                 if (confirm) {
                     blade.isLoading = true;
-                    modules.restart(function () {
+                    try {
+                        modules.restart(function () {
+                            //$window.location.reload(); returns 400 bad request due server restarts
+                        });
+                    }
+                    catch{
+                    }
+                    finally {
                         $window.location.reload();
-                    });
+                    }
                 }
             }
         }

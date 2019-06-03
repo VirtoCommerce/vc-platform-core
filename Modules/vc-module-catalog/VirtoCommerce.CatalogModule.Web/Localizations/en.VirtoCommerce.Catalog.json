@@ -95,7 +95,7 @@
                     "tax-type": "Tax type"
                 },
                 "validations": {
-                    "code": "Code can't contain $+;=%{}[]|/@ ~!^*&()?:'<>, characters"
+                    "code": "Code can't contain $+;=%{}[]/@ ~!^*&()?'<>, characters"
                 },
                 "placeholders": {
                     "name": "Enter category name",
@@ -164,7 +164,8 @@
                     "manage-dictionary": "Manage dictionary",
                     "new-dictionary-property-caution": "You can manage dictionary items only after saving property",
                     "attributes": "Attributes",
-                    "manage-attributes": "Manage property attributes"
+                    "manage-attributes": "Manage property attributes",
+                    "hidden": "Hidden"
                 },
                 "placeholders": {
                     "display-name": "Enter display name..."
@@ -293,7 +294,7 @@
                     "end-date": "Listing expires on"
                 },
                 "validations": {
-                    "sku": "SKU can't contain $+;=%{}[]|/@ ~!^*&()?:'<>, characters"
+                    "sku": "SKU can't contain $+;=%{}[]|@ ~!^*&()?'<>, characters"
                 },
                 "placeholders": {
                     "sku": "Enter item SKU",
@@ -331,7 +332,8 @@
                     "no-items": "No Variations yet",
                     "picture": "Pic",
                     "name": "Name",
-                    "sku": "SKU"
+                    "sku": "SKU",
+                    "manufacturer-part-number": "Manufacturer part number"
                 }
             },
             "editorialReviews-list": {
@@ -605,7 +607,7 @@
                     "code": "Code"
                 },
                 "validations": {
-                    "code": "Code can't contain $+;=%{}[]|\/@ ~!^*&()?:'<>, characters"
+                    "code": "Code can't contain $+;=%{}[]|@ ~!^*&()?'<>, characters"
                 },
                 "placeholders": {
                     "name": "Enter category name",
@@ -629,7 +631,7 @@
                     "seo-information-summary-undefined": "Seo information undefined"
                 },
                 "validations": {
-                    "sku": "SKU can't contain $+;=%{}[]|\/@ ~!^*&()?:'<>, characters",
+                    "sku": "SKU can't contain $+;=%{}[]|@ ~!^*&()?'<>, characters",
                     "sku-required": "Required",
                     "name-required": "Required"
                 },
@@ -650,7 +652,7 @@
                     "upload-images-summary": "{{ count }} image(s) uploaded"
                 },
                 "validations": {
-                    "sku": "SKU can't contain $+;=%{}[]|\/@ ~!^*&()?:'<>, characters",
+                    "sku": "SKU can't contain $+;=%{}[]|@ ~!^*&()?'<>, characters",
                     "sku-required": "Required",
                     "name-required": "Required"
                 },
@@ -708,33 +710,53 @@
         "catalog:import": "Import catalog data"
     },
     "settings": {
-        "Catalog.ImageCategories": {
-            "description": "Dictionary of possible categories that item's Images can have",
-            "title": "Image categories"
+        "Catalog": {
+            "ImageCategories": {
+                "description": "Dictionary of possible categories that item's Images can have",
+                "title": "Image categories"
+            },
+            "AssociationGroups": {
+                "description": "Catalog product association groups",
+                "title": "Association Group names"
+            },
+            "EditorialReviewTypes": {
+                "description": "The dictionary of possible types that item's Descriptions can have",
+                "title": "Item description types"
+            },
+            "CodesInOutline": {
+                "description": "Enable or disable using codes instead of ids in outlines",
+                "title": "Use catalog and product codes in outlines"
+            },
+            "ExposeAliasInDictionary": {
+                "description": "Enable or disable exposing the Alias for dictionary values",
+                "title": "Expose Alias In Dictionary"
+            },
+            "Search": {
+                "UseCatalogIndexedSearchInManager": {
+                    "description": "Enable or disable indexed search for catalog module with advanced syntax",
+                    "title": "Use indexed search for catalog"
+                },
+                "UseFullObjectIndexStoring": {
+                    "description": "Store serialized catalog objects in the index and return them in search results",
+                    "title": "Store serialized catalog objects in the index"
+                }
+            }
         },
-        "Catalog.AssociationGroups": {
-            "description": "Catalog product association groups",
-            "title": "Association Group names"
-        },
-        "Catalog.EditorialReviewTypes": {
-            "description": "The dictionary of possible types that item's Descriptions can have",
-            "title": "Item description types"
-        },
-        "Catalog.CodesInOutline": {
-            "description": "Enable or disable using codes instead of ids in outlines",
-            "title": "Use catalog and product codes in outlines"
-        },
-        "Catalog.ExposeAliasInDictionary": {
-            "description": "Enable or disable exposing the Alias for dictionary values",
-            "title": "Expose Alias In Dictionary"
-        },
-        "Catalog.Search.UseCatalogIndexedSearchInManager": {
-            "description": "Enable or disable indexed search for catalog module with advanced syntax",
-            "title": "Use indexed search for catalog"
-        },
-        "Catalog.Search.UseFullObjectIndexStoring": {
-            "description": "Store serialized catalog objects in the index and return them in search results",
-            "title": "Store serialized catalog objects in the index"
+        "VirtoCommerce": {
+            "Search": {
+                "IndexingJobs": {
+                    "IndexationDate": {
+                        "Product": {
+                            "title": "Product indexation date and time",
+                            "description": "Date and time of the product indexation task to start"
+                        },
+                        "Category": {
+                            "title": "Category indexation date and time",
+                            "description": "Date and time of the category indexation task to start"
+                        }
+                    }
+                }
+            }
         }
     },
     "module": {

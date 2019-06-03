@@ -9,6 +9,7 @@ function ($scope, assignments, dialogService, uiGridHelper, bladeUtils, catalogs
         blade.isLoading = true;
         assignments.search({
             pricelistId: blade.pricelistId,
+            keyword: filter.keyword,
             sort: uiGridHelper.getSortExpression($scope),
             skip: ($scope.pageSettings.currentPage - 1) * $scope.pageSettings.itemsPerPageCount,
             take: $scope.pageSettings.itemsPerPageCount
@@ -80,9 +81,28 @@ function ($scope, assignments, dialogService, uiGridHelper, bladeUtils, catalogs
                     });
                 }
             }
-        }
+        };
         dialogService.showConfirmationDialog(dialog);
-    }
+    };
+
+    $scope.deleteAllFiltered = function () {
+        var dialog = {
+            id: "confirmDeleteItems",
+            callback: function (confirm) {
+                if (!confirm)
+                    return;
+                closeChildrenBlades();
+                blade.isLoading = true;
+                assignments.removeFiltered({
+                    pricelistId: blade.pricelistId,
+                    keyword: filter.keyword
+                }, function () {
+                    blade.refresh();
+                });
+            }
+        };
+        dialogService.showDialog(dialog, 'Modules/$(VirtoCommerce.Pricing)/Scripts/dialogs/deleteAll-dialog.tpl.html', 'platformWebApp.confirmDialogController');
+    };
 
     function closeChildrenBlades() {
         angular.forEach(blade.childrenBlades.slice(), function (child) {
@@ -114,6 +134,17 @@ function ($scope, assignments, dialogService, uiGridHelper, bladeUtils, catalogs
             },
             canExecuteMethod: function () {
                 return isItemsChecked();
+            },
+            permission: 'pricing:delete'
+        },
+        {
+            name: "pricing.commands.delete-all-filtered",
+            icon: 'fa fa-trash-o',
+            executeMethod: function() {
+                $scope.deleteAllFiltered();
+            },
+            canExecuteMethod: function() {
+                return blade.currentEntities && blade.currentEntities.length > 0;
             },
             permission: 'pricing:delete'
         }

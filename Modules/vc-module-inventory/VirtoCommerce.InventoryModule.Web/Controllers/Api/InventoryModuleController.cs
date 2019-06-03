@@ -12,7 +12,7 @@ using VirtoCommerce.Platform.Core.Common;
 
 namespace VirtoCommerce.InventoryModule.Web.Controllers.Api
 {
-    [Route("api/inventory")]
+    [Route("api")]
     public class InventoryModuleController : Controller
     {
         private readonly IInventoryService _inventoryService;
@@ -32,9 +32,8 @@ namespace VirtoCommerce.InventoryModule.Web.Controllers.Api
         /// </summary>
         [HttpPost]
         [AllowAnonymous]
-        [ProducesResponseType(typeof(GenericSearchResult<FulfillmentCenter>), 200)]
-        [Route("fulfillmentcenters/search")]
-        public async Task<IActionResult> SearchFulfillmentCenters([FromBody] FulfillmentCenterSearchCriteria searchCriteria)
+        [Route("inventory/fulfillmentcenters/search")]
+        public async Task<ActionResult<FulfillmentCenterSearchResult>> SearchFulfillmentCenters([FromBody] FulfillmentCenterSearchCriteria searchCriteria)
         {
             var retVal = await _fulfillmentCenterSearchService.SearchCentersAsync(searchCriteria);
             return Ok(retVal);
@@ -46,9 +45,8 @@ namespace VirtoCommerce.InventoryModule.Web.Controllers.Api
         /// </summary>
         /// <param name="id">fulfillment center id</param>
         [HttpGet]
-        [ProducesResponseType(typeof(FulfillmentCenter), 200)]
-        [Route("fulfillmentcenters/{id}")]
-        public async Task<IActionResult> GetFulfillmentCenter([FromRoute]string id)
+        [Route("inventory/fulfillmentcenters/{id}")]
+        public async Task<ActionResult<FulfillmentCenter>> GetFulfillmentCenter([FromRoute]string id)
         {
             var retVal = await _fulfillmentCenterService.GetByIdsAsync(new[] { id });
             return Ok(retVal.FirstOrDefault());
@@ -59,10 +57,9 @@ namespace VirtoCommerce.InventoryModule.Web.Controllers.Api
         /// </summary>
         /// <param name="center">fulfillment center</param>
         [HttpPut]
-        [ProducesResponseType(typeof(FulfillmentCenter), 200)]
-        [Route("fulfillmentcenters")]
+        [Route("inventory/fulfillmentcenters")]
         [Authorize(ModuleConstants.Security.Permissions.FulfillmentEdit)]
-        public async Task<IActionResult> SaveFulfillmentCenter([FromBody]FulfillmentCenter center)
+        public async Task<ActionResult<FulfillmentCenter>> SaveFulfillmentCenter([FromBody]FulfillmentCenter center)
         {
             await _fulfillmentCenterService.SaveChangesAsync(new[] { center });
             return Ok(center);
@@ -72,13 +69,13 @@ namespace VirtoCommerce.InventoryModule.Web.Controllers.Api
         /// Delete  fulfillment centers registered in the system
         /// </summary>
         [HttpDelete]
-        [ProducesResponseType(typeof(void), 200)]
-        [Route("fulfillmentcenters")]
+        [Route("inventory/fulfillmentcenters")]
+        [Route("fulfillment/centers")]
         [Authorize(ModuleConstants.Security.Permissions.FulfillmentDelete)]
-        public async Task<IActionResult> DeleteFulfillmentCenters([FromQuery] string[] ids)
+        public async Task<ActionResult> DeleteFulfillmentCenters([FromQuery] string[] ids)
         {
             await _fulfillmentCenterService.DeleteAsync(ids);
-            return Ok();
+            return NoContent();
         }
 
 
@@ -88,9 +85,8 @@ namespace VirtoCommerce.InventoryModule.Web.Controllers.Api
         /// <remarks>Get inventory of products for each fulfillment center.</remarks>
         /// <param name="ids">Products ids</param>
         [HttpGet]
-        [Route("products")]
-        [ProducesResponseType(typeof(InventoryInfo[]), 200)]
-        public async Task<IActionResult> GetProductsInventories([FromQuery] string[] ids)
+        [Route("inventory/products")]
+        public async Task<ActionResult<InventoryInfo[]>> GetProductsInventories([FromQuery] string[] ids)
         {
             var result = new List<InventoryInfo>();
             var allFulfillments = await _fulfillmentCenterSearchService.SearchCentersAsync(new FulfillmentCenterSearchCriteria { Take = int.MaxValue });
@@ -120,9 +116,8 @@ namespace VirtoCommerce.InventoryModule.Web.Controllers.Api
         /// <remarks>Get inventory of products for each fulfillment center.</remarks>
         /// <param name="ids">Products ids</param>
         [HttpPost]
-        [Route("products/plenty")]
-        [ProducesResponseType(typeof(InventoryInfo[]), 200)]
-        public async Task<IActionResult> GetProductsInventoriesByPlentyIds([FromQuery] string[] ids)
+        [Route("inventory/products/plenty")]
+        public async Task<ActionResult<InventoryInfo[]>> GetProductsInventoriesByPlentyIds([FromQuery] string[] ids)
         {
             return await GetProductsInventories(ids);
         }
@@ -133,9 +128,8 @@ namespace VirtoCommerce.InventoryModule.Web.Controllers.Api
         /// <remarks>Get inventories of product for each fulfillment center.</remarks>
         /// <param name="productId">Product id</param>
         [HttpGet]
-        [Route("products/{productId}")]
-        [ProducesResponseType(typeof(InventoryInfo[]), 200)]
-        public async Task<IActionResult> GetProductInventories([FromRoute]string productId)
+        [Route("inventory/products/{productId}")]
+        public async Task<ActionResult<InventoryInfo[]>> GetProductInventories([FromRoute]string productId)
         {
             return await GetProductsInventories(new[] { productId });
         }
@@ -146,12 +140,11 @@ namespace VirtoCommerce.InventoryModule.Web.Controllers.Api
         /// <remarks>Update given inventory of product.</remarks>
         /// <param name="inventory">Inventory to update</param>
         [HttpPut]
-        [Route("products/{productId}")]
-        [ProducesResponseType(typeof(InventoryInfo), 200)]
+        [Route("inventory/products/{productId}")]
         [Authorize(ModuleConstants.Security.Permissions.Update)]
-        public async Task<IActionResult> UpdateProductInventory([FromBody]InventoryInfo inventory)
+        public async Task<ActionResult<InventoryInfo>> UpdateProductInventory([FromBody]InventoryInfo inventory)
         {
-            await _inventoryService.SaveChangesAsync(new [] { inventory});
+            await _inventoryService.SaveChangesAsync(new[] { inventory });
             return Ok(inventory);
         }
     }

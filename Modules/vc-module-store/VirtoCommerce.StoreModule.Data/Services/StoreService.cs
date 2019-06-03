@@ -4,9 +4,7 @@ using System.Linq;
 using System.Threading.Tasks;
 using FluentValidation;
 using Microsoft.Extensions.Caching.Memory;
-using VirtoCommerce.CoreModule.Core.Payment;
-using VirtoCommerce.CoreModule.Core.Seo;
-using VirtoCommerce.CoreModule.Core.Shipping;
+
 using VirtoCommerce.Platform.Core.Caching;
 using VirtoCommerce.Platform.Core.Common;
 using VirtoCommerce.Platform.Core.DynamicProperties;
@@ -29,19 +27,17 @@ namespace VirtoCommerce.StoreModule.Data.Services
         private readonly Func<IStoreRepository> _repositoryFactory;
         private readonly ISettingsManager _settingManager;
         private readonly IDynamicPropertyService _dynamicPropertyService;
-        private readonly IShippingMethodsRegistrar _shippingMethodRegistrar;
-        private readonly IPaymentMethodsRegistrar _paymentMethodRegistrar;
+
         private readonly IEventPublisher _eventPublisher;
         private readonly IPlatformMemoryCache _platformMemoryCache;
 
-        public StoreService(Func<IStoreRepository> repositoryFactory, ISettingsManager settingManager, IDynamicPropertyService dynamicPropertyService, IShippingMethodsRegistrar shippingService, IPaymentMethodsRegistrar paymentService,
+        public StoreService(Func<IStoreRepository> repositoryFactory, ISettingsManager settingManager, IDynamicPropertyService dynamicPropertyService,
                             IEventPublisher eventPublisher, IPlatformMemoryCache platformMemoryCache)
         {
             _repositoryFactory = repositoryFactory;
             _settingManager = settingManager;
             _dynamicPropertyService = dynamicPropertyService;
-            _shippingMethodRegistrar = shippingService;
-            _paymentMethodRegistrar = paymentService;
+
             _eventPublisher = eventPublisher;
             _platformMemoryCache = platformMemoryCache;
         }
@@ -55,6 +51,8 @@ namespace VirtoCommerce.StoreModule.Data.Services
             {
                 var stores = new List<Store>();
 
+                cacheEntry.AddExpirationToken(StoreCacheRegion.CreateChangeToken());
+
                 using (var repository = _repositoryFactory())
                 {
                     repository.DisableChangesTracking();
@@ -65,11 +63,9 @@ namespace VirtoCommerce.StoreModule.Data.Services
                         var store = AbstractTypeFactory<Store>.TryCreateInstance();
                         dbStore.ToModel(store);
 
-                        PopulateStore(store, dbStore);
 
                         await _settingManager.DeepLoadSettingsAsync(store);
                         stores.Add(store);
-                        cacheEntry.AddExpirationToken(StoreCacheRegion.CreateChangeToken(store));
                     }
                 }
 
@@ -177,12 +173,7 @@ namespace VirtoCommerce.StoreModule.Data.Services
 
         protected virtual void ClearCache(IEnumerable<Store> stores)
         {
-            StoreSearchCacheRegion.ExpireRegion();
-
-            foreach (var store in stores)
-            {
-                StoreCacheRegion.ExpireStore(store);
-            }
+            StoreCacheRegion.ExpireRegion();
         }
 
         protected virtual void ValidateStoresProperties(IEnumerable<Store> stores)
@@ -199,28 +190,8 @@ namespace VirtoCommerce.StoreModule.Data.Services
             }
         }
 
-        protected virtual void PopulateStore(Store store, StoreEntity dbStore)
-        {
-            //Return all registered methods with store settings 
-            store.PaymentMethods = _paymentMethodRegistrar.GetAllPaymentMethods();
-            foreach (var paymentMethod in store.PaymentMethods)
-            {
-                var dbStoredPaymentMethod = dbStore.PaymentMethods.FirstOrDefault(x => x.Code.EqualsInvariant(paymentMethod.Code));
-                if (dbStoredPaymentMethod != null)
-                {
-                    dbStoredPaymentMethod.ToModel(paymentMethod);
-                }
-            }
-            store.ShippingMethods = _shippingMethodRegistrar.GetAllShippingMethods();
-            foreach (var shippingMethod in store.ShippingMethods)
-            {
-                var dbStoredShippingMethod = dbStore.ShippingMethods.FirstOrDefault(x => x.Code.EqualsInvariant(shippingMethod.Code));
-                if (dbStoredShippingMethod != null)
-                {
-                    dbStoredShippingMethod.ToModel(shippingMethod);
-                }
-            }
-        }
+
+
         #endregion
     }
 }

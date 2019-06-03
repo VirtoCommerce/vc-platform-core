@@ -1,8 +1,8 @@
 using System;
 using System.ComponentModel.DataAnnotations;
-using VirtoCommerce.Platform.Core.Common;
 using System.ComponentModel.DataAnnotations.Schema;
 using VirtoCommerce.CartModule.Core.Model;
+using VirtoCommerce.Platform.Core.Common;
 
 namespace VirtoCommerce.CartModule.Data.Model
 {
@@ -15,7 +15,7 @@ namespace VirtoCommerce.CartModule.Data.Model
 
         [NotMapped]
         public LineItem ModelLineItem { get; set; }
-        
+
         public string LineItemId { get; set; }
         public virtual LineItemEntity LineItem { get; set; }
 
@@ -54,8 +54,12 @@ namespace VirtoCommerce.CartModule.Data.Model
             BarCode = shipmentItem.BarCode;
             Quantity = shipmentItem.Quantity;
 
-            //Preserve link of the  original model LineItem for future references binding LineItems with  ShipmentLineItems 
-            ModelLineItem = shipmentItem.LineItem;
+            //Preserve link of the  original model LineItem for future references binding LineItems with  ShipmentLineItems
+            if (shipmentItem.LineItem != null)
+            {
+                ModelLineItem = shipmentItem.LineItem;
+            }
+
             pkMap.AddPair(shipmentItem, this);
 
             return this;

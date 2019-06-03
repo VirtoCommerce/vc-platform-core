@@ -165,7 +165,8 @@
           "manage-dictionary": "Управление словарем",
           "new-dictionary-property-caution": "Для доступа к значениям в начале сохраните свойство",
           "attributes": "Атрибуты",
-          "manage-attributes": "Управление атрибутами свойств"
+          "manage-attributes": "Управление атрибутами свойств",
+          "hidden": "Скрыто"
         },
         "placeholders": {
           "display-name": "Введите отображаемое название..."
@@ -329,7 +330,8 @@
               "no-items": "Пока нет вариаций",
               "picture": "Картинка",
               "name": "Название",
-              "sku": "SKU"
+              "sku": "SKU",
+              "manufacturer-part-number": "Номер детали производителя"
           }
       },
       "editorialReviews-list": {

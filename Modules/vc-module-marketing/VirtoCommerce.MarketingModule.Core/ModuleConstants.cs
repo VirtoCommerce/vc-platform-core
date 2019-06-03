@@ -32,20 +32,12 @@ namespace VirtoCommerce.MarketingModule.Core
                     AllowedValues = new[] { "BestReward", "CombineStackable" }
                 };
 
-                public static SettingDescriptor ExportImportDescription = new SettingDescriptor
-                {
-                    Name = "Marketing.ExportImport.Description",
-                    ValueType = SettingValueType.ShortText,
-                    GroupName = "Marketing|General",
-                    DefaultValue = "Export/Import promotions and dynamic contents (places, contents, publications)"
-                };
 
                 public static IEnumerable<SettingDescriptor> AllSettings
                 {
                     get
                     {
                         yield return CombinePolicy;
-                        yield return ExportImportDescription;
                     }
                 }
             }

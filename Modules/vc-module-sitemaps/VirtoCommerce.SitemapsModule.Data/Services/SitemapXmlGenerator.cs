@@ -14,18 +14,19 @@ using VirtoCommerce.SitemapsModule.Core.Services;
 using VirtoCommerce.SitemapsModule.Data.Models.Xml;
 using VirtoCommerce.StoreModule.Core.Model;
 using VirtoCommerce.StoreModule.Core.Services;
+using VirtoCommerce.SitemapsModule.Core;
 
 namespace VirtoCommerce.SitemapsModule.Data.Services
 {
     public class SitemapXmlGenerator : ISitemapXmlGenerator
     {
         private readonly ILogger _logger;
-        protected ISitemapSearchService _sitemapSearchService;
-        protected ISitemapItemSearchService _sitemapItemSearchService;
-        protected ISitemapUrlBuilder _sitemapUrlBuilder;
-        protected IEnumerable<ISitemapItemRecordProvider> _sitemapItemRecordProviders;
-        protected ISettingsManager _settingsManager;
-        protected IStoreService _storeService;
+        private readonly ISitemapSearchService _sitemapSearchService;
+        private readonly ISitemapItemSearchService _sitemapItemSearchService;
+        private readonly ISitemapUrlBuilder _sitemapUrlBuilder;
+        private readonly IEnumerable<ISitemapItemRecordProvider> _sitemapItemRecordProviders;
+        private readonly ISettingsManager _settingsManager;
+        private readonly IStoreService _storeService;
 
 
         public SitemapXmlGenerator(
@@ -77,8 +78,8 @@ namespace VirtoCommerce.SitemapsModule.Data.Services
         {
             var stream = new MemoryStream();
 
-            var filenameSeparator = _settingsManager.GetValue("Sitemap.FilenameSeparator", "--");
-            var recordsLimitPerFile = _settingsManager.GetValue("Sitemap.RecordsLimitPerFile", 10000);
+            var filenameSeparator = _settingsManager.GetValue(ModuleConstants.Settings.General.FilenameSeparator.Name, "--");
+            var recordsLimitPerFile = _settingsManager.GetValue(ModuleConstants.Settings.General.RecordsLimitPerFile.Name, 10000);
 
             var xmlNamespaces = new XmlSerializerNamespaces();
             xmlNamespaces.Add("", "http://www.sitemaps.org/schemas/sitemap/0.9");
@@ -151,8 +152,8 @@ namespace VirtoCommerce.SitemapsModule.Data.Services
 
         private async Task LoadSitemapRecords(Store store, Sitemap sitemap, string baseUrl, Action<ExportImportProgressInfo> progressCallback = null)
         {
-            var recordsLimitPerFile = _settingsManager.GetValue("Sitemap.RecordsLimitPerFile", 10000);
-            var filenameSeparator = _settingsManager.GetValue("Sitemap.FilenameSeparator", "--");
+            var recordsLimitPerFile = _settingsManager.GetValue(ModuleConstants.Settings.General.RecordsLimitPerFile.Name, 10000);
+            var filenameSeparator = _settingsManager.GetValue(ModuleConstants.Settings.General.FilenameSeparator.Name, "--");
 
             var sitemapItemSearchCriteria = new SitemapItemSearchCriteria
             {

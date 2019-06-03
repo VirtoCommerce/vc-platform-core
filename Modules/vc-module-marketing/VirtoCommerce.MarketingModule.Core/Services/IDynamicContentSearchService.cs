@@ -1,14 +1,14 @@
 using System.Threading.Tasks;
 using VirtoCommerce.MarketingModule.Core.Model;
-using VirtoCommerce.Platform.Core.Common;
+using VirtoCommerce.MarketingModule.Core.Model.DynamicContent.Search;
 
 namespace VirtoCommerce.MarketingModule.Core.Services
 {
     public interface IDynamicContentSearchService
     {
-        Task<GenericSearchResult<DynamicContentFolder>> SearchFoldersAsync(DynamicContentFolderSearchCriteria criteria);
-        Task<GenericSearchResult<DynamicContentItem>> SearchContentItemsAsync(DynamicContentItemSearchCriteria criteria);
-        Task<GenericSearchResult<DynamicContentPlace>> SearchContentPlacesAsync(DynamicContentPlaceSearchCriteria criteria);
-        Task<GenericSearchResult<DynamicContentPublication>> SearchContentPublicationsAsync(DynamicContentPublicationSearchCriteria criteria);
+        Task<DynamicContentFolderSearchResult> SearchFoldersAsync(DynamicContentFolderSearchCriteria criteria);
+        Task<DynamicContentItemSearchResult> SearchContentItemsAsync(DynamicContentItemSearchCriteria criteria);
+        Task<DynamicContentPlaceSearchResult> SearchContentPlacesAsync(DynamicContentPlaceSearchCriteria criteria);
+        Task<DynamicContentPublicationSearchResult> SearchContentPublicationsAsync(DynamicContentPublicationSearchCriteria criteria);
     }
 }

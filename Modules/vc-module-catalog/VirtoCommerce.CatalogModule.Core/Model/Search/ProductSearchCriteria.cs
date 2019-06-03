@@ -8,6 +8,10 @@ namespace VirtoCommerce.CatalogModule.Core.Model.Search
         public string CatalogId { get; set; }
         public string CategoryId { get; set; }
         public IList<string> Skus { get; set; }
+        /// <summary>
+        /// Include product variations in result
+        /// </summary>
+        public bool SearchInVariations { get; set; }
 
         /// <summary>
         /// Search product with specified types

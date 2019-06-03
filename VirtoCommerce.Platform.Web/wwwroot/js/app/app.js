@@ -165,8 +165,8 @@ angular.module('platformWebApp', AppDependencies).controller('platformWebApp.app
             return $q.when({});
         };
     })
-    .factory('fileUploaderOptions', ["platformWebApp.authDataStorage", function (authDataStorage) {
-        var authData = authDataStorage.getStoredData();
+    .factory('fileUploaderOptions', function () {
+        // do not add dynamic headers here, as the service is initialized once and no updates will be made
         return {
             url: '/',
             alias: 'file',
@@ -178,9 +178,20 @@ angular.module('platformWebApp', AppDependencies).controller('platformWebApp.app
             filters: [],
             formData: [],
             queueLimit: Number.MAX_VALUE,
-            withCredentials: false,
-            headers: authData ? { Authorization: 'Bearer ' + authData.token } : {}
+            withCredentials: false
         };
+    })
+    .config(['$provide', function ($provide) {
+        $provide.decorator('FileUploader', ['$delegate', 'platformWebApp.authDataStorage', function (FileUploader, authDataStorage) {
+            // inject auth header for all FileUploader instance
+            FileUploader.prototype._onAfterAddingFile = function (item) {
+                var authData = authDataStorage.getStoredData();
+                var authHeaders = authData ? { Authorization: 'Bearer ' + authData.token } : {};
+                item.headers = angular.extend({}, item.headers, authHeaders);
+                FileUploader.prototype.onAfterAddingFile(item);
+            }
+            return FileUploader;
+        }])
     }])
     .config(['$stateProvider', '$httpProvider', 'uiSelectConfig', 'datepickerConfig', 'datepickerPopupConfig', 'tagsInputConfigProvider', '$compileProvider',
         function ($stateProvider, $httpProvider, uiSelectConfig, datepickerConfig, datepickerPopupConfig, tagsInputConfigProvider, $compileProvider) {
@@ -290,9 +301,14 @@ angular.module('platformWebApp', AppDependencies).controller('platformWebApp.app
                     if (!authContext.isAuthenticated) {
                         $state.go('loginDialog');
                     } else if (authContext.passwordExpired) {
+                        var currentState = $state.current;
                         $state.go('changePasswordDialog', {
                             onClose: function () {
-                                $state.go('workspace');
+                                if (currentState && !currentState.abstract) {
+                                    $state.go(currentState);
+                                } else {
+                                    $state.go('workspace');
+                                }
                             }
                         });
                     } else if (!$state.current.name || $state.current.name === 'loginDialog') {

@@ -1,0 +1,62 @@
+{
+    "payment": {
+        "blades": {
+            "payment-method-detail": {
+                "subtitle": "Edit payment method",
+                "labels": {
+                    "is-active": "Is active",
+                    "is-partial-payments-available": "Is partial payments available",
+                    "name": "Name",
+                    "code": "Code",
+                    "description": "Description",
+                    "settings": "Settings"
+                },
+                "placeholders": {
+                    "description": "Enter description"
+                }
+            },
+            "payment-method-list": {
+                "subtitle": "Edit payment method",
+                "labels": {
+                    "is-active": "Is active",
+                    "payment-method": "Payment method",
+                    "note": "Set the order how payment methods appear sorted in web store. Drag and drop to change the order."
+                },
+                "placeholders": {
+                    "description": "Enter description"
+                }
+            }
+        },
+        "dialogs": {
+            "payment-method-save": {
+                "title": "Save changes",
+                "message": "The payment method has been modified. Do you want to save changes?"
+            }
+        },
+        "widgets": {
+            "store-payment-widget": {
+                "title": "Payment methods",
+                "blade-subtitle": "Payment methods"
+            }
+        },
+        "labels": {
+            "DefaultManualPaymentMethod": {
+                "name": "Manual test payment method",
+                "description": "Manual test method, don't use on production"
+            }
+        }
+    },
+    "settings": {
+        "VirtoCommerce.Payment.DefaultManualPaymentMethod": {
+            "Logo": {
+                "title": "Logo url",
+                "description": "Payment method logo url"
+            }
+        }
+    },
+    "module": {
+        "VirtoCommerce.Payment": {
+            "description": "Export/Import payment methods"
+        } 
+    } 
+}

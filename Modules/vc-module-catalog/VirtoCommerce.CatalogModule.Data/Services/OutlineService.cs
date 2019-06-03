@@ -152,7 +152,8 @@ namespace VirtoCommerce.CatalogModule.Data.Services
             var retVal = new OutlineItem
             {
                 Id = _outlinePartResolver.ResolveOutlinePart(entity),
-                SeoObjectType = seoSupport != null ? seoSupport.SeoObjectType : "Catalog"
+                SeoObjectType = seoSupport != null ? seoSupport.SeoObjectType : "Catalog",
+                SeoInfos = seoSupport?.SeoInfos
             };
             return retVal;
         }

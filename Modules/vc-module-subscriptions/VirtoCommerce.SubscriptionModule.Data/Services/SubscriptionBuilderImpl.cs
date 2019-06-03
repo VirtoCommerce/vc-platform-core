@@ -1,17 +1,16 @@
 using System;
 using System.Collections.Generic;
 using System.Linq;
-using System.Text;
 using System.Threading.Tasks;
 using Newtonsoft.Json;
 using VirtoCommerce.CoreModule.Core.Common;
-using VirtoCommerce.CoreModule.Core.Payment;
 using VirtoCommerce.OrdersModule.Core.Model;
-using VirtoCommerce.SubscriptionModule.Core.Model;
-using VirtoCommerce.SubscriptionModule.Core.Services;
+using VirtoCommerce.PaymentModule.Core.Model;
 using VirtoCommerce.Platform.Core.Common;
 using VirtoCommerce.Platform.Core.Settings;
 using VirtoCommerce.StoreModule.Core.Services;
+using VirtoCommerce.SubscriptionModule.Core.Model;
+using VirtoCommerce.SubscriptionModule.Core.Services;
 
 namespace VirtoCommerce.SubscriptionModule.Data.Services
 {
@@ -49,7 +48,7 @@ namespace VirtoCommerce.SubscriptionModule.Data.Services
                     Subscription.Balance = 0m;
                     var allNotCanceledOrders = Subscription.CustomerOrders.Where(x => !x.IsCancelled);
                     var ordersGrandTotal = allNotCanceledOrders.Sum(x => Math.Round(x.Total, 2, MidpointRounding.AwayFromZero));
-                    var paidPaymentStatuses = new PaymentStatus[] { PaymentStatus.Authorized, PaymentStatus.Paid };
+                    var paidPaymentStatuses = new[] { PaymentStatus.Authorized, PaymentStatus.Paid };
                     var paidTotal = allNotCanceledOrders.SelectMany(x => x.InPayments).Where(x => !x.IsCancelled && paidPaymentStatuses.Contains(x.PaymentStatus)).Sum(x => x.Sum);
 
                     Subscription.Balance = ordersGrandTotal - paidTotal;

@@ -2,7 +2,6 @@ using System;
 using System.Collections.Generic;
 using System.IO;
 using System.IO.Compression;
-using System.IO.Packaging;
 using System.Linq;
 using System.Net;
 using System.Net.Http;
@@ -103,7 +102,7 @@ namespace VirtoCommerce.SitemapsModule.Web.Controllers.Api
         [HttpPost]
         [Route("")]
         [Authorize(ModuleConstants.Security.Permissions.Create)]
-        public async Task<ActionResult<Sitemap>> AddSitemap([FromBody]Sitemap sitemap)
+        public async Task<ActionResult> AddSitemap([FromBody]Sitemap sitemap)
         {
             if (sitemap == null)
             {
@@ -112,13 +111,13 @@ namespace VirtoCommerce.SitemapsModule.Web.Controllers.Api
 
             await _sitemapService.SaveChangesAsync(new[] { sitemap });
 
-            return Ok(sitemap);
+            return NoContent();
         }
 
         [HttpPut]
         [Route("")]
         [Authorize(ModuleConstants.Security.Permissions.Update)]
-        public async Task<ActionResult<Sitemap>> UpdateSitemap([FromBody]Sitemap sitemap)
+        public async Task<ActionResult> UpdateSitemap([FromBody]Sitemap sitemap)
         {
             if (sitemap == null)
             {
@@ -127,7 +126,7 @@ namespace VirtoCommerce.SitemapsModule.Web.Controllers.Api
 
             await _sitemapService.SaveChangesAsync(new[] { sitemap });
 
-            return Ok(sitemap);
+            return NoContent();
         }
 
         [HttpDelete]
@@ -142,7 +141,7 @@ namespace VirtoCommerce.SitemapsModule.Web.Controllers.Api
 
             await _sitemapService.RemoveAsync(ids);
 
-            return Ok();
+            return NoContent();
         }
 
         [HttpPost]
@@ -178,12 +177,12 @@ namespace VirtoCommerce.SitemapsModule.Web.Controllers.Api
             }
             await _sitemapItemService.SaveChangesAsync(items);
 
-            return Ok();
+            return NoContent();
         }
 
         [HttpDelete]
         [Route("items")]
-        public async Task<IActionResult> RemoveSitemapItems(string[] itemIds)
+        public async Task<ActionResult> RemoveSitemapItems(string[] itemIds)
         {
             if (itemIds == null)
             {
@@ -192,7 +191,7 @@ namespace VirtoCommerce.SitemapsModule.Web.Controllers.Api
 
             await _sitemapItemService.RemoveAsync(itemIds);
 
-            return Ok();
+            return NoContent();
         }
 
         [HttpGet]

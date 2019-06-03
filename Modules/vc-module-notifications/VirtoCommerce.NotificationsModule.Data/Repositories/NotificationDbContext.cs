@@ -23,30 +23,11 @@ namespace VirtoCommerce.NotificationsModule.Data.Repositories
 
             modelBuilder.Entity<NotificationEntity>().ToTable("Notification").HasKey(x => x.Id);
             modelBuilder.Entity<NotificationEntity>().Property(x => x.Id).HasMaxLength(128);
-            
-            modelBuilder.Entity<NotificationEntity>()
-                .HasMany(n => n.Templates)
-                .WithOne()
-                .HasForeignKey(n => n.NotificationId)
-                .IsRequired(false)
-                .OnDelete(DeleteBehavior.Cascade);
-                        
             modelBuilder.Entity<NotificationEntity>().Property(x => x.CreatedBy).HasMaxLength(64);
             modelBuilder.Entity<NotificationEntity>().Property(x => x.ModifiedBy).HasMaxLength(64);
 
-            modelBuilder.Entity<EmailNotificationEntity>()
-                .HasMany(n => n.Attachments)
-                .WithOne()
-                .HasForeignKey(n => n.NotificationId)
-                .IsRequired(false)
-                .OnDelete(DeleteBehavior.Cascade);
-
-            modelBuilder.Entity<EmailNotificationEntity>()
-                .HasMany(n => n.Recipients)
-                .WithOne()
-                .HasForeignKey(n => n.NotificationId)
-                .IsRequired(false)
-                .OnDelete(DeleteBehavior.Cascade);
+            modelBuilder.Entity<EmailNotificationEntity>();
+            modelBuilder.Entity<SmsNotificationEntity>();
 
             #endregion
 
@@ -57,6 +38,12 @@ namespace VirtoCommerce.NotificationsModule.Data.Repositories
             modelBuilder.Entity<NotificationTemplateEntity>().Property(x => x.CreatedBy).HasMaxLength(64);
             modelBuilder.Entity<NotificationTemplateEntity>().Property(x => x.ModifiedBy).HasMaxLength(64);
 
+            modelBuilder.Entity<NotificationTemplateEntity>().HasOne(x => x.Notification).WithMany(x => x.Templates)
+                       .HasForeignKey(x => x.NotificationId).OnDelete(DeleteBehavior.Cascade);
+
+            modelBuilder.Entity<EmailNotificationTemplateEntity>();
+            modelBuilder.Entity<SmsNotificationTemplateEntity>();
+
             #endregion
 
             #region NotificationMessage
@@ -65,6 +52,12 @@ namespace VirtoCommerce.NotificationsModule.Data.Repositories
             modelBuilder.Entity<NotificationMessageEntity>().Property(x => x.Id).HasMaxLength(128);
             modelBuilder.Entity<NotificationMessageEntity>().Property(x => x.CreatedBy).HasMaxLength(64);
             modelBuilder.Entity<NotificationMessageEntity>().Property(x => x.ModifiedBy).HasMaxLength(64);
+
+            modelBuilder.Entity<NotificationMessageEntity>().HasOne(x => x.Notification).WithMany()
+                  .HasForeignKey(x => x.NotificationId).OnDelete(DeleteBehavior.Restrict);
+
+            modelBuilder.Entity<EmailNotificationMessageEntity>();
+            modelBuilder.Entity<SmsNotificationMessageEntity>();
 
             #endregion
 
@@ -75,12 +68,18 @@ namespace VirtoCommerce.NotificationsModule.Data.Repositories
             modelBuilder.Entity<EmailAttachmentEntity>().Property(x => x.CreatedBy).HasMaxLength(64);
             modelBuilder.Entity<EmailAttachmentEntity>().Property(x => x.ModifiedBy).HasMaxLength(64);
 
+            modelBuilder.Entity<EmailAttachmentEntity>().HasOne(x => x.Notification).WithMany(x => x.Attachments)
+                  .HasForeignKey(x => x.NotificationId).OnDelete(DeleteBehavior.Cascade);
+
             #endregion
 
             #region NotificationEmailRecipient
 
             modelBuilder.Entity<NotificationEmailRecipientEntity>().ToTable("NotificationEmailRecipient").HasKey(x => x.Id);
             modelBuilder.Entity<NotificationEmailRecipientEntity>().Property(x => x.Id).HasMaxLength(128);
+
+            modelBuilder.Entity<NotificationEmailRecipientEntity>().HasOne(x => x.Notification).WithMany(x => x.Recipients)
+                  .HasForeignKey(x => x.NotificationId).OnDelete(DeleteBehavior.Cascade);
 
             #endregion
 

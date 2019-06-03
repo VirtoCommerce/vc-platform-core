@@ -49,7 +49,7 @@ namespace Mvc.Server
         // you must provide your own token endpoint action:
 
         [HttpPost("~/connect/token"), Produces("application/json")]
-        public async Task<IActionResult> Exchange(OpenIdConnectRequest request)
+        public async Task<ActionResult> Exchange(OpenIdConnectRequest request)
         {
             Debug.Assert(request.IsTokenRequest(),
                 "The OpenIddict binder for ASP.NET Core MVC is not registered. " +
@@ -84,7 +84,7 @@ namespace Mvc.Server
                 var claimsPrincipal = await _userClaimsPrincipalFactory.CreateAsync(user);
                 var limitedPermissions = _authorizationOptions.LimitedCookiePermissions?.Split(PlatformConstants.Security.Claims.PermissionClaimTypeDelimiter, StringSplitOptions.RemoveEmptyEntries) ?? new string[0];
 
-                if (!user.Roles.Select(r => r.Name).Contains(PlatformConstants.Security.SystemRoles.Administrator))
+                if (!user.IsAdministrator)
                 {
                     limitedPermissions = claimsPrincipal
                         .Claims

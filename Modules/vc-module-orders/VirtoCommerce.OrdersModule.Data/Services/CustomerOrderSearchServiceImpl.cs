@@ -20,14 +20,16 @@ namespace VirtoCommerce.OrdersModule.Data.Services
     {
         private readonly Func<IOrderRepository> _repositoryFactory;
         private readonly IPlatformMemoryCache _platformMemoryCache;
+        private readonly ICustomerOrderService _customerOrderService;
 
-        public CustomerOrderSearchServiceImpl(Func<IOrderRepository> repositoryFactory, IPlatformMemoryCache platformMemoryCache)
+        public CustomerOrderSearchServiceImpl(Func<IOrderRepository> repositoryFactory, ICustomerOrderService customerOrderService, IPlatformMemoryCache platformMemoryCache)
         {
             _repositoryFactory = repositoryFactory;
             _platformMemoryCache = platformMemoryCache;
+            _customerOrderService = customerOrderService;
         }
 
-        public virtual async Task<GenericSearchResult<CustomerOrder>> SearchCustomerOrdersAsync(CustomerOrderSearchCriteria criteria)
+        public virtual async Task<CustomerOrderSearchResult> SearchCustomerOrdersAsync(CustomerOrderSearchCriteria criteria)
         {
             var cacheKey = CacheKey.With(GetType(), "SearchCustomerOrdersAsync", criteria.GetCacheKey());
             return await _platformMemoryCache.GetOrCreateExclusiveAsync(cacheKey, async (cacheEntry) =>
@@ -36,8 +38,8 @@ namespace VirtoCommerce.OrdersModule.Data.Services
                 using (var repository = _repositoryFactory())
                 {
                     repository.DisableChangesTracking();
-                    var retVal = new GenericSearchResult<CustomerOrder>();
-                    var orderResponseGroup = EnumUtility.SafeParse(criteria.ResponseGroup, CustomerOrderResponseGroup.Full);
+                    var result = AbstractTypeFactory<CustomerOrderSearchResult>.TryCreateInstance();
+                    var orderResponseGroup = EnumUtility.SafeParseFlags(criteria.ResponseGroup, CustomerOrderResponseGroup.Full);
 
                     var query = GetOrdersQuery(repository, criteria);
 
@@ -55,15 +57,13 @@ namespace VirtoCommerce.OrdersModule.Data.Services
                     }
                     query = query.OrderBySortInfos(sortInfos);
 
-                    retVal.TotalCount = await query.CountAsync();
+                    result.TotalCount = await query.CountAsync();
                     var orderIds = await query.Select(x => x.Id).Skip(criteria.Skip).Take(criteria.Take).ToArrayAsync();
 
-                    var list = await repository.GetCustomerOrdersByIdsAsync(orderIds, orderResponseGroup);
-
-                    retVal.Results = list.Select(x =>
-                        x.ToModel(AbstractTypeFactory<CustomerOrder>.TryCreateInstance()) as CustomerOrder).ToList();
-
-                    return retVal;
+                    result.Results = (await _customerOrderService.GetByIdsAsync(orderIds, criteria.ResponseGroup)).AsQueryable()
+                                                   .OrderBySortInfos(sortInfos)
+                                                   .ToList();
+                    return result;
                 }
             });
         }

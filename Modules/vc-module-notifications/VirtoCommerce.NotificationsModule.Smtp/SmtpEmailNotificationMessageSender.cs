@@ -66,12 +66,19 @@ namespace VirtoCommerce.NotificationsModule.Smtp
                     {
                         await client.SendMailAsync(mailMsg);
                     }
-                };
+                }
+
+                ;
             }
             catch (SmtpException ex)
             {
                 throw new SentNotificationException(ex.Message, ex);
             }
+            catch (InvalidOperationException ex)
+            {
+                throw new SentNotificationException(ex.Message, ex);
+            }
+
         }
 
         private SmtpClient CreateClient()

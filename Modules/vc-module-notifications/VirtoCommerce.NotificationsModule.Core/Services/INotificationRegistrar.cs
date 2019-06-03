@@ -9,6 +9,5 @@ namespace VirtoCommerce.NotificationsModule.Core.Services
     public interface INotificationRegistrar
     {
         void RegisterNotification<T>() where T : Notification;
-        void RegisterNotification<T, TMap>() where T : Notification where TMap : AuditableEntity;
     }
 }

@@ -4,14 +4,15 @@ using System.Linq;
 using System.Threading.Tasks;
 using Microsoft.Extensions.Caching.Memory;
 using VirtoCommerce.CoreModule.Core.Common;
-using VirtoCommerce.CoreModule.Core.Payment;
-using VirtoCommerce.CoreModule.Core.Shipping;
+
 using VirtoCommerce.OrdersModule.Core.Events;
 using VirtoCommerce.OrdersModule.Core.Model;
 using VirtoCommerce.OrdersModule.Core.Services;
 using VirtoCommerce.OrdersModule.Data.Caching;
 using VirtoCommerce.OrdersModule.Data.Model;
 using VirtoCommerce.OrdersModule.Data.Repositories;
+using VirtoCommerce.PaymentModule.Core.Model.Search;
+using VirtoCommerce.PaymentModule.Core.Services;
 using VirtoCommerce.Platform.Core.Caching;
 using VirtoCommerce.Platform.Core.ChangeLog;
 using VirtoCommerce.Platform.Core.Common;
@@ -19,6 +20,8 @@ using VirtoCommerce.Platform.Core.DynamicProperties;
 using VirtoCommerce.Platform.Core.Events;
 using VirtoCommerce.Platform.Core.Settings;
 using VirtoCommerce.Platform.Data.Infrastructure;
+using VirtoCommerce.ShippingModule.Core.Model.Search;
+using VirtoCommerce.ShippingModule.Core.Services;
 using VirtoCommerce.StoreModule.Core.Services;
 
 namespace VirtoCommerce.OrdersModule.Data.Services
@@ -31,16 +34,18 @@ namespace VirtoCommerce.OrdersModule.Data.Services
         private readonly IStoreService _storeService;
 
         private readonly IUniqueNumberGenerator _uniqueNumberGenerator;
-        private readonly IPaymentMethodsRegistrar _paymentMethodsRegistrar;
-        private readonly IShippingMethodsRegistrar _shippingMethodsRegistrar;
+        private readonly IShippingMethodsSearchService _shippingMethodsSearchService;
+        private readonly IPaymentMethodsSearchService _paymentMethodSearchService;
         private readonly IChangeLogService _changeLogService;
         private readonly ICustomerOrderTotalsCalculator _totalsCalculator;
         private readonly IPlatformMemoryCache _platformMemoryCache;
 
-        public CustomerOrderServiceImpl(Func<IOrderRepository> orderRepositoryFactory, IUniqueNumberGenerator uniqueNumberGenerator
+        public CustomerOrderServiceImpl(
+            Func<IOrderRepository> orderRepositoryFactory, IUniqueNumberGenerator uniqueNumberGenerator
             , IDynamicPropertyService dynamicPropertyService, IStoreService storeService, IChangeLogService changeLogService
             , IEventPublisher eventPublisher, ICustomerOrderTotalsCalculator totalsCalculator
-            , IShippingMethodsRegistrar shippingMethodsRegistrar, IPaymentMethodsRegistrar paymentMethodsRegistrar, IPlatformMemoryCache platformMemoryCache)
+            , IShippingMethodsSearchService shippingMethodsSearchService, IPaymentMethodsSearchService paymentMethodSearchService,
+            IPlatformMemoryCache platformMemoryCache)
         {
             _repositoryFactory = orderRepositoryFactory;
             _eventPublisher = eventPublisher;
@@ -48,12 +53,13 @@ namespace VirtoCommerce.OrdersModule.Data.Services
             _storeService = storeService;
             _changeLogService = changeLogService;
             _totalsCalculator = totalsCalculator;
-            _shippingMethodsRegistrar = shippingMethodsRegistrar;
-            _paymentMethodsRegistrar = paymentMethodsRegistrar;
+            _shippingMethodsSearchService = shippingMethodsSearchService;
+
+            _paymentMethodSearchService = paymentMethodSearchService;
             _platformMemoryCache = platformMemoryCache;
             _uniqueNumberGenerator = uniqueNumberGenerator;
         }
-        
+
         #region ICustomerOrderService Members
 
         public virtual async Task<CustomerOrder[]> GetByIdsAsync(string[] orderIds, string responseGroup = null)
@@ -62,7 +68,7 @@ namespace VirtoCommerce.OrdersModule.Data.Services
             return await _platformMemoryCache.GetOrCreateExclusiveAsync(cacheKey, async (cacheEntry) =>
             {
                 var retVal = new List<CustomerOrder>();
-                var orderResponseGroup = EnumUtility.SafeParse(responseGroup, CustomerOrderResponseGroup.Full);
+                var orderResponseGroup = EnumUtility.SafeParseFlags(responseGroup, CustomerOrderResponseGroup.Full);
 
                 using (var repository = _repositoryFactory())
                 {
@@ -81,7 +87,7 @@ namespace VirtoCommerce.OrdersModule.Data.Services
                             {
                                 _totalsCalculator.CalculateTotals(customerOrder);
                             }
-                            LoadOrderDependencies(customerOrder);
+                            await LoadOrderDependenciesAsync(customerOrder);
                             retVal.Add(customerOrder);
                             cacheEntry.AddExpirationToken(OrderCacheRegion.CreateChangeToken(customerOrder));
                         }
@@ -95,7 +101,7 @@ namespace VirtoCommerce.OrdersModule.Data.Services
 
         public virtual async Task<CustomerOrder> GetByIdAsync(string orderId, string responseGroup = null)
         {
-            var orders = await GetByIdsAsync(new[] {orderId}, responseGroup);
+            var orders = await GetByIdsAsync(new[] { orderId }, responseGroup);
             return orders.FirstOrDefault();
         }
 
@@ -110,7 +116,7 @@ namespace VirtoCommerce.OrdersModule.Data.Services
                 foreach (var order in orders)
                 {
                     await EnsureThatAllOperationsHaveNumber(order);
-                    LoadOrderDependencies(order);
+                    await LoadOrderDependenciesAsync(order);
 
                     var originalEntity = dataExistOrders.FirstOrDefault(x => x.Id == order.Id);
                     //Calculate order totals
@@ -167,29 +173,30 @@ namespace VirtoCommerce.OrdersModule.Data.Services
             }
             ClearCache(orders);
         }
-        
+
         #endregion
 
-        protected virtual void LoadOrderDependencies(CustomerOrder order)
+        protected virtual async Task LoadOrderDependenciesAsync(CustomerOrder order)
         {
             if (order == null)
             {
                 throw new ArgumentNullException(nameof(order));
             }
-            var shippingMethods = _shippingMethodsRegistrar.GetAllShippingMethods();
-            if (!shippingMethods.IsNullOrEmpty())
+
+            var shippingMethods = await _shippingMethodsSearchService.SearchShippingMethodsAsync(new ShippingMethodsSearchCriteria { StoreId = order.StoreId });
+            if (!shippingMethods.Results.IsNullOrEmpty())
             {
                 foreach (var shipment in order.Shipments)
                 {
-                    shipment.ShippingMethod = shippingMethods.FirstOrDefault(x => x.Code.EqualsInvariant(shipment.ShipmentMethodCode));
+                    shipment.ShippingMethod = shippingMethods.Results.FirstOrDefault(x => x.Code.EqualsInvariant(shipment.ShipmentMethodCode));
                 }
             }
-            var paymentMethods = _paymentMethodsRegistrar.GetAllPaymentMethods();
-            if (!paymentMethods.IsNullOrEmpty())
+            var paymentMethods = await _paymentMethodSearchService.SearchPaymentMethodsAsync(new PaymentMethodsSearchCriteria { StoreId = order.StoreId });
+            if (!paymentMethods.Results.IsNullOrEmpty())
             {
                 foreach (var payment in order.InPayments)
                 {
-                    payment.PaymentMethod = paymentMethods.FirstOrDefault(x => x.Code.EqualsInvariant(payment.GatewayCode));
+                    payment.PaymentMethod = paymentMethods.Results.FirstOrDefault(x => x.Code.EqualsInvariant(payment.GatewayCode));
                 }
             }
         }

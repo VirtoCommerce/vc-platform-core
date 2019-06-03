@@ -1,6 +1,5 @@
 using System.Collections.Generic;
 using System.Linq;
-using System.Net;
 using System.Threading.Tasks;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
@@ -13,7 +12,7 @@ using VirtoCommerce.Platform.Core.Common;
 namespace VirtoCommerce.CustomerModule.Web.Controllers.Api
 {
     [Route("api")]
-    
+
     public class CustomerModuleController : Controller
     {
         private readonly IMemberService _memberService;
@@ -53,7 +52,7 @@ namespace VirtoCommerce.CustomerModule.Web.Controllers.Api
         [HttpPost]
         [Route("members/search")]
         [Authorize(ModuleConstants.Security.Permissions.Access)]
-        public async Task<ActionResult<GenericSearchResult<Member>>> Search([FromBody]MembersSearchCriteria criteria)
+        public async Task<ActionResult<MemberSearchResult>> Search([FromBody]MembersSearchCriteria criteria)
         {
             var result = await _memberSearchService.SearchMembersAsync(criteria);
             return Ok(result);
@@ -85,8 +84,8 @@ namespace VirtoCommerce.CustomerModule.Web.Controllers.Api
         [Authorize(ModuleConstants.Security.Permissions.Read)]
         public async Task<ActionResult<Member[]>> GetMembersByIds([FromQuery] string[] ids, string responseGroup = null, string[] memberTypes = null)
         {
-            //pass member types name for better perfomance
-            var retVal = await _memberService.GetByIdsAsync(ids, responseGroup, memberTypes != null ? memberTypes : null);
+            //pass member types name for better performance
+            var retVal = await _memberService.GetByIdsAsync(ids, responseGroup, memberTypes);
             if (retVal != null)
             {
                 // Casting to dynamic fixes a serialization error in XML formatter when the returned object type is derived from the Member class.
@@ -139,7 +138,7 @@ namespace VirtoCommerce.CustomerModule.Web.Controllers.Api
         public async Task<ActionResult> UpdateMember([FromBody] Member member)
         {
             await _memberService.SaveChangesAsync(new[] { member });
-            return Ok();
+            return NoContent();
         }
 
         /// <summary>
@@ -166,7 +165,7 @@ namespace VirtoCommerce.CustomerModule.Web.Controllers.Api
         public async Task<ActionResult> DeleteMembers([FromQuery] string[] ids)
         {
             await _memberService.DeleteAsync(ids);
-            return Ok();
+            return NoContent();
         }
 
         /// <summary>
@@ -191,7 +190,7 @@ namespace VirtoCommerce.CustomerModule.Web.Controllers.Api
                     {
                         listIds.Add(member.Id);
                     }
-                    
+
                     criteria.Skip += criteria.Take;
                 }
             }
@@ -201,9 +200,9 @@ namespace VirtoCommerce.CustomerModule.Web.Controllers.Api
             {
                 await _memberService.DeleteAsync(ids.ToArray());
             });
-            
 
-            return Ok();
+
+            return NoContent();
         }
 
         #region Special members for storefront C# API client  (because it not support polymorph types)
@@ -395,7 +394,7 @@ namespace VirtoCommerce.CustomerModule.Web.Controllers.Api
         [Route("contacts")]
         [Authorize(ModuleConstants.Security.Permissions.Read)]
         public Task<ActionResult<Member[]>> GetContactsByIds([FromQuery]string[] ids)
-        {          
+        {
             return GetMembersByIds(ids, null, new[] { typeof(Contact).Name });
         }
 
@@ -459,7 +458,7 @@ namespace VirtoCommerce.CustomerModule.Web.Controllers.Api
         [HttpPost]
         [Route("vendors/search")]
         [Authorize(ModuleConstants.Security.Permissions.Read)]
-        public async Task<ActionResult<GenericSearchResult<Vendor>>> SearchVendors([FromBody]MembersSearchCriteria criteria)
+        public async Task<ActionResult<VenderSearchResult>> SearchVendors([FromBody]MembersSearchCriteria criteria)
         {
             if (criteria == null)
             {
@@ -470,11 +469,9 @@ namespace VirtoCommerce.CustomerModule.Web.Controllers.Api
             criteria.MemberTypes = new[] { criteria.MemberType };
             var searchResult = await _memberSearchService.SearchMembersAsync(criteria);
 
-            var result = new GenericSearchResult<Vendor>
-            {
-                TotalCount = searchResult.TotalCount,
-                Results = searchResult.Results.OfType<Vendor>().ToList()
-            };
+            var result = AbstractTypeFactory<VenderSearchResult>.TryCreateInstance();
+            result.TotalCount = searchResult.TotalCount;
+            result.Results = searchResult.Results.OfType<Vendor>().ToList();
 
             return Ok(result);
         }
@@ -490,7 +487,7 @@ namespace VirtoCommerce.CustomerModule.Web.Controllers.Api
                 member.Addresses = addresses.ToList();
                 await _memberService.SaveChangesAsync(new[] { member });
             }
-            return Ok();
+            return NoContent();
         }
 
         /// <summary>
@@ -536,12 +533,12 @@ namespace VirtoCommerce.CustomerModule.Web.Controllers.Api
         [Authorize(ModuleConstants.Security.Permissions.Read)]
         public async Task<ActionResult<Member[]>> GetMemberOrganizations([FromQuery] string id)
         {
-            var members = await _memberService.GetByIdsAsync(new[] { id  }, null, new[] { typeof(Employee).Name, typeof(Contact).Name });
+            var members = await _memberService.GetByIdsAsync(new[] { id }, null, new[] { typeof(Employee).Name, typeof(Contact).Name });
             var member = members.FirstOrDefault();
             var organizationsIds = new List<string>();
             if (member != null)
             {
-                if(member is Contact contact)
+                if (member is Contact contact)
                 {
                     organizationsIds = contact.Organizations?.ToList();
                 }
