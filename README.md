@@ -1,24 +1,25 @@
-# Meet the new  major version of  Virto Commerce platform 3.0
+# Meet the new 3.0 major version of Virto Commerce platform 
 Our development efforts were focused on moving to ASP.NET Core, performance, architecture improvements, further enhancements and fixing arhitectural bugs. 
 
 ## What were our objective when starting development project on VC platform v3? 
 
 - Change primary technology stack to .NET Core for the platform application and all key modules. 
-- Eliminate known technical and architecture design issues of 2.x version (Caching, Overloaded core module, Asynchronous code, Platform simplification, Extensibility, Performance, Authentication and Authorization) 
-- Provide easy and clear migration from 2.x version by preserving complete backward compatibility for API and Database schema 
+- Eliminate known technical and architecture design issues of 2.x version (Caching, Overloaded core module, Asynchronous code, Platform Complexity, Extensibility, Performance, Authentication and Authorization) 
+- Provide easy and clear migration from 2.x version by preserving complete backward compatibility for API and Database Schema 
 - The platform and 18 core modules were planned to be migrated. 
 
 ## Release status note 
-- *We inspire you to try and investigate the new version of the system and give us your feedback*
+- *We encourage you to try and investigate the new version of the product and give us your feedback*
 - *This is a beta release, which hasn't been verified on a production project yet*
-- *We have delivered a simple migration from 2.x version by preserving complete backward compatibility for API and Database schema, while you need for additional efforts in case there are custom changes in your current 2.X system. Please follow our migration guide during the migration project*
-- *We cannot guarantee the backward compatibility of current the beta version with the final 3.X release*
+- *We have delivered a simple migration from 2.x version by preserving complete backward compatibility for API and Database Schema. You'll need an additional effort when there are custom changes in 2.x version. Please follow our migration guide during the project migration*
+- **_We cannot guarantee the backward compatibility of current beta version with the final 3.X release_**
 
-## These Virto Commerce Release Notes below are a subset of the larger list of changes in migration to ASP.NET Core. 
+## The Virto Commerce Release Notes below are a subset of the larger list of changes in migration to ASP.NET Core. 
 
 ## What does Virto V3 provide to developers and architects?
-- Improved extensibility and unification increase the development speed and decrease time to market. 
-- Unified architecture and usage of good architecture practices leads to shorter learning curve for developers who are new to working with Virto Commerce. 
+- Improved extensibility and unification.
+- Increase in development speed and decrease in time to market. 
+- Unified architecture and usage of good architecture practices leads to shorter learning curve for developers who are new to working with Virto Commerce.
 
 ## Used technological stack 
 - **ASP.NET Core 2.2.0** as base platform 
@@ -37,44 +38,44 @@ Our development efforts were focused on moving to ASP.NET Core, performance, arc
   - Solution structure
     - Split concrete implementations into projects (Modules, Assets etc)
   - DI
-    - Replaced Unity DI to build-in .NET Core DI Microsoft.Extensions.DependencyInjection
+    - Replaced Unity DI with builtin .NET Core DI Microsoft.Extensions.DependencyInjection
   - Modularity
     - Completely reworked assembly and dependency loading into platform process
     - Changed IModule abstraction to have only two methods Initialize and PostInitialize.
-    - Changed module.manifest file structure (removed settings and persmissions sections)
+    - Changed module.manifest file structure (removed settings and permissions sections)
  - Security
-    - Completely migrate authentification and authorization to the default ASP.NET Identity without any extension
-    - OpenIddict server to support  all OAuth flows also used for token based authorization
+    - Completely migrate authentification and authorization to the default ASP.NET Identity without any extensions
+    - OpenIddict server to support all OAuth flows also used for token based authorization
     - Removed Hmac and simple key authorization for call platform API
     - Now permissions are defined only in design time in special fluent syntax
     - Added localization for permissions
     - The storefront switched to work with using barrier token authorization
  - Persistent infrastructure
     - New migrations
-    - TPH inheritence model only (map hierarhy to single table)
+    - TPH inheritence model only (map hierarchy to single table)
     - DbContext now is defined separately from repository
     - Using  DbContext triggers for auditing and change logging
     - Switch to asynchronous calls of DbCOntext methods
  - Settings
     - Now settings are defined only in design time in special fluent syntax
     - Added localization for settings
-    - Allow to change setting value through any  .NET Core configuration provider
+    - Allow to change setting value through any .NET Core configuration provider
  - Caching
-    - Replaced CacheManager at  ASP.NET InMemory
+    - Replaced CacheManager with ASP.NET InMemory
     - Strongly typed cache regions and cache dependencies 
     - Allow to manage expiration time of cached objects and disable cache 
     - Removed special CacheModule, now caching is implemented in place where it is needed. 
  - Dynamic properties
-    - Changed registration logic, now is using manual registration instead of using reflection as it was done in 2.x
+    - Changed registration logic, now using manual registration instead of using reflection as it was done in 2.x
  - Logging
-    - Used build in .NET Core  ILog abstraction and logic instead of ICommonLogging and NLog
+    - Used builtin .NET Core  ILog abstraction and logic instead of ICommonLogging and NLog
  - UI
     - Replaced Gulp + Bower to Webpack + npm 
      
 **Modules changes**:
 - Changed module solution structure (Core project, Constants, Caching)
 - Switched all DAL into asynchronous operations
-- Export/Import now is streamed for all modules
+- Export/Import is now streamed for all modules
 
 **New modules**:
 - `Notifications module` (written from scratch) key features:
@@ -103,13 +104,56 @@ Our development efforts were focused on moving to ASP.NET Core, performance, arc
 -  ~~**VirtoCommerce.Cache**~~
 - ~~**VirtoCommerce.DynamicExpressions**~~
 
-**Whats next**:
+**Next steps**:
 - Implement cache synchronization logic between multiple platform instances use `Redis` cache for this purposes 
 - Resource based authorization (scope bounded permissions)
+- Move module projects to GitHub repositiories
 - Remaining modules
     - ElasticSearch
     - AzureSearch
     
+# Getting started:
+## Precompiled binary getting started
+- Download archive with platform precompiled version [VirtoCommerce.Platform.3.0.0.beta.zip](https://github.com/VirtoCommerce/vc-platform-core/releases/tag/v3.0.0.beta)
+- Unpack follow zip to local disk to path `C:\vc-platform-3`. In result you should get the folder which contains platform precompiled code. 
+- Run platform by command `dotnet.exe C:\vc-platform-3\VirtoCommerce.Platform.Web.dll`
+- Open in your browser follow url `https://localhost:5001` in the warning for not private connections that appears click advanced and continue work.
+- On the first request the application will create and initialize database. After that you should see the sign in page. Use the following credentials: `admin/store`
+
+## Source code  getting started
+   - Get the latest source code from `master` branch
+   - Make a symlink for Modules folder 
+   ```cmd 
+   mklink /d C:\vc-platform-3\VirtoCommerce.Platform.Web\Modules C:\vc-platform-3\Modules
+   ```
+   - Open and compile platform solution `VirtoCommerce.Platform.sln` in any preffered IDE
+   - Install Node.js dependencies. 
+   ```
+   npm install
+   ```
+   - build and pack js scripts and css for platform 
+   ```
+   npm run webpack:dev
+   ```
+   - repeat previous command for each module in `Modules` folder
+   
+   
+## Run [storefront](https://github.com/VirtoCommerce/vc-storefront-core) with new platform version
+- Deploy  the latest storefront version from `dev` branch by any of preffered way described there https://virtocommerce.com/docs/vc2devguide/deployment/storefront-deployment
+- Make changes  in  `appsettings.json`    
+```json
+...
+//Comment the follow settings
+// "AppId": "...",
+// "SecretKey": "..."
+...
+//Uncomment the follow settings
+"UserName": "admin",
+"Password": "store"
+```    
+# How to migrate your solution from 2.x to 3.0 platform version
+- If your solution doesn't have any custom modules and extensions you just need to use the connection string to the old database for the new 3.0 platfrom version and after first run the update scripts will transfer all your data to the new scheme otherwise, you need to convert your models according to this instruction (Coming soon).
+
 # License
 Copyright (c) Virto Solutions LTD.  All rights reserved.
 
