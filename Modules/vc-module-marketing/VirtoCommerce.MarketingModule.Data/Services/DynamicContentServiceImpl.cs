@@ -223,6 +223,20 @@ namespace VirtoCommerce.MarketingModule.Data.Services
             DynamicContentPublicationCacheRegion.ExpireRegion();
         }
 
+        public async Task<DynamicContentPublication[]> GetContentPublicationsByStoreIdAndPlaceNameAsync(string storeId, DateTime intervalDate, string placeName)
+        {
+            var cacheKey = CacheKey.With(GetType(), "GetContentPublicationsByStoreIdAndPlaceName", storeId, intervalDate.ToString("s"), placeName);
+            return await _platformMemoryCache.GetOrCreateExclusiveAsync(cacheKey, async (cacheEntry) =>
+            {
+                cacheEntry.AddExpirationToken(DynamicContentPublicationCacheRegion.CreateChangeToken());
+                using (var repository = _repositoryFactory())
+                {
+                    var publications = await repository.GetContentPublicationsByStoreIdAndPlaceNameAsync(storeId, intervalDate, placeName);
+                    return publications.Select(x => x.ToModel(AbstractTypeFactory<DynamicContentPublication>.TryCreateInstance())).ToArray();
+                }
+            });
+        }
+
         public async Task DeletePublicationsAsync(string[] ids)
         {
             using (var repository = _repositoryFactory())

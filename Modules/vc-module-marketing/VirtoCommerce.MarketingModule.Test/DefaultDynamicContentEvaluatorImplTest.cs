@@ -1,14 +1,18 @@
 using System;
-using System.Linq;
-using Microsoft.EntityFrameworkCore;
-using Microsoft.EntityFrameworkCore.Infrastructure;
+using System.Collections.Generic;
+using System.Collections.ObjectModel;
 using Microsoft.Extensions.Logging;
 using Moq;
+using VirtoCommerce.CoreModule.Core.Conditions;
+using VirtoCommerce.CoreModule.Core.Conditions.Browse;
+using VirtoCommerce.CoreModule.Core.Conditions.GeoConditions;
+using VirtoCommerce.MarketingModule.Core.Model;
+using VirtoCommerce.MarketingModule.Core.Model.DynamicContent;
 using VirtoCommerce.MarketingModule.Core.Services;
 using VirtoCommerce.MarketingModule.Data.Model;
 using VirtoCommerce.MarketingModule.Data.Repositories;
 using VirtoCommerce.MarketingModule.Data.Services;
-using VirtoCommerce.MarketingModule.Test.Common;
+using VirtoCommerce.Platform.Core.Common;
 using VirtoCommerce.Platform.Core.Domain;
 using Xunit;
 
@@ -31,56 +35,60 @@ namespace VirtoCommerce.MarketingModule.Test
             _loggerMock = new Mock<ILogger<DefaultDynamicContentEvaluatorImpl>>();
             _mockUnitOfWork = new Mock<IUnitOfWork>();
             _repositoryMock.Setup(ss => ss.UnitOfWork).Returns(_mockUnitOfWork.Object);
+
+            AbstractTypeFactory<IConditionTree>.RegisterType<DynamicContentConditionTree>();
+            AbstractTypeFactory<IConditionTree>.RegisterType<BlockContentCondition>();
+            AbstractTypeFactory<IConditionTree>.RegisterType<ConditionGeoTimeZone>();
+            AbstractTypeFactory<IConditionTree>.RegisterType<ConditionGeoZipCode>();
+            AbstractTypeFactory<IConditionTree>.RegisterType<ConditionStoreSearchedPhrase>();
+            AbstractTypeFactory<IConditionTree>.RegisterType<ConditionAgeIs>();
+            AbstractTypeFactory<IConditionTree>.RegisterType<ConditionGeoCity>();
+            AbstractTypeFactory<IConditionTree>.RegisterType<ConditionGeoCountry>();
+            AbstractTypeFactory<IConditionTree>.RegisterType<ConditionGeoState>();
+            AbstractTypeFactory<IConditionTree>.RegisterType<ConditionLanguageIs>();
+            AbstractTypeFactory<IConditionTree>.RegisterType<UserGroupsContainsCondition>();
         }
 
         [Fact]
         public void EvaluateItemsAsync_Evaluate()
         {
-            //TODO remove IMarketingRepository part to Sevice in DefaultDynamicContentEvaluatorImpl
             //Arrange
-            //var expected = new List<DynamicContentItem>();
-            //var evalContext = new DynamicContentEvaluationContext();
+            var expected = new List<DynamicContentItem>();
+            var evalContext = new DynamicContentEvaluationContext() { GeoCity = "NY" };
+            var dynamicContentItem = new DynamicContentItem()
+            {
+                Id = Guid.NewGuid().ToString()
+            };
+            expected.Add(dynamicContentItem);
+            var expectedArray = expected.ToArray();
 
-            //var groups = new List<DynamicContentPublishingGroupEntity>
-            //{
-            //    new DynamicContentPublishingGroupEntity
-            //    {
-            //        PredicateVisualTreeSerialized = "",
-            //        IsActive = true,
-            //        ContentPlaces = new ObservableCollection<PublishingGroupContentPlaceEntity>
-            //        {
-            //            new PublishingGroupContentPlaceEntity() {ContentPlace = new DynamicContentPlaceEntity()}
-            //        }
-            //    }
-            //}.AsQueryable();
-            //var evaluator = GetDefaultDynamicContentEvaluatorImpl(groups);
+            var groups = new List<DynamicContentPublication>
+            {
+                new DynamicContentPublication
+                {
+                    PredicateVisualTreeSerialized = GetConditionJson(),
+                    IsActive = true,
+                    ContentItems = new ObservableCollection<DynamicContentItem> { dynamicContentItem },
+                    DynamicExpression = new DynamicContentConditionTree()
+                }
+            };
+            _dynamicContentServiceMock.Setup(dcs => dcs.GetContentPublicationsByStoreIdAndPlaceNameAsync(It.IsAny<string>(), It.IsAny<DateTime>(),                         It.IsAny<string>()))
+                .ReturnsAsync(groups.ToArray());
+            _dynamicContentServiceMock.Setup(dcs => dcs.GetContentItemsByIdsAsync(new[] {dynamicContentItem.Id}))
+                .ReturnsAsync(expectedArray);
 
-            ////Act
-            //var items = evaluator.EvaluateItemsAsync(evalContext).GetAwaiter().GetResult();
+            var evaluator = new DefaultDynamicContentEvaluatorImpl(_dynamicContentServiceMock.Object, _loggerMock.Object);
 
-            ////Assert
-            //Assert.All(items, a => a.Description.Equals(string.Empty));
+            //Act
+            var results = evaluator.EvaluateItemsAsync(evalContext).GetAwaiter().GetResult();
+
+            //Assert
+            Assert.Equal(expectedArray, results);
         }
 
-        private DefaultDynamicContentEvaluatorImpl GetDefaultDynamicContentEvaluatorImpl(IQueryable<DynamicContentPublishingGroupEntity> groups)
+        private string GetConditionJson()
         {
-            var mockSet = MockDbSet.GetMockDbSet(groups);
-
-            var options = new DbContextOptionsBuilder<MarketingDbContext>()
-                .UseInMemoryDatabase(Guid.NewGuid().ToString())
-                .Options;
-            var mockContext = new Mock<MarketingDbContext>(options);
-            mockContext.Setup(c => c.Set<DynamicContentPublishingGroupEntity>()).Returns(mockSet.Object);
-            var mockDatabase = new Mock<DatabaseFacade>(mockContext.Object);
-            mockContext.Setup(c => c.Database).Returns(mockDatabase.Object);
-            var repository = new MarketingRepositoryImpl(mockContext.Object);
-            _repositoryFactory = () => repository;
-            return new DefaultDynamicContentEvaluatorImpl(_repositoryFactory, _dynamicContentServiceMock.Object, _loggerMock.Object);
-        }
-
-        private string GetConditionExpression()
-        {
-            return "<LambdaExpression NodeType=\"Lambda\" Name=\"\" TailCall=\"false\" CanReduce=\"false\"><Type><Type Name=\"System.Func`2\"><Type Name=\"VirtoCommerce.Domain.Common.IEvaluationContext\" /><Type Name=\"System.Boolean\" /></Type></Type><Parameters><ParameterExpression NodeType=\"Parameter\" Name=\"f\" IsByRef=\"false\" CanReduce=\"false\"><Type><Type Name=\"VirtoCommerce.Domain.Common.IEvaluationContext\" /></Type></ParameterExpression></Parameters><Body><ConstantExpression NodeType=\"Constant\" CanReduce=\"false\"><Type><Type Name=\"System.Boolean\" /></Type><Value>True</Value></ConstantExpression></Body><ReturnType><Type Name=\"System.Boolean\" /></ReturnType></LambdaExpression>";
+            return "{\"AvailableChildren\":null,\"Children\":[{\"All\":false,\"Not\":false,\"AvailableChildren\":null,\"Children\":[{\"Value\":\"NY\",\"MatchCondition\":\"Contains\",\"AvailableChildren\":null,\"Children\":[],\"Id\":\"ConditionGeoCity\"}],\"Id\":\"BlockContentCondition\"}],\"Id\":\"DynamicContentConditionTree\"}";
         }
     }
 }

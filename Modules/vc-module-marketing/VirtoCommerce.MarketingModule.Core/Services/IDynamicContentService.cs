@@ -1,3 +1,4 @@
+using System;
 using System.Threading.Tasks;
 using VirtoCommerce.MarketingModule.Core.Model;
 
@@ -20,5 +21,6 @@ namespace VirtoCommerce.MarketingModule.Core.Services
         Task<DynamicContentPublication[]> GetPublicationsByIdsAsync(string[] ids);
         Task SavePublicationsAsync(DynamicContentPublication[] publications);
         Task DeletePublicationsAsync(string[] ids);
+        Task<DynamicContentPublication[]> GetContentPublicationsByStoreIdAndPlaceNameAsync(string storeId, DateTime intervalDate, string placeName);
     }
 }
