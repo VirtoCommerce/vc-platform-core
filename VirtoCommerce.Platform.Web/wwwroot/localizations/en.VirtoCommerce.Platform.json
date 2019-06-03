@@ -730,9 +730,9 @@
                 "title": "Application restart",
                 "message": "Are you sure you want to restart the application?"
             },
-			"error-details": {
-			  "title": "The error details"
-			}
+            "error-details": {
+                "title": "The error details"
+            }
         }
     },
     "permissions": {
@@ -764,53 +764,81 @@
         "platform:export": "Allows to export platform and modules data"
     },
     "settings": {
-        "VirtoCommerce.Platform.Security.AccountTypes": {
-            "description": "Dictionary for possible user types",
-            "title": "User types"
-        },
-        "VirtoCommerce.ModulesAutoInstalled": {
-            "description": "The flag indicates that the modules are automatically installed",
-            "title": "Modules installed"
-        },
-        "VirtoCommerce.Platform.UI.MainMenu.State": {
-            "description": "Persisted state of main menu",
-            "title": "Persisted state of main menu"
-        },
-        "VirtoCommerce.Platform.UI.Language": {
-            "description": "Default language (two letter code from ISO 639-1, case-insensitive). Example: en, de",
-            "title": "Language"
-        },
-        "VirtoCommerce.Platform.UI.RegionalFormat": {
-            "description": "Default regional format (CLDR locale code, with dash or underscore as delimiter, case-insensitive). Example: en, en_US, sr_Cyrl, sr_Cyrl_RS",
-            "title": "Regional format"
-        },
-        "VirtoCommerce.Platform.UI.TimeZone": {
-            "description": "Default time zone (IANA time zone name [tz database], exactly as in database, case-sensitive). Examples: America/New_York, Europe/Moscow",
-            "title": "Time zone"
-        },
-        "VirtoCommerce.Platform.UI.UseTimeAgo": {
-            "description": "When set to true (by default), system will display date in format like 'a few seconds ago' when possible",
-            "title": "Use time ago format when is possible"
-        },
-        "VirtoCommerce.Platform.UI.FullDateThreshold": {
-            "description": "Number of units after time ago format will be switched to full date format",
-            "title": "Full date threshold"
-        },
-        "VirtoCommerce.Platform.UI.FullDateThresholdUnit": {
-            "description": "Unit of full date threshold",
-            "title": "Full date threshold unit"
-        },
-        "VirtoCommerce.Platform.UI.Customization": {
-            "description": "JSON contains personalization settings of manager UI",
-            "title": "The manager UI customization"
-        },
-        "VirtoCommerce.Platform.Cache.Enabled": {
-            "description": "Using this setting, you can turn on and off  cache globally for the entire platform application",
-            "title": "Enable or disable cache globally"
-        },
-        "VirtoCommerce.Platform.Cache.AbsoulteExpiration": {
-            "description": "Specifies the maximum time  that the cached data to be stored in the cache. Format: [-][d.]hh:mm:ss[.fffffff]",
-            "title": "The global lifetime of objects in the cache"
+        "VirtoCommerce": {
+            "ModulesAutoInstalled": {
+                "description": "The flag indicates that the modules are automatically installed",
+                "title": "Modules installed"
+            },
+            "ModulesAutoInstallState": {
+                "title": "Modules autoinstall state",
+                "description": "The current state of autoinstall modules wizard"
+            },
+            "SetupStep": {
+                "title": "Current setup step",
+                "description": "The current step in the setup wizard"
+            },
+            "SampleDataState": {
+                "title": "Sample data state",
+                "description": "The current state of sample data wizard"
+            },
+            "Platform": {
+                "Security": {
+                    "AccountTypes": {
+                        "description": "Dictionary for possible user types",
+                        "title": "User types"
+                    }
+                },
+                "UI": {
+                    "MainMenu": {
+                        "State": {
+                            "description": "Persisted state of main menu",
+                            "title": "Persisted state of main menu"
+                        }
+                    },
+                    "Language": {
+                        "description": "Default language (two letter code from ISO 639-1, case-insensitive). Example: en, de",
+                        "title": "Language"
+                    },
+                    "RegionalFormat": {
+                        "description": "Default regional format (CLDR locale code, with dash or underscore as delimiter, case-insensitive). Example: en, en_US, sr_Cyrl, sr_Cyrl_RS",
+                        "title": "Regional format"
+                    },
+                    "TimeZone": {
+                        "description": "Default time zone (IANA time zone name [tz database], exactly as in database, case-sensitive). Examples: America/New_York, Europe/Moscow",
+                        "title": "Time zone"
+                    },
+                    "UseTimeAgo": {
+                        "description": "When set to true (by default), system will display date in format like 'a few seconds ago' when possible",
+                        "title": "Use time ago format when is possible"
+                    },
+                    "FullDateThreshold": {
+                        "description": "Number of units after time ago format will be switched to full date format",
+                        "title": "Full date threshold"
+                    },
+                    "FullDateThresholdUnit": {
+                        "description": "Unit of full date threshold",
+                        "title": "Full date threshold unit"
+                    },
+                    "Customization": {
+                        "description": "JSON contains personalization settings of manager UI",
+                        "title": "The manager UI customization"
+                    },
+                    "ShowMeridian": {
+                        "description": "Show time meridian indicator (AM or PM)",
+                        "title": "Show time meridian"
+                    }
+                },
+                "Cache": {
+                    "Enabled": {
+                        "description": "Using this setting, you can turn on and off  cache globally for the entire platform application",
+                        "title": "Enable or disable cache globally"
+                    },
+                    "AbsoulteExpiration": {
+                        "description": "Specifies the maximum time  that the cached data to be stored in the cache. Format: [-][d.]hh:mm:ss[.fffffff]",
+                        "title": "The global lifetime of objects in the cache"
+                    }
+                }
+            }
         }
     }
 }
