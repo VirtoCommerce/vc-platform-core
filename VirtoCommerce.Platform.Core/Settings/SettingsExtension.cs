@@ -110,6 +110,11 @@ namespace VirtoCommerce.Platform.Core.Settings
                 var objectSetting = await manager.GetObjectSettingAsync(name);
                 if (objectSetting.Value != null)
                 {
+                    if (IsZero(objectSetting.ValueType, objectSetting.Value))
+                    {
+                        return result;
+                    }
+
                     result = (T)objectSetting.Value;
                 }
             }
@@ -128,7 +133,6 @@ namespace VirtoCommerce.Platform.Core.Settings
 
         public static async Task SetValueAsync<T>(this ISettingsManager manager, string name, T value)
         {
-            var type = typeof(T);
             var objectSetting = await manager.GetObjectSettingAsync(name);
             objectSetting.Value = value;
             await manager.SaveObjectSettingsAsync(new[] { objectSetting });
@@ -143,6 +147,19 @@ namespace VirtoCommerce.Platform.Core.Settings
                 retVal = (T)Convert.ChangeType(setting.Value, typeof(T), CultureInfo.InvariantCulture);
             }
             return retVal;
+        }
+
+        private static bool IsZero(SettingValueType valueType, object value)
+        {
+            switch (valueType)
+            {
+                case SettingValueType.Decimal:
+                    return Convert.ToDecimal(value, CultureInfo.InvariantCulture) == 0;
+                case SettingValueType.Integer:
+                    return Convert.ToInt32(value, CultureInfo.InvariantCulture) == 0;
+                default:
+                    return false;
+            }
         }
     }
 }
