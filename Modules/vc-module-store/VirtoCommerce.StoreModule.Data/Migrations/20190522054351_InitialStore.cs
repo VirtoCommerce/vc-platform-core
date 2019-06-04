@@ -1,9 +1,9 @@
-﻿using System;
+using System;
 using Microsoft.EntityFrameworkCore.Migrations;
 
 namespace VirtoCommerce.StoreModule.Data.Migrations
 {
-    public partial class Initial : Migration
+    public partial class InitialStore : Migration
     {
         protected override void Up(MigrationBuilder migrationBuilder)
         {
