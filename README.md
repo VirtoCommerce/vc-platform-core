@@ -117,7 +117,7 @@ Our development efforts were focused on moving to ASP.NET Core, performance, arc
 - Download archive with platform precompiled version [VirtoCommerce.Platform.3.0.0.beta.zip](https://github.com/VirtoCommerce/vc-platform-core/releases/tag/v3.0.0.beta)
 - Unpack follow zip to local disk to path `C:\vc-platform-3`. In result you should get the folder which contains platform precompiled code. 
 - Run platform by command `dotnet.exe C:\vc-platform-3\VirtoCommerce.Platform.Web.dll`
-- Open in your browser follow url `https://localhost:10645` in the warning for not private connections that appears click advanced and continue work.
+- Open in your browser follow url `https://localhost:5001` in the warning for not private connections that appears click advanced and continue work.
 - On the first request the application will create and initialize database. After that you should see the sign in page. Use the following credentials: `admin/store`
 
 ## Source code  getting started
