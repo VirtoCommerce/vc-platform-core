@@ -27,7 +27,8 @@ namespace VirtoCommerce.PricingModule.Test
             RegisterTypes();
             var evalContext = new PriceEvaluationContext
             {
-                ProductIds = new[] { "4ed55441810a47da88a483e5a1ee4e94" }
+                ProductIds = new[] { "4ed55441810a47da88a483e5a1ee4e94" },
+                UserGroups = new [] { "VIP" }
             };
 
             var pricingService = GetPricingService(GetPricingRepository);
@@ -44,7 +45,8 @@ namespace VirtoCommerce.PricingModule.Test
             var evalContext = new PriceEvaluationContext
             {
                 ProductIds = new[] { "ProductId" },
-                PricelistIds = new[] { "Pricelist 1", "Pricelist 2", "Pricelist 3" }
+                PricelistIds = new[] { "Pricelist 1", "Pricelist 2", "Pricelist 3" },
+                Quantity = 0
             };
 
             var mockPrices = new Common.TestAsyncEnumerable<PriceEntity>(new List<PriceEntity> {
@@ -114,6 +116,10 @@ namespace VirtoCommerce.PricingModule.Test
 
             if (AbstractTypeFactory<IConditionTree>.AllTypeInfos.All(t => t.Type != typeof(BlockPricingCondition)))
                 AbstractTypeFactory<IConditionTree>.RegisterType<BlockPricingCondition>();
+
+            if (AbstractTypeFactory<IConditionTree>.AllTypeInfos.All(t => t.Type != typeof(UserGroupsContainsCondition)))
+                AbstractTypeFactory<IConditionTree>.RegisterType<UserGroupsContainsCondition>();
+            
 
         }
     }

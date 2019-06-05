@@ -3,7 +3,7 @@ using VirtoCommerce.CoreModule.Core.Common;
 
 namespace VirtoCommerce.MarketingModule.Core.Model
 {
-    public class DynamicContentEvaluationContext : IEvaluationContext
+    public class DynamicContentEvaluationContext : EvaluationContextBase
     {
         public DynamicContentEvaluationContext()
         {

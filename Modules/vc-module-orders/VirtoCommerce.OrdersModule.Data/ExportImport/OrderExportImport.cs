@@ -47,6 +47,7 @@ namespace VirtoCommerce.OrdersModule.Data.ExportImport
                     var searchCriteria = AbstractTypeFactory<CustomerOrderSearchCriteria>.TryCreateInstance();
                     searchCriteria.Take = take;
                     searchCriteria.Skip = skip;
+                    searchCriteria.WithPrototypes = true;
                     var searchResult = await _customerOrderSearchService.SearchCustomerOrdersAsync(searchCriteria);
                     return (GenericSearchResult<CustomerOrder>)searchResult;
                 }, (processedCount, totalCount) =>

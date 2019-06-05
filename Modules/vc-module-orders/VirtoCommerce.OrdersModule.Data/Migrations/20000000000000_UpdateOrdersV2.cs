@@ -10,7 +10,7 @@ namespace VirtoCommerce.OrdersModule.Data.Migrations
                  FROM INFORMATION_SCHEMA.TABLES 
                  WHERE TABLE_NAME = '__MigrationHistory'))
                     BEGIN
-                        INSERT INTO [dbo].[__EFMigrationsHistory] ([MigrationId],[ProductVersion]) VALUES ('20190411192159_InitialOrders', '2.2.3-servicing-35854')
+                        INSERT INTO [dbo].[__EFMigrationsHistory] ([MigrationId],[ProductVersion]) VALUES ('20190530163834_InitialOrders', '2.2.3-servicing-35854')
 
 	                    BEGIN
                             ALTER TABLE [CustomerOrder] ADD [Status] nvarchar(64) NULL
@@ -76,6 +76,11 @@ namespace VirtoCommerce.OrdersModule.Data.Migrations
 	                                CancelledDate = oo.CancelledDate, CancelReason = oo.CancelReason
                                     FROM [OrderPaymentIn] co INNER JOIN OrderOperation oo ON co.Id = oo.Id')
 	                    END
+                        BEGIN
+                             ALTER TABLE [dbo].[CustomerOrder] DROP CONSTRAINT [FK_dbo.CustomerOrder_dbo.OrderOperation_Id]
+                             ALTER TABLE [dbo].[OrderPaymentIn] DROP CONSTRAINT [FK_dbo.OrderPaymentIn_dbo.OrderOperation_Id]
+                             ALTER TABLE [dbo].[OrderShipment] DROP CONSTRAINT [FK_dbo.OrderShipment_dbo.OrderOperation_Id]
+                        END
 
                     END");
         }

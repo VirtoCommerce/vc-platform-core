@@ -13,9 +13,9 @@ using VirtoCommerce.CoreModule.Core.Conditions;
 using VirtoCommerce.Platform.Core.Caching;
 using VirtoCommerce.Platform.Core.Common;
 using VirtoCommerce.Platform.Core.Events;
+using VirtoCommerce.Platform.Data.Infrastructure;
 using VirtoCommerce.PricingModule.Core.Events;
 using VirtoCommerce.PricingModule.Core.Model;
-using VirtoCommerce.PricingModule.Core.Model.Conditions;
 using VirtoCommerce.PricingModule.Core.Services;
 using VirtoCommerce.PricingModule.Data.Caching;
 using VirtoCommerce.PricingModule.Data.Model;
@@ -57,23 +57,20 @@ namespace VirtoCommerce.PricingModule.Data.Services
             {
                 cacheEntry.AddExpirationToken(PricingCacheRegion.CreateChangeToken());
 
-                using (var repository = _repositoryFactory())
+                var allAssignments = await GetAllPricelistAssignments();
+                foreach (var assignment in allAssignments.Where(x => !string.IsNullOrEmpty(x.PredicateVisualTreeSerialized)))
                 {
-                    var allAssignments = (await repository.PricelistAssignments.Include(x => x.Pricelist).ToArrayAsync()).Select(x => x.ToModel(AbstractTypeFactory<PricelistAssignment>.TryCreateInstance())).ToArray();
-                    foreach (var assignment in allAssignments.Where(x => !string.IsNullOrEmpty(x.ConditionExpression)))
+                    try
                     {
-                        try
-                        {
-                            //Deserialize conditions
-                            assignment.Conditions = JsonConvert.DeserializeObject<IConditionTree[]>(assignment.ConditionExpression, new ConditionJsonConverter());
-                        }
-                        catch (Exception ex)
-                        {
-                            _logger.LogError(ex, "Failed to deserialize an expression.");
-                        }
+                        //Deserialize conditions
+                        assignment.DynamicExpression = JsonConvert.DeserializeObject<IConditionTree>(assignment.PredicateVisualTreeSerialized, new ConditionJsonConverter());
                     }
-                    return allAssignments;
+                    catch (Exception ex)
+                    {
+                        _logger.LogError(ex, "Failed to deserialize an expression.");
+                    }
                 }
+                return allAssignments;
             });
 
             var query = priceListAssignments.AsQueryable();
@@ -119,6 +116,15 @@ namespace VirtoCommerce.PricingModule.Data.Services
             return assignmentsToReturn.OrderByDescending(x => x.Priority).ThenByDescending(x => x.Name).Select(x => x.Pricelist);
         }
 
+        public virtual async Task<PricelistAssignment[]> GetAllPricelistAssignments()
+        {
+            using (var repository = _repositoryFactory())
+            {
+                repository.DisableChangesTracking();
+
+                return (await repository.PricelistAssignments.Include(x => x.Pricelist).ToArrayAsync()).Select(x => x.ToModel(AbstractTypeFactory<PricelistAssignment>.TryCreateInstance())).ToArray();
+            }
+        }
         /// <summary>
         /// Evaluation product prices.
         /// Will get either all prices or one price per currency depending on the settings in evalContext.
@@ -492,28 +498,9 @@ namespace VirtoCommerce.PricingModule.Data.Services
 
         private void FillPricelistAssignmentConditions(PricelistAssignment assignment)
         {
-            var defaultExpressionTree = _extensionManager.PriceConditionTree;
-            //Set default expression tree first
-            assignment.DynamicExpression = defaultExpressionTree;
             if (!string.IsNullOrEmpty(assignment.PredicateVisualTreeSerialized))
             {
                 assignment.DynamicExpression = JsonConvert.DeserializeObject<IConditionTree>(assignment.PredicateVisualTreeSerialized, new ConditionJsonConverter());
-                if (defaultExpressionTree != null)
-                {
-                    //Copy available elements from default tree because they not persisted
-                    var sourceBlocks = defaultExpressionTree.Traverse(x => x.Children);
-                    var targetBlocks = assignment.DynamicExpression.Traverse(x => x.Children).ToList();
-
-                    foreach (var sourceBlock in sourceBlocks)
-                    {
-                        foreach (var targetBlock in targetBlocks.Where(x => x.Id == sourceBlock.Id))
-                        {
-                            targetBlock.AvailableChildren = sourceBlock.AvailableChildren;
-                        }
-                    }
-                    //copy available elements from default expression tree
-                    assignment.DynamicExpression.AvailableChildren = defaultExpressionTree.AvailableChildren;
-                }
             }
         }
 
@@ -522,9 +509,6 @@ namespace VirtoCommerce.PricingModule.Data.Services
             //Serialize condition expression 
             if (assignment.DynamicExpression?.Children != null)
             {
-                var conditionExpression = ((PriceConditionTree)assignment.DynamicExpression).GetConditions();
-                assignment.ConditionExpression = JsonConvert.SerializeObject(conditionExpression);
-
                 //Clear availableElements in expression (for decrease size)
                 assignment.DynamicExpression.AvailableChildren = null;
                 var allBlocks = assignment.DynamicExpression.Traverse(x => x.Children);

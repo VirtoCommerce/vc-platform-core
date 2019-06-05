@@ -1,4 +1,5 @@
 using System.Collections.Generic;
+using Newtonsoft.Json;
 using VirtoCommerce.Platform.Core.Common;
 
 namespace VirtoCommerce.CatalogModule.Core.Model.Search
@@ -38,5 +39,8 @@ namespace VirtoCommerce.CatalogModule.Core.Model.Search
         /// Gets or sets the search provider specific raw search query; all other search criteria will be ignored
         /// </summary>
         public string RawQuery { get; set; }
+
+        [JsonProperty("searchPhrase")]
+        public new string Keyword { get; set; }
     }
 }

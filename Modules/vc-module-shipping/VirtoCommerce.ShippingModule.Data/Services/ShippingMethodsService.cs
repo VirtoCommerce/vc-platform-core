@@ -60,7 +60,7 @@ namespace VirtoCommerce.ShippingModule.Data.Services
                     var existEntities = await repository.GetStoreShippingMethodsByIdsAsync(ids, responseGroup);
                     foreach (var existEntity in existEntities)
                     {
-                        var shippingMethod = AbstractTypeFactory<ShippingMethod>.TryCreateInstance(existEntity.TypeName);
+                        var shippingMethod = AbstractTypeFactory<ShippingMethod>.TryCreateInstance(string.IsNullOrEmpty(existEntity.TypeName) ? $"{existEntity.Code}ShippingMethod" : existEntity.TypeName);
                         if (shippingMethod != null)
                         {
                             existEntity.ToModel(shippingMethod);

@@ -31,7 +31,7 @@ namespace VirtoCommerce.StoreModule.Data.Services
         private readonly IEventPublisher _eventPublisher;
         private readonly IPlatformMemoryCache _platformMemoryCache;
 
-        public StoreService(Func<IStoreRepository> repositoryFactory, ISettingsManager settingManager, IDynamicPropertyService dynamicPropertyService, 
+        public StoreService(Func<IStoreRepository> repositoryFactory, ISettingsManager settingManager, IDynamicPropertyService dynamicPropertyService,
                             IEventPublisher eventPublisher, IPlatformMemoryCache platformMemoryCache)
         {
             _repositoryFactory = repositoryFactory;
@@ -51,6 +51,8 @@ namespace VirtoCommerce.StoreModule.Data.Services
             {
                 var stores = new List<Store>();
 
+                cacheEntry.AddExpirationToken(StoreCacheRegion.CreateChangeToken());
+
                 using (var repository = _repositoryFactory())
                 {
                     repository.DisableChangesTracking();
@@ -64,7 +66,6 @@ namespace VirtoCommerce.StoreModule.Data.Services
 
                         await _settingManager.DeepLoadSettingsAsync(store);
                         stores.Add(store);
-                        cacheEntry.AddExpirationToken(StoreCacheRegion.CreateChangeToken(store));
                     }
                 }
 
@@ -172,12 +173,7 @@ namespace VirtoCommerce.StoreModule.Data.Services
 
         protected virtual void ClearCache(IEnumerable<Store> stores)
         {
-            StoreSearchCacheRegion.ExpireRegion();
-
-            foreach (var store in stores)
-            {
-                StoreCacheRegion.ExpireStore(store);
-            }
+            StoreCacheRegion.ExpireRegion();
         }
 
         protected virtual void ValidateStoresProperties(IEnumerable<Store> stores)
@@ -194,7 +190,7 @@ namespace VirtoCommerce.StoreModule.Data.Services
             }
         }
 
-     
+
 
         #endregion
     }

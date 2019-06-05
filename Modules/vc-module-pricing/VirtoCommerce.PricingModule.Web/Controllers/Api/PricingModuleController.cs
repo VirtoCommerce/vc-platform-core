@@ -24,9 +24,10 @@ namespace VirtoCommerce.PricingModule.Web.Controllers.Api
         private readonly ICatalogService _catalogService;
         private readonly IPricingExtensionManager _extensionManager;
         private readonly IBlobUrlResolver _blobUrlResolver;
+        private readonly IPricingExtensionManager _pricingExtensionManager;
 
 
-        public PricingModuleController(IPricingService pricingService, IItemService itemService, ICatalogService catalogService, IPricingExtensionManager extensionManager, IPricingSearchService pricingSearchService, IBlobUrlResolver blobUrlResolver)
+        public PricingModuleController(IPricingService pricingService, IItemService itemService, ICatalogService catalogService, IPricingExtensionManager extensionManager, IPricingSearchService pricingSearchService, IBlobUrlResolver blobUrlResolver, IPricingExtensionManager pricingExtensionManager)
         {
             _extensionManager = extensionManager;
             _pricingService = pricingService;
@@ -34,6 +35,7 @@ namespace VirtoCommerce.PricingModule.Web.Controllers.Api
             _catalogService = catalogService;
             _pricingSearchService = pricingSearchService;
             _blobUrlResolver = blobUrlResolver;
+            _pricingExtensionManager = pricingExtensionManager;
         }
 
         /// <summary>
@@ -72,6 +74,24 @@ namespace VirtoCommerce.PricingModule.Web.Controllers.Api
         public async Task<ActionResult<PricelistAssignment>> GetPricelistAssignmentById(string id)
         {
             var assignment = (await _pricingService.GetPricelistAssignmentsByIdAsync(new[] { id })).FirstOrDefault();
+            var defaultExpressionTree = _pricingExtensionManager.PriceConditionTree;
+            if (defaultExpressionTree != null)
+            {
+                //Copy available elements from default tree because they not persisted
+                var sourceBlocks = defaultExpressionTree.Traverse(x => x.Children);
+                var targetBlocks = assignment.DynamicExpression.Traverse(x => x.Children).ToList();
+
+                foreach (var sourceBlock in sourceBlocks)
+                {
+                    foreach (var targetBlock in targetBlocks.Where(x => x.Id == sourceBlock.Id))
+                    {
+                        targetBlock.AvailableChildren = sourceBlock.AvailableChildren;
+                    }
+                }
+                //copy available elements from default expression tree
+                assignment.DynamicExpression.AvailableChildren = defaultExpressionTree.AvailableChildren;
+            }
+
             return Ok(assignment);
         }
 
@@ -339,6 +359,39 @@ namespace VirtoCommerce.PricingModule.Web.Controllers.Api
         public async Task<ActionResult> UpdatePriceList([FromBody]Pricelist priceList)
         {
             await _pricingService.SavePricelistsAsync(new[] { priceList });
+            return NoContent();
+        }
+
+        /// <summary>
+        /// Delete pricelist assignments
+        /// </summary>
+        /// <remarks>Delete pricelist assignments by given criteria.</remarks>
+        /// <param name="criteria">Filter criteria</param>
+        /// <todo>Return no any reason if can't update</todo>
+        [HttpDelete]
+        [ProducesResponseType(typeof(void), 204)]
+        [Route("api/pricing/filteredAssignments")]
+        [Authorize(ModuleConstants.Security.Permissions.Delete)]
+        public async Task<ActionResult> DeleteFilteredAssignments([FromQuery]PricelistAssignmentsSearchCriteria criteria)
+        {
+            if (criteria == null)
+            {
+                criteria = new PricelistAssignmentsSearchCriteria();
+            }
+
+            var result = await _pricingSearchService.SearchPricelistAssignmentsAsync(criteria);
+
+            var pricelistAssignmentsIds = result.Results.Select(x => x.Id);
+            const int BATCH_SIZE = 20;
+            var skip = 0;
+            IEnumerable<string> batch;
+            while ((batch = pricelistAssignmentsIds.Skip(skip).Take(BATCH_SIZE)).Count() > 0)
+            {
+                await _pricingService.DeletePricelistsAssignmentsAsync(batch.ToArray());
+
+                skip += BATCH_SIZE;
+            }
+
             return NoContent();
         }
 

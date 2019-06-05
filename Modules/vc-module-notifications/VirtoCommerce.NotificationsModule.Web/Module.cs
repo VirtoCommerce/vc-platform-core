@@ -8,11 +8,12 @@ using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Options;
+using VirtoCommerce.Notifications.Core.Types;
 using VirtoCommerce.NotificationsModule.Core;
 using VirtoCommerce.NotificationsModule.Core.Model;
 using VirtoCommerce.NotificationsModule.Core.Services;
+using VirtoCommerce.NotificationsModule.Core.Types;
 using VirtoCommerce.NotificationsModule.Data.ExportImport;
-using VirtoCommerce.NotificationsModule.Data.JsonConverters;
 using VirtoCommerce.NotificationsModule.Data.Model;
 using VirtoCommerce.NotificationsModule.Data.Repositories;
 using VirtoCommerce.NotificationsModule.Data.Senders;
@@ -20,6 +21,7 @@ using VirtoCommerce.NotificationsModule.Data.Services;
 using VirtoCommerce.NotificationsModule.LiquidRenderer;
 using VirtoCommerce.NotificationsModule.SendGrid;
 using VirtoCommerce.NotificationsModule.Smtp;
+using VirtoCommerce.NotificationsModule.Web.JsonConverters;
 using VirtoCommerce.Platform.Core.Common;
 using VirtoCommerce.Platform.Core.ExportImport;
 using VirtoCommerce.Platform.Core.Modularity;
@@ -42,9 +44,10 @@ namespace VirtoCommerce.NotificationsModule.Web
             serviceCollection.AddTransient<INotificationRepository, NotificationRepository>();
             serviceCollection.AddSingleton<Func<INotificationRepository>>(provider => () => provider.CreateScope().ServiceProvider.GetService<INotificationRepository>());
             serviceCollection.AddSingleton<INotificationService, NotificationService>();
-            serviceCollection.AddSingleton<INotificationRegistrar, NotificationService>();
             serviceCollection.AddSingleton<INotificationSearchService, NotificationSearchService>();
+            serviceCollection.AddSingleton<INotificationRegistrar, NotificationService>();
             serviceCollection.AddSingleton<INotificationMessageService, NotificationMessageService>();
+            serviceCollection.AddSingleton<INotificationMessageSearchService, NotificationMessageSearchService>();
             serviceCollection.AddSingleton<INotificationSender, NotificationSender>();
             serviceCollection.AddSingleton<INotificationTemplateRenderer, LiquidTemplateRenderer>();
             serviceCollection.AddSingleton<INotificationMessageSenderProviderFactory, NotificationMessageSenderProviderFactory>();
@@ -60,14 +63,21 @@ namespace VirtoCommerce.NotificationsModule.Web
         public void PostInitialize(IApplicationBuilder appBuilder)
         {
             _appBuilder = appBuilder;
-            AbstractTypeFactory<Notification>.RegisterType<EmailNotification>().MapToType<NotificationEntity>();
-            AbstractTypeFactory<Notification>.RegisterType<SmsNotification>().MapToType<NotificationEntity>();
-            AbstractTypeFactory<NotificationTemplate>.RegisterType<EmailNotificationTemplate>().MapToType<NotificationTemplateEntity>();
-            AbstractTypeFactory<NotificationTemplate>.RegisterType<SmsNotificationTemplate>().MapToType<NotificationTemplateEntity>();
-            AbstractTypeFactory<NotificationMessage>.RegisterType<EmailNotificationMessage>().MapToType<NotificationMessageEntity>();
-            AbstractTypeFactory<NotificationMessage>.RegisterType<SmsNotificationMessage>().MapToType<NotificationMessageEntity>();
+
+            AbstractTypeFactory<NotificationTemplate>.RegisterType<EmailNotificationTemplate>();
+            AbstractTypeFactory<NotificationTemplate>.RegisterType<SmsNotificationTemplate>();
+
+            AbstractTypeFactory<NotificationMessage>.RegisterType<EmailNotificationMessage>();
+            AbstractTypeFactory<NotificationMessage>.RegisterType<SmsNotificationMessage>();
+
             AbstractTypeFactory<NotificationEntity>.RegisterType<EmailNotificationEntity>();
             AbstractTypeFactory<NotificationEntity>.RegisterType<SmsNotificationEntity>();
+
+            AbstractTypeFactory<NotificationTemplateEntity>.RegisterType<EmailNotificationTemplateEntity>();
+            AbstractTypeFactory<NotificationTemplateEntity>.RegisterType<SmsNotificationTemplateEntity>();
+
+            AbstractTypeFactory<NotificationMessageEntity>.RegisterType<EmailNotificationMessageEntity>();
+            AbstractTypeFactory<NotificationMessageEntity>.RegisterType<SmsNotificationMessageEntity>();
 
             var settingsRegistrar = appBuilder.ApplicationServices.GetRequiredService<ISettingsRegistrar>();
             settingsRegistrar.RegisterSettings(ModuleConstants.Settings.AllSettings, ModuleInfo.Id);
@@ -82,7 +92,7 @@ namespace VirtoCommerce.NotificationsModule.Web
                 }).ToArray());
 
             var mvcJsonOptions = appBuilder.ApplicationServices.GetService<IOptions<MvcJsonOptions>>();
-            mvcJsonOptions.Value.SerializerSettings.Converters.Add(new PolymorphicJsonConverter());
+            mvcJsonOptions.Value.SerializerSettings.Converters.Add(new NotificationPolymorphicJsonConverter());
 
             using (var serviceScope = appBuilder.ApplicationServices.CreateScope())
             {
@@ -93,7 +103,7 @@ namespace VirtoCommerce.NotificationsModule.Web
                 }
             }
 
-            //TODO move to impl. projects
+            //TODO move out from here to projects
             var configuration = appBuilder.ApplicationServices.GetService<IConfiguration>();
             var notificationGateway = configuration.GetSection("Notifications:Gateway").Value;
             var notificationMessageSenderProviderFactory = appBuilder.ApplicationServices.GetService<INotificationMessageSenderProviderFactory>();
@@ -107,6 +117,16 @@ namespace VirtoCommerce.NotificationsModule.Web
                     break;
             }
 
+            var registrar = appBuilder.ApplicationServices.GetService<INotificationRegistrar>();
+            registrar.RegisterNotification<ResetPasswordEmailNotification>();
+            registrar.RegisterNotification<ConfirmationEmailNotification>();
+            registrar.RegisterNotification<RegistrationEmailNotification>();
+            registrar.RegisterNotification<RegistrationInvitationEmailNotification>();
+            registrar.RegisterNotification<RemindUserNameEmailNotification>();
+            registrar.RegisterNotification<ResetPasswordSmsNotification>();
+            registrar.RegisterNotification<TwoFactorEmailNotification>();
+            registrar.RegisterNotification<TwoFactorSmsNotification>();
+            registrar.RegisterNotification<ChangePhoneNumberSmsNotification>();
         }
 
         public void Uninstall()

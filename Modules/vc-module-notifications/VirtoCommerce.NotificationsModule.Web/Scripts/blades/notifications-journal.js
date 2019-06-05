@@ -33,14 +33,8 @@ angular.module('virtoCommerce.notificationsModule')
 
         blade.refresh = function () {
             var searchCriteria = getSearchCriteria();
-            notifications.getNotificationJournalList({
-                objectId: blade.objectId,
-                objectTypeId: blade.objectTypeId,
-                start: ($scope.pageSettings.currentPage - 1) * $scope.pageSettings.itemsPerPageCount,
-                count: $scope.pageSettings.itemsPerPageCount,
-                sort: uiGridHelper.getSortExpression($scope)
-            }, function (data) {
-                blade.currentEntities = data.notifications;
+            notifications.getNotificationJournalList(searchCriteria, function (data) {
+                blade.currentEntities = data.results;
                 $scope.pageSettings.totalItems = data.totalCount;
                 blade.isLoading = false;
             });

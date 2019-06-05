@@ -1,24 +1,25 @@
 using System;
+using System.Collections.Generic;
 using System.Collections.ObjectModel;
 using System.IO;
 using System.Linq;
 using System.Threading;
 using System.Threading.Tasks;
-using Microsoft.AspNetCore.Mvc;
 using Moq;
 using Newtonsoft.Json;
 using VirtoCommerce.NotificationsModule.Core.Model;
 using VirtoCommerce.NotificationsModule.Core.Services;
+using VirtoCommerce.NotificationsModule.Core.Types;
 using VirtoCommerce.NotificationsModule.Data.ExportImport;
 using VirtoCommerce.NotificationsModule.Data.Model;
 using VirtoCommerce.NotificationsModule.Data.Repositories;
 using VirtoCommerce.NotificationsModule.Data.Services;
+using VirtoCommerce.NotificationsModule.Web.JsonConverters;
 using VirtoCommerce.Platform.Core.Common;
 using VirtoCommerce.Platform.Core.Domain;
 using VirtoCommerce.Platform.Core.Events;
 using VirtoCommerce.Platform.Core.ExportImport;
 using Xunit;
-using RegistrationEmailNotification = VirtoCommerce.NotificationsModule.Tests.NotificationTypes.RegistrationEmailNotification;
 
 namespace VirtoCommerce.NotificationsModule.Tests.IntegrationTests
 {
@@ -26,8 +27,8 @@ namespace VirtoCommerce.NotificationsModule.Tests.IntegrationTests
     {
         private NotificationsExportImport _notificationsExportImportManager;
         private readonly INotificationRegistrar _notificationRegistrar;
-        private readonly NotificationSearchService _notificationSearchService;
-        private readonly NotificationService _notificationService;
+        private readonly Mock<INotificationSearchService> _notificationSearchServiceMock;
+        private readonly Mock<INotificationService> _notificationServiceMock;
         private readonly Mock<INotificationRepository> _repositoryMock;
         private readonly Mock<IEventPublisher> _eventPulisherMock;
         private readonly Mock<IUnitOfWork> _mockUnitOfWork;
@@ -39,41 +40,18 @@ namespace VirtoCommerce.NotificationsModule.Tests.IntegrationTests
             INotificationRepository RepositoryFactory() => _repositoryMock.Object;
             _mockUnitOfWork = new Mock<IUnitOfWork>();
             _repositoryMock.Setup(ss => ss.UnitOfWork).Returns(_mockUnitOfWork.Object);
-            //_notificationSearchService = new NotificationSearchService(RepositoryFactory);
-            _notificationService = new NotificationService(RepositoryFactory, _eventPulisherMock.Object);
-            _notificationsExportImportManager = new NotificationsExportImport(_notificationSearchService, _notificationService, GetJsonSerializer());
+            _notificationSearchServiceMock = new Mock<INotificationSearchService>();
+            _notificationServiceMock = new Mock<INotificationService>();
 
-            var mvcJsonOptions = new MvcJsonOptions()
-            {
-                SerializerSettings =
-                {
-                    NullValueHandling = NullValueHandling.Ignore,
-                    ReferenceLoopHandling = ReferenceLoopHandling.Ignore,
-                    Formatting = Formatting.Indented
-                }
-            };
+            _notificationsExportImportManager = new NotificationsExportImport(_notificationSearchServiceMock.Object, _notificationServiceMock.Object, GetJsonSerializer());
 
-            _notificationsExportImportManager = new NotificationsExportImport(_notificationSearchService, _notificationService, JsonSerializer.Create(mvcJsonOptions.SerializerSettings));
+            if (!AbstractTypeFactory<NotificationTemplate>.AllTypeInfos.SelectMany(x => x.AllSubclasses).Contains(typeof(EmailNotificationTemplate)))
+                AbstractTypeFactory<NotificationTemplate>.RegisterType<EmailNotificationTemplate>().MapToType<NotificationTemplateEntity>();
+
+            if (!AbstractTypeFactory<NotificationMessage>.AllTypeInfos.SelectMany(x => x.AllSubclasses).Contains(typeof(EmailNotificationMessage)))
+                AbstractTypeFactory<NotificationMessage>.RegisterType<EmailNotificationMessage>().MapToType<NotificationMessageEntity>();
 
             _notificationRegistrar = new NotificationService(RepositoryFactory, _eventPulisherMock.Object);
-
-
-            if (!AbstractTypeFactory<Notification>.AllTypeInfos.Any(t => t.IsAssignableTo(nameof(EmailNotification))))
-            {
-                AbstractTypeFactory<Notification>.RegisterType<EmailNotification>().MapToType<NotificationEntity>();
-                AbstractTypeFactory<NotificationEntity>.RegisterType<EmailNotificationEntity>();
-            }
-
-            if (!AbstractTypeFactory<NotificationTemplate>.AllTypeInfos.Any(t => t.IsAssignableTo(nameof(EmailNotificationTemplate))))
-            {
-                AbstractTypeFactory<NotificationTemplate>.RegisterType<EmailNotificationTemplate>().MapToType<NotificationTemplateEntity>();
-            }
-
-            if (!AbstractTypeFactory<NotificationMessage>.AllTypeInfos.Any(t => t.IsAssignableTo(nameof(EmailNotificationMessage))))
-            {
-                AbstractTypeFactory<NotificationMessage>.RegisterType<EmailNotificationMessage>().MapToType<NotificationMessageEntity>();
-            }
-
             _notificationRegistrar.RegisterNotification<RegistrationEmailNotification>();
         }
 
@@ -83,7 +61,8 @@ namespace VirtoCommerce.NotificationsModule.Tests.IntegrationTests
             {
                 ReferenceLoopHandling = ReferenceLoopHandling.Ignore,
                 NullValueHandling = NullValueHandling.Ignore,
-                Formatting = Formatting.Indented
+                Formatting = Formatting.Indented,
+                Converters = new List<JsonConverter> { new NotificationPolymorphicJsonConverter() }
             });
         }
 
@@ -93,22 +72,19 @@ namespace VirtoCommerce.NotificationsModule.Tests.IntegrationTests
             //Arrange
             var manifest = new PlatformExportManifest();
             var fileStream = new FileStream(Path.GetFullPath("export_test.json"), FileMode.Create);
-            var entity = AbstractTypeFactory<NotificationEntity>.TryCreateInstance(nameof(EmailNotificationEntity));
+            var entity = AbstractTypeFactory<Notification>.TryCreateInstance(nameof(EmailNotification));
             entity.Id = Guid.NewGuid().ToString();
             entity.Type = nameof(RegistrationEmailNotification);
-            entity.Kind = nameof(EmailNotification);
-            entity.TenantId = Guid.NewGuid().ToString();
-            entity.TenantType = nameof(Notification);
-            entity.Templates = new ObservableCollection<NotificationTemplateEntity>()
+
+            entity.TenantIdentity = new TenantIdentity(Guid.NewGuid().ToString(), nameof(Notification));
+            entity.Templates = new ObservableCollection<NotificationTemplate>()
             {
-                new NotificationTemplateEntity() { Body = "test", LanguageCode = "en-US" },
+                new EmailNotificationTemplate() { Body = "test", LanguageCode = "en-US" },
             };
 
-            //_repositoryMock.Setup(r => r.GetByTypesAsync(new[] { nameof(RegistrationEmailNotification) }, null, null, NotificationResponseGroup.Default.ToString(), true))
-            //               .ReturnsAsync(new[] { entity });
-
-            //_repositoryMock.Setup(r => r.GetByTypesAsync(new[] { nameof(RegistrationEmailNotification) }, null, null, NotificationResponseGroup.Full.ToString(), true))
-            //               .ReturnsAsync(new[] { entity });
+            _notificationSearchServiceMock
+                .Setup(nss => nss.SearchNotificationsAsync(It.IsAny<NotificationSearchCriteria>()))
+                .ReturnsAsync(new NotificationSearchResult { Results = new List<Notification> { entity }, TotalCount = 1 });
 
             //Act
             await _notificationsExportImportManager.DoExportAsync(fileStream, exportImportProgressInfo => { }, new CancellationTokenWrapper(CancellationToken.None));
@@ -121,7 +97,6 @@ namespace VirtoCommerce.NotificationsModule.Tests.IntegrationTests
         public async Task DoImport_SuccessImport()
         {
             //Arrange
-            var manifest = new PlatformExportManifest();
             var fileStream = new FileStream(Path.GetFullPath("export_test.json"), FileMode.Open);
 
             //Act

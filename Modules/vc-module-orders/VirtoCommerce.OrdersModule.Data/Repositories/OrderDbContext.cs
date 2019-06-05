@@ -49,10 +49,10 @@ namespace VirtoCommerce.OrdersModule.Data.Repositories
                         .HasForeignKey(x => x.LineItemId).OnDelete(DeleteBehavior.Cascade).IsRequired();
 
             modelBuilder.Entity<ShipmentItemEntity>().HasOne(x => x.Shipment).WithMany(x => x.Items)
-                        .HasForeignKey(x => x.ShipmentId).OnDelete(DeleteBehavior.Restrict).IsRequired();
+                        .HasForeignKey(x => x.ShipmentId).OnDelete(DeleteBehavior.Cascade).IsRequired();
 
             modelBuilder.Entity<ShipmentItemEntity>().HasOne(x => x.ShipmentPackage).WithMany(x => x.Items)
-                        .HasForeignKey(x => x.ShipmentPackageId).OnDelete(DeleteBehavior.Restrict);
+                        .HasForeignKey(x => x.ShipmentPackageId).OnDelete(DeleteBehavior.Cascade);
 
             modelBuilder.Entity<ShipmentItemEntity>().ToTable("OrderShipmentItem");
             #endregion
@@ -90,10 +90,10 @@ namespace VirtoCommerce.OrdersModule.Data.Repositories
                         .HasForeignKey(x => x.CustomerOrderId).OnDelete(DeleteBehavior.Cascade);
 
             modelBuilder.Entity<AddressEntity>().HasOne(x => x.Shipment).WithMany(x => x.Addresses)
-                        .HasForeignKey(x => x.ShipmentId).OnDelete(DeleteBehavior.Restrict);
+                        .HasForeignKey(x => x.ShipmentId).OnDelete(DeleteBehavior.Cascade);
 
             modelBuilder.Entity<AddressEntity>().HasOne(x => x.PaymentIn).WithMany(x => x.Addresses)
-                        .HasForeignKey(x => x.PaymentInId).OnDelete(DeleteBehavior.Restrict);
+                        .HasForeignKey(x => x.PaymentInId).OnDelete(DeleteBehavior.Cascade);
 
             modelBuilder.Entity<AddressEntity>().ToTable("OrderAddress");
             #endregion
@@ -122,13 +122,13 @@ namespace VirtoCommerce.OrdersModule.Data.Repositories
                         .HasForeignKey(x => x.CustomerOrderId).OnDelete(DeleteBehavior.Cascade);
 
             modelBuilder.Entity<DiscountEntity>().HasOne(x => x.Shipment).WithMany(x => x.Discounts)
-                        .HasForeignKey(x => x.ShipmentId).OnDelete(DeleteBehavior.Restrict);
+                        .HasForeignKey(x => x.ShipmentId).OnDelete(DeleteBehavior.Cascade);
 
             modelBuilder.Entity<DiscountEntity>().HasOne(x => x.LineItem).WithMany(x => x.Discounts)
-                        .HasForeignKey(x => x.LineItemId).OnDelete(DeleteBehavior.Restrict);
+                        .HasForeignKey(x => x.LineItemId).OnDelete(DeleteBehavior.Cascade);
 
             modelBuilder.Entity<DiscountEntity>().HasOne(x => x.PaymentIn).WithMany(x => x.Discounts)
-                        .HasForeignKey(x => x.PaymentInId).OnDelete(DeleteBehavior.Restrict);
+                        .HasForeignKey(x => x.PaymentInId).OnDelete(DeleteBehavior.Cascade);
 
             modelBuilder.Entity<DiscountEntity>().ToTable("OrderDiscount");
             #endregion
@@ -142,13 +142,13 @@ namespace VirtoCommerce.OrdersModule.Data.Repositories
                         .HasForeignKey(x => x.CustomerOrderId).OnDelete(DeleteBehavior.Cascade);
 
             modelBuilder.Entity<TaxDetailEntity>().HasOne(x => x.Shipment).WithMany(x => x.TaxDetails)
-                        .HasForeignKey(x => x.ShipmentId).OnDelete(DeleteBehavior.Restrict);
+                        .HasForeignKey(x => x.ShipmentId).OnDelete(DeleteBehavior.Cascade);
 
             modelBuilder.Entity<TaxDetailEntity>().HasOne(x => x.LineItem).WithMany(x => x.TaxDetails)
-                        .HasForeignKey(x => x.LineItemId).OnDelete(DeleteBehavior.Restrict);
+                        .HasForeignKey(x => x.LineItemId).OnDelete(DeleteBehavior.Cascade);
 
             modelBuilder.Entity<TaxDetailEntity>().HasOne(x => x.PaymentIn).WithMany(x => x.TaxDetails)
-                        .HasForeignKey(x => x.PaymentInId).OnDelete(DeleteBehavior.Restrict);
+                        .HasForeignKey(x => x.PaymentInId).OnDelete(DeleteBehavior.Cascade);
 
             modelBuilder.Entity<TaxDetailEntity>().ToTable("OrderTaxDetail");
             #endregion

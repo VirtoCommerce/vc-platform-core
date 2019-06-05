@@ -6,7 +6,6 @@ using Microsoft.Extensions.Caching.Memory;
 using Newtonsoft.Json;
 using VirtoCommerce.MarketingModule.Core.Events;
 using VirtoCommerce.MarketingModule.Core.Model;
-using VirtoCommerce.MarketingModule.Core.Model.DynamicContent;
 using VirtoCommerce.MarketingModule.Core.Services;
 using VirtoCommerce.MarketingModule.Data.Caching;
 using VirtoCommerce.MarketingModule.Data.Model;
@@ -224,6 +223,20 @@ namespace VirtoCommerce.MarketingModule.Data.Services
             DynamicContentPublicationCacheRegion.ExpireRegion();
         }
 
+        public async Task<DynamicContentPublication[]> GetContentPublicationsByStoreIdAndPlaceNameAsync(string storeId, DateTime intervalDate, string placeName)
+        {
+            var cacheKey = CacheKey.With(GetType(), "GetContentPublicationsByStoreIdAndPlaceName", storeId, intervalDate.ToString("s"), placeName);
+            return await _platformMemoryCache.GetOrCreateExclusiveAsync(cacheKey, async (cacheEntry) =>
+            {
+                cacheEntry.AddExpirationToken(DynamicContentPublicationCacheRegion.CreateChangeToken());
+                using (var repository = _repositoryFactory())
+                {
+                    var publications = await repository.GetContentPublicationsByStoreIdAndPlaceNameAsync(storeId, intervalDate, placeName);
+                    return publications.Select(x => x.ToModel(AbstractTypeFactory<DynamicContentPublication>.TryCreateInstance())).ToArray();
+                }
+            });
+        }
+
         public async Task DeletePublicationsAsync(string[] ids)
         {
             using (var repository = _repositoryFactory())
@@ -240,9 +253,6 @@ namespace VirtoCommerce.MarketingModule.Data.Services
             //Serialize condition expression 
             if (publication.DynamicExpression?.Children != null)
             {
-                var conditionExpression = ((DynamicContentConditionTree)publication.DynamicExpression).GetConditions();
-                publication.PredicateSerialized = JsonConvert.SerializeObject(conditionExpression);
-
                 //Clear availableElements in expression (for decrease size)
                 publication.DynamicExpression.AvailableChildren = null;
                 var allBlocks = publication.DynamicExpression.Traverse(x => x.Children);

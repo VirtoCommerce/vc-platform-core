@@ -4,12 +4,12 @@ using System.ComponentModel.DataAnnotations;
 using System.Linq;
 using System.Threading.Tasks;
 using Moq;
+using VirtoCommerce.NotificationsModule.Core.Extensions;
 using VirtoCommerce.NotificationsModule.Core.Model;
 using VirtoCommerce.NotificationsModule.Core.Services;
 using VirtoCommerce.NotificationsModule.Data.Model;
 using VirtoCommerce.NotificationsModule.Data.Repositories;
 using VirtoCommerce.NotificationsModule.Data.Services;
-using VirtoCommerce.NotificationsModule.Tests.NotificationTypes;
 using VirtoCommerce.Platform.Core.Common;
 using VirtoCommerce.Platform.Core.Domain;
 using VirtoCommerce.Platform.Core.Events;
@@ -28,7 +28,7 @@ namespace VirtoCommerce.NotificationsModule.Tests.UnitTests
 
             if (socialNetworkNotification != null)
             {
-                socialNetworkNotification.Token = this.Token;
+                socialNetworkNotification.Token = Token;
             }
 
             return base.ToModel(notification);
@@ -39,7 +39,7 @@ namespace VirtoCommerce.NotificationsModule.Tests.UnitTests
             var socialNetworkNotification = notification as SocialNetworkNotification;
             if (socialNetworkNotification != null)
             {
-                this.Token = socialNetworkNotification.Token;
+                Token = socialNetworkNotification.Token;
 
             }
 
@@ -51,20 +51,27 @@ namespace VirtoCommerce.NotificationsModule.Tests.UnitTests
             var socialNetworkNotification = notification as SocialNetworkNotificationEntity;
             if (socialNetworkNotification != null)
             {
-                socialNetworkNotification.Token = this.Token;
+                socialNetworkNotification.Token = Token;
             }
 
             base.Patch(notification);
         }
     }
 
-    public class SocialNetworkNotification : Notification
+    public abstract class SocialNetworkNotification : Notification
     {
-        [StringLength(128)]
         public string Token { get; set; }
+        public override string Kind => nameof(SocialNetworkNotification);
     }
-    public class SocialNetworkTemplate : NotificationTemplate { }
-    public class SocialNetworkMessage : NotificationMessage { }
+
+    public class SocialNetworkTemplate : NotificationTemplate
+    {
+        public override string Kind => nameof(SocialNetworkNotification);
+    }
+    public class SocialNetworkMessage : NotificationMessage
+    {
+        public override string Kind => nameof(SocialNetworkNotification);
+    }
     public class RegistrationSocialNetworkNotification : SocialNetworkNotification { }
 
     public class SocialNetworkNotificationEntityUnitTests
@@ -75,6 +82,8 @@ namespace VirtoCommerce.NotificationsModule.Tests.UnitTests
         private readonly Func<INotificationRepository> _repositoryFactory;
         private readonly Mock<IEventPublisher> _eventPublisherMock;
         private readonly NotificationService _notificationService;
+        private readonly Mock<INotificationService> _notificationServiceMock;
+        private readonly NotificationSearchService _notificationSearchService;
 
         public SocialNetworkNotificationEntityUnitTests()
         {
@@ -85,52 +94,37 @@ namespace VirtoCommerce.NotificationsModule.Tests.UnitTests
             _eventPublisherMock = new Mock<IEventPublisher>();
             _notificationService = new NotificationService(_repositoryFactory, _eventPublisherMock.Object);
             _notificationRegistrar = _notificationService;
-            //todo
-            if (!AbstractTypeFactory<Notification>.AllTypeInfos.Any(t => t.IsAssignableTo(nameof(SocialNetworkNotification))))
-            {
-                AbstractTypeFactory<Notification>.RegisterType<SocialNetworkNotification>().MapToType<NotificationEntity>();
-            }
+            _notificationServiceMock = new Mock<INotificationService>();
+            _notificationSearchService = new NotificationSearchService(_repositoryFactory, _notificationServiceMock.Object);
 
-            if (!AbstractTypeFactory<NotificationTemplate>.AllTypeInfos.Any(t => t.IsAssignableTo(nameof(SocialNetworkTemplate))))
-            {
-                AbstractTypeFactory<NotificationTemplate>.RegisterType<SocialNetworkTemplate>().MapToType<NotificationTemplateEntity>();
-            }
-
-            if (!AbstractTypeFactory<NotificationMessage>.AllTypeInfos.Any(t => t.IsAssignableTo(nameof(SocialNetworkMessage))))
-            {
-                AbstractTypeFactory<NotificationMessage>.RegisterType<SocialNetworkMessage>().MapToType<NotificationMessageEntity>();
-            }
-
-            if (!AbstractTypeFactory<NotificationEntity>.AllTypeInfos.Any(t => t.IsAssignableTo(nameof(SocialNetworkNotificationEntity))))
-            {
+            if (!AbstractTypeFactory<NotificationEntity>.AllTypeInfos.SelectMany(x => x.AllSubclasses).Contains(typeof(SocialNetworkNotificationEntity)))
                 AbstractTypeFactory<NotificationEntity>.RegisterType<SocialNetworkNotificationEntity>();
-            }
+
         }
 
         [Fact]
-        public async Task GetNotificationByTypeAsync_ReturnNotifiction()
+        public async Task GetNotificationByTypeAsync_ReturnNotification()
         {
             //Arrange
-            //string type = nameof(RegistrationSocialNetworkNotification);
-            //var responseGroup = NotificationResponseGroup.Default.ToString();
-            //_repositoryMock.Setup(n => n.GetByTypesAsync(new[] { nameof(RegistrationSocialNetworkNotification) }, null, null, responseGroup))
-            //    .ReturnsAsync(new[] { new SocialNetworkNotificationEntity() { IsActive = true } });
-            //_notificationRegistrar.RegisterNotification<RegistrationSocialNetworkNotification>();
+            var type = nameof(RegistrationSocialNetworkNotification);
 
-            ////Act
-            //var result = await _notificationService.GetByTypeAsync(type, null, null, responseGroup);
+            var mockNotifications = new Common.TestAsyncEnumerable<NotificationEntity>(new List<NotificationEntity>());
+            _repositoryMock.Setup(r => r.Notifications).Returns(mockNotifications.AsQueryable());
+            _notificationRegistrar.RegisterNotification<RegistrationSocialNetworkNotification>();
 
-            ////Assert
-            //Assert.NotNull(result);
-            //Assert.Equal(type, result.Type);
-            //Assert.True(result.IsActive);
+            //Act
+            var result = await _notificationSearchService.GetNotificationAsync(type);
+
+            //Assert
+            Assert.NotNull(result);
+            Assert.Equal(type, result.Type);
         }
 
         [Fact]
         public async Task GetNotificationsByIdsAsync_ReturnNotifications()
         {
             //Arrange
-            string id = Guid.NewGuid().ToString();
+            var id = Guid.NewGuid().ToString();
             var notifications = new List<NotificationEntity> { new SocialNetworkNotificationEntity() { Id = id, Type = nameof(SocialNetworkNotification) } };
             var responseGroup = NotificationResponseGroup.Default.ToString();
             _repositoryMock.Setup(n => n.GetByIdsAsync(new[] { id }, responseGroup)).ReturnsAsync(notifications.ToArray());
@@ -148,7 +142,7 @@ namespace VirtoCommerce.NotificationsModule.Tests.UnitTests
         public async Task SaveChangesAsync_SavedNotification()
         {
             //Arrange
-            string id = Guid.NewGuid().ToString();
+            var id = Guid.NewGuid().ToString();
             _notificationRegistrar.RegisterNotification<RegistrationSocialNetworkNotification>();
             var notificationEntities = new List<NotificationEntity>
             {

@@ -1,12 +1,10 @@
-angular.module('virtoCommerce.taxModule')
-.controller('virtoCommerce.taxModule.taxProviderListController', ['$scope', 'platformWebApp.bladeNavigationService', 'virtoCommerce.taxModule.taxProviders', function ($scope, bladeNavigationService, taxProviders) {
+angular.module('virtoCommerce.taxModule').controller('virtoCommerce.taxModule.taxProviderListController', ['$scope', 'platformWebApp.bladeNavigationService', 'virtoCommerce.taxModule.taxProviders', function ($scope, bladeNavigationService, taxProviders) {
     var blade = $scope.blade;
-
 
     blade.refresh = function () {
         blade.isLoading = true;
         taxProviders.search({
-            storeId: blade.storeId        
+            storeId: blade.storeId
         }, function (data) {
             blade.isLoading = false;
             blade.currentEntities = data.results;
@@ -15,14 +13,14 @@ angular.module('virtoCommerce.taxModule')
             bladeNavigationService.setError('Error ' + error.status, blade);
         });
     }
-    
+
     $scope.selectNode = function (node) {
         $scope.selectedNodeId = node.typeName;
 
         var newBlade = {
             id: 'taxProviderDetail',
             taxProvider: node,
-            storeId : blade.storeId,
+            storeId: blade.storeId,
             title: blade.title,
             subtitle: 'tax.blades.taxProvider-detail.subtitle',
             controller: 'virtoCommerce.taxModule.taxProviderDetailController',
@@ -30,7 +28,6 @@ angular.module('virtoCommerce.taxModule')
         };
         bladeNavigationService.showBlade(newBlade, $scope.blade);
     };
-
 
     blade.toolbarCommands = [
         {

@@ -11,7 +11,7 @@ namespace VirtoCommerce.CatalogModule.Data.Migrations
                  WHERE TABLE_NAME = '__MigrationHistory'))
                     BEGIN
                         BEGIN
-	                        INSERT INTO [dbo].[__EFMigrationsHistory] ([MigrationId],[ProductVersion]) VALUES ('20190510073242_InitialCatalog', '2.2.3-servicing-35854')
+	                        INSERT INTO [dbo].[__EFMigrationsHistory] ([MigrationId],[ProductVersion]) VALUES ('20190515064457_InitialCatalog', '2.2.3-servicing-35854')
                         END
                     END");
 

@@ -62,7 +62,7 @@ namespace VirtoCommerce.Platform.Data.ExportImport
         public PlatformExportManifest ReadExportManifest(Stream stream)
         {
             PlatformExportManifest retVal;
-            using (var package = new ZipArchive(stream))
+            using (var package = new ZipArchive(stream, ZipArchiveMode.Read, true))
             {
                 var manifestPart = package.GetEntry(ManifestZipEntryName);
                 using (var manifestStream = manifestPart.Open())
@@ -109,7 +109,7 @@ namespace VirtoCommerce.Platform.Data.ExportImport
             progressInfo.Description = "Starting platform import...";
             progressCallback(progressInfo);
 
-            using (var zipArchive = new ZipArchive(stream))
+            using (var zipArchive = new ZipArchive(stream, ZipArchiveMode.Read, true))
             using (EventSuppressor.SupressEvents())
             {
                 //Import selected platform entries
@@ -304,8 +304,8 @@ namespace VirtoCommerce.Platform.Data.ExportImport
                         foreach (var module in manifest.Modules)
                         {
                             var moduleSettings = await _settingsManager.GetObjectSettingsAsync(_settingsManager.AllRegisteredSettings.Where(x => x.ModuleId == module.Id).Select(x => x.Name));
-
-                            foreach (var setting in moduleSettings)
+                            //Export only settings with set values
+                            foreach (var setting in moduleSettings.Where(x => x.ItHasValues))
                             {
                                 serializer.Serialize(writer, setting);
                             }

@@ -40,14 +40,16 @@ namespace VirtoCommerce.NotificationsModule.Tests.IntegrationTests
             _notificationService = serviceProvider.GetService<INotificationService>();
             _notificationSearchService = serviceProvider.GetService<INotificationSearchService>();
 
-            if (AbstractTypeFactory<NotificationEntity>.AllTypeInfos.All(t => t.Type != typeof(TwitterNotificationEntity)))
-            {
+            if (!AbstractTypeFactory<NotificationEntity>.AllTypeInfos.SelectMany(x => x.AllSubclasses).Contains(typeof(TwitterNotificationEntity)))
                 AbstractTypeFactory<NotificationEntity>.RegisterType<TwitterNotificationEntity>();
-            }
+
+            if (!AbstractTypeFactory<NotificationTemplate>.AllTypeInfos.SelectMany(x => x.AllSubclasses).Contains(typeof(EmailNotificationTemplate)))
+                AbstractTypeFactory<NotificationTemplate>.RegisterType<EmailNotificationTemplate>().MapToType<NotificationTemplateEntity>();
+
+            if (!AbstractTypeFactory<NotificationMessage>.AllTypeInfos.SelectMany(x => x.AllSubclasses).Contains(typeof(EmailNotificationMessage)))
+                AbstractTypeFactory<NotificationMessage>.RegisterType<EmailNotificationMessage>().MapToType<NotificationMessageEntity>();
 
             var registrar = serviceProvider.GetService<INotificationRegistrar>();
-            registrar.RegisterNotification<TwitterNotification>();
-            registrar.RegisterNotification<TwitterNotification, NotificationEntity>();
             registrar.RegisterNotification<PostTwitterNotification>();
         }
 
@@ -57,7 +59,7 @@ namespace VirtoCommerce.NotificationsModule.Tests.IntegrationTests
             //Arrange
             var notifications = new List<TwitterNotification>()
             {
-                new TwitterNotification
+                new PostTwitterNotification
                 {
                     Type = nameof(PostTwitterNotification), IsActive = true,
                     TenantIdentity = new TenantIdentity("Platform", null),
@@ -75,7 +77,8 @@ namespace VirtoCommerce.NotificationsModule.Tests.IntegrationTests
         public async Task SearchNotifications_ContainsTwitterNotification()
         {
             //Arrange
-            var criteria = new NotificationSearchCriteria() { Take = int.MaxValue };
+            var criteria = AbstractTypeFactory<NotificationSearchCriteria>.TryCreateInstance();
+            criteria.Take = int.MaxValue;
 
             //Act
             var result = await _notificationSearchService.SearchNotificationsAsync(criteria);
@@ -88,7 +91,8 @@ namespace VirtoCommerce.NotificationsModule.Tests.IntegrationTests
         public async Task SaveChangesAsync_UpdateTwitterNotification()
         {
             //Arrange
-            var criteria = new NotificationSearchCriteria() { Take = int.MaxValue };
+            var criteria = AbstractTypeFactory<NotificationSearchCriteria>.TryCreateInstance();
+            criteria.Take = int.MaxValue;
             var notifications = await _notificationSearchService.SearchNotificationsAsync(criteria);
             var notification = notifications.Results.FirstOrDefault();
             if (notification is TwitterNotification twitterNotification)

@@ -94,7 +94,7 @@ namespace VirtoCommerce.ContentModule.Web.Controllers.Api
             //ToDo Reset cached items
             //_cacheManager.ClearRegion($"content-{storeId}");
             ContentCacheRegion.ExpireRegion();
-            return Ok();
+            return NoContent();
         }
 
         /// <summary>
@@ -158,7 +158,7 @@ namespace VirtoCommerce.ContentModule.Web.Controllers.Api
             var storageProvider = _blobContentStorageProviderFactory.CreateProvider(GetContentBasePath(contentType, storeId));
 
             storageProvider.Move(oldUrl, newUrl);
-            return Ok();
+            return NoContent();
         }
 
         /// <summary>
@@ -176,7 +176,7 @@ namespace VirtoCommerce.ContentModule.Web.Controllers.Api
 
             //This method used only for default themes copying that we use string.Empty instead storeId because default themes placed only in root content folder
             storageProvider.Copy(srcPath, destPath);
-            return Ok();
+            return NoContent();
         }
 
         /// <summary>
@@ -213,7 +213,7 @@ namespace VirtoCommerce.ContentModule.Web.Controllers.Api
             //remove archive after unpack
             await storageProvider.RemoveAsync(new[] { archivePath });
 
-            return Ok();
+            return NoContent();
         }
 
         /// <summary>
@@ -232,7 +232,7 @@ namespace VirtoCommerce.ContentModule.Web.Controllers.Api
 
             await storageProvider.CreateFolderAsync(folder.ToBlobModel(AbstractTypeFactory<BlobFolder>.TryCreateInstance()));
 
-            return Ok();
+            return NoContent();
         }
 
 

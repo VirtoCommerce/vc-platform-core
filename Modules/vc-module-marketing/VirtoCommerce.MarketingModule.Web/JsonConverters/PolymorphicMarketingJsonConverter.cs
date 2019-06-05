@@ -54,7 +54,7 @@ namespace VirtoCommerce.MarketingModule.Web.JsonConverters
                 }
 
                 //manually remove these props because using JsonIgnore breaks import/export
-                var ignoredPropertysNames = new[] { "predicateSerialized", "predicateVisualTreeSerialized", "rewardsSerialized" };
+                var ignoredPropertysNames = new[] { "predicateVisualTreeSerialized" };
                 var ignoredProperties = jo.Children<JProperty>().Where(x => ignoredPropertysNames.Contains(x.Name)).ToList();
                 foreach (var property in ignoredProperties)
                 {
@@ -100,12 +100,6 @@ namespace VirtoCommerce.MarketingModule.Web.JsonConverters
             var dynamicExpression = dynamicExpressionToken?.ToObject<PromotionConditionAndRewardTree>(serializer);
             if (dynamicExpression?.Children != null)
             {
-                var conditionExpression = dynamicExpression.GetConditions();
-                dynamicPromotion.PredicateSerialized = JsonConvert.SerializeObject(conditionExpression);
-
-                var rewards = dynamicExpression.GetRewards();
-                dynamicPromotion.RewardsSerialized = JsonConvert.SerializeObject(rewards);
-
                 // Clear availableElements in expression to decrease size
                 dynamicExpression.AvailableChildren = null;
                 var allBlocks = ((IConditionTree)dynamicExpression).Traverse(x => x.Children);
@@ -123,7 +117,7 @@ namespace VirtoCommerce.MarketingModule.Web.JsonConverters
             IConditionTree result = null;
 
             var dynamicPromotion = value as DynamicPromotion;
-            if (dynamicPromotion?.PredicateVisualTreeSerialized != null)
+            if (!string.IsNullOrEmpty(dynamicPromotion?.PredicateVisualTreeSerialized))
             {
                 result = JsonConvert.DeserializeObject<PromotionConditionAndRewardTree>(
                     dynamicPromotion.PredicateVisualTreeSerialized,

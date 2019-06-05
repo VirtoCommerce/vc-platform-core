@@ -94,7 +94,7 @@ namespace VirtoCommerce.Platform.Web.Controllers.Api
                 await _eventPublisher.Publish(new UserLogoutEvent(user));
             }
 
-            return Ok();
+            return NoContent();
         }
 
         /// <summary>
@@ -234,24 +234,11 @@ namespace VirtoCommerce.Platform.Web.Controllers.Api
                     }
                 }
             }
-            return Ok();
+            return NoContent();
         }
 
         /// <summary>
-        /// Add a new role role
-        /// </summary>
-        /// <param name="role"></param>
-        [HttpPost]
-        [Route("roles")]
-        [Authorize(PlatformConstants.Security.Permissions.SecurityUpdate)]
-        public async Task<ActionResult<IdentityResult>> CreateRoleAsync([FromBody] Role role)
-        {
-            var result = await _roleManager.CreateAsync(role);
-            return Ok(result);
-        }
-
-        /// <summary>
-        /// Update an existing role
+        /// Update an existing role or create new
         /// </summary>
         /// <param name="role"></param>
         [HttpPut]
@@ -310,6 +297,19 @@ namespace VirtoCommerce.Platform.Web.Controllers.Api
         {
             var retVal = await _userManager.FindByIdAsync(id);
             return Ok(retVal);
+        }
+
+        /// <summary>
+        /// Get user details by user email
+        /// </summary>
+        /// <param name="email"></param>
+        [HttpGet]
+        [Route("users/email/{email}")]
+        [Authorize(PlatformConstants.Security.Permissions.SecurityQuery)]
+        public async Task<ActionResult<ApplicationUser>> GetUserByEmailAsync([FromRoute] string email)
+        {
+            var result = await _userManager.FindByEmailAsync(email);
+            return Ok(result);
         }
 
         /// <summary>
@@ -625,6 +625,19 @@ namespace VirtoCommerce.Platform.Web.Controllers.Api
             return Ok(IdentityResult.Failed());
         }
 
+        //TODO: Remove later
+        #region Obsolete methods
+        [Obsolete("user /roles/search instead")]
+        [HttpPost]
+        [Route("roles")]
+        [Authorize(PlatformConstants.Security.Permissions.SecurityQuery)]
+        public async Task<ActionResult<RoleSearchResult>> SearchRolesObsolete([FromBody] RoleSearchCriteria request)
+        {
+            var result = await _roleSearchService.SearchRolesAsync(request);
+            return Ok(result);
+        }
+
+        #endregion
 
         private bool IsUserEditable(string userName)
         {

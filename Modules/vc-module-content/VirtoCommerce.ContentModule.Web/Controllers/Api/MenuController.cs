@@ -94,7 +94,7 @@ namespace VirtoCommerce.ContentModule.Web.Controllers.Api
             //CheckCurrentUserHasPermissionForObjects(ContentPredefinedPermissions.Update, new ContentScopeObject { StoreId = list.StoreId });
 
             await _menuService.AddOrUpdateAsync(list);
-            return Ok();
+            return NoContent();
         }
 
         /// <summary>
@@ -118,7 +118,7 @@ namespace VirtoCommerce.ContentModule.Web.Controllers.Api
             }
             await _menuService.DeleteListsAsync(listIds);
 
-            return Ok();
+            return NoContent();
         }
 
     }

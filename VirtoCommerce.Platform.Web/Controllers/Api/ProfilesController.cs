@@ -1,4 +1,3 @@
-using System.Linq;
 using System.Threading.Tasks;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Identity;
@@ -66,7 +65,7 @@ namespace VirtoCommerce.Platform.Web.Controllers.Api
             {
                 await _settingsManager.DeepSaveSettingsAsync(userProfile);
             }
-            return Ok();
+            return NoContent();
         }
     }
 }

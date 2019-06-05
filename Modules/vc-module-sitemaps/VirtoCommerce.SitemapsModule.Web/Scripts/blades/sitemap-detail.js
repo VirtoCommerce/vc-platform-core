@@ -1,5 +1,4 @@
-﻿angular.module('virtoCommerce.sitemapsModule')
-.controller('virtoCommerce.sitemapsModule.sitemapDetailController', ['$scope', 'platformWebApp.bladeUtils', 'platformWebApp.uiGridHelper', 'platformWebApp.bladeNavigationService', 'virtoCommerce.sitemapsModule.sitemapApi', 'platformWebApp.dialogService', function ($scope, bladeUtils, uiGridHelper, bladeNavigationService, sitemapApi, dialogService) {
+﻿angular.module('virtoCommerce.sitemapsModule').controller('virtoCommerce.sitemapsModule.sitemapDetailController', ['$scope', 'platformWebApp.bladeUtils', 'platformWebApp.uiGridHelper', 'platformWebApp.bladeNavigationService', 'virtoCommerce.sitemapsModule.sitemapApi', 'platformWebApp.dialogService', function ($scope, bladeUtils, uiGridHelper, bladeNavigationService, sitemapApi, dialogService) {
     var blade = $scope.blade;
     blade.updatePermission = 'sitemaps:update';
 
@@ -23,8 +22,7 @@
             sort: uiGridHelper.getSortExpression($scope),
             skip: ($scope.pageSettings.currentPage - 1) * $scope.pageSettings.itemsPerPageCount,
             take: $scope.pageSettings.itemsPerPageCount
-        },
-        function (response) {
+        }, function (response) {
             $scope.pageSettings.totalItems = response.totalCount;
             blade.currentEntities = response.results;
             blade.isLoading = false;
@@ -78,10 +76,9 @@
                     blade.isLoading = false;
                 } else {
                     if (blade.isNew) {
-                        sitemapApi.addSitemap(blade.currentEntity, function (result) {
+                        sitemapApi.addSitemap(blade.currentEntity, function () {
                             angular.copy(blade.currentEntity, blade.origEntity);
-                            refreshParent();
-                            blade.parentSelectNode(result);
+                            bladeNavigationService.closeBlade(blade, blade.parentRefresh);
                         });
                     } else {
                         sitemapApi.updateSitemap(blade.currentEntity, function () {

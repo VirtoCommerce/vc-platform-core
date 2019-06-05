@@ -58,7 +58,7 @@ namespace VirtoCommerce.Platform.Web.Controllers.Api
         public ActionResult ReloadModules()
         {
             _externalModuleCatalog.Reload();
-            return Ok();
+            return NoContent();
         }
 
         /// <summary>

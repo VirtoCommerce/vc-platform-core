@@ -31,7 +31,7 @@ angular.module('platformWebApp')
                                 function (x) {
                                     $scope.loginProgress = false;
                                     if (angular.isDefined(x.status)) {
-                                        if (x.status == 401) {
+                                        if (x.status === 401) {
                                             $scope.authError = 'The login or password is incorrect.';
                                         } else {
                                             $scope.authError = 'Authentication error (code: ' + x.status + ').';
@@ -123,12 +123,13 @@ angular.module('platformWebApp')
                 },
                 controller: ['$q', '$scope', '$stateParams', 'platformWebApp.accounts', 'platformWebApp.authService', 'platformWebApp.passwordValidationService', function ($q, $scope, $stateParams, accounts, authService, passwordValidationService) {
                     $scope.userName = authService.userName;
-
-                    accounts.get({ id: $stateParams.userName }, function (user) {
-                        if (!user || !user.passwordExpired) {
-                            $stateParams.onClose();
-                        }
-                    });
+                    if ($scope.userName) {
+                        accounts.get({ id: $scope.userName }, function (user) {
+                            if (!user || !user.passwordExpired) {
+                                $stateParams.onClose();
+                            }
+                        });
+                    }
 
                     $scope.validatePasswordAsync = function (value) {
                         return passwordValidationService.validatePasswordAsync(value);

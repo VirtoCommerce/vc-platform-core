@@ -84,7 +84,7 @@ namespace Mvc.Server
                 var claimsPrincipal = await _userClaimsPrincipalFactory.CreateAsync(user);
                 var limitedPermissions = _authorizationOptions.LimitedCookiePermissions?.Split(PlatformConstants.Security.Claims.PermissionClaimTypeDelimiter, StringSplitOptions.RemoveEmptyEntries) ?? new string[0];
 
-                if (!user.Roles.Select(r => r.Name).Contains(PlatformConstants.Security.SystemRoles.Administrator))
+                if (!user.IsAdministrator)
                 {
                     limitedPermissions = claimsPrincipal
                         .Claims

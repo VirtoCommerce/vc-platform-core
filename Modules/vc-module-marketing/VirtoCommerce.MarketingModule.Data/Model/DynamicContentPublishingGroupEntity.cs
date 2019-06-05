@@ -61,7 +61,6 @@ namespace VirtoCommerce.MarketingModule.Data.Model
             publication.StoreId = StoreId;
             publication.StartDate = StartDate;
             publication.EndDate = EndDate;
-            publication.PredicateSerialized = ConditionExpression;
             publication.PredicateVisualTreeSerialized = PredicateVisualTreeSerialized;
 
             if (ContentItems != null)
@@ -97,7 +96,6 @@ namespace VirtoCommerce.MarketingModule.Data.Model
             StoreId = publication.StoreId;
             StartDate = publication.StartDate;
             EndDate = publication.EndDate;
-            ConditionExpression = publication.PredicateSerialized;
             PredicateVisualTreeSerialized = publication.PredicateVisualTreeSerialized;
 
             if (publication.ContentItems != null)

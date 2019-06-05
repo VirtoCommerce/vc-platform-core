@@ -339,6 +339,7 @@ namespace VirtoCommerce.Platform.Web
             app.UseMiddleware<ApiErrorWrappingMiddleware>();
 
             app.UseHttpsRedirection();
+
             app.UseStaticFiles();
             app.UseCookiePolicy();
 
@@ -409,6 +410,8 @@ namespace VirtoCommerce.Platform.Web
 
             //Seed default users
             app.UseDefaultUsersAsync().GetAwaiter().GetResult();
+
+
         }
     }
 }

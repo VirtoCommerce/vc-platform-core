@@ -2,14 +2,13 @@ using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Threading.Tasks;
-using Microsoft.VisualStudio.TestTools.UnitTesting;
 using Moq;
 using VirtoCommerce.NotificationsModule.Core.Model;
 using VirtoCommerce.NotificationsModule.Core.Services;
+using VirtoCommerce.NotificationsModule.Core.Types;
 using VirtoCommerce.NotificationsModule.Data.Model;
 using VirtoCommerce.NotificationsModule.Data.Repositories;
 using VirtoCommerce.NotificationsModule.Data.Services;
-using VirtoCommerce.NotificationsModule.Tests.NotificationTypes;
 using VirtoCommerce.Platform.Core.Common;
 using VirtoCommerce.Platform.Core.Domain;
 using VirtoCommerce.Platform.Core.Events;
@@ -36,68 +35,16 @@ namespace VirtoCommerce.NotificationsModule.Tests.UnitTests
             _eventPublisherMock = new Mock<IEventPublisher>();
             _notificationService = new NotificationService(_repositoryFactory, _eventPublisherMock.Object);
             _notificationRegistrar = _notificationService;
-            //todo
-            if (!AbstractTypeFactory<Notification>.AllTypeInfos.Any(t => t.IsAssignableTo(nameof(EmailNotification))))
-            {
-                AbstractTypeFactory<Notification>.RegisterType<EmailNotification>().MapToType<NotificationEntity>();
-            }
 
-            if (!AbstractTypeFactory<NotificationTemplate>.AllTypeInfos.Any(t => t.IsAssignableTo(nameof(EmailNotificationTemplate))))
-            {
-                AbstractTypeFactory<NotificationTemplate>.RegisterType<EmailNotificationTemplate>().MapToType<NotificationTemplateEntity>();
-            }
-
-            if (!AbstractTypeFactory<NotificationMessage>.AllTypeInfos.Any(t => t.IsAssignableTo(nameof(EmailNotificationMessage))))
-            {
-                AbstractTypeFactory<NotificationMessage>.RegisterType<EmailNotificationMessage>().MapToType<NotificationMessageEntity>();
-            }
-
-            if (!AbstractTypeFactory<NotificationEntity>.AllTypeInfos.Any(t => t.IsAssignableTo(nameof(EmailNotificationEntity))))
-            {
+            if (!AbstractTypeFactory<NotificationEntity>.AllTypeInfos.SelectMany(x => x.AllSubclasses).Contains(typeof(EmailNotificationEntity)))
                 AbstractTypeFactory<NotificationEntity>.RegisterType<EmailNotificationEntity>();
-            }
-        }
-
-        [Fact]
-        public async Task GetNotificationByTypeAsync_ReturnNotifiction()
-        {
-            //Arrange
-            string type = nameof(RegistrationEmailNotification);
-            //_repositoryMock.Setup(n => n.GetByTypesAsync(new[] { nameof(RegistrationEmailNotification) }, null, null, NotificationResponseGroup.Default.ToString()))
-            //    .ReturnsAsync(new EmailNotificationEntity() { IsActive = true });
-            _notificationRegistrar.RegisterNotification<RegistrationEmailNotification>();
-
-            //Act
-            //var result = await _notificationService.GetByTypeAsync(type, null, null);
-
-            ////Assert
-            //Assert.NotNull(result);
-            //Assert.Equal(type, result.Type);
-        }
-
-        [Fact]
-        public async Task GetNotificationByTypeAsync_ReturnNotifictionWithTemplates()
-        {
-            //Arrange
-            //string type = nameof(RegistrationEmailNotification);
-            //var responseGroup = NotificationResponseGroup.WithTemplates.ToString();
-            //_repositoryMock.Setup(n => n.GetByTypeAsync(nameof(RegistrationEmailNotification), null, null, responseGroup))
-            //    .ReturnsAsync(new EmailNotificationEntity() { IsActive = true });
-            //_notificationRegistrar.RegisterNotification<RegistrationEmailNotification>();
-
-            ////Act
-            //var result = await _notificationService.GetByTypeAsync(type, null, null, responseGroup);
-
-            ////Assert
-            //Assert.NotNull(result);
-            //Assert.Equal(type, result.Type);
         }
 
         [Fact]
         public async Task GetNotificationsByIdsAsync_ReturnNotifications()
         {
             //Arrange
-            string id = Guid.NewGuid().ToString();
+            var id = Guid.NewGuid().ToString();
             var responseGroup = NotificationResponseGroup.Default.ToString();
             var notifications = new List<NotificationEntity> { new EmailNotificationEntity() { Id = id, Type = nameof(EmailNotification) } };
             _repositoryMock.Setup(n => n.GetByIdsAsync(new[] { id }, responseGroup))
@@ -116,7 +63,7 @@ namespace VirtoCommerce.NotificationsModule.Tests.UnitTests
         public async Task SaveChangesAsync_SavedNotification()
         {
             //Arrange
-            string id = Guid.NewGuid().ToString();
+            var id = Guid.NewGuid().ToString();
             var notificationEntities = new List<NotificationEntity>
             {
                 new EmailNotificationEntity()

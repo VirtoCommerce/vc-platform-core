@@ -27,7 +27,6 @@ namespace VirtoCommerce.TaxModule.Web.Controllers.Api
             return Ok(result);
         }
 
-
         [HttpGet]
         [Route("{id}")]
         public async Task<ActionResult<TaxProviderSearchResult>> GetTaxProviderById(string id)
@@ -66,6 +65,5 @@ namespace VirtoCommerce.TaxModule.Web.Controllers.Api
 
             return Ok(result);
         }
-
     }
 }

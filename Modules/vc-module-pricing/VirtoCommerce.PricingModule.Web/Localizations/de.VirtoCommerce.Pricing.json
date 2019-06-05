@@ -75,6 +75,8 @@
                     "pricelist": "Preisliste",
                     "pricelist-currency": "Währung",
                     "priority": "Priorität",
+                    "activation": "Aktivierung",
+                    "expiration": "Ablauf",
                     "last-modified": "Geändert",
                     "modified-by": "Geändert von"
                 }
@@ -128,6 +130,12 @@
                 "title": "Bestätigung löschen",
                 "message": "Sind Sie sicher, dass Sie ausgewählte Preislistenzuordnungen löschen möchten?"
             },
+            "assignments-delete-all": {
+                "title": "Bestätigung löschen",
+                "warning": "Warnung Diese Änderung ist endgültig und kann nicht rückgängig gemacht werden. Es kann zu Datenverlust führen.",
+                "message": "Alle gefilterte Elemente werden gelöscht",
+                "instruction": "Geben Sie 'yes', um den Löschvorgang zu aktivieren:"
+            },
             "pricelists-delete": {
                 "title": "Bestätigung löschen",
                 "message": "Sind Sie sicher, dass Sie ausgewählte Preislisten löschen möchten?"
@@ -153,7 +161,6 @@
             "add-selected": "Ausgewählte hinzufügen"
         }
     },
-
     "permissions": {
         "pricing:access": "Öffnen Sie das Preismenü",
         "pricing:create": "Erstellen Sie Preisdaten",
@@ -161,11 +168,14 @@
         "pricing:update": "Preisdaten aktualisieren",
         "pricing:delete": "Löschen Sie die Preisdaten"
     },
-
     "settings": {
-        "Pricing.ExportImport.PageSize": {
-            "title": "Die Seitengröße wird für den Export / Import verwendet",
-            "description": "Hoher Wert kann zu langsamer Leistung führen"
+        "Pricing": {
+            "ExportImport": {
+                "PageSize": {
+                    "title": "Die Seitengröße wird für den Export / Import verwendet",
+                    "description": "Hoher Wert kann zu langsamer Leistung führen"
+                }
+            }
         }
     }
 }

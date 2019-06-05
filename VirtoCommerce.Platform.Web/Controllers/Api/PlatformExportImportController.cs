@@ -370,6 +370,10 @@ namespace VirtoCommerce.Platform.Web.Controllers.Api
                 {
                     Directory.CreateDirectory(localTmpFolder);
                 }
+                if (System.IO.File.Exists(localTmpPath))
+                {
+                    System.IO.File.Delete(localTmpPath);
+                }
                 //Import first to local tmp folder because Azure blob storage doesn't support some special file access mode 
                 using (var stream = System.IO.File.OpenWrite(localTmpPath))
                 {
