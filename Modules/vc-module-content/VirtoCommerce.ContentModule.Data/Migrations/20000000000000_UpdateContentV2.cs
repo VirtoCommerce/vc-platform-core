@@ -10,7 +10,7 @@ namespace VirtoCommerce.ContentModule.Data.Migrations
                  FROM INFORMATION_SCHEMA.TABLES 
                  WHERE TABLE_NAME = '__MigrationHistory'))
                     BEGIN
-	                    INSERT INTO [dbo].[__EFMigrationsHistory] ([MigrationId],[ProductVersion]) VALUES ('20180629125447_Content', '2.2.3-servicing-35854')
+	                    INSERT INTO [dbo].[__EFMigrationsHistory] ([MigrationId],[ProductVersion]) VALUES ('20180629125447_InitialContent', '2.2.3-servicing-35854')
                         UPDATE [PlatformDynamicProperty] SET ObjectType = 'VirtoCommerce.StoreModule.Core.Model.Store' WHERE [Name] = 'DefaultThemeName' AND ObjectType = 'VirtoCommerce.Domain.Store.Model.Store'
                     END");
         }
