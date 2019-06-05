@@ -587,87 +587,88 @@
       }
     },
     "dialogs": {
-      "folders-delete": {
-        "title": "Bestätigung löschen",
-        "message": "Möchten Sie die ausgewählten Dateien oder Ordner löschen?"
-      },
-      "properties-save": {
-        "title": "Änderungen speichern",
-        "message": "Die Eigenschaften wurden geändert. Möchten Sie die Änderungen bestätigen?"
-      },
-      "notification-template-save": {
-        "title": "Änderungen speichern",
-        "message": "Die Benachrichtigungsvorlage wurde geändert. Möchten Sie die Änderungen speichern?"
-      },
-      "role-save": {
-        "title": "Änderungen speichern",
-        "message": "Die Rolle wurde geändert. Möchten Sie die Änderungen speichern?"
-      },
-      "roles-delete": {
-        "title": "Bestätigung löschen",
-        "message": "Möchten Sie die ausgewählten Rollen löschen?"
-      },
-      "account-save": {
-        "title": "Änderungen speichern",
-        "message": "Das Konto wurde geändert. Möchten Sie die Änderungen speichern?"
-      },
-      "account-delete": {
-        "title": "Bestätigung löschen",
-        "message": "Möchten Sie die ausgewählten Konten löschen?"
-      },
-      "dynamic-property-delete": {
-        "title": "Bestätigung löschen",
-        "message": "Sind Sie sicher, dass Sie diese dynamische Eigenschaft löschen?"
-      },
-      "settings-value-delete": {
-        "title": "Bestätigung löschen",
-        "message": "Möchten Sie die ausgewählten Werte löschen?"
-      },
-      "settings-save": {
-        "title": "Änderungen speichern",
-        "message": "Die Einstellungen wurden geändert. Möchten Sie die Änderungen bestätigen?"
-      },
-      "settings-delete": {
-        "title": "Bestätigung löschen",
-        "message": "Die Einstellungen wurden geändert. Möchten Sie die Änderungen speichern?"
-      },
-      "email-sending-success": {
-        "title": "Erfolg senden",
-        "message": "E-Mail wurde erfolgreich gesendet."
-      },
-      "email-send-error": {
-        "title": "Fehler beim Senden",
-        "message": "E-Mail wurde nicht gesendet! Fehler {{error}}"
-      },
-      "dictionary-items-delete": {
-        "title": "Bestätigung löschen",
-        "message": "Sind Sie sicher, dass Sie die {{quantity}} ausgewählte Wörterbuch(s) Element(e) löschen wollen?"
-      },
-      "module-action": {
-        "title-install": "Installieren bestätigung",
-        "title-update": "Aktualisierung bestätigung",
-        "title-delete": "Bestätigung der Deinstallation",
-        "message0-install": "Sie werden jetzt installieren.",
-        "message0-update": "Sie werden jetzt aktualisieren.",
-        "message0-delete": "Sie werden jetzt deinstallieren.",
-        "message1-install": "Die folgenden Abhängigkeiten wird auch installiert werden",
-        "message1-delete": "Die folgenden je Module werden auch deinstalliert werden.",
-        "message2-install": "Auswahl und Abhängigkeiten installieren?",
-        "message2-update": "Auswahl aktualisieren und Abhängigkeiten?",
-        "message2-delete": "Deinstallieren Sie diese und alle je Module?"
-      },
-      "module-delete": {
-        "title": "Bestätigung löschen",
-        "message": "Sind Sie sicher, dass Sie dieses Modul deinstallieren wollen?"
-      },
-      "api-key-delete": {
-        "title": "Bestätigung löschen",
-        "message": "Sind Sie sicher, dass Sie diese API-Schlüssel löschen?"
-      },
-      "app-restart": {
-        "title": "Anwendungsneustart",
-        "message": "Sind Sie sicher, dass Sie die Anwendung neu starten möchten?"
-      }
+        "folders-delete": {
+            "title": "Bestätigung löschen",
+            "message": "Möchten Sie die ausgewählten Dateien oder Ordner löschen?"
+        },
+        "properties-save": {
+            "title": "Änderungen speichern",
+            "message": "Die Eigenschaften wurden geändert. Möchten Sie die Änderungen bestätigen?"
+        },
+        "notification-template-save": {
+            "title": "Änderungen speichern",
+            "message": "Die Benachrichtigungsvorlage wurde geändert. Möchten Sie die Änderungen speichern?"
+        },
+        "role-save": {
+            "title": "Änderungen speichern",
+            "message": "Die Rolle wurde geändert. Möchten Sie die Änderungen speichern?"
+        },
+        "roles-delete": {
+            "title": "Bestätigung löschen",
+            "message": "Möchten Sie die ausgewählten Rollen löschen?"
+        },
+        "account-save": {
+            "title": "Änderungen speichern",
+            "message": "Das Konto wurde geändert. Möchten Sie die Änderungen speichern?"
+        },
+        "account-delete": {
+            "title": "Bestätigung löschen",
+            "message": "Möchten Sie die ausgewählten Konten löschen?"
+        },
+        "dynamic-property-delete": {
+            "title": "Bestätigung löschen",
+            "message": "Sind Sie sicher, dass Sie diese dynamische Eigenschaft löschen?"
+        },
+        "settings-value-delete": {
+            "title": "Bestätigung löschen",
+            "message": "Möchten Sie die ausgewählten Werte löschen?"
+        },
+        "settings-save": {
+            "title": "Änderungen speichern",
+            "message": "Die Einstellungen wurden geändert. Möchten Sie die Änderungen bestätigen?"
+        },
+        "settings-delete": {
+            "title": "Bestätigung löschen",
+            "message": "Die Einstellungen wurden geändert. Möchten Sie die Änderungen speichern?"
+        },
+        "email-sending-success": {
+            "title": "Erfolg senden",
+            "message": "E-Mail wurde erfolgreich gesendet."
+        },
+        "email-send-error": {
+            "title": "Fehler beim Senden",
+            "message": "E-Mail wurde nicht gesendet! Fehler {{error}}"
+        },
+        "dictionary-items-delete": {
+            "title": "Bestätigung löschen",
+            "message": "Sind Sie sicher, dass Sie die {{quantity}} ausgewählte Wörterbuch(s) Element(e) löschen wollen?"
+        },
+        "module-action": {
+            "title-install": "Installieren bestätigung",
+            "title-update": "Aktualisierung bestätigung",
+            "title-delete": "Bestätigung der Deinstallation",
+            "message0-install": "Sie werden jetzt installieren.",
+            "message0-update": "Sie werden jetzt aktualisieren.",
+            "message0-delete": "Sie werden jetzt deinstallieren.",
+            "message1-install": "Die folgenden Abhängigkeiten wird auch installiert werden",
+            "message1-delete": "Die folgenden je Module werden auch deinstalliert werden.",
+            "message2-install": "Auswahl und Abhängigkeiten installieren?",
+            "message2-update": "Auswahl aktualisieren und Abhängigkeiten?",
+            "message2-delete": "Deinstallieren Sie diese und alle je Module?"
+        },
+        "module-delete": {
+            "title": "Bestätigung löschen",
+            "message": "Sind Sie sicher, dass Sie dieses Modul deinstallieren wollen?"
+        },
+        "api-key-delete": {
+            "title": "Bestätigung löschen",
+            "message": "Sind Sie sicher, dass Sie diese API-Schlüssel löschen?"
+        }
+        // temproraly disabled restart feature, show english dialog version
+        //"app-restart": {
+        //  "title": "Anwendungsneustart",
+        //  "message": "Sind Sie sicher, dass Sie die Anwendung neu starten möchten?"
+        //}
     }
   }
 }
