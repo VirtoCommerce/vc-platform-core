@@ -304,7 +304,7 @@ angular.module('platformWebApp', AppDependencies).controller('platformWebApp.app
                     } else if (authContext.passwordExpired) {
                         $state.go('changePasswordDialog', {
                             onClose: function () {
-                                if (currentState && !currentState.abstract
+                                if (!currentState.abstract
                                     && currentState.name !== 'loginDialog'
                                     && currentState.name !== 'changePasswordDialog') {
                                     $state.go(currentState);
