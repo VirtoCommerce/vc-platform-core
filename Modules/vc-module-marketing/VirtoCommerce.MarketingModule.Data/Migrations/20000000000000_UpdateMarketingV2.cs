@@ -16,7 +16,31 @@ namespace VirtoCommerce.MarketingModule.Data.Migrations
                         UPDATE [PlatformDynamicProperty] SET ObjectType = 'VirtoCommerce.MarketingModule.Core.Model.DynamicContentItem' WHERE [Name] = 'Html' AND ObjectType = 'VirtoCommerce.Domain.Marketing.Model.DynamicContentItem'
                         UPDATE [Promotion] SET [PredicateVisualTreeSerialized] = REPLACE([PredicateVisualTreeSerialized], 'PromoDynamicExpressionTree', 'PromotionConditionAndRewardTree')
                         UPDATE [Promotion] SET [PredicateVisualTreeSerialized] = REPLACE([PredicateVisualTreeSerialized], 'RewardBlock', 'BlockReward')
+                        UPDATE [Promotion] SET [PredicateSerialized] = null
+                        UPDATE [Promotion] SET [RewardsSerialized] = null
 						UPDATE [DynamicContentPublishingGroup] SET [PredicateVisualTreeSerialized] = REPLACE([PredicateVisualTreeSerialized], 'ConditionExpressionTree', 'DynamicContentConditionTree')
+                        UPDATE [DynamicContentPublishingGroup] SET [ConditionExpression] = null
+
+                        BEGIN
+                            DECLARE @typeInd varchar(10) = '""$type"":""';
+                            DECLARE @commaInd varchar(10) = '"",';
+                            DECLARE @index INT = 1;
+
+                            WHILE @index < 20
+                            BEGIN
+                                UPDATE [Promotion] SET[PredicateVisualTreeSerialized] = REPLACE([PredicateVisualTreeSerialized], SUBSTRING([PredicateVisualTreeSerialized], CHARINDEX(@typeInd, [PredicateVisualTreeSerialized]), CHARINDEX(@commaInd, [PredicateVisualTreeSerialized], CHARINDEX(@typeInd, [PredicateVisualTreeSerialized])) - CHARINDEX(@typeInd, [PredicateVisualTreeSerialized]) + 2), '')
+                                WHERE CHARINDEX(@typeInd, [PredicateVisualTreeSerialized]) > 0
+                                SET @index = @index + 1;
+                            END
+
+                            SET @index = 1;
+                            WHILE @index < 20
+                            BEGIN
+                                UPDATE [DynamicContentPublishingGroup] SET[PredicateVisualTreeSerialized] = REPLACE([PredicateVisualTreeSerialized], SUBSTRING([PredicateVisualTreeSerialized], CHARINDEX(@typeInd, [PredicateVisualTreeSerialized]), CHARINDEX(@commaInd, [PredicateVisualTreeSerialized], CHARINDEX(@typeInd, [PredicateVisualTreeSerialized])) - CHARINDEX(@typeInd, [PredicateVisualTreeSerialized]) + 2), '')
+                                WHERE CHARINDEX(@typeInd, [PredicateVisualTreeSerialized]) > 0
+                                SET @index = @index + 1;
+                            END
+                        END
                     END");
         }
 

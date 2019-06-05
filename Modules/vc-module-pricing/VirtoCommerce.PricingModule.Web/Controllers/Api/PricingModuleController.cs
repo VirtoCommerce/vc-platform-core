@@ -24,9 +24,10 @@ namespace VirtoCommerce.PricingModule.Web.Controllers.Api
         private readonly ICatalogService _catalogService;
         private readonly IPricingExtensionManager _extensionManager;
         private readonly IBlobUrlResolver _blobUrlResolver;
+        private readonly IPricingExtensionManager _pricingExtensionManager;
 
 
-        public PricingModuleController(IPricingService pricingService, IItemService itemService, ICatalogService catalogService, IPricingExtensionManager extensionManager, IPricingSearchService pricingSearchService, IBlobUrlResolver blobUrlResolver)
+        public PricingModuleController(IPricingService pricingService, IItemService itemService, ICatalogService catalogService, IPricingExtensionManager extensionManager, IPricingSearchService pricingSearchService, IBlobUrlResolver blobUrlResolver, IPricingExtensionManager pricingExtensionManager)
         {
             _extensionManager = extensionManager;
             _pricingService = pricingService;
@@ -34,6 +35,7 @@ namespace VirtoCommerce.PricingModule.Web.Controllers.Api
             _catalogService = catalogService;
             _pricingSearchService = pricingSearchService;
             _blobUrlResolver = blobUrlResolver;
+            _pricingExtensionManager = pricingExtensionManager;
         }
 
         /// <summary>
@@ -72,6 +74,24 @@ namespace VirtoCommerce.PricingModule.Web.Controllers.Api
         public async Task<ActionResult<PricelistAssignment>> GetPricelistAssignmentById(string id)
         {
             var assignment = (await _pricingService.GetPricelistAssignmentsByIdAsync(new[] { id })).FirstOrDefault();
+            var defaultExpressionTree = _pricingExtensionManager.PriceConditionTree;
+            if (defaultExpressionTree != null)
+            {
+                //Copy available elements from default tree because they not persisted
+                var sourceBlocks = defaultExpressionTree.Traverse(x => x.Children);
+                var targetBlocks = assignment.DynamicExpression.Traverse(x => x.Children).ToList();
+
+                foreach (var sourceBlock in sourceBlocks)
+                {
+                    foreach (var targetBlock in targetBlocks.Where(x => x.Id == sourceBlock.Id))
+                    {
+                        targetBlock.AvailableChildren = sourceBlock.AvailableChildren;
+                    }
+                }
+                //copy available elements from default expression tree
+                assignment.DynamicExpression.AvailableChildren = defaultExpressionTree.AvailableChildren;
+            }
+
             return Ok(assignment);
         }
 

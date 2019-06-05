@@ -5,34 +5,34 @@ using VirtoCommerce.PricingModule.Core.Model;
 
 namespace VirtoCommerce.PricingModule.Data.Model
 {
-	public class PricelistAssignmentEntity : AuditableEntity
-	{
-		[StringLength(128)]
-		[Required]
-		public string Name { get; set; }
+    public class PricelistAssignmentEntity : AuditableEntity
+    {
+        [StringLength(128)]
+        [Required]
+        public string Name { get; set; }
 
-		[StringLength(512)]
-		public string Description { get; set; }
+        [StringLength(512)]
+        public string Description { get; set; }
 
-		public int Priority { get; set; }
+        public int Priority { get; set; }
 
-		public DateTime? StartDate { get; set; }
+        public DateTime? StartDate { get; set; }
 
-		public DateTime? EndDate { get; set; }
+        public DateTime? EndDate { get; set; }
 
-		public string ConditionExpression { get; set; }
+        public string ConditionExpression { get; set; }
 
-		public string PredicateVisualTreeSerialized { get; set; }
+        public string PredicateVisualTreeSerialized { get; set; }
 
-		[StringLength(128)]
-		[Required]
-		public string CatalogId { get; set; }
+        [StringLength(128)]
+        [Required]
+        public string CatalogId { get; set; }
 
 
-		#region Navigation Properties
-		public string PricelistId { get; set; }
+        #region Navigation Properties
+        public string PricelistId { get; set; }
 
-		public virtual PricelistEntity Pricelist { get; set; }
+        public virtual PricelistEntity Pricelist { get; set; }
 
         #endregion
 
@@ -41,29 +41,28 @@ namespace VirtoCommerce.PricingModule.Data.Model
             if (assignment == null)
                 throw new ArgumentNullException("assignment");
 
-            assignment.Id = this.Id;
-            assignment.CatalogId = this.CatalogId;
-            assignment.ConditionExpression = this.ConditionExpression;
-            assignment.CreatedBy = this.CreatedBy;
-            assignment.CreatedDate = this.CreatedDate;
-            assignment.Description = this.Description;
-            assignment.EndDate = this.EndDate;
-            assignment.ModifiedBy = this.ModifiedBy;
-            assignment.ModifiedDate = this.ModifiedDate;
-            assignment.Name = this.Name;
-            assignment.PredicateVisualTreeSerialized = this.PredicateVisualTreeSerialized;
-            assignment.PricelistId = this.PricelistId;
-            assignment.Priority = this.Priority;
-            assignment.StartDate = this.StartDate;
+            assignment.Id = Id;
+            assignment.CatalogId = CatalogId;
+            assignment.CreatedBy = CreatedBy;
+            assignment.CreatedDate = CreatedDate;
+            assignment.Description = Description;
+            assignment.EndDate = EndDate;
+            assignment.ModifiedBy = ModifiedBy;
+            assignment.ModifiedDate = ModifiedDate;
+            assignment.Name = Name;
+            assignment.PredicateVisualTreeSerialized = PredicateVisualTreeSerialized;
+            assignment.PricelistId = PricelistId;
+            assignment.Priority = Priority;
+            assignment.StartDate = StartDate;
 
-            if (this.Pricelist != null)
+            if (Pricelist != null)
             {
                 //Need to make lightweight pricelist
                 assignment.Pricelist = AbstractTypeFactory<Pricelist>.TryCreateInstance();
-                assignment.Pricelist.Id = this.Pricelist.Id;
-                assignment.Pricelist.Currency = this.Pricelist.Currency;
-                assignment.Pricelist.Description = this.Pricelist.Description;
-                assignment.Pricelist.Name = this.Pricelist.Name;
+                assignment.Pricelist.Id = Pricelist.Id;
+                assignment.Pricelist.Currency = Pricelist.Currency;
+                assignment.Pricelist.Description = Pricelist.Description;
+                assignment.Pricelist.Name = Pricelist.Name;
 
             }
 
@@ -77,20 +76,19 @@ namespace VirtoCommerce.PricingModule.Data.Model
 
             pkMap.AddPair(assignment, this);
 
-            this.Id = assignment.Id;
-            this.CatalogId = assignment.CatalogId;
-            this.ConditionExpression = assignment.ConditionExpression;
-            this.CreatedBy = assignment.CreatedBy;
-            this.CreatedDate = assignment.CreatedDate;
-            this.Description = assignment.Description;
-            this.EndDate = assignment.EndDate;
-            this.ModifiedBy = assignment.ModifiedBy;
-            this.ModifiedDate = assignment.ModifiedDate;
-            this.Name = assignment.Name;
-            this.PredicateVisualTreeSerialized = assignment.PredicateVisualTreeSerialized;
-            this.PricelistId = assignment.PricelistId;
-            this.Priority = assignment.Priority;
-            this.StartDate = assignment.StartDate;
+            Id = assignment.Id;
+            CatalogId = assignment.CatalogId;
+            CreatedBy = assignment.CreatedBy;
+            CreatedDate = assignment.CreatedDate;
+            Description = assignment.Description;
+            EndDate = assignment.EndDate;
+            ModifiedBy = assignment.ModifiedBy;
+            ModifiedDate = assignment.ModifiedDate;
+            Name = assignment.Name;
+            PredicateVisualTreeSerialized = assignment.PredicateVisualTreeSerialized;
+            PricelistId = assignment.PricelistId;
+            Priority = assignment.Priority;
+            StartDate = assignment.StartDate;
 
             return this;
         }
@@ -100,15 +98,14 @@ namespace VirtoCommerce.PricingModule.Data.Model
             if (target == null)
                 throw new ArgumentNullException("target");
 
-            target.Name = this.Name;
-            target.Description = this.Description;
-            target.StartDate = this.StartDate;
-            target.EndDate = this.EndDate;
-            target.CatalogId = this.CatalogId;
-            target.PricelistId = this.PricelistId;
-            target.Priority = this.Priority;
-            target.ConditionExpression = this.ConditionExpression;
-            target.PredicateVisualTreeSerialized = this.PredicateVisualTreeSerialized;        
+            target.Name = Name;
+            target.Description = Description;
+            target.StartDate = StartDate;
+            target.EndDate = EndDate;
+            target.CatalogId = CatalogId;
+            target.PricelistId = PricelistId;
+            target.Priority = Priority;
+            target.PredicateVisualTreeSerialized = PredicateVisualTreeSerialized;
         }
 
     }
