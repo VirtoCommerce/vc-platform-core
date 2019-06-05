@@ -76,8 +76,6 @@ namespace VirtoCommerce.MarketingModule.Web.Controllers.Api
             //foreach (var promotion in promoSearchResult.Results.OfType<DynamicPromotion>())
             //{
             //    promotion.PredicateVisualTreeSerialized = null;
-            //    promotion.PredicateSerialized = null;
-            //    promotion.RewardsSerialized = null;
             //}
 
             retVal.TotalCount = promoSearchResult.TotalCount;
@@ -313,7 +311,7 @@ namespace VirtoCommerce.MarketingModule.Web.Controllers.Api
             {
                 var etalonEpressionTree = _marketingExtensionManager.PromotionCondition;
 
-                var promotionConditionAndRewardTree = dynamicPromotion.PredicateVisualTreeSerialized != null ? JsonConvert.DeserializeObject<PromotionConditionAndRewardTree>(
+                var promotionConditionAndRewardTree = !string.IsNullOrEmpty(dynamicPromotion.PredicateVisualTreeSerialized) ? JsonConvert.DeserializeObject<PromotionConditionAndRewardTree>(
                     dynamicPromotion.PredicateVisualTreeSerialized,
                     new ConditionJsonConverter(), new RewardJsonConverter())
                     : (PromotionConditionAndRewardTree)etalonEpressionTree;
@@ -334,8 +332,6 @@ namespace VirtoCommerce.MarketingModule.Web.Controllers.Api
                 promotionConditionAndRewardTree.AvailableChildren = etalonEpressionTree.AvailableChildren;
 
                 dynamicPromotion.PredicateVisualTreeSerialized = JsonConvert.SerializeObject(promotionConditionAndRewardTree);
-                dynamicPromotion.PredicateSerialized = JsonConvert.SerializeObject(promotionConditionAndRewardTree.GetConditions());
-                dynamicPromotion.RewardsSerialized = JsonConvert.SerializeObject(promotionConditionAndRewardTree.GetRewards());
             }
 
         }

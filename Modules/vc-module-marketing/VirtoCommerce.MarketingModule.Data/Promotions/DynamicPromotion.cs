@@ -19,6 +19,7 @@ namespace VirtoCommerce.MarketingModule.Data.Promotions
 
         private Condition[] _conditions;
         private PromotionReward[] _rewards;
+        private PromotionConditionAndRewardTree _promotionConditionAndRewardTree;
 
         public DynamicPromotion(ICouponService couponService, IPromotionUsageService usageService)
         {
@@ -32,13 +33,25 @@ namespace VirtoCommerce.MarketingModule.Data.Promotions
         /// </summary>
         public bool IsAllowCombiningWithSelf { get; set; }
 
-        public string PredicateSerialized { get; set; }
         public string PredicateVisualTreeSerialized { get; set; }
-        public string RewardsSerialized { get; set; }
 
-        protected Condition[] Conditions => _conditions ?? (_conditions = JsonConvert.DeserializeObject<Condition[]>(PredicateSerialized, new ConditionJsonConverter()));
+        protected PromotionConditionAndRewardTree PromotionConditionAndRewardTree
+        {
+            get
+            {
+                if (_promotionConditionAndRewardTree == null && !string.IsNullOrEmpty(PredicateVisualTreeSerialized))
+                {
+                    _promotionConditionAndRewardTree = JsonConvert.DeserializeObject<PromotionConditionAndRewardTree>(PredicateVisualTreeSerialized
+                        , new ConditionJsonConverter(), new RewardJsonConverter());
+                }
 
-        protected PromotionReward[] Rewards => _rewards ?? (_rewards = JsonConvert.DeserializeObject<PromotionReward[]>(RewardsSerialized, new RewardJsonConverter()));
+                return _promotionConditionAndRewardTree;
+            }
+        }
+
+        protected Condition[] Conditions => _conditions ?? (_conditions = PromotionConditionAndRewardTree.GetConditions());
+
+        protected PromotionReward[] Rewards => _rewards ?? (_rewards = PromotionConditionAndRewardTree.GetRewards());
 
         public override PromotionReward[] EvaluatePromotion(IEvaluationContext context)
         {

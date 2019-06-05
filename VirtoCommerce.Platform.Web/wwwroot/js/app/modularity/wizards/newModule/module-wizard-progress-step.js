@@ -1,8 +1,7 @@
-﻿angular.module('platformWebApp')
-.controller('platformWebApp.moduleInstallProgressController', ['$scope', '$window', 'platformWebApp.bladeNavigationService', 'platformWebApp.modules', function ($scope, $window, bladeNavigationService, modules) {
+﻿angular.module('platformWebApp').controller('platformWebApp.moduleInstallProgressController', ['$scope', '$window', 'platformWebApp.bladeNavigationService', 'platformWebApp.modules', 'platformWebApp.dialogService', function ($scope, $window, bladeNavigationService, modules, dialogService) {
     var blade = $scope.blade;
     blade.subtitle = 'Installation progress';
-    
+
     $scope.$on("new-notification-event", function (event, notification) {
         if (blade.currentEntity && notification.id == blade.currentEntity.id) {
             angular.copy(notification, blade.currentEntity);
@@ -16,11 +15,29 @@
     });
 
     $scope.restart = function () {
-        $scope.restarted = true;
-        modules.restart({},
-            function () { $window.location.reload(); },
-            function (error) { bladeNavigationService.setError('Error ' + error.status, blade); });
-    };
+        var dialog = {
+            id: "confirmRestart",
+            title: "platform.dialogs.app-restart.title",
+            message: "platform.dialogs.app-restart.message",
+            callback: function (confirm) {
+                if (confirm) {
+                    $scope.restarted = true;
+                    blade.isLoading = true;
+                    try {
+                        modules.restart(function () {
+                            //$window.location.reload(); returns 400 bad request due server restarts
+                        });
+                    }
+                    catch{
+                    }
+                    finally {
+                        $window.location.reload();
+                    }
+                }
+            }
+        }
+        dialogService.showConfirmationDialog(dialog);
+    }
 
     blade.isLoading = false;
 }]);
