@@ -63,7 +63,6 @@ namespace VirtoCommerce.StoreModule.Data.Services
                         var store = AbstractTypeFactory<Store>.TryCreateInstance();
                         dbStore.ToModel(store);
 
-
                         await _settingManager.DeepLoadSettingsAsync(store);
                         stores.Add(store);
                     }
@@ -112,6 +111,9 @@ namespace VirtoCommerce.StoreModule.Data.Services
 
                 await repository.UnitOfWork.CommitAsync();
                 pkMap.ResolvePrimaryKeys();
+                //Save settings
+                await _settingManager.DeepSaveSettingsAsync(stores);
+
                 await _eventPublisher.Publish(new StoreChangedEvent(changedEntries));
             }
 

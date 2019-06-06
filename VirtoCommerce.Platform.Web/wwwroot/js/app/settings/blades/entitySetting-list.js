@@ -1,15 +1,13 @@
-﻿angular.module('platformWebApp')
-.controller('platformWebApp.entitySettingListController', ['$scope', 'platformWebApp.settings.helper', 'platformWebApp.bladeNavigationService', function ($scope, settingsHelper, bladeNavigationService) {
+﻿angular.module('platformWebApp').controller('platformWebApp.entitySettingListController', ['$scope', 'platformWebApp.settings.helper', 'platformWebApp.bladeNavigationService', function ($scope, settingsHelper, bladeNavigationService) {
     var blade = $scope.blade;
     // blade.updatePermission = // Use predefined (parent) permission
     blade.title = 'platform.blades.entitySetting-list.title';
 
     function initializeBlade(results) {
+        console.log(results);
         blade.data = results;
         results = angular.copy(results);
 
-        // settingsHelper.fixValues(results);
-        
         _.each(results, function (setting) {
             // set group names to show.
             if (setting.groupName) {
@@ -26,7 +24,6 @@
                 });
             }
         });
-
 
         results = _.groupBy(results, 'groupName');
         blade.groupNames = _.keys(results);
@@ -74,8 +71,7 @@
         });
 
         //settingsHelper.toApiFormat(objects);
-        
-        //console.log('saveChanges3: ' + angular.toJson(objects, true));
+
         angular.copy(objects, blade.data);
         angular.copy(blade.currentEntities, blade.origEntity);
         $scope.bladeClose();

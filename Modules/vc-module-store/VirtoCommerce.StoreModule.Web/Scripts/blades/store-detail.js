@@ -1,5 +1,4 @@
-﻿angular.module('virtoCommerce.storeModule')
-.controller('virtoCommerce.storeModule.storeDetailController', ['$scope', 'platformWebApp.bladeNavigationService', 'virtoCommerce.storeModule.stores', 'virtoCommerce.catalogModule.catalogs', 'platformWebApp.settings', 'platformWebApp.settings.helper', 'platformWebApp.dialogService', 'virtoCommerce.coreModule.currency.currencyUtils',
+﻿angular.module('virtoCommerce.storeModule').controller('virtoCommerce.storeModule.storeDetailController', ['$scope', 'platformWebApp.bladeNavigationService', 'virtoCommerce.storeModule.stores', 'virtoCommerce.catalogModule.catalogs', 'platformWebApp.settings', 'platformWebApp.settings.helper', 'platformWebApp.dialogService', 'virtoCommerce.coreModule.currency.currencyUtils',
     function ($scope, bladeNavigationService, stores, catalogs, settings, settingsHelper, dialogService, currencyUtils) {
         var blade = $scope.blade;
         blade.updatePermission = 'store:update';
@@ -13,7 +12,7 @@
                     blade.parentBlade.refresh();
                 }
             },
-            function (error) { bladeNavigationService.setError('Error ' + error.status, blade); });
+                function (error) { bladeNavigationService.setError('Error ' + error.status, blade); });
         }
 
         function initializeBlade(data) {
@@ -22,20 +21,6 @@
 
             blade.currentEntityId = data.id;
             blade.title = data.name;
-
-            settingsHelper.fixValues(data.settings);
-
-            if (data.shippingMethods) {
-                data.shippingMethods.sort(function (a, b) { return a.priority - b.priority; });
-            }
-
-            if (data.paymentMethods) {
-                data.paymentMethods.sort(function (a, b) { return a.priority - b.priority; });
-            }
-
-            _.each(data.shippingMethods, function (x) { settingsHelper.fixValues(x.settings); });
-            _.each(data.paymentMethods, function (x) { settingsHelper.fixValues(x.settings); });
-            _.each(data.taxProviders, function (x) { settingsHelper.fixValues(x.settings); });
 
             blade.currentEntity = angular.copy(data);
             blade.origEntity = data;
@@ -61,11 +46,6 @@
             var entityToSave = angular.copy(blade.currentEntity);
             entityToSave.languages = _.union([entityToSave.defaultLanguage], entityToSave.additionalLanguages);
             entityToSave.currencies = _.union([entityToSave.defaultCurrency], entityToSave.additionalCurrencies);
-
-            settingsHelper.toApiFormat(entityToSave.settings);
-            _.each(entityToSave.shippingMethods, function (x) { settingsHelper.toApiFormat(x.settings); });
-            _.each(entityToSave.paymentMethods, function (x) { settingsHelper.toApiFormat(x.settings); });
-            _.each(entityToSave.taxProviders, function (x) { settingsHelper.toApiFormat(x.settings); });
 
             stores.update({}, entityToSave, function (data) {
                 blade.refresh(true);
