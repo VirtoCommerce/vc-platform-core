@@ -11,7 +11,6 @@ using VirtoCommerce.CatalogModule.Data.Caching;
 using VirtoCommerce.CatalogModule.Data.Model;
 using VirtoCommerce.CatalogModule.Data.Repositories;
 using VirtoCommerce.CatalogModule.Data.Validation;
-using VirtoCommerce.CoreModule.Core.Seo;
 using VirtoCommerce.Platform.Core.Assets;
 using VirtoCommerce.Platform.Core.Caching;
 using VirtoCommerce.Platform.Core.Common;
@@ -216,13 +215,13 @@ namespace VirtoCommerce.CatalogModule.Data.Services
                 {
                     await InnerLoadDependenciesAsync(product.Variations.ToArray());
                 }
+
                 //Resolve relative urls for all product images
                 var allImages = product.GetFlatObjectsListWithInterface<IHasImages>().Where(x => x.Images != null).SelectMany(x => x.Images);
                 foreach (var image in allImages.Where(x => !string.IsNullOrEmpty(x.Url)))
                 {
-                    image.RelativeUrl = image.Url;
+                    image.RelativeUrl = !string.IsNullOrEmpty(image.RelativeUrl) ? image.RelativeUrl : image.Url;
                     image.Url = _blobUrlResolver.GetAbsoluteUrl(image.Url);
-
                 }
             }
         }
