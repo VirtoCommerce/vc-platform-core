@@ -47,11 +47,6 @@ namespace VirtoCommerce.Platform.Data.Model
                 objSetting.Value = values.FirstOrDefault();
             }
 
-            if (objSetting.AllowedValues.IsNullOrEmpty() && objSetting.DefaultValue != null)
-            {
-                objSetting.AllowedValues = new object[] { objSetting.DefaultValue };
-            }
-
             return objSetting;
         }
 
