@@ -1,3 +1,6 @@
+using System.Linq;
+using VirtoCommerce.OrdersModule.Core;
+using VirtoCommerce.OrdersModule.Core.Model;
 using VirtoCommerce.Platform.Core.Security;
 
 namespace VirtoCommerce.OrderModule.Web.Security
@@ -7,23 +10,23 @@ namespace VirtoCommerce.OrderModule.Web.Security
         public static string ApplyResponseGroupFiltering(Permission[] permissions, string respGroup)
         {
             var result = respGroup;
-            //TODO
-            //var needRestrict = permissions.Any() && !permissions.Any(x => x.Id == ModuleConstants.Security.Permissions.ReadPrices);
 
-            //if (needRestrict && string.IsNullOrWhiteSpace(respGroup))
-            //{
-            //    const CustomerOrderResponseGroup val = CustomerOrderResponseGroup.Full & ~CustomerOrderResponseGroup.WithPrices;
+            var needRestrict = permissions.Any() && !permissions.Any(x => x.Id == ModuleConstants.Security.Permissions.ReadPrices);
 
-            //    result = val.ToString();
-            //}
-            //else if (needRestrict)
-            //{
-            //    var items = respGroup.Split(',').Select(x => x.Trim()).ToList();
+            if (needRestrict && string.IsNullOrWhiteSpace(respGroup))
+            {
+                const CustomerOrderResponseGroup val = CustomerOrderResponseGroup.Full & ~CustomerOrderResponseGroup.WithPrices;
 
-            //    items.Remove(CustomerOrderResponseGroup.WithPrices.ToString());
+                result = val.ToString();
+            }
+            else if (needRestrict)
+            {
+                var items = respGroup.Split(',').Select(x => x.Trim()).ToList();
 
-            //    result = string.Join(",", items);
-            //}
+                items.Remove(CustomerOrderResponseGroup.WithPrices.ToString());
+
+                result = string.Join(",", items);
+            }
 
             return result;
         }

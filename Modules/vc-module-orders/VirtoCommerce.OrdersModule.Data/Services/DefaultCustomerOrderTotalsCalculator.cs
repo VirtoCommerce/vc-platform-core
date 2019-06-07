@@ -57,7 +57,7 @@ namespace VirtoCommerce.OrdersModule.Data.Services
             {
                 order.SubTotal = order.Items.Sum(x => x.Price * x.Quantity);
                 order.SubTotalWithTax = order.Items.Sum(x => x.PriceWithTax * x.Quantity);
-                order.SubTotalTaxTotal += order.Items.Sum(x => x.TaxTotal);
+                order.SubTotalTaxTotal += order.Items.Sum(x => x.TaxTotal ?? 0m);
                 order.SubTotalDiscount = order.Items.Sum(x => x.DiscountTotal);
                 order.SubTotalDiscountWithTax = order.Items.Sum(x => x.DiscountTotalWithTax);
                 order.DiscountTotal += order.Items.Sum(x => x.DiscountTotal);
@@ -73,8 +73,8 @@ namespace VirtoCommerce.OrdersModule.Data.Services
                 order.ShippingTotalWithTax = order.Shipments.Sum(x => x.TotalWithTax);
                 order.ShippingSubTotal = order.Shipments.Sum(x => x.Price);
                 order.ShippingSubTotalWithTax = order.Shipments.Sum(x => x.PriceWithTax);
-                order.ShippingDiscountTotal = order.Shipments.Sum(x => x.DiscountAmount);
-                order.ShippingDiscountTotalWithTax = order.Shipments.Sum(x => x.DiscountAmountWithTax);
+                order.ShippingDiscountTotal = order.Shipments.Sum(x => x.DiscountAmount ?? 0m);
+                order.ShippingDiscountTotalWithTax = order.Shipments.Sum(x => x.DiscountAmountWithTax ?? 0m);
                 order.DiscountTotal += order.Shipments.Sum(x => x.DiscountAmount);
                 order.DiscountTotalWithTax += order.Shipments.Sum(x => x.DiscountAmountWithTax);
                 order.FeeTotal += order.Shipments.Sum(x => x.Fee);
@@ -86,16 +86,16 @@ namespace VirtoCommerce.OrdersModule.Data.Services
             {
                 order.PaymentTotal = order.InPayments.Sum(x => x.Total);
                 order.PaymentTotalWithTax = order.InPayments.Sum(x => x.TotalWithTax);
-                order.PaymentSubTotal = order.InPayments.Sum(x => x.Price);
-                order.PaymentSubTotalWithTax = order.InPayments.Sum(x => x.PriceWithTax);
-                order.PaymentDiscountTotal = order.InPayments.Sum(x => x.DiscountAmount);
-                order.PaymentDiscountTotalWithTax = order.InPayments.Sum(x => x.DiscountAmountWithTax);
+                order.PaymentSubTotal = order.InPayments.Sum(x => x.Price ?? 0m);
+                order.PaymentSubTotalWithTax = order.InPayments.Sum(x => x.PriceWithTax ?? 0m);
+                order.PaymentDiscountTotal = order.InPayments.Sum(x => x.DiscountAmount ?? 0m);
+                order.PaymentDiscountTotalWithTax = order.InPayments.Sum(x => x.DiscountAmountWithTax ?? 0m);
                 order.DiscountTotal += order.InPayments.Sum(x => x.DiscountAmount);
                 order.DiscountTotalWithTax += order.InPayments.Sum(x => x.DiscountAmountWithTax);
                 order.TaxTotal += order.InPayments.Sum(x => x.TaxTotal);
             }
 
-            var taxFactor = 1 + order.TaxPercentRate;
+            var taxFactor = 1 + order.TaxPercentRate ?? 0m;
             order.FeeWithTax = order.Fee * taxFactor;
             order.FeeTotalWithTax = order.FeeTotal * taxFactor;
             order.DiscountTotal += order.DiscountAmount;
@@ -104,23 +104,23 @@ namespace VirtoCommerce.OrdersModule.Data.Services
             order.TaxTotal -= order.DiscountAmount * order.TaxPercentRate;
 
             //Need to round all order totals
-            order.SubTotal = Math.Round(order.SubTotal, 2, MidpointRounding.AwayFromZero);
-            order.SubTotalWithTax = Math.Round(order.SubTotalWithTax, 2, MidpointRounding.AwayFromZero);
+            order.SubTotal = order.SubTotal != null ? Math.Round((decimal)order.SubTotal, 2, MidpointRounding.AwayFromZero) : order.SubTotal;
+            order.SubTotalWithTax = order.SubTotalWithTax != null ? Math.Round((decimal)order.SubTotalWithTax, 2, MidpointRounding.AwayFromZero) : order.SubTotalWithTax;
             order.SubTotalDiscount = Math.Round(order.SubTotalDiscount, 2, MidpointRounding.AwayFromZero);
             order.SubTotalDiscountWithTax = Math.Round(order.SubTotalDiscountWithTax, 2, MidpointRounding.AwayFromZero);
-            order.TaxTotal = Math.Round(order.TaxTotal, 2, MidpointRounding.AwayFromZero);
-            order.DiscountTotal = Math.Round(order.DiscountTotal, 2, MidpointRounding.AwayFromZero);
-            order.DiscountTotalWithTax = Math.Round(order.DiscountTotalWithTax, 2, MidpointRounding.AwayFromZero);
+            order.TaxTotal = order.TaxTotal != null ? Math.Round((decimal)order.TaxTotal, 2, MidpointRounding.AwayFromZero) : order.TaxTotal;
+            order.DiscountTotal = order.DiscountTotal != null ? Math.Round((decimal)order.DiscountTotal, 2, MidpointRounding.AwayFromZero) : order.DiscountTotal;
+            order.DiscountTotalWithTax = order.DiscountTotalWithTax != null ? Math.Round((decimal)order.DiscountTotalWithTax, 2, MidpointRounding.AwayFromZero) : order.DiscountTotalWithTax;
             order.Fee = Math.Round(order.Fee, 2, MidpointRounding.AwayFromZero);
             order.FeeWithTax = Math.Round(order.FeeWithTax, 2, MidpointRounding.AwayFromZero);
             order.FeeTotal = Math.Round(order.FeeTotal, 2, MidpointRounding.AwayFromZero);
             order.FeeTotalWithTax = Math.Round(order.FeeTotalWithTax, 2, MidpointRounding.AwayFromZero);
-            order.ShippingTotal = Math.Round(order.ShippingTotal, 2, MidpointRounding.AwayFromZero);
-            order.ShippingTotalWithTax = Math.Round(order.ShippingTotal, 2, MidpointRounding.AwayFromZero);
-            order.ShippingSubTotal = Math.Round(order.ShippingSubTotal, 2, MidpointRounding.AwayFromZero);
-            order.ShippingSubTotalWithTax = Math.Round(order.ShippingSubTotalWithTax, 2, MidpointRounding.AwayFromZero);
-            order.PaymentTotal = Math.Round(order.PaymentTotal, 2, MidpointRounding.AwayFromZero);
-            order.PaymentTotalWithTax = Math.Round(order.PaymentTotalWithTax, 2, MidpointRounding.AwayFromZero);
+            order.ShippingTotal = order.ShippingTotal != null ? Math.Round((decimal)order.ShippingTotal, 2, MidpointRounding.AwayFromZero): order.ShippingTotal;
+            order.ShippingTotalWithTax = order.ShippingTotalWithTax != null ? Math.Round((decimal)order.ShippingTotal, 2, MidpointRounding.AwayFromZero): order.ShippingTotalWithTax;
+            order.ShippingSubTotal = order.ShippingSubTotal != null ? Math.Round((decimal)order.ShippingSubTotal, 2, MidpointRounding.AwayFromZero) : order.ShippingSubTotal;
+            order.ShippingSubTotalWithTax = order.ShippingSubTotalWithTax != null ? Math.Round((decimal)order.ShippingSubTotalWithTax, 2, MidpointRounding.AwayFromZero): order.ShippingSubTotalWithTax;
+            order.PaymentTotal = order.PaymentTotal != null ? Math.Round((decimal)order.PaymentTotal, 2, MidpointRounding.AwayFromZero) : order.PaymentTotal;
+            order.PaymentTotalWithTax = order.PaymentTotalWithTax != null ? Math.Round((decimal)order.PaymentTotalWithTax, 2, MidpointRounding.AwayFromZero) : order.PaymentTotalWithTax;
             order.PaymentSubTotal = Math.Round(order.PaymentSubTotal, 2, MidpointRounding.AwayFromZero);
             order.PaymentSubTotalWithTax = Math.Round(order.PaymentSubTotalWithTax, 2, MidpointRounding.AwayFromZero);
             order.PaymentDiscountTotal = Math.Round(order.PaymentDiscountTotal, 2, MidpointRounding.AwayFromZero);
@@ -151,7 +151,7 @@ namespace VirtoCommerce.OrdersModule.Data.Services
             {
                 throw new ArgumentNullException(nameof(shipment));
             }
-            var taxFactor = 1 + shipment.TaxPercentRate;
+            var taxFactor = 1 + shipment.TaxPercentRate ?? 0m;
             shipment.PriceWithTax = shipment.Price * taxFactor;
             shipment.DiscountAmountWithTax = shipment.DiscountAmount * taxFactor;
             shipment.FeeWithTax = shipment.Fee * taxFactor;
@@ -167,7 +167,7 @@ namespace VirtoCommerce.OrdersModule.Data.Services
             {
                 throw new ArgumentNullException(nameof(lineItem));
             }
-            var taxFactor = 1 + lineItem.TaxPercentRate;
+            var taxFactor = 1 + lineItem.TaxPercentRate ?? 0m;
             lineItem.PriceWithTax = lineItem.Price * taxFactor;
             lineItem.PlacedPrice = lineItem.Price - lineItem.DiscountAmount;
             lineItem.ExtendedPrice = lineItem.PlacedPrice * lineItem.Quantity;

@@ -5,6 +5,7 @@ using System.Linq;
 using System.Threading.Tasks;
 using DinkToPdf;
 using Microsoft.AspNetCore.Authorization;
+using Microsoft.AspNetCore.Identity;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.Extensions.Caching.Memory;
 using VirtoCommerce.CartModule.Core.Services;
@@ -28,6 +29,7 @@ using VirtoCommerce.PaymentModule.Model.Requests;
 using VirtoCommerce.Platform.Core.Caching;
 using VirtoCommerce.Platform.Core.ChangeLog;
 using VirtoCommerce.Platform.Core.Common;
+using VirtoCommerce.Platform.Core.Security;
 using VirtoCommerce.Platform.Core.Settings;
 using VirtoCommerce.StoreModule.Core.Services;
 using CustomerOrderSearchResult = VirtoCommerce.OrdersModule.Core.Model.Search.CustomerOrderSearchResult;
@@ -46,6 +48,7 @@ namespace VirtoCommerce.OrdersModule.Web.Controllers.Api
         private readonly ICustomerOrderBuilder _customerOrderBuilder;
         private readonly IShoppingCartService _cartService;
         private readonly ICustomerOrderTotalsCalculator _totalsCalculator;
+        private readonly UserManager<ApplicationUser> _userManager;
         private readonly INotificationSearchService _notificationSearchService;
 
         private readonly INotificationTemplateRenderer _notificationTemplateRenderer;
@@ -64,7 +67,8 @@ namespace VirtoCommerce.OrdersModule.Web.Controllers.Api
             , IChangeLogSearchService changeLogSearchService
             , INotificationTemplateRenderer notificationTemplateRenderer
             , INotificationSearchService notificationSearchService
-            , ICustomerOrderTotalsCalculator totalsCalculator)
+            , ICustomerOrderTotalsCalculator totalsCalculator
+            , UserManager<ApplicationUser> userManager)
         {
             _customerOrderService = customerOrderService;
             _searchService = searchService;
@@ -80,6 +84,7 @@ namespace VirtoCommerce.OrdersModule.Web.Controllers.Api
             _notificationTemplateRenderer = notificationTemplateRenderer;
             _notificationSearchService = notificationSearchService;
             _totalsCalculator = totalsCalculator;
+            _userManager = userManager;
         }
 
         /// <summary>
@@ -110,8 +115,9 @@ namespace VirtoCommerce.OrdersModule.Web.Controllers.Api
         {
             var searchCriteria = AbstractTypeFactory<CustomerOrderSearchCriteria>.TryCreateInstance();
             searchCriteria.Number = number;
-            //ToDo
-            //searchCriteria.ResponseGroup = OrderReadPricesPermission.ApplyResponseGroupFiltering(_securityService.GetUserPermissions(User.Identity.Name), respGroup); ;
+
+            var user = await _userManager.FindByNameAsync(User.Identity.Name);
+            searchCriteria.ResponseGroup = OrderReadPricesPermission.ApplyResponseGroupFiltering(user.Roles.SelectMany(x => x.Permissions).Distinct().ToArray(), respGroup); ;
 
             var result = await _searchService.SearchCustomerOrdersAsync(searchCriteria);
 

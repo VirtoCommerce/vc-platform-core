@@ -47,9 +47,9 @@ namespace VirtoCommerce.SubscriptionModule.Data.Services
                 {
                     Subscription.Balance = 0m;
                     var allNotCanceledOrders = Subscription.CustomerOrders.Where(x => !x.IsCancelled);
-                    var ordersGrandTotal = allNotCanceledOrders.Sum(x => Math.Round(x.Total, 2, MidpointRounding.AwayFromZero));
+                    var ordersGrandTotal = allNotCanceledOrders.Sum(x => Math.Round(x.Total ?? 0m, 2, MidpointRounding.AwayFromZero));
                     var paidPaymentStatuses = new[] { PaymentStatus.Authorized, PaymentStatus.Paid };
-                    var paidTotal = allNotCanceledOrders.SelectMany(x => x.InPayments).Where(x => !x.IsCancelled && paidPaymentStatuses.Contains(x.PaymentStatus)).Sum(x => x.Sum);
+                    var paidTotal = allNotCanceledOrders.SelectMany(x => x.InPayments).Where(x => !x.IsCancelled && paidPaymentStatuses.Contains(x.PaymentStatus)).Sum(x => x.Sum ?? 0m);
 
                     Subscription.Balance = ordersGrandTotal - paidTotal;
                 }

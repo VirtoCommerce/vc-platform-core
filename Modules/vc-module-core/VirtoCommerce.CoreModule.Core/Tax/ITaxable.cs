@@ -7,7 +7,7 @@ namespace VirtoCommerce.CoreModule.Core.Tax
         /// </summary>
         string TaxType { get; set; }
 
-        decimal TaxTotal { get; }
-        decimal TaxPercentRate { get; }
+        decimal? TaxTotal { get; }
+        decimal? TaxPercentRate { get; }
     }
 }

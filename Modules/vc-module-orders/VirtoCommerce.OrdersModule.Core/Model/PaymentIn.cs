@@ -36,15 +36,15 @@ namespace VirtoCommerce.OrdersModule.Core.Model
         public ProcessPaymentRequestResult ProcessPaymentResult { get; set; }
 
         //the self cost of the payment method
-        public virtual decimal Price { get; set; }
-        public virtual decimal PriceWithTax { get; set; }
+        public virtual decimal? Price { get; set; }
+        public virtual decimal? PriceWithTax { get; set; }
 
-        public virtual decimal Total { get; set; }
+        public virtual decimal? Total { get; set; }
 
-        public virtual decimal TotalWithTax { get; set; }
+        public virtual decimal? TotalWithTax { get; set; }
 
-        public virtual decimal DiscountAmount { get; set; }
-        public virtual decimal DiscountAmountWithTax { get; set; }
+        public virtual decimal? DiscountAmount { get; set; }
+        public virtual decimal? DiscountAmountWithTax { get; set; }
 
 
         #region ITaxable Members
@@ -54,9 +54,9 @@ namespace VirtoCommerce.OrdersModule.Core.Model
         /// </summary>
         public string TaxType { get; set; }
 
-        public decimal TaxTotal { get; set; }
+        public decimal? TaxTotal { get; set; }
 
-        public decimal TaxPercentRate { get; set; }
+        public decimal? TaxPercentRate { get; set; }
 
         #endregion
 

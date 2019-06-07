@@ -128,8 +128,8 @@ namespace VirtoCommerce.CartModule.Data.Model
             DiscountAmount = payment.DiscountAmount;
             DiscountAmountWithTax = payment.DiscountAmountWithTax;
             TaxType = payment.TaxType;
-            TaxPercentRate = payment.TaxPercentRate;
-            TaxTotal = payment.TaxTotal;
+            TaxPercentRate = payment.TaxPercentRate ?? TaxPercentRate;
+            TaxTotal = payment.TaxTotal ?? TaxTotal;
             Total = payment.Total;
             TotalWithTax = payment.TotalWithTax;
             OuterId = payment.OuterId;

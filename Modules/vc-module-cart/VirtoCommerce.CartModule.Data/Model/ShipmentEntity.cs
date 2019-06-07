@@ -163,12 +163,12 @@ namespace VirtoCommerce.CartModule.Data.Model
             ShipmentMethodCode = shipment.ShipmentMethodCode;
             Total = shipment.Total;
             TotalWithTax = shipment.TotalWithTax;
-            TaxTotal = shipment.TaxTotal;
+            TaxTotal = shipment.TaxTotal ?? TaxTotal;
             Price = shipment.Price;
             PriceWithTax = shipment.PriceWithTax;
             DiscountAmount = shipment.DiscountAmount;
             DiscountAmountWithTax = shipment.DiscountAmountWithTax;
-            TaxPercentRate = shipment.TaxPercentRate;
+            TaxPercentRate = shipment.TaxPercentRate ?? TaxPercentRate;
             Currency = shipment.Currency;
             WeightUnit = shipment.WeightUnit;
             WeightValue = shipment.Weight;

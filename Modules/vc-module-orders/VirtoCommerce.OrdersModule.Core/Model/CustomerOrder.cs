@@ -52,7 +52,7 @@ namespace VirtoCommerce.OrdersModule.Core.Model
         /// Therefore, a discount applying to the order  will occur after tax. 
         /// For instance, if the cart subtotal is $100, and $15 is the tax subtotal, a cart-wide discount of 10% will yield a total of $105 ($100 subtotal – $10 discount + $15 tax on the original $100).
         /// </summary>
-		public decimal DiscountAmount { get; set; }
+		public decimal? DiscountAmount { get; set; }
 
         #region ITaxDetailSupport Members
 
@@ -68,25 +68,25 @@ namespace VirtoCommerce.OrdersModule.Core.Model
         /// <summary>
         /// Grand order total
         /// </summary>
-        public virtual decimal Total { get; set; }
+        public virtual decimal? Total { get; set; }
 
 
-        public virtual decimal SubTotal { get; set; }
+        public virtual decimal? SubTotal { get; set; }
 
-        public virtual decimal SubTotalWithTax { get; set; }
+        public virtual decimal? SubTotalWithTax { get; set; }
         public virtual decimal SubTotalDiscount { get; set; }
 
         public virtual decimal SubTotalDiscountWithTax { get; set; }
 
         public virtual decimal SubTotalTaxTotal { get; set; }
 
-        public virtual decimal ShippingTotal { get; set; }
+        public virtual decimal? ShippingTotal { get; set; }
 
-        public virtual decimal ShippingTotalWithTax { get; set; }
+        public virtual decimal? ShippingTotalWithTax { get; set; }
 
-        public virtual decimal ShippingSubTotal { get; set; }
+        public virtual decimal? ShippingSubTotal { get; set; }
 
-        public virtual decimal ShippingSubTotalWithTax { get; set; }
+        public virtual decimal? ShippingSubTotalWithTax { get; set; }
 
         public virtual decimal ShippingDiscountTotal { get; set; }
 
@@ -94,9 +94,9 @@ namespace VirtoCommerce.OrdersModule.Core.Model
 
         public virtual decimal ShippingTaxTotal { get; set; }
 
-        public virtual decimal PaymentTotal { get; set; }
+        public virtual decimal? PaymentTotal { get; set; }
 
-        public virtual decimal PaymentTotalWithTax { get; set; }
+        public virtual decimal? PaymentTotalWithTax { get; set; }
 
 
         public virtual decimal PaymentSubTotal { get; set; }
@@ -109,9 +109,9 @@ namespace VirtoCommerce.OrdersModule.Core.Model
 
         public virtual decimal PaymentTaxTotal { get; set; }
 
-        public virtual decimal DiscountTotal { get; set; }
+        public virtual decimal? DiscountTotal { get; set; }
 
-        public virtual decimal DiscountTotalWithTax { get; set; }
+        public virtual decimal? DiscountTotalWithTax { get; set; }
 
 
         //Any extra Fee 
@@ -129,9 +129,9 @@ namespace VirtoCommerce.OrdersModule.Core.Model
         /// </summary>
         public string TaxType { get; set; }
 
-        public virtual decimal TaxTotal { get; set; }
+        public virtual decimal? TaxTotal { get; set; }
 
-        public decimal TaxPercentRate { get; set; }
+        public decimal? TaxPercentRate { get; set; }
 
         #endregion
 

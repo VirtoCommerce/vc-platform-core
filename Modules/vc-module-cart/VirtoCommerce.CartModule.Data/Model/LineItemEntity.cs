@@ -213,8 +213,8 @@ namespace VirtoCommerce.CartModule.Data.Model
             DiscountAmount = lineItem.DiscountAmount;
             DiscountAmountWithTax = lineItem.DiscountAmountWithTax;
             Quantity = lineItem.Quantity;
-            TaxTotal = lineItem.TaxTotal;
-            TaxPercentRate = lineItem.TaxPercentRate;
+            TaxTotal = lineItem.TaxTotal ?? TaxTotal;
+            TaxPercentRate = lineItem.TaxPercentRate ?? TaxPercentRate;
             Weight = lineItem.Weight;
             Height = lineItem.Height;
             Width = lineItem.Width;

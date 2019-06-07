@@ -95,7 +95,7 @@ namespace VirtoCommerce.CartModule.Data.Services
                 cart.TaxTotal += cart.Payments.Sum(x => x.TaxTotal);
             }
 
-            var taxFactor = 1 + cart.TaxPercentRate;
+            var taxFactor = 1 + cart.TaxPercentRate ?? 0m;
             cart.FeeWithTax = cart.Fee * taxFactor;
             cart.FeeTotalWithTax = cart.FeeTotal * taxFactor;
             cart.DiscountTotal += cart.DiscountAmount;
@@ -108,7 +108,7 @@ namespace VirtoCommerce.CartModule.Data.Services
             cart.SubTotalWithTax = Math.Round(cart.SubTotalWithTax, 2, MidpointRounding.AwayFromZero);
             cart.SubTotalDiscount = Math.Round(cart.SubTotalDiscount, 2, MidpointRounding.AwayFromZero);
             cart.SubTotalDiscountWithTax = Math.Round(cart.SubTotalDiscountWithTax, 2, MidpointRounding.AwayFromZero);
-            cart.TaxTotal = Math.Round(cart.TaxTotal, 2, MidpointRounding.AwayFromZero);
+            cart.TaxTotal = cart.TaxTotal != null ? Math.Round((decimal)cart.TaxTotal, 2, MidpointRounding.AwayFromZero): cart.TaxTotal;
             cart.DiscountTotal = Math.Round(cart.DiscountTotal, 2, MidpointRounding.AwayFromZero);
             cart.DiscountTotalWithTax = Math.Round(cart.DiscountTotalWithTax, 2, MidpointRounding.AwayFromZero);
             cart.Fee = Math.Round(cart.Fee, 2, MidpointRounding.AwayFromZero);
@@ -126,7 +126,7 @@ namespace VirtoCommerce.CartModule.Data.Services
             cart.PaymentDiscountTotal = Math.Round(cart.PaymentDiscountTotal, 2, MidpointRounding.AwayFromZero);
             cart.PaymentDiscountTotalWithTax = Math.Round(cart.PaymentDiscountTotalWithTax, 2, MidpointRounding.AwayFromZero);
 
-            cart.Total = cart.SubTotal + cart.ShippingSubTotal + cart.TaxTotal + cart.PaymentSubTotal + cart.FeeTotal - cart.DiscountTotal;
+            cart.Total = cart.SubTotal + cart.ShippingSubTotal + cart.TaxTotal ?? 0m + cart.PaymentSubTotal + cart.FeeTotal - cart.DiscountTotal;
         }
 
         protected virtual void CalculatePaymentTotals(Payment payment)
@@ -135,7 +135,7 @@ namespace VirtoCommerce.CartModule.Data.Services
             {
                 throw new ArgumentNullException(nameof(payment));
             }
-            var taxFactor = 1 + payment.TaxPercentRate;
+            var taxFactor = 1 + payment.TaxPercentRate ?? 0m;
             payment.Total = payment.Price - payment.DiscountAmount;
             payment.TotalWithTax = payment.Total * taxFactor;
             payment.PriceWithTax = payment.Price * taxFactor;
@@ -149,7 +149,7 @@ namespace VirtoCommerce.CartModule.Data.Services
             {
                 throw new ArgumentNullException(nameof(shipment));
             }
-            var taxFactor = 1 + shipment.TaxPercentRate;
+            var taxFactor = 1 + shipment.TaxPercentRate ?? 0m;
             shipment.PriceWithTax = shipment.Price * taxFactor;
             shipment.DiscountAmountWithTax = shipment.DiscountAmount * taxFactor;
             shipment.FeeWithTax = shipment.Fee * taxFactor;
@@ -164,7 +164,7 @@ namespace VirtoCommerce.CartModule.Data.Services
             {
                 throw new ArgumentNullException(nameof(lineItem));
             }
-            var taxFactor = 1 + lineItem.TaxPercentRate;
+            var taxFactor = 1 + lineItem.TaxPercentRate ?? 0m;
             lineItem.ListPriceWithTax = lineItem.ListPrice * taxFactor;
             lineItem.SalePriceWithTax = lineItem.SalePrice * taxFactor;
             lineItem.PlacedPrice = lineItem.ListPrice - lineItem.DiscountAmount;

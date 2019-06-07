@@ -54,15 +54,15 @@ namespace VirtoCommerce.OrdersModule.Core.Model
 
         public Address DeliveryAddress { get; set; }
 
-        public virtual decimal Price { get; set; }
-        public virtual decimal PriceWithTax { get; set; }
+        public virtual decimal? Price { get; set; }
+        public virtual decimal? PriceWithTax { get; set; }
 
-        public virtual decimal Total { get; set; }
+        public virtual decimal? Total { get; set; }
 
-        public virtual decimal TotalWithTax { get; set; }
+        public virtual decimal? TotalWithTax { get; set; }
 
-        public virtual decimal DiscountAmount { get; set; }
-        public virtual decimal DiscountAmountWithTax { get; set; }
+        public virtual decimal? DiscountAmount { get; set; }
+        public virtual decimal? DiscountAmountWithTax { get; set; }
 
         //Any extra Fee 
         public virtual decimal Fee { get; set; }
@@ -76,9 +76,9 @@ namespace VirtoCommerce.OrdersModule.Core.Model
         /// </summary>
         public string TaxType { get; set; }
 
-        public decimal TaxTotal { get; set; }
+        public decimal? TaxTotal { get; set; }
 
-        public decimal TaxPercentRate { get; set; }
+        public decimal? TaxPercentRate { get; set; }
 
         #endregion
 

@@ -133,15 +133,15 @@ namespace VirtoCommerce.OrdersModule.Data.Model
 
             base.FromModel(payment, pkMap);
 
-            Price = payment.Price;
-            PriceWithTax = payment.PriceWithTax;
-            DiscountAmount = payment.DiscountAmount;
-            DiscountAmountWithTax = payment.DiscountAmountWithTax;
+            Price = payment.Price ?? Price;
+            PriceWithTax = payment.PriceWithTax ?? PriceWithTax;
+            DiscountAmount = payment.DiscountAmount ?? DiscountAmount;
+            DiscountAmountWithTax = payment.DiscountAmountWithTax ?? DiscountAmountWithTax;
             TaxType = payment.TaxType;
-            TaxPercentRate = payment.TaxPercentRate;
-            TaxTotal = payment.TaxTotal;
-            Total = payment.Total;
-            TotalWithTax = payment.TotalWithTax;
+            TaxPercentRate = payment.TaxPercentRate ?? TaxPercentRate;
+            TaxTotal = payment.TaxTotal ?? TaxTotal;
+            Total = payment.Total ?? Total;
+            TotalWithTax = payment.TotalWithTax ?? TotalWithTax;
 
             CustomerId = payment.CustomerId;
             CustomerName = payment.CustomerName;
@@ -157,7 +157,7 @@ namespace VirtoCommerce.OrdersModule.Data.Model
             IsCancelled = payment.IsCancelled;
             CancelledDate = payment.CancelledDate;
             CancelReason = payment.CancelReason;
-            Sum = payment.Sum;
+            Sum = payment.Sum ?? Sum;
 
             if (payment.PaymentMethod != null)
             {
@@ -198,8 +198,6 @@ namespace VirtoCommerce.OrdersModule.Data.Model
             if (target == null)
                 throw new ArgumentException(@"operation argument must be of type PaymentInEntity", nameof(operation));
 
-            var isNeedPatch = !(GetNonCalculatablePrices().All(x => x == 0m) && target.GetNonCalculatablePrices().Any(x => x != 0m));
-            base.NeedPatchSum = isNeedPatch;
             base.Patch(operation);
 
             target.TaxType = TaxType;
@@ -218,19 +216,15 @@ namespace VirtoCommerce.OrdersModule.Data.Model
             target.CancelledDate = CancelledDate;
             target.CancelReason = CancelReason;
 
-            if (isNeedPatch)
-            {
-                target.Price = Price;
-                target.PriceWithTax = PriceWithTax;
-                target.DiscountAmount = DiscountAmount;
-                target.DiscountAmountWithTax = DiscountAmountWithTax;
-                target.TaxPercentRate = TaxPercentRate;
-                target.TaxTotal = TaxTotal;
-                target.Total = Total;
-                target.TotalWithTax = TotalWithTax;
-                target.Sum = Sum;
-            }
-
+            target.Price = Price;
+            target.PriceWithTax = PriceWithTax;
+            target.DiscountAmount = DiscountAmount;
+            target.DiscountAmountWithTax = DiscountAmountWithTax;
+            target.TaxPercentRate = TaxPercentRate;
+            target.TaxTotal = TaxTotal;
+            target.Total = Total;
+            target.TotalWithTax = TotalWithTax;
+            target.Sum = Sum;
 
             if (!Addresses.IsNullCollection())
             {
@@ -265,14 +259,6 @@ namespace VirtoCommerce.OrdersModule.Data.Model
             TaxTotal = 0m;
             TaxPercentRate = 0m;
             Sum = 0m;
-        }
-
-        public virtual IEnumerable<decimal> GetNonCalculatablePrices()
-        {
-            yield return TaxPercentRate;
-            yield return Price;
-            yield return DiscountAmount;
-            yield return Sum;
         }
     }
 }

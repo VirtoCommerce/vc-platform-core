@@ -206,8 +206,8 @@ namespace VirtoCommerce.CartModule.Data.Model
             DiscountTotal = cart.DiscountTotal;
             DiscountTotalWithTax = cart.DiscountTotalWithTax;
             DiscountAmount = cart.DiscountAmount;
-            TaxTotal = cart.TaxTotal;
-            TaxPercentRate = cart.TaxPercentRate;
+            TaxTotal = cart.TaxTotal ?? TaxTotal;
+            TaxPercentRate = cart.TaxPercentRate ?? TaxPercentRate;
             Type = cart.Type;
             Name = cart.Name;
             StoreId = cart.StoreId;

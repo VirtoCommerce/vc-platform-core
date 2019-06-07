@@ -130,9 +130,9 @@ namespace VirtoCommerce.CartModule.Core.Model
         /// </summary>
         public string TaxType { get; set; }
 
-        public virtual decimal TaxTotal { get; set; }
+        public virtual decimal? TaxTotal { get; set; }
 
-        public  decimal TaxPercentRate { get; set; }
+        public  decimal? TaxPercentRate { get; set; }
 
         #endregion
         #region IHaveTaxDetalization Members

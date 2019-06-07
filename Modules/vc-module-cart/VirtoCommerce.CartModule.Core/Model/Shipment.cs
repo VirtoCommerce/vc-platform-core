@@ -49,9 +49,9 @@ namespace VirtoCommerce.CartModule.Core.Model
         /// </summary>
         public string TaxType { get; set; }
 
-        public decimal TaxTotal { get; set; }
+        public decimal? TaxTotal { get; set; }
 
-        public decimal TaxPercentRate { get; set; }
+        public decimal? TaxPercentRate { get; set; }
 
         #endregion
 

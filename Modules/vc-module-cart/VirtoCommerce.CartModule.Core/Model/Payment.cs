@@ -6,14 +6,14 @@ using VirtoCommerce.Platform.Core.DynamicProperties;
 
 namespace VirtoCommerce.CartModule.Core.Model
 {
-	public class Payment : AuditableEntity, IHasTaxDetalization, ITaxable, IHasDiscounts, IHasDynamicProperties
+    public class Payment : AuditableEntity, IHasTaxDetalization, ITaxable, IHasDiscounts, IHasDynamicProperties
     {
-		public string OuterId { get; set; }
-		public string Currency { get; set; }
-		public string PaymentGatewayCode { get; set; }
-		public decimal Amount { get; set; }
+        public string OuterId { get; set; }
+        public string Currency { get; set; }
+        public string PaymentGatewayCode { get; set; }
+        public decimal Amount { get; set; }
 
-		public Address BillingAddress { get; set; }
+        public Address BillingAddress { get; set; }
 
 
         public virtual decimal Price { get; set; }
@@ -34,9 +34,9 @@ namespace VirtoCommerce.CartModule.Core.Model
         /// </summary>
         public string TaxType { get; set; }
 
-        public decimal TaxTotal { get; set; }
+        public decimal? TaxTotal { get; set; }
 
-        public decimal TaxPercentRate { get; set; }
+        public decimal? TaxPercentRate { get; set; }
 
         #endregion
 

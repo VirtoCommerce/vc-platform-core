@@ -32,9 +32,6 @@ namespace VirtoCommerce.OrdersModule.Data.Model
         [StringLength(2048)]
         public string CancelReason { get; set; }
 
-        [NotMapped]
-        public bool NeedPatchSum { get; set; } = true;
-
         public virtual OrderOperation ToModel(OrderOperation operation)
         {
             if (operation == null)
@@ -84,7 +81,7 @@ namespace VirtoCommerce.OrdersModule.Data.Model
             CancelledDate = operation.CancelledDate;
             CancelReason = operation.CancelReason;
             IsApproved = operation.IsApproved;
-            Sum = operation.Sum;
+            Sum = operation.Sum ?? Sum;
 
             return this;
         }
@@ -104,11 +101,7 @@ namespace VirtoCommerce.OrdersModule.Data.Model
             operation.CancelledDate = CancelledDate;
             operation.CancelReason = CancelReason;
             operation.IsApproved = IsApproved;
-
-            if (NeedPatchSum)
-            {
-                operation.Sum = Sum;
-            }
+            operation.Sum = Sum;
         }
 
         private static IEnumerable<IOperation> GetAllChildOperations(IOperation operation)

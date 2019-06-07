@@ -1,5 +1,4 @@
 using System;
-using System.Collections.Generic;
 using System.Collections.ObjectModel;
 using System.ComponentModel.DataAnnotations;
 using System.ComponentModel.DataAnnotations.Schema;
@@ -135,7 +134,7 @@ namespace VirtoCommerce.OrdersModule.Data.Model
 
             base.ToModel(order);
 
-            Sum = order.Total;
+            Sum = order.Total ?? Sum;
 
             return order;
         }
@@ -158,25 +157,25 @@ namespace VirtoCommerce.OrdersModule.Data.Model
             OrganizationName = order.OrganizationName;
             EmployeeId = order.EmployeeId;
             EmployeeName = order.EmployeeName;
-            DiscountAmount = order.DiscountAmount;
-            Total = order.Total;
-            SubTotal = order.SubTotal;
-            SubTotalWithTax = order.SubTotalWithTax;
-            ShippingTotal = order.ShippingTotal;
-            ShippingTotalWithTax = order.ShippingTotalWithTax;
-            PaymentTotal = order.PaymentTotal;
-            PaymentTotalWithTax = order.PaymentTotalWithTax;
+            DiscountAmount = order.DiscountAmount ?? DiscountAmount;
+            Total = order.Total ?? Total;
+            SubTotal = order.SubTotal ?? SubTotal;
+            SubTotalWithTax = order.SubTotalWithTax ?? SubTotalWithTax;
+            ShippingTotal = order.ShippingTotal ?? ShippingTotal;
+            ShippingTotalWithTax = order.ShippingTotalWithTax ?? ShippingTotalWithTax;
+            PaymentTotal = order.PaymentTotal ?? PaymentTotal;
+            PaymentTotalWithTax = order.PaymentTotalWithTax ?? PaymentTotalWithTax;
             HandlingTotal = order.FeeTotal;
             HandlingTotalWithTax = order.FeeTotalWithTax;
-            DiscountTotal = order.DiscountTotal;
-            DiscountTotalWithTax = order.DiscountTotalWithTax;
-            DiscountAmount = order.DiscountAmount;
-            TaxTotal = order.TaxTotal;
+            DiscountTotal = order.DiscountTotal ?? DiscountTotal;
+            DiscountTotalWithTax = order.DiscountTotalWithTax ?? DiscountTotalWithTax;
+            DiscountAmount = order.DiscountAmount ?? DiscountAmount;
+            TaxTotal = order.TaxTotal ?? TaxTotal;
             IsPrototype = order.IsPrototype;
             SubscriptionNumber = order.SubscriptionNumber;
             SubscriptionId = order.SubscriptionId;
             LanguageCode = order.LanguageCode;
-            TaxPercentRate = order.TaxPercentRate;
+            TaxPercentRate = order.TaxPercentRate ?? TaxPercentRate;
 
             if (order.Addresses != null)
             {
@@ -222,7 +221,7 @@ namespace VirtoCommerce.OrdersModule.Data.Model
                     AbstractTypeFactory<TaxDetailEntity>.TryCreateInstance().FromModel(x)));
             }
 
-            Sum = order.Total;
+            Sum = order.Total ?? Sum;
 
             return this;
         }
@@ -249,27 +248,20 @@ namespace VirtoCommerce.OrdersModule.Data.Model
             target.SubscriptionId = SubscriptionId;
             target.LanguageCode = LanguageCode;
 
-            // Checks whether calculation of sum is needed to pass the result to the property of base class before calling of base.Patch
-            var needPatchPrices = !(GetNonCalculatablePrices().All(x => x == 0m) &&
-                                    target.GetNonCalculatablePrices().Any(x => x != 0m));
-
-            if (needPatchPrices)
-            {
-                target.Total = Total;
-                target.SubTotal = SubTotal;
-                target.SubTotalWithTax = SubTotalWithTax;
-                target.ShippingTotal = ShippingTotal;
-                target.ShippingTotalWithTax = ShippingTotalWithTax;
-                target.PaymentTotal = PaymentTotal;
-                target.PaymentTotalWithTax = PaymentTotalWithTax;
-                target.HandlingTotal = HandlingTotal;
-                target.HandlingTotalWithTax = HandlingTotalWithTax;
-                target.DiscountTotal = DiscountTotal;
-                target.DiscountTotalWithTax = DiscountTotalWithTax;
-                target.DiscountAmount = DiscountAmount;
-                target.TaxTotal = TaxTotal;
-                target.TaxPercentRate = TaxPercentRate;
-            }
+            target.Total = Total;
+            target.SubTotal = SubTotal;
+            target.SubTotalWithTax = SubTotalWithTax;
+            target.ShippingTotal = ShippingTotal;
+            target.ShippingTotalWithTax = ShippingTotalWithTax;
+            target.PaymentTotal = PaymentTotal;
+            target.PaymentTotalWithTax = PaymentTotalWithTax;
+            target.HandlingTotal = HandlingTotal;
+            target.HandlingTotalWithTax = HandlingTotalWithTax;
+            target.DiscountTotal = DiscountTotal;
+            target.DiscountTotalWithTax = DiscountTotalWithTax;
+            target.DiscountAmount = DiscountAmount;
+            target.TaxTotal = TaxTotal;
+            target.TaxPercentRate = TaxPercentRate;
 
             if (!Addresses.IsNullCollection())
             {
@@ -373,14 +365,6 @@ namespace VirtoCommerce.OrdersModule.Data.Model
             {
                 item.ResetPrices();
             }
-        }
-
-        public virtual IEnumerable<decimal> GetNonCalculatablePrices()
-        {
-            yield return TaxPercentRate;
-            yield return ShippingTotalWithTax;
-            yield return PaymentTotalWithTax;
-            yield return DiscountAmount;
         }
     }
 }

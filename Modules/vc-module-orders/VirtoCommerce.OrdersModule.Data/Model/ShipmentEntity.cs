@@ -1,5 +1,4 @@
 using System;
-using System.Collections.Generic;
 using System.Collections.ObjectModel;
 using System.ComponentModel.DataAnnotations;
 using System.ComponentModel.DataAnnotations.Schema;
@@ -48,24 +47,24 @@ namespace VirtoCommerce.OrdersModule.Data.Model
         public string TaxType { get; set; }
 
         [Column(TypeName = "Money")]
-        public decimal Price { get; set; }
+        public decimal? Price { get; set; }
         [Column(TypeName = "Money")]
-        public decimal PriceWithTax { get; set; }
+        public decimal? PriceWithTax { get; set; }
 
         [Column(TypeName = "Money")]
-        public decimal DiscountAmount { get; set; }
+        public decimal? DiscountAmount { get; set; }
         [Column(TypeName = "Money")]
-        public decimal DiscountAmountWithTax { get; set; }
+        public decimal? DiscountAmountWithTax { get; set; }
 
 
         [Column(TypeName = "Money")]
-        public decimal Total { get; set; }
+        public decimal? Total { get; set; }
         [Column(TypeName = "Money")]
-        public decimal TotalWithTax { get; set; }
+        public decimal? TotalWithTax { get; set; }
 
         [Column(TypeName = "Money")]
-        public decimal TaxTotal { get; set; }
-        public decimal TaxPercentRate { get; set; }
+        public decimal? TaxTotal { get; set; }
+        public decimal? TaxPercentRate { get; set; }
 
         public string CustomerOrderId { get; set; }
         public virtual CustomerOrderEntity CustomerOrder { get; set; }
@@ -97,10 +96,10 @@ namespace VirtoCommerce.OrdersModule.Data.Model
             shipment.ModifiedDate = ModifiedDate;
             shipment.ModifiedBy = ModifiedBy;
 
-            shipment.Price = Price;
-            shipment.PriceWithTax = PriceWithTax;
-            shipment.DiscountAmount = DiscountAmount;
-            shipment.DiscountAmountWithTax = DiscountAmountWithTax;
+            shipment.Price = Price ?? shipment.Price;
+            shipment.PriceWithTax = PriceWithTax ?? shipment.PriceWithTax;
+            shipment.DiscountAmount = DiscountAmount ?? shipment.DiscountAmount;
+            shipment.DiscountAmountWithTax = DiscountAmountWithTax ?? shipment.DiscountAmountWithTax;
             shipment.FulfillmentCenterId = FulfillmentCenterId;
             shipment.FulfillmentCenterName = FulfillmentCenterName;
             shipment.OrganizationId = OrganizationId;
@@ -118,10 +117,10 @@ namespace VirtoCommerce.OrdersModule.Data.Model
             shipment.WeightUnit = WeightUnit;
             shipment.Length = Length;
             shipment.TaxType = TaxType;
-            shipment.TaxPercentRate = TaxPercentRate;
-            shipment.TaxTotal = TaxTotal;
-            shipment.Total = Total;
-            shipment.TotalWithTax = TotalWithTax;
+            shipment.TaxPercentRate = TaxPercentRate ?? shipment.TaxPercentRate;
+            shipment.TaxTotal = TaxTotal ?? shipment.TaxTotal;
+            shipment.Total = Total ?? shipment.Total;
+            shipment.TotalWithTax = TotalWithTax ?? shipment.TotalWithTax;
 
             shipment.Discounts = Discounts.Select(x => x.ToModel(AbstractTypeFactory<Discount>.TryCreateInstance())).ToList();
             shipment.Items = Items.Select(x => x.ToModel(AbstractTypeFactory<ShipmentItem>.TryCreateInstance())).ToList();
@@ -216,7 +215,7 @@ namespace VirtoCommerce.OrdersModule.Data.Model
                 Discounts = new ObservableCollection<DiscountEntity>(shipment.Discounts.Select(x => AbstractTypeFactory<DiscountEntity>.TryCreateInstance().FromModel(x)));
             }
 
-            Sum = shipment.TotalWithTax;
+            Sum = shipment.TotalWithTax ?? Sum;
 
             return this;
         }
@@ -229,9 +228,6 @@ namespace VirtoCommerce.OrdersModule.Data.Model
                 throw new ArgumentException(@"operation argument must be of type ShipmentEntity", nameof(operation));
             }
 
-            var isNeedPatch = !(GetNonCalculatablePrices().Any(x => x == 0m) && target.GetNonCalculatablePrices().Any(x => x != 0m));
-
-            base.NeedPatchSum = isNeedPatch;
             base.Patch(operation);
 
             target.FulfillmentCenterId = FulfillmentCenterId;
@@ -252,17 +248,14 @@ namespace VirtoCommerce.OrdersModule.Data.Model
             target.Length = Length;
             target.TaxType = TaxType;
 
-            if (isNeedPatch)
-            {
-                target.Price = Price;
-                target.PriceWithTax = PriceWithTax;
-                target.DiscountAmount = DiscountAmount;
-                target.DiscountAmountWithTax = DiscountAmountWithTax;
-                target.TaxPercentRate = TaxPercentRate;
-                target.TaxTotal = TaxTotal;
-                target.Total = Total;
-                target.TotalWithTax = TotalWithTax;
-            }
+            target.Price = Price;
+            target.PriceWithTax = PriceWithTax;
+            target.DiscountAmount = DiscountAmount;
+            target.DiscountAmountWithTax = DiscountAmountWithTax;
+            target.TaxPercentRate = TaxPercentRate;
+            target.TaxTotal = TaxTotal;
+            target.Total = Total;
+            target.TotalWithTax = TotalWithTax;
 
             if (!InPayments.IsNullCollection())
             {
@@ -307,13 +300,6 @@ namespace VirtoCommerce.OrdersModule.Data.Model
             TaxTotal = 0m;
             TaxPercentRate = 0m;
             Sum = 0m;
-        }
-
-        public virtual IEnumerable<decimal> GetNonCalculatablePrices()
-        {
-            yield return TaxPercentRate;
-            yield return Price;
-            yield return DiscountAmount;
         }
     }
 }
