@@ -9,7 +9,6 @@ angular.module("platformWebApp")
                   var blade = {
                       id: 'settings',
                       title: 'platform.blades.settingGroup-list.title',
-                      //subtitle: 'Manage settings',
                       controller: 'platformWebApp.settingGroupListController',
                       template: '$(Platform)/Scripts/app/settings/blades/settingGroup-list.tpl.html',
                       isClosingDisabled: true
@@ -39,33 +38,6 @@ angular.module("platformWebApp")
 
     retVal.getSetting = function(settings, settingName) {
         return _.findWhere(settings, { name: settingName });
-    };
-
-    retVal.fixValues = function (settings) {
-        // parse values as they all are strings
-        //var selectedSettings = _.where(settings, { valueType: 'Integer' });
-        //_.forEach(selectedSettings, function (setting) {
-        //    setting.value = parseInt(setting.value, 10);
-        //    if (setting.allowedValues) {
-        //        setting.allowedValues = _.map(setting.allowedValues, function (value) { return parseInt(value, 10); });
-        //    }
-        //});
-
-        //selectedSettings = _.where(settings, { valueType: 'Decimal' });
-        //_.forEach(selectedSettings, function (setting) {
-        //    setting.value = parseFloat(setting.value);
-        //    if (setting.allowedValues) {
-        //        setting.allowedValues = _.map(setting.allowedValues, function (value) { return parseFloat(value); });
-        //    }
-        //});
-
-        //selectedSettings = _.where(settings, { valueType: 'Boolean' });
-        //_.forEach(selectedSettings, function (setting) {
-        //    setting.value = setting.value && setting.value.toLowerCase() === 'true';
-        //    if (setting.allowedValues) {
-        //        setting.allowedValues = _.map(setting.allowedValues, function (value) { return value.toLowerCase() === 'true'; });
-        //    }
-        //});  
     };
 
     retVal.toApiFormat = function (settings) {

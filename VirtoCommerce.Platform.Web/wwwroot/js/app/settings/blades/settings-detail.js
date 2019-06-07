@@ -1,5 +1,4 @@
-angular.module('platformWebApp')
-.controller('platformWebApp.settingsDetailController', ['$scope', 'platformWebApp.dialogService', 'platformWebApp.settings.helper', 'platformWebApp.bladeNavigationService', 'platformWebApp.settings', function ($scope, dialogService, settingsHelper, bladeNavigationService, settings) {
+angular.module('platformWebApp').controller('platformWebApp.settingsDetailController', ['$scope', 'platformWebApp.dialogService', 'platformWebApp.settings.helper', 'platformWebApp.bladeNavigationService', 'platformWebApp.settings', function ($scope, dialogService, settingsHelper, bladeNavigationService, settings) {
     var blade = $scope.blade;
     blade.updatePermission = 'platform:setting:update';
 
@@ -14,8 +13,6 @@ angular.module('platformWebApp')
     }
 
     function initializeBlade(results) {
-        settingsHelper.fixValues(results);
-
         _.each(results, function (setting) {
             // set group names to show.
             if (setting.groupName) {
@@ -25,7 +22,7 @@ angular.module('platformWebApp')
 
             // transform to va-generic-value-input suitable structure
             if (!setting.value && setting.defaultValue) {
-                setting.value =  setting.defaultValue;
+                setting.value = setting.defaultValue;
             }
             setting.values = setting.isDictionary ? [{ value: { id: setting.value, name: setting.value } }] : [{ id: setting.value, value: setting.value }];
             if (setting.allowedValues) {
@@ -41,7 +38,7 @@ angular.module('platformWebApp')
         blade.isLoading = false;
     }
 
-    $scope.editArray = function (node) {
+    $scope.editDictionary = function (node) {
         var newBlade = {
             id: "settingDetailChild",
             currentEntityId: node.name,
@@ -72,7 +69,6 @@ angular.module('platformWebApp')
 
         settingsHelper.toApiFormat(objects);
 
-        //console.log('saveChanges3: ' + angular.toJson(objects, true));
         settings.update({}, objects, function () {
             if (blade.moduleId) {
                 blade.data = undefined;

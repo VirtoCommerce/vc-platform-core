@@ -1,4 +1,4 @@
-﻿angular.module('platformWebApp')
+angular.module('platformWebApp')
 .config(['$stateProvider', function ($stateProvider) {
     $stateProvider
         .state('workspace.userProfile', {
@@ -34,7 +34,6 @@
         mainMenuState: {},
         load: function () {
             return userProfileApi.get(function (profile) {
-                settingsHelper.fixValues(profile.settings);
                 profile.language = languages.normalize(settingsHelper.getSetting(profile.settings, "VirtoCommerce.Platform.UI.Language").value);
                 profile.regionalFormat = locales.normalize(settingsHelper.getSetting(profile.settings, "VirtoCommerce.Platform.UI.RegionalFormat").value);
                 profile.timeZone = settingsHelper.getSetting(profile.settings, "VirtoCommerce.Platform.UI.TimeZone").value;

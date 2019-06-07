@@ -1,5 +1,4 @@
-angular.module('platformWebApp')
-.controller('platformWebApp.settingDictionaryController', ['$scope', 'platformWebApp.dialogService', 'platformWebApp.bladeNavigationService', 'platformWebApp.settings', function ($scope, dialogService, bladeNavigationService, settings) {
+angular.module('platformWebApp').controller('platformWebApp.settingDictionaryController', ['$scope', 'platformWebApp.dialogService', 'platformWebApp.bladeNavigationService', 'platformWebApp.settings', function ($scope, dialogService, bladeNavigationService, settings) {
     var blade = $scope.blade;
     blade.updatePermission = 'platform:setting:update';
     var currentEntities;
@@ -54,15 +53,15 @@ angular.module('platformWebApp')
     blade.headIcon = 'fa-wrench';
     blade.subtitle = 'platform.blades.setting-dictionary.subtitle';
     blade.toolbarCommands = [
-     {
-         name: "platform.commands.delete", icon: 'fa fa-trash-o',
-         executeMethod: function () {
-             deleteChecked();
-         },
-         canExecuteMethod: function () {
-             return isItemsChecked();
-         }
-     }
+        {
+            name: "platform.commands.delete", icon: 'fa fa-trash-o',
+            executeMethod: function () {
+                deleteChecked();
+            },
+            canExecuteMethod: function () {
+                return isItemsChecked();
+            }
+        }
     ];
 
     if (blade.isApiSave) {
@@ -85,25 +84,25 @@ angular.module('platformWebApp')
         };
 
         blade.toolbarCommands.splice(0, 0,
-        {
-            name: "platform.commands.save",
-            icon: 'fa fa-save',
-            executeMethod: function () {
-                saveChanges();
+            {
+                name: "platform.commands.save",
+                icon: 'fa fa-save',
+                executeMethod: function () {
+                    saveChanges();
+                },
+                canExecuteMethod: function () {
+                    return isDirty() && formScope && formScope.$valid;
+                }
             },
-            canExecuteMethod: function () {
-                return isDirty() && formScope && formScope.$valid;
-            }
-        },
-        {
-            name: "platform.commands.reset",
-            icon: 'fa fa-undo',
-            executeMethod: function () {
-                angular.copy(blade.origEntity, currentEntities);
-                blade.selectedAll = false;
-            },
-            canExecuteMethod: isDirty,
-        });
+            {
+                name: "platform.commands.reset",
+                icon: 'fa fa-undo',
+                executeMethod: function () {
+                    angular.copy(blade.origEntity, currentEntities);
+                    blade.selectedAll = false;
+                },
+                canExecuteMethod: isDirty,
+            });
         blade.refresh();
     } else {
         $scope.$watch('blade.parentBlade.currentEntities', function (data) {
@@ -129,22 +128,12 @@ angular.module('platformWebApp')
     }
 
     function deleteChecked() {
-        //var dialog = {
-        //    id: "confirmDeleteItem",
-        //    title: "platform.dialogs.settings-value-delete.title",
-        //    message: "platform.dialogs.settings-value-delete.message",
-        //    callback: function (remove) {
-        //        if (remove) {
         var selection = _.where(currentEntities, { _selected: true });
         angular.forEach(selection, function (listItem) {
             $scope.delete(currentEntities.indexOf(listItem));
         });
-        //        }
-        //    }
-        //}
-        //dialogService.showConfirmationDialog(dialog);
     }
 
-    // on load
     resetNewValue();
+
 }]);

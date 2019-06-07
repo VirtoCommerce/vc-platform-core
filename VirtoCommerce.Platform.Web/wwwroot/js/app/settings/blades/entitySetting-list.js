@@ -4,7 +4,6 @@
     blade.title = 'platform.blades.entitySetting-list.title';
 
     function initializeBlade(results) {
-        console.log(results);
         blade.data = results;
         results = angular.copy(results);
 
@@ -16,11 +15,13 @@
             }
 
             // transform to va-generic-value-input suitable structure
-            setting.isDictionary = _.any(setting.allowedValues);
+            if (!setting.value && setting.defaultValue) {
+                setting.value = setting.defaultValue;
+            }
             setting.values = setting.isDictionary ? [{ value: { id: setting.value, name: setting.value } }] : [{ id: setting.value, value: setting.value }];
             if (setting.allowedValues) {
                 setting.allowedValues = _.map(setting.allowedValues, function (x) {
-                    return { id: x, name: x };
+                    return { value: x };
                 });
             }
         });
@@ -32,7 +33,7 @@
         blade.isLoading = false;
     }
 
-    $scope.editArray = function (node) {
+    $scope.editDictionary = function (node) {
         var newBlade = {
             id: "settingDetailChild",
             currentEntityId: node.name,
