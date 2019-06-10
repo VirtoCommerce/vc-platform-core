@@ -19,7 +19,7 @@ namespace VirtoCommerce.LuceneSearchModule.Web
 
             if (provider.EqualsInvariant("Lucene"))
             {
-                serviceCollection.Configure<LuceneSearchOptions>(configuration.GetSection("Search:Lucene"));
+                serviceCollection.AddOptions<LuceneSearchOptions>().Bind(configuration.GetSection("Search:Lucene")).ValidateDataAnnotations();
                 serviceCollection.AddSingleton<ISearchProvider, LuceneSearchProvider>();
             }
         }

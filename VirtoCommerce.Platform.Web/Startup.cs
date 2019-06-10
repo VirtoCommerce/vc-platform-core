@@ -69,8 +69,8 @@ namespace VirtoCommerce.Platform.Web
             // without this Bearer authorization will not work
             services.AddSingleton<IAuthenticationSchemeProvider, CustomAuthenticationSchemeProvider>();
 
-            services.Configure<PlatformOptions>(Configuration.GetSection("VirtoCommerce"));
-            services.Configure<HangfireOptions>(Configuration.GetSection("VirtoCommerce:Jobs"));
+            services.AddOptions<PlatformOptions>().Bind(Configuration.GetSection("VirtoCommerce")).ValidateDataAnnotations();
+            services.AddOptions<HangfireOptions>().Bind(Configuration.GetSection("VirtoCommerce:Jobs")).ValidateDataAnnotations();
 
             PlatformVersion.CurrentVersion = SemanticVersion.Parse(Microsoft.Extensions.PlatformAbstractions.PlatformServices.Default.Application.ApplicationVersion);
 
@@ -292,12 +292,12 @@ namespace VirtoCommerce.Platform.Web
             var assetsProvider = Configuration.GetSection("Assets:Provider").Value;
             if (assetsProvider.EqualsInvariant(AzureBlobProvider.ProviderName))
             {
-                services.Configure<AzureBlobOptions>(Configuration.GetSection("Assets:AzureBlobStorage"));
+                services.AddOptions<AzureBlobOptions>().Bind(Configuration.GetSection("Assets:AzureBlobStorage")).ValidateDataAnnotations();
                 services.AddAzureBlobProvider();
             }
             else
             {
-                services.Configure<FileSystemBlobOptions>(Configuration.GetSection("Assets:FileSystem"));
+                services.AddOptions<FileSystemBlobOptions>().Bind(Configuration.GetSection("Assets:FileSystem")).ValidateDataAnnotations();
                 services.AddFileSystemBlobProvider(options =>
                 {
                     options.RootPath = HostingEnvironment.MapPath(options.RootPath);
