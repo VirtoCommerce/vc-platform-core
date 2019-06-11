@@ -18,10 +18,6 @@
   </ItemGroup>
 
   <ItemGroup>
-    <ProjectReference Include="..\..\..\VirtoCommerce.Platform.Modules\VirtoCommerce.Platform.Modules.csproj" />
-  </ItemGroup>
-
-  <ItemGroup>
     <Reference Include="Microsoft.Extensions.Logging.Abstractions" />
   </ItemGroup>
 
