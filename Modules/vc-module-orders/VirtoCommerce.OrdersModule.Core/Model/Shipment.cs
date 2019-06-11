@@ -65,9 +65,9 @@ namespace VirtoCommerce.OrdersModule.Core.Model
         public virtual decimal? DiscountAmountWithTax { get; set; }
 
         //Any extra Fee 
-        public virtual decimal Fee { get; set; }
+        public virtual decimal? Fee { get; set; }
 
-        public virtual decimal FeeWithTax { get; set; }
+        public virtual decimal? FeeWithTax { get; set; }
 
         #region ITaxable Members
 

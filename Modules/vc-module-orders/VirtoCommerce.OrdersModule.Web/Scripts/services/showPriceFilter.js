@@ -6,6 +6,11 @@ angular.module('virtoCommerce.orderModule')
 
             if (regexp.test(value) && arguments.length > 1 && !show) {
                 value = String(value).replace(regexp, '#');
+
+            }
+
+            if (!value && !show) {
+                value = '#,##';
             }
 
             return value;

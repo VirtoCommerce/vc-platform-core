@@ -19,35 +19,35 @@ namespace VirtoCommerce.OrdersModule.Core.Model
         /// <summary>
         ///  unit price without discount and tax
         /// </summary>
-        public decimal Price { get; set; }
+        public decimal? Price { get; set; }
 
-        public virtual decimal PriceWithTax { get; set; }
+        public virtual decimal? PriceWithTax { get; set; }
 
         /// <summary>
         /// Resulting price with discount for one unit
         /// </summary>
-        public virtual decimal PlacedPrice { get; set; }
-        public virtual decimal PlacedPriceWithTax { get; set; }
+        public virtual decimal? PlacedPrice { get; set; }
+        public virtual decimal? PlacedPriceWithTax { get; set; }
 
-        public virtual decimal ExtendedPrice { get; set; }
+        public virtual decimal? ExtendedPrice { get; set; }
 
-        public virtual decimal ExtendedPriceWithTax { get; set; }
+        public virtual decimal? ExtendedPriceWithTax { get; set; }
 
         /// <summary>
         /// Gets the value of the single qty line item discount amount
         /// </summary>
-        public virtual decimal DiscountAmount { get; set; }
+        public virtual decimal? DiscountAmount { get; set; }
 
-        public virtual decimal DiscountAmountWithTax { get; set; }
+        public virtual decimal? DiscountAmountWithTax { get; set; }
 
-        public decimal DiscountTotal { get; set; }
+        public decimal? DiscountTotal { get; set; }
 
-        public decimal DiscountTotalWithTax { get; set; }
+        public decimal? DiscountTotalWithTax { get; set; }
 
         //Any extra Fee 
-        public virtual decimal Fee { get; set; }
+        public virtual decimal? Fee { get; set; }
 
-        public virtual decimal FeeWithTax { get; set; }
+        public virtual decimal? FeeWithTax { get; set; }
         #region ITaxable Members
 
         /// <summary>

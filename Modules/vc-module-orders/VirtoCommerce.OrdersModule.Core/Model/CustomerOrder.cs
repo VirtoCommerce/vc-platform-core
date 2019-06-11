@@ -74,11 +74,11 @@ namespace VirtoCommerce.OrdersModule.Core.Model
         public virtual decimal? SubTotal { get; set; }
 
         public virtual decimal? SubTotalWithTax { get; set; }
-        public virtual decimal SubTotalDiscount { get; set; }
+        public virtual decimal? SubTotalDiscount { get; set; }
 
-        public virtual decimal SubTotalDiscountWithTax { get; set; }
+        public virtual decimal? SubTotalDiscountWithTax { get; set; }
 
-        public virtual decimal SubTotalTaxTotal { get; set; }
+        public virtual decimal? SubTotalTaxTotal { get; set; }
 
         public virtual decimal? ShippingTotal { get; set; }
 
@@ -88,26 +88,26 @@ namespace VirtoCommerce.OrdersModule.Core.Model
 
         public virtual decimal? ShippingSubTotalWithTax { get; set; }
 
-        public virtual decimal ShippingDiscountTotal { get; set; }
+        public virtual decimal? ShippingDiscountTotal { get; set; }
 
-        public virtual decimal ShippingDiscountTotalWithTax { get; set; }
+        public virtual decimal? ShippingDiscountTotalWithTax { get; set; }
 
-        public virtual decimal ShippingTaxTotal { get; set; }
+        public virtual decimal? ShippingTaxTotal { get; set; }
 
         public virtual decimal? PaymentTotal { get; set; }
 
         public virtual decimal? PaymentTotalWithTax { get; set; }
 
 
-        public virtual decimal PaymentSubTotal { get; set; }
+        public virtual decimal? PaymentSubTotal { get; set; }
 
-        public virtual decimal PaymentSubTotalWithTax { get; set; }
+        public virtual decimal? PaymentSubTotalWithTax { get; set; }
 
-        public virtual decimal PaymentDiscountTotal { get; set; }
+        public virtual decimal? PaymentDiscountTotal { get; set; }
 
-        public virtual decimal PaymentDiscountTotalWithTax { get; set; }
+        public virtual decimal? PaymentDiscountTotalWithTax { get; set; }
 
-        public virtual decimal PaymentTaxTotal { get; set; }
+        public virtual decimal? PaymentTaxTotal { get; set; }
 
         public virtual decimal? DiscountTotal { get; set; }
 
@@ -115,13 +115,13 @@ namespace VirtoCommerce.OrdersModule.Core.Model
 
 
         //Any extra Fee 
-        public decimal Fee { get; set; }
+        public decimal? Fee { get; set; }
 
-        public virtual decimal FeeWithTax { get; set; }
+        public virtual decimal? FeeWithTax { get; set; }
 
-        public virtual decimal FeeTotal { get; set; }
+        public virtual decimal? FeeTotal { get; set; }
 
-        public virtual decimal FeeTotalWithTax { get; set; }
+        public virtual decimal? FeeTotalWithTax { get; set; }
         #region ITaxable Members
 
         /// <summary>

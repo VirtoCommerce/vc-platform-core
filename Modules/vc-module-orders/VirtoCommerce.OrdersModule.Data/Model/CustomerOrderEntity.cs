@@ -45,34 +45,34 @@ namespace VirtoCommerce.OrdersModule.Data.Model
         public bool IsPrototype { get; set; }
 
         [Column(TypeName = "Money")]
-        public decimal DiscountAmount { get; set; }
+        public decimal? DiscountAmount { get; set; }
         [Column(TypeName = "Money")]
-        public decimal TaxTotal { get; set; }
+        public decimal? TaxTotal { get; set; }
         [Column(TypeName = "Money")]
-        public decimal Total { get; set; }
+        public decimal? Total { get; set; }
         [Column(TypeName = "Money")]
-        public decimal SubTotal { get; set; }
+        public decimal? SubTotal { get; set; }
         [Column(TypeName = "Money")]
-        public decimal SubTotalWithTax { get; set; }
+        public decimal? SubTotalWithTax { get; set; }
         [Column(TypeName = "Money")]
-        public decimal ShippingTotal { get; set; }
+        public decimal? ShippingTotal { get; set; }
         [Column(TypeName = "Money")]
-        public decimal ShippingTotalWithTax { get; set; }
+        public decimal? ShippingTotalWithTax { get; set; }
         [Column(TypeName = "Money")]
-        public decimal PaymentTotal { get; set; }
+        public decimal? PaymentTotal { get; set; }
         [Column(TypeName = "Money")]
-        public decimal PaymentTotalWithTax { get; set; }
+        public decimal? PaymentTotalWithTax { get; set; }
         [Column(TypeName = "Money")]
-        public decimal HandlingTotal { get; set; }
+        public decimal? HandlingTotal { get; set; }
         [Column(TypeName = "Money")]
-        public decimal HandlingTotalWithTax { get; set; }
+        public decimal? HandlingTotalWithTax { get; set; }
         [Column(TypeName = "Money")]
-        public decimal DiscountTotal { get; set; }
+        public decimal? DiscountTotal { get; set; }
         [Column(TypeName = "Money")]
-        public decimal DiscountTotalWithTax { get; set; }
+        public decimal? DiscountTotalWithTax { get; set; }
         [StringLength(16)]
         public string LanguageCode { get; set; }
-        public decimal TaxPercentRate { get; set; }
+        public decimal? TaxPercentRate { get; set; }
 
         [StringLength(128)]
         public string ShoppingCartId { get; set; }
@@ -157,25 +157,24 @@ namespace VirtoCommerce.OrdersModule.Data.Model
             OrganizationName = order.OrganizationName;
             EmployeeId = order.EmployeeId;
             EmployeeName = order.EmployeeName;
-            DiscountAmount = order.DiscountAmount ?? DiscountAmount;
-            Total = order.Total ?? Total;
-            SubTotal = order.SubTotal ?? SubTotal;
-            SubTotalWithTax = order.SubTotalWithTax ?? SubTotalWithTax;
-            ShippingTotal = order.ShippingTotal ?? ShippingTotal;
-            ShippingTotalWithTax = order.ShippingTotalWithTax ?? ShippingTotalWithTax;
-            PaymentTotal = order.PaymentTotal ?? PaymentTotal;
-            PaymentTotalWithTax = order.PaymentTotalWithTax ?? PaymentTotalWithTax;
+            DiscountAmount = order.DiscountAmount;
+            Total = order.Total;
+            SubTotal = order.SubTotal;
+            SubTotalWithTax = order.SubTotalWithTax;
+            ShippingTotal = order.ShippingTotal;
+            ShippingTotalWithTax = order.ShippingTotalWithTax;
+            PaymentTotal = order.PaymentTotal;
+            PaymentTotalWithTax = order.PaymentTotalWithTax;
             HandlingTotal = order.FeeTotal;
             HandlingTotalWithTax = order.FeeTotalWithTax;
-            DiscountTotal = order.DiscountTotal ?? DiscountTotal;
-            DiscountTotalWithTax = order.DiscountTotalWithTax ?? DiscountTotalWithTax;
-            DiscountAmount = order.DiscountAmount ?? DiscountAmount;
-            TaxTotal = order.TaxTotal ?? TaxTotal;
+            DiscountTotal = order.DiscountTotal;
+            DiscountTotalWithTax = order.DiscountTotalWithTax;
+            TaxTotal = order.TaxTotal;
             IsPrototype = order.IsPrototype;
             SubscriptionNumber = order.SubscriptionNumber;
             SubscriptionId = order.SubscriptionId;
             LanguageCode = order.LanguageCode;
-            TaxPercentRate = order.TaxPercentRate ?? TaxPercentRate;
+            TaxPercentRate = order.TaxPercentRate;
 
             if (order.Addresses != null)
             {
@@ -248,20 +247,20 @@ namespace VirtoCommerce.OrdersModule.Data.Model
             target.SubscriptionId = SubscriptionId;
             target.LanguageCode = LanguageCode;
 
-            target.Total = Total;
-            target.SubTotal = SubTotal;
-            target.SubTotalWithTax = SubTotalWithTax;
-            target.ShippingTotal = ShippingTotal;
-            target.ShippingTotalWithTax = ShippingTotalWithTax;
-            target.PaymentTotal = PaymentTotal;
-            target.PaymentTotalWithTax = PaymentTotalWithTax;
-            target.HandlingTotal = HandlingTotal;
-            target.HandlingTotalWithTax = HandlingTotalWithTax;
-            target.DiscountTotal = DiscountTotal;
-            target.DiscountTotalWithTax = DiscountTotalWithTax;
-            target.DiscountAmount = DiscountAmount;
-            target.TaxTotal = TaxTotal;
-            target.TaxPercentRate = TaxPercentRate;
+            target.Total = Total ?? target.Total;
+            target.SubTotal = SubTotal ?? target.SubTotal;
+            target.SubTotalWithTax = SubTotalWithTax ?? target.SubTotalWithTax;
+            target.ShippingTotal = ShippingTotal ?? target.ShippingTotal;
+            target.ShippingTotalWithTax = ShippingTotalWithTax ?? target.ShippingTotalWithTax;
+            target.PaymentTotal = PaymentTotal ?? target.PaymentTotal;
+            target.PaymentTotalWithTax = PaymentTotalWithTax ?? target.PaymentTotalWithTax;
+            target.HandlingTotal = HandlingTotal ?? target.HandlingTotal;
+            target.HandlingTotalWithTax = HandlingTotalWithTax ?? target.HandlingTotalWithTax;
+            target.DiscountTotal = DiscountTotal ?? target.DiscountTotal;
+            target.DiscountTotalWithTax = DiscountTotalWithTax ?? target.DiscountTotalWithTax;
+            target.DiscountAmount = DiscountAmount ?? target.DiscountAmount;
+            target.TaxTotal = TaxTotal ?? target.TaxTotal;
+            target.TaxPercentRate = TaxPercentRate ?? target.TaxPercentRate;
 
             if (!Addresses.IsNullCollection())
             {
@@ -335,21 +334,21 @@ namespace VirtoCommerce.OrdersModule.Data.Model
 
         public virtual void ResetPrices()
         {
-            TaxPercentRate = 0m;
-            ShippingTotalWithTax = 0m;
-            PaymentTotalWithTax = 0m;
-            DiscountAmount = 0m;
-            Total = 0m;
-            SubTotal = 0m;
-            SubTotalWithTax = 0m;
-            ShippingTotal = 0m;
-            PaymentTotal = 0m;
-            HandlingTotal = 0m;
-            HandlingTotalWithTax = 0m;
-            DiscountTotal = 0m;
-            DiscountTotalWithTax = 0m;
-            TaxTotal = 0m;
-            Sum = 0m;
+            TaxPercentRate = null;
+            ShippingTotalWithTax = null;
+            PaymentTotalWithTax = null;
+            DiscountAmount = null;
+            Total = null;
+            SubTotal = null;
+            SubTotalWithTax = null;
+            ShippingTotal = null;
+            PaymentTotal = null;
+            HandlingTotal = null;
+            HandlingTotalWithTax = null;
+            DiscountTotal = null;
+            DiscountTotalWithTax = null;
+            TaxTotal = null;
+            Sum = null;
 
             foreach (var payment in InPayments)
             {

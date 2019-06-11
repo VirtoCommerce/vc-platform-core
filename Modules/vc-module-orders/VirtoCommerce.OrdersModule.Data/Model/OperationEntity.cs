@@ -25,7 +25,7 @@ namespace VirtoCommerce.OrdersModule.Data.Model
         [StringLength(3)]
         public string Currency { get; set; }
         [Column(TypeName = "Money")]
-        public decimal Sum { get; set; }
+        public decimal? Sum { get; set; }
 
         public bool IsCancelled { get; set; }
         public DateTime? CancelledDate { get; set; }
@@ -101,7 +101,7 @@ namespace VirtoCommerce.OrdersModule.Data.Model
             operation.CancelledDate = CancelledDate;
             operation.CancelReason = CancelReason;
             operation.IsApproved = IsApproved;
-            operation.Sum = Sum;
+            operation.Sum = Sum ?? operation.Sum;
         }
 
         private static IEnumerable<IOperation> GetAllChildOperations(IOperation operation)

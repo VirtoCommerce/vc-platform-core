@@ -28,6 +28,11 @@ namespace VirtoCommerce.OrderModule.Web.Security
                 result = string.Join(",", items);
             }
 
+            if (needRestrict && string.IsNullOrEmpty(result))
+            {
+                result = CustomerOrderResponseGroup.Default.ToString();
+            }
+
             return result;
         }
     }

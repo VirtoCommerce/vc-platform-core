@@ -1,5 +1,4 @@
 using System;
-using System.Collections.Generic;
 using System.Collections.ObjectModel;
 using System.ComponentModel.DataAnnotations;
 using System.ComponentModel.DataAnnotations.Schema;
@@ -19,16 +18,16 @@ namespace VirtoCommerce.OrdersModule.Data.Model
         [StringLength(3)]
         public string Currency { get; set; }
         [Column(TypeName = "Money")]
-        public decimal Price { get; set; }
+        public decimal? Price { get; set; }
         [Column(TypeName = "Money")]
-        public decimal PriceWithTax { get; set; }
+        public decimal? PriceWithTax { get; set; }
         [Column(TypeName = "Money")]
-        public decimal DiscountAmount { get; set; }
+        public decimal? DiscountAmount { get; set; }
         [Column(TypeName = "Money")]
-        public decimal DiscountAmountWithTax { get; set; }
+        public decimal? DiscountAmountWithTax { get; set; }
         [Column(TypeName = "Money")]
-        public decimal TaxTotal { get; set; }
-        public decimal TaxPercentRate { get; set; }
+        public decimal? TaxTotal { get; set; }
+        public decimal? TaxPercentRate { get; set; }
         public int Quantity { get; set; }
         [Required]
         [StringLength(64)]
@@ -171,8 +170,8 @@ namespace VirtoCommerce.OrdersModule.Data.Model
             DiscountAmount = lineItem.DiscountAmount;
             DiscountAmountWithTax = lineItem.DiscountAmountWithTax;
             Quantity = lineItem.Quantity;
-            TaxTotal = lineItem.TaxTotal ?? TaxTotal;
-            TaxPercentRate = lineItem.TaxPercentRate ?? TaxPercentRate;
+            TaxTotal = lineItem.TaxTotal;
+            TaxPercentRate = lineItem.TaxPercentRate;
             Weight = lineItem.Weight;
             Height = lineItem.Height;
             Width = lineItem.Width;
@@ -222,15 +221,12 @@ namespace VirtoCommerce.OrdersModule.Data.Model
             target.CancelReason = CancelReason;
             target.Comment = Comment;
 
-            if (!(GetNonCalculatablePrices().All(x => x == 0m) && target.GetNonCalculatablePrices().Any(x => x != 0m)))
-            {
-                target.TaxPercentRate = TaxPercentRate;
-                target.Price = Price;
-                target.DiscountAmount = DiscountAmount;
-                target.PriceWithTax = PriceWithTax;
-                target.DiscountAmountWithTax = DiscountAmountWithTax;
-                target.TaxTotal = TaxTotal;
-            }
+            target.TaxPercentRate = TaxPercentRate ?? target.TaxPercentRate;
+            target.Price = Price ?? target.Price;
+            target.DiscountAmount = DiscountAmount ?? target.DiscountAmount;
+            target.PriceWithTax = PriceWithTax ?? target.PriceWithTax;
+            target.DiscountAmountWithTax = DiscountAmountWithTax ?? target.DiscountAmountWithTax;
+            target.TaxTotal = TaxTotal ?? target.TaxTotal;
 
             if (!Discounts.IsNullCollection())
             {
@@ -246,19 +242,12 @@ namespace VirtoCommerce.OrdersModule.Data.Model
         }
         public virtual void ResetPrices()
         {
-            Price = 0m;
-            PriceWithTax = 0m;
-            DiscountAmount = 0m;
-            DiscountAmountWithTax = 0m;
-            TaxTotal = 0m;
-            TaxPercentRate = 0m;
-        }
-
-        public virtual IEnumerable<decimal> GetNonCalculatablePrices()
-        {
-            yield return TaxPercentRate;
-            yield return Price;
-            yield return DiscountAmount;
+            Price = null;
+            PriceWithTax = null;
+            DiscountAmount = null;
+            DiscountAmountWithTax = null;
+            TaxTotal = null;
+            TaxPercentRate = null;
         }
     }
 }

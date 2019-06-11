@@ -96,10 +96,10 @@ namespace VirtoCommerce.OrdersModule.Data.Model
             shipment.ModifiedDate = ModifiedDate;
             shipment.ModifiedBy = ModifiedBy;
 
-            shipment.Price = Price ?? shipment.Price;
-            shipment.PriceWithTax = PriceWithTax ?? shipment.PriceWithTax;
-            shipment.DiscountAmount = DiscountAmount ?? shipment.DiscountAmount;
-            shipment.DiscountAmountWithTax = DiscountAmountWithTax ?? shipment.DiscountAmountWithTax;
+            shipment.Price = Price;
+            shipment.PriceWithTax = PriceWithTax;
+            shipment.DiscountAmount = DiscountAmount;
+            shipment.DiscountAmountWithTax = DiscountAmountWithTax;
             shipment.FulfillmentCenterId = FulfillmentCenterId;
             shipment.FulfillmentCenterName = FulfillmentCenterName;
             shipment.OrganizationId = OrganizationId;
@@ -117,10 +117,10 @@ namespace VirtoCommerce.OrdersModule.Data.Model
             shipment.WeightUnit = WeightUnit;
             shipment.Length = Length;
             shipment.TaxType = TaxType;
-            shipment.TaxPercentRate = TaxPercentRate ?? shipment.TaxPercentRate;
-            shipment.TaxTotal = TaxTotal ?? shipment.TaxTotal;
-            shipment.Total = Total ?? shipment.Total;
-            shipment.TotalWithTax = TotalWithTax ?? shipment.TotalWithTax;
+            shipment.TaxPercentRate = TaxPercentRate;
+            shipment.TaxTotal = TaxTotal;
+            shipment.Total = Total;
+            shipment.TotalWithTax = TotalWithTax;
 
             shipment.Discounts = Discounts.Select(x => x.ToModel(AbstractTypeFactory<Discount>.TryCreateInstance())).ToList();
             shipment.Items = Items.Select(x => x.ToModel(AbstractTypeFactory<ShipmentItem>.TryCreateInstance())).ToList();
@@ -291,15 +291,15 @@ namespace VirtoCommerce.OrdersModule.Data.Model
         }
         public virtual void ResetPrices()
         {
-            Price = 0m;
-            PriceWithTax = 0m;
-            DiscountAmount = 0m;
-            DiscountAmountWithTax = 0m;
-            Total = 0m;
-            TotalWithTax = 0m;
-            TaxTotal = 0m;
-            TaxPercentRate = 0m;
-            Sum = 0m;
+            Price = null;
+            PriceWithTax = null;
+            DiscountAmount = null;
+            DiscountAmountWithTax = null;
+            Total = null;
+            TotalWithTax = null;
+            TaxTotal = null;
+            TaxPercentRate = null;
+            Sum = null;
         }
     }
 }

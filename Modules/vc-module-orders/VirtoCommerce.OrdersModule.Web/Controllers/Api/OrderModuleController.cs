@@ -96,7 +96,7 @@ namespace VirtoCommerce.OrdersModule.Web.Controllers.Api
         public async Task<ActionResult<CustomerOrderSearchResult>> Search([FromBody]CustomerOrderSearchCriteria criteria)
         {
             //Scope bound ACL filtration
-            criteria = FilterOrderSearchCriteria(User.Identity.Name, criteria);
+            criteria = await FilterOrderSearchCriteria(User.Identity.Name, criteria);
 
             var result = await _searchService.SearchCustomerOrdersAsync(criteria);
 
@@ -147,8 +147,11 @@ namespace VirtoCommerce.OrdersModule.Web.Controllers.Api
         [Route("{id}")]
         public async Task<ActionResult<CustomerOrder>> GetById(string id, [FromRoute] string respGroup = null)
         {
+            var user = await _userManager.FindByNameAsync(User.Identity.Name);
+            var userPermissions = user.Roles.SelectMany(x => x.Permissions).Distinct().ToArray();
+
             var retVal = await _customerOrderService.GetByIdAsync(id,
-                /* OrderReadPricesPermission.ApplyResponseGroupFiltering(_securityService.GetUserPermissions(User.Identity.Name),*/ respGroup);
+                OrderReadPricesPermission.ApplyResponseGroupFiltering(userPermissions, respGroup));
 
             if (retVal == null)
             {
@@ -482,8 +485,8 @@ namespace VirtoCommerce.OrdersModule.Web.Controllers.Api
             var searchCriteria = AbstractTypeFactory<CustomerOrderSearchCriteria>.TryCreateInstance();
             searchCriteria.Number = orderNumber;
             searchCriteria.Take = 1;
-            //ToDo
-            //searchCriteria.ResponseGroup = OrderReadPricesPermission.ApplyResponseGroupFiltering(_securityService.GetUserPermissions(User.Identity.Name), null);
+            var user = await _userManager.FindByNameAsync(User.Identity.Name);
+            searchCriteria.ResponseGroup = OrderReadPricesPermission.ApplyResponseGroupFiltering(user.Roles.SelectMany(x => x.Permissions).Distinct().ToArray(), null);
 
             var orders = await _searchService.SearchCustomerOrdersAsync(searchCriteria);
             var order = orders.Results.FirstOrDefault();
@@ -533,7 +536,7 @@ namespace VirtoCommerce.OrdersModule.Web.Controllers.Api
             return Ok(result);
         }
 
-        private CustomerOrderSearchCriteria FilterOrderSearchCriteria(string userName, CustomerOrderSearchCriteria criteria)
+        private async Task<CustomerOrderSearchCriteria> FilterOrderSearchCriteria(string userName, CustomerOrderSearchCriteria criteria)
         {
             //TODO
             //if (!_securityService.UserHasAnyPermission(userName, null, OrderPredefinedPermissions.Read))
@@ -557,9 +560,12 @@ namespace VirtoCommerce.OrdersModule.Web.Controllers.Api
             //    {
             //        criteria.EmployeeId = userName;
             //    }
-            //// ResponseGroup
-            // criteria.ResponseGroup = OrderReadPricesPermission.ApplyResponseGroupFiltering(_securityService.GetUserPermissions(User.Identity.Name), criteria.ResponseGroup);
             //}
+
+            // ResponseGroup
+            var user = await _userManager.FindByNameAsync(User.Identity.Name);
+            criteria.ResponseGroup = OrderReadPricesPermission.ApplyResponseGroupFiltering(user.Roles.SelectMany(x => x.Permissions).Distinct().ToArray(), criteria.ResponseGroup);
+
             return criteria;
         }
     }

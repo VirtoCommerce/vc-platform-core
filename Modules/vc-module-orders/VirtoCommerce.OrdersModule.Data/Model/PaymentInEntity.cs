@@ -1,5 +1,4 @@
 using System;
-using System.Collections.Generic;
 using System.Collections.ObjectModel;
 using System.ComponentModel.DataAnnotations;
 using System.ComponentModel.DataAnnotations.Schema;
@@ -42,23 +41,23 @@ namespace VirtoCommerce.OrdersModule.Data.Model
         public string TaxType { get; set; }
 
         [Column(TypeName = "Money")]
-        public decimal Price { get; set; }
+        public decimal? Price { get; set; }
         [Column(TypeName = "Money")]
-        public decimal PriceWithTax { get; set; }
+        public decimal? PriceWithTax { get; set; }
 
         [Column(TypeName = "Money")]
-        public decimal DiscountAmount { get; set; }
+        public decimal? DiscountAmount { get; set; }
         [Column(TypeName = "Money")]
-        public decimal DiscountAmountWithTax { get; set; }
+        public decimal? DiscountAmountWithTax { get; set; }
 
         [Column(TypeName = "Money")]
-        public decimal Total { get; set; }
+        public decimal? Total { get; set; }
         [Column(TypeName = "Money")]
-        public decimal TotalWithTax { get; set; }
+        public decimal? TotalWithTax { get; set; }
 
         [Column(TypeName = "Money")]
-        public decimal TaxTotal { get; set; }
-        public decimal TaxPercentRate { get; set; }
+        public decimal? TaxTotal { get; set; }
+        public decimal? TaxPercentRate { get; set; }
 
         public virtual ObservableCollection<AddressEntity> Addresses { get; set; } = new NullCollection<AddressEntity>();
         public virtual ObservableCollection<PaymentGatewayTransactionEntity> Transactions { get; set; } = new NullCollection<PaymentGatewayTransactionEntity>();
@@ -216,15 +215,15 @@ namespace VirtoCommerce.OrdersModule.Data.Model
             target.CancelledDate = CancelledDate;
             target.CancelReason = CancelReason;
 
-            target.Price = Price;
-            target.PriceWithTax = PriceWithTax;
-            target.DiscountAmount = DiscountAmount;
-            target.DiscountAmountWithTax = DiscountAmountWithTax;
-            target.TaxPercentRate = TaxPercentRate;
-            target.TaxTotal = TaxTotal;
-            target.Total = Total;
-            target.TotalWithTax = TotalWithTax;
-            target.Sum = Sum;
+            target.Price = Price ?? target.Price;
+            target.PriceWithTax = PriceWithTax ?? target.PriceWithTax;
+            target.DiscountAmount = DiscountAmount ?? target.DiscountAmount;
+            target.DiscountAmountWithTax = DiscountAmountWithTax ?? target.DiscountAmountWithTax;
+            target.TaxPercentRate = TaxPercentRate ?? target.TaxPercentRate;
+            target.TaxTotal = TaxTotal ?? target.TaxTotal;
+            target.Total = Total ?? target.Total;
+            target.TotalWithTax = TotalWithTax ?? target.TotalWithTax;
+            target.Sum = Sum ?? target.Sum;
 
             if (!Addresses.IsNullCollection())
             {
@@ -250,15 +249,15 @@ namespace VirtoCommerce.OrdersModule.Data.Model
         }
         public virtual void ResetPrices()
         {
-            Price = 0m;
-            PriceWithTax = 0m;
-            DiscountAmount = 0m;
-            DiscountAmountWithTax = 0m;
-            Total = 0m;
-            TotalWithTax = 0m;
-            TaxTotal = 0m;
-            TaxPercentRate = 0m;
-            Sum = 0m;
+            Price = null;
+            PriceWithTax = null;
+            DiscountAmount = null;
+            DiscountAmountWithTax = null;
+            Total = null;
+            TotalWithTax = null;
+            TaxTotal = null;
+            TaxPercentRate = null;
+            Sum = null;
         }
     }
 }

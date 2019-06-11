@@ -121,13 +121,13 @@ namespace VirtoCommerce.OrdersModule.Data.Migrations
                     b.Property<string>("CustomerName")
                         .HasMaxLength(255);
 
-                    b.Property<decimal>("DiscountAmount")
+                    b.Property<decimal?>("DiscountAmount")
                         .HasColumnType("Money");
 
-                    b.Property<decimal>("DiscountTotal")
+                    b.Property<decimal?>("DiscountTotal")
                         .HasColumnType("Money");
 
-                    b.Property<decimal>("DiscountTotalWithTax")
+                    b.Property<decimal?>("DiscountTotalWithTax")
                         .HasColumnType("Money");
 
                     b.Property<string>("EmployeeId")
@@ -136,10 +136,10 @@ namespace VirtoCommerce.OrdersModule.Data.Migrations
                     b.Property<string>("EmployeeName")
                         .HasMaxLength(255);
 
-                    b.Property<decimal>("HandlingTotal")
+                    b.Property<decimal?>("HandlingTotal")
                         .HasColumnType("Money");
 
-                    b.Property<decimal>("HandlingTotalWithTax")
+                    b.Property<decimal?>("HandlingTotalWithTax")
                         .HasColumnType("Money");
 
                     b.Property<bool>("IsApproved");
@@ -166,16 +166,16 @@ namespace VirtoCommerce.OrdersModule.Data.Migrations
                     b.Property<string>("OrganizationName")
                         .HasMaxLength(255);
 
-                    b.Property<decimal>("PaymentTotal")
+                    b.Property<decimal?>("PaymentTotal")
                         .HasColumnType("Money");
 
-                    b.Property<decimal>("PaymentTotalWithTax")
+                    b.Property<decimal?>("PaymentTotalWithTax")
                         .HasColumnType("Money");
 
-                    b.Property<decimal>("ShippingTotal")
+                    b.Property<decimal?>("ShippingTotal")
                         .HasColumnType("Money");
 
-                    b.Property<decimal>("ShippingTotalWithTax")
+                    b.Property<decimal?>("ShippingTotalWithTax")
                         .HasColumnType("Money");
 
                     b.Property<string>("ShoppingCartId")
@@ -191,10 +191,10 @@ namespace VirtoCommerce.OrdersModule.Data.Migrations
                     b.Property<string>("StoreName")
                         .HasMaxLength(255);
 
-                    b.Property<decimal>("SubTotal")
+                    b.Property<decimal?>("SubTotal")
                         .HasColumnType("Money");
 
-                    b.Property<decimal>("SubTotalWithTax")
+                    b.Property<decimal?>("SubTotalWithTax")
                         .HasColumnType("Money");
 
                     b.Property<string>("SubscriptionId")
@@ -203,16 +203,16 @@ namespace VirtoCommerce.OrdersModule.Data.Migrations
                     b.Property<string>("SubscriptionNumber")
                         .HasMaxLength(64);
 
-                    b.Property<decimal>("Sum")
+                    b.Property<decimal?>("Sum")
                         .HasColumnType("Money");
 
-                    b.Property<decimal>("TaxPercentRate")
+                    b.Property<decimal?>("TaxPercentRate")
                         .HasColumnType("decimal(18,4)");
 
-                    b.Property<decimal>("TaxTotal")
+                    b.Property<decimal?>("TaxTotal")
                         .HasColumnType("Money");
 
-                    b.Property<decimal>("Total")
+                    b.Property<decimal?>("Total")
                         .HasColumnType("Money");
 
                     b.HasKey("Id");
@@ -301,10 +301,10 @@ namespace VirtoCommerce.OrdersModule.Data.Migrations
 
                     b.Property<string>("CustomerOrderId");
 
-                    b.Property<decimal>("DiscountAmount")
+                    b.Property<decimal?>("DiscountAmount")
                         .HasColumnType("Money");
 
-                    b.Property<decimal>("DiscountAmountWithTax")
+                    b.Property<decimal?>("DiscountAmountWithTax")
                         .HasColumnType("Money");
 
                     b.Property<string>("FulfillmentLocationCode")
@@ -335,13 +335,13 @@ namespace VirtoCommerce.OrdersModule.Data.Migrations
                         .IsRequired()
                         .HasMaxLength(256);
 
-                    b.Property<decimal>("Price")
+                    b.Property<decimal?>("Price")
                         .HasColumnType("Money");
 
                     b.Property<string>("PriceId")
                         .HasMaxLength(128);
 
-                    b.Property<decimal>("PriceWithTax")
+                    b.Property<decimal?>("PriceWithTax")
                         .HasColumnType("Money");
 
                     b.Property<string>("ProductId")
@@ -360,10 +360,10 @@ namespace VirtoCommerce.OrdersModule.Data.Migrations
                         .IsRequired()
                         .HasMaxLength(64);
 
-                    b.Property<decimal>("TaxPercentRate")
+                    b.Property<decimal?>("TaxPercentRate")
                         .HasColumnType("decimal(18,4)");
 
-                    b.Property<decimal>("TaxTotal")
+                    b.Property<decimal?>("TaxTotal")
                         .HasColumnType("Money");
 
                     b.Property<string>("TaxType")
@@ -479,10 +479,10 @@ namespace VirtoCommerce.OrdersModule.Data.Migrations
 
                     b.Property<string>("CustomerOrderId");
 
-                    b.Property<decimal>("DiscountAmount")
+                    b.Property<decimal?>("DiscountAmount")
                         .HasColumnType("Money");
 
-                    b.Property<decimal>("DiscountAmountWithTax")
+                    b.Property<decimal?>("DiscountAmountWithTax")
                         .HasColumnType("Money");
 
                     b.Property<string>("GatewayCode")
@@ -512,10 +512,10 @@ namespace VirtoCommerce.OrdersModule.Data.Migrations
                     b.Property<string>("OuterId")
                         .HasMaxLength(128);
 
-                    b.Property<decimal>("Price")
+                    b.Property<decimal?>("Price")
                         .HasColumnType("Money");
 
-                    b.Property<decimal>("PriceWithTax")
+                    b.Property<decimal?>("PriceWithTax")
                         .HasColumnType("Money");
 
                     b.Property<string>("Purpose")
@@ -526,22 +526,22 @@ namespace VirtoCommerce.OrdersModule.Data.Migrations
                     b.Property<string>("Status")
                         .HasMaxLength(64);
 
-                    b.Property<decimal>("Sum")
+                    b.Property<decimal?>("Sum")
                         .HasColumnType("Money");
 
-                    b.Property<decimal>("TaxPercentRate")
+                    b.Property<decimal?>("TaxPercentRate")
                         .HasColumnType("decimal(18,4)");
 
-                    b.Property<decimal>("TaxTotal")
+                    b.Property<decimal?>("TaxTotal")
                         .HasColumnType("Money");
 
                     b.Property<string>("TaxType")
                         .HasMaxLength(64);
 
-                    b.Property<decimal>("Total")
+                    b.Property<decimal?>("Total")
                         .HasColumnType("Money");
 
-                    b.Property<decimal>("TotalWithTax")
+                    b.Property<decimal?>("TotalWithTax")
                         .HasColumnType("Money");
 
                     b.Property<DateTime?>("VoidedDate");
@@ -581,10 +581,10 @@ namespace VirtoCommerce.OrdersModule.Data.Migrations
                     b.Property<string>("CustomerOrderId")
                         .IsRequired();
 
-                    b.Property<decimal>("DiscountAmount")
+                    b.Property<decimal?>("DiscountAmount")
                         .HasColumnType("Money");
 
-                    b.Property<decimal>("DiscountAmountWithTax")
+                    b.Property<decimal?>("DiscountAmountWithTax")
                         .HasColumnType("Money");
 
                     b.Property<string>("EmployeeId")
@@ -625,10 +625,10 @@ namespace VirtoCommerce.OrdersModule.Data.Migrations
                     b.Property<string>("OrganizationName")
                         .HasMaxLength(255);
 
-                    b.Property<decimal>("Price")
+                    b.Property<decimal?>("Price")
                         .HasColumnType("Money");
 
-                    b.Property<decimal>("PriceWithTax")
+                    b.Property<decimal?>("PriceWithTax")
                         .HasColumnType("Money");
 
                     b.Property<string>("ShipmentMethodCode")
@@ -640,22 +640,22 @@ namespace VirtoCommerce.OrdersModule.Data.Migrations
                     b.Property<string>("Status")
                         .HasMaxLength(64);
 
-                    b.Property<decimal>("Sum")
+                    b.Property<decimal?>("Sum")
                         .HasColumnType("Money");
 
-                    b.Property<decimal>("TaxPercentRate")
+                    b.Property<decimal?>("TaxPercentRate")
                         .HasColumnType("decimal(18,4)");
 
-                    b.Property<decimal>("TaxTotal")
+                    b.Property<decimal?>("TaxTotal")
                         .HasColumnType("Money");
 
                     b.Property<string>("TaxType")
                         .HasMaxLength(64);
 
-                    b.Property<decimal>("Total")
+                    b.Property<decimal?>("Total")
                         .HasColumnType("Money");
 
-                    b.Property<decimal>("TotalWithTax")
+                    b.Property<decimal?>("TotalWithTax")
                         .HasColumnType("Money");
 
                     b.Property<decimal?>("VolumetricWeight");
@@ -876,7 +876,7 @@ namespace VirtoCommerce.OrdersModule.Data.Migrations
             modelBuilder.Entity("VirtoCommerce.OrdersModule.Data.Model.ShipmentItemEntity", b =>
                 {
                     b.HasOne("VirtoCommerce.OrdersModule.Data.Model.LineItemEntity", "LineItem")
-                        .WithMany()
+                        .WithMany("ShipmentItems")
                         .HasForeignKey("LineItemId")
                         .OnDelete(DeleteBehavior.Cascade);
 

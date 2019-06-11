@@ -37,7 +37,7 @@ namespace VirtoCommerce.OrdersModule.Web.BackgroundJobs
                                                          .GroupBy(x => x.Currency)
                                                          .Select(x => new { Currency = x.Key, AvgValue = x.Select(y => y.Total).DefaultIfEmpty(0).Average() })
                                                          .ToArrayAsync();
-                retVal.AvgOrderValue = avgValues.Select(x => new Money(x.Currency, x.AvgValue)).ToList();
+                retVal.AvgOrderValue = avgValues.Select(x => new Money(x.Currency, x.AvgValue ?? 0m)).ToList();
 
 
                 //Revenue
@@ -45,7 +45,7 @@ namespace VirtoCommerce.OrdersModule.Web.BackgroundJobs
                                                     .Where(x => !x.IsCancelled)
                                                     .GroupBy(x => x.Currency).Select(x => new { Currency = x.Key, Value = x.Select(y => y.Sum).DefaultIfEmpty(0).Sum() })
                                                     .ToArrayAsync();
-                retVal.Revenue = revenues.Select(x => new Money(x.Currency, x.Value)).ToList();
+                retVal.Revenue = revenues.Select(x => new Money(x.Currency, x.Value ?? 0m)).ToList();
 
 
                 retVal.RevenuePeriodDetails = new List<QuarterPeriodMoney>();
@@ -66,14 +66,14 @@ namespace VirtoCommerce.OrdersModule.Web.BackgroundJobs
                                                          .Where(x => x.Currency == currency)
                                                          .Select(x => x.Total).DefaultIfEmpty(0).AverageAsync();
 
-                        var periodStat = new QuarterPeriodMoney(currency, amount)
+                        var periodStat = new QuarterPeriodMoney(currency, amount ?? 0m)
                         {
                             Quarter = quarter,
                             Year = startDate.Year
                         };
                         retVal.RevenuePeriodDetails.Add(periodStat);
 
-                        periodStat = new QuarterPeriodMoney(currency, avgOrderValue)
+                        periodStat = new QuarterPeriodMoney(currency, avgOrderValue ?? 0m)
                         {
                             Quarter = quarter,
                             Year = startDate.Year
@@ -89,7 +89,7 @@ namespace VirtoCommerce.OrdersModule.Web.BackgroundJobs
                                                                .Where(x => !x.IsCancelled).GroupBy(x => x.Currency)
                                                                .Select(x => new { Currency = x.Key, AvgValue = x.GroupBy(y => y.CustomerId).Average(y => y.Sum(z => z.Sum)) })
                                                                .ToArrayAsync();
-                retVal.RevenuePerCustomer = revenuesPerCustomer.Select(x => new Money(x.Currency, x.AvgValue)).ToList();
+                retVal.RevenuePerCustomer = revenuesPerCustomer.Select(x => new Money(x.Currency, x.AvgValue ?? 0m)).ToList();
 
                 //Items purchased
                 retVal.ItemsPurchased = await repository.CustomerOrders.Where(x => x.CreatedDate >= start && x.CreatedDate <= end)
