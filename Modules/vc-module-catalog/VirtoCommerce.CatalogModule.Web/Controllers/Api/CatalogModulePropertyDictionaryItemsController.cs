@@ -55,7 +55,7 @@ namespace VirtoCommerce.CatalogModule.Web.Controllers.Api
         [HttpDelete]
         [Route("")]
         [Authorize(ModuleConstants.Security.Permissions.CatalogDelete)]
-        public async Task<ActionResult> Delete([FromQuery] string[] ids)
+        public async Task<ActionResult> DeletePropertyDictionaryItems([FromQuery] string[] ids)
         {
             await _propertyDictionaryService.DeleteAsync(ids);
             return Ok();

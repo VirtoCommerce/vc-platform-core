@@ -36,7 +36,7 @@ namespace VirtoCommerce.ImageToolsModule.Web.Controllers.Api
         [HttpPost]
         [Route("")]
         [Authorize(Permission.Create)]
-        public async Task<ActionResult<ThumbnailOption>> Create([FromBody]ThumbnailOption option)
+        public async Task<ActionResult<ThumbnailOption>> CreateThumbnailOption([FromBody]ThumbnailOption option)
         {
             await _thumbnailOptionService.SaveOrUpdateAsync(new[] { option });
             return Ok(option);
@@ -50,7 +50,7 @@ namespace VirtoCommerce.ImageToolsModule.Web.Controllers.Api
         [HttpDelete]
         [Route("")]
         [Authorize(Permission.Delete)]
-        public async Task<ActionResult> Delete([FromQuery] string[] ids)
+        public async Task<ActionResult> DeleteThumbnailOption([FromQuery] string[] ids)
         {
             await _thumbnailOptionService.RemoveByIdsAsync(ids);
             return Ok();
@@ -64,7 +64,7 @@ namespace VirtoCommerce.ImageToolsModule.Web.Controllers.Api
         [HttpGet]
         [Route("{id}")]
         [Authorize(Permission.Read)]
-        public async Task<ActionResult<ThumbnailOption>> Get([FromRoute]string id)
+        public async Task<ActionResult<ThumbnailOption>> GetThumbnailOption([FromRoute]string id)
         {
             var options = await _thumbnailOptionService.GetByIdsAsync(new[] { id });
             return Ok(options.FirstOrDefault());
@@ -78,7 +78,7 @@ namespace VirtoCommerce.ImageToolsModule.Web.Controllers.Api
         [HttpPost]
         [Route("search")]
         [Authorize(Permission.Read)]
-        public async Task<ActionResult<ThumbnailOptionSearchResult>> Search([FromBody]ThumbnailOptionSearchCriteria criteria)
+        public async Task<ActionResult<ThumbnailOptionSearchResult>> SearchThumbnailOption([FromBody]ThumbnailOptionSearchCriteria criteria)
         {
             var result = await _thumbnailOptionSearchService.SearchAsync(criteria);
             return Ok(result);
@@ -92,7 +92,7 @@ namespace VirtoCommerce.ImageToolsModule.Web.Controllers.Api
         [HttpPut]
         [Route("")]
         [Authorize(Permission.Update)]
-        public async Task<ActionResult> Update([FromBody]ThumbnailOption option)
+        public async Task<ActionResult> UpdateThumbnailOption([FromBody]ThumbnailOption option)
         {
             await _thumbnailOptionService.SaveOrUpdateAsync(new[] { option });
             return Ok();

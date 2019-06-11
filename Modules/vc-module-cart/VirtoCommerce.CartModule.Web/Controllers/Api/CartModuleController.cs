@@ -218,7 +218,7 @@ namespace VirtoCommerce.CartModule.Web.Controllers.Api
         [HttpPost]
         [Route("search")]
         [Authorize(ModuleConstants.Security.Permissions.Read)]
-        public async Task<ActionResult<GenericSearchResult<ShoppingCart>>> Search([FromBody] ShoppingCartSearchCriteria criteria)
+        public async Task<ActionResult<GenericSearchResult<ShoppingCart>>> SearchShoppingCart([FromBody] ShoppingCartSearchCriteria criteria)
         {
             var result = await _searchService.SearchCartAsync(criteria);
             return Ok(result);
@@ -244,7 +244,7 @@ namespace VirtoCommerce.CartModule.Web.Controllers.Api
         [HttpPut]
         [Route("")]
         [Authorize(ModuleConstants.Security.Permissions.Update)]
-        public async Task<ActionResult<ShoppingCart>> Update([FromBody] ShoppingCart cart)
+        public async Task<ActionResult<ShoppingCart>> UpdateShoppingCart([FromBody] ShoppingCart cart)
         {
             using (await AsyncLock.GetLockByKey(CacheKey.With(cart.GetType(), cart.Id)).LockAsync())
             {
