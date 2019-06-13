@@ -19,7 +19,16 @@
   </ItemGroup>
 
   <ItemGroup>
+    <ProjectReference Include="..\..\..\VirtoCommerce.Platform.Core\VirtoCommerce.Platform.Core.csproj" />
+    <ProjectReference Include="..\VirtoCommerce.ExportModule.Core\VirtoCommerce.ExportModule.Core.csproj" />
+  </ItemGroup>
+
+  <ItemGroup>
     <Reference Include="Microsoft.Extensions.Logging.Abstractions" />
+  </ItemGroup>
+
+  <ItemGroup>
+    <Folder Include="PricingModuleModelMocks\" />
   </ItemGroup>
 
 </Project>

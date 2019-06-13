@@ -1,7 +1,4 @@
-using System;
-using System.Collections.Generic;
-using System.Text;
-using VirtoCommerce.Platform.Core.Common;
+using System.Collections;
 
 namespace VirtoCommerce.ExportModule.Core.Model
 {
@@ -10,6 +7,6 @@ namespace VirtoCommerce.ExportModule.Core.Model
         int PageSize { get; set; }
         int CurrentPageNumber { get; set; }
         int GetTotalCount();
-        IEnumerable<Entity> FetchNextPage();
+        IEnumerable FetchNextPage();
     }
 }
