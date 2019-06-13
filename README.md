@@ -1,10 +1,30 @@
-# VirtoCommerce Platform Core - COMING SOON!
-**List of changes**
+# Meet the new 3.0 major version of Virto Commerce platform 
+Our development efforts were focused on moving to ASP.NET Core, performance, architecture improvements, further enhancements and fixing arhitectural bugs. 
 
-**Tecnology stack**
-- **ASP.NET Core 2.1.6** as base platform 
-- **EF Core 2.1.4** as primary ORM
-- **ASP.NET Core Identity 2.1.6** for authentification and authorization
+## What were our objective when starting development project on VC platform v3? 
+
+- Change primary technology stack to .NET Core for the platform application and all key modules. 
+- Eliminate known technical and architecture design issues of 2.x version (Caching, Overloaded core module, Asynchronous code, Platform Complexity, Extensibility, Performance, Authentication and Authorization) 
+- Provide easy and clear migration from 2.x version by preserving complete backward compatibility for API and Database Schema 
+- The platform and 18 core modules were planned to be migrated. 
+
+## Release status note 
+- *We encourage you to try and investigate the new version of the product and give us your feedback*
+- *This is a beta release, which hasn't been verified on a production project yet*
+- *We have delivered a simple migration from 2.x version by preserving complete backward compatibility for API and Database Schema. You'll need an additional effort when there are custom changes in 2.x version. Please follow our migration guide during the project migration*
+- **_We cannot guarantee the backward compatibility of current beta version with the final 3.X release_**
+
+## The Virto Commerce Release Notes below are a subset of the larger list of changes in migration to ASP.NET Core. 
+
+## What does Virto V3 provide to developers and architects?
+- Improved extensibility and unification.
+- Increase in development speed and decrease in time to market. 
+- Unified architecture and usage of good architecture practices leads to shorter learning curve for developers who are new to working with Virto Commerce.
+
+## Used technological stack 
+- **ASP.NET Core 2.2.0** as base platform 
+- **EF Core 2.2.0** as primary ORM
+- **ASP.NET Core Identity 2.2.0** for authentification and authorization
 - **OpenIddict 2.0.0** for OAuth authorization
 - **WebPack** as primary design/runtime bundler and minifier
 - **Swashbuckle.AspNetCore.SwaggerGen** for Swagger docs and UI
@@ -12,69 +32,127 @@
 - **AngularJS 1.4** as primary framework for SPA
 - **HangFire 1.6.21** for run background tasks
 
-**Platform**
+**Platform changes**:
   - Configuration
     - Use NET Core configuration paradigm (configuration providers and strongly types IOptions)
   - Solution structure
     - Split concrete implementations into projects (Modules, Assets etc)
   - DI
-    - Replaced Unity DI to build-in .NET Core DI Microsoft.Extensions.DependencyInjection
+    - Replaced Unity DI with builtin .NET Core DI Microsoft.Extensions.DependencyInjection
   - Modularity
     - Completely reworked assembly and dependency loading into platform process
     - Changed IModule abstraction to have only two methods Initialize and PostInitialize.
-    - Changed module.manifest file structure (removed settings and persmissions sections)
+    - Changed module.manifest file structure (removed settings and permissions sections)
  - Security
-    - Completely migrate authentification and authorization to the default ASP.NET Identity without any extension
-    - OpenIddict server to support  all OAuth flows also used for token based authorization
+    - Completely migrate authentification and authorization to the default ASP.NET Identity without any extensions
+    - OpenIddict server to support all OAuth flows also used for token based authorization
     - Removed Hmac and simple key authorization for call platform API
     - Now permissions are defined only in design time in special fluent syntax
     - Added localization for permissions
     - The storefront switched to work with using barrier token authorization
  - Persistent infrastructure
     - New migrations
-    - TPH inheritence model only (map hierarhy to single table)
+    - TPH inheritence model only (map hierarchy to single table)
     - DbContext now is defined separately from repository
     - Using  DbContext triggers for auditing and change logging
     - Switch to asynchronous calls of DbCOntext methods
  - Settings
     - Now settings are defined only in design time in special fluent syntax
     - Added localization for settings
-    - Allow to change setting value through any  .NET Core configuration provider
+    - Allow to change setting value through any .NET Core configuration provider
  - Caching
-    - Replaced CacheManager at  ASP.NET InMemory
+    - Replaced CacheManager with ASP.NET InMemory
     - Strongly typed cache regions and cache dependencies 
     - Allow to manage expiration time of cached objects and disable cache 
     - Removed special CacheModule, now caching is implemented in place where it is needed. 
  - Dynamic properties
-    - Changed registration logic, now is using manual registration instead of using reflection as it was done in 2.x
+    - Changed registration logic, now using manual registration instead of using reflection as it was done in 2.x
  - Logging
-    - Used build in .NET Core  ILog abstraction and logic instead of ICommonLogging and NLog
+    - Used builtin .NET Core  ILog abstraction and logic instead of ICommonLogging and NLog
  - UI
     - Replaced Gulp + Bower to Webpack + npm 
      
-**Modules**
+**Modules changes**:
 - Changed module solution structure (Core project, Constants, Caching)
 - Switched all DAL into asynchronous operations
-- the new Notifications module (written from scratch)
-- Removed **VirtoCommerce.Domain** project and nuget package (now each module defines self domain model and abstractions in Core project)
-- Removed **CacheModule**
-- Export/Import now is streamed for all modules
+- Export/Import is now streamed for all modules
 
-TODO check list:
-- Implement cache synchronization logic between multiple platform instances use Redis cache for this purposes 
-- Resource based authorization (scope bounded permissions)
-- Remaining modules
-    - Catalog (eliminated webmodel and improved extensibility model)
-    - Marketing (rework expressions serialization design)
-    - ElasticSearch
-    - Azure
-    - Personalization ???
-    - Publishing ??? need to improve design and extensibility
+**New modules**:
+- `Notifications module` (written from scratch) key features:
+    - Functionality which was spread across the system is shifted to dedicated module 
+    - Manage notification availability for each store
+    - Unlimited cannels types for sending notifications (Email, Sms, Social networks etc)
+    - Possibility to activate/deactivate each notification individually for each store 
+    - New flexible extendibility model 
+    - Allows to preview a notification template with data
+    - Support of LIQUID syntax for templates based on Scriban engine 
+    - The new notification messaged feed allows to search and preview individual messages 
+- `Tax module` key features:
+    - The tax calculation functionality which was spread across the system is shifted to a dedicated module which is now responsible for tax settings and calculation 
+    - The new module is a single integration point for third party software and custom extensions 
+- `Shipping module` key features:
+    -  The shipping costs calculation functionality which was spread across the system is shifted to a dedicated module which is now responsible for shipping methods, related settings and shipping costs calculation
+    - The new module is a single integration point for third party software and custom extensions 
+- `Payment module` key features:
+    - The payment methods functionality and integrations which were spread across the system are shifted to a dedicated module which is now responsible for payment methods and related settings 
+    - The new module is a single integration point for payment gateways integration
+- `Search module` key features:
+    - The new module is a single integration point for search engines integration and provides a generic UI and program components for indexed search
     
-- Migration script from 2.x -> 3.x
+**Removed modules**: 
+-  ~~**VirtoCommerce.Domain**~~ project and nuget package (now each module defines self domain model and abstractions in Core project)
+-  ~~**VirtoCommerce.Cache**~~
+- ~~**VirtoCommerce.DynamicExpressions**~~
 
-![8ea72ae0c3d511e7a1325bdfb85b1215 map](https://user-images.githubusercontent.com/7566324/32503635-68fa4a8c-c3e6-11e7-910a-88af3fec87e1.png)
+**Next steps**:
+- Implement cache synchronization logic between multiple platform instances use `Redis` cache for this purposes 
+- Resource based authorization (scope bounded permissions)
+- Move module projects to GitHub repositiories
+- Remaining modules
+    - ElasticSearch
+    - AzureSearch
+    
+# Getting started:
+## Precompiled binary getting started
+- Download archive with platform precompiled version [VirtoCommerce.Platform.3.0.0.beta.zip](https://github.com/VirtoCommerce/vc-platform-core/releases/tag/v3.0.0.beta)
+- Unpack follow zip to local disk to path `C:\vc-platform-3`. In result you should get the folder which contains platform precompiled code. 
+- Run platform by command `dotnet.exe C:\vc-platform-3\VirtoCommerce.Platform.Web.dll`
+- Open in your browser follow url `https://localhost:5001` in the warning for not private connections that appears click advanced and continue work.
+- On the first request the application will create and initialize database. After that you should see the sign in page. Use the following credentials: `admin/store`
 
+## Source code  getting started
+   - Get the latest source code from `master` branch
+   - Make a symlink for Modules folder 
+   ```cmd 
+   mklink /d C:\vc-platform-3\VirtoCommerce.Platform.Web\Modules C:\vc-platform-3\Modules
+   ```
+   - Open and compile platform solution `VirtoCommerce.Platform.sln` in any preffered IDE
+   - Install Node.js dependencies. 
+   ```
+   npm install
+   ```
+   - build and pack js scripts and css for platform 
+   ```
+   npm run webpack:dev
+   ```
+   - repeat previous command for each module in `Modules` folder
+   
+   
+## Run [storefront](https://github.com/VirtoCommerce/vc-storefront-core) with new platform version
+- Deploy  the latest storefront version from `dev` branch by any of preffered way described there https://virtocommerce.com/docs/vc2devguide/deployment/storefront-deployment
+- Make changes  in  `appsettings.json`    
+```json
+...
+//Comment the follow settings
+// "AppId": "...",
+// "SecretKey": "..."
+...
+//Uncomment the follow settings
+"UserName": "admin",
+"Password": "store"
+```    
+# How to migrate your solution from 2.x to 3.0 platform version
+- If your solution doesn't have any custom modules and extensions you just need to use the connection string to the old database for the new 3.0 platfrom version and after first run the update scripts will transfer all your data to the new scheme otherwise, you need to convert your models according to this instruction (Coming soon).
 
 # License
 Copyright (c) Virto Solutions LTD.  All rights reserved.
