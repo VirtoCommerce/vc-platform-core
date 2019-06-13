@@ -19,7 +19,7 @@ namespace VirtoCommerce.CartModule.Core.Model
         {
             get
             {
-                return Price + Price * TaxPercentRate ?? 1m;
+                return Price + Price * TaxPercentRate ?? 0m;
             }
         }
      
@@ -29,7 +29,7 @@ namespace VirtoCommerce.CartModule.Core.Model
         {
             get
             {
-                return DiscountAmount + DiscountAmount * TaxPercentRate ?? 1m;
+                return DiscountAmount + DiscountAmount * TaxPercentRate ?? 0m;
             }
         }
 

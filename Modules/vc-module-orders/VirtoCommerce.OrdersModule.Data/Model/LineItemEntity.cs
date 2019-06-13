@@ -10,7 +10,7 @@ using VirtoCommerce.Platform.Core.Common;
 
 namespace VirtoCommerce.OrdersModule.Data.Model
 {
-    public class LineItemEntity : AuditableEntity
+    public class LineItemEntity : AuditableEntity, ISupportPartialPriceUpdate
     {
         [StringLength(128)]
         public string PriceId { get; set; }

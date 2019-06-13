@@ -332,8 +332,9 @@ namespace VirtoCommerce.OrdersModule.Data.Model
             base.Patch(operation);
         }
 
-        public virtual void ResetPrices()
+        public new virtual void ResetPrices()
         {
+            base.ResetPrices();
             TaxPercentRate = null;
             ShippingTotalWithTax = null;
             PaymentTotalWithTax = null;
@@ -348,7 +349,6 @@ namespace VirtoCommerce.OrdersModule.Data.Model
             DiscountTotal = null;
             DiscountTotalWithTax = null;
             TaxTotal = null;
-            Sum = null;
 
             foreach (var payment in InPayments)
             {

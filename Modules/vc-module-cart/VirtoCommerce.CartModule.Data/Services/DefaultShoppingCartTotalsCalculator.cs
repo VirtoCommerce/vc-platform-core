@@ -108,7 +108,7 @@ namespace VirtoCommerce.CartModule.Data.Services
             cart.SubTotalWithTax = Math.Round(cart.SubTotalWithTax, 2, MidpointRounding.AwayFromZero);
             cart.SubTotalDiscount = Math.Round(cart.SubTotalDiscount, 2, MidpointRounding.AwayFromZero);
             cart.SubTotalDiscountWithTax = Math.Round(cart.SubTotalDiscountWithTax, 2, MidpointRounding.AwayFromZero);
-            cart.TaxTotal = cart.TaxTotal != null ? Math.Round((decimal)cart.TaxTotal, 2, MidpointRounding.AwayFromZero): cart.TaxTotal;
+            cart.TaxTotal = cart.TaxTotal != null ? Math.Round(cart.TaxTotal.Value, 2, MidpointRounding.AwayFromZero): cart.TaxTotal;
             cart.DiscountTotal = Math.Round(cart.DiscountTotal, 2, MidpointRounding.AwayFromZero);
             cart.DiscountTotalWithTax = Math.Round(cart.DiscountTotalWithTax, 2, MidpointRounding.AwayFromZero);
             cart.Fee = Math.Round(cart.Fee, 2, MidpointRounding.AwayFromZero);

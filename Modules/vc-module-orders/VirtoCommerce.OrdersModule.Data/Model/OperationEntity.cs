@@ -11,7 +11,7 @@ using VirtoCommerce.Platform.Core.Common;
 
 namespace VirtoCommerce.OrdersModule.Data.Model
 {
-    public abstract class OperationEntity : AuditableEntity
+    public abstract class OperationEntity : AuditableEntity, ISupportPartialPriceUpdate
     {
         [Required]
         [StringLength(64)]
@@ -134,6 +134,11 @@ namespace VirtoCommerce.OrdersModule.Data.Model
             }
 
             return retVal;
+        }
+
+        public void ResetPrices()
+        {
+            Sum = null;
         }
     }
 }

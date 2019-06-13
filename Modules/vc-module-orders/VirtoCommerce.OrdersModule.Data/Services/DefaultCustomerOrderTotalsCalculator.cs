@@ -52,28 +52,16 @@ namespace VirtoCommerce.OrdersModule.Data.Services
 
             if (!order.Items.IsNullOrEmpty())
             {
-                var price = order.Items.Any(x => x.Price.HasValue) ? order.Items.Sum(x => x.Price * x.Quantity) : null;
-                order.SubTotal = price != null ? Convert.ToDecimal(order.SubTotal) + price : order.SubTotal;
-
+                order.SubTotal = order.Items.Any(x => x.Price.HasValue) ? order.Items.Sum(x => x.Price * x.Quantity) : null;
                 order.SubTotalWithTax = order.Items.Any(x => x.PriceWithTax.HasValue) ? order.Items.Sum(x => x.PriceWithTax * x.Quantity) : null;
-
-                var taxTotal = order.Items.Any(x => x.TaxTotal.HasValue) ? order.Items.Sum(x => x.TaxTotal) : null;
-                order.SubTotalTaxTotal = taxTotal != null ? Convert.ToDecimal(order.SubTotalTaxTotal) + taxTotal : order.SubTotalTaxTotal;
-                order.TaxTotal = taxTotal != null ? Convert.ToDecimal(order.TaxTotal) + taxTotal : order.TaxTotal;
-
-                var discountTotal = order.Items.Any(x => x.DiscountTotal.HasValue) ? order.Items.Sum(x => x.DiscountTotal) : null;
-                order.SubTotalDiscount = discountTotal;
-                order.DiscountTotal = discountTotal != null ? Convert.ToDecimal(order.DiscountTotal) + discountTotal : order.DiscountTotal;
-
-                var discountTotalWithTax = order.Items.Any(x => x.DiscountTotalWithTax.HasValue) ? order.Items.Sum(x => x.DiscountTotalWithTax) : null;
-                order.SubTotalDiscountWithTax = discountTotalWithTax;
-                order.DiscountTotalWithTax = discountTotalWithTax != null ? Convert.ToDecimal(order.DiscountTotalWithTax) + discountTotalWithTax : order.DiscountTotalWithTax;
-
-                var fee = order.Items.Any(x => x.Fee.HasValue) ? order.Items.Sum(x => x.Fee) : null;
-                order.FeeTotal = fee != null ? Convert.ToDecimal(order.FeeTotal) + fee : order.FeeTotal;
-                var feeWithTax = order.Items.Any(x => x.FeeWithTax.HasValue) ? order.Items.Sum(x => x.FeeWithTax) : null;
-                order.FeeTotalWithTax = feeWithTax != null ? Convert.ToDecimal(order.FeeTotalWithTax) + feeWithTax : order.FeeTotalWithTax;
-
+                order.SubTotalTaxTotal = order.Items.Any(x => x.TaxTotal.HasValue) ? order.Items.Sum(x => x.TaxTotal) + Convert.ToDecimal(order.SubTotalTaxTotal) : order.SubTotalTaxTotal;
+                order.SubTotalDiscount = order.Items.Any(x => x.DiscountTotal.HasValue) ? order.Items.Sum(x => x.DiscountTotal) : null;
+                order.SubTotalDiscountWithTax = order.Items.Any(x => x.DiscountTotalWithTax.HasValue) ? order.Items.Sum(x => x.DiscountTotalWithTax) : null;
+                order.DiscountTotal = order.Items.Any(x => x.DiscountTotal.HasValue) ? order.Items.Sum(x => x.DiscountTotal) + Convert.ToDecimal(order.DiscountTotal) : order.DiscountTotal;
+                order.DiscountTotalWithTax = order.Items.Any(x => x.DiscountTotalWithTax.HasValue) ? order.Items.Sum(x => x.DiscountTotalWithTax) + order.DiscountTotalWithTax : order.DiscountTotalWithTax;
+                order.FeeTotal = order.Items.Any(x => x.Fee.HasValue) ? order.Items.Sum(x => x.Fee) + Convert.ToDecimal(order.FeeTotal) : null;
+                order.FeeTotalWithTax = order.Items.Any(x => x.FeeWithTax.HasValue) ? order.Items.Sum(x => x.FeeWithTax) + Convert.ToDecimal(order.FeeTotalWithTax) : order.FeeTotalWithTax;
+                order.TaxTotal = order.Items.Any(x => x.TaxTotal.HasValue) ? order.Items.Sum(x => x.TaxTotal) + Convert.ToDecimal(order.TaxTotal) : order.TaxTotal;
             }
 
             if (!order.Shipments.IsNullOrEmpty())
@@ -84,11 +72,11 @@ namespace VirtoCommerce.OrdersModule.Data.Services
                 order.ShippingSubTotalWithTax = order.Shipments.Any(x => x.PriceWithTax.HasValue) ? order.Shipments.Sum(x => x.PriceWithTax) : null;
                 order.ShippingDiscountTotal = order.Shipments.Any(x => x.DiscountAmount.HasValue) ? order.Shipments.Sum(x => x.DiscountAmount) : null;
                 order.ShippingDiscountTotalWithTax = order.Shipments.Any(x => x.DiscountAmountWithTax.HasValue) ? order.Shipments.Sum(x => x.DiscountAmountWithTax) : null;
-                order.DiscountTotal += order.Shipments.Sum(x => x.DiscountAmount);
-                order.DiscountTotalWithTax += order.Shipments.Sum(x => x.DiscountAmountWithTax);
-                order.FeeTotal += order.Shipments.Sum(x => x.Fee);
-                order.FeeTotalWithTax += order.Shipments.Sum(x => x.FeeWithTax);
-                order.TaxTotal += order.Shipments.Sum(x => x.TaxTotal);
+                order.DiscountTotal = order.Shipments.Any(x => x.DiscountAmount.HasValue) ? order.Shipments.Sum(x => x.DiscountAmount) + Convert.ToDecimal(order.DiscountTotal) : order.DiscountTotal;
+                order.DiscountTotalWithTax = order.Shipments.Any(x => x.DiscountAmountWithTax.HasValue) ? order.Shipments.Sum(x => x.DiscountAmountWithTax) + Convert.ToDecimal(order.DiscountTotalWithTax) : order.DiscountTotalWithTax;
+                order.FeeTotal = order.Shipments.Any(x => x.Fee.HasValue) ? order.Shipments.Sum(x => x.Fee) + Convert.ToDecimal(order.FeeTotal) : order.FeeTotal;
+                order.FeeTotalWithTax = order.Shipments.Any(x => x.FeeWithTax.HasValue) ? order.Shipments.Sum(x => x.FeeWithTax) + Convert.ToDecimal(order.FeeTotalWithTax) : order.FeeTotalWithTax;
+                order.TaxTotal = order.Shipments.Any(x => x.TaxTotal.HasValue) ? order.Shipments.Sum(x => x.TaxTotal) + Convert.ToDecimal(order.TaxTotal) : order.TaxTotal;
             }
 
             if (!order.InPayments.IsNullOrEmpty())
@@ -98,16 +86,10 @@ namespace VirtoCommerce.OrdersModule.Data.Services
                 order.PaymentSubTotal = order.InPayments.Any(x => x.Price.HasValue) ? order.InPayments.Sum(x => x.Price) : null;
                 order.PaymentSubTotalWithTax = order.InPayments.Any(x => x.PriceWithTax.HasValue) ? order.InPayments.Sum(x => x.PriceWithTax) : null;
                 order.PaymentDiscountTotal = order.InPayments.Any(x => x.DiscountAmount.HasValue) ? order.InPayments.Sum(x => x.DiscountAmount) : null;
-
-                var discountAmountWithTax = order.InPayments.Any(x => x.DiscountAmountWithTax.HasValue) ? order.InPayments.Sum(x => x.DiscountAmountWithTax) : null;
-                order.PaymentDiscountTotalWithTax = discountAmountWithTax;
-                order.DiscountTotalWithTax = discountAmountWithTax != null ? Convert.ToDecimal(order.DiscountTotalWithTax) + discountAmountWithTax : order.DiscountTotalWithTax;
-
-                var discountAmount = order.InPayments.Any(x => x.DiscountAmount.HasValue) ? order.InPayments.Sum(x => x.DiscountAmount) : null;
-                order.DiscountTotal = discountAmount != null ? Convert.ToDecimal(order.DiscountTotal) + order.InPayments.Sum(x => x.DiscountAmount) : order.DiscountTotal;
-
-                var taxTotal = order.InPayments.Any(x => x.TaxTotal.HasValue) ? order.InPayments.Sum(x => x.TaxTotal) : null;
-                order.TaxTotal = taxTotal != null ? Convert.ToDecimal(order.TaxTotal) + taxTotal : order.TaxTotal;
+                order.PaymentDiscountTotalWithTax = order.InPayments.Any(x => x.DiscountAmountWithTax.HasValue) ? order.InPayments.Sum(x => x.DiscountAmountWithTax) : null;
+                order.DiscountTotal = order.InPayments.Any(x => x.DiscountAmount.HasValue) ? order.InPayments.Sum(x => x.DiscountAmount) + Convert.ToDecimal(order.DiscountTotal) : order.DiscountTotal;
+                order.DiscountTotalWithTax = order.InPayments.Any(x => x.DiscountAmountWithTax.HasValue) ? order.InPayments.Sum(x => x.DiscountAmountWithTax) + Convert.ToDecimal(order.DiscountTotalWithTax) : order.DiscountTotalWithTax;
+                order.TaxTotal = order.InPayments.Any(x => x.TaxTotal.HasValue) ? order.InPayments.Sum(x => x.TaxTotal) + Convert.ToDecimal(order.TaxTotal) : order.TaxTotal;
             }
 
             var taxFactor = 1 + order.TaxPercentRate ?? 0m;

@@ -156,7 +156,7 @@ namespace VirtoCommerce.OrdersModule.Data.Model
             IsCancelled = payment.IsCancelled;
             CancelledDate = payment.CancelledDate;
             CancelReason = payment.CancelReason;
-            Sum = payment.Sum ?? Sum;
+            Sum = payment.Sum;
 
             if (payment.PaymentMethod != null)
             {
@@ -215,15 +215,15 @@ namespace VirtoCommerce.OrdersModule.Data.Model
             target.CancelledDate = CancelledDate;
             target.CancelReason = CancelReason;
 
-            target.Price = Price ?? target.Price;
-            target.PriceWithTax = PriceWithTax ?? target.PriceWithTax;
-            target.DiscountAmount = DiscountAmount ?? target.DiscountAmount;
-            target.DiscountAmountWithTax = DiscountAmountWithTax ?? target.DiscountAmountWithTax;
-            target.TaxPercentRate = TaxPercentRate ?? target.TaxPercentRate;
-            target.TaxTotal = TaxTotal ?? target.TaxTotal;
-            target.Total = Total ?? target.Total;
-            target.TotalWithTax = TotalWithTax ?? target.TotalWithTax;
-            target.Sum = Sum ?? target.Sum;
+            target.Price = Price;
+            target.PriceWithTax = PriceWithTax;
+            target.DiscountAmount = DiscountAmount;
+            target.DiscountAmountWithTax = DiscountAmountWithTax;
+            target.TaxPercentRate = TaxPercentRate;
+            target.TaxTotal = TaxTotal;
+            target.Total = Total;
+            target.TotalWithTax = TotalWithTax;
+            target.Sum = Sum;
 
             if (!Addresses.IsNullCollection())
             {
@@ -247,8 +247,9 @@ namespace VirtoCommerce.OrdersModule.Data.Model
                 Transactions.Patch(target.Transactions, (sourceTran, targetTran) => sourceTran.Patch(targetTran));
             }
         }
-        public virtual void ResetPrices()
+        public new virtual void ResetPrices()
         {
+            base.ResetPrices();
             Price = null;
             PriceWithTax = null;
             DiscountAmount = null;

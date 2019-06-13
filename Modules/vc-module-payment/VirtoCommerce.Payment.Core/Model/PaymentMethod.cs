@@ -28,7 +28,7 @@ namespace VirtoCommerce.PaymentModule.Core.Model
         public string Currency { get; set; }
 
         public virtual decimal Price { get; set; }
-        public virtual decimal PriceWithTax => Price + Price * TaxPercentRate ?? 1m;
+        public virtual decimal PriceWithTax => Price + Price * TaxPercentRate ?? 0m;
 
         public virtual decimal Total => Price - DiscountAmount;
 
@@ -39,7 +39,7 @@ namespace VirtoCommerce.PaymentModule.Core.Model
         {
             get
             {
-                return DiscountAmount + DiscountAmount * TaxPercentRate ?? 1m;
+                return DiscountAmount + DiscountAmount * TaxPercentRate ?? 0m;
             }
         }
 

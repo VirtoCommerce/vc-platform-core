@@ -289,8 +289,9 @@ namespace VirtoCommerce.OrdersModule.Data.Model
                 TaxDetails.Patch(target.TaxDetails, taxDetailComparer, (sourceTaxDetail, targetTaxDetail) => sourceTaxDetail.Patch(targetTaxDetail));
             }
         }
-        public virtual void ResetPrices()
+        public new virtual void ResetPrices()
         {
+            base.ResetPrices();
             Price = null;
             PriceWithTax = null;
             DiscountAmount = null;
