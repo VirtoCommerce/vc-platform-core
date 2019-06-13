@@ -247,7 +247,7 @@ namespace VirtoCommerce.OrdersModule.Data.Model
                 Transactions.Patch(target.Transactions, (sourceTran, targetTran) => sourceTran.Patch(targetTran));
             }
         }
-        public new virtual void ResetPrices()
+        public override void ResetPrices()
         {
             base.ResetPrices();
             Price = null;

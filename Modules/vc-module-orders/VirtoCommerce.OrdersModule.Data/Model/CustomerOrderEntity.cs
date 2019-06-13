@@ -332,7 +332,7 @@ namespace VirtoCommerce.OrdersModule.Data.Model
             base.Patch(operation);
         }
 
-        public new virtual void ResetPrices()
+        public override void ResetPrices()
         {
             base.ResetPrices();
             TaxPercentRate = null;

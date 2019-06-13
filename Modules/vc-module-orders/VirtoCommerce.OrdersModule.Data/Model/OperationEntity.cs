@@ -136,7 +136,7 @@ namespace VirtoCommerce.OrdersModule.Data.Model
             return retVal;
         }
 
-        public void ResetPrices()
+        public virtual void ResetPrices()
         {
             Sum = null;
         }
