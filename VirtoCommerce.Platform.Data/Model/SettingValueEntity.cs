@@ -8,6 +8,9 @@ namespace VirtoCommerce.Platform.Data.Model
 {
     public class SettingValueEntity : AuditableEntity
     {
+        /// <summary>
+        /// <see cref="SettingValueType"/>
+        /// </summary>
         [Required]
         [StringLength(64)]
         public string ValueType { get; set; }
@@ -16,13 +19,17 @@ namespace VirtoCommerce.Platform.Data.Model
         public string ShortTextValue { get; set; }
 
         public string LongTextValue { get; set; }
+
         public decimal DecimalValue { get; set; }
+
         public int IntegerValue { get; set; }
+
         public bool BooleanValue { get; set; }
 
         public DateTime? DateTimeValue { get; set; }
 
         public string SettingId { get; set; }
+
         public virtual SettingEntity Setting { get; set; }
 
         public object GetValue()
@@ -49,37 +56,30 @@ namespace VirtoCommerce.Platform.Data.Model
         {
             ValueType = valueType.ToString();
 
-            if (valueType == SettingValueType.Boolean)
+            switch (valueType)
             {
-                BooleanValue = Convert.ToBoolean(value);
-            }
-            else if (valueType == SettingValueType.DateTime)
-            {
-                DateTimeValue = Convert.ToDateTime(value, CultureInfo.InvariantCulture);
-            }
-            else if (valueType == SettingValueType.Decimal)
-            {
-                DecimalValue = Convert.ToDecimal(value, CultureInfo.InvariantCulture);
-            }
-            else if (valueType == SettingValueType.Integer)
-            {
-                IntegerValue = Convert.ToInt32(value, CultureInfo.InvariantCulture);
-            }
-            else if (valueType == SettingValueType.LongText)
-            {
-                LongTextValue = Convert.ToString(value);
-            }
-            else if (valueType == SettingValueType.Json)
-            {
-                LongTextValue = Convert.ToString(value);
-            }
-            else if (valueType == SettingValueType.SecureString)
-            {
-                ShortTextValue = Convert.ToString(value);
-            }
-            else
-            {
-                ShortTextValue = Convert.ToString(value);
+                case SettingValueType.Boolean:
+                    BooleanValue = Convert.ToBoolean(value);
+                    break;
+                case SettingValueType.DateTime:
+                    DateTimeValue = Convert.ToDateTime(value, CultureInfo.InvariantCulture);
+                    break;
+                case SettingValueType.Decimal:
+                    DecimalValue = Convert.ToDecimal(value, CultureInfo.InvariantCulture);
+                    break;
+                case SettingValueType.Integer:
+                    IntegerValue = Convert.ToInt32(value, CultureInfo.InvariantCulture);
+                    break;
+                case SettingValueType.LongText:
+                case SettingValueType.Json:
+                    LongTextValue = Convert.ToString(value);
+                    break;
+                case SettingValueType.SecureString:
+                    ShortTextValue = Convert.ToString(value);
+                    break;
+                default:
+                    ShortTextValue = Convert.ToString(value);
+                    break;
             }
 
             ShortTextValue = string.IsNullOrWhiteSpace(ShortTextValue) ? null : ShortTextValue;
@@ -94,7 +94,7 @@ namespace VirtoCommerce.Platform.Data.Model
                 case SettingValueType.Boolean:
                     return BooleanValue.ToString();
                 case SettingValueType.DateTime:
-                    return DateTimeValue == null ? null : DateTimeValue.Value.ToString(formatProvider);
+                    return DateTimeValue?.ToString(formatProvider);
                 case SettingValueType.Decimal:
                     return DecimalValue.ToString(formatProvider);
                 case SettingValueType.Integer:

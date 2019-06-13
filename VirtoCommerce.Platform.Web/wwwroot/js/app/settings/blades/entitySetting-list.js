@@ -1,36 +1,47 @@
 ﻿angular.module('platformWebApp').controller('platformWebApp.entitySettingListController', ['$scope', 'platformWebApp.settings.helper', 'platformWebApp.bladeNavigationService', function ($scope, settingsHelper, bladeNavigationService) {
     var blade = $scope.blade;
-    // blade.updatePermission = // Use predefined (parent) permission
     blade.title = 'platform.blades.entitySetting-list.title';
 
-    function initializeBlade(results) {
-        blade.data = results;
-        results = angular.copy(results);
+    function initializeBlade(settings) {
+        blade.data = settings;
+        settings = angular.copy(settings);
+        fixSettingValue(settings);
+        addGroupNameToShow(settings);
+        convertAllowedValues(settings);
 
-        _.each(results, function (setting) {
-            // set group names to show.
+        settings = _.groupBy(settings, 'groupName');
+        blade.groupNames = _.keys(settings);
+        blade.currentEntities = angular.copy(settings);
+        blade.origEntity = settings;
+        blade.isLoading = false;
+    }
+
+    /** transform settings to editable format */
+    function transformSettings(settings) {
+        _.each(settings, function (setting) {
+
+            // if setting has no value, use default
+            if ((setting.value === undefined) && setting.defaultValue) {
+                setting.value = setting.defaultValue;
+            }
+
+            // add groupName to show
             if (setting.groupName) {
                 var paths = setting.groupName.split('|');
                 setting.groupName = paths.pop();
             }
 
-            // transform to va-generic-value-input suitable structure
-            if (!setting.value && setting.defaultValue) {
-                setting.value = setting.defaultValue;
-            }
+            // setting.values used to 
             setting.values = setting.isDictionary ? [{ value: { id: setting.value, name: setting.value } }] : [{ id: setting.value, value: setting.value }];
+
+            // convert allovedValues to editable format
             if (setting.allowedValues) {
                 setting.allowedValues = _.map(setting.allowedValues, function (x) {
                     return { value: x };
                 });
             }
-        });
 
-        results = _.groupBy(results, 'groupName');
-        blade.groupNames = _.keys(results);
-        blade.currentEntities = angular.copy(results);
-        blade.origEntity = results;
-        blade.isLoading = false;
+        });
     }
 
     $scope.editDictionary = function (node) {
@@ -60,6 +71,7 @@
     }
 
     $scope.saveChanges = function () {
+        debugger;
         if (!blade.hasUpdatePermission()) return;
 
         blade.isLoading = true;

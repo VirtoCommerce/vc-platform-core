@@ -5,9 +5,8 @@ namespace VirtoCommerce.Platform.Core.Settings
 {
     public class ObjectSettingEntry : SettingDescriptor
     {
-        public ObjectSettingEntry()
-        {
-        }
+        public ObjectSettingEntry() { }
+
         public ObjectSettingEntry(SettingDescriptor descriptor)
         {
             RestartRequired = descriptor.RestartRequired;
@@ -18,12 +17,19 @@ namespace VirtoCommerce.Platform.Core.Settings
             AllowedValues = descriptor.AllowedValues;
             DefaultValue = descriptor.DefaultValue;
             IsDictionary = descriptor.IsDictionary;
+            IsMultiValue = descriptor.IsMultiValue;
         }
+
+        /// <summary>
+        /// return true if Value or AllowedValues is not empty
+        /// </summary>
         public bool ItHasValues => Value != null || !AllowedValues.IsNullOrEmpty();
+
         /// <summary>
         /// Setting may belong to any object in system
         /// </summary>
         public string ObjectId { get; set; }
+
         public string ObjectType { get; set; }
 
         public object Value { get; set; }

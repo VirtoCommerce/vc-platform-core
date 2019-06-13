@@ -78,6 +78,7 @@ namespace VirtoCommerce.Platform.Core.Settings
         {
             await manager.DeepRemoveSettingsAsync(new[] { entry });
         }
+
         /// <summary>
         /// Deep remove entity and all nested objects settings values
         /// </summary>

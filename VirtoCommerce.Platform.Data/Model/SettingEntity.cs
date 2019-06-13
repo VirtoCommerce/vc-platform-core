@@ -26,13 +26,13 @@ namespace VirtoCommerce.Platform.Data.Model
 
         public virtual ObservableCollection<SettingValueEntity> SettingValues { get; set; }
 
-
         public virtual ObjectSettingEntry ToModel(ObjectSettingEntry objSetting)
         {
             if (objSetting == null)
             {
                 throw new ArgumentNullException(nameof(objSetting));
             }
+
             objSetting.Name = Name;
             objSetting.ObjectType = ObjectType;
             objSetting.ObjectId = ObjectId;
@@ -79,7 +79,7 @@ namespace VirtoCommerce.Platform.Data.Model
 
             if (!SettingValues.IsNullCollection())
             {
-                var comparer = AnonymousComparer.Create((SettingValueEntity x) => x.ToString(EnumUtility.SafeParse(x.ValueType, Core.Settings.SettingValueType.LongText), CultureInfo.InvariantCulture) ?? string.Empty);
+                var comparer = AnonymousComparer.Create((SettingValueEntity x) => x.ToString(EnumUtility.SafeParse(x.ValueType, SettingValueType.LongText), CultureInfo.InvariantCulture) ?? string.Empty);
                 SettingValues.Patch(target.SettingValues, comparer, (sourceSetting, targetSetting) => { });
             }
         }

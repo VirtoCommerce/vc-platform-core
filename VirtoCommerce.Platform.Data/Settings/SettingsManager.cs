@@ -35,8 +35,8 @@ namespace VirtoCommerce.Platform.Data.Settings
             _memoryCache = memoryCache;
         }
 
-
         #region ISettingsRegistrar Members
+
         public void RegisterSettingsForType(IEnumerable<SettingDescriptor> settings, string typeName)
         {
             if (settings == null)
@@ -71,7 +71,9 @@ namespace VirtoCommerce.Platform.Data.Settings
                 _registeredSettingsByNameDict[setting.Name] = setting;
             }
         }
+
         #endregion
+
         #region ISettingsManager Members
 
         public virtual async Task<ObjectSettingEntry> GetObjectSettingAsync(string name, string objectType = null, string objectId = null)
@@ -190,13 +192,10 @@ namespace VirtoCommerce.Platform.Data.Settings
 
         protected virtual void ClearCache(IEnumerable<ObjectSettingEntry> objectSettings)
         {
-            //Clear setting from cache
             foreach (var setting in objectSettings)
             {
                 SettingsCacheRegion.ExpireSetting(setting);
             }
         }
-
-
     }
 }
