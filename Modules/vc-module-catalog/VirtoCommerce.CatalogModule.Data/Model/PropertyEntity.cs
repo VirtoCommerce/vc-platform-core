@@ -77,6 +77,7 @@ namespace VirtoCommerce.CatalogModule.Data.Model
             property.CreatedDate = CreatedDate;
             property.ModifiedBy = ModifiedBy;
             property.ModifiedDate = ModifiedDate;
+            property.OuterId = OuterId;
 
             property.CatalogId = CatalogId;
             property.CategoryId = CategoryId;
@@ -117,6 +118,7 @@ namespace VirtoCommerce.CatalogModule.Data.Model
             CreatedDate = property.CreatedDate;
             ModifiedBy = property.ModifiedBy;
             ModifiedDate = property.ModifiedDate;
+            OuterId = property.OuterId;
 
             CatalogId = property.CatalogId;
             CategoryId = property.CategoryId;

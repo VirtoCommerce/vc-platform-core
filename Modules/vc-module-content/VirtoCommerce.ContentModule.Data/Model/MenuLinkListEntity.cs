@@ -32,6 +32,8 @@ namespace VirtoCommerce.ContentModule.Data.Model
         public MenuLinkList ToModel(MenuLinkList menuLinkList)
         {
             menuLinkList.Id = Id;
+            menuLinkList.OuterId = OuterId;
+
             menuLinkList.Name = Name;
             menuLinkList.StoreId = StoreId;
             menuLinkList.Language = Language;
@@ -52,6 +54,8 @@ namespace VirtoCommerce.ContentModule.Data.Model
             pkMap.AddPair(menuLinkList, this);
 
             Id = menuLinkList.Id;
+            OuterId = menuLinkList.OuterId;
+
             StoreId = menuLinkList.StoreId;
             Name = menuLinkList.Name;
             Language = menuLinkList.Language;

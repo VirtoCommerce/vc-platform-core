@@ -39,6 +39,7 @@ namespace VirtoCommerce.OrdersModule.Data.Model
             package.CreatedBy = CreatedBy;
             package.ModifiedDate = ModifiedDate;
             package.ModifiedBy = ModifiedBy;
+            package.OuterId = OuterId;
 
             package.PackageType = PackageType;
             package.Weight = Weight;
@@ -63,6 +64,7 @@ namespace VirtoCommerce.OrdersModule.Data.Model
             CreatedBy = package.CreatedBy;
             ModifiedDate = package.ModifiedDate;
             ModifiedBy = package.ModifiedBy;
+            OuterId = package.OuterId;
 
             PackageType = package.PackageType;
             Weight = package.Weight;

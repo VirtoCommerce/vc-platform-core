@@ -98,6 +98,7 @@ namespace VirtoCommerce.OrdersModule.Data.Model
             lineItem.CreatedBy = CreatedBy;
             lineItem.ModifiedDate = ModifiedDate;
             lineItem.ModifiedBy = ModifiedBy;
+            lineItem.OuterId = OuterId;
 
             lineItem.PriceId = PriceId;
             lineItem.CatalogId = CatalogId;
@@ -149,6 +150,7 @@ namespace VirtoCommerce.OrdersModule.Data.Model
             CreatedBy = lineItem.CreatedBy;
             ModifiedDate = lineItem.ModifiedDate;
             ModifiedBy = lineItem.ModifiedBy;
+            OuterId = lineItem.OuterId;
 
             PriceId = lineItem.PriceId;
             CatalogId = lineItem.CatalogId;

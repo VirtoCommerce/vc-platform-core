@@ -58,6 +58,7 @@ namespace VirtoCommerce.InventoryModule.Data.Model
             inventory.CreatedDate = CreatedDate;
             inventory.ModifiedBy = ModifiedBy;
             inventory.ModifiedDate = ModifiedDate;
+            inventory.OuterId = OuterId;
 
             inventory.AllowBackorder = AllowBackorder;
             inventory.AllowPreorder = AllowPreorder;
@@ -87,6 +88,7 @@ namespace VirtoCommerce.InventoryModule.Data.Model
             CreatedDate = inventory.CreatedDate;
             ModifiedBy = inventory.ModifiedBy;
             ModifiedDate = inventory.ModifiedDate;
+            OuterId = inventory.OuterId;
 
             AllowBackorder = inventory.AllowBackorder;
             AllowPreorder = inventory.AllowPreorder;

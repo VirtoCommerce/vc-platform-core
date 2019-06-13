@@ -40,6 +40,7 @@ namespace VirtoCommerce.ImageToolsModule.Data.Models
             CreatedDate = task.CreatedDate;
             ModifiedBy = task.ModifiedBy;
             ModifiedDate = task.ModifiedDate;
+            OuterId = task.OuterId;
 
             if (task.ThumbnailOptions != null)
             {
@@ -71,6 +72,7 @@ namespace VirtoCommerce.ImageToolsModule.Data.Models
             task.ModifiedDate = ModifiedDate;
             task.Name = Name;
             task.WorkPath = WorkPath;
+            task.OuterId = OuterId;
 
             task.ThumbnailOptions = ThumbnailTaskOptions.Select(o => o.ThumbnailOption.ToModel(AbstractTypeFactory<ThumbnailOption>.TryCreateInstance())).ToArray();
 

@@ -81,6 +81,9 @@ namespace VirtoCommerce.CustomerModule.Data.Migrations
                     b.Property<string>("Organization")
                         .HasMaxLength(128);
 
+                    b.Property<string>("OuterId")
+                        .HasMaxLength(128);
+
                     b.Property<string>("PostalCode")
                         .IsRequired()
                         .HasMaxLength(32);
@@ -154,6 +157,9 @@ namespace VirtoCommerce.CustomerModule.Data.Migrations
                     b.Property<DateTime?>("ModifiedDate");
 
                     b.Property<string>("Name")
+                        .HasMaxLength(128);
+
+                    b.Property<string>("OuterId")
                         .HasMaxLength(128);
 
                     b.HasKey("Id");
@@ -247,6 +253,9 @@ namespace VirtoCommerce.CustomerModule.Data.Migrations
                     b.Property<string>("ModifierName")
                         .HasMaxLength(128);
 
+                    b.Property<string>("OuterId")
+                        .HasMaxLength(128);
+
                     b.Property<string>("Title")
                         .HasMaxLength(128);
 
@@ -314,6 +323,9 @@ namespace VirtoCommerce.CustomerModule.Data.Migrations
                         .HasMaxLength(64);
 
                     b.Property<DateTime?>("ModifiedDate");
+
+                    b.Property<string>("OuterId")
+                        .HasMaxLength(128);
 
                     b.Property<string>("StoreId")
                         .HasMaxLength(128);

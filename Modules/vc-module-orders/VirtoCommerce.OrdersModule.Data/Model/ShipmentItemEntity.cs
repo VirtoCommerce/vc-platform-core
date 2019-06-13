@@ -35,6 +35,7 @@ namespace VirtoCommerce.OrdersModule.Data.Model
             shipmentItem.CreatedBy = CreatedBy;
             shipmentItem.ModifiedDate = ModifiedDate;
             shipmentItem.ModifiedBy = ModifiedBy;
+            shipmentItem.OuterId = OuterId;
 
             shipmentItem.BarCode = BarCode;
             shipmentItem.Quantity = Quantity;
@@ -52,6 +53,7 @@ namespace VirtoCommerce.OrdersModule.Data.Model
             CreatedBy = shipmentItem.CreatedBy;
             ModifiedDate = shipmentItem.ModifiedDate;
             ModifiedBy = shipmentItem.ModifiedBy;
+            OuterId = shipmentItem.OuterId;
 
             BarCode = shipmentItem.BarCode;
             shipmentItem.Quantity = shipmentItem.Quantity;

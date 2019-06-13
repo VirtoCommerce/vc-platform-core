@@ -47,6 +47,9 @@ namespace VirtoCommerce.CatalogModule.Data.Migrations
                     b.Property<string>("Name")
                         .HasMaxLength(1024);
 
+                    b.Property<string>("OuterId")
+                        .HasMaxLength(128);
+
                     b.Property<long>("Size");
 
                     b.Property<string>("Url")
@@ -86,6 +89,9 @@ namespace VirtoCommerce.CatalogModule.Data.Migrations
                         .HasMaxLength(64);
 
                     b.Property<DateTime?>("ModifiedDate");
+
+                    b.Property<string>("OuterId")
+                        .HasMaxLength(128);
 
                     b.Property<int>("Priority");
 
@@ -127,6 +133,9 @@ namespace VirtoCommerce.CatalogModule.Data.Migrations
 
                     b.Property<string>("Name")
                         .IsRequired()
+                        .HasMaxLength(128);
+
+                    b.Property<string>("OuterId")
                         .HasMaxLength(128);
 
                     b.Property<string>("OwnerId")
@@ -188,6 +197,9 @@ namespace VirtoCommerce.CatalogModule.Data.Migrations
 
                     b.Property<string>("Name")
                         .IsRequired()
+                        .HasMaxLength(128);
+
+                    b.Property<string>("OuterId")
                         .HasMaxLength(128);
 
                     b.Property<string>("ParentCategoryId")
@@ -286,6 +298,9 @@ namespace VirtoCommerce.CatalogModule.Data.Migrations
 
                     b.Property<DateTime?>("ModifiedDate");
 
+                    b.Property<string>("OuterId")
+                        .HasMaxLength(128);
+
                     b.Property<int>("Priority");
 
                     b.Property<int>("ReviewState");
@@ -328,6 +343,9 @@ namespace VirtoCommerce.CatalogModule.Data.Migrations
 
                     b.Property<string>("Name")
                         .HasMaxLength(1024);
+
+                    b.Property<string>("OuterId")
+                        .HasMaxLength(128);
 
                     b.Property<int>("SortOrder");
 
@@ -409,6 +427,9 @@ namespace VirtoCommerce.CatalogModule.Data.Migrations
                         .IsRequired()
                         .HasMaxLength(1024);
 
+                    b.Property<string>("OuterId")
+                        .HasMaxLength(128);
+
                     b.Property<string>("PackageType")
                         .HasMaxLength(128);
 
@@ -469,6 +490,9 @@ namespace VirtoCommerce.CatalogModule.Data.Migrations
                         .HasMaxLength(64);
 
                     b.Property<DateTime?>("ModifiedDate");
+
+                    b.Property<string>("OuterId")
+                        .HasMaxLength(128);
 
                     b.Property<int>("Priority");
 
@@ -602,6 +626,9 @@ namespace VirtoCommerce.CatalogModule.Data.Migrations
                         .IsRequired()
                         .HasMaxLength(128);
 
+                    b.Property<string>("OuterId")
+                        .HasMaxLength(128);
+
                     b.Property<int>("PropertyValueType");
 
                     b.Property<string>("TargetType")
@@ -681,6 +708,9 @@ namespace VirtoCommerce.CatalogModule.Data.Migrations
                     b.Property<string>("Name")
                         .HasMaxLength(64);
 
+                    b.Property<string>("OuterId")
+                        .HasMaxLength(128);
+
                     b.Property<string>("ShortTextValue")
                         .HasMaxLength(512);
 
@@ -736,6 +766,9 @@ namespace VirtoCommerce.CatalogModule.Data.Migrations
                         .HasMaxLength(64);
 
                     b.Property<DateTime?>("ModifiedDate");
+
+                    b.Property<string>("OuterId")
+                        .HasMaxLength(128);
 
                     b.Property<string>("StoreId")
                         .HasMaxLength(128);

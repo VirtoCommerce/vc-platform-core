@@ -68,6 +68,9 @@ namespace VirtoCommerce.InventoryModule.Data.Migrations
                     b.Property<string>("Organization")
                         .HasMaxLength(128);
 
+                    b.Property<string>("OuterId")
+                        .HasMaxLength(128);
+
                     b.Property<string>("PostalCode")
                         .HasMaxLength(32);
 
@@ -113,6 +116,9 @@ namespace VirtoCommerce.InventoryModule.Data.Migrations
                         .HasMaxLength(64);
 
                     b.Property<DateTime?>("ModifiedDate");
+
+                    b.Property<string>("OuterId")
+                        .HasMaxLength(128);
 
                     b.Property<DateTime?>("PreorderAvailabilityDate");
 

@@ -31,12 +31,14 @@ namespace VirtoCommerce.MarketingModule.Data.Model
             place.Id = Id;
             place.CreatedBy = CreatedBy;
             place.CreatedDate = CreatedDate;
-            place.Description = Description;
             place.ModifiedBy = ModifiedBy;
             place.ModifiedDate = ModifiedDate;
+            place.OuterId = OuterId;
+
             place.Name = Name;
             place.FolderId = FolderId;
             place.ImageUrl = ImageUrl;
+            place.Description = Description;
 
             if (Folder != null)
             {
@@ -55,12 +57,14 @@ namespace VirtoCommerce.MarketingModule.Data.Model
             Id = place.Id;
             CreatedBy = place.CreatedBy;
             CreatedDate = place.CreatedDate;
-            Description = place.Description;
             ModifiedBy = place.ModifiedBy;
             ModifiedDate = place.ModifiedDate;
+            OuterId = place.OuterId;
+
             Name = place.Name;
             FolderId = place.FolderId;
             ImageUrl = place.ImageUrl;
+            Description = place.Description;
 
             return this;
         }

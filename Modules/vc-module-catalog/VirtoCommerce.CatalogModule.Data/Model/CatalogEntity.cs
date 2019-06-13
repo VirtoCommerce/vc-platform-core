@@ -48,6 +48,7 @@ namespace VirtoCommerce.CatalogModule.Data.Model
             catalog.Id = Id;
             catalog.Name = Name;
             catalog.IsVirtual = Virtual;
+            catalog.OuterId = OuterId;
 
             catalog.Languages = new List<CatalogLanguage>();
             var defaultLanguage = (new CatalogLanguageEntity { Language = string.IsNullOrEmpty(DefaultLanguage) ? "en-us" : DefaultLanguage }).ToModel(AbstractTypeFactory<CatalogLanguage>.TryCreateInstance());
@@ -91,6 +92,8 @@ namespace VirtoCommerce.CatalogModule.Data.Model
             Id = catalog.Id;
             Name = catalog.Name;
             Virtual = catalog.IsVirtual;
+            OuterId = catalog.OuterId;
+
             DefaultLanguage = catalog.DefaultLanguage.LanguageCode;
 
             if (!catalog.Properties.IsNullOrEmpty())

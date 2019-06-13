@@ -40,11 +40,13 @@ namespace VirtoCommerce.MarketingModule.Data.Model
             folder.Id = Id;
             folder.CreatedBy = CreatedBy;
             folder.CreatedDate = CreatedDate;
-            folder.Description = Description;
             folder.ModifiedBy = ModifiedBy;
             folder.ModifiedDate = ModifiedDate;
+            folder.OuterId = OuterId;
+
             folder.Name = Name;
             folder.ParentFolderId = ParentFolderId;
+            folder.Description = Description;
 
             if (ParentFolder != null)
             {
@@ -63,11 +65,13 @@ namespace VirtoCommerce.MarketingModule.Data.Model
             Id = folder.Id;
             CreatedBy = folder.CreatedBy;
             CreatedDate = folder.CreatedDate;
-            Description = folder.Description;
             ModifiedBy = folder.ModifiedBy;
             ModifiedDate = folder.ModifiedDate;
+            OuterId = folder.OuterId;
+
             Name = folder.Name;
             ParentFolderId = folder.ParentFolderId;
+            Description = folder.Description;
 
             return this;
         }

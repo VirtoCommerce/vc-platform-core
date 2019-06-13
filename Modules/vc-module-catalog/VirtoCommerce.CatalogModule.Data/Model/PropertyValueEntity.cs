@@ -67,6 +67,8 @@ namespace VirtoCommerce.CatalogModule.Data.Model
             propValue.CreatedDate = CreatedDate;
             propValue.ModifiedBy = ModifiedBy;
             propValue.ModifiedDate = ModifiedDate;
+            propValue.OuterId = OuterId;
+
             propValue.LanguageCode = Locale;
             propValue.PropertyName = Name;
             propValue.ValueId = DictionaryItemId;
@@ -132,6 +134,8 @@ namespace VirtoCommerce.CatalogModule.Data.Model
             CreatedDate = propValue.CreatedDate;
             ModifiedBy = propValue.ModifiedBy;
             ModifiedDate = propValue.ModifiedDate;
+            OuterId = propValue.OuterId;
+
             Name = propValue.PropertyName;
             ValueType = (int)propValue.ValueType;
             DictionaryItemId = propValue.ValueId;

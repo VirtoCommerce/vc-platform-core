@@ -46,6 +46,7 @@ namespace VirtoCommerce.CatalogModule.Data.Model
             seoInfo.CreatedDate = CreatedDate;
             seoInfo.ModifiedBy = ModifiedBy;
             seoInfo.ModifiedDate = ModifiedDate;
+            seoInfo.OuterId = OuterId;
 
             seoInfo.LanguageCode = Language;
             seoInfo.SemanticUrl = Keyword;
@@ -70,6 +71,7 @@ namespace VirtoCommerce.CatalogModule.Data.Model
             CreatedDate = seoInfo.CreatedDate;
             ModifiedBy = seoInfo.ModifiedBy;
             ModifiedDate = seoInfo.ModifiedDate;
+            OuterId = seoInfo.OuterId;
 
             Language = seoInfo.LanguageCode;
             Keyword = seoInfo.SemanticUrl;

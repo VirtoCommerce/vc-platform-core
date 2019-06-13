@@ -53,6 +53,9 @@ namespace VirtoCommerce.ImageToolsModule.Data.Migrations
                         .IsRequired()
                         .HasMaxLength(1024);
 
+                    b.Property<string>("OuterId")
+                        .HasMaxLength(128);
+
                     b.Property<string>("ResizeMethod")
                         .IsRequired()
                         .HasMaxLength(64);
@@ -86,6 +89,9 @@ namespace VirtoCommerce.ImageToolsModule.Data.Migrations
                         .IsRequired()
                         .HasMaxLength(1024);
 
+                    b.Property<string>("OuterId")
+                        .HasMaxLength(128);
+
                     b.Property<string>("WorkPath")
                         .IsRequired()
                         .HasMaxLength(2048);
@@ -101,9 +107,11 @@ namespace VirtoCommerce.ImageToolsModule.Data.Migrations
                         .ValueGeneratedOnAdd()
                         .HasMaxLength(128);
 
-                    b.Property<string>("ThumbnailOptionId");
+                    b.Property<string>("ThumbnailOptionId")
+                        .IsRequired();
 
-                    b.Property<string>("ThumbnailTaskId");
+                    b.Property<string>("ThumbnailTaskId")
+                        .IsRequired();
 
                     b.HasKey("Id");
 

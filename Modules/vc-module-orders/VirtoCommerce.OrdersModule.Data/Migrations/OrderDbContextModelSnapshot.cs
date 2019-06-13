@@ -166,6 +166,9 @@ namespace VirtoCommerce.OrdersModule.Data.Migrations
                     b.Property<string>("OrganizationName")
                         .HasMaxLength(255);
 
+                    b.Property<string>("OuterId")
+                        .HasMaxLength(128);
+
                     b.Property<decimal>("PaymentTotal")
                         .HasColumnType("Money");
 
@@ -335,6 +338,9 @@ namespace VirtoCommerce.OrdersModule.Data.Migrations
                         .IsRequired()
                         .HasMaxLength(256);
 
+                    b.Property<string>("OuterId")
+                        .HasMaxLength(128);
+
                     b.Property<decimal>("Price")
                         .HasColumnType("Money");
 
@@ -412,6 +418,9 @@ namespace VirtoCommerce.OrdersModule.Data.Migrations
 
                     b.Property<string>("Note")
                         .HasMaxLength(2048);
+
+                    b.Property<string>("OuterId")
+                        .HasMaxLength(128);
 
                     b.Property<string>("PaymentInId")
                         .IsRequired();
@@ -625,6 +634,9 @@ namespace VirtoCommerce.OrdersModule.Data.Migrations
                     b.Property<string>("OrganizationName")
                         .HasMaxLength(255);
 
+                    b.Property<string>("OuterId")
+                        .HasMaxLength(128);
+
                     b.Property<decimal>("Price")
                         .HasColumnType("Money");
 
@@ -696,6 +708,9 @@ namespace VirtoCommerce.OrdersModule.Data.Migrations
 
                     b.Property<DateTime?>("ModifiedDate");
 
+                    b.Property<string>("OuterId")
+                        .HasMaxLength(128);
+
                     b.Property<int>("Quantity");
 
                     b.Property<string>("ShipmentId")
@@ -739,6 +754,9 @@ namespace VirtoCommerce.OrdersModule.Data.Migrations
                         .HasMaxLength(64);
 
                     b.Property<DateTime?>("ModifiedDate");
+
+                    b.Property<string>("OuterId")
+                        .HasMaxLength(128);
 
                     b.Property<string>("PackageType")
                         .HasMaxLength(64);

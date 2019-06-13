@@ -129,6 +129,7 @@ namespace VirtoCommerce.CatalogModule.Data.Model
             product.CreatedBy = CreatedBy;
             product.ModifiedDate = ModifiedDate;
             product.ModifiedBy = ModifiedBy;
+            product.OuterId = OuterId;
 
             product.CatalogId = CatalogId;
             product.CategoryId = CategoryId;
@@ -236,6 +237,7 @@ namespace VirtoCommerce.CatalogModule.Data.Model
             CreatedBy = product.CreatedBy;
             ModifiedDate = product.ModifiedDate;
             ModifiedBy = product.ModifiedBy;
+            OuterId = product.OuterId;
 
             CatalogId = product.CatalogId;
             CategoryId = product.CategoryId;

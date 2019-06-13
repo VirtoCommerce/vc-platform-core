@@ -61,6 +61,8 @@ namespace VirtoCommerce.MarketingModule.Data.Model
             promotion.CreatedDate = CreatedDate;
             promotion.ModifiedBy = ModifiedBy;
             promotion.ModifiedDate = ModifiedDate;
+            promotion.OuterId = OuterId;
+
             promotion.StartDate = StartDate;
             promotion.EndDate = EndDate;
             promotion.Store = StoreId;
@@ -103,6 +105,8 @@ namespace VirtoCommerce.MarketingModule.Data.Model
             CreatedDate = promotion.CreatedDate;
             ModifiedBy = promotion.ModifiedBy;
             ModifiedDate = promotion.ModifiedDate;
+            OuterId = promotion.OuterId;
+
             StartDate = promotion.StartDate ?? DateTime.UtcNow;
             EndDate = promotion.EndDate;
             StoreId = promotion.Store;

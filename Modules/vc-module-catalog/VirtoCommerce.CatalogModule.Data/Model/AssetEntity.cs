@@ -42,6 +42,8 @@ namespace VirtoCommerce.CatalogModule.Data.Model
             asset.CreatedDate = CreatedDate;
             asset.ModifiedBy = ModifiedBy;
             asset.ModifiedDate = ModifiedDate;
+            asset.OuterId = OuterId;
+
             asset.LanguageCode = LanguageCode;
             asset.Name = Name;
             asset.MimeType = MimeType;
@@ -64,6 +66,8 @@ namespace VirtoCommerce.CatalogModule.Data.Model
             CreatedDate = asset.CreatedDate;
             ModifiedBy = asset.ModifiedBy;
             ModifiedDate = asset.ModifiedDate;
+            OuterId = asset.OuterId;
+
             LanguageCode = asset.LanguageCode;
             Name = asset.Name;
             MimeType = asset.MimeType;

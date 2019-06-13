@@ -58,6 +58,7 @@ namespace VirtoCommerce.InventoryModule.Data.Model
             center.CreatedDate = CreatedDate;
             center.ModifiedBy = ModifiedBy;
             center.ModifiedDate = ModifiedDate;
+            center.OuterId = OuterId;
 
             center.Address = AbstractTypeFactory<Address>.TryCreateInstance();
 
@@ -88,6 +89,7 @@ namespace VirtoCommerce.InventoryModule.Data.Model
             CreatedDate = center.CreatedDate;
             ModifiedBy = center.ModifiedBy;
             ModifiedDate = center.ModifiedDate;
+            OuterId = center.OuterId;
 
             if (center.Address != null)
             {

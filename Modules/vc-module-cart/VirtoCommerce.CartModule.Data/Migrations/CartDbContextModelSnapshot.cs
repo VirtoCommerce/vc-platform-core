@@ -230,6 +230,9 @@ namespace VirtoCommerce.CartModule.Data.Migrations
                         .IsRequired()
                         .HasMaxLength(256);
 
+                    b.Property<string>("OuterId")
+                        .HasMaxLength(128);
+
                     b.Property<string>("PriceId")
                         .HasMaxLength(128);
 
@@ -403,6 +406,9 @@ namespace VirtoCommerce.CartModule.Data.Migrations
 
                     b.Property<DateTime?>("ModifiedDate");
 
+                    b.Property<string>("OuterId")
+                        .HasMaxLength(128);
+
                     b.Property<decimal>("Price")
                         .HasColumnType("Money");
 
@@ -470,6 +476,9 @@ namespace VirtoCommerce.CartModule.Data.Migrations
                         .HasMaxLength(64);
 
                     b.Property<DateTime?>("ModifiedDate");
+
+                    b.Property<string>("OuterId")
+                        .HasMaxLength(128);
 
                     b.Property<int>("Quantity");
 
@@ -551,6 +560,9 @@ namespace VirtoCommerce.CartModule.Data.Migrations
 
                     b.Property<string>("OrganizationId")
                         .HasMaxLength(64);
+
+                    b.Property<string>("OuterId")
+                        .HasMaxLength(128);
 
                     b.Property<decimal>("PaymentTotal")
                         .HasColumnType("Money");

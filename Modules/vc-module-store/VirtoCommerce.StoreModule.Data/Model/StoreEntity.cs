@@ -90,18 +90,20 @@ namespace VirtoCommerce.StoreModule.Data.Model
             }
 
             store.Id = Id;
+            store.CreatedBy = CreatedBy;
+            store.CreatedDate = CreatedDate;
+            store.ModifiedBy = ModifiedBy;
+            store.ModifiedDate = ModifiedDate;
+            store.OuterId = OuterId;
+
             store.AdminEmail = AdminEmail;
             store.Catalog = Catalog;
             store.Country = Country;
-            store.CreatedBy = CreatedBy;
-            store.CreatedDate = CreatedDate;
             store.DefaultCurrency = DefaultCurrency;
             store.DefaultLanguage = DefaultLanguage;
             store.Description = Description;
             store.DisplayOutOfStock = DisplayOutOfStock;
             store.Email = Email;
-            store.ModifiedBy = ModifiedBy;
-            store.ModifiedDate = ModifiedDate;
             store.Name = Name;
             store.Region = Region;
             store.SecureUrl = SecureUrl;
@@ -109,7 +111,6 @@ namespace VirtoCommerce.StoreModule.Data.Model
             store.Url = Url;
             store.MainFulfillmentCenterId = FulfillmentCenterId;
             store.MainReturnsFulfillmentCenterId = ReturnsFulfillmentCenterId;
-
             store.StoreState = EnumUtility.SafeParse(StoreState.ToString(), Core.Model.StoreState.Open);
             store.Languages = Languages.Select(x => x.LanguageCode).ToList();
             store.Currencies = Currencies.Select(x => x.CurrencyCode).ToList();
@@ -130,18 +131,20 @@ namespace VirtoCommerce.StoreModule.Data.Model
             pkMap.AddPair(store, this);
 
             Id = store.Id;
+            CreatedBy = store.CreatedBy;
+            CreatedDate = store.CreatedDate;
+            ModifiedBy = store.ModifiedBy;
+            ModifiedDate = store.ModifiedDate;
+            OuterId = store.OuterId;
+
             AdminEmail = store.AdminEmail;
             Catalog = store.Catalog;
             Country = store.Country;
-            CreatedBy = store.CreatedBy;
-            CreatedDate = store.CreatedDate;
             DefaultCurrency = store.DefaultCurrency;
             DefaultLanguage = store.DefaultLanguage;
             Description = store.Description;
             DisplayOutOfStock = store.DisplayOutOfStock;
             Email = store.Email;
-            ModifiedBy = store.ModifiedBy;
-            ModifiedDate = store.ModifiedDate;
             Name = store.Name;
             Region = store.Region;
             SecureUrl = store.SecureUrl;

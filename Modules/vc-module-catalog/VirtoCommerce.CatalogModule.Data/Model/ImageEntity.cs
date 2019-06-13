@@ -41,6 +41,7 @@ namespace VirtoCommerce.CatalogModule.Data.Model
             image.CreatedDate = CreatedDate;
             image.ModifiedBy = ModifiedBy;
             image.ModifiedDate = ModifiedDate;
+            image.OuterId = OuterId;
 
             image.Group = Group;
             image.LanguageCode = LanguageCode;
@@ -64,6 +65,7 @@ namespace VirtoCommerce.CatalogModule.Data.Model
             CreatedDate = image.CreatedDate;
             ModifiedBy = image.ModifiedBy;
             ModifiedDate = image.ModifiedDate;
+            OuterId = image.OuterId;
 
             Group = image.Group;
             LanguageCode = image.LanguageCode;

@@ -7,30 +7,30 @@ using VirtoCommerce.PricingModule.Core.Model;
 
 namespace VirtoCommerce.PricingModule.Data.Model
 {
-	public class PricelistEntity : AuditableEntity
-	{
-		public PricelistEntity()
-		{
-			Prices = new NullCollection<PriceEntity>();
-			Assignments = new NullCollection<PricelistAssignmentEntity>();
-		}
+    public class PricelistEntity : AuditableEntity
+    {
+        public PricelistEntity()
+        {
+            Prices = new NullCollection<PriceEntity>();
+            Assignments = new NullCollection<PricelistAssignmentEntity>();
+        }
 
-		[Required]
-		[StringLength(128)]
-		public string Name { get; set; }
-		
-		[StringLength(512)]
-		public string Description { get; set; }
-	
-		[Required]
-		[StringLength(64)]
-		public string Currency { get; set; }
+        [Required]
+        [StringLength(128)]
+        public string Name { get; set; }
+
+        [StringLength(512)]
+        public string Description { get; set; }
+
+        [Required]
+        [StringLength(64)]
+        public string Currency { get; set; }
 
 
-		#region Navigation Properties
+        #region Navigation Properties
 
-		public virtual ObservableCollection<PriceEntity> Prices { get; set; }
-		public virtual ObservableCollection<PricelistAssignmentEntity> Assignments { get; set; }
+        public virtual ObservableCollection<PriceEntity> Prices { get; set; }
+        public virtual ObservableCollection<PricelistAssignmentEntity> Assignments { get; set; }
 
         #endregion
 
@@ -40,29 +40,31 @@ namespace VirtoCommerce.PricingModule.Data.Model
             if (pricelist == null)
                 throw new ArgumentNullException("pricelist");
 
-            pricelist.Id = this.Id;
-            pricelist.CreatedBy = this.CreatedBy;
-            pricelist.CreatedDate = this.CreatedDate;
-            pricelist.Currency = this.Currency;
-            pricelist.Description = this.Description;
-            pricelist.ModifiedBy = this.ModifiedBy;
-            pricelist.ModifiedDate = this.ModifiedDate;
-            pricelist.Name = this.Name;
+            pricelist.Id = Id;
+            pricelist.CreatedBy = CreatedBy;
+            pricelist.CreatedDate = CreatedDate;
+            pricelist.ModifiedBy = ModifiedBy;
+            pricelist.ModifiedDate = ModifiedDate;
+            pricelist.OuterId = OuterId;
+
+            pricelist.Currency = Currency;
+            pricelist.Description = Description;
+            pricelist.Name = Name;
 
             pricelist.Assignments = new List<PricelistAssignment>();
             //Create lightweight assignment for represent assignment info in pricelist
-            foreach(var assignemntEntity in this.Assignments)
+            foreach (var assignemntEntity in Assignments)
             {
                 var assignment = AbstractTypeFactory<PricelistAssignment>.TryCreateInstance();
                 assignment.Id = assignemntEntity.Id;
                 assignment.CatalogId = assignemntEntity.CatalogId;
-                assignment.Description = assignemntEntity.Description;            
-                assignment.Name = assignemntEntity.Name;              
+                assignment.Description = assignemntEntity.Description;
+                assignment.Name = assignemntEntity.Name;
                 assignment.Priority = assignemntEntity.Priority;
                 assignment.StartDate = assignemntEntity.StartDate;
 
                 pricelist.Assignments.Add(assignment);
-            }    
+            }
             return pricelist;
         }
 
@@ -73,15 +75,17 @@ namespace VirtoCommerce.PricingModule.Data.Model
 
             pkMap.AddPair(pricelist, this);
 
-            this.Id = pricelist.Id;
-            this.CreatedBy = pricelist.CreatedBy;
-            this.CreatedDate = pricelist.CreatedDate;
-            this.Currency = pricelist.Currency;
-            this.Description = pricelist.Description;
-            this.ModifiedBy = pricelist.ModifiedBy;
-            this.ModifiedDate = pricelist.ModifiedDate;
-            this.Name = pricelist.Name;
-        
+            Id = pricelist.Id;
+            CreatedBy = pricelist.CreatedBy;
+            CreatedDate = pricelist.CreatedDate;
+            ModifiedBy = pricelist.ModifiedBy;
+            ModifiedDate = pricelist.ModifiedDate;
+            OuterId = pricelist.OuterId;
+
+            Currency = pricelist.Currency;
+            Description = pricelist.Description;
+            Name = pricelist.Name;
+
             return this;
         }
 
@@ -90,10 +94,9 @@ namespace VirtoCommerce.PricingModule.Data.Model
             if (target == null)
                 throw new ArgumentNullException("target");
 
-            target.Name = this.Name;
-            target.Currency = this.Currency;
-            target.Description = this.Description;
-
+            target.Name = Name;
+            target.Currency = Currency;
+            target.Description = Description;
         }
     }
 }

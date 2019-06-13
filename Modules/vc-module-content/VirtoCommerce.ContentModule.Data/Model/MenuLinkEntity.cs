@@ -38,6 +38,8 @@ namespace VirtoCommerce.ContentModule.Data.Model
         public MenuLink ToModel(MenuLink link)
         {
             link.Id = Id;
+            link.OuterId = OuterId;
+
             link.Title = Title;
             link.Url = Url;
             link.Priority = Priority;
@@ -53,6 +55,8 @@ namespace VirtoCommerce.ContentModule.Data.Model
         public MenuLinkEntity FromModel(MenuLink link)
         {
             Id = link.Id;
+            OuterId = link.OuterId;
+
             Title = link.Title;
             Url = link.Url;
             Priority = link.Priority;

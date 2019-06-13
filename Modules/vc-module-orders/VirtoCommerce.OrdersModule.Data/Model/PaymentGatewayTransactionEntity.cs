@@ -51,14 +51,16 @@ namespace VirtoCommerce.OrdersModule.Data.Model
                 throw new ArgumentNullException(nameof(transaction));
 
             transaction.Id = Id;
-            transaction.Amount = Amount;
             transaction.CreatedBy = CreatedBy;
             transaction.CreatedDate = CreatedDate;
+            transaction.ModifiedBy = ModifiedBy;
+            transaction.ModifiedDate = ModifiedDate;
+            transaction.OuterId = OuterId;
+
+            transaction.Amount = Amount;
             transaction.CurrencyCode = Currency;
             transaction.GatewayIpAddress = GatewayIpAddress;
             transaction.IsProcessed = IsProcessed;
-            transaction.ModifiedBy = ModifiedBy;
-            transaction.ModifiedDate = ModifiedDate;
             transaction.Note = Note;
             transaction.ProcessAttemptCount = ProcessAttemptCount;
             transaction.ProcessedDate = ProcessedDate;
@@ -80,14 +82,16 @@ namespace VirtoCommerce.OrdersModule.Data.Model
             pkMap.AddPair(transaction, this);
 
             Id = transaction.Id;
-            Amount = transaction.Amount;
             CreatedBy = transaction.CreatedBy;
             CreatedDate = transaction.CreatedDate;
+            ModifiedBy = transaction.ModifiedBy;
+            ModifiedDate = transaction.ModifiedDate;
+            OuterId = transaction.OuterId;
+
+            Amount = transaction.Amount;
             Currency = transaction.CurrencyCode;
             GatewayIpAddress = transaction.GatewayIpAddress;
             IsProcessed = transaction.IsProcessed;
-            ModifiedBy = transaction.ModifiedBy;
-            ModifiedDate = transaction.ModifiedDate;
             Note = transaction.Note;
             ProcessAttemptCount = transaction.ProcessAttemptCount;
             ProcessedDate = transaction.ProcessedDate;

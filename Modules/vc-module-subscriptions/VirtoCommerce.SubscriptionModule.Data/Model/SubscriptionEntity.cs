@@ -53,9 +53,6 @@ namespace VirtoCommerce.SubscriptionModule.Data.Model
 
         public string CustomerOrderPrototypeId { get; set; }
 
-        [StringLength(256)]
-        public string OuterId { get; set; }
-
         public string Comment { get; set; }
 
         public virtual Subscription ToModel(Subscription subscription)
@@ -65,24 +62,25 @@ namespace VirtoCommerce.SubscriptionModule.Data.Model
                 throw new NullReferenceException(nameof(subscription));
             }
 
+            subscription.Id = Id;
+            subscription.CreatedBy = CreatedBy;
+            subscription.CreatedDate = CreatedDate;
+            subscription.ModifiedBy = ModifiedBy;
+            subscription.ModifiedDate = ModifiedDate;
+            subscription.OuterId = OuterId;
+
             subscription.Balance = Balance;
             subscription.CancelledDate = CancelledDate;
             subscription.CancelReason = CancelReason;
-            subscription.CreatedBy = CreatedBy;
-            subscription.CreatedDate = CreatedDate;
             subscription.CurrentPeriodEnd = CurrentPeriodEnd;
             subscription.CurrentPeriodStart = CurrentPeriodStart;
             subscription.CustomerId = CustomerId;
             subscription.CustomerName = CustomerName;
             subscription.CustomerOrderPrototypeId = CustomerOrderPrototypeId;
             subscription.EndDate = EndDate;
-            subscription.Id = Id;
             subscription.IntervalCount = IntervalCount;
             subscription.IsCancelled = IsCancelled;
-            subscription.ModifiedBy = ModifiedBy;
-            subscription.ModifiedDate = ModifiedDate;
             subscription.Number = Number;
-            subscription.OuterId = OuterId;
             subscription.StartDate = StartDate;
             subscription.StoreId = StoreId;
             subscription.TrialEnd = TrialEnd;
@@ -109,6 +107,7 @@ namespace VirtoCommerce.SubscriptionModule.Data.Model
             CreatedDate = subscription.CreatedDate;
             ModifiedBy = subscription.ModifiedBy;
             ModifiedDate = subscription.ModifiedDate;
+            OuterId = subscription.OuterId;
 
             Balance = subscription.Balance;
             CancelledDate = subscription.CancelledDate;
@@ -122,7 +121,6 @@ namespace VirtoCommerce.SubscriptionModule.Data.Model
             IntervalCount = subscription.IntervalCount;
             IsCancelled = subscription.IsCancelled;
             Number = subscription.Number;
-            OuterId = subscription.OuterId;
             StartDate = subscription.StartDate;
             StoreId = subscription.StoreId;
             TrialEnd = subscription.TrialEnd;
