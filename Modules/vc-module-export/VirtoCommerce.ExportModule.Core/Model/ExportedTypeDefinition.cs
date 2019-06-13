@@ -6,7 +6,7 @@ namespace VirtoCommerce.ExportModule.Core.Model
     {
         public string TypeName { get; set; }
         public ExportedTypeMetadata MetaData { get; set; }
-        public Func<ExportDataQuery, IPagedDataSource> ExportedDataSourceFactory;
+        public Func<ExportDataQuery, IPagedDataSource> ExportedDataSourceFactory { get; set; };
 
         public ExportedTypeDefinition WithDataSourceFactory(Func<ExportDataQuery, IPagedDataSource> factory)
         {

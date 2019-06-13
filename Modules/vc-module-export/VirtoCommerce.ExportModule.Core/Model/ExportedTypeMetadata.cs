@@ -17,7 +17,7 @@ namespace VirtoCommerce.ExportModule.Core.Model
         {
             var result = new ExportedTypeMetadata();
             var t = typeof(T);
-            List<MemberInfo> passedNodes = new List<MemberInfo>();
+            var passedNodes = new List<MemberInfo>();
             result.PropertiesInfo = result.GetFromType(t, string.Empty, passedNodes);
             return result;
         }
@@ -29,12 +29,12 @@ namespace VirtoCommerce.ExportModule.Core.Model
             {
                 if (!passedNodes.Contains(pi))
                 {
-                    string derivedMemberName = $@"{baseMemberName}{(baseMemberName.IsNullOrEmpty() ? string.Empty : ".")}{pi.Name}";
-                    Type nestType = GetNestType(pi.PropertyType);
-                    if (nestType.IsSubclassOf(typeof(Entity)))
+                    var derivedMemberName = $@"{baseMemberName}{(baseMemberName.IsNullOrEmpty() ? string.Empty : ".")}{pi.Name}";
+                    var nestedType = GetNestedType(pi.PropertyType);
+                    if (nestedType.IsSubclassOf(typeof(Entity)))
                     {
                         passedNodes.Add(pi);
-                        result.AddRange(GetFromType(nestType, derivedMemberName, passedNodes));
+                        result.AddRange(GetFromType(nestedType, derivedMemberName, passedNodes));
                     }
                     else
                     {
@@ -49,12 +49,12 @@ namespace VirtoCommerce.ExportModule.Core.Model
             return result.ToArray();
         }
 
-        private Type GetNestType(Type t)
+        private Type GetNestedType(Type t)
         {
-            Type result = t;
+            var result = t;
             if (t.GetInterfaces().Any(x => x.IsGenericType && x.GetGenericTypeDefinition() == typeof(IEnumerable<>)))
             {
-                Type[] definedGenericArgs = t.GetGenericArguments();
+                var definedGenericArgs = t.GetGenericArguments();
                 if (definedGenericArgs.Any() && definedGenericArgs[0].IsSubclassOf(typeof(Entity)))
                 {
                     result = definedGenericArgs[0];
