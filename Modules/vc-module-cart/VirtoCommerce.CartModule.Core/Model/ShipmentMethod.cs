@@ -5,15 +5,15 @@ using VirtoCommerce.Platform.Core.Common;
 
 namespace VirtoCommerce.CartModule.Core.Model
 {
-	public class ShipmentMethod : ValueObject, ITaxable
+    public class ShipmentMethod : ValueObject, ITaxable
     {
-		public string ShipmentMethodCode { get; set; }
-		public string OptionName { get; set; }
-		public string Name { get; set; }
-		public string LogoUrl { get; set; }
-		public string Currency { get; set; }
+        public string ShipmentMethodCode { get; set; }
+        public string OptionName { get; set; }
+        public string Name { get; set; }
+        public string LogoUrl { get; set; }
+        public string Currency { get; set; }
 
-		public decimal Price { get; set; }
+        public decimal Price { get; set; }
 
         public virtual decimal PriceWithTax
         {
@@ -22,14 +22,14 @@ namespace VirtoCommerce.CartModule.Core.Model
                 return Price + Price * TaxPercentRate ?? 0m;
             }
         }
-     
+
         public virtual decimal DiscountAmount { get; set; }
 
         public virtual decimal DiscountAmountWithTax
         {
             get
             {
-                return DiscountAmount + DiscountAmount * TaxPercentRate ?? 0m;
+                return DiscountAmount + DiscountAmount * (TaxPercentRate ?? 0m);
             }
         }
 
