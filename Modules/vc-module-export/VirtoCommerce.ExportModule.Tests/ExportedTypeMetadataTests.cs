@@ -8,7 +8,7 @@ namespace VirtoCommerce.ExportModule.Tests
     public class ExportedTypeMetadataTests
     {
         [Fact]
-        public async Task GetFromType_()
+        public async Task GetFromType_Price_BuiltCorrectly()
         {
             var metadata = ExportedTypeMetadata.GetFromType<Price>();
             var props = metadata.PropertiesInfo.Select(x => x.Name);
