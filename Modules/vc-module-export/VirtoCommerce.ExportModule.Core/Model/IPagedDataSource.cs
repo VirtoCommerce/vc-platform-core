@@ -6,8 +6,7 @@ namespace VirtoCommerce.ExportModule.Core.Model
     {
         int PageSize { get; set; }
         int CurrentPageNumber { get; set; }
-        ExportDataQuery DataQuery { get; set; }
-        int GetTotalCount();        
-        IEnumerable FetchNextPage();        
+        int GetTotalCount();
+        IEnumerable FetchNextPage();
     }
 }

@@ -1,7 +1,6 @@
 using System;
-using System.Linq;
 using System.Collections.Generic;
-using System.Text;
+using System.Linq;
 using System.Reflection;
 using VirtoCommerce.Platform.Core.Common;
 
@@ -9,7 +8,6 @@ namespace VirtoCommerce.ExportModule.Core.Model
 {
     public class ExportedTypeMetadata : ValueObject
     {
-
         public string Version { get; set; }
         public ExportTypePropertyInfo[] PropertiesInfo { get; set; }
 
@@ -25,11 +23,11 @@ namespace VirtoCommerce.ExportModule.Core.Model
         private ExportTypePropertyInfo[] GetFromType(Type t, string baseMemberName, List<MemberInfo> passedNodes)
         {
             var result = new List<ExportTypePropertyInfo>();
-            foreach (var pi in t.GetProperties().Where(x=>x.CanRead))
+            foreach (var pi in t.GetProperties().Where(x => x.CanRead))
             {
                 if (!passedNodes.Contains(pi))
                 {
-                    var derivedMemberName = $@"{baseMemberName}{(baseMemberName.IsNullOrEmpty() ? string.Empty : ".")}{pi.Name}";
+                    var derivedMemberName = $"{baseMemberName}{(baseMemberName.IsNullOrEmpty() ? string.Empty : ".")}{pi.Name}";
                     var nestedType = GetNestedType(pi.PropertyType);
                     if (nestedType.IsSubclassOf(typeof(Entity)))
                     {
