@@ -17,6 +17,7 @@ namespace VirtoCommerce.ExportModule.Web
 
             serviceCollection.AddSingleton<IKnownExportTypesRegistrar, KnownExportTypesService>();
             serviceCollection.AddSingleton<IKnownExportTypesResolver, KnownExportTypesService>();
+            serviceCollection.AddScoped<IExportProviderFactory, ExportProviderFactory>();
             serviceCollection.AddScoped<IDataExporter, DataExporter>();
         }
 
