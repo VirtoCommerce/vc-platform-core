@@ -101,27 +101,27 @@ namespace VirtoCommerce.OrdersModule.Data.Services
             order.TaxTotal -= order.DiscountAmount * order.TaxPercentRate;
 
             //Need to round all order totals
-            order.SubTotal = order.SubTotal != null ? Math.Round((decimal)order.SubTotal, 2, MidpointRounding.AwayFromZero) : order.SubTotal;
-            order.SubTotalWithTax = order.SubTotalWithTax != null ? Math.Round((decimal)order.SubTotalWithTax, 2, MidpointRounding.AwayFromZero) : order.SubTotalWithTax;
-            order.SubTotalDiscount = order.SubTotalDiscount != null ? Math.Round((decimal)order.SubTotalDiscount, 2, MidpointRounding.AwayFromZero) : order.SubTotalDiscount;
-            order.SubTotalDiscountWithTax = order.SubTotalDiscountWithTax != null ? Math.Round((decimal)order.SubTotalDiscountWithTax, 2, MidpointRounding.AwayFromZero) : order.SubTotalDiscountWithTax;
-            order.TaxTotal = order.TaxTotal != null ? Math.Round((decimal)order.TaxTotal, 2, MidpointRounding.AwayFromZero) : order.TaxTotal;
-            order.DiscountTotal = order.DiscountTotal != null ? Math.Round((decimal)order.DiscountTotal, 2, MidpointRounding.AwayFromZero) : order.DiscountTotal;
-            order.DiscountTotalWithTax = order.DiscountTotalWithTax != null ? Math.Round((decimal)order.DiscountTotalWithTax, 2, MidpointRounding.AwayFromZero) : order.DiscountTotalWithTax;
-            order.Fee = order.Fee != null ? Math.Round((decimal)order.Fee, 2, MidpointRounding.AwayFromZero) : order.Fee;
-            order.FeeWithTax = order.FeeWithTax != null ? Math.Round((decimal)order.FeeWithTax, 2, MidpointRounding.AwayFromZero) : order.FeeWithTax;
-            order.FeeTotal = order.FeeTotal != null ? Math.Round((decimal)order.FeeTotal, 2, MidpointRounding.AwayFromZero) : order.FeeTotal;
-            order.FeeTotalWithTax = order.FeeTotalWithTax != null ? Math.Round((decimal)order.FeeTotalWithTax, 2, MidpointRounding.AwayFromZero) : order.FeeTotalWithTax;
-            order.ShippingTotal = order.ShippingTotal != null ? Math.Round((decimal)order.ShippingTotal, 2, MidpointRounding.AwayFromZero) : order.ShippingTotal;
-            order.ShippingTotalWithTax = order.ShippingTotalWithTax != null ? Math.Round((decimal)order.ShippingTotal, 2, MidpointRounding.AwayFromZero) : order.ShippingTotalWithTax;
-            order.ShippingSubTotal = order.ShippingSubTotal != null ? Math.Round((decimal)order.ShippingSubTotal, 2, MidpointRounding.AwayFromZero) : order.ShippingSubTotal;
-            order.ShippingSubTotalWithTax = order.ShippingSubTotalWithTax != null ? Math.Round((decimal)order.ShippingSubTotalWithTax, 2, MidpointRounding.AwayFromZero) : order.ShippingSubTotalWithTax;
-            order.PaymentTotal = order.PaymentTotal != null ? Math.Round((decimal)order.PaymentTotal, 2, MidpointRounding.AwayFromZero) : order.PaymentTotal;
-            order.PaymentTotalWithTax = order.PaymentTotalWithTax != null ? Math.Round((decimal)order.PaymentTotalWithTax, 2, MidpointRounding.AwayFromZero) : order.PaymentTotalWithTax;
-            order.PaymentSubTotal = order.PaymentSubTotal != null ? Math.Round((decimal)order.PaymentSubTotal, 2, MidpointRounding.AwayFromZero) : order.PaymentSubTotal;
-            order.PaymentSubTotalWithTax = order.PaymentSubTotalWithTax != null ? Math.Round((decimal)order.PaymentSubTotalWithTax, 2, MidpointRounding.AwayFromZero) : order.PaymentSubTotalWithTax;
-            order.PaymentDiscountTotal = order.PaymentDiscountTotal != null ? Math.Round((decimal)order.PaymentDiscountTotal, 2, MidpointRounding.AwayFromZero) : order.PaymentDiscountTotal;
-            order.PaymentDiscountTotalWithTax = order.PaymentDiscountTotalWithTax != null ? Math.Round((decimal)order.PaymentDiscountTotalWithTax, 2, MidpointRounding.AwayFromZero) : order.PaymentDiscountTotalWithTax;
+            order.SubTotal = order.SubTotal != null ? Math.Round(order.SubTotal.Value, 2, MidpointRounding.AwayFromZero) : order.SubTotal;
+            order.SubTotalWithTax = order.SubTotalWithTax != null ? Math.Round(order.SubTotalWithTax.Value, 2, MidpointRounding.AwayFromZero) : order.SubTotalWithTax;
+            order.SubTotalDiscount = order.SubTotalDiscount != null ? Math.Round(order.SubTotalDiscount.Value, 2, MidpointRounding.AwayFromZero) : order.SubTotalDiscount;
+            order.SubTotalDiscountWithTax = order.SubTotalDiscountWithTax != null ? Math.Round(order.SubTotalDiscountWithTax.Value, 2, MidpointRounding.AwayFromZero) : order.SubTotalDiscountWithTax;
+            order.TaxTotal = order.TaxTotal != null ? Math.Round(order.TaxTotal.Value, 2, MidpointRounding.AwayFromZero) : order.TaxTotal;
+            order.DiscountTotal = order.DiscountTotal != null ? Math.Round(order.DiscountTotal.Value, 2, MidpointRounding.AwayFromZero) : order.DiscountTotal;
+            order.DiscountTotalWithTax = order.DiscountTotalWithTax != null ? Math.Round(order.DiscountTotalWithTax.Value, 2, MidpointRounding.AwayFromZero) : order.DiscountTotalWithTax;
+            order.Fee = order.Fee != null ? Math.Round(order.Fee.Value, 2, MidpointRounding.AwayFromZero) : order.Fee;
+            order.FeeWithTax = order.FeeWithTax != null ? Math.Round(order.FeeWithTax.Value, 2, MidpointRounding.AwayFromZero) : order.FeeWithTax;
+            order.FeeTotal = order.FeeTotal != null ? Math.Round(order.FeeTotal.Value, 2, MidpointRounding.AwayFromZero) : order.FeeTotal;
+            order.FeeTotalWithTax = order.FeeTotalWithTax != null ? Math.Round(order.FeeTotalWithTax.Value, 2, MidpointRounding.AwayFromZero) : order.FeeTotalWithTax;
+            order.ShippingTotal = order.ShippingTotal != null ? Math.Round(order.ShippingTotal.Value, 2, MidpointRounding.AwayFromZero) : order.ShippingTotal;
+            order.ShippingTotalWithTax = order.ShippingTotalWithTax != null ? Math.Round(order.ShippingTotal.Value, 2, MidpointRounding.AwayFromZero) : order.ShippingTotalWithTax;
+            order.ShippingSubTotal = order.ShippingSubTotal != null ? Math.Round(order.ShippingSubTotal.Value, 2, MidpointRounding.AwayFromZero) : order.ShippingSubTotal;
+            order.ShippingSubTotalWithTax = order.ShippingSubTotalWithTax != null ? Math.Round(order.ShippingSubTotalWithTax.Value, 2, MidpointRounding.AwayFromZero) : order.ShippingSubTotalWithTax;
+            order.PaymentTotal = order.PaymentTotal != null ? Math.Round(order.PaymentTotal.Value, 2, MidpointRounding.AwayFromZero) : order.PaymentTotal;
+            order.PaymentTotalWithTax = order.PaymentTotalWithTax != null ? Math.Round(order.PaymentTotalWithTax.Value, 2, MidpointRounding.AwayFromZero) : order.PaymentTotalWithTax;
+            order.PaymentSubTotal = order.PaymentSubTotal != null ? Math.Round(order.PaymentSubTotal.Value, 2, MidpointRounding.AwayFromZero) : order.PaymentSubTotal;
+            order.PaymentSubTotalWithTax = order.PaymentSubTotalWithTax != null ? Math.Round(order.PaymentSubTotalWithTax.Value, 2, MidpointRounding.AwayFromZero) : order.PaymentSubTotalWithTax;
+            order.PaymentDiscountTotal = order.PaymentDiscountTotal != null ? Math.Round(order.PaymentDiscountTotal.Value, 2, MidpointRounding.AwayFromZero) : order.PaymentDiscountTotal;
+            order.PaymentDiscountTotalWithTax = order.PaymentDiscountTotalWithTax != null ? Math.Round(order.PaymentDiscountTotalWithTax.Value, 2, MidpointRounding.AwayFromZero) : order.PaymentDiscountTotalWithTax;
 
             order.Total = order.SubTotal + order.ShippingSubTotal + order.TaxTotal + order.PaymentSubTotal + order.FeeTotal - order.DiscountTotal;
             order.Sum = order.Total;
