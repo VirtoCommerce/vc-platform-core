@@ -15,8 +15,6 @@ Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "VirtoCommerce.Platform.Core
 EndProject
 Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "VirtoCommerce.Platform.Modules", "..\..\VirtoCommerce.Platform.Modules\VirtoCommerce.Platform.Modules.csproj", "{31F15B14-B925-4215-871C-F30FC70FB61D}"
 EndProject
-Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "VirtoCommerce.PricingModule.Core", "..\vc-module-pricing\VirtoCommerce.PricingModule.Core\VirtoCommerce.PricingModule.Core.csproj", "{E4F4DB88-50D8-4C75-8FBF-4716EFB3D58F}"
-EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
 		Debug|Any CPU = Debug|Any CPU

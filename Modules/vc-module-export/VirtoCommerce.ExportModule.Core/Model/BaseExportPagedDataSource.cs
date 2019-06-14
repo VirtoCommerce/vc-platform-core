@@ -1,10 +1,9 @@
-using System;
 using System.Collections;
 using VirtoCommerce.Platform.Core.Common;
 
 namespace VirtoCommerce.ExportModule.Core.Model
 {
-    public class BaseExportPagedDataSource : IPagedDataSource
+    public abstract class BaseExportPagedDataSource : IPagedDataSource
     {
         protected class FetchResult
         {
@@ -24,14 +23,7 @@ namespace VirtoCommerce.ExportModule.Core.Model
         private int _totalCount = -1;
         private SearchCriteriaBase _searchCriteria;
 
-        public BaseExportPagedDataSource()
-        {
-        }
-
-        protected virtual FetchResult FetchUsingService(SearchCriteriaBase searchCriteria)
-        {
-            throw new NotImplementedException();
-        }
+        protected abstract FetchResult FetchUsingService(SearchCriteriaBase searchCriteria);
 
         public virtual IEnumerable FetchNextPage()
         {

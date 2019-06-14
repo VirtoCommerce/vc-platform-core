@@ -1,8 +1,9 @@
+using System;
 using VirtoCommerce.ExportModule.Core.Model;
 
 namespace VirtoCommerce.ExportModule.Core.Services
 {
-    public interface IExportProvider
+    public interface IExportProvider : IDisposable
     {
         string TypeName { get; }
         IExportProviderConfiguration Configuration { get; }

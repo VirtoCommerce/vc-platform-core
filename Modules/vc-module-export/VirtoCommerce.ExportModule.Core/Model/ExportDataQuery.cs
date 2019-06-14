@@ -9,15 +9,7 @@ namespace VirtoCommerce.ExportModule.Core.Model
         public string Sort { get; set; }
         public string[] IncludedProperties { get; set; }
 
-        public virtual SearchCriteriaBase ToSearchCriteria()
-        {
-            throw new System.NotImplementedException();
-        }
-
-        public virtual void FromSearchCriteria(SearchCriteriaBase searchCriteria)
-        {
-            throw new System.NotImplementedException();
-        }
-
+        public abstract SearchCriteriaBase ToSearchCriteria();
+        public abstract void FromSearchCriteria(SearchCriteriaBase searchCriteria);
     }
 }

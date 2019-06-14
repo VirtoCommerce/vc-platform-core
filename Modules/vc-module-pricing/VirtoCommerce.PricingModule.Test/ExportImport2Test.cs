@@ -35,14 +35,14 @@ namespace VirtoCommerce.PricingModule.Test
 
             var dataExporter = new DataExporter(resolver, new ExportProviderFactory());
 
-            var ms = new MemoryStream();
-
-            dataExporter.Export(
-                ms,
-                new ExportDataRequest() { DataQuery = new PriceExportDataQuery(), ExportTypeName = typeof(Price).FullName, ProviderName = nameof(JsonExportProvider) },
-                new System.Action<ExportProgressInfo>(x => Console.WriteLine(x.Description)),
-                new System.Threading.CancellationToken());
-
+            using (var ms = new MemoryStream())
+            {
+                dataExporter.Export(
+                    ms,
+                    new ExportDataRequest() { DataQuery = new PriceExportDataQuery(), ExportTypeName = typeof(Price).FullName, ProviderName = nameof(CsvExportProvider) },
+                    new System.Action<ExportProgressInfo>(x => Console.WriteLine(x.Description)),
+                    new System.Threading.CancellationToken());
+            }
         }
 
         /// <summary>

@@ -24,11 +24,6 @@
   </ItemGroup>
 
   <ItemGroup>
-    <ProjectReference Include="..\..\vc-module-pricing\VirtoCommerce.PricingModule.Core\VirtoCommerce.PricingModule.Core.csproj" />
-    <ProjectReference Include="..\VirtoCommerce.ExportModule.Core\VirtoCommerce.ExportModule.Core.csproj" />
-  </ItemGroup>
-
-  <ItemGroup>
     <Reference Include="Microsoft.Extensions.Logging.Abstractions" />
   </ItemGroup>
 
