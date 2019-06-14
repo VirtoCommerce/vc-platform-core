@@ -15,7 +15,7 @@ namespace VirtoCommerce.ExportModule.Data.Services
         {
             var type = typeof(T);
 
-            if (_knownExportTypes.TryGetValue(type, out var result))
+            if (!_knownExportTypes.TryGetValue(type, out var result))
             {
                 _knownExportTypes.Add(type, new ExportedTypeDefinition()
                 {
