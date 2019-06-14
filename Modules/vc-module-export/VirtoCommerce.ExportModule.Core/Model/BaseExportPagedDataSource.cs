@@ -17,8 +17,8 @@ namespace VirtoCommerce.ExportModule.Core.Model
             }
         }
 
-        public int PageSize { get; set; }
-        public int CurrentPageNumber { get; set; }
+        public int PageSize { get; private set; }
+        public int CurrentPageNumber { get; private set; }
         public ExportDataQuery DataQuery { get; set; }
         private int _totalCount = -1;
         private SearchCriteriaBase _searchCriteria;
