@@ -5,7 +5,6 @@ using VirtoCommerce.PricingModule.Core.Model.Search;
 
 namespace VirtoCommerce.PricingModule.Data.ExportImport
 {
-
     public class PriceExportDataQuery : ExportDataQuery
     {
         public override SearchCriteriaBase ToSearchCriteria()

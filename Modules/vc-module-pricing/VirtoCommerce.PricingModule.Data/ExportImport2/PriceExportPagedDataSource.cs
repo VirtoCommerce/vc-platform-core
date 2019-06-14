@@ -5,7 +5,6 @@ using VirtoCommerce.PricingModule.Core.Services;
 
 namespace VirtoCommerce.PricingModule.Data.ExportImport
 {
-
     public class PriceExportPagedDataSource : BaseExportPagedDataSource
     {
         readonly IPricingSearchService _searchService;

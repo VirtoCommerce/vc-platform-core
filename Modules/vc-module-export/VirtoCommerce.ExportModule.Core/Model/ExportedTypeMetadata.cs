@@ -8,7 +8,6 @@ namespace VirtoCommerce.ExportModule.Core.Model
 {
     public class ExportedTypeMetadata : ValueObject
     {
-
         public string Version { get; set; }
         public ExportTypePropertyInfo[] PropertiesInfo { get; set; }
 
