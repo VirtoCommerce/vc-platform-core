@@ -24,7 +24,6 @@ namespace VirtoCommerce.ExportModule.Core.Model
         private int _totalCount = -1;
         private SearchCriteriaBase _searchCriteria;
 
-
         public BaseExportPagedDataSource()
         {
         }

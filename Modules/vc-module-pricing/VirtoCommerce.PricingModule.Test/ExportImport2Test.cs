@@ -1,3 +1,5 @@
+using System;
+using System.IO;
 using System.Threading.Tasks;
 using Moq;
 using Newtonsoft.Json;
@@ -17,11 +19,12 @@ namespace VirtoCommerce.PricingModule.Test
         [Fact]
         public async Task TestExport()
         {
+            // This is temporary (for debug purposes) full test of prices export
 
             IKnownExportTypesRegistrar registrar = new KnownExportTypesService();
             registrar.RegisterType<Price>();
-            var resolver = (IKnownExportTypesResolver)registrar;
 
+            var resolver = (IKnownExportTypesResolver)registrar;
 
             var searchServiceMock = new Mock<IPricingSearchService>();
             searchServiceMock.Setup(x => x.SearchPricesAsync(It.IsAny<PricesSearchCriteria>())).ReturnsAsync(GetTestPriceResult());
@@ -30,14 +33,22 @@ namespace VirtoCommerce.PricingModule.Test
                 .WithDataSourceFactory(dataQuery => new PriceExportPagedDataSource(searchServiceMock.Object) { DataQuery = dataQuery })
                 .WithMetadata(ExportedTypeMetadata.GetFromType<Price>());
 
-            var pagedDataSource = resolver.ResolveExportedTypeDefinition(typeof(Price).FullName).ExportedDataSourceFactory(new PriceExportDataQuery());
+            var dataExporter = new DataExporter(resolver, new ExportProviderFactory());
 
-            pagedDataSource.PageSize = 50;
-            var result = pagedDataSource.FetchNextPage();
+            var ms = new MemoryStream();
 
+            dataExporter.Export(
+                ms,
+                new ExportDataRequest() { DataQuery = new PriceExportDataQuery(), ExportTypeName = typeof(Price).FullName, ProviderName = nameof(JsonExportProvider) },
+                new System.Action<ExportProgressInfo>(x => Console.WriteLine(x.Description)),
+                new System.Threading.CancellationToken());
 
         }
 
+        /// <summary>
+        /// There is fake prices set
+        /// </summary>
+        /// <returns></returns>
         private PriceSearchResult GetTestPriceResult()
         {
             #region resultInJSON
