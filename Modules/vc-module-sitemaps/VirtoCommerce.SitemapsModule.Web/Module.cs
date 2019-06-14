@@ -22,13 +22,22 @@ using VirtoCommerce.Tools;
 
 namespace VirtoCommerce.SitemapsModule.Web
 {
+    /// <summary>
+    /// 
+    /// </summary>
     public class Module : IModule, IExportSupport, IImportSupport
     {
         private IApplicationBuilder _appBuilder;
 
-
+        /// <summary>
+        /// 
+        /// </summary>
         public ManifestModuleInfo ModuleInfo { get; set; }
 
+        /// <summary>
+        /// 
+        /// </summary>
+        /// <param name="serviceCollection"></param>
         public void Initialize(IServiceCollection serviceCollection)
         {
             var configuration = serviceCollection.BuildServiceProvider().GetRequiredService<IConfiguration>();
@@ -53,6 +62,10 @@ namespace VirtoCommerce.SitemapsModule.Web
             serviceCollection.AddSingleton<SitemapExportImport>();
         }
 
+        /// <summary>
+        /// 
+        /// </summary>
+        /// <param name="appBuilder"></param>
         public void PostInitialize(IApplicationBuilder appBuilder)
         {
             _appBuilder = appBuilder;
@@ -78,10 +91,21 @@ namespace VirtoCommerce.SitemapsModule.Web
             permissionsRegistrar.RegisterPermissions(allPermissions);
         }
 
+        /// <summary>
+        /// 
+        /// </summary>
         public void Uninstall()
         {
         }
 
+        /// <summary>
+        /// 
+        /// </summary>
+        /// <param name="outStream"></param>
+        /// <param name="options"></param>
+        /// <param name="progressCallback"></param>
+        /// <param name="cancellationToken"></param>
+        /// <returns></returns>
         public async Task ExportAsync(Stream outStream, ExportImportOptions options, Action<ExportImportProgressInfo> progressCallback,
             ICancellationToken cancellationToken)
         {
@@ -89,6 +113,14 @@ namespace VirtoCommerce.SitemapsModule.Web
                 progressCallback, cancellationToken);
         }
 
+        /// <summary>
+        /// 
+        /// </summary>
+        /// <param name="inputStream"></param>
+        /// <param name="options"></param>
+        /// <param name="progressCallback"></param>
+        /// <param name="cancellationToken"></param>
+        /// <returns></returns>
         public async Task ImportAsync(Stream inputStream, ExportImportOptions options, Action<ExportImportProgressInfo> progressCallback,
             ICancellationToken cancellationToken)
         {
