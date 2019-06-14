@@ -14,8 +14,11 @@ namespace VirtoCommerce.ExportModule.Web
         public void Initialize(IServiceCollection serviceCollection)
         {
             var configuration = serviceCollection.BuildServiceProvider().GetRequiredService<IConfiguration>();
+
             serviceCollection.AddSingleton<IKnownExportTypesRegistrar, KnownExportTypesService>();
             serviceCollection.AddSingleton<IKnownExportTypesResolver, KnownExportTypesService>();
+            serviceCollection.AddScoped<IExportProviderFactory, ExportProviderFactory>();
+            serviceCollection.AddScoped<IDataExporter, DataExporter>();
         }
 
         public void PostInitialize(IApplicationBuilder appBuilder)

@@ -19,6 +19,11 @@
   </ItemGroup>
 
   <ItemGroup>
+    <ProjectReference Include="..\..\..\VirtoCommerce.Platform.Core\VirtoCommerce.Platform.Core.csproj" />
+    <ProjectReference Include="..\VirtoCommerce.ExportModule.Core\VirtoCommerce.ExportModule.Core.csproj" />
+  </ItemGroup>
+
+  <ItemGroup>
     <ProjectReference Include="..\..\vc-module-pricing\VirtoCommerce.PricingModule.Core\VirtoCommerce.PricingModule.Core.csproj" />
     <ProjectReference Include="..\VirtoCommerce.ExportModule.Core\VirtoCommerce.ExportModule.Core.csproj" />
   </ItemGroup>
