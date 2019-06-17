@@ -1,6 +1,3 @@
-using System;
-using System.Collections.Generic;
-using System.Text;
 using VirtoCommerce.Platform.Core.Common;
 
 namespace VirtoCommerce.ExportModule.Core.Model
@@ -11,5 +8,8 @@ namespace VirtoCommerce.ExportModule.Core.Model
         public string[] ObjectIds { get; set; }
         public string Sort { get; set; }
         public string[] IncludedProperties { get; set; }
+
+        public abstract SearchCriteriaBase ToSearchCriteria();
+        public abstract void FromSearchCriteria(SearchCriteriaBase searchCriteria);
     }
 }
