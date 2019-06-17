@@ -23,7 +23,7 @@ namespace VirtoCommerce.Platform.Core.Settings
         /// <summary>
         /// return true if Value or AllowedValues is not empty
         /// </summary>
-        public bool ItHasValues => Value != null || !AllowedValues.IsNullOrEmpty();
+        public bool ItHasValues => !Values.IsNullOrEmpty() || !AllowedValues.IsNullOrEmpty();
 
         /// <summary>
         /// Setting may belong to any object in system
@@ -32,7 +32,10 @@ namespace VirtoCommerce.Platform.Core.Settings
 
         public string ObjectType { get; set; }
 
-        public object Value { get; set; }
+        /// <summary>
+        /// Settings values
+        /// </summary>
+        public object[] Values { get; set; }
 
         protected override IEnumerable<object> GetEqualityComponents()
         {

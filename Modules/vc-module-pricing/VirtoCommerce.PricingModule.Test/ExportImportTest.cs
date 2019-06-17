@@ -23,7 +23,7 @@ namespace VirtoCommerce.PricingModule.Test
 
             var settingsManager = GetSettingsManager();
 
-            settingsManager.Setup(s => s.GetObjectSettingAsync(It.IsAny<string>(), It.IsAny<string>(), It.IsAny<string>())).ReturnsAsync(new ObjectSettingEntry { Value = 2 });
+            settingsManager.Setup(s => s.GetObjectSettingAsync(It.IsAny<string>(), It.IsAny<string>(), It.IsAny<string>())).ReturnsAsync(new ObjectSettingEntry { Values = new object[] { 2 } });
 
             var importProcessor = GetImportExportProcessor(pricingService.Object, settingsManager.Object);
 

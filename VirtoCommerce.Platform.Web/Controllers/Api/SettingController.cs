@@ -1,3 +1,4 @@
+using System;
 using System.Linq;
 using System.Threading.Tasks;
 using Microsoft.AspNetCore.Authorization;
@@ -94,22 +95,21 @@ namespace VirtoCommerce.Platform.Web.Controllers.Api
         public async Task<ActionResult<object[]>> GetArrayAsync(string name)
         {
             var setting = await _settingsManager.GetObjectSettingAsync(name);
-            object[] result = null;
+            var result = Array.Empty<object>();
             if (setting != null)
             {
                 if (!setting.AllowedValues.IsNullOrEmpty())
                 {
                     result = setting.AllowedValues;
                 }
-                else if (setting.Value != null)
+                else if (!setting.Values.IsNullOrEmpty())
                 {
-                    result = new[] { setting.Value };
+                    result = setting.Values;
                 }
                 else if (setting.DefaultValue != null)
                 {
                     result = new[] { setting.DefaultValue };
                 }
-
             }
             return Ok(result);
         }

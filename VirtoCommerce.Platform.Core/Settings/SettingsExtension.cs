@@ -1,4 +1,5 @@
 using System;
+using System.Collections;
 using System.Collections.Generic;
 using System.Globalization;
 using System.Linq;
@@ -20,7 +21,6 @@ namespace VirtoCommerce.Platform.Core.Settings
             {
                 throw new ArgumentNullException(nameof(entity));
             }
-
 
             //Deep load settings values for all object contains settings
             var hasSettingsObjects = entity.GetFlatObjectsListWithInterface<IHasSettings>();
@@ -97,52 +97,93 @@ namespace VirtoCommerce.Platform.Core.Settings
             await manager.RemoveObjectSettingsAsync(foDeleteSettings);
         }
 
-        public static T GetValue<T>(this ISettingsManager manager, string name, T defaultValue)
+        public static T GetValue<T>(this ISettingsManager manager, string settingName, T defaultValue)
         {
-            return manager.GetValueAsync(name, defaultValue).GetAwaiter().GetResult();
+            return manager.GetValueAsync(settingName, defaultValue).GetAwaiter().GetResult();
         }
 
-        public static async Task<T> GetValueAsync<T>(this ISettingsManager manager, string name, T defaultValue)
+        public static async Task<T> GetValueAsync<T>(this ISettingsManager manager, string settingName, T defaultValue)
         {
             var result = defaultValue;
+            ObjectSettingEntry objectSetting = null;
 
             try
             {
-                var objectSetting = await manager.GetObjectSettingAsync(name);
-                if (objectSetting.Value != null)
-                {
-                    result = (T)objectSetting.Value;
-                }
+                objectSetting = await manager.GetObjectSettingAsync(settingName);
             }
             catch (PlatformException)
             {
                 // This exception can be thrown when there is no setting registered with given name.
                 // VC Platform 2.x was returning the default value in this case, so the platform 3.x will do the same.
             }
+
+            if (objectSetting != null)
+            {
+                result = new List<ObjectSettingEntry> { objectSetting }.GetSettingValue(settingName, defaultValue);
+            }
+
             return result;
         }
 
-        public static void SetValue<T>(this ISettingsManager manager, string name, T value)
+        public static void SetValue<T>(this ISettingsManager manager, string settingName, T value)
         {
-            manager.SetValueAsync(name, value).GetAwaiter().GetResult();
+            manager.SetValueAsync(settingName, new[] { value }).GetAwaiter().GetResult();
         }
 
-        public static async Task SetValueAsync<T>(this ISettingsManager manager, string name, T value)
+        public static void SetValue<T>(this ISettingsManager manager, string settingName, T[] values)
         {
-            var type = typeof(T);
-            var objectSetting = await manager.GetObjectSettingAsync(name);
-            objectSetting.Value = value;
+            manager.SetValueAsync(settingName, values).GetAwaiter().GetResult();
+        }
+
+        public static async Task SetValueAsync<T>(this ISettingsManager manager, string settingName, T value)
+        {
+            await manager.SetValueAsync(settingName, new[] { value });
+        }
+
+        public static async Task SetValueAsync<T>(this ISettingsManager manager, string settingName, T[] values)
+        {
+            var objectSetting = await manager.GetObjectSettingAsync(settingName);
+            if (!objectSetting.IsMultiValue && values.Length > 1)
+            {
+                throw new Exception($"You can't save multiple values to none MultiValue settings, set {nameof(objectSetting.IsMultiValue)} to true");
+            }
+
+            objectSetting.Values = values.Cast<object>().ToArray();
             await manager.SaveObjectSettingsAsync(new[] { objectSetting });
         }
 
-        public static T GetSettingValue<T>(this IEnumerable<ObjectSettingEntry> objectSettings, string settingName, T defaulValue)
+        public static T GetSettingValue<T>(this IEnumerable<ObjectSettingEntry> objectSettings, string settingName, T defaultValue)
         {
-            var retVal = defaulValue;
+            var retVal = defaultValue;
             var setting = objectSettings.FirstOrDefault(x => x.Name.EqualsInvariant(settingName));
-            if (setting != null && setting.Value != null)
+
+            if (setting != null)
             {
-                retVal = (T)Convert.ChangeType(setting.Value, typeof(T), CultureInfo.InvariantCulture);
+                var isCollection = typeof(IEnumerable).IsAssignableFrom(typeof(T));
+
+                if (isCollection && !setting.IsMultiValue)
+                {
+                    throw new Exception("You can't get multiply values from single value setting");
+                }
+
+                if (setting.IsMultiValue)
+                {
+                    throw new Exception("You can't get single value from MultiValue setting");
+                }
+
+                if (!setting.Values.IsNullOrEmpty())
+                {
+                    if (setting.IsMultiValue)
+                    {
+                        retVal = (T)Convert.ChangeType(setting.Values, typeof(T), CultureInfo.InvariantCulture);
+                    }
+                    else
+                    {
+                        retVal = (T)Convert.ChangeType(setting.Values.FirstOrDefault(), typeof(T), CultureInfo.InvariantCulture);
+                    }
+                }
             }
+
             return retVal;
         }
     }

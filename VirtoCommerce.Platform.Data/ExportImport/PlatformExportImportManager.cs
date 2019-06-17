@@ -303,7 +303,11 @@ namespace VirtoCommerce.Platform.Data.ExportImport
                         progressCallback(progressInfo);
                         foreach (var module in manifest.Modules)
                         {
-                            var moduleSettings = await _settingsManager.GetObjectSettingsAsync(_settingsManager.AllRegisteredSettings.Where(x => x.ModuleId == module.Id).Select(x => x.Name));
+                            var settingsNames = _settingsManager.AllRegisteredSettings
+                                                                .Where(x => x.ModuleId == module.Id)
+                                                                .Select(x => x.Name);
+
+                            var moduleSettings = await _settingsManager.GetObjectSettingsAsync(settingsNames);
                             //Export only settings with set values
                             foreach (var setting in moduleSettings.Where(x => x.ItHasValues))
                             {

@@ -235,7 +235,7 @@ Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "VirtoCommerce.ShippingModul
 EndProject
 Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "VirtoCommerce.ShippingModule.Data", "Modules\vc-module-shipping\VirtoCommerce.ShippingModule.Data\VirtoCommerce.ShippingModule.Data.csproj", "{A8391444-C053-468D-A082-C2E58E75381C}"
 EndProject
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "VirtoCommerce.ShippingModule.Web", "Modules\vc-module-shipping\VirtoCommerce.ShippingModule.Web\VirtoCommerce.ShippingModule.Web.csproj", "{A18C318A-A099-465B-A4D3-6480FD93B94C}"
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "VirtoCommerce.ShippingModule.Web", "Modules\vc-module-shipping\VirtoCommerce.ShippingModule.Web\VirtoCommerce.ShippingModule.Web.csproj", "{A18C318A-A099-465B-A4D3-6480FD93B94C}"
 EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
@@ -591,18 +591,6 @@ Global
 		{D609CE39-BD8F-4794-AA37-EAE5BEF8839F}.Debug|Any CPU.Build.0 = Debug|Any CPU
 		{D609CE39-BD8F-4794-AA37-EAE5BEF8839F}.Release|Any CPU.ActiveCfg = Release|Any CPU
 		{D609CE39-BD8F-4794-AA37-EAE5BEF8839F}.Release|Any CPU.Build.0 = Release|Any CPU
-		{AC642CE9-0394-4174-92B1-B89669F07196}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
-		{AC642CE9-0394-4174-92B1-B89669F07196}.Debug|Any CPU.Build.0 = Debug|Any CPU
-		{AC642CE9-0394-4174-92B1-B89669F07196}.Release|Any CPU.ActiveCfg = Release|Any CPU
-		{AC642CE9-0394-4174-92B1-B89669F07196}.Release|Any CPU.Build.0 = Release|Any CPU
-		{A8391444-C053-468D-A082-C2E58E75381C}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
-		{A8391444-C053-468D-A082-C2E58E75381C}.Debug|Any CPU.Build.0 = Debug|Any CPU
-		{A8391444-C053-468D-A082-C2E58E75381C}.Release|Any CPU.ActiveCfg = Release|Any CPU
-		{A8391444-C053-468D-A082-C2E58E75381C}.Release|Any CPU.Build.0 = Release|Any CPU
-		{A18C318A-A099-465B-A4D3-6480FD93B94C}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
-		{A18C318A-A099-465B-A4D3-6480FD93B94C}.Debug|Any CPU.Build.0 = Debug|Any CPU
-		{A18C318A-A099-465B-A4D3-6480FD93B94C}.Release|Any CPU.ActiveCfg = Release|Any CPU
-		{A18C318A-A099-465B-A4D3-6480FD93B94C}.Release|Any CPU.Build.0 = Release|Any CPU
 		{5052B473-5CCC-43B5-AB8B-62461B192BCF}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
 		{5052B473-5CCC-43B5-AB8B-62461B192BCF}.Debug|Any CPU.Build.0 = Debug|Any CPU
 		{5052B473-5CCC-43B5-AB8B-62461B192BCF}.Release|Any CPU.ActiveCfg = Release|Any CPU
@@ -615,6 +603,18 @@ Global
 		{D57464F0-D36D-4362-8134-66ABEE2C9C8D}.Debug|Any CPU.Build.0 = Debug|Any CPU
 		{D57464F0-D36D-4362-8134-66ABEE2C9C8D}.Release|Any CPU.ActiveCfg = Release|Any CPU
 		{D57464F0-D36D-4362-8134-66ABEE2C9C8D}.Release|Any CPU.Build.0 = Release|Any CPU
+		{AC642CE9-0394-4174-92B1-B89669F07196}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{AC642CE9-0394-4174-92B1-B89669F07196}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{AC642CE9-0394-4174-92B1-B89669F07196}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{AC642CE9-0394-4174-92B1-B89669F07196}.Release|Any CPU.Build.0 = Release|Any CPU
+		{A8391444-C053-468D-A082-C2E58E75381C}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{A8391444-C053-468D-A082-C2E58E75381C}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{A8391444-C053-468D-A082-C2E58E75381C}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{A8391444-C053-468D-A082-C2E58E75381C}.Release|Any CPU.Build.0 = Release|Any CPU
+		{A18C318A-A099-465B-A4D3-6480FD93B94C}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{A18C318A-A099-465B-A4D3-6480FD93B94C}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{A18C318A-A099-465B-A4D3-6480FD93B94C}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{A18C318A-A099-465B-A4D3-6480FD93B94C}.Release|Any CPU.Build.0 = Release|Any CPU
 	EndGlobalSection
 	GlobalSection(SolutionProperties) = preSolution
 		HideSolutionNode = FALSE

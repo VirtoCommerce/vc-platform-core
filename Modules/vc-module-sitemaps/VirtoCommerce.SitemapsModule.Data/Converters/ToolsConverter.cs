@@ -29,7 +29,7 @@ namespace VirtoCommerce.SitemapsModule.Data.Converters
                 var seoLinksTypeSetting = store.Settings.FirstOrDefault(s => s.Name == "Stores.SeoLinksType");
                 if (seoLinksTypeSetting != null)
                 {
-                    seoLinksType = EnumUtility.SafeParse(seoLinksTypeSetting.Value?.ToString(), Tools.Models.SeoLinksType.Collapsed);
+                    seoLinksType = EnumUtility.SafeParse(seoLinksTypeSetting.Values?.FirstOrDefault()?.ToString(), Tools.Models.SeoLinksType.Collapsed);
                 }
             }
 

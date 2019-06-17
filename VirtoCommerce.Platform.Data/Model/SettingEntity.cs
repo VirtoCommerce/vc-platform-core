@@ -13,6 +13,7 @@ namespace VirtoCommerce.Platform.Data.Model
         public SettingEntity()
         {
             SettingValues = new NullCollection<SettingValueEntity>();
+            SettingAllowedValues = new NullCollection<SettingValueEntity>();
         }
 
         [StringLength(128)]
@@ -24,7 +25,19 @@ namespace VirtoCommerce.Platform.Data.Model
         [StringLength(128)]
         public string Name { get; set; }
 
+        public bool IsDictionary { get; set; }
+
+        public bool IsMultiValue { get; set; }
+
+        /// <summary>
+        /// Values for current settings
+        /// </summary>
         public virtual ObservableCollection<SettingValueEntity> SettingValues { get; set; }
+
+        /// <summary>
+        /// Allowed values that settings can have
+        /// </summary>
+        public virtual ObservableCollection<SettingValueEntity> SettingAllowedValues { get; set; }
 
         public virtual ObjectSettingEntry ToModel(ObjectSettingEntry objSetting)
         {
@@ -36,16 +49,11 @@ namespace VirtoCommerce.Platform.Data.Model
             objSetting.Name = Name;
             objSetting.ObjectType = ObjectType;
             objSetting.ObjectId = ObjectId;
-            var values = SettingValues.Select(x => x.GetValue()).ToArray();
+            objSetting.IsDictionary = IsDictionary;
+            objSetting.IsMultiValue = IsMultiValue;
 
-            if (objSetting.IsDictionary)
-            {
-                objSetting.AllowedValues = values;
-            }
-            else
-            {
-                objSetting.Value = values.FirstOrDefault();
-            }
+            objSetting.Values = SettingValues.Select(x => x.GetValue()).ToArray();
+            objSetting.AllowedValues = SettingAllowedValues.Select(x => x.GetValue()).ToArray();
 
             return objSetting;
         }
@@ -59,13 +67,14 @@ namespace VirtoCommerce.Platform.Data.Model
             ObjectType = objectSettingEntry.ObjectType;
             ObjectId = objectSettingEntry.ObjectId;
             Name = objectSettingEntry.Name;
+
             if (objectSettingEntry.IsDictionary)
             {
-                SettingValues = new ObservableCollection<SettingValueEntity>(objectSettingEntry.AllowedValues.Select(x => new SettingValueEntity { }.SetValue(objectSettingEntry.ValueType, x)));
+                SettingValues = new ObservableCollection<SettingValueEntity>(objectSettingEntry.AllowedValues.Select(x => new SettingValueEntity().SetValue(objectSettingEntry.ValueType, x)));
             }
             else
             {
-                SettingValues = new ObservableCollection<SettingValueEntity>(new[] { new SettingValueEntity { }.SetValue(objectSettingEntry.ValueType, objectSettingEntry.Value) });
+                SettingValues = new ObservableCollection<SettingValueEntity>(new[] { new SettingValueEntity().SetValue(objectSettingEntry.ValueType, objectSettingEntry.Values) });
             }
             return this;
         }
