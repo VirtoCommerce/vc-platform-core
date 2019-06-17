@@ -13,7 +13,6 @@ namespace VirtoCommerce.ExportModule.Tests
             var metadata = ExportedTypeMetadata.GetFromType<Pricelist>();
             var props = metadata.PropertiesInfo.Select(x => x.Name);
 
-
             // Check if all own property detected
             Assert.Contains("Name", props);
             Assert.Contains("Description", props);
@@ -25,8 +24,9 @@ namespace VirtoCommerce.ExportModule.Tests
             Assert.Contains("ShouldSerializeAuditableProperties", props);
             Assert.Contains("Id", props);
 
-            Assert.DoesNotContain("Pricelist.Price", props); // Check it doesn't contains recursive links
-            Assert.DoesNotContain("Price.Pricelist.Assignments", props); // Check it doesn't contains recursive links
+            // Check it doesn't contains recursive links
+            Assert.DoesNotContain("Pricelist.Price", props);
+            Assert.DoesNotContain("Price.Pricelist.Assignments", props);
 
         }
     }
