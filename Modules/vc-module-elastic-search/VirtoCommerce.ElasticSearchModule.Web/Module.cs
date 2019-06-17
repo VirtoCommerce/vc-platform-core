@@ -5,7 +5,6 @@ using VirtoCommerce.ElasticSearchModule.Data;
 using VirtoCommerce.Platform.Core.Common;
 using VirtoCommerce.Platform.Core.Modularity;
 using VirtoCommerce.Platform.Core.Settings;
-using VirtoCommerce.SearchModule.Core.Model;
 using VirtoCommerce.SearchModule.Core.Services;
 
 namespace VirtoCommerce.ElasticSearchModule.Web
@@ -13,17 +12,15 @@ namespace VirtoCommerce.ElasticSearchModule.Web
     public class Module : IModule
     {
         public ManifestModuleInfo ModuleInfo { get; set; }
+
         public void Initialize(IServiceCollection serviceCollection)
         {
-            var snapshot = serviceCollection.BuildServiceProvider();
-            var configuration = snapshot.GetService<IConfiguration>();
-            var searchProvider = configuration.GetValue<string>("Search:Provider");
+            var configuration = serviceCollection.BuildServiceProvider().GetService<IConfiguration>();
+            var provider = configuration.GetValue<string>("Search:Provider");
 
-            if (searchProvider.EqualsInvariant("Elasticsearch"))
+            if (provider.EqualsInvariant("ElasticSearch"))
             {
-                var searchConnectionString = configuration.GetValue<string>("Search:Elasticsearch:SearchConnectionString");
-                var searchConnection = new SearchConnection(searchConnectionString, searchProvider);
-                serviceCollection.AddSingleton<ISearchConnection>(searchConnection);
+                serviceCollection.Configure<ElasticSearchOptions>(configuration.GetSection("Search:ElasticSearch"));
                 serviceCollection.AddSingleton<ISearchProvider, ElasticSearchProvider>();
             }
         }

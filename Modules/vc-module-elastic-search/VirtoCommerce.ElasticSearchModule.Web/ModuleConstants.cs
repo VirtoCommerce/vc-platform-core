@@ -11,7 +11,7 @@ namespace VirtoCommerce.ElasticSearchModule.Web
             {
                 private static readonly SettingDescriptor IndexTotalFieldsLimit = new SettingDescriptor
                 {
-                    Name = "VirtoCommerce.Search.Elasticsearch.IndexTotalFieldsLimit",
+                    Name = "VirtoCommerce.Search.ElasticSearch.IndexTotalFieldsLimit",
                     GroupName = "Platform|General",
                     ValueType = SettingValueType.Integer,
                     DefaultValue = 1000
@@ -19,7 +19,7 @@ namespace VirtoCommerce.ElasticSearchModule.Web
 
                 private static readonly SettingDescriptor TokenFilter = new SettingDescriptor
                 {
-                    Name = "VirtoCommerce.Search.Elasticsearch.TokenFilter",
+                    Name = "VirtoCommerce.Search.ElasticSearch.TokenFilter",
                     GroupName = "Platform|General",
                     ValueType = SettingValueType.ShortText,
                     DefaultValue = "custom_edge_ngram"
@@ -27,7 +27,7 @@ namespace VirtoCommerce.ElasticSearchModule.Web
 
                 private static readonly SettingDescriptor MinGram = new SettingDescriptor
                 {
-                    Name = "VirtoCommerce.Search.Elasticsearch.NGramTokenFilter.MinGram",
+                    Name = "VirtoCommerce.Search.ElasticSearch.NGramTokenFilter.MinGram",
                     GroupName = "Platform|General",
                     ValueType = SettingValueType.Integer,
                     DefaultValue = 1
@@ -35,7 +35,7 @@ namespace VirtoCommerce.ElasticSearchModule.Web
 
                 private static readonly SettingDescriptor MaxGram = new SettingDescriptor
                 {
-                    Name = "VirtoCommerce.Search.Elasticsearch.NGramTokenFilter.MaxGram",
+                    Name = "VirtoCommerce.Search.ElasticSearch.NGramTokenFilter.MaxGram",
                     GroupName = "Platform|General",
                     ValueType = SettingValueType.Integer,
                     DefaultValue = 20

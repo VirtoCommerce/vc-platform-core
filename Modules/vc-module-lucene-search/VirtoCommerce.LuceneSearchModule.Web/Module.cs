@@ -10,8 +10,8 @@ namespace VirtoCommerce.LuceneSearchModule.Web
 {
     public class Module : IModule
     {
-
         public ManifestModuleInfo ModuleInfo { get; set; }
+
         public void Initialize(IServiceCollection serviceCollection)
         {
             var configuration = serviceCollection.BuildServiceProvider().GetService<IConfiguration>();
