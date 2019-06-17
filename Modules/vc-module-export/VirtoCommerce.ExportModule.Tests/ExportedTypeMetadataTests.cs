@@ -1,21 +1,32 @@
-using System.Threading.Tasks;
-using Xunit;
-using VirtoCommerce.ExportModule.Core.Model;
 using System.Linq;
+using System.Threading.Tasks;
+using VirtoCommerce.ExportModule.Core.Model;
+using Xunit;
 
 namespace VirtoCommerce.ExportModule.Tests
 {
     public class ExportedTypeMetadataTests
     {
         [Fact]
-        public async Task GetFromType_Price_BuiltCorrectly()
+        public async Task GetFromType_Pricelist_BuiltCorrectly()
         {
-            var metadata = ExportedTypeMetadata.GetFromType<Price>();
+            var metadata = ExportedTypeMetadata.GetFromType<Pricelist>();
             var props = metadata.PropertiesInfo.Select(x => x.Name);
 
-            Assert.Contains("Currency", props); // Check if own property detected
-            Assert.Contains("Pricelist.Currency", props); // Check if property is an entity detected
-            Assert.Contains("Pricelist.Assignments.Name", props); // Check if nested type is an enumerable of entities and a property of such entity detected too
+
+            // Check if all own property detected
+            Assert.Contains("Name", props);
+            Assert.Contains("Description", props);
+            Assert.Contains("Currency", props);
+            Assert.Contains("CreatedDate", props);
+            Assert.Contains("ModifiedDate", props);
+            Assert.Contains("CreatedBy", props);
+            Assert.Contains("ModifiedBy", props);
+            Assert.Contains("ShouldSerializeAuditableProperties", props);
+            Assert.Contains("Id", props);
+
+            Assert.DoesNotContain("Pricelist.Price", props); // Check it doesn't contains recursive links
+            Assert.DoesNotContain("Price.Pricelist.Assignments", props); // Check it doesn't contains recursive links
 
         }
     }
