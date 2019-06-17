@@ -46,6 +46,7 @@ namespace VirtoCommerce.Platform.Core.Settings
 
         /// <summary>
         /// The flag indicates what current setting is just editable dictionary and hasn't any concrete value
+        /// (allow to edit AllowedValues)
         /// </summary>
         public bool IsDictionary { get; set; }
 

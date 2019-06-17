@@ -25,6 +25,9 @@ namespace VirtoCommerce.Platform.Data.Model
         [StringLength(128)]
         public string Name { get; set; }
 
+        /// <summary>
+        /// 
+        /// </summary>
         public bool IsDictionary { get; set; }
 
         public bool IsMultiValue { get; set; }
