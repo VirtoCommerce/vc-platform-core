@@ -19,19 +19,12 @@ namespace VirtoCommerce.CoreModule.Web.ExportImport
         private readonly JsonSerializer _serializer;
         private readonly ICurrencyService _currencyService;
         private readonly IPackageTypesService _packageTypesService;
-        private readonly ISeoService _seoService;
 
-        public CoreExportImport(ICurrencyService currencyService, IPackageTypesService packageTypesService, ISeoService seoService)
+        public CoreExportImport(ICurrencyService currencyService, IPackageTypesService packageTypesService, JsonSerializer jsonSerializer)
         {
             _currencyService = currencyService;
             _packageTypesService = packageTypesService;
-            _seoService = seoService;
-            _serializer = new JsonSerializer
-            {
-                ReferenceLoopHandling = ReferenceLoopHandling.Ignore,
-                Formatting = Formatting.Indented,
-                NullValueHandling = NullValueHandling.Ignore
-            };
+            _serializer = jsonSerializer;
         }
 
         public async Task ExportAsync(Stream outStream, ExportImportOptions options, Action<ExportImportProgressInfo> progressCallback,
@@ -84,24 +77,6 @@ namespace VirtoCommerce.CoreModule.Web.ExportImport
                 progressCallback(progressInfo);
                 writer.WriteEndArray();
 
-                var seoResult = await _seoService.GetAllSeoDuplicatesAsync();
-                writer.WritePropertyName("SeoInfoTotalCount");
-                writer.WriteValue(seoResult.Count());
-
-                writer.WritePropertyName("SeoInfos");
-                writer.WriteStartArray();
-
-                foreach (var seoInfo in seoResult)
-                {
-                    _serializer.Serialize(writer, seoInfo);
-                }
-
-                writer.Flush();
-                progressInfo.Description = $"{seoResult.Count()} seo info exported";
-                progressCallback(progressInfo);
-
-                writer.WriteEndArray();
-
                 writer.WriteEndObject();
                 writer.Flush();
             }
@@ -115,7 +90,6 @@ namespace VirtoCommerce.CoreModule.Web.ExportImport
             var progressInfo = new ExportImportProgressInfo();
             var currencyTotalCount = 0;
             var packageTypeTotalCount = 0;
-            var seoInfoTotalCount = 0;
 
             using (var streamReader = new StreamReader(inputStream))
             using (var reader = new JsonTextReader(streamReader))
@@ -189,41 +163,6 @@ namespace VirtoCommerce.CoreModule.Web.ExportImport
                                     packageTypes.Clear();
 
                                     progressInfo.Description = $"{ packageTypeCount } Package Types imported";
-
-                                    progressCallback(progressInfo);
-                                }
-                            }
-                        }
-                        else if (reader.Value.ToString() == "SeoInfoTotalCount")
-                        {
-                            seoInfoTotalCount = reader.ReadAsInt32() ?? 0;
-                        }
-                        else if (reader.Value.ToString() == "SeoInfos")
-                        {
-                            reader.Read();
-                            if (reader.TokenType == JsonToken.StartArray)
-                            {
-                                reader.Read();
-
-                                var seoInfos = new List<SeoInfo>();
-                                var seoInfoCount = 0;
-
-                                while (reader.TokenType != JsonToken.EndArray)
-                                {
-                                    var seoInfo = _serializer.Deserialize<SeoInfo>(reader);
-                                    seoInfos.Add(seoInfo);
-                                    seoInfoCount++;
-
-                                    reader.Read();
-                                }
-                                cancellationToken.ThrowIfCancellationRequested();
-
-                                if (seoInfoCount % _batchSize == 0 || reader.TokenType == JsonToken.EndArray)
-                                {
-                                    await _seoService.SaveSeoInfosAsync(seoInfos.ToArray());
-                                    seoInfos.Clear();
-
-                                    progressInfo.Description = $"{ seoInfoCount } SeoInfos imported";
 
                                     progressCallback(progressInfo);
                                 }

@@ -21,8 +21,7 @@ namespace VirtoCommerce.Platform.Web.Controllers.Api
         /// <returns></returns>
         [HttpPost]
         [Route("")]
-        [ProducesResponseType(typeof(PushNotificationSearchResult), 200)]
-        public IActionResult Search(PushNotificationSearchCriteria criteria)
+        public ActionResult<PushNotificationSearchResult> Search(PushNotificationSearchCriteria criteria)
         {
             var retVal = _pushNotifier.SearchNotifies(User.Identity.Name, criteria);
             return Ok(retVal);
@@ -34,8 +33,7 @@ namespace VirtoCommerce.Platform.Web.Controllers.Api
         /// <returns></returns>
         [HttpPost]
         [Route("markAllAsRead")]
-        [ProducesResponseType(typeof(PushNotificationSearchResult), 200)]
-        public async Task<IActionResult> MarkAllAsRead()
+        public async Task<ActionResult<PushNotificationSearchResult>> MarkAllAsRead()
         {
             var criteria = new PushNotificationSearchCriteria { OnlyNew = true, Skip = 0, Take = int.MaxValue };
             var retVal = _pushNotifier.SearchNotifies(User.Identity.Name, criteria);

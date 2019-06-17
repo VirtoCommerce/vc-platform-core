@@ -1,0 +1,18 @@
+{
+    "version": "1.0.0",
+    "name": "asp.net",
+    "private": true,
+    "scripts": {
+        "webpack:dev": "webpack --display-error-details --mode=development",
+        "webpack:watch": "webpack --watch --mode=development",
+        "webpack:build": "webpack --mode=production"
+    },
+    "devDependencies": {
+        "clean-webpack-plugin": "^1.0.0",
+        "css-loader": "^1.0.1",
+        "mini-css-extract-plugin": "^0.4.5",
+        "webpack": "4.32.2",
+        "webpack-cli": "3.3.2"
+    },
+    "dependencies": {}
+}

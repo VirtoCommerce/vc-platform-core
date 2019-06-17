@@ -1,10 +1,7 @@
 using System;
 using System.Collections.Generic;
 using System.IO;
-using System.Text;
 using System.Threading.Tasks;
-using Microsoft.AspNetCore.Mvc;
-using Microsoft.Extensions.Options;
 using Moq;
 using Newtonsoft.Json;
 using Newtonsoft.Json.Linq;
@@ -134,19 +131,8 @@ namespace VirtoCommerce.SubscriptionModule.Test
             _paymentPlanService = new Mock<IPaymentPlanService>();
             _paymentPlanSearchService = new Mock<IPaymentPlanSearchService>();
 
-            var mvcJsonOptions = new MvcJsonOptions
-            {
-                SerializerSettings = 
-                {
-                    ReferenceLoopHandling = ReferenceLoopHandling.Ignore,
-                    NullValueHandling = NullValueHandling.Ignore,
-                    Formatting = Formatting.Indented
-                }
-            };
-            var options = new OptionsWrapper<MvcJsonOptions>(mvcJsonOptions);
-
             _subscriptionExportImport = new SubscriptionExportImport(_subscriptionService.Object, _subscriptionSearchService.Object,
-                _paymentPlanSearchService.Object, _paymentPlanService.Object, options);
+                _paymentPlanSearchService.Object, _paymentPlanService.Object, GetJsonSerializer());
 
             _cancellationToken = new Mock<ICancellationToken>();
         }
@@ -163,6 +149,16 @@ namespace VirtoCommerce.SubscriptionModule.Test
             return currentAssembly.GetManifestResourceStream(resourcePath);
         }
 
+        private JsonSerializer GetJsonSerializer()
+        {
+            return JsonSerializer.Create(new JsonSerializerSettings()
+            {
+                ReferenceLoopHandling = ReferenceLoopHandling.Ignore,
+                NullValueHandling = NullValueHandling.Ignore,
+                Formatting = Formatting.Indented
+            });
+        }
+
         [Fact]
         public async Task TestDataExport()
         {
@@ -172,7 +168,7 @@ namespace VirtoCommerce.SubscriptionModule.Test
                 Take = 0,
                 ResponseGroup = SubscriptionResponseGroup.Default.ToString()
             };
-            var firstSubscriptionResult = new GenericSearchResult<Subscription>
+            var firstSubscriptionResult = new SubscriptionSearchResult
             {
                 TotalCount = TestSubscriptions.Count
             };
@@ -186,7 +182,7 @@ namespace VirtoCommerce.SubscriptionModule.Test
                 Take = ExpectedBatchSize,
                 ResponseGroup = SubscriptionResponseGroup.Default.ToString()
             };
-            var secondSubscriptionResult = new GenericSearchResult<Subscription>
+            var secondSubscriptionResult = new SubscriptionSearchResult
             {
                 TotalCount = TestSubscriptions.Count,
                 Results = TestSubscriptions
@@ -199,7 +195,8 @@ namespace VirtoCommerce.SubscriptionModule.Test
             {
                 Take = 0,
             };
-            var firstPaymentPlanResult = new GenericSearchResult<PaymentPlan>
+
+            var firstPaymentPlanResult = new PaymentPlanSearchResult
             {
                 TotalCount = TestPaymentPlans.Count
             };
@@ -211,7 +208,8 @@ namespace VirtoCommerce.SubscriptionModule.Test
                 Skip = 0,
                 Take = ExpectedBatchSize
             };
-            var secondPaymentPlanResult = new GenericSearchResult<PaymentPlan>
+
+            var secondPaymentPlanResult = new PaymentPlanSearchResult
             {
                 TotalCount = TestPaymentPlans.Count,
                 Results = TestPaymentPlans

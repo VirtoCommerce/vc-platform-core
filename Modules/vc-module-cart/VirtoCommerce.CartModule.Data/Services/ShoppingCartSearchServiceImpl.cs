@@ -4,7 +4,6 @@ using System.Linq;
 using System.Threading.Tasks;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.Caching.Memory;
-using VirtoCommerce.CartModule.Core.Model;
 using VirtoCommerce.CartModule.Core.Model.Search;
 using VirtoCommerce.CartModule.Core.Services;
 using VirtoCommerce.CartModule.Data.Caching;
@@ -17,25 +16,26 @@ namespace VirtoCommerce.CartModule.Data.Services
 {
     public class ShoppingCartSearchServiceImpl : IShoppingCartSearchService
     {
+        private readonly Func<ICartRepository> _repositoryFactory;
+        private readonly IPlatformMemoryCache _platformMemoryCache;
+        private readonly IShoppingCartService _cartService;
+
         public ShoppingCartSearchServiceImpl(Func<ICartRepository> repositoryFactory, IPlatformMemoryCache platformMemoryCache, IShoppingCartService cartService)
         {
-            RepositoryFactory = repositoryFactory;
-            PlatformMemoryCache = platformMemoryCache;
-            CartService = cartService;
+            _repositoryFactory = repositoryFactory;
+            _platformMemoryCache = platformMemoryCache;
+            _cartService = cartService;
         }
 
-        protected Func<ICartRepository> RepositoryFactory { get; }
-        protected IPlatformMemoryCache PlatformMemoryCache { get; }
-        protected IShoppingCartService CartService { get; }
 
-        public async Task<GenericSearchResult<ShoppingCart>> SearchCartAsync(ShoppingCartSearchCriteria criteria)
+        public async Task<ShoppingCartSearchResult> SearchCartAsync(ShoppingCartSearchCriteria criteria)
         {
-            var retVal = new GenericSearchResult<ShoppingCart>();
+            var retVal = AbstractTypeFactory<ShoppingCartSearchResult>.TryCreateInstance();
             var cacheKey = CacheKey.With(GetType(), "SearchCartAsync", criteria.GetCacheKey());
-            return await PlatformMemoryCache.GetOrCreateExclusiveAsync(cacheKey, async cacheEntry =>
+            return await _platformMemoryCache.GetOrCreateExclusiveAsync(cacheKey, async cacheEntry =>
             {
                 cacheEntry.AddExpirationToken(CartSearchCacheRegion.CreateChangeToken());
-                using (var repository = RepositoryFactory())
+                using (var repository = _repositoryFactory())
                 {
                     var sortInfos = GetSortInfos(criteria);
                     var query = GetQuery(repository, criteria, sortInfos);
@@ -44,7 +44,7 @@ namespace VirtoCommerce.CartModule.Data.Services
                     if (criteria.Take > 0)
                     {
                         var cartIds = await query.Select(x => x.Id).Skip(criteria.Skip).Take(criteria.Take).ToArrayAsync();
-                        retVal.Results = (await CartService.GetByIdsAsync(cartIds, criteria.ResponseGroup)).AsQueryable().OrderBySortInfos(sortInfos).ToArray();
+                        retVal.Results = (await _cartService.GetByIdsAsync(cartIds, criteria.ResponseGroup)).AsQueryable().OrderBySortInfos(sortInfos).ToArray();
                     }
 
                     return retVal;

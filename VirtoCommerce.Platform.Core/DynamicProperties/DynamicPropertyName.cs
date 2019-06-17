@@ -1,9 +1,9 @@
-﻿using System;
+using System;
 using VirtoCommerce.Platform.Core.Common;
 
 namespace VirtoCommerce.Platform.Core.DynamicProperties
 {
-    public class DynamicPropertyName : ValueObject, ICloneable
+    public class DynamicPropertyName : ValueObject
     {
         /// <summary>
         /// Language ID, e.g. en-US.
@@ -11,12 +11,5 @@ namespace VirtoCommerce.Platform.Core.DynamicProperties
         public string Locale { get; set; }
         public string Name { get; set; }
 
-
-        #region ICloneable members
-        public object Clone()
-        {
-            return MemberwiseClone();
-        } 
-        #endregion
     }
 }

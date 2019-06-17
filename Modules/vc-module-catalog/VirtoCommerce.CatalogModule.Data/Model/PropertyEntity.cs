@@ -11,7 +11,7 @@ namespace VirtoCommerce.CatalogModule.Data.Model
     {
         public PropertyEntity()
         {
-            DictionaryValues = new NullCollection<PropertyDictionaryValueEntity>();
+            DictionaryItems = new NullCollection<PropertyDictionaryItemEntity>();
             PropertyAttributes = new NullCollection<PropertyAttributeEntity>();
             DisplayNames = new NullCollection<PropertyDisplayNameEntity>();
             ValidationRules = new NullCollection<PropertyValidationRuleEntity>();
@@ -36,6 +36,7 @@ namespace VirtoCommerce.CatalogModule.Data.Model
 
         public bool IsMultiValue { get; set; }
 
+        public bool IsHidden { get; set; }
         /// <summary>
         /// Gets or sets a value indicating whether this instance is locale dependant. If true, the locale must be specified for the values.
         /// </summary>
@@ -57,7 +58,7 @@ namespace VirtoCommerce.CatalogModule.Data.Model
         public string CategoryId { get; set; }
         public virtual CategoryEntity Category { get; set; }
 
-        public virtual ObservableCollection<PropertyDictionaryValueEntity> DictionaryValues { get; set; }
+        public virtual ObservableCollection<PropertyDictionaryItemEntity> DictionaryItems { get; set; }
         public virtual ObservableCollection<PropertyAttributeEntity> PropertyAttributes { get; set; }
         public virtual ObservableCollection<PropertyDisplayNameEntity> DisplayNames { get; set; }
         public virtual ObservableCollection<PropertyValidationRuleEntity> ValidationRules { get; set; }
@@ -67,7 +68,9 @@ namespace VirtoCommerce.CatalogModule.Data.Model
         public virtual Property ToModel(Property property)
         {
             if (property == null)
+            {
                 throw new ArgumentNullException(nameof(property));
+            }
 
             property.Id = Id;
             property.CreatedBy = CreatedBy;
@@ -78,19 +81,20 @@ namespace VirtoCommerce.CatalogModule.Data.Model
             property.CatalogId = CatalogId;
             property.CategoryId = CategoryId;
 
-
             property.Name = Name;
             property.Required = IsRequired;
             property.Multivalue = IsMultiValue;
             property.Multilanguage = IsLocaleDependant;
             property.Dictionary = IsEnum;
+            property.Hidden = IsHidden;
             property.ValueType = (PropertyValueType)PropertyValueType;
             property.Type = EnumUtility.SafeParse(TargetType, PropertyType.Catalog);
 
-            property.DictionaryValues = DictionaryValues.Select(x => x.ToModel(AbstractTypeFactory<PropertyDictionaryValue>.TryCreateInstance())).ToList();
+
             property.Attributes = PropertyAttributes.Select(x => x.ToModel(AbstractTypeFactory<PropertyAttribute>.TryCreateInstance())).ToList();
             property.DisplayNames = DisplayNames.Select(x => x.ToModel(AbstractTypeFactory<PropertyDisplayName>.TryCreateInstance())).ToList();
             property.ValidationRules = ValidationRules.Select(x => x.ToModel(AbstractTypeFactory<PropertyValidationRule>.TryCreateInstance())).ToList();
+
             foreach (var rule in property.ValidationRules)
             {
                 rule.Property = property;
@@ -102,7 +106,9 @@ namespace VirtoCommerce.CatalogModule.Data.Model
         public virtual PropertyEntity FromModel(Property property, PrimaryKeyResolvingMap pkMap)
         {
             if (property == null)
+            {
                 throw new ArgumentNullException(nameof(property));
+            }
 
             pkMap.AddPair(property, this);
 
@@ -114,23 +120,19 @@ namespace VirtoCommerce.CatalogModule.Data.Model
 
             CatalogId = property.CatalogId;
             CategoryId = property.CategoryId;
-            
+
             Name = property.Name;
             PropertyValueType = (int)property.ValueType;
             IsMultiValue = property.Multivalue;
             IsLocaleDependant = property.Multilanguage;
             IsEnum = property.Dictionary;
             IsRequired = property.Required;
+            IsHidden = property.Hidden;
             TargetType = property.Type.ToString();
-  
+
             if (property.Attributes != null)
             {
                 PropertyAttributes = new ObservableCollection<PropertyAttributeEntity>(property.Attributes.Select(x => AbstractTypeFactory<PropertyAttributeEntity>.TryCreateInstance().FromModel(x, pkMap)));
-            }
-
-            if (property.DictionaryValues != null)
-            {
-                DictionaryValues = new ObservableCollection<PropertyDictionaryValueEntity>(property.DictionaryValues.Select(x => AbstractTypeFactory<PropertyDictionaryValueEntity>.TryCreateInstance().FromModel(x, pkMap)));
             }
 
             if (property.DisplayNames != null)
@@ -154,15 +156,20 @@ namespace VirtoCommerce.CatalogModule.Data.Model
             target.IsRequired = IsRequired;
             target.TargetType = TargetType;
             target.Name = Name;
+            target.IsHidden = IsHidden;
+
+            target.CatalogId = CatalogId;
+            target.CategoryId = CategoryId;
 
             if (!PropertyAttributes.IsNullCollection())
             {
                 var attributeComparer = AnonymousComparer.Create((PropertyAttributeEntity x) => x.IsTransient() ? x.PropertyAttributeName : x.Id);
                 PropertyAttributes.Patch(target.PropertyAttributes, attributeComparer, (sourceAsset, targetAsset) => sourceAsset.Patch(targetAsset));
             }
-            if (!DictionaryValues.IsNullCollection())
+            if (!DictionaryItems.IsNullCollection())
             {
-                DictionaryValues.Patch(target.DictionaryValues, (sourcePropValue, targetPropValue) => sourcePropValue.Patch(targetPropValue));
+                var dictItemComparer = AnonymousComparer.Create((PropertyDictionaryItemEntity x) => $"{x.Alias}-${x.PropertyId}");
+                DictionaryItems.Patch(target.DictionaryItems, dictItemComparer, (sourceDictItem, targetDictItem) => sourceDictItem.Patch(targetDictItem));
             }
             if (!DisplayNames.IsNullCollection())
             {

@@ -1,0 +1,25 @@
+﻿<div class="blade-content __medium-wide">
+    <div class="blade-inner">
+        <div class="inner-block" ng-init="setGridOptions({
+                    data: 'blade.currentEntities',
+                    rowTemplate: 'list.row.html',
+                    columnDefs: [
+                        { name: 'name', displayName: 'pricing.blades.item-pricelists-list.labels.name', cellTooltip: true},
+                        { name: 'catalog', displayName: 'pricing.blades.assignment-list.labels.catalog', cellTooltip: true},
+                        { name: 'currency', displayName: 'pricing.blades.item-pricelists-list.labels.currency', width: 70},
+                        { name: 'priority', displayName: 'pricing.blades.item-pricelists-list.labels.priority', width: 70},
+                        { name: 'prices.length', displayName: 'pricing.blades.item-pricelists-list.labels.prices-count', width: 70}
+                    ]})">
+            <div class="table-wrapper" ng-if="blade.currentEntities.length">
+                <div ui-grid="gridOptions" ui-grid-auto-resize ui-grid-save-state ui-grid-resize-columns ui-grid-move-columns ui-grid-height></div>
+            </div>
+            <div class="note" ng-if="!blade.currentEntities.length">
+                {{ 'pricing.blades.item-pricelists-list.no-assignments' | translate }}
+                <a ui-sref="workspace.pricingModule">{{ 'pricing.blades.item-pricelists-list.manage-pricelists' | translate }}</a>
+            </div>
+        </div>
+    </div>
+</div>
+<script type="text/ng-template" id="list.row.html">
+    <div ng-click='grid.appScope.openBlade(row.entity)' ng-repeat="(colRenderIndex, col) in colContainer.renderedColumns track by col.uid" ui-grid-one-bind-id-grid="rowRenderIndex + '-' + col.uid + '-cell'" class="ui-grid-cell" ng-class="{'ui-grid-row-header-cell': col.isRowHeader, '__selected': row.entity.id===grid.appScope.selectedNodeId }" role="{{col.isRowHeader ? 'rowheader' : 'gridcell' }}" ui-grid-cell></div>
+</script>

@@ -1,0 +1,23 @@
+{
+    "version": "1.0.0",
+    "name": "asp.net",
+    "private": true,
+    "scripts": {
+        "webpack:dev": "webpack --display-error-details --mode=development",
+        "webpack:watch": "webpack --watch --mode=development",
+        "webpack:build": "webpack --mode=production"
+    },
+    "devDependencies": {
+        "clean-webpack-plugin": "^1.0.0",
+        "css-loader": "^1.0.1",
+        "gulp": "3.9.1",
+        "gulp-concat": "2.6.0",
+        "gulp-uglify": "2.0.0",
+        "main-bower-files": "2.13.1",
+        "mini-css-extract-plugin": "^0.4.5",
+        "jquery": "^2.1.4",
+        "webpack": "4.32.2",
+        "webpack-cli": "3.3.2"
+    },
+    "dependencies": {}
+}

@@ -1,4 +1,4 @@
-﻿using System;
+using System;
 using System.ComponentModel.DataAnnotations;
 using VirtoCommerce.Platform.Core.Common;
 using VirtoCommerce.Platform.Core.DynamicProperties;
@@ -6,7 +6,7 @@ using VirtoCommerce.Platform.Core.DynamicProperties;
 namespace VirtoCommerce.Platform.Data.Model
 {
     public class DynamicPropertyNameEntity : AuditableEntity
-    {  
+    {
         [StringLength(64)]
         public string Locale { get; set; }
 
@@ -19,18 +19,22 @@ namespace VirtoCommerce.Platform.Data.Model
         public virtual DynamicPropertyName ToModel(DynamicPropertyName propName)
         {
             if (propName == null)
+            {
                 throw new ArgumentNullException(nameof(propName));
+            }
 
             propName.Locale = Locale;
             propName.Name = Name;
-        
+
             return propName;
         }
 
         public virtual DynamicPropertyNameEntity FromModel(DynamicPropertyName propName)
         {
             if (propName == null)
+            {
                 throw new ArgumentNullException(nameof(propName));
+            }
 
             Locale = propName.Locale;
             Name = propName.Name;

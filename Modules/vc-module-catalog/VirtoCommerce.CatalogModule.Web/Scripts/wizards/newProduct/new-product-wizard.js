@@ -1,4 +1,4 @@
-﻿angular.module('virtoCommerce.catalogModule')
+angular.module('virtoCommerce.catalogModule')
     .controller('virtoCommerce.catalogModule.newProductWizardController', ['$scope', 'platformWebApp.bladeNavigationService', '$http', 'virtoCommerce.storeModule.stores', 'virtoCommerce.catalogModule.catalogImagesFolderPathHelper', function ($scope, bladeNavigationService, $http, stores, catalogImgHelper) {
     var blade = $scope.blade;
     blade.headIcon = blade.item.productType === 'Digital' ? 'fa fa-file-archive-o' : 'fa fa-truck';
@@ -92,7 +92,7 @@
     }
 
     $scope.codeValidator = function (value) {
-        var pattern = /[$+;=%{}[\]|\\\/@ ~!^*&()?:'<>,]/;
+        var pattern = /[$+;=%{}[\]|@~!^*&()?'<>,]/;
         return !pattern.test(value);
     };
 

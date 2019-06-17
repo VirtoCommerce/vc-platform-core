@@ -1,6 +1,5 @@
-﻿<div class="blade-static __collapsed">
+<div class="blade-static __collapsed">
     <div class="form-group">
-        <vc-journal-search blade="blade"></vc-journal-search>
         <p class="form-count">{{ 'platform.list.count' | translate }}: <span class="count">{{pageSettings.totalItems | number:0}}</span></p>
     </div>
 </div>
@@ -12,9 +11,8 @@
                  rowHeight: 61,
                  columnDefs: [
                             { name: 'actions', displayName: '', enableColumnResizing: false, enableSorting: false, width: 30, cellTemplate: 'list-actions.cell.html', pinnedLeft:true },
-                            { name: 'notification', displayName: 'notifications.blades.notifications-journal.labels.notification', cellTemplate: 'notification.cell.html' },
-                            { name: 'recipient', displayName: 'notifications.blades.notifications-journal.labels.recipient' },
-                            { name: 'startSendingDate', displayName: 'notifications.blades.notifications-journal.labels.created' },
+                            { name: 'notificationType', displayName: 'notifications.blades.notifications-journal.labels.notification', cellTemplate: 'notification.cell.html' },
+                            { name: 'createdDate', displayName: 'notifications.blades.notifications-journal.labels.created' },
                             { name: 'status', displayName: 'notifications.blades.notifications-journal.labels.status', cellTemplate: 'status.cell.html' }
                 ]})">
             <div class="table-wrapper" ng-if="blade.currentEntities.length">
@@ -46,17 +44,17 @@
 <script type="text/ng-template" id="notification.cell.html">
     <div class="ui-grid-cell-contents">
         <div class="list-item">
-            <span class="list-name">{{row.entity.body | translate}}</span>
-            <span class="list-descr" style="color: #999;display: block;font-size: 12px;margin-top: 5px; white-space: initial;">{{row.entity.displayName | translate}}</span>
+            <span class="list-name">{{row.entity.notificationType | translate}}</span>
+            <span class="list-descr" style="color: #999;display: block;font-size: 12px;margin-top: 5px; white-space: initial;">{{row.entity.notificationType | translate}}</span>
         </div>
     </div>
 </script>
 <script type="text/ng-template" id="status.cell.html">
     <div class="ui-grid-cell-contents">
         <div class="inner-contents">
-            <span class="table-status" ng-if="!row.entity.isActive && !row.entity.isSuccessSend" style="background:red">{{ 'notifications.blades.notifications-journal.labels.error' | translate }}</span>
-            <span class="table-status" ng-if="row.entity.isActive && !row.entity.isSuccessSend" style="max-width:60px;">{{ 'notifications.blades.notifications-journal.labels.processing' | translate }}</span>
-            <span class="table-status __active" ng-if="row.entity.isSuccessSend">{{ 'notifications.blades.notifications-journal.labels.success' | translate }}</span>
+            <span class="table-status" ng-if="!row.entity.sendDate && row.entity.sendAttemptCount === row.entity.maxSendAttemptCount" style="background:red">{{ 'notifications.blades.notifications-journal.labels.error' | translate }}</span>
+            <span class="table-status" ng-if="!row.entity.sendDate && row.entity.sendAttemptCount < row.entity.maxSendAttemptCount" style="max-width:60px;">{{ 'notifications.blades.notifications-journal.labels.processing' | translate }}</span>
+            <span class="table-status __active" ng-if="row.entity.sendDate">{{ 'notifications.blades.notifications-journal.labels.success' | translate }}</span>
         </div>
     </div>
 </script>

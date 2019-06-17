@@ -1,5 +1,5 @@
-﻿angular.module('virtoCommerce.coreModule.common')
-.controller('virtoCommerce.coreModule.common.coreAddressListController', ['$timeout', '$scope', 'platformWebApp.bladeNavigationService', function ($timeout, $scope, bladeNavigationService) {
+angular.module('virtoCommerce.coreModule.common')
+    .controller('virtoCommerce.coreModule.common.coreAddressListController', ['$timeout', '$scope', 'platformWebApp.bladeNavigationService', function ($timeout, $scope, bladeNavigationService) {
     var blade = $scope.blade;
     $scope.selectedItem = null;
 

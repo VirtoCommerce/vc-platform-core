@@ -8,36 +8,23 @@ namespace VirtoCommerce.NotificationsModule.Data.Model
     /// <summary>
     /// Entity is template of Notification
     /// </summary>
-    public class NotificationTemplateEntity : AuditableEntity
+    public abstract class NotificationTemplateEntity : AuditableEntity
     {
+        public abstract string Kind { get; }
         /// <summary>
         /// Language of template
         /// </summary>
         [StringLength(10)]
         public string LanguageCode { get; set; }
 
-        /// <summary>
-        /// Subject of template
-        /// </summary>
-        [StringLength(512)]
-        public string Subject { get; set; }
-
-        /// <summary>
-        /// Body of template
-        /// </summary>
-        public string Body { get; set; }
-
-        /// <summary>
-        /// Message of template
-        /// </summary>
-        [StringLength(1600)]
-        public string Message { get; set; }
 
         /// <summary>
         /// Id of notification
         /// </summary>
         [StringLength(128)]
         public string NotificationId { get; set; }
+
+        public NotificationEntity Notification { get; set; }
 
         public virtual NotificationTemplate ToModel(NotificationTemplate template)
         {
@@ -50,23 +37,15 @@ namespace VirtoCommerce.NotificationsModule.Data.Model
             template.ModifiedBy = ModifiedBy;
             template.ModifiedDate = ModifiedDate;
 
-            switch (template)
-            {
-                case EmailNotificationTemplate emailNotificationTemplate:
-                    emailNotificationTemplate.Subject = Subject;
-                    emailNotificationTemplate.Body = Body;
-                    break;
-                case SmsNotificationTemplate smsNotificationTemplate:
-                    smsNotificationTemplate.Message = Message;
-                    break;
-            }
-
             return template;
         }
 
-        public virtual NotificationTemplateEntity FromModel(NotificationTemplate template)
+        public virtual NotificationTemplateEntity FromModel(NotificationTemplate template, PrimaryKeyResolvingMap pkMap)
         {
             if (template == null) throw new ArgumentNullException(nameof(template));
+
+            pkMap.AddPair(template, this);
+
 
             Id = template.Id;
             LanguageCode = template.LanguageCode;
@@ -75,26 +54,12 @@ namespace VirtoCommerce.NotificationsModule.Data.Model
             ModifiedBy = template.ModifiedBy;
             ModifiedDate = template.ModifiedDate;
 
-            switch (template)
-            {
-                case EmailNotificationTemplate emailNotificationTemplate:
-                    Subject = emailNotificationTemplate.Subject;
-                    Body = emailNotificationTemplate.Body;
-                    break;
-                case SmsNotificationTemplate smsNotificationTemplate:
-                    Message = smsNotificationTemplate.Message;
-                    break;
-            }
-
             return this;
         }
 
         public virtual void Patch(NotificationTemplateEntity template)
         {
             template.LanguageCode = LanguageCode;
-            template.Subject = Subject;
-            template.Body = Body;
-            template.Message = Message;
         }
     }
 }

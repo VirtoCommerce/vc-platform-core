@@ -1,8 +1,8 @@
 using System;
 using System.Collections.Generic;
-using System.Drawing;
-using System.Text;
 using System.Threading.Tasks;
+using SixLabors.ImageSharp;
+using SixLabors.ImageSharp.PixelFormats;
 using VirtoCommerce.ImageToolsModule.Core.Models;
 using VirtoCommerce.ImageToolsModule.Core.ThumbnailGeneration;
 using VirtoCommerce.Platform.Core.Common;
@@ -14,16 +14,14 @@ namespace VirtoCommerce.ImageToolsModule.Data.ThumbnailGeneration
     /// </summary>
     public class DefaultThumbnailGenerator : IThumbnailGenerator
     {
-        public DefaultThumbnailGenerator(IImageService storageProvider, IImageResizer imageResizer)
+        private readonly IImageService _imageService;
+        private readonly IImageResizer _imageResizer;
+
+        public DefaultThumbnailGenerator(IImageService imageService, IImageResizer imageResizer)
         {
-            ImageService = storageProvider;
-            ImageResizer = imageResizer;
+            _imageService = imageService;
+            _imageResizer = imageResizer;
         }
-
-        protected object ProgressLock { get; } = new object();
-
-        protected IImageService ImageService { get; }
-        protected IImageResizer ImageResizer { get; }
 
         /// <summary>
         /// Generates thumbnails asynchronously
@@ -37,7 +35,7 @@ namespace VirtoCommerce.ImageToolsModule.Data.ThumbnailGeneration
         {
             token?.ThrowIfCancellationRequested();
 
-            var originalImage = await ImageService.LoadImageAsync(sourcePath);
+            var originalImage = await _imageService.LoadImageAsync(sourcePath, out var format);
             if (originalImage == null)
             {
                 return new ThumbnailGenerationResult
@@ -48,21 +46,14 @@ namespace VirtoCommerce.ImageToolsModule.Data.ThumbnailGeneration
 
             var result = new ThumbnailGenerationResult();
 
-            //one process only can use an Image object at the same time.
-            Image clone;
-            lock (ProgressLock)
-            {
-                clone = (Image)originalImage.Clone();
-            }
-
             foreach (var option in options)
             {
-                var thumbnail = GenerateThumbnail(clone, option);
+                var thumbnail = GenerateThumbnail(originalImage, option);
                 var thumbnailUrl = sourcePath.GenerateThumbnailName(option.FileSuffix);
 
                 if (thumbnail != null)
                 {
-                    await ImageService.SaveImageAsync(thumbnailUrl, thumbnail, clone.RawFormat, option.JpegQuality);
+                    await _imageService.SaveImageAsync(thumbnailUrl, thumbnail, format, option.JpegQuality);
                 }
                 else
                 {
@@ -81,29 +72,37 @@ namespace VirtoCommerce.ImageToolsModule.Data.ThumbnailGeneration
         /// <param name="image"></param>
         /// <param name="option"></param>
         /// <returns></returns>
-        protected virtual Image GenerateThumbnail(Image image, ThumbnailOption option)
+        protected virtual Image<Rgba32> GenerateThumbnail(Image<Rgba32> image, ThumbnailOption option)
         {
             var height = option.Height ?? image.Height;
             var width = option.Width ?? image.Width;
-            var color = ColorTranslator.FromHtml(option.BackgroundColor);
 
-            Image thumbnail = null;
+            var color = Rgba32.Transparent;
+            if (!string.IsNullOrWhiteSpace(option.BackgroundColor))
+            {
+                color = Rgba32.FromHex(option.BackgroundColor);
+            }
+
+            Image<Rgba32> result;
             switch (option.ResizeMethod)
             {
                 case ResizeMethod.FixedSize:
-                    thumbnail = ImageResizer.FixedSize(image, width, height, color);
+                    result = _imageResizer.FixedSize(image, width, height, color);
                     break;
                 case ResizeMethod.FixedWidth:
-                    thumbnail = ImageResizer.FixedWidth(image, width, color);
+                    result = _imageResizer.FixedWidth(image, width, color);
                     break;
                 case ResizeMethod.FixedHeight:
-                    thumbnail = ImageResizer.FixedHeight(image, height, color);
+                    result = _imageResizer.FixedHeight(image, height, color);
                     break;
                 case ResizeMethod.Crop:
-                    thumbnail = ImageResizer.Crop(image, width, height, option.AnchorPosition);
+                    result = _imageResizer.Crop(image, width, height, option.AnchorPosition);
                     break;
+                default:
+                    throw new ArgumentOutOfRangeException($"ResizeMethod {option.ResizeMethod.ToString()} not supported.");
             }
-            return thumbnail;
+
+            return result;
         }
     }
 }

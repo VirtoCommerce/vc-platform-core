@@ -1,22 +1,22 @@
 using System.Collections.Generic;
-using System.Linq;
 using VirtoCommerce.NotificationsModule.Core.Extensions;
 using VirtoCommerce.NotificationsModule.Core.Services;
-using VirtoCommerce.Platform.Core.Common;
 
 namespace VirtoCommerce.NotificationsModule.Core.Model
 {
     /// <summary>
     /// Type of Notification for the Email
     /// </summary>
-    public class EmailNotification : Notification
+    public abstract class EmailNotification : Notification
     {
         public EmailNotification()
         {
-            Kind = nameof(EmailNotification);
+            Type = GetType().Name;
             Templates = new List<NotificationTemplate>();
             Attachments = new List<EmailAttachment>();
         }
+
+        public override string Kind => nameof(EmailNotification);
 
         /// <summary>
         /// Sender
@@ -41,19 +41,20 @@ namespace VirtoCommerce.NotificationsModule.Core.Model
 
         public override NotificationMessage ToMessage(NotificationMessage message, INotificationTemplateRenderer render)
         {
-            var emailMessage = (EmailNotificationMessage) message;
-            
+            var emailMessage = (EmailNotificationMessage)message;
+
             var template = (EmailNotificationTemplate)Templates.FindWithLanguage(message.LanguageCode);
             if (template != null)
             {
                 emailMessage.Subject = render.Render(template.Subject, this);
                 emailMessage.Body = render.Render(template.Body, this);
-                emailMessage.From = From;
-                emailMessage.To = To;
-                emailMessage.CC = CC;
-                emailMessage.BCC = BCC;
-                emailMessage.Attachments = Attachments;
             }
+
+            emailMessage.From = From;
+            emailMessage.To = To;
+            emailMessage.CC = CC;
+            emailMessage.BCC = BCC;
+            emailMessage.Attachments = Attachments;
 
             return base.ToMessage(message, render);
         }

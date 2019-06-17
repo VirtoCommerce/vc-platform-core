@@ -1,16 +1,14 @@
 using System;
 using System.Collections.Generic;
 using System.IO;
-using System.Text;
 using System.Threading.Tasks;
-using Microsoft.AspNetCore.Mvc;
-using Microsoft.Extensions.Options;
 using Moq;
 using Newtonsoft.Json;
 using Newtonsoft.Json.Linq;
 using VirtoCommerce.Platform.Core.Common;
 using VirtoCommerce.Platform.Core.ExportImport;
 using VirtoCommerce.SitemapsModule.Core.Models;
+using VirtoCommerce.SitemapsModule.Core.Models.Search;
 using VirtoCommerce.SitemapsModule.Core.Services;
 using VirtoCommerce.SitemapsModule.Data.ExportImport;
 using Xunit;
@@ -229,6 +227,8 @@ namespace VirtoCommerce.SitemapsModule.Test
 
         private readonly Mock<ISitemapService> _sitemapService;
         private readonly Mock<ISitemapItemService> _sitemapItemService;
+        private readonly Mock<ISitemapSearchService> _sitemapSearchService;
+        private readonly Mock<ISitemapItemSearchService> _sitemapItemSearchService;
         private readonly Mock<ICancellationToken> _cancellationToken;
         private readonly SitemapExportImport _sitemapExportImport;
 
@@ -236,20 +236,13 @@ namespace VirtoCommerce.SitemapsModule.Test
         {
             _sitemapService = new Mock<ISitemapService>();
             _sitemapItemService = new Mock<ISitemapItemService>();
+            _sitemapSearchService = new Mock<ISitemapSearchService>();
+            _sitemapItemSearchService = new Mock<ISitemapItemSearchService>();
             _cancellationToken = new Mock<ICancellationToken>();
 
-            var mvcJsonOptions = new MvcJsonOptions()
-            {
-                SerializerSettings =
-                {
-                    NullValueHandling = NullValueHandling.Ignore,
-                    ReferenceLoopHandling = ReferenceLoopHandling.Ignore,
-                    Formatting = Formatting.Indented
-                }
-            };
-            var jsonOptions = new OptionsWrapper<MvcJsonOptions>(mvcJsonOptions);
-
-            _sitemapExportImport = new SitemapExportImport(_sitemapService.Object, _sitemapItemService.Object, jsonOptions);
+            InitSitemapService();
+            InitSitemapItemService();
+            _sitemapExportImport = new SitemapExportImport(_sitemapService.Object, _sitemapItemService.Object, _sitemapSearchService.Object, _sitemapItemSearchService.Object, GetJsonSerializer());
         }
 
         private static Stream ReadEmbeddedResource(string filePath)
@@ -264,35 +257,19 @@ namespace VirtoCommerce.SitemapsModule.Test
         {
         }
 
+        private JsonSerializer GetJsonSerializer()
+        {
+            return JsonSerializer.Create(new JsonSerializerSettings()
+            {
+                ReferenceLoopHandling = ReferenceLoopHandling.Ignore,
+                NullValueHandling = NullValueHandling.Ignore,
+                Formatting = Formatting.Indented
+            });
+        }
+
         [Fact]
         public async Task TestDataExport()
         {
-            // Arrange
-            var sitemapSearchCriteria = new SitemapSearchCriteria
-            {
-                Skip = 0,
-                Take = int.MaxValue
-            };
-            var sitemapSearchResult = new GenericSearchResult<Sitemap>
-            {
-                TotalCount = TestSitemaps.Count,
-                Results = TestSitemaps
-            };
-            _sitemapService.Setup(service => service.SearchAsync(sitemapSearchCriteria))
-                .ReturnsAsync(sitemapSearchResult);
-
-            var sitemapItemSearchCriteria = new SitemapItemSearchCriteria
-            {
-                Skip = 0,
-                Take = int.MaxValue
-            };
-            var sitemapItemsSearchResult = new GenericSearchResult<SitemapItem>
-            {
-                TotalCount = TestSitemapItems.Count,
-                Results = TestSitemapItems
-            };
-            _sitemapItemService.Setup(service => service.SearchAsync(sitemapItemSearchCriteria))
-                .ReturnsAsync(sitemapItemsSearchResult);
 
             string expectedJson;
             using (var resourceStream = ReadEmbeddedResource("Resources.SerializedSitemapsData.json"))
@@ -344,6 +321,30 @@ namespace VirtoCommerce.SitemapsModule.Test
             // Assert
             Assert.Equal(TestSitemaps, actualSitemaps);
             Assert.Equal(TestSitemapItems, actualSitemapItems);
+        }
+
+        private void InitSitemapService()
+        {
+            var sitemapSearchResult = new SitemapSearchResult
+            {
+                TotalCount = TestSitemaps.Count,
+                Results = TestSitemaps
+            };
+
+            _sitemapSearchService.Setup(service => service.SearchAsync(It.IsAny<SitemapSearchCriteria>()))
+                .ReturnsAsync(sitemapSearchResult);
+        }
+
+        private void InitSitemapItemService()
+        {
+            var sitemapItemsSearchResult = new SitemapItemsSearchResult
+            {
+                TotalCount = TestSitemapItems.Count,
+                Results = TestSitemapItems
+            };
+
+            _sitemapItemSearchService.Setup(service => service.SearchAsync(It.IsAny<SitemapItemSearchCriteria>()))
+                .ReturnsAsync(sitemapItemsSearchResult);
         }
     }
 }

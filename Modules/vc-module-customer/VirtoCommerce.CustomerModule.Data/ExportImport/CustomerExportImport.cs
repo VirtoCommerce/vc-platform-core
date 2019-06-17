@@ -4,8 +4,6 @@ using System.IO;
 using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
-using Microsoft.AspNetCore.Mvc;
-using Microsoft.Extensions.Options;
 using Newtonsoft.Json;
 using VirtoCommerce.CustomerModule.Core;
 using VirtoCommerce.CustomerModule.Core.Model;
@@ -17,7 +15,7 @@ using VirtoCommerce.Platform.Core.Settings;
 
 namespace VirtoCommerce.CustomerModule.Data.ExportImport
 {
-    public sealed class CustomerExportImport : IExportSupport, IImportSupport
+    public sealed class CustomerExportImport
     {
         private readonly IMemberService _memberService;
         private readonly IMemberSearchService _memberSearchService;
@@ -26,12 +24,12 @@ namespace VirtoCommerce.CustomerModule.Data.ExportImport
 
         private int? _batchSize;
 
-        public CustomerExportImport(IMemberService memberService, IMemberSearchService memberSearchService, ISettingsManager settingsManager, IOptions<MvcJsonOptions> jsonOptions)
+        public CustomerExportImport(IMemberService memberService, IMemberSearchService memberSearchService, ISettingsManager settingsManager, JsonSerializer jsonSerializer)
         {
             _memberService = memberService;
             _memberSearchService = memberSearchService;
             _settingsManager = settingsManager;
-            _serializer = JsonSerializer.Create(jsonOptions.Value.SerializerSettings);
+            _serializer = jsonSerializer;
         }
 
 
@@ -68,7 +66,7 @@ namespace VirtoCommerce.CustomerModule.Data.ExportImport
                 writer.WriteValue(memberCount);
 
                 cancellationToken.ThrowIfCancellationRequested();
-              
+
                 writer.WritePropertyName("Members");
                 writer.WriteStartArray();
 
@@ -138,7 +136,7 @@ namespace VirtoCommerce.CustomerModule.Data.ExportImport
                                 var orgsTopologicalSortedList = TopologicalSort.Sort(nodes, edges);
                                 members = members.OrderByDescending(x => orgsTopologicalSortedList.IndexOf(x.Id)).ToList();
 
-                                for (int i = 0; i < membersCount; i += batchSize)
+                                for (var i = 0; i < membersCount; i += batchSize)
                                 {
                                     await _memberService.SaveChangesAsync(members.Skip(i).Take(batchSize).ToArray());
 

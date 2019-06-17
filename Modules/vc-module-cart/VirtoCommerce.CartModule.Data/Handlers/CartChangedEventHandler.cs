@@ -1,6 +1,7 @@
 using System.Collections.Generic;
 using System.Linq;
 using System.Threading.Tasks;
+using Hangfire;
 using VirtoCommerce.CartModule.Core.Events;
 using VirtoCommerce.CartModule.Core.Model;
 using VirtoCommerce.Platform.Core.Common;
@@ -18,33 +19,57 @@ namespace VirtoCommerce.CartModule.Data.Handlers
             _dynamicPropertyService = dynamicPropertyService;
         }
 
-        public virtual async Task Handle(CartChangedEvent message)
+        public virtual Task Handle(CartChangedEvent message)
         {
             foreach (var changedEntry in message.ChangedEntries)
             {
                 if (changedEntry.EntryState == EntryState.Added)
                 {
-                    await _dynamicPropertyService.SaveDynamicPropertyValuesAsync(changedEntry.NewEntry);
+                    BackgroundJob.Enqueue(() => SaveDynamicPropertyValuesInBackground(changedEntry.NewEntry));
                 }
                 else if (changedEntry.EntryState == EntryState.Modified)
                 {
-                    await _dynamicPropertyService.SaveDynamicPropertyValuesAsync(changedEntry.NewEntry);
-                    await TryDeleteDynamicPropertiesForRemovedLineItems(changedEntry);
+                    BackgroundJob.Enqueue(() =>
+                        SaveAndDeleteForRemovedLineItemsDynamicPropertyValuesInBackground(changedEntry.NewEntry, changedEntry.OldEntry));
                 }
                 else if (changedEntry.EntryState == EntryState.Deleted)
                 {
-                    await _dynamicPropertyService.DeleteDynamicPropertyValuesAsync(changedEntry.NewEntry);
+                    BackgroundJob.Enqueue(() => DeleteDynamicPropertyValuesInBackground(changedEntry.NewEntry));
                 }
-                
+
             }
+
+            return Task.CompletedTask;
         }
 
-        protected virtual async Task TryDeleteDynamicPropertiesForRemovedLineItems(GenericChangedEntry<ShoppingCart> changedEntry)
+        [DisableConcurrentExecution(60 * 60 * 24)]
+        public void SaveDynamicPropertyValuesInBackground(ShoppingCart newEntry)
         {
-            var originalDynPropOwners = changedEntry.OldEntry.GetFlatObjectsListWithInterface<IHasDynamicProperties>()
+            var dynamicProperties = (IHasDynamicProperties)newEntry;
+            _dynamicPropertyService.SaveDynamicPropertyValuesAsync(dynamicProperties).GetAwaiter().GetResult();
+        }
+
+        [DisableConcurrentExecution(60 * 60 * 24)]
+        public void DeleteDynamicPropertyValuesInBackground(ShoppingCart newEntry)
+        {
+            var dynamicProperties = (IHasDynamicProperties)newEntry;
+            _dynamicPropertyService.DeleteDynamicPropertyValuesAsync(dynamicProperties).GetAwaiter().GetResult();
+        }
+
+        [DisableConcurrentExecution(60 * 60 * 24)]
+        public void SaveAndDeleteForRemovedLineItemsDynamicPropertyValuesInBackground(ShoppingCart newEntry, ShoppingCart oldEntry)
+        {
+            _dynamicPropertyService.SaveDynamicPropertyValuesAsync(newEntry).GetAwaiter().GetResult();
+            TryDeleteDynamicPropertiesForRemovedLineItems(newEntry, oldEntry).GetAwaiter().GetResult();
+        }
+
+
+        protected virtual async Task TryDeleteDynamicPropertiesForRemovedLineItems(ShoppingCart newEntry, ShoppingCart oldEntry)
+        {
+            var originalDynPropOwners = oldEntry.GetFlatObjectsListWithInterface<IHasDynamicProperties>()
                                           .Distinct()
                                           .ToList();
-            var modifiedDynPropOwners = changedEntry.NewEntry.GetFlatObjectsListWithInterface<IHasDynamicProperties>()
+            var modifiedDynPropOwners = newEntry.GetFlatObjectsListWithInterface<IHasDynamicProperties>()
                                          .Distinct()
                                          .ToList();
             var removingDynPropOwners = new List<IHasDynamicProperties>();

@@ -21,7 +21,7 @@ namespace VirtoCommerce.Platform.Data.Assets
             _blobUrlResolver = blobUrlResolver;
         }
 
-        public async Task<GenericSearchResult<AssetEntry>> SearchAssetEntriesAsync(AssetEntrySearchCriteria criteria)
+        public async Task<AssetEntrySearchResult> SearchAssetEntriesAsync(AssetEntrySearchCriteria criteria)
         {
             criteria = criteria ?? AbstractTypeFactory<AssetEntrySearchCriteria>.TryCreateInstance();
 
@@ -55,10 +55,9 @@ namespace VirtoCommerce.Platform.Data.Assets
                     }
                 }
 
-                var result = new GenericSearchResult<AssetEntry>()
-                {
-                    TotalCount = await query.CountAsync()
-                };
+                var result = AbstractTypeFactory<AssetEntrySearchResult>.TryCreateInstance();
+
+                result.TotalCount = await query.CountAsync();
 
                 var sortInfos = criteria.SortInfos;
                 if (sortInfos.IsNullOrEmpty())
@@ -79,13 +78,13 @@ namespace VirtoCommerce.Platform.Data.Assets
                     .Skip(criteria.Skip)
                     .Take(criteria.Take)
                     .Select(x => x.Id)
-                    .ToListAsync();
+                    .ToArrayAsync();
 
                 var asetsResult = await repository.GetAssetsByIdsAsync(ids);
 
                 result.Results = asetsResult
                     .Select(x => x.ToModel(AbstractTypeFactory<AssetEntry>.TryCreateInstance(), _blobUrlResolver))
-                    .OrderBy(x => ids.IndexOf(x.Id))
+                    .AsQueryable().OrderBySortInfos(sortInfos)
                     .ToList();
 
                 return result;
@@ -96,7 +95,7 @@ namespace VirtoCommerce.Platform.Data.Assets
         {
             using (var repository = _platformRepository())
             {
-                var entities = await repository.GetAssetsByIdsAsync(ids);
+                var entities = await repository.GetAssetsByIdsAsync(ids.ToArray());
                 return entities.Select(x => x.ToModel(AbstractTypeFactory<AssetEntry>.TryCreateInstance(), _blobUrlResolver));
             }
         }

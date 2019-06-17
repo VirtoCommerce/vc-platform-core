@@ -17,6 +17,11 @@ namespace VirtoCommerce.Platform.Core.Security
         public virtual string Password { get; set; }
         public virtual IList<Role> Roles { get; set; }
 
+        /// <summary>
+        /// Indicates that the password for this user is expired and must be changed.
+        /// </summary>
+        public virtual bool PasswordExpired { get; set; }
+
         //This override methods required to correct working of the Identity DB context updates.
         //DbContext throws out an "object of an already tracked object" when attempting to update a user on an object that wasn't retrieved from the DbContext
         public override bool Equals(object obj)
@@ -40,6 +45,34 @@ namespace VirtoCommerce.Platform.Core.Security
                 return Id.GetHashCode();
             }
             return base.GetHashCode();
+        }
+
+        public virtual void Patch(ApplicationUser target)
+        {
+            target.UserName = UserName;
+            target.IsAdministrator = IsAdministrator;
+            target.Email = Email;
+            target.NormalizedEmail = NormalizedEmail;
+            target.NormalizedUserName = NormalizedUserName;
+            target.EmailConfirmed = EmailConfirmed;
+            target.PasswordHash = PasswordHash;
+            target.SecurityStamp = SecurityStamp;
+            target.PhoneNumberConfirmed = PhoneNumberConfirmed;
+            target.TwoFactorEnabled = TwoFactorEnabled;
+            target.LockoutEnabled = LockoutEnabled;
+            target.AccessFailedCount = AccessFailedCount;
+
+            target.MemberId = MemberId;
+            target.StoreId = StoreId;
+            target.PhotoUrl = PhotoUrl;
+            target.UserType = UserType;
+            target.Password = Password;
+            target.PasswordExpired = PasswordExpired;
+
+            if (!Roles.IsNullOrEmpty())
+            {
+                Roles.Patch(target.Roles, (sourcePhone, targetPhone) => sourcePhone.Patch(targetPhone));
+            }
         }
     }
 }

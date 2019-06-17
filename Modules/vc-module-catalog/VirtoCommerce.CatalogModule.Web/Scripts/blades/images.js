@@ -1,9 +1,9 @@
-﻿angular.module('virtoCommerce.catalogModule')
+angular.module('virtoCommerce.catalogModule')
 .controller('virtoCommerce.catalogModule.imagesController',
     ['$scope', '$filter', '$translate', 'platformWebApp.dialogService',
         'platformWebApp.bladeNavigationService', 'platformWebApp.authService',
-        'platformWebApp.assets.api', 'virtoCommerce.catalogModule.imageTools', 'platformWebApp.settings', 'platformWebApp.bladeUtils', 'platformWebApp.uiGridHelper', '$timeout',
-        function ($scope, $filter, $translate, dialogService, bladeNavigationService, authService, assets, imageTools, settings, bladeUtils, uiGridHelper, $timeout) {
+        'platformWebApp.assets.api', 'platformWebApp.settings', 'platformWebApp.bladeUtils', 'platformWebApp.uiGridHelper', '$timeout',
+        function ($scope, $filter, $translate, dialogService, bladeNavigationService, authService, assets, settings, bladeUtils, uiGridHelper, $timeout) {
             var blade = $scope.blade;
             blade.headIcon = 'fa-image';
             var languages = blade.parentBlade.catalog.languages;

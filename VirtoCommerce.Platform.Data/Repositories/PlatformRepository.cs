@@ -1,3 +1,4 @@
+using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Threading.Tasks;
@@ -30,9 +31,9 @@ namespace VirtoCommerce.Platform.Data.Repositories
 
         public virtual async Task<DynamicPropertyEntity[]> GetObjectDynamicPropertiesAsync(string[] objectTypeNames, string[] objectIds)
         {
-            var properties = DynamicProperties.Include(x => x.DisplayNames)
+            var properties = await DynamicProperties.Include(x => x.DisplayNames)
                                               .OrderBy(x => x.Name)
-                                              .Where(x => objectTypeNames.Contains(x.ObjectType)).ToArray();
+                                              .Where(x => objectTypeNames.Contains(x.ObjectType)).ToArrayAsync();
 
             var propertyIds = properties.Select(x => x.Id).ToArray();
             var proprValues = await DynamicPropertyObjectValues.Include(x => x.DictionaryItem.DisplayNames)
@@ -44,6 +45,11 @@ namespace VirtoCommerce.Platform.Data.Repositories
 
         public virtual async Task<DynamicPropertyDictionaryItemEntity[]> GetDynamicPropertyDictionaryItemByIdsAsync(string[] ids)
         {
+            if (ids.IsNullOrEmpty())
+            {
+                return Array.Empty<DynamicPropertyDictionaryItemEntity>();
+            }
+
             var retVal = await DynamicPropertyDictionaryItems.Include(x => x.DisplayNames)
                                      .Where(x => ids.Contains(x.Id))
                                      .ToArrayAsync();
@@ -52,12 +58,32 @@ namespace VirtoCommerce.Platform.Data.Repositories
 
         public virtual async Task<DynamicPropertyEntity[]> GetDynamicPropertiesByIdsAsync(string[] ids)
         {
+            if (ids.IsNullOrEmpty())
+            {
+                return Array.Empty<DynamicPropertyEntity>();
+            }
+
             var retVal = await DynamicProperties.Include(x => x.DisplayNames)
                                           .Where(x => ids.Contains(x.Id))
                                           .OrderBy(x => x.Name)
                                           .ToArrayAsync();
             return retVal;
         }
+
+        public virtual async Task<DynamicPropertyEntity[]> GetDynamicPropertiesForTypesAsync(string[] objectTypes)
+        {
+            if (objectTypes.IsNullOrEmpty())
+            {
+                return Array.Empty<DynamicPropertyEntity>();
+            }
+
+            var retVal = await DynamicProperties.Include(p => p.DisplayNames)
+                                          .Where(p => objectTypes.Contains(p.ObjectType))
+                                          .OrderBy(p => p.Name)
+                                          .ToArrayAsync();
+            return retVal;
+        }
+
 
         public virtual async Task<SettingEntity[]> GetObjectSettingsAsync(string objectType, string objectId)
         {
@@ -70,9 +96,24 @@ namespace VirtoCommerce.Platform.Data.Repositories
 
         public IQueryable<AssetEntryEntity> AssetEntries => DbContext.Set<AssetEntryEntity>();
 
-        public async Task<AssetEntryEntity[]> GetAssetsByIdsAsync(IEnumerable<string> ids)
+        public async Task<AssetEntryEntity[]> GetAssetsByIdsAsync(string[] ids)
         {
+            if (ids.IsNullOrEmpty())
+            {
+                return Array.Empty<AssetEntryEntity>();
+            }
+
             return await AssetEntries.Where(x => ids.Contains(x.Id)).ToArrayAsync();
+        }
+
+        public async Task<OperationLogEntity[]> GetOperationLogsByIdsAsync(string[] ids)
+        {
+            if (ids.IsNullOrEmpty())
+            {
+                return Array.Empty<OperationLogEntity>();
+            }
+
+            return await OperationLogs.Where(x => ids.Contains(x.Id)).ToArrayAsync();
         }
 
 

@@ -1,6 +1,7 @@
 using System;
 using System.Collections.Generic;
 using System.Linq;
+using System.Text;
 using VirtoCommerce.CoreModule.Core.Common;
 using VirtoCommerce.CoreModule.Core.Seo;
 using VirtoCommerce.Platform.Core.Common;
@@ -91,6 +92,10 @@ namespace VirtoCommerce.CatalogModule.Core.Model
             }
             return result;
         }
+        #endregion
+
+        #region Conditional JSON serialization for properties declared in base type
+        public override bool ShouldSerializeAuditableProperties => false;
         #endregion
     }
 }

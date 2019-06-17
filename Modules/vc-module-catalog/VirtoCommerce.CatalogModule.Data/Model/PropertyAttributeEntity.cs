@@ -35,7 +35,7 @@ namespace VirtoCommerce.CatalogModule.Data.Model
             attribute.CreatedDate = CreatedDate;
             attribute.ModifiedBy = ModifiedBy;
             attribute.ModifiedDate = ModifiedDate;
-            
+
             attribute.Name = PropertyAttributeName;
             attribute.Value = PropertyAttributeValue;
             attribute.PropertyId = PropertyId;
@@ -54,7 +54,7 @@ namespace VirtoCommerce.CatalogModule.Data.Model
             CreatedBy = attribute.CreatedBy;
             CreatedDate = attribute.CreatedDate;
             ModifiedBy = attribute.ModifiedBy;
-            ModifiedDate = attribute.ModifiedDate;    
+            ModifiedDate = attribute.ModifiedDate;
             PropertyId = attribute.PropertyId;
             PropertyAttributeName = attribute.Name;
             PropertyAttributeValue = attribute.Value;
@@ -65,7 +65,7 @@ namespace VirtoCommerce.CatalogModule.Data.Model
         public virtual void Patch(PropertyAttributeEntity target)
         {
             target.PropertyAttributeName = PropertyAttributeName;
-            target.PropertyAttributeValue = PropertyAttributeValue;           
+            target.PropertyAttributeValue = PropertyAttributeValue;
         }
     }
 }

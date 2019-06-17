@@ -1,4 +1,4 @@
-﻿// Subset of list of locales defined by CLDR
+// Subset of list of locales defined by CLDR
 // based on https://github.com/umpirsky/locale-list
 angular.module('platformWebApp')
 .factory('platformWebApp.common.locales', function () {
@@ -460,13 +460,13 @@ angular.module('platformWebApp')
     { id: "rm_CH", name: "Romansh (Switzerland)", nativeName: "rumantsch (Svizra)" },
     { id: "rn", name: "Rundi", nativeName: "Ikirundi" },
     { id: "rn_BI", name: "Rundi (Burundi)", nativeName: "Ikirundi (Uburundi)" },
-    { id: "ru", name: "Russian", nativeName: "русский" },
-    { id: "ru_BY", name: "Russian (Belarus)", nativeName: "русский (Беларусь)" },
-    { id: "ru_KZ", name: "Russian (Kazakhstan)", nativeName: "русский (Казахстан)" },
-    { id: "ru_KG", name: "Russian (Kyrgyzstan)", nativeName: "русский (Киргизия)" },
-    { id: "ru_MD", name: "Russian (Moldova)", nativeName: "русский (Молдова)" },
-    { id: "ru_RU", name: "Russian (Russia)", nativeName: "русский (Россия)" },
-    { id: "ru_UA", name: "Russian (Ukraine)", nativeName: "русский (Украина)" },
+    { id: "ru", name: "Russian", nativeName: "Русский" },
+    { id: "ru_BY", name: "Russian (Belarus)", nativeName: "Русский (Беларусь)" },
+    { id: "ru_KZ", name: "Russian (Kazakhstan)", nativeName: "Русский (Казахстан)" },
+    { id: "ru_KG", name: "Russian (Kyrgyzstan)", nativeName: "Русский (Киргизия)" },
+    { id: "ru_MD", name: "Russian (Moldova)", nativeName: "Русский (Молдова)" },
+    { id: "ru_RU", name: "Russian (Russia)", nativeName: "Русский (Россия)" },
+    { id: "ru_UA", name: "Russian (Ukraine)", nativeName: "Русский (Украина)" },
     { id: "sg", name: "Sango", nativeName: "Sängö" },
     { id: "sg_CF", name: "Sango (Central African Republic)", nativeName: "Sängö (Ködörösêse tî Bêafrîka)" },
     { id: "gd", name: "Scottish Gaelic", nativeName: "Gàidhlig" },

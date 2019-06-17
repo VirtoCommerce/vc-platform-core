@@ -1,38 +1,39 @@
 using System;
 using System.Collections.Generic;
 using VirtoCommerce.CoreModule.Core.Common;
-using VirtoCommerce.CoreModule.Core.Payment;
 using VirtoCommerce.CoreModule.Core.Tax;
+using VirtoCommerce.PaymentModule.Core.Model;
+using VirtoCommerce.PaymentModule.Model.Requests;
 
 namespace VirtoCommerce.OrdersModule.Core.Model
 {
-	public class PaymentIn : OrderOperation, IHasTaxDetalization, ITaxable, IHasDiscounts
+    public class PaymentIn : OrderOperation, IHasTaxDetalization, ITaxable, IHasDiscounts
     {
-		public string Purpose { get; set; }
+        public string Purpose { get; set; }
         /// <summary>
         /// Payment method (gateway) code
         /// </summary>
-		public string GatewayCode { get; set; }
+        public string GatewayCode { get; set; }
         /// <summary>
         /// Payment method contains additional payment method information
         /// </summary>
         public PaymentMethod PaymentMethod { get; set; }
-		public string OrganizationId { get; set; }
-		public string OrganizationName { get; set; }
+        public string OrganizationId { get; set; }
+        public string OrganizationName { get; set; }
 
-		public string CustomerId { get; set; }
-		public string CustomerName { get; set; }
+        public string CustomerId { get; set; }
+        public string CustomerName { get; set; }
 
-		public DateTime? IncomingDate { get; set; }
-		public string OuterId { get; set; }
-		public Address BillingAddress { get; set; }
+        public DateTime? IncomingDate { get; set; }
+        public string OuterId { get; set; }
+        public Address BillingAddress { get; set; }
 
-		public PaymentStatus PaymentStatus { get; set; }
-		public DateTime? AuthorizedDate { get; set; }
-		public DateTime? CapturedDate { get; set; }
-		public DateTime? VoidedDate { get; set; }
+        public PaymentStatus PaymentStatus { get; set; }
+        public DateTime? AuthorizedDate { get; set; }
+        public DateTime? CapturedDate { get; set; }
+        public DateTime? VoidedDate { get; set; }
 
-        public ProcessPaymentResult ProcessPaymentResult { get; set; }
+        public ProcessPaymentRequestResult ProcessPaymentResult { get; set; }
 
         //the self cost of the payment method
         public virtual decimal Price { get; set; }

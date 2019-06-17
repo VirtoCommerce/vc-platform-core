@@ -7,6 +7,7 @@ using Microsoft.Extensions.Options;
 using VirtoCommerce.NotificationsModule.Core.Exceptions;
 using VirtoCommerce.NotificationsModule.Core.Model;
 using VirtoCommerce.NotificationsModule.Core.Services;
+using VirtoCommerce.Platform.Core.Common;
 
 namespace VirtoCommerce.NotificationsModule.Smtp
 {
@@ -40,6 +41,22 @@ namespace VirtoCommerce.NotificationsModule.Smtp
                     mailMsg.Body = emailNotificationMessage.Body;
                     mailMsg.IsBodyHtml = true;
 
+                    if (!emailNotificationMessage.CC.IsNullOrEmpty())
+                    {
+                        foreach (var ccEmail in emailNotificationMessage.CC)
+                        {
+                            mailMsg.CC.Add(new MailAddress(ccEmail));
+                        }
+                    }
+
+                    if (!emailNotificationMessage.BCC.IsNullOrEmpty())
+                    {
+                        foreach (var bccEmail in emailNotificationMessage.BCC)
+                        {
+                            mailMsg.Bcc.Add(new MailAddress(bccEmail));
+                        }
+                    }
+
                     foreach (var attachment in emailNotificationMessage.Attachments)
                     {
                         mailMsg.Attachments.Add(new Attachment(attachment.FileName, attachment.MimeType));
@@ -49,12 +66,19 @@ namespace VirtoCommerce.NotificationsModule.Smtp
                     {
                         await client.SendMailAsync(mailMsg);
                     }
-                };
+                }
+
+                ;
             }
             catch (SmtpException ex)
             {
                 throw new SentNotificationException(ex.Message, ex);
             }
+            catch (InvalidOperationException ex)
+            {
+                throw new SentNotificationException(ex.Message, ex);
+            }
+
         }
 
         private SmtpClient CreateClient()

@@ -17,13 +17,12 @@ namespace VirtoCommerce.LicensingModule.Data.Handlers
             _changeLogService = changeLogService;
         }
 
-        public Task Handle(LicenseSignedEvent message)
+        public virtual async Task Handle(LicenseSignedEvent message)
         {
-            SaveOperationLog(message.License.Id, message.IsActivated ? $"License activated from IP '{message.ClientIpAddress}'" : $"License downloaded from IP '{message.ClientIpAddress}'", EntryState.Modified);
-            return Task.CompletedTask;
+            await SaveOperationLogAsync(message.License.Id, message.IsActivated ? $"License activated from IP '{message.ClientIpAddress}'" : $"License downloaded from IP '{message.ClientIpAddress}'", EntryState.Modified);
         }
 
-        public Task Handle(LicenseChangedEvent message)
+        public async Task Handle(LicenseChangedEvent message)
         {
             foreach (var changedEntry in message.ChangedEntries)
             {
@@ -55,14 +54,12 @@ namespace VirtoCommerce.LicensingModule.Data.Handlers
                         operationLogs.Add(GetLogRecord(modified.Id, "Activation code changed from '{0}' to '{1}'", original.ActivationCode, modified.ActivationCode));
                     }
 
-                    _changeLogService.SaveChanges(operationLogs.ToArray());
+                    await _changeLogService.SaveChangesAsync(operationLogs.ToArray());
                 }
             }
-
-            return Task.CompletedTask;
         }
 
-        protected virtual void SaveOperationLog(string objectId, string detail, EntryState entryState)
+        protected virtual async Task SaveOperationLogAsync(string objectId, string detail, EntryState entryState)
         {
             var operation = new OperationLog
             {
@@ -71,7 +68,7 @@ namespace VirtoCommerce.LicensingModule.Data.Handlers
                 OperationType = entryState,
                 Detail = detail
             };
-            _changeLogService.SaveChanges(operation);
+            await _changeLogService.SaveChangesAsync(operation);
         }
 
         private static OperationLog GetLogRecord(string licenseId, string template, params object[] parameters)

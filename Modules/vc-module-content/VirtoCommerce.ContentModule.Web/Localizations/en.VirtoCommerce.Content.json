@@ -1,0 +1,296 @@
+{
+    "content": {
+        "main-menu-title": "Content",
+        "blades": {
+            "scope-value-pick-from-simple-list": {
+                "title": "Only for selected stores",
+                "subtitle": "Select stores"
+            },
+            "content-main": {
+                "title": "Content",
+                "subtitle": "Content service",
+                "labels": {
+                    "no-active-theme": "No active theme, click to choose",
+                    "active-theme": "Active theme:",
+                    "edit-css-html": "Edit CSS/HTML",
+                    "preview-theme": "Preview theme",
+                    "customize-theme": "Customize theme",
+                    "themes": "Themes",
+                    "pages": "Pages",
+                    "link-lists": "Link lists",
+                    "blogs": "Blogs",
+                    "stores": "Stores",
+                    "no-stores": "You can configure Stores content here, but there were no Stores found. Open STORES menu to create one."
+                }
+            },
+            "themes-list": {
+                "title": "{{name}}",
+                "subtitle": "Themes list",
+                "labels": {
+                    "name": "Name",
+                    "activated": "Activated in store",
+                    "no-data": "No themes yet"
+                }
+            },
+            "edit-asset": {
+                "subtitle": "Edit document content",
+                "title-new": "New document",
+                "subtitle-new": "Create new document",
+                "labels": {
+                    "liquid-documentation": "Liquid Documentation",
+                    "asset-name": "Asset name",
+                    "upload-new-file": "Upload new file",
+                    "progress": "Progress"
+                },
+                "placeholders": {
+                    "asset-name": "Enter asset name"
+                },
+                "validations": {
+                    "name-invalid": "Name can contain alphanumeric, \"_\", \"-\" and \".\" characters only."
+                }
+            },
+            "edit-image-asset": {
+                "subtitle": "Edit {{name}}"
+            },
+            "pages-list": {
+                "title-pages": "{{name}} pages list",
+                "subtitle-pages": "Pages List",
+                "title-blogs": "{{name}} pages list",
+                "subtitle-blogs": "Blogs List",
+                "labels": {
+                    "name": "Name",
+                    "modified": "Modified"
+                }
+            },
+            "link-lists": {
+                "title": "Link Lists",
+                "subtitle": "Link Lists in store '{{name}}'",
+                "labels": {
+                    "name": "Name",
+                    "language": "Language",
+                    "no-data": "No Link Lists yet"
+                }
+            },
+            "theme-detail": {
+                "subtitle": "Manage the theme",
+                "title-new": "New theme",
+                "subtitle-new": "Create new theme",
+                "labels": {
+                    "theme-name": "Theme name"
+                },
+                "placeholders": {
+                    "theme-name": "Enter theme name"
+                }
+            },
+            "theme-upload": {
+                "title": "Theme upload",
+                "labels": {
+                    "select-files": "Select theme file",
+                    "drag-note": "Drop theme (.zip) file here",
+                    "progress": "Progress",
+                    "file-selected": "Theme file: ",
+                    "asset-uploaded": "Theme file uploaded."
+                },
+                "placeholders": {
+                    "image-url": "Paste theme file URL here"
+                }
+            },
+            "edit-page": {
+                "title": "Edit '{{name}}'",
+                "subtitle": "Page edit",
+                "title-new": "New page",
+                "subtitle-new": "Create new page",
+                "subtitle-post": "Blogpost edit",
+                "title-new-post": "New post",
+                "subtitle-new-post": "Create new blogpost",
+                "labels": {
+                    "name": "Name",
+                    "language": "Language",
+                    "drag-note": "Drag and drop file here",
+                    "progress": "Progress",
+                    "markdown": "Markdown",
+                    "metadata": "Metadata"
+                },
+                "placeholders": {
+                    "name": "Enter name",
+                    "language": "Select...",
+                    "metadata": "Enter metadata"
+                },
+                "validations": {
+                    "pageName-invalid": "Page name can contain alphanumeric, \"_\", \"-\" and \".\" characters only."
+                }
+            },
+            "menu-link-list": {
+                "title": "'{{name}}' list",
+                "subtitle": "Edit Link list",
+                "title-new": "New list",
+                "subtitle-new": "Create new Link list",
+                "labels": {
+                    "name": "Name",
+                    "language": "Language",
+                    "list-note": "Set the order how the links appear sorted in web store. Drag and drop to change the order.",
+                    "link-title": "Link Title",
+                    "link-url": "URL",
+                    "links-to": "Links to",
+                    "linked-object": "Linked object"
+                },
+                "placeholders": {
+                    "name": "Enter list name",
+                    "language": "Select...",
+                    "associated-object-type": "Select type",
+                    "select-linked-object": "Select"
+                }
+            },
+            "catalog-items-select": {
+                "title-product": "Pick Product for link",
+                "title-category": "Pick Category for link"
+            },
+            "edit-blog": {
+                "subtitle": "Edit blog",
+                "title-new": "New blog",
+                "subtitle-new": "Create new blog",
+                "labels": {
+                    "blog-name": "Blog name",
+                    "metadata": "Metadata"
+                },
+                "placeholders": {
+                    "blog-name": "Enter blog name"
+                },
+                "validations": {
+                    "name-invalid": "Name can contain alphanumeric, \"_\", \"-\" and \".\" characters only."
+                }
+            },
+            "asset-list": {
+                "subtitle": "Manage theme assets",
+                "labels": {
+                    "add-new": "Add new",
+                    "nodata": "No Assets yet"
+                }
+            },
+            "theme-asset-list": {
+                "title": "Edit {{path}}",
+                "subtitle": "Theme asset list",
+                "labels": {
+                    "add-new": "Add new",
+                    "nodata": "No Assets yet"
+                }
+            }
+        },
+        "widgets": {
+            "menu": {
+                "title": "Link Lists",
+                "blade-subtitle": "Link Lists"
+            },
+            "pages": {
+                "title": "Pages",
+                "blade-subtitle": "Pages List"
+            },
+            "store-cms": {
+                "themes": "Themes",
+                "pages": "Pages",
+                "blogs": "Blogs",
+                "links": "Link Lists",
+                "active-theme": "Active theme"
+            }
+        },
+        "dialogs": {
+            "theme-clone": {
+                "title": "Clone confirmation",
+                "message": "Are you sure you want to clone selected Theme?"
+            },
+            "link-list-delete": {
+                "title": "Delete confirmation",
+                "message": "Are you sure you want to delete selected Link lists?"
+            },
+            "links-delete": {
+                "title": "Delete confirmation",
+                "message": "Are you sure you want to delete selected links?"
+            },
+            "blog-delete": {
+                "title": "Delete confirmation",
+                "message": "Are you sure you want to delete selected Blog?"
+            },
+            "page-delete": {
+                "title": "Delete confirmation",
+                "message": "Are you sure you want to delete this page?"
+            },
+            "blog-save": {
+                "title": "Save changes",
+                "message": "The blog has been modified. Do you want to save changes?"
+            },
+            "page-save": {
+                "title": "Save changes",
+                "message": "The page has been modified. Do you want to save changes?"
+            },
+            "theme-save": {
+                "title": "Save changes",
+                "message": "The theme has been modified. Do you want to save changes?"
+            },
+            "theme-delete": {
+                "title": "Delete confirmation",
+                "message": "Are you sure you want to delete '{{name}}'?",
+                "message-last-one": "This theme is the last one. If you delete it, you could break your storefront. Are you sure you want to delete '{{name}}'?"
+            },
+            "asset-delete": {
+                "title": "Delete confirmation",
+                "message": "Are you sure you want to delete this asset?"
+            },
+            "asset-save": {
+                "title": "Save changes",
+                "message": "The asset has been modified. Do you want to save changes?"
+            },
+            "link-list-save": {
+                "title": "Save changes",
+                "message": "The menu link list has been modified. Do you want to save changes?"
+            },
+            "set-store-url": {
+                "title": "Url is not set for the store",
+                "message": "Please, set store url before previewing!"
+            },
+            "name-must-unique": {
+                "title": "Name not unique",
+                "message": "Name must be unique for this language!"
+            }
+        },
+        "commands": {
+            "add-link": "Add link",
+            "add-list": "Add list",
+            "add-blog": "Add blog",
+            "add-post": "Add post",
+            "add-page": "Add",
+            "delete-links": "Delete links",
+            "delete-theme": "Delete",
+            "manage-metadata": "Manage Metadata properties",
+            "edit-as-markdown": "Edit as markdown",
+            "edit-as-html": "Edit as html",
+            "preview-theme": "Preview",
+            "edit-css-html": "Edit CSS/HTML",
+            "add-theme": "Add new theme",
+            "set-active": "Set Active",
+            "preview-page": "Preview page"
+        },
+        "front-matter-description": {
+            "Title_FrontMatterHeader": "The page title",
+            "Layout_FrontMatterHeader": "If set, this specifies the theme layout file to use. Use the layout file name without the file extension. e.g. 'Theme'",
+            "Template_FrontMatterHeader": "Name of liquid template in theme witch will be used for display this page by including  {{ page.content }} expression",
+            "Permalink_FrontMatterHeader": "Refer to the URLs (excluding the domain name or directory folder) for your pages, posts. Possible values :folder/:categories/:year/:month/:day/:title, my-page, :folder/my-page",
+            "Published_FrontMatterHeader": "Set to false if you don’t want a specific post to show up when the site is generated.",
+            "Category_FrontMatterHeader": "Instead of placing posts inside of folders, you can specify one or more categories that the post belongs to. When the site is generated the post will act as though it had been set with these categories normally. Categories (plural key) can be specified as a YAML list or a comma-separated string.",
+            "Tags_FrontMatterHeader": "Similar to categories, one or multiple tags can be added to a post. Also like categories, tags can be specified as a YAML list or a comma-separated string.",
+            "Alias_FrontMatterHeader": "It allows  to specify aliases on a per page basis, in the YAML front matter. This aliases can be used for redirection.",
+            "Authorize_FrontMatterHeader": "Set to true if you want to block anonymous access to the page."
+        },
+        "permissions": {
+            "content:access": "Open store content menu",
+            "content:create": "Create store content data",
+            "content:read": "View store content data",
+            "content:update": "Update store content data",
+            "content:delete": "Delete store content data"
+        }
+    },
+    "module": {
+        "VirtoCommerce.Content": {
+            "description": "Export/Import pages, themes, links, menu items"
+        }
+    }
+}

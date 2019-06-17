@@ -1,3 +1,4 @@
+using System;
 using System.Collections.Generic;
 using VirtoCommerce.Platform.Core.Common;
 
@@ -5,6 +6,8 @@ namespace VirtoCommerce.Platform.Core.Security
 {
     public class Permission : ValueObject
     {
+        [Obsolete("Left for backward compatibility")]
+        public string Id => Name;
 
         public string Name { get; set; }
         /// <summary>
@@ -20,6 +23,13 @@ namespace VirtoCommerce.Platform.Core.Security
         {
             yield return Name;
             yield return ModuleId;
+        }
+
+        public virtual void Patch(Permission target)
+        {
+            target.Name = Name;
+            target.ModuleId = ModuleId;
+            target.GroupName = GroupName;
         }
     }
 }

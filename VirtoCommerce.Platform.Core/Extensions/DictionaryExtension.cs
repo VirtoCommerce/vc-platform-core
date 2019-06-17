@@ -10,8 +10,7 @@ namespace VirtoCommerce.Platform.Core.Common
     {
         public static TValue GetValueOrThrow<TKey, TValue>(this IDictionary<TKey, TValue> dictionary, TKey key, string exceptionMessage)
         {
-            TValue value;
-            if(!dictionary.TryGetValue(key, out value))
+            if (!dictionary.TryGetValue(key, out var value))
             {
                 throw new KeyNotFoundException(exceptionMessage);
             }

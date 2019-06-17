@@ -49,7 +49,7 @@ namespace Mvc.Server
         // you must provide your own token endpoint action:
 
         [HttpPost("~/connect/token"), Produces("application/json")]
-        public async Task<IActionResult> Exchange(OpenIdConnectRequest request)
+        public async Task<ActionResult> Exchange(OpenIdConnectRequest request)
         {
             Debug.Assert(request.IsTokenRequest(),
                 "The OpenIddict binder for ASP.NET Core MVC is not registered. " +
@@ -81,12 +81,12 @@ namespace Mvc.Server
 
                 // Create a new authentication ticket.
                 var ticket = await CreateTicketAsync(request, user);
-                var claims = await _userClaimsPrincipalFactory.CreateAsync(user);
+                var claimsPrincipal = await _userClaimsPrincipalFactory.CreateAsync(user);
                 var limitedPermissions = _authorizationOptions.LimitedCookiePermissions?.Split(PlatformConstants.Security.Claims.PermissionClaimTypeDelimiter, StringSplitOptions.RemoveEmptyEntries) ?? new string[0];
 
-                if (!user.Roles.Select(r => r.Name).Contains(PlatformConstants.Security.Roles.Administrator))
+                if (!user.IsAdministrator)
                 {
-                    limitedPermissions = claims
+                    limitedPermissions = claimsPrincipal
                         .Claims
                         .Where(c => c.Type == PlatformConstants.Security.Claims.PermissionClaimType)
                         .Select(c => c.Value)
@@ -104,8 +104,8 @@ namespace Mvc.Server
                     // If the user identity has claim named "limited_permissions", this attribute should authorize only permissions listed in that claim. Any permissions that are required by this attribute but
                     // not listed in the claim should cause this method to return false. However, if permission limits of user identity are not defined ("limited_permissions" claim is missing),
                     // then no limitations should be applied to the permissions.
-                    ((ClaimsIdentity)claims.Identity).AddClaim(new Claim(PlatformConstants.Security.Claims.LimitedPermissionsClaimType, string.Join(PlatformConstants.Security.Claims.PermissionClaimTypeDelimiter, limitedPermissions)));
-                    await HttpContext.SignInAsync(IdentityConstants.ApplicationScheme, claims);
+                    ((ClaimsIdentity)claimsPrincipal.Identity).AddClaim(new Claim(PlatformConstants.Security.Claims.LimitedPermissionsClaimType, string.Join(PlatformConstants.Security.Claims.PermissionClaimTypeDelimiter, limitedPermissions)));
+                    await HttpContext.SignInAsync(IdentityConstants.ApplicationScheme, claimsPrincipal);
                 }
 
                 return SignIn(ticket.Principal, ticket.Properties, ticket.AuthenticationScheme);

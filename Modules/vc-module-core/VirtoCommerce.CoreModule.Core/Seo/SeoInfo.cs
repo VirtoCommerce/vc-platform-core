@@ -55,5 +55,10 @@ namespace VirtoCommerce.CoreModule.Core.Seo
             return MemberwiseClone();
         }
         #endregion
+
+
+        #region Conditional JSON serialization for properties declared in base type
+        public override bool ShouldSerializeAuditableProperties => false;
+        #endregion
     }
 }

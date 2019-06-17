@@ -1,25 +1,13 @@
-using System;
-using System.Collections.Generic;
 using VirtoCommerce.Platform.Core.Common;
 using VirtoCommerce.Platform.Core.Domain;
 
 namespace VirtoCommerce.CatalogModule.Core.Model
 {
-    public class PropertyDisplayName : ValueObject, IHasLanguage, ICloneable
-	{
-		public string Name { get; set; }
-		public string LanguageCode { get; set; }
-
-        #region ICloneable members
-        public virtual object Clone()
-        {
-            return MemberwiseClone();
-        }
+    public class PropertyDisplayName : ValueObject, IHasLanguage
+    {
+        public string Name { get; set; }
+        #region IHasLanguage members
+        public string LanguageCode { get; set; }
         #endregion
-
-        protected override IEnumerable<object> GetEqualityComponents()
-        {
-            yield return LanguageCode;
-        }
     }
 }

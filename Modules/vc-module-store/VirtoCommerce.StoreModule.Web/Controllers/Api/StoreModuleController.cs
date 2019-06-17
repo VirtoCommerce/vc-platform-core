@@ -1,13 +1,10 @@
 using System;
-using System.Collections.Generic;
 using System.Linq;
 using System.Threading.Tasks;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Identity;
 using Microsoft.AspNetCore.Mvc;
-using VirtoCommerce.CoreModule.Core.Tax;
 using VirtoCommerce.NotificationsModule.Core.Services;
-using VirtoCommerce.Platform.Core.Common;
 using VirtoCommerce.Platform.Core.Security;
 using VirtoCommerce.StoreModule.Core;
 using VirtoCommerce.StoreModule.Core.Model;
@@ -40,38 +37,11 @@ namespace VirtoCommerce.StoreModule.Web.Controllers.Api
         }
 
         /// <summary>
-        /// Evaluate and return all tax rates for specified store and evaluation context 
-        /// </summary>
-        /// <param name="storeId"></param>
-        /// <param name="evalContext"></param>
-        /// <returns></returns>
-        [HttpPost]
-        [ProducesResponseType(typeof(TaxRate[]), 200)]
-        [Route("taxes/{storeId}/evaluate")]
-        public async Task<IActionResult> EvaluateTaxes(string storeId, [FromBody]TaxEvaluationContext evalContext)
-        {
-            //TODO: move to another module fromhere
-            var retVal = new List<TaxRate>();
-            var store = await _storeService.GetByIdAsync(storeId);
-            if (store != null)
-            {
-                var activeTaxProvider = store.TaxProviders.FirstOrDefault(x => x.IsActive);
-                if (activeTaxProvider != null)
-                {
-                    evalContext.StoreId = store.Id;
-                    retVal.AddRange(activeTaxProvider.CalculateRates(evalContext));
-                }
-            }
-            return Ok(retVal);
-        }
-
-        /// <summary>
         /// Search stores
         /// </summary>
         [HttpPost]
         [Route("search")]
-        [ProducesResponseType(typeof(GenericSearchResult<Store>), 200)]
-        public async Task<GenericSearchResult<Store>> SearchStores([FromBody]StoreSearchCriteria criteria)
+        public async Task<StoreSearchResult> SearchStores([FromBody]StoreSearchCriteria criteria)
         {
             //Filter resulting stores correspond to current user permissions
             //first check global permission
@@ -101,8 +71,7 @@ namespace VirtoCommerce.StoreModule.Web.Controllers.Api
         /// </summary>
         [HttpGet]
         [Route("")]
-        [ProducesResponseType(typeof(Store[]), 200)]
-        public async Task<IActionResult> GetStores()
+        public async Task<ActionResult<Store[]>> GetStores()
         {
             var criteria = new StoreSearchCriteria
             {
@@ -119,8 +88,7 @@ namespace VirtoCommerce.StoreModule.Web.Controllers.Api
         /// <param name="id">Store id</param>
         [HttpGet]
         [Route("{id}")]
-        [ProducesResponseType(typeof(Store), 200)]
-        public async Task<IActionResult> GetStoreById(string id)
+        public async Task<ActionResult<Store>> GetStoreById(string id)
         {
             var result = await _storeService.GetByIdAsync(id);
             //TODO
@@ -136,9 +104,8 @@ namespace VirtoCommerce.StoreModule.Web.Controllers.Api
         /// <param name="store">Store</param>
         [HttpPost]
         [Route("")]
-        [ProducesResponseType(typeof(Store), 200)]
         [Authorize(ModuleConstants.Security.Permissions.Create)]
-        public async Task<IActionResult> Create([FromBody]Store store)
+        public async Task<ActionResult<Store>> Create([FromBody]Store store)
         {
             await _storeService.SaveChangesAsync(new[] { store });
             return Ok(store);
@@ -150,13 +117,12 @@ namespace VirtoCommerce.StoreModule.Web.Controllers.Api
         /// <param name="store">Store</param>
         [HttpPut]
         [Route("")]
-        [ProducesResponseType(typeof(void), 200)]
-        public async Task<IActionResult> Update([FromBody]Store store)
+        public async Task<ActionResult> Update([FromBody]Store store)
         {
             //TODO
             //CheckCurrentUserHasPermissionForObjects(StorePredefinedPermissions.Update, store);
             await _storeService.SaveChangesAsync(new[] { store });
-            return Ok();
+            return NoContent();
         }
 
         /// <summary>
@@ -165,13 +131,12 @@ namespace VirtoCommerce.StoreModule.Web.Controllers.Api
         /// <param name="ids">Ids of store that needed to delete</param>
         [HttpDelete]
         [Route("")]
-        [ProducesResponseType(typeof(void), 200)]
-        public async Task<IActionResult> Delete([FromQuery] string[] ids)
+        public async Task<ActionResult> Delete([FromQuery] string[] ids)
         {
             //TODO
             //CheckCurrentUserHasPermissionForObjects(StorePredefinedPermissions.Delete, stores);
             await _storeService.DeleteAsync(ids);
-            return Ok();
+            return NoContent();
         }
 
         /// <summary>
@@ -181,8 +146,7 @@ namespace VirtoCommerce.StoreModule.Web.Controllers.Api
         /// <returns></returns>
         [HttpPost]
         [Route("send/dynamicnotification")]
-        [ProducesResponseType(typeof(void), 200)]
-        public async Task<IActionResult> SendDynamicNotificationAnStoreEmail(SendDynamicNotificationRequest request)
+        public async Task<ActionResult> SendDynamicNotificationAnStoreEmail(SendDynamicNotificationRequest request)
         {
             var store = await _storeService.GetByIdAsync(request.StoreId);
 
@@ -199,7 +163,7 @@ namespace VirtoCommerce.StoreModule.Web.Controllers.Api
             };
             await _notificationSender.SendNotificationAsync(notification, request.Language);
 
-            return Ok();
+            return NoContent();
         }
 
         /// <summary>
@@ -210,8 +174,7 @@ namespace VirtoCommerce.StoreModule.Web.Controllers.Api
         /// <returns></returns>
         [HttpGet]
         [Route("{storeId}/accounts/{id}/loginonbehalf")]
-        [ProducesResponseType(typeof(LoginOnBehalfInfo), 200)]
-        public async Task<IActionResult> GetLoginOnBehalfInfo(string storeId, string id)
+        public async Task<ActionResult<LoginOnBehalfInfo>> GetLoginOnBehalfInfo(string storeId, string id)
         {
             var result = new LoginOnBehalfInfo
             {
@@ -235,8 +198,7 @@ namespace VirtoCommerce.StoreModule.Web.Controllers.Api
         /// <returns></returns>
         [HttpGet]
         [Route("allowed/{userId}")]
-        [ProducesResponseType(typeof(Store[]), 200)]
-        public async Task<IActionResult> GetUserAllowedStores(string userId)
+        public async Task<ActionResult<Store[]>> GetUserAllowedStores(string userId)
         {
             var user = await _userManager.FindByIdAsync(userId);
             if (user != null)

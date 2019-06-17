@@ -41,8 +41,8 @@ angular.module(moduleName, ['ui.grid.infiniteScroll'])
             var menuTemplate =
             {
                 priority: 901,
-                satisfy: function (notify, place) { return place == 'menu' && notify.notifyType == 'ThumbnailProcess'; },
-                template: 'Modules/$(VirtoCommerce.ImageTools)/Scripts/notifications/menuThumbnailProcess.tpl.html',
+                satisfy: function (notify, place) { return place == 'header-notification' && notify.notifyType == 'ThumbnailProcess'; },
+                template: 'Modules/$(VirtoCommerce.ImageTools)/Scripts/notifications/headerNotification.tpl.html',
                 action: function (notify) { $state.go('workspace.pushNotificationsHistory', notify) }
             };
             pushNotificationTemplateResolver.register(menuTemplate);

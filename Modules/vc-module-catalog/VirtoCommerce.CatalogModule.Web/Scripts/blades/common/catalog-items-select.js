@@ -1,4 +1,4 @@
-﻿angular.module('virtoCommerce.catalogModule')
+angular.module('virtoCommerce.catalogModule')
     .controller('virtoCommerce.catalogModule.catalogItemSelectController', ['$scope', 'virtoCommerce.catalogModule.catalogs', 'virtoCommerce.catalogModule.listEntries', 'platformWebApp.bladeUtils', 'uiGridConstants', 'platformWebApp.uiGridHelper', 'platformWebApp.ui-grid.extension', '$timeout',
     function ($scope, catalogs, listEntries, bladeUtils, uiGridConstants, uiGridHelper, gridOptionExtension, $timeout) {
     var blade = $scope.blade;
@@ -26,8 +26,8 @@
                     catalogId: blade.catalogId,
                     categoryId: blade.categoryId,
                     keyword: filter.keyword,
-                    responseGroup: 'withCategories, withProducts',
-                    searchInVariations: true,
+                    searchInVariations : filter.searchInVariations ? filter.searchInVariations : false,
+                    responseGroup: 'withCategories, withProducts',                    
                     sort: uiGridHelper.getSortExpression($scope),
                     skip: ($scope.pageSettings.currentPage - 1) * $scope.pageSettings.itemsPerPageCount,
                     take: $scope.pageSettings.itemsPerPageCount
@@ -106,19 +106,18 @@
         if ($scope.options.selectItemFn) {
             $scope.options.selectItemFn(listItem);
         };
-
+        
         var newBlade = {
-            id: 'CatalogItemsSelect',
+            id: blade.id,
             breadcrumbs: blade.breadcrumbs,
             catalogId: blade.catalogId,
             catalog: blade.catalog,
-            controller: 'virtoCommerce.catalogModule.catalogItemSelectController',
-            template: 'Modules/$(VirtoCommerce.Catalog)/Scripts/blades/common/catalog-items-select.tpl.html',
+            controller: blade.controller,
+            template: blade.template,
             options: $scope.options,
             searchCriteria: blade.searchCriteria,
             toolbarCommands: blade.toolbarCommands
         };
-
 
         if ($scope.isCatalogSelectMode()) {
             newBlade.catalogId = listItem.id;
@@ -140,6 +139,7 @@
             });
         }
         else {
+            //default blade for product details
             newBlade = {
                 id: "listItemDetail",
                 itemId: listItem.id,
@@ -150,6 +150,15 @@
                 controller: 'virtoCommerce.catalogModule.itemDetailController',
                 template: 'Modules/$(VirtoCommerce.Catalog)/Scripts/blades/item-detail.tpl.html'
             };
+
+            //extension point allows to use custom views for product details
+            if ($scope.options.fnGetBladeForItem) {
+                var customBlade = $scope.options.fnGetBladeForItem(listItem);
+                if (customBlade) {
+                    newBlade = customBlade;
+                }
+            }
+           
             bladeNavigationService.showBlade(newBlade, blade);
 
             // setting current categoryId to be globally available
@@ -159,7 +168,7 @@
 
     // simple and advanced filtering
 
-    var filter = blade.filter = blade.filter || { keyword: null };
+    var filter = blade.filter = blade.filter || { keyword: '' };
 
     filter.criteriaChanged = function () {
         if ($scope.pageSettings.currentPage > 1) {
@@ -170,9 +179,14 @@
     };
 
     $scope.setGridOptions = function (gridId, gridOptions) {
-        gridOptions.isRowSelectable = function (row) {
-            return ($scope.options.allowCheckingItem && row.entity.type !== 'category') || ($scope.options.allowCheckingCategory && row.entity.type === 'category');
-        };
+        gridOptions.isRowSelectable = angular.isFunction($scope.options.isItemSelectable)
+            ? function(row) {
+                return $scope.options.isItemSelectable(row.entity);
+            }
+            : function(row) {
+                return $scope.options.allowCheckingItem && row.entity.type !== 'category' ||
+                    $scope.options.allowCheckingCategory && row.entity.type === 'category';
+            };
 
         gridOptions.columnDefs = gridOptions.columnDefs.concat($scope.options.gridColumns);
         gridOptionExtension.tryExtendGridOptions(gridId, gridOptions);

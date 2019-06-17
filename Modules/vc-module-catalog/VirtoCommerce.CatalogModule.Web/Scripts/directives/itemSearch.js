@@ -7,7 +7,7 @@
         },
         scope: {
             blade: '='
-        },
+        },       
         link: function ($scope) {
             var blade = $scope.blade;
             $scope.$localStorage = $localStorage;
@@ -16,6 +16,7 @@
             if ($localStorage.catalogSearchFilterId && !filter.keyword && filter.keyword !== null) {
                 filter.current = _.findWhere($localStorage.catalogSearchFilters, { id: $localStorage.catalogSearchFilterId });
                 filter.keyword = filter.current ? filter.current.keyword : '';
+                filter.searchInVariations = filter.current ? filter.current.searchInVariations : false;             
             }
 
             filter.change = function (isDetailBladeOpen) {
@@ -27,6 +28,7 @@
                     if (!isDetailBladeOpen)
                         bladeNavigationService.closeBlade({ id: 'filterDetail' });
                     filter.keyword = filter.current ? filter.current.keyword : '';
+                    filter.searchInVariations = filter.current ? filter.current.searchInVariations : false;
                     filter.criteriaChanged();
                 }
             };
@@ -45,6 +47,8 @@
                 angular.extend(newBlade, bladeData);
                 bladeNavigationService.showBlade(newBlade, blade);
             };
+
+            filter.criteriaChanged();
         }
     }
 }]);

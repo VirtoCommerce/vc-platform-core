@@ -37,6 +37,6 @@ namespace VirtoCommerce.CatalogModule.Data.Validation
                   .Matches(rule.RegExp).WithName(rule.Property.Name)
                   .When(notNullOrEmptyPredicate);
             }
-        }    
+        }
     }
 }

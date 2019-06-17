@@ -2,6 +2,7 @@ using System;
 using System.Collections.ObjectModel;
 using System.ComponentModel.DataAnnotations;
 using System.Linq;
+using VirtoCommerce.CoreModule.Core.Seo;
 using VirtoCommerce.Platform.Core.Common;
 using VirtoCommerce.StoreModule.Core.Model;
 
@@ -13,11 +14,10 @@ namespace VirtoCommerce.StoreModule.Data.Model
         {
             Languages = new NullCollection<StoreLanguageEntity>();
             Currencies = new NullCollection<StoreCurrencyEntity>();
-            PaymentMethods = new NullCollection<StorePaymentMethodEntity>();
-            ShippingMethods = new NullCollection<StoreShippingMethodEntity>();
-            TaxProviders = new NullCollection<StoreTaxProviderEntity>();
+
             TrustedGroups = new NullCollection<StoreTrustedGroupEntity>();
             FulfillmentCenters = new NullCollection<StoreFulfillmentCenterEntity>();
+            SeoInfos = new NullCollection<SeoInfoEntity>();
         }
 
         [Required]
@@ -76,17 +76,18 @@ namespace VirtoCommerce.StoreModule.Data.Model
         public virtual ObservableCollection<StoreCurrencyEntity> Currencies { get; set; }
         public virtual ObservableCollection<StoreTrustedGroupEntity> TrustedGroups { get; set; }
 
-        public virtual ObservableCollection<StorePaymentMethodEntity> PaymentMethods { get; set; }
-        public virtual ObservableCollection<StoreShippingMethodEntity> ShippingMethods { get; set; }
-        public virtual ObservableCollection<StoreTaxProviderEntity> TaxProviders { get; set; }
 
         public virtual ObservableCollection<StoreFulfillmentCenterEntity> FulfillmentCenters { get; set; }
+        public virtual ObservableCollection<SeoInfoEntity> SeoInfos { get; set; }
+
         #endregion
 
         public virtual Store ToModel(Store store)
         {
             if (store == null)
+            {
                 throw new ArgumentNullException(nameof(store));
+            }
 
             store.Id = Id;
             store.AdminEmail = AdminEmail;
@@ -109,12 +110,15 @@ namespace VirtoCommerce.StoreModule.Data.Model
             store.MainFulfillmentCenterId = FulfillmentCenterId;
             store.MainReturnsFulfillmentCenterId = ReturnsFulfillmentCenterId;
 
-            store.StoreState = EnumUtility.SafeParse<StoreState>(StoreState.ToString(), Core.Model.StoreState.Open);
+            store.StoreState = EnumUtility.SafeParse(StoreState.ToString(), Core.Model.StoreState.Open);
             store.Languages = Languages.Select(x => x.LanguageCode).ToList();
             store.Currencies = Currencies.Select(x => x.CurrencyCode).ToList();
             store.TrustedGroups = TrustedGroups.Select(x => x.GroupName).ToList();
             store.AdditionalFulfillmentCenterIds = FulfillmentCenters.Where(x => x.Type == FulfillmentCenterType.Main).Select(x => x.FulfillmentCenterId).ToList();
             store.ReturnsFulfillmentCenterIds = FulfillmentCenters.Where(x => x.Type == FulfillmentCenterType.Returns).Select(x => x.FulfillmentCenterId).ToList();
+            // SeoInfos
+            store.SeoInfos = SeoInfos.Select(x => x.ToModel(AbstractTypeFactory<SeoInfo>.TryCreateInstance())).ToList();
+
             return store;
         }
 
@@ -147,7 +151,7 @@ namespace VirtoCommerce.StoreModule.Data.Model
 
             if (store.DefaultCurrency != null)
             {
-                DefaultCurrency = store.DefaultCurrency.ToString();
+                DefaultCurrency = store.DefaultCurrency;
             }
             if (store.MainFulfillmentCenterId != null)
             {
@@ -181,18 +185,6 @@ namespace VirtoCommerce.StoreModule.Data.Model
                 }));
             }
 
-            if (store.ShippingMethods != null)
-            {
-                ShippingMethods = new ObservableCollection<StoreShippingMethodEntity>(store.ShippingMethods.Select(x => AbstractTypeFactory<StoreShippingMethodEntity>.TryCreateInstance().FromModel(x, pkMap)));
-            }
-            if (store.PaymentMethods != null)
-            {
-                PaymentMethods = new ObservableCollection<StorePaymentMethodEntity>(store.PaymentMethods.Select(x => AbstractTypeFactory<StorePaymentMethodEntity>.TryCreateInstance().FromModel(x, pkMap)));
-            }
-            if (store.TaxProviders != null)
-            {
-                TaxProviders = new ObservableCollection<StoreTaxProviderEntity>(store.TaxProviders.Select(x => AbstractTypeFactory<StoreTaxProviderEntity>.TryCreateInstance().FromModel(x, pkMap)));
-            }
 
             FulfillmentCenters = new ObservableCollection<StoreFulfillmentCenterEntity>();
             if (store.AdditionalFulfillmentCenterIds != null)
@@ -215,6 +207,10 @@ namespace VirtoCommerce.StoreModule.Data.Model
                     StoreId = store.Id,
                     Type = FulfillmentCenterType.Returns
                 }));
+            }
+            if (store.SeoInfos != null)
+            {
+                SeoInfos = new ObservableCollection<SeoInfoEntity>(store.SeoInfos.Select(x => AbstractTypeFactory<SeoInfoEntity>.TryCreateInstance().FromModel(x, pkMap)));
             }
 
             return this;
@@ -240,7 +236,7 @@ namespace VirtoCommerce.StoreModule.Data.Model
             target.SecureUrl = SecureUrl;
             target.TimeZone = TimeZone;
             target.Url = Url;
-            target.StoreState = (int)StoreState;
+            target.StoreState = StoreState;
             target.FulfillmentCenterId = FulfillmentCenterId;
             target.ReturnsFulfillmentCenterId = ReturnsFulfillmentCenterId;
 
@@ -263,29 +259,15 @@ namespace VirtoCommerce.StoreModule.Data.Model
                                       (sourceGroup, targetGroup) => sourceGroup.GroupName = targetGroup.GroupName);
             }
 
-            if (!PaymentMethods.IsNullCollection())
-            {
-                var paymentComparer = AnonymousComparer.Create((StorePaymentMethodEntity x) => x.Code);
-                PaymentMethods.Patch(target.PaymentMethods, paymentComparer,
-                                      (sourceMethod, targetMethod) => sourceMethod.Patch(targetMethod));
-            }
-            if (!ShippingMethods.IsNullCollection())
-            {
-                var shippingComparer = AnonymousComparer.Create((StoreShippingMethodEntity x) => x.Code);
-                ShippingMethods.Patch(target.ShippingMethods, shippingComparer,
-                                      (sourceMethod, targetMethod) => sourceMethod.Patch(targetMethod));
-            }
-            if (!TaxProviders.IsNullCollection())
-            {
-                var shippingComparer = AnonymousComparer.Create((StoreTaxProviderEntity x) => x.Code);
-                TaxProviders.Patch(target.TaxProviders, shippingComparer,
-                                      (sourceProvider, targetProvider) => sourceProvider.Patch(targetProvider));
-            }
             if (!FulfillmentCenters.IsNullCollection())
             {
                 var fulfillmentCenterComparer = AnonymousComparer.Create((StoreFulfillmentCenterEntity fc) => $"{fc.FulfillmentCenterId}-{fc.Type}");
                 FulfillmentCenters.Patch(target.FulfillmentCenters, fulfillmentCenterComparer,
                                       (sourceFulfillmentCenter, targetFulfillmentCenter) => sourceFulfillmentCenter.Patch(targetFulfillmentCenter));
+            }
+            if (!SeoInfos.IsNullCollection())
+            {
+                SeoInfos.Patch(target.SeoInfos, (sourceSeoInfo, targetSeoInfo) => sourceSeoInfo.Patch(targetSeoInfo));
             }
         }
     }

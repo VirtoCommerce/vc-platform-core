@@ -6,7 +6,6 @@ using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.Caching.Memory;
 using VirtoCommerce.Platform.Core.Caching;
 using VirtoCommerce.Platform.Core.Common;
-using VirtoCommerce.StoreModule.Core.Model;
 using VirtoCommerce.StoreModule.Core.Model.Search;
 using VirtoCommerce.StoreModule.Core.Services;
 using VirtoCommerce.StoreModule.Data.Caching;
@@ -17,25 +16,25 @@ namespace VirtoCommerce.StoreModule.Data.Services
 {
     public class StoreSearchService : IStoreSearchService
     {
+        private readonly Func<IStoreRepository> _repositoryFactory;
+        private readonly IPlatformMemoryCache _platformMemoryCache;
+        private readonly IStoreService _storeService;
+
         public StoreSearchService(Func<IStoreRepository> repositoryFactory, IPlatformMemoryCache platformMemoryCache, IStoreService storeService)
         {
-            RepositoryFactory = repositoryFactory;
-            PlatformMemoryCache = platformMemoryCache;
-            StoreService = storeService;
+            _repositoryFactory = repositoryFactory;
+            _platformMemoryCache = platformMemoryCache;
+            _storeService = storeService;
         }
 
-        protected Func<IStoreRepository> RepositoryFactory { get; }
-        protected IPlatformMemoryCache PlatformMemoryCache { get; }
-        protected IStoreService StoreService { get; }
-
-        public virtual async Task<GenericSearchResult<Store>> SearchStoresAsync(StoreSearchCriteria criteria)
+        public virtual async Task<StoreSearchResult> SearchStoresAsync(StoreSearchCriteria criteria)
         {
             var cacheKey = CacheKey.With(GetType(), "SearchStoresAsync", criteria.GetCacheKey());
-            return await PlatformMemoryCache.GetOrCreateExclusiveAsync(cacheKey, async (cacheEntry) =>
+            return await _platformMemoryCache.GetOrCreateExclusiveAsync(cacheKey, async (cacheEntry) =>
             {
-                cacheEntry.AddExpirationToken(StoreSearchCacheRegion.CreateChangeToken());
-                var result = new GenericSearchResult<Store>();
-                using (var repository = RepositoryFactory())
+                cacheEntry.AddExpirationToken(StoreCacheRegion.CreateChangeToken());
+                var result = AbstractTypeFactory<StoreSearchResult>.TryCreateInstance();
+                using (var repository = _repositoryFactory())
                 {
                     var sortInfos = criteria.SortInfos;
                     if (sortInfos.IsNullOrEmpty())
@@ -55,7 +54,7 @@ namespace VirtoCommerce.StoreModule.Data.Services
                     if (criteria.Take > 0)
                     {
                         var storeIds = await query.Select(x => x.Id).Skip(criteria.Skip).Take(criteria.Take).ToArrayAsync();
-                        result.Results = (await StoreService.GetByIdsAsync(storeIds)).AsQueryable().OrderBySortInfos(sortInfos).ToList();
+                        result.Results = (await _storeService.GetByIdsAsync(storeIds)).AsQueryable().OrderBySortInfos(sortInfos).ToList();
                     }
                 }
                 return result;

@@ -1,8 +1,7 @@
 using System;
-using System.Collections.Generic;
 using System.Linq;
-using System.Text;
 using System.Threading.Tasks;
+using Hangfire;
 using VirtoCommerce.OrdersModule.Core.Events;
 using VirtoCommerce.OrdersModule.Core.Model;
 using VirtoCommerce.OrdersModule.Core.Services;
@@ -25,17 +24,30 @@ namespace VirtoCommerce.SubscriptionModule.Data.Handlers
             _customerOrderService = customerOrderService;
         }
 
-        public virtual async Task Handle(OrderChangedEvent message)
+        public virtual Task Handle(OrderChangedEvent message)
         {
-            foreach (var changedEntry in message.ChangedEntries.Where(x => x.EntryState == EntryState.Added))
+            var addedOrders = message.ChangedEntries.Where(x => x.EntryState == EntryState.Added).Select(e => e.NewEntry).ToArray();
+            BackgroundJob.Enqueue(() => HandleOrderChangesInBackground(addedOrders));
+
+            return Task.CompletedTask;
+        }
+
+        [DisableConcurrentExecution(60 * 60 * 24)]
+        public virtual void HandleOrderChangesInBackground(CustomerOrder[] orders)
+        {
+            foreach (var order in orders)
             {
-                await HandleOrderChangesAsync(changedEntry);
+                HandleOrderChanges(order);
             }
         }
 
-        protected virtual async Task HandleOrderChangesAsync(GenericChangedEntry<CustomerOrder> changedEntry)
+        public void HandleOrderChanges(CustomerOrder order)
         {
-            var customerOrder = changedEntry.NewEntry;
+            HandleOrderChangesAsync(order).GetAwaiter().GetResult();
+        }
+
+        protected virtual async Task HandleOrderChangesAsync(CustomerOrder customerOrder)
+        {
             //Prevent creating subscription for customer orders with other operation type (it is need for preventing to handling  subscription prototype and recurring order creations)
             if (!customerOrder.IsPrototype && string.IsNullOrEmpty(customerOrder.SubscriptionId))
             {

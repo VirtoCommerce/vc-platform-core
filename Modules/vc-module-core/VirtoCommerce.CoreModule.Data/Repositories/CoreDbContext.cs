@@ -3,7 +3,6 @@ using Microsoft.EntityFrameworkCore;
 using VirtoCommerce.CoreModule.Data.Currency;
 using VirtoCommerce.CoreModule.Data.Model;
 using VirtoCommerce.CoreModule.Data.Package;
-using VirtoCommerce.CoreModule.Data.Seo;
 
 namespace VirtoCommerce.CoreModule.Data.Repositories
 {
@@ -16,11 +15,6 @@ namespace VirtoCommerce.CoreModule.Data.Repositories
 
         protected override void OnModelCreating(ModelBuilder modelBuilder)
         {
-            modelBuilder.Entity<SeoUrlKeywordEntity>().ToTable("SeoUrlKeyword").HasKey(x => x.Id);
-            modelBuilder.Entity<SeoUrlKeywordEntity>().Property(x => x.Id).HasMaxLength(128);
-            modelBuilder.Entity<SeoUrlKeywordEntity>().HasIndex(x => new { x.Keyword, x.StoreId }).HasName("IX_KeywordStoreId");
-            modelBuilder.Entity<SeoUrlKeywordEntity>().HasIndex(x => new { x.ObjectId, x.ObjectType }).HasName("IX_ObjectIdAndObjectType");
-
             modelBuilder.Entity<SequenceEntity>().ToTable("Sequence").HasKey(x => x.ObjectType);
 
             modelBuilder.Entity<CurrencyEntity>().ToTable("Currency").HasKey(x => x.Id);

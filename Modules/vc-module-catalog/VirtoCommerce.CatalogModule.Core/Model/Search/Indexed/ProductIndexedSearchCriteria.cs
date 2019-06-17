@@ -4,11 +4,16 @@ using System.Linq;
 using VirtoCommerce.Platform.Core.Common;
 using VirtoCommerce.SearchModule.Core.Model;
 
-namespace VirtoCommerce.CatalogModule.Core.Model
+namespace VirtoCommerce.CatalogModule.Core.Model.Search
 {
-    public class ProductIndexedSearchCriteria : IndexedSearchCriteriaBase
+    public class ProductIndexedSearchCriteria : CatalogIndexedSearchCriteria
     {
         public override string ObjectType { get; set; } = KnownDocumentTypes.Product;
+
+        /// <summary>
+        /// Physical, Digital, etc.
+        /// </summary>
+        public string ProductType { get; set; }
 
         public string Currency { get; set; }
 
@@ -63,6 +68,6 @@ namespace VirtoCommerce.CatalogModule.Core.Model
         /// <summary>
         /// Override base SortInfo property to support GeoSortInfo sorting types
         /// </summary>
-        public override IList<SortInfo> SortInfos => GeoSortInfo.TryParse(Sort).ToArray();
+        public override IList<SortInfo> SortInfos => GeoSortInfo.TryParse(Sort).ToList();
     }
 }

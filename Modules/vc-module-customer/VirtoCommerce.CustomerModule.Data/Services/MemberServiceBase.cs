@@ -3,7 +3,6 @@ using System.Collections.Generic;
 using System.Linq;
 using System.Threading.Tasks;
 using Microsoft.Extensions.Caching.Memory;
-using VirtoCommerce.CoreModule.Core.Seo;
 using VirtoCommerce.CustomerModule.Core.Events;
 using VirtoCommerce.CustomerModule.Core.Model;
 using VirtoCommerce.CustomerModule.Core.Services;
@@ -23,20 +22,19 @@ namespace VirtoCommerce.CustomerModule.Data.Services
     /// </summary>
     public abstract class MemberServiceBase : IMemberService
     {
-        protected MemberServiceBase(Func<IMemberRepository> repositoryFactory,IEventPublisher eventPublisher, IDynamicPropertyService dynamicPropertyService, ISeoService seoService, IPlatformMemoryCache platformMemoryCache)
+        private readonly Func<IMemberRepository> _repositoryFactory;
+        private readonly IEventPublisher _eventPublisher;
+        private readonly IDynamicPropertyService _dynamicPropertyService;
+        private readonly IPlatformMemoryCache _platformMemoryCache;
+
+        protected MemberServiceBase(Func<IMemberRepository> repositoryFactory, IEventPublisher eventPublisher, IDynamicPropertyService dynamicPropertyService, IPlatformMemoryCache platformMemoryCache)
         {
-            RepositoryFactory = repositoryFactory;
-            EventPublisher = eventPublisher;
-            DynamicPropertyService = dynamicPropertyService;
-            SeoService = seoService;
-            PlatformMemoryCache = platformMemoryCache;
+            _repositoryFactory = repositoryFactory;
+            _eventPublisher = eventPublisher;
+            _dynamicPropertyService = dynamicPropertyService;
+            _platformMemoryCache = platformMemoryCache;
         }
 
-        protected Func<IMemberRepository> RepositoryFactory { get; }
-        protected IEventPublisher EventPublisher { get; }
-        protected IDynamicPropertyService DynamicPropertyService { get; }
-        protected ISeoService SeoService { get; }
-        protected IPlatformMemoryCache PlatformMemoryCache { get; }
 
         #region IMemberService Members
 
@@ -50,10 +48,10 @@ namespace VirtoCommerce.CustomerModule.Data.Services
         public virtual async Task<Member[]> GetByIdsAsync(string[] memberIds, string responseGroup = null, string[] memberTypes = null)
         {
             var cacheKey = CacheKey.With(GetType(), "GetByIdsAsync", string.Join("-", memberIds), responseGroup, memberTypes == null ? null : string.Join("-", memberTypes));
-            return await PlatformMemoryCache.GetOrCreateExclusiveAsync(cacheKey, async (cacheEntry) =>
+            return await _platformMemoryCache.GetOrCreateExclusiveAsync(cacheKey, async (cacheEntry) =>
             {
                 var retVal = new List<Member>();
-                using (var repository = RepositoryFactory())
+                using (var repository = _repositoryFactory())
                 {
                     repository.DisableChangesTracking();
                     //There is loading for all corresponding members conceptual model entities types
@@ -78,17 +76,14 @@ namespace VirtoCommerce.CustomerModule.Data.Services
                     }
                 }
 
-                var taskDynamicProperty = DynamicPropertyService.LoadDynamicPropertyValuesAsync(retVal.ToArray<IHasDynamicProperties>());
-                var taskSeo = SeoService.LoadSeoForObjectsAsync(retVal.OfType<ISeoSupport>().ToArray());
-                await Task.WhenAll(taskDynamicProperty, taskSeo);
-
+                await _dynamicPropertyService.LoadDynamicPropertyValuesAsync(retVal.ToArray<IHasDynamicProperties>());
                 return retVal.ToArray();
             });
         }
 
         public virtual async Task<Member> GetByIdAsync(string memberId, string responseGroup = null, string memberType = null)
         {
-            var members = await GetByIdsAsync(new[] {memberId}, responseGroup, new[] {memberType});
+            var members = await GetByIdsAsync(new[] { memberId }, responseGroup, new[] { memberType });
             return members.FirstOrDefault();
         }
 
@@ -101,7 +96,7 @@ namespace VirtoCommerce.CustomerModule.Data.Services
             var pkMap = new PrimaryKeyResolvingMap();
             var changedEntries = new List<GenericChangedEntry<Member>>();
 
-            using (var repository = RepositoryFactory())
+            using (var repository = _repositoryFactory())
             {
                 var existingMemberEntities = await repository.GetMembersByIdsAsync(members.Where(m => !m.IsTransient()).Select(m => m.Id).ToArray());
 
@@ -119,7 +114,7 @@ namespace VirtoCommerce.CustomerModule.Data.Services
                             if (dataTargetMember != null)
                             {
                                 changedEntries.Add(new GenericChangedEntry<Member>(member, dataTargetMember.ToModel(AbstractTypeFactory<Member>.TryCreateInstance(member.MemberType)), EntryState.Modified));
-                                dataSourceMember.Patch(dataTargetMember);                               
+                                dataSourceMember.Patch(dataTargetMember);
                             }
                             else
                             {
@@ -130,29 +125,38 @@ namespace VirtoCommerce.CustomerModule.Data.Services
                     }
                 }
                 //Raise domain events
-                await EventPublisher.Publish(new MemberChangingEvent(changedEntries));
+                await _eventPublisher.Publish(new MemberChangingEvent(changedEntries));
                 await repository.UnitOfWork.CommitAsync();
                 pkMap.ResolvePrimaryKeys();
-                await EventPublisher.Publish(new MemberChangedEvent(changedEntries));
+
+                foreach (var member in members)
+                {
+                    await _dynamicPropertyService.SaveDynamicPropertyValuesAsync(member);
+                }
+
+                await _eventPublisher.Publish(new MemberChangedEvent(changedEntries));
             }
 
             ClearCache(members);
         }
 
         public virtual async Task DeleteAsync(string[] ids, string[] memberTypes = null)
-        { 
-            using (var repository = RepositoryFactory())
+        {
+            using (var repository = _repositoryFactory())
             {
                 var members = await GetByIdsAsync(ids, null, memberTypes);
                 if (!members.IsNullOrEmpty())
                 {
-                    var changedEntries = members.Select(x => new GenericChangedEntry<Member>(x, EntryState.Deleted));
-                    await EventPublisher.Publish(new MemberChangingEvent(changedEntries));
+                    var changedEntries = members.Select(x => new GenericChangedEntry<Member>(x, EntryState.Deleted)).ToArray();
+                    await _eventPublisher.Publish(new MemberChangingEvent(changedEntries));
 
                     await repository.RemoveMembersByIdsAsync(members.Select(m => m.Id).ToArray());
                     await repository.UnitOfWork.CommitAsync();
-
-                    await EventPublisher.Publish(new MemberChangedEvent(changedEntries));
+                    foreach (var member in members)
+                    {
+                        await _dynamicPropertyService.DeleteDynamicPropertyValuesAsync(member);
+                    }
+                    await _eventPublisher.Publish(new MemberChangedEvent(changedEntries));
                 }
 
                 ClearCache(members);

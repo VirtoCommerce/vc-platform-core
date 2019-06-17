@@ -1,4 +1,4 @@
-﻿angular.module('virtoCommerce.catalogModule')
+angular.module('virtoCommerce.catalogModule')
 .controller('virtoCommerce.catalogModule.editorialReviewsListController', ['$timeout', '$scope', 'platformWebApp.bladeNavigationService', 'platformWebApp.uiGridHelper', 'platformWebApp.dialogService', function ($timeout, $scope, bladeNavigationService, uiGridHelper, dialogService) {
     var blade = $scope.blade;
 
@@ -59,7 +59,7 @@
         {
         	name: "platform.commands.add", icon: 'fa fa-plus',
         	executeMethod: function () {
-        		$scope.openBlade({});
+        		$scope.openBlade();
         	},
         	canExecuteMethod: function () {
         		return true;

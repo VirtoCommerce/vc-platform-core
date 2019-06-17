@@ -1,0 +1,112 @@
+using System;
+using System.ComponentModel.DataAnnotations;
+using VirtoCommerce.Platform.Core.Common;
+using VirtoCommerce.PricingModule.Core.Model;
+
+namespace VirtoCommerce.PricingModule.Data.Model
+{
+    public class PricelistAssignmentEntity : AuditableEntity
+    {
+        [StringLength(128)]
+        [Required]
+        public string Name { get; set; }
+
+        [StringLength(512)]
+        public string Description { get; set; }
+
+        public int Priority { get; set; }
+
+        public DateTime? StartDate { get; set; }
+
+        public DateTime? EndDate { get; set; }
+
+        public string ConditionExpression { get; set; }
+
+        public string PredicateVisualTreeSerialized { get; set; }
+
+        [StringLength(128)]
+        [Required]
+        public string CatalogId { get; set; }
+
+
+        #region Navigation Properties
+        public string PricelistId { get; set; }
+
+        public virtual PricelistEntity Pricelist { get; set; }
+
+        #endregion
+
+        public virtual PricelistAssignment ToModel(PricelistAssignment assignment)
+        {
+            if (assignment == null)
+                throw new ArgumentNullException("assignment");
+
+            assignment.Id = Id;
+            assignment.CatalogId = CatalogId;
+            assignment.CreatedBy = CreatedBy;
+            assignment.CreatedDate = CreatedDate;
+            assignment.Description = Description;
+            assignment.EndDate = EndDate;
+            assignment.ModifiedBy = ModifiedBy;
+            assignment.ModifiedDate = ModifiedDate;
+            assignment.Name = Name;
+            assignment.PredicateVisualTreeSerialized = PredicateVisualTreeSerialized;
+            assignment.PricelistId = PricelistId;
+            assignment.Priority = Priority;
+            assignment.StartDate = StartDate;
+
+            if (Pricelist != null)
+            {
+                //Need to make lightweight pricelist
+                assignment.Pricelist = AbstractTypeFactory<Pricelist>.TryCreateInstance();
+                assignment.Pricelist.Id = Pricelist.Id;
+                assignment.Pricelist.Currency = Pricelist.Currency;
+                assignment.Pricelist.Description = Pricelist.Description;
+                assignment.Pricelist.Name = Pricelist.Name;
+
+            }
+
+            return assignment;
+        }
+
+        public virtual PricelistAssignmentEntity FromModel(PricelistAssignment assignment, PrimaryKeyResolvingMap pkMap)
+        {
+            if (assignment == null)
+                throw new ArgumentNullException("assignment");
+
+            pkMap.AddPair(assignment, this);
+
+            Id = assignment.Id;
+            CatalogId = assignment.CatalogId;
+            CreatedBy = assignment.CreatedBy;
+            CreatedDate = assignment.CreatedDate;
+            Description = assignment.Description;
+            EndDate = assignment.EndDate;
+            ModifiedBy = assignment.ModifiedBy;
+            ModifiedDate = assignment.ModifiedDate;
+            Name = assignment.Name;
+            PredicateVisualTreeSerialized = assignment.PredicateVisualTreeSerialized;
+            PricelistId = assignment.PricelistId;
+            Priority = assignment.Priority;
+            StartDate = assignment.StartDate;
+
+            return this;
+        }
+
+        public virtual void Patch(PricelistAssignmentEntity target)
+        {
+            if (target == null)
+                throw new ArgumentNullException("target");
+
+            target.Name = Name;
+            target.Description = Description;
+            target.StartDate = StartDate;
+            target.EndDate = EndDate;
+            target.CatalogId = CatalogId;
+            target.PricelistId = PricelistId;
+            target.Priority = Priority;
+            target.PredicateVisualTreeSerialized = PredicateVisualTreeSerialized;
+        }
+
+    }
+}

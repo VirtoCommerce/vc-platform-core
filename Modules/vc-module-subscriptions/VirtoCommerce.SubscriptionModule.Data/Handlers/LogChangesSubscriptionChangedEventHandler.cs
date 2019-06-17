@@ -13,7 +13,7 @@ namespace VirtoCommerce.SubscriptionModule.Data.Handlers
 {
     public class LogChangesSubscriptionChangedEventHandler : IEventHandler<SubscriptionChangedEvent>, IEventHandler<OrderChangedEvent>
     {
-        private readonly IChangeLogService _changeLogService; 
+        private readonly IChangeLogService _changeLogService;
 
         public LogChangesSubscriptionChangedEventHandler(IChangeLogService changeLogService)
         {
@@ -29,7 +29,7 @@ namespace VirtoCommerce.SubscriptionModule.Data.Handlers
             }
             if (!operationLogs.IsNullOrEmpty())
             {
-                _changeLogService.SaveChanges(operationLogs.ToArray());
+                await _changeLogService.SaveChangesAsync(operationLogs.ToArray());
             }
         }
 
@@ -42,7 +42,7 @@ namespace VirtoCommerce.SubscriptionModule.Data.Handlers
             }
             if (!operationLogs.IsNullOrEmpty())
             {
-                _changeLogService.SaveChanges(operationLogs.ToArray());
+                await _changeLogService.SaveChangesAsync(operationLogs.ToArray());
             }
         }
 
@@ -104,7 +104,7 @@ namespace VirtoCommerce.SubscriptionModule.Data.Handlers
             }
 
             return Task.FromResult<IEnumerable<OperationLog>>(result);
-        }  
+        }
 
         protected virtual OperationLog GetLogRecord(string subscriptionId, string template, params object[] parameters)
         {
@@ -118,6 +118,6 @@ namespace VirtoCommerce.SubscriptionModule.Data.Handlers
             return result;
         }
 
-     
+
     }
 }

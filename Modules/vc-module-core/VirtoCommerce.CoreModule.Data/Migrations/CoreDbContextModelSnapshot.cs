@@ -15,11 +15,11 @@ namespace VirtoCommerce.CoreModule.Data.Migrations
         {
 #pragma warning disable 612, 618
             modelBuilder
-                .HasAnnotation("ProductVersion", "2.1.0-rtm-30799")
+                .HasAnnotation("ProductVersion", "2.2.3-servicing-35854")
                 .HasAnnotation("Relational:MaxIdentifierLength", 128)
                 .HasAnnotation("SqlServer:ValueGenerationStrategy", SqlServerValueGenerationStrategy.IdentityColumn);
 
-            modelBuilder.Entity("VirtoCommerce.CoreModule.Data.Model.CurrencyEntity", b =>
+            modelBuilder.Entity("VirtoCommerce.CoreModule.Data.Currency.CurrencyEntity", b =>
                 {
                     b.Property<string>("Id")
                         .ValueGeneratedOnAdd()
@@ -62,7 +62,22 @@ namespace VirtoCommerce.CoreModule.Data.Migrations
                     b.ToTable("Currency");
                 });
 
-            modelBuilder.Entity("VirtoCommerce.CoreModule.Data.Model.PackageTypeEntity", b =>
+            modelBuilder.Entity("VirtoCommerce.CoreModule.Data.Model.SequenceEntity", b =>
+                {
+                    b.Property<string>("ObjectType")
+                        .ValueGeneratedOnAdd()
+                        .HasMaxLength(256);
+
+                    b.Property<DateTime?>("ModifiedDate");
+
+                    b.Property<int>("Value");
+
+                    b.HasKey("ObjectType");
+
+                    b.ToTable("Sequence");
+                });
+
+            modelBuilder.Entity("VirtoCommerce.CoreModule.Data.Package.PackageTypeEntity", b =>
                 {
                     b.Property<string>("Id")
                         .ValueGeneratedOnAdd()
@@ -84,80 +99,6 @@ namespace VirtoCommerce.CoreModule.Data.Migrations
                     b.HasKey("Id");
 
                     b.ToTable("PackageType");
-                });
-
-            modelBuilder.Entity("VirtoCommerce.CoreModule.Data.Model.SeoUrlKeywordEntity", b =>
-                {
-                    b.Property<string>("Id")
-                        .ValueGeneratedOnAdd()
-                        .HasMaxLength(128);
-
-                    b.Property<string>("CreatedBy")
-                        .HasMaxLength(64);
-
-                    b.Property<DateTime>("CreatedDate");
-
-                    b.Property<string>("ImageAltDescription")
-                        .HasMaxLength(255);
-
-                    b.Property<bool>("IsActive");
-
-                    b.Property<string>("Keyword")
-                        .IsRequired()
-                        .HasMaxLength(255);
-
-                    b.Property<string>("Language")
-                        .HasMaxLength(5);
-
-                    b.Property<string>("MetaDescription")
-                        .HasMaxLength(1024);
-
-                    b.Property<string>("MetaKeywords")
-                        .HasMaxLength(255);
-
-                    b.Property<string>("ModifiedBy")
-                        .HasMaxLength(64);
-
-                    b.Property<DateTime?>("ModifiedDate");
-
-                    b.Property<string>("ObjectId")
-                        .IsRequired()
-                        .HasMaxLength(255);
-
-                    b.Property<string>("ObjectType")
-                        .IsRequired()
-                        .HasMaxLength(64);
-
-                    b.Property<string>("StoreId")
-                        .HasMaxLength(128);
-
-                    b.Property<string>("Title")
-                        .HasMaxLength(255);
-
-                    b.HasKey("Id");
-
-                    b.HasIndex("Keyword", "StoreId")
-                        .HasName("IX_KeywordStoreId");
-
-                    b.HasIndex("ObjectId", "ObjectType")
-                        .HasName("IX_ObjectIdAndObjectType");
-
-                    b.ToTable("SeoUrlKeyword");
-                });
-
-            modelBuilder.Entity("VirtoCommerce.CoreModule.Data.Model.SequenceEntity", b =>
-                {
-                    b.Property<string>("ObjectType")
-                        .ValueGeneratedOnAdd()
-                        .HasMaxLength(256);
-
-                    b.Property<DateTime?>("ModifiedDate");
-
-                    b.Property<int>("Value");
-
-                    b.HasKey("ObjectType");
-
-                    b.ToTable("Sequence");
                 });
 #pragma warning restore 612, 618
         }

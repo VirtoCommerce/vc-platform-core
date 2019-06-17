@@ -1,0 +1,87 @@
+﻿<div class="blade-static __expanded">
+    <div class="form-group">
+        <label class="form-label head-label">{{'pricing.blades.item-prices.head-label' | translate}} <a href="" ng-click="createNewPricelist()" class="form-edit" va-permission="pricing:read"><em class="form-ico fa fa-pencil"></em></a></label>
+
+        <div class="form-input">
+            <ui-select ng-model="blade.selectedPricelist" class="head-select" required>
+                <ui-select-match placeholder="{{'pricing.blades.item-prices.pricelist-select-placeholder' | translate}}">{{$select.selected.displayName}}</ui-select-match>
+                <ui-select-choices repeat="x in blade.pricelistList | filter: $select.search">
+                    <span ng-bind-html="x.displayName | highlight: $select.search"></span>
+                </ui-select-choices>
+            </ui-select>
+
+            <button class="btn add-price-button" type="button" ng-disabled="!blade.selectedPricelist" ng-click="blade.addNewPrice(blade.selectedPricelist)">Add new price</button>
+        </div>
+    </div>
+</div>
+<div class="blade-content __large-wide">
+    <div class="blade-inner">
+        <div class="inner-block">
+                <form name="formScope" ng-init="setGridOptions('item-prices-grid', {
+                    data: 'blade.currentEntities',
+                    rowHeight: 60,
+                    rowTemplate: 'list.row.html',
+                    enableCellEdit: false,
+                    enableCellEditOnFocus: true,
+                    editableCellTemplate: 'default-cellTextEditor',
+                    columnDefs: [
+                        { name: 'name', displayName: 'pricing.blades.item-prices.labels.name', cellTooltip: true, cellTemplate: 'ui-grid/cellNameLinkTemplate', width: 180 },
+                        { name: 'currency', displayName: 'pricing.blades.item-prices.labels.currency', width: 60 },
+                        { name: 'catalog', displayName: 'pricing.blades.item-prices.labels.catalog', cellTooltip: true},
+                        { name: 'list', displayName: 'pricing.blades.item-prices.labels.list-price', editableCellTemplate: 'list-cellTextEditor', validators: {listValidator: true, required: true}, cellTemplate: 'priceCellTitleValidator', enableCellEdit: true, enableHiding: false },
+                        { name: 'sale', displayName: 'pricing.blades.item-prices.labels.sale-price', editableCellTemplate: 'sale-cellTextEditor', validators: {saleValidator: true}, cellTemplate: 'priceCellTitleValidator', enableCellEdit: true },
+                        { name: 'minQuantity', displayName: 'pricing.blades.item-prices.labels.min-quantity', editableCellTemplate: 'minQuantity-cellTextEditor', validators: {minQuantityForPricelistValidator: true, required: true}, cellTemplate: 'ui-grid/cellTitleValidator', enableCellEdit: true, enableHiding: false }
+                    ]})">
+                <div class="table-wrapper" ng-if="blade.currentEntities.length" ng-init="setForm(formScope);">
+                    <div ui-grid="gridOptions" ui-grid-cellNav ui-grid-edit ui-grid-validate ui-grid-auto-resize ui-grid-save-state ui-grid-selection ui-grid-resize-columns ui-grid-move-columns ui-grid-height></div>
+                </div>
+            </form>
+            <div class="note" ng-if="!blade.currentEntities.length">{{ 'platform.list.no-data' | translate }}</div>
+        </div>
+    </div>
+</div>
+
+
+<script type="text/ng-template" id="ui-grid/cellNameLinkTemplate">
+    <div class="ui-grid-cell-contents">
+        <a class="form-input" ng-href='' ng-click='grid.appScope.selectPricelist(row.entity)'>{{row.entity.name}}</a>
+    </div>
+</script>
+<script type="text/ng-template" id="ui-grid/cellTitleValidator">
+    <div class="ui-grid-cell-contents" title="{{grid.validate.getTitleFormattedErrors(row.entity,col.colDef)}}">
+        <div class="form-editor form-input">
+            <input class="ng-valid form-input" ng-class="{'ng-invalid' : grid.validate.isInvalid(row.entity,col.colDef)}" value="{{COL_FIELD CUSTOM_FILTERS}}" placeholder="{{'platform.placeholders.n-a' | translate}}" readonly="readonly" />
+        </div>
+    </div>
+</script>
+<script type="text/ng-template" id="priceCellTitleValidator">
+    <div class="ui-grid-cell-contents" title="{{grid.validate.getTitleFormattedErrors(row.entity,col.colDef)}}">
+        <div class="form-editor form-input">
+            <input class="ng-valid form-input" money ng-model="MODEL_COL_FIELD" ng-class="{'ng-invalid' : grid.validate.isInvalid(row.entity,col.colDef)}" placeholder="{{'platform.placeholders.n-a' | translate}}" readonly="readonly" />
+        </div>
+    </div>
+</script>
+
+<script type="text/ng-template" id="default-cellTextEditor">
+    <div class="form-editor form-input">
+        <input class="form-input" ng-model="MODEL_COL_FIELD" ui-grid-editor placeholder="{{'platform.placeholders.n-a' | translate}}" />
+    </div>
+</script>
+<script type="text/ng-template" id="list-cellTextEditor">
+    <div class="form-editor form-input">
+        <input class="form-input" money required ng-model="MODEL_COL_FIELD" ui-grid-editor ng-class="{'ng-invalid': !grid.appScope.isListPriceValid(row.entity)}" />
+    </div>
+</script>
+<script type="text/ng-template" id="sale-cellTextEditor">
+    <div class="form-editor form-input">
+        <input class="form-input" money ng-model="MODEL_COL_FIELD" ui-grid-editor ng-class="{'ng-invalid': !grid.appScope.isSalePriceValid(row.entity)}" placeholder="{{'platform.placeholders.n-a' | translate}}">
+    </div>
+</script>
+<script type="text/ng-template" id="minQuantity-cellTextEditor">
+    <div class="form-editor form-input">
+        <input class="form-input" smart-float num-type="integer" required ng-model="MODEL_COL_FIELD" ui-grid-editor ng-class="{'ng-invalid': !grid.appScope.isUniqueQtyForPricelist(row.entity)}">
+    </div>
+</script>
+<script type="text/ng-template" id="list.row.html">
+    <div ng-repeat="(colRenderIndex, col) in colContainer.renderedColumns track by col.uid" ui-grid-one-bind-id-grid="rowRenderIndex + '-' + col.uid + '-cell'" class="ui-grid-cell" ng-class="{'ui-grid-row-header-cell': col.isRowHeader }" role="{{col.isRowHeader ? 'rowheader' : 'gridcell' }}" ui-grid-cell></div>
+</script>

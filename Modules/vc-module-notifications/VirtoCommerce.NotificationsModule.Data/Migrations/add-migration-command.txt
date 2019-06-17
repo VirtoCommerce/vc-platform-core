@@ -1,0 +1,3 @@
+Add-Migration Initial -Context VirtoCommerce.NotificationsModule.Data.Repositories.NotificationDbContext  -Verbose -OutputDir Migrations -Project VirtoCommerce.NotificationsModule.Data -StartupProject VirtoCommerce.NotificationsModule.Data  -Debug
+
+Remove-Migration -Context VirtoCommerce.NotificationsModule.Data.Repositories.NotificationDbContext  -Verbose -Project VirtoCommerce.NotificationsModule.Data -StartupProject VirtoCommerce.NotificationsModule.Data  -Debug

@@ -17,32 +17,31 @@ using VirtoCommerce.Platform.Core.ChangeLog;
 using VirtoCommerce.Platform.Core.Common;
 using VirtoCommerce.Platform.Core.Events;
 using VirtoCommerce.Platform.Core.Exceptions;
-using VirtoCommerce.Platform.Core.Settings;
+using VirtoCommerce.Platform.Core.Extensions;
 
 namespace VirtoCommerce.LicensingModule.Data.Services
 {
     public class LicenseService : ILicenseService
     {
         private readonly Func<ILicenseRepository> _licenseRepositoryFactory;
-        private readonly IChangeLogService _changeLogService;
+        private readonly IChangeLogSearchService _changeLogSearchService;
         private readonly IEventPublisher _eventPublisher;
-        private readonly ISettingsManager _settingsManager;
         private readonly LicenseOptions _licenseOptions;
 
-        public LicenseService(Func<ILicenseRepository> licenseRepositoryFactory, IChangeLogService changeLogService, ISettingsManager settingsManager, IEventPublisher eventPublisher
+        public LicenseService(Func<ILicenseRepository> licenseRepositoryFactory, IChangeLogSearchService changeLogSearchService, IEventPublisher eventPublisher
             , IOptions<LicenseOptions> licenseOptions)
         {
             _licenseRepositoryFactory = licenseRepositoryFactory;
-            _changeLogService = changeLogService;
-            _settingsManager = settingsManager;
+            _changeLogSearchService = changeLogSearchService;
             _eventPublisher = eventPublisher;
             _licenseOptions = licenseOptions.Value;
         }
 
-        public async Task<GenericSearchResult<License>> SearchAsync(LicenseSearchCriteria criteria)
+        public async Task<LicenseSearchResult> SearchAsync(LicenseSearchCriteria criteria)
         {
             using (var repository = _licenseRepositoryFactory())
             {
+                var result = AbstractTypeFactory<LicenseSearchResult>.TryCreateInstance();
                 var query = repository.Licenses;
 
                 if (criteria.Keyword != null)
@@ -58,18 +57,16 @@ namespace VirtoCommerce.LicensingModule.Data.Services
                 query = query.OrderBySortInfos(sortInfos);
                 var arrayLicense = await query.Skip(criteria.Skip).Take(criteria.Take).ToArrayAsync();
 
-                var retVal = new GenericSearchResult<License>
-                {
-                    TotalCount = await query.CountAsync(),
-                    Results = arrayLicense.Select(x => x.ToModel(AbstractTypeFactory<License>.TryCreateInstance())).ToArray()
-                };
-                return retVal;
+                result.TotalCount = await query.CountAsync();
+                result.Results = arrayLicense.Select(x => x.ToModel(AbstractTypeFactory<License>.TryCreateInstance())).ToArray();
+
+                return result;
             }
         }
 
         public async Task<License[]> GetByIdsAsync(string[] ids)
         {
-            License[] result;
+            var result = Array.Empty<License>();
 
             using (var repository = _licenseRepositoryFactory())
             {
@@ -78,13 +75,14 @@ namespace VirtoCommerce.LicensingModule.Data.Services
                     .Select(x =>
                     {
                         var retVal = x.ToModel(AbstractTypeFactory<License>.TryCreateInstance());
-                        //Load change log by separate request
-                        _changeLogService.LoadChangeLogs(retVal);
                         return retVal;
-                    })
-                    .ToArray();
+                    }).ToArray();
             }
-
+            var searchResult = await _changeLogSearchService.SearchAsync(new ChangeLogSearchCriteria { ObjectIds = ids, ObjectType = typeof(License).Name, Take = int.MaxValue });
+            foreach (var license in result)
+            {
+                license.OperationsLog = searchResult.Results.Where(x => x.ObjectId == license.Id).ToList();
+            }
             return result;
         }
 
@@ -123,7 +121,7 @@ namespace VirtoCommerce.LicensingModule.Data.Services
                         }
                     }
                 }
-                
+
                 await repository.UnitOfWork.CommitAsync();
                 await _eventPublisher.Publish(new LicenseChangedEvent(changedEntries));
                 pkMap.ResolvePrimaryKeys();
@@ -155,7 +153,7 @@ namespace VirtoCommerce.LicensingModule.Data.Services
                 };
 
                 var licenseString = JsonConvert.SerializeObject(license);
-                var signature = CreateSignature(licenseString);
+                var signature = await CreateSignatureAsync(licenseString);
 
                 result = string.Join("\r\n", licenseString, signature);
 
@@ -176,7 +174,7 @@ namespace VirtoCommerce.LicensingModule.Data.Services
             }
         }
 
-        private string CreateSignature(string data)
+        private async Task<string> CreateSignatureAsync(string data)
         {
             var hashAlgorithmName = HashAlgorithmName.SHA256.Name;
 
@@ -184,10 +182,11 @@ namespace VirtoCommerce.LicensingModule.Data.Services
             using (var rsa = new RSACryptoServiceProvider())
             {
                 // TODO: Store private key in a more secure storage, for example in Azure Key Vault
-                var privateKey = ReadFileWithKey(Path.GetFullPath(_licenseOptions.LicensePrivateKeyPath));
+                var privateKeyFilePath = Path.GetFullPath(_licenseOptions.LicensePrivateKeyPath);
+                var privateKey = await ReadFileWithKey(privateKeyFilePath);
                 if (!string.IsNullOrEmpty(privateKey))
                 {
-                    rsa.FromXmlString(privateKey);
+                    rsa.FromXmlStringCustom(privateKey);
                 }
 
                 var signatureFormatter = new RSAPKCS1SignatureFormatter(rsa);
@@ -202,21 +201,14 @@ namespace VirtoCommerce.LicensingModule.Data.Services
             }
         }
 
-        private static string ReadFileWithKey(string path)
+        private static async Task<string> ReadFileWithKey(string path)
         {
-            string fileContent;
-
             if (!File.Exists(path))
             {
                 throw new LicenseOrKeyNotFoundException(path);
             }
 
-            using (var streamReader = File.OpenText(path))
-            {
-                fileContent = streamReader.ReadToEnd();
-            }
-
-            return fileContent;
+            return await File.ReadAllTextAsync(path);
         }
     }
 }

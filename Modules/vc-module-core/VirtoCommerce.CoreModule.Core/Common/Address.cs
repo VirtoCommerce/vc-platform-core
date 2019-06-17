@@ -1,12 +1,14 @@
 using System;
+using System.Collections.Generic;
 using System.Linq;
 using VirtoCommerce.Platform.Core.Common;
 
 namespace VirtoCommerce.CoreModule.Core.Common
 {
-    public class Address : ValueObject, ICloneable
+    public class Address : ValueObject
     {
         public AddressType AddressType { get; set; }
+        public string Key { get; set; }
         public string Name { get; set; }
         public string Organization { get; set; }
         public string CountryCode { get; set; }
@@ -23,14 +25,20 @@ namespace VirtoCommerce.CoreModule.Core.Common
         public string LastName { get; set; }
         public string Phone { get; set; }
         public string Email { get; set; }
-        public object Clone()
+
+        protected override IEnumerable<object> GetEqualityComponents()
         {
-            return MemberwiseClone() as Address;
+            var result = base.GetEqualityComponents();
+            if (!string.IsNullOrEmpty(Key))
+            {
+                result = new[] { Key };
+            }
+            return result;
         }
 
         public override string ToString()
         {
-            return string.Join(", ", new[] { FirstName, LastName, Line1, City, RegionName, PostalCode ?? Zip, CountryName }.Where(x=> !string.IsNullOrWhiteSpace(x)));
+            return string.Join(", ", new[] { FirstName, LastName, Line1, City, RegionName, PostalCode ?? Zip, CountryName }.Where(x => !string.IsNullOrWhiteSpace(x)));
         }
     }
 

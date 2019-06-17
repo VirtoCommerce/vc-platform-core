@@ -13,7 +13,9 @@ angular.module('platformWebApp')
                     blade.parentBlade.refresh();
                 }
             },
-            function (error) { bladeNavigationService.setError('Error ' + error.status, blade); });
+            function(error) {
+                 bladeNavigationService.setError(error, blade);
+            });
         }
 
         function initializeBlade(data) {
@@ -147,7 +149,7 @@ angular.module('platformWebApp')
                         }
                         blade.isLoading = false;
                     }, function (error) {
-                        bladeNavigationService.setError('Error ' + error.status, blade);
+                        bladeNavigationService.setError(error, blade);
                         blade.isLoading = false;
                     });
                 },

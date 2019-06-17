@@ -1,0 +1,28 @@
+<?xml version="1.0" encoding="utf-8" ?>
+<module>
+    <id>VirtoCommerce.Tax</id>
+    <version>3.0.0</version>
+    <platformVersion>3.0.0</platformVersion>
+    <dependencies>
+        <dependency id="VirtoCommerce.Core" version="3.0.0" />
+        <dependency id="VirtoCommerce.Store" version="3.0.0" />
+    </dependencies>
+
+    <title>Tax module</title>
+    <description>Tax and fees</description>
+    <authors>
+        <author>Virto Commerce</author>
+    </authors>
+    <owners>
+        <owner>Virto Commerce</owner>
+    </owners>
+    <projectUrl>https://virtocommerce.com/apps/extensions/virto-tax-module</projectUrl>
+    <iconUrl>Modules/$(VirtoCommerce.Tax)/Content/logo.png</iconUrl>
+    <releaseNotes></releaseNotes>
+    <copyright>Copyright © 2011-2019 Virto Commerce. All rights reserved</copyright>
+    <tags>stores</tags>
+
+    <assemblyFile>VirtoCommerce.TaxModule.Web.dll</assemblyFile>
+    <moduleType>VirtoCommerce.TaxModule.Web.Module, VirtoCommerce.TaxModule.Web</moduleType>
+
+</module>

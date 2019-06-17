@@ -1,5 +1,6 @@
 using System.Collections.Generic;
 using System.Globalization;
+using System.Linq;
 using Lucene.Net.Index;
 
 namespace VirtoCommerce.LuceneSearchModule.Data
@@ -39,26 +40,44 @@ namespace VirtoCommerce.LuceneSearchModule.Data
             return string.Format(CultureInfo.InvariantCulture, "{0}", value);
         }
 
-        //TODO
-        //public static IEnumerable<string> GetAllFieldValues(this IndexReader reader, string field)
-        //{
-        //    if (string.IsNullOrEmpty(field))
-        //    {
-        //        yield break;
-        //    }
+        public static IEnumerable<string> GetAllFieldValues(this IndexReader reader, string field)
+        {
+            if (string.IsNullOrEmpty(field))
+            {
+                yield break;
+            }
 
-        //    var termEnum = reader.Terms(new Term(field));
+            var atomicReaders = reader.Leaves.Select(c => c.AtomicReader);
 
-        //    do
-        //    {
-        //        var currentTerm = termEnum.Term;
+            foreach (var atomicReader in atomicReaders)
+            {
+                var terms = atomicReader.GetTerms(field);
 
-        //        if (currentTerm == null || currentTerm.Field != field)
-        //            yield break;
+                if (terms != null)
+                {
+                    var termsEnum = terms.GetIterator(null);
+                    while (true)
+                    {
+                        var term = termsEnum.Next();
+                        if (term == null)
+                        {
+                            break;
+                        }
 
-        //        yield return currentTerm.Text;
-        //    }
-        //    while (termEnum.Next());
-        //}
+                        yield return Term.ToString(termsEnum.Term);
+                    }
+                }
+            }
+        }
+
+        public static string[] GetAllFacetableFields(this IndexReader reader)
+        {
+            var availableFields = reader.Leaves
+                                .SelectMany(r => ((AtomicReader)r.Reader).Fields)
+                                .Distinct()
+                                .ToArray();
+
+            return availableFields;
+        }
     }
 }

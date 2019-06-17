@@ -3,6 +3,7 @@ using System.Linq;
 using VirtoCommerce.CatalogModule.Core.Model;
 using VirtoCommerce.CatalogModule.Core.Model.OutlinePart;
 using VirtoCommerce.CatalogModule.Core.Services;
+using VirtoCommerce.CoreModule.Core.Outlines;
 using VirtoCommerce.CoreModule.Core.Seo;
 using VirtoCommerce.Platform.Core.Common;
 
@@ -46,8 +47,10 @@ namespace VirtoCommerce.CatalogModule.Data.Services
                         //filter branches with passed catalog
                         if (string.IsNullOrEmpty(catalogId) || outlineItems.Any(x => x.Id.EqualsInvariant(catalogId) && x.SeoObjectType.EqualsInvariant("catalog")))
                         {
-                            var outline = new Outline();
-                            outline.Items = outlineItems.ToList();
+                            var outline = new Outline
+                            {
+                                Items = outlineItems.ToList()
+                            };
                             obj.Outlines.Add(outline);
                         }
                     }
@@ -149,7 +152,8 @@ namespace VirtoCommerce.CatalogModule.Data.Services
             var retVal = new OutlineItem
             {
                 Id = _outlinePartResolver.ResolveOutlinePart(entity),
-                SeoObjectType = seoSupport != null ? seoSupport.SeoObjectType : "Catalog"
+                SeoObjectType = seoSupport != null ? seoSupport.SeoObjectType : "Catalog",
+                SeoInfos = seoSupport?.SeoInfos
             };
             return retVal;
         }

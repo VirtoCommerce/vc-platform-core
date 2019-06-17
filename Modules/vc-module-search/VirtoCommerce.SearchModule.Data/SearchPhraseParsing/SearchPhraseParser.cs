@@ -21,7 +21,7 @@ namespace VirtoCommerce.SearchModule.Data.SearchPhraseParsing
 
             var result = new SearchPhraseParseResult
             {
-                SearchPhrase = string.Join(" ", listener.Keywords),
+                Keyword = string.Join(" ", listener.Keywords),
                 Filters = listener.Filters,
             };
 

@@ -175,7 +175,6 @@
                 "message": "The notification template has been modified. Do you want to save changes?"
             }
         }
-
     },
     "notificationTypes": {
         "RegistrationEmailNotification": {
@@ -233,6 +232,22 @@
         "SubscriptionCanceledEmailNotification": {
             "displayName": "Subscription canceled notification",
             "description": "This notification sends by email to client when subscription was canceled"
+        },
+        "ChangePhoneNumberSmsNotification": {
+            "displayName": "Phone number change notification",
+            "description": "This notification sends by sms to client when phone number is changed"
+        },
+        "ResetPasswordSmsNotification": {
+            "displayName": "Password reset notification",
+            "description": "This notification sends by sms to client when password reset"
+        },
+        "RegistrationInvitationEmailNotification": {
+            "displayName": "Registration invitation notification",
+            "description": "This notification sends by email to client when registered invitation"
+        },
+        "RemindUserNameEmailNotification": {
+            "displayName": "User name remind notification",
+            "description": "This notification sends by email to client when remind user name"
         }
     },
     "permissions": {
@@ -250,6 +265,11 @@
         "VirtoCommerce.Notifications.General.Languages": {
             "description": "Languages available in the Notifications",
             "title": "Languages"
+        }
+    },
+    "module": {
+        "VirtoCommerce.Notifications": {
+            "description": "Export/Import notifications"
         }
     }
 }

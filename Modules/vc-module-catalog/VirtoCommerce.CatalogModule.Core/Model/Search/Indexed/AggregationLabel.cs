@@ -1,6 +1,4 @@
-using System;
-
-namespace VirtoCommerce.CatalogModule.Core.Model
+﻿namespace VirtoCommerce.CatalogModule.Core.Model.Search
 {
     public class AggregationLabel
     {

@@ -6,9 +6,13 @@ using System.Threading.Tasks;
 using VirtoCommerce.CartModule.Core.Model;
 using VirtoCommerce.CartModule.Core.Model.Search;
 using VirtoCommerce.CartModule.Core.Services;
-using VirtoCommerce.CoreModule.Core.Payment;
-using VirtoCommerce.CoreModule.Core.Shipping;
+using VirtoCommerce.PaymentModule.Core.Model;
+using VirtoCommerce.PaymentModule.Core.Model.Search;
+using VirtoCommerce.PaymentModule.Core.Services;
 using VirtoCommerce.Platform.Core.Common;
+using VirtoCommerce.ShippingModule.Core.Model;
+using VirtoCommerce.ShippingModule.Core.Model.Search;
+using VirtoCommerce.ShippingModule.Core.Services;
 using VirtoCommerce.StoreModule.Core.Model;
 using VirtoCommerce.StoreModule.Core.Services;
 
@@ -19,18 +23,27 @@ namespace VirtoCommerce.CartModule.Data.Services
         private readonly IStoreService _storeService;
         private readonly IShoppingCartService _shoppingCartService;
         private readonly IShoppingCartSearchService _shoppingCartSearchService;
+        private readonly IShippingMethodsSearchService _shippingMethodsSearchService;
+        private readonly IPaymentMethodsSearchService _paymentMethodsSearchService;
+
         //private readonly IMemberService _memberService;
 
         private Store _store;
 
-        [CLSCompliant(false)]
-        public ShoppingCartBuilderImpl(IStoreService storeService, IShoppingCartService shoppingShoppingCartService, IShoppingCartSearchService shoppingCartSearchService
+        public ShoppingCartBuilderImpl(
+            IStoreService storeService,
+            IShoppingCartService shoppingShoppingCartService,
+            IShoppingCartSearchService shoppingCartSearchService,
+            IShippingMethodsSearchService shippingMethodsSearchService,
+             IPaymentMethodsSearchService paymentMethodsSearchService
             //, IMemberService memberService
             )
         {
             _storeService = storeService;
             _shoppingCartService = shoppingShoppingCartService;
             _shoppingCartSearchService = shoppingCartSearchService;
+            _paymentMethodsSearchService = paymentMethodsSearchService;
+            _shippingMethodsSearchService = shippingMethodsSearchService;
             //_memberService = memberService;
         }
 
@@ -38,10 +51,7 @@ namespace VirtoCommerce.CartModule.Data.Services
 
         public virtual IShoppingCartBuilder TakeCart(ShoppingCart cart)
         {
-            if (cart == null)
-                throw new ArgumentNullException(nameof(cart));
-
-            Cart = cart;
+            Cart = cart ?? throw new ArgumentNullException(nameof(cart));
             return this;
         }
 
@@ -125,17 +135,25 @@ namespace VirtoCommerce.CartModule.Data.Services
             return this;
         }
 
-        public virtual ICollection<ShippingRate> GetShippingRates(string shippingMethodCode)
+        public virtual async Task<ICollection<ShippingRate>> GetShippingRatesAsync(string shippingMethodCode)
         {
             var shippingEvaluationContext = new ShippingEvaluationContext(Cart);
 
-            var shippingMethod = Store.ShippingMethods.FirstOrDefault(x => x.IsActive
-                                                                           && x.Code.EqualsInvariant(shippingMethodCode));
+            var criteria = new ShippingMethodsSearchCriteria
+            {
+                IsActive = true,
+                Take = int.MaxValue,
+                StoreId = Store.Id,
+                Codes = new[] { shippingMethodCode }
+            };
+
+            var shippingMethod = (await _shippingMethodsSearchService.SearchShippingMethodsAsync(criteria))
+                                .Results.FirstOrDefault();
 
             return shippingMethod?.CalculateRates(shippingEvaluationContext).ToList();
         }
 
-        public virtual IShoppingCartBuilder AddOrUpdateShipment(Shipment shipment)
+        public virtual async Task<IShoppingCartBuilder> AddOrUpdateShipmentAsync(Shipment shipment)
         {
             Shipment existingShipment = null;
 
@@ -154,7 +172,7 @@ namespace VirtoCommerce.CartModule.Data.Services
 
             if (!string.IsNullOrEmpty(shipment.ShipmentMethodCode))
             {
-                var shippingRates = GetShippingRates(shipment.ShipmentMethodCode);
+                var shippingRates = await GetShippingRatesAsync(shipment.ShipmentMethodCode);
 
                 var shippingRate = shippingRates
                     .FirstOrDefault(sm => shipment.ShipmentMethodOption.EqualsInvariant(sm.OptionName));
@@ -185,7 +203,7 @@ namespace VirtoCommerce.CartModule.Data.Services
             return this;
         }
 
-        public virtual IShoppingCartBuilder AddOrUpdatePayment(Payment payment)
+        public virtual async Task<IShoppingCartBuilder> AddOrUpdatePaymentAsync(Payment payment)
         {
             Payment existingPayment = null;
 
@@ -202,7 +220,7 @@ namespace VirtoCommerce.CartModule.Data.Services
 
             if (!string.IsNullOrEmpty(payment.PaymentGatewayCode))
             {
-                var availablePaymentMethods = GetAvailablePaymentMethods();
+                var availablePaymentMethods = await GetAvailablePaymentMethodsAsync();
                 var paymentMethod = availablePaymentMethods.FirstOrDefault(pm => string.Equals(pm.Code, payment.PaymentGatewayCode, StringComparison.InvariantCultureIgnoreCase));
                 if (paymentMethod == null)
                 {
@@ -239,12 +257,19 @@ namespace VirtoCommerce.CartModule.Data.Services
             return this;
         }
 
-        public virtual ICollection<ShippingRate> GetAvailableShippingRates()
+        public virtual async Task<ICollection<ShippingRate>> GetAvailableShippingRatesAsync()
         {
             // TODO: Remake with shipmentId
             var shippingEvaluationContext = new ShippingEvaluationContext(Cart);
 
-            var activeAvailableShippingMethods = Store.ShippingMethods.Where(x => x.IsActive).ToList();
+            var criteria = new ShippingMethodsSearchCriteria
+            {
+                IsActive = true,
+                Take = int.MaxValue,
+                StoreId = Store.Id
+            };
+
+            var activeAvailableShippingMethods = (await _shippingMethodsSearchService.SearchShippingMethodsAsync(criteria)).Results;
 
             var availableShippingRates = activeAvailableShippingMethods
                 .SelectMany(x => x.CalculateRates(shippingEvaluationContext))
@@ -254,23 +279,29 @@ namespace VirtoCommerce.CartModule.Data.Services
             return availableShippingRates;
         }
 
-        public virtual ICollection<PaymentMethod> GetAvailablePaymentMethods()
+        public virtual async Task<ICollection<PaymentMethod>> GetAvailablePaymentMethodsAsync()
         {
-            return Store.PaymentMethods.Where(x => x.IsActive).ToList();
+            var criteria = new PaymentMethodsSearchCriteria
+            {
+                IsActive = true,
+                Take = int.MaxValue,
+                StoreId = Store.Id
+            };
+
+            var searchResult = await _paymentMethodsSearchService.SearchPaymentMethodsAsync(criteria);
+            return searchResult.Results;
         }
 
-        public virtual Task SaveAsync()
+        public virtual async Task SaveAsync()
         {
-            return _shoppingCartService.SaveChangesAsync(new[] { Cart });
+            await _shoppingCartService.SaveChangesAsync(new[] { Cart });
         }
 
         public ShoppingCart Cart { get; private set; }
 
         #endregion
 
-
         protected Store Store => _store ?? (_store = _storeService.GetByIdAsync(Cart.StoreId).GetAwaiter().GetResult());
-
 
         protected virtual void InnerChangeItemQuantity(LineItem lineItem, int quantity)
         {

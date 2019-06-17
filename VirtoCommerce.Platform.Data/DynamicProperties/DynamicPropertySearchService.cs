@@ -25,12 +25,13 @@ namespace VirtoCommerce.Platform.Data.DynamicProperties
 
 
         #region IDynamicPropertySearchService members
-        public virtual async Task<GenericSearchResult<DynamicPropertyDictionaryItem>> SearchDictionaryItemsAsync(DynamicPropertyDictionaryItemSearchCriteria criteria)
+        public virtual async Task<DynamicPropertyDictionaryItemSearchResult> SearchDictionaryItemsAsync(DynamicPropertyDictionaryItemSearchCriteria criteria)
         {
             var cacheKey = CacheKey.With(GetType(), "SearchDictionaryItemsAsync", criteria.GetHashCode().ToString());
             return await _memoryCache.GetOrCreateExclusiveAsync(cacheKey, async (cacheEntry) =>
             {
-                var result = new GenericSearchResult<DynamicPropertyDictionaryItem>();
+                cacheEntry.AddExpirationToken(DynamicPropertiesCacheRegion.CreateChangeToken());
+                var result = AbstractTypeFactory<DynamicPropertyDictionaryItemSearchResult>.TryCreateInstance();
                 using (var repository = _repositoryFactory())
                 {
                     //Optimize performance and CPU usage
@@ -38,9 +39,9 @@ namespace VirtoCommerce.Platform.Data.DynamicProperties
 
                     var query = repository.DynamicPropertyDictionaryItems;
 
-                    if (!string.IsNullOrEmpty(criteria.DynamicPropertyId))
+                    if (!string.IsNullOrEmpty(criteria.PropertyId))
                     {
-                        query = query.Where(x => x.PropertyId == criteria.DynamicPropertyId);
+                        query = query.Where(x => x.PropertyId == criteria.PropertyId);
                     }
                     if (!string.IsNullOrEmpty(criteria.Keyword))
                     {
@@ -67,12 +68,13 @@ namespace VirtoCommerce.Platform.Data.DynamicProperties
             });
         }
 
-        public virtual async Task<GenericSearchResult<DynamicProperty>> SearchDynamicPropertiesAsync(DynamicPropertySearchCriteria criteria)
+        public virtual async Task<DynamicPropertySearchResult> SearchDynamicPropertiesAsync(DynamicPropertySearchCriteria criteria)
         {
-            var cacheKey = CacheKey.With(GetType(), "SearchDynamicPropertiesAsync", criteria.GetHashCode().ToString());
+            var cacheKey = CacheKey.With(GetType(), "SearchDynamicPropertiesAsync", criteria.GetCacheKey());
             return await _memoryCache.GetOrCreateExclusiveAsync(cacheKey, async (cacheEntry) =>
             {
-                var result = new GenericSearchResult<DynamicProperty>();
+                cacheEntry.AddExpirationToken(DynamicPropertiesCacheRegion.CreateChangeToken());
+                var result = AbstractTypeFactory<DynamicPropertySearchResult>.TryCreateInstance();
                 using (var repository = _repositoryFactory())
                 {
                     //Optimize performance and CPU usage
@@ -80,9 +82,9 @@ namespace VirtoCommerce.Platform.Data.DynamicProperties
 
                     var query = repository.DynamicProperties;
 
-                    if (!string.IsNullOrEmpty(criteria.ObjectType))
+                    if (!string.IsNullOrEmpty(criteria.TypeName))
                     {
-                        query = query.Where(x => x.ObjectType == criteria.ObjectType);
+                        query = query.Where(x => x.ObjectType == criteria.TypeName);
                     }
                     if (!string.IsNullOrEmpty(criteria.Keyword))
                     {

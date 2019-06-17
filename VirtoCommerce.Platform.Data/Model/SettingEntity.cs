@@ -37,6 +37,7 @@ namespace VirtoCommerce.Platform.Data.Model
             objSetting.ObjectType = ObjectType;
             objSetting.ObjectId = ObjectId;
             var values = SettingValues.Select(x => x.GetValue()).ToArray();
+
             if (objSetting.IsDictionary)
             {
                 objSetting.AllowedValues = values;
@@ -45,6 +46,7 @@ namespace VirtoCommerce.Platform.Data.Model
             {
                 objSetting.Value = values.FirstOrDefault();
             }
+
             return objSetting;
         }
 

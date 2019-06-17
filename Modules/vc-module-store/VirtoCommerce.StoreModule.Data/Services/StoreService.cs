@@ -4,16 +4,14 @@ using System.Linq;
 using System.Threading.Tasks;
 using FluentValidation;
 using Microsoft.Extensions.Caching.Memory;
-using VirtoCommerce.CoreModule.Core.Payment;
-using VirtoCommerce.CoreModule.Core.Seo;
-using VirtoCommerce.CoreModule.Core.Shipping;
-using VirtoCommerce.CoreModule.Core.Tax;
+
 using VirtoCommerce.Platform.Core.Caching;
 using VirtoCommerce.Platform.Core.Common;
 using VirtoCommerce.Platform.Core.DynamicProperties;
 using VirtoCommerce.Platform.Core.Events;
 using VirtoCommerce.Platform.Core.Security;
 using VirtoCommerce.Platform.Core.Settings;
+using VirtoCommerce.Platform.Data.Infrastructure;
 using VirtoCommerce.StoreModule.Core.Events;
 using VirtoCommerce.StoreModule.Core.Model;
 using VirtoCommerce.StoreModule.Core.Services;
@@ -26,60 +24,53 @@ namespace VirtoCommerce.StoreModule.Data.Services
 {
     public class StoreService : IStoreService
     {
-        public StoreService(Func<IStoreRepository> repositoryFactory, ISeoService seoService, ISettingsManager settingManager,
-                            IDynamicPropertyService dynamicPropertyService, IShippingMethodsRegistrar shippingService, IPaymentMethodsRegistrar paymentService,
-                            ITaxProviderRegistrar taxService, IEventPublisher eventPublisher, IPlatformMemoryCache platformMemoryCache)
-        {
-            RepositoryFactory = repositoryFactory;
-            SeoService = seoService;
-            SettingManager = settingManager;
-            DynamicPropertyService = dynamicPropertyService;
-            ShippingMethodRegistrar = shippingService;
-            PaymentMethodRegistrar = paymentService;
-            TaxProviderRegistrar = taxService;
-            EventPublisher = eventPublisher;
-            PlatformMemoryCache = platformMemoryCache;
-        }
+        private readonly Func<IStoreRepository> _repositoryFactory;
+        private readonly ISettingsManager _settingManager;
+        private readonly IDynamicPropertyService _dynamicPropertyService;
 
-        protected Func<IStoreRepository> RepositoryFactory { get; }
-        protected ISeoService SeoService { get; }
-        protected ISettingsManager SettingManager { get; }
-        protected IDynamicPropertyService DynamicPropertyService { get; }
-        protected IShippingMethodsRegistrar ShippingMethodRegistrar { get; }
-        protected IPaymentMethodsRegistrar PaymentMethodRegistrar { get; }
-        protected ITaxProviderRegistrar TaxProviderRegistrar { get; }
-        protected IEventPublisher EventPublisher { get; }
-        protected IPlatformMemoryCache PlatformMemoryCache { get; }
+        private readonly IEventPublisher _eventPublisher;
+        private readonly IPlatformMemoryCache _platformMemoryCache;
+
+        public StoreService(Func<IStoreRepository> repositoryFactory, ISettingsManager settingManager, IDynamicPropertyService dynamicPropertyService,
+                            IEventPublisher eventPublisher, IPlatformMemoryCache platformMemoryCache)
+        {
+            _repositoryFactory = repositoryFactory;
+            _settingManager = settingManager;
+            _dynamicPropertyService = dynamicPropertyService;
+
+            _eventPublisher = eventPublisher;
+            _platformMemoryCache = platformMemoryCache;
+        }
 
         #region IStoreService Members
 
         public virtual async Task<Store[]> GetByIdsAsync(string[] ids)
         {
             var cacheKey = CacheKey.With(GetType(), "GetByIdsAsync", string.Join("-", ids));
-            return await PlatformMemoryCache.GetOrCreateExclusiveAsync(cacheKey, async (cacheEntry) =>
+            return await _platformMemoryCache.GetOrCreateExclusiveAsync(cacheKey, async (cacheEntry) =>
             {
                 var stores = new List<Store>();
 
-                using (var repository = RepositoryFactory())
+                cacheEntry.AddExpirationToken(StoreCacheRegion.CreateChangeToken());
+
+                using (var repository = _repositoryFactory())
                 {
+                    repository.DisableChangesTracking();
+
                     var dbStores = await repository.GetStoresByIdsAsync(ids);
                     foreach (var dbStore in dbStores)
                     {
                         var store = AbstractTypeFactory<Store>.TryCreateInstance();
                         dbStore.ToModel(store);
 
-                        PopulateStore(store, dbStore);
 
-                        await SettingManager.DeepLoadSettingsAsync(store);
+                        await _settingManager.DeepLoadSettingsAsync(store);
                         stores.Add(store);
-                        cacheEntry.AddExpirationToken(StoreCacheRegion.CreateChangeToken(store));
                     }
                 }
 
                 var result = stores.ToArray();
-                var taskLoadDynamicPropertyValues = DynamicPropertyService.LoadDynamicPropertyValuesAsync(result);
-                var taskLoadSeoForObjects = SeoService.LoadSeoForObjectsAsync(result);
-                await Task.WhenAll(taskLoadDynamicPropertyValues, taskLoadSeoForObjects);
+                await _dynamicPropertyService.LoadDynamicPropertyValuesAsync(result);
 
                 return result;
             });
@@ -95,7 +86,7 @@ namespace VirtoCommerce.StoreModule.Data.Services
         {
             ValidateStoresProperties(stores);
 
-            using (var repository = RepositoryFactory())
+            using (var repository = _repositoryFactory())
             {
                 var changedEntries = new List<GenericChangedEntry<Store>>();
                 var pkMap = new PrimaryKeyResolvingMap();
@@ -117,11 +108,11 @@ namespace VirtoCommerce.StoreModule.Data.Services
                         repository.Add(sourceEntity);
                         changedEntries.Add(new GenericChangedEntry<Store>(store, EntryState.Added));
                     }
-
-                    await repository.UnitOfWork.CommitAsync();
-                    pkMap.ResolvePrimaryKeys();
-                    await EventPublisher.Publish(new StoreChangedEvent(changedEntries));
                 }
+
+                await repository.UnitOfWork.CommitAsync();
+                pkMap.ResolvePrimaryKeys();
+                await _eventPublisher.Publish(new StoreChangedEvent(changedEntries));
             }
 
             ClearCache(stores);
@@ -129,7 +120,7 @@ namespace VirtoCommerce.StoreModule.Data.Services
 
         public virtual async Task DeleteAsync(string[] ids)
         {
-            using (var repository = RepositoryFactory())
+            using (var repository = _repositoryFactory())
             {
                 var changedEntries = new List<GenericChangedEntry<Store>>();
                 var stores = await GetByIdsAsync(ids);
@@ -145,7 +136,7 @@ namespace VirtoCommerce.StoreModule.Data.Services
                     }
                 }
                 await repository.UnitOfWork.CommitAsync();
-                await EventPublisher.Publish(new StoreChangedEvent(changedEntries));
+                await _eventPublisher.Publish(new StoreChangedEvent(changedEntries));
 
                 ClearCache(stores);
             }
@@ -182,12 +173,7 @@ namespace VirtoCommerce.StoreModule.Data.Services
 
         protected virtual void ClearCache(IEnumerable<Store> stores)
         {
-            StoreSearchCacheRegion.ExpireRegion();
-
-            foreach (var store in stores)
-            {
-                StoreCacheRegion.ExpireStore(store);
-            }
+            StoreCacheRegion.ExpireRegion();
         }
 
         protected virtual void ValidateStoresProperties(IEnumerable<Store> stores)
@@ -204,37 +190,8 @@ namespace VirtoCommerce.StoreModule.Data.Services
             }
         }
 
-        protected virtual void PopulateStore(Store store, StoreEntity dbStore)
-        {
-            //Return all registered methods with store settings 
-            store.PaymentMethods = PaymentMethodRegistrar.GetAllPaymentMethods();
-            foreach (var paymentMethod in store.PaymentMethods)
-            {
-                var dbStoredPaymentMethod = dbStore.PaymentMethods.FirstOrDefault(x => x.Code.EqualsInvariant(paymentMethod.Code));
-                if (dbStoredPaymentMethod != null)
-                {
-                    dbStoredPaymentMethod.ToModel(paymentMethod);
-                }
-            }
-            store.ShippingMethods = ShippingMethodRegistrar.GetAllShippingMethods();
-            foreach (var shippingMethod in store.ShippingMethods)
-            {
-                var dbStoredShippingMethod = dbStore.ShippingMethods.FirstOrDefault(x => x.Code.EqualsInvariant(shippingMethod.Code));
-                if (dbStoredShippingMethod != null)
-                {
-                    dbStoredShippingMethod.ToModel(shippingMethod);
-                }
-            }
-            store.TaxProviders = TaxProviderRegistrar.GetAllTaxProviders();
-            foreach (var taxProvider in store.TaxProviders)
-            {
-                var dbStoredTaxProvider = dbStore.TaxProviders.FirstOrDefault(x => x.Code.EqualsInvariant(taxProvider.Code));
-                if (dbStoredTaxProvider != null)
-                {
-                    dbStoredTaxProvider.ToModel(taxProvider);
-                }
-            }
-        }
+
+
         #endregion
     }
 }

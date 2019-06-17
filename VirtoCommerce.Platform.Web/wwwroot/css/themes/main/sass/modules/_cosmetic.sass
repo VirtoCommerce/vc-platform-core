@@ -15,12 +15,15 @@
 .alt-description
   color: #43b0e6 !important
 .demo-warning
-  background: $baseColor
+  align-items: center
+  background: $redBg
   color: $whiteColor
+  display: flex
   font-family: $font
   font-size: 13px
+  justify-content: center
+  height: 30px
   left: 0
-  padding: 5px 0
   position: absolute
   right: 0
   text-align: center
@@ -56,7 +59,6 @@
   font-family: $font
   font-size: 13px
   left: 0
-  padding: 5px 0
   position: absolute
   right: 0
   top: 0
@@ -71,7 +73,8 @@
     top: 12px
     z-index: 5
   .error-title
-    height: 30px
+    height: $headerHeight
+    line-height: $headerHeight
     position: relative
 
     //@include align-items(center)
@@ -111,13 +114,16 @@
   cursor: not-allowed
   filter: alpha(opacity=60)
   opacity: .6
+input:read-only
+  opacity: .6
+  pointer-events: none
 .table .table-item:hover,
 .__items .list-item:hover,
 .__files .list-block:hover
-  background: #ecf7fc
+  background: $navbarItemOver
 .nav-bar .bar .__items .list-item
   &:hover
-    background: #383838
+    background: $navbarItemOver
   &.__animated
     background: #43b0e6
 .table .table-item.__selected,
@@ -139,16 +145,18 @@
 .__items .list-item.__selected .list-ico,
 .__files .list-block:hover .list-ico,
 .__files .list-item.__selected > .list-block .list-ico
-  color: #a1c0d4
+  color: $colorText
+  text-shadow: none
 .nav-bar .bar .__items .list-item
   &:hover .list-ico
-    color: #a6a6a6
+    color: $colorText
+    text-shadow: none
   &.__animated .list-ico,
   &.__animated:hover .list-ico
     color: #fff
     text-shadow: none
 .dropdown.__more .dropdown-content  .list-item .list-fav:hover .list-ico
-    color: #52a2ca
+    color: $orangeBg
 
 /* Links */
 a

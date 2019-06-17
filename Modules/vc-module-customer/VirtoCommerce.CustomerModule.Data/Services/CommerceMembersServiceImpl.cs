@@ -1,11 +1,7 @@
 using System;
-using System.Diagnostics.CodeAnalysis;
 using System.Linq;
-using System.Linq.Expressions;
 using System.Threading.Tasks;
-using VirtoCommerce.CoreModule.Core.Seo;
 using VirtoCommerce.CustomerModule.Core.Model;
-using VirtoCommerce.CustomerModule.Core.Model.Search;
 using VirtoCommerce.CustomerModule.Data.Model;
 using VirtoCommerce.CustomerModule.Data.Repositories;
 using VirtoCommerce.Platform.Core.Caching;
@@ -22,28 +18,28 @@ namespace VirtoCommerce.CustomerModule.Data.Services
     /// </summary>
     public class CommerceMembersServiceImpl : MemberServiceBase
     {
-        public CommerceMembersServiceImpl(Func<ICustomerRepository> repositoryFactory, IEventPublisher eventPublisher
-            , IDynamicPropertyService dynamicPropertyService, ISeoService seoService, IPlatformMemoryCache platformMemoryCache, IUserSearchService userSearchService)
-            : base(repositoryFactory, eventPublisher, dynamicPropertyService, seoService, platformMemoryCache)
-        {
-            UserSearchService = userSearchService;
-        }
+        private readonly IUserSearchService _userSearchService;
 
-        protected IUserSearchService UserSearchService { get; }
+        public CommerceMembersServiceImpl(Func<ICustomerRepository> repositoryFactory, IEventPublisher eventPublisher
+            , IDynamicPropertyService dynamicPropertyService, IPlatformMemoryCache platformMemoryCache, IUserSearchService userSearchService)
+            : base(repositoryFactory, eventPublisher, dynamicPropertyService, platformMemoryCache)
+        {
+            _userSearchService = userSearchService;
+        }
 
         #region IMemberService Members
 
         public override async Task<Member[]> GetByIdsAsync(string[] memberIds, string responseGroup = null, string[] memberTypes = null)
         {
             var result = await base.GetByIdsAsync(memberIds, responseGroup, memberTypes);
-            var memberRespGroup = EnumUtility.SafeParse(responseGroup, MemberResponseGroup.Full);
+            var memberRespGroup = EnumUtility.SafeParseFlags(responseGroup, MemberResponseGroup.Full);
             //Load member security accounts by separate request
             if (memberRespGroup.HasFlag(MemberResponseGroup.WithSecurityAccounts))
             {
-                var hasSecurityAccountMembers = result.OfType<IHasSecurityAccounts>();
+                var hasSecurityAccountMembers = result.OfType<IHasSecurityAccounts>().ToArray();
                 if (hasSecurityAccountMembers.Any())
                 {
-                    var usersSearchResult = await UserSearchService.SearchUsersAsync(new UserSearchCriteria { MemberIds = hasSecurityAccountMembers.Select(x => x.Id).ToList(), Take = int.MaxValue });
+                    var usersSearchResult = await _userSearchService.SearchUsersAsync(new UserSearchCriteria { MemberIds = hasSecurityAccountMembers.Select(x => x.Id).ToList(), Take = int.MaxValue });
                     foreach (var hasAccountMember in hasSecurityAccountMembers)
                     {
                         hasAccountMember.SecurityAccounts = usersSearchResult.Results.Where(x => x.MemberId.EqualsInvariant(hasAccountMember.Id)).ToList();

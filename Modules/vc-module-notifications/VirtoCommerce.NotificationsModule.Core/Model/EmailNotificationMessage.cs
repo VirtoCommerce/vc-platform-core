@@ -12,6 +12,8 @@ namespace VirtoCommerce.NotificationsModule.Core.Model
             Attachments = new List<EmailAttachment>();
         }
 
+        public override string Kind => nameof(EmailNotification);
+
         /// <summary>
         /// Sender of Notification
         /// </summary>

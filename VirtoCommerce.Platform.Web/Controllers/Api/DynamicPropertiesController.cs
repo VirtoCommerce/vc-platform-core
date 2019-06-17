@@ -1,3 +1,4 @@
+using System;
 using System.Linq;
 using System.Threading.Tasks;
 using Microsoft.AspNetCore.Authorization;
@@ -29,8 +30,7 @@ namespace VirtoCommerce.Platform.Web.Controllers.Api
         /// <returns></returns>
         [HttpGet]
         [Route("types")]
-        [ProducesResponseType(typeof(string[]), 200)]
-        public IActionResult GetObjectTypes()
+        public ActionResult<string[]> GetObjectTypes()
         {
             return Ok(_dynamicPropertyRegistrar.AllRegisteredTypeNames);
         }
@@ -40,12 +40,12 @@ namespace VirtoCommerce.Platform.Web.Controllers.Api
         /// </summary>
         /// <returns></returns>
         [HttpPost]
-        [Route("types/{typeName}/properties")]
-        [ProducesResponseType(typeof(DynamicProperty[]), 200)]
-        public async Task<IActionResult> Search([FromBody] DynamicPropertySearchCriteria criteria)
+        [Route("properties/search")]
+
+        public async Task<ActionResult<DynamicPropertySearchResult>> SearchDynamicProperties([FromBody] DynamicPropertySearchCriteria criteria)
         {
             var result = await _dynamicPropertySearchService.SearchDynamicPropertiesAsync(criteria);
-            return Ok(result.Results);
+            return Ok(result);
         }
 
         /// <summary>
@@ -54,9 +54,8 @@ namespace VirtoCommerce.Platform.Web.Controllers.Api
         /// <returns></returns>
         [HttpPost]
         [Route("properties")]
-        [ProducesResponseType(typeof(DynamicProperty), 200)]
         [Authorize(PlatformConstants.Security.Permissions.DynamicPropertiesCreate)]
-        public async Task<IActionResult> CreatePropertyAsync([FromBody]DynamicProperty property)
+        public async Task<ActionResult<DynamicProperty>> CreatePropertyAsync([FromBody]DynamicProperty property)
         {
             var result = await _dynamicPropertyService.SaveDynamicPropertiesAsync(new[] { property });
             return Ok(result.FirstOrDefault());
@@ -68,12 +67,11 @@ namespace VirtoCommerce.Platform.Web.Controllers.Api
         /// <returns></returns>
         [HttpPut]
         [Route("properties")]
-        [ProducesResponseType(typeof(void), 200)]
         [Authorize(PlatformConstants.Security.Permissions.DynamicPropertiesUpdate)]
-        public async Task<IActionResult> UpdatePropertyAsync([FromBody]DynamicProperty property)
+        public async Task<ActionResult> UpdatePropertyAsync([FromBody]DynamicProperty property)
         {
             await _dynamicPropertyService.SaveDynamicPropertiesAsync(new[] { property });
-            return Ok();
+            return NoContent();
         }
 
         /// <summary>
@@ -82,12 +80,11 @@ namespace VirtoCommerce.Platform.Web.Controllers.Api
         /// <returns></returns>
         [HttpDelete]
         [Route("properties")]
-        [ProducesResponseType(typeof(void), 200)]
         [Authorize(PlatformConstants.Security.Permissions.DynamicPropertiesDelete)]
-        public async Task<IActionResult> DeletePropertyAsync([FromQuery] string[] propertyIds)
+        public async Task<ActionResult> DeletePropertyAsync([FromQuery] string[] propertyIds)
         {
             await _dynamicPropertyService.DeleteDynamicPropertiesAsync(propertyIds);
-            return Ok();
+            return NoContent();
         }
 
         /// <summary>
@@ -96,11 +93,10 @@ namespace VirtoCommerce.Platform.Web.Controllers.Api
         /// <returns></returns>
         [HttpPost]
         [Route("dictionaryitems/search")]
-        [ProducesResponseType(typeof(DynamicPropertyDictionaryItem[]), 200)]
-        public async Task<IActionResult> GetDictionaryItems([FromBody]DynamicPropertyDictionaryItemSearchCriteria criteria)
+        public async Task<ActionResult<DynamicPropertyDictionaryItemSearchResult>> SearchDictionaryItems([FromBody]DynamicPropertyDictionaryItemSearchCriteria criteria)
         {
             var result = await _dynamicPropertySearchService.SearchDictionaryItemsAsync(criteria);
-            return Ok(result.Results);
+            return Ok(result);
         }
 
         /// <summary>
@@ -112,12 +108,11 @@ namespace VirtoCommerce.Platform.Web.Controllers.Api
         /// <returns></returns>
         [HttpPost]
         [Route("dictionaryitems")]
-        [ProducesResponseType(typeof(void), 200)]
         [Authorize(PlatformConstants.Security.Permissions.DynamicPropertiesUpdate)]
-        public async Task<IActionResult> SaveDictionaryItemsAsync([FromBody]DynamicPropertyDictionaryItem[] items)
+        public async Task<ActionResult> SaveDictionaryItemsAsync([FromBody]DynamicPropertyDictionaryItem[] items)
         {
             await _dynamicPropertyService.SaveDictionaryItemsAsync(items);
-            return Ok();
+            return NoContent();
         }
 
         /// <summary>
@@ -127,12 +122,105 @@ namespace VirtoCommerce.Platform.Web.Controllers.Api
         /// <returns></returns>
         [HttpDelete]
         [Route("dictionaryitems")]
-        [ProducesResponseType(typeof(void), 200)]
         [Authorize(PlatformConstants.Security.Permissions.DynamicPropertiesUpdate)]
-        public async Task<IActionResult> DeleteDictionaryItemAsync([FromQuery] string[] ids)
+        public async Task<ActionResult> DeleteDictionaryItemAsync([FromQuery] string[] ids)
         {
             await _dynamicPropertyService.DeleteDictionaryItemsAsync(ids);
-            return Ok();
+            return NoContent();
         }
+
+
+        #region Legacy API methods left for backward compatibility
+
+        [ApiExplorerSettings(IgnoreApi = true)]
+        [Obsolete("use POST api/platform/dynamic/properties/search instead")]
+        [HttpGet]
+        [Route("types/{typeName}/properties")]
+        public async Task<ActionResult<DynamicProperty[]>> GetProperties([FromRoute] string typeName)
+        {
+            var result = await _dynamicPropertySearchService.SearchDynamicPropertiesAsync(new DynamicPropertySearchCriteria { TypeName = typeName });
+            return Ok(result.Results);
+        }
+
+        [ApiExplorerSettings(IgnoreApi = true)]
+        [Obsolete("use POST api/platform/dynamic/properties  instead")]
+        [HttpPost]
+        [Route("types/{typeName}/properties")]
+        [Authorize(PlatformConstants.Security.Permissions.DynamicPropertiesCreate)]
+        public async Task<ActionResult<DynamicProperty>> CreateProperty([FromRoute] string typeName, [FromBody] DynamicProperty property)
+        {
+            property.Id = null;
+            if (string.IsNullOrEmpty(property.ObjectType))
+            {
+                property.ObjectType = typeName;
+            }
+            await _dynamicPropertyService.SaveDynamicPropertiesAsync(new[] { property });
+            return Ok(property);
+        }
+
+        [ApiExplorerSettings(IgnoreApi = true)]
+        [Obsolete("use PUT api/platform/dynamic/properties  instead")]
+        [HttpPut]
+        [Route("types/{typeName}/properties/{propertyId}")]
+        [Authorize(PlatformConstants.Security.Permissions.DynamicPropertiesUpdate)]
+        public async Task<ActionResult> UpdateProperty([FromRoute] string typeName, [FromRoute] string propertyId, [FromBody] DynamicProperty property)
+        {
+            property.Id = propertyId;
+
+            if (string.IsNullOrEmpty(property.ObjectType))
+            {
+                property.ObjectType = typeName;
+            }
+            await _dynamicPropertyService.SaveDynamicPropertiesAsync(new[] { property });
+            return NoContent();
+        }
+
+        [ApiExplorerSettings(IgnoreApi = true)]
+        [HttpDelete]
+        [Obsolete("use DELETE api/platform/dynamic/properties?propertyIds=  instead")]
+        [Route("types/{typeName}/properties/{propertyId}")]
+        [Authorize(PlatformConstants.Security.Permissions.DynamicPropertiesDelete)]
+        public async Task<ActionResult> DeleteProperty([FromRoute] string typeName, [FromRoute] string propertyId)
+        {
+            await _dynamicPropertyService.DeleteDynamicPropertiesAsync(new[] { propertyId });
+            return NoContent();
+        }
+
+        [ApiExplorerSettings(IgnoreApi = true)]
+        [Obsolete("use POST api/platform/dynamic/dictionaryitems/search instead")]
+        [HttpGet]
+        [Route("types/{typeName}/properties/{propertyId}/dictionaryitems")]
+        public async Task<ActionResult<DynamicPropertyDictionaryItem[]>> GetDictionaryItems([FromRoute] string typeName, [FromRoute] string propertyId)
+        {
+            var result = await _dynamicPropertySearchService.SearchDictionaryItemsAsync(new DynamicPropertyDictionaryItemSearchCriteria { PropertyId = propertyId, ObjectType = typeName });
+            return Ok(result.Results);
+        }
+
+        [ApiExplorerSettings(IgnoreApi = true)]
+        [Obsolete("use POST api/platform/dynamic/dictionaryitems instead")]
+        [HttpPost]
+        [Route("types/{typeName}/properties/{propertyId}/dictionaryitems")]
+        [Authorize(PlatformConstants.Security.Permissions.DynamicPropertiesUpdate)]
+        public async Task<ActionResult> SaveDictionaryItems([FromRoute] string typeName, [FromRoute] string propertyId, [FromBody] DynamicPropertyDictionaryItem[] items)
+        {
+            foreach (var item in items)
+            {
+                item.PropertyId = propertyId;
+            }
+            await _dynamicPropertyService.SaveDictionaryItemsAsync(items);
+            return NoContent();
+        }
+
+        [ApiExplorerSettings(IgnoreApi = true)]
+        [Obsolete("use DELETE api/platform/dynamic/dictionaryitems?ids= instead")]
+        [HttpDelete]
+        [Route("types/{typeName}/properties/{propertyId}/dictionaryitems")]
+        [Authorize(PlatformConstants.Security.Permissions.DynamicPropertiesUpdate)]
+        public async Task<ActionResult> DeleteDictionaryItem([FromRoute] string typeName, [FromRoute] string propertyId, [FromQuery] string[] ids)
+        {
+            await _dynamicPropertyService.DeleteDictionaryItemsAsync(ids);
+            return NoContent();
+        }
+        #endregion
     }
 }

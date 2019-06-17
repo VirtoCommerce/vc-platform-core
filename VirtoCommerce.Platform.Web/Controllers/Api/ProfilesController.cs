@@ -1,4 +1,3 @@
-using System.Linq;
 using System.Threading.Tasks;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Identity;
@@ -41,7 +40,6 @@ namespace VirtoCommerce.Platform.Web.Controllers.Api
             {
                 var userProfile = AbstractTypeFactory<UserProfile>.TryCreateInstance();
                 userProfile.Id = currentUser.Id;
-                userProfile.Settings = _settingsManager.AllRegisteredSettings.Where(x => x.GroupName == "Platform|User Profile").Select(x => new ObjectSettingEntry(x)).ToList();
                 await _settingsManager.DeepLoadSettingsAsync(userProfile);
                 return Ok(userProfile);
             }
@@ -67,7 +65,7 @@ namespace VirtoCommerce.Platform.Web.Controllers.Api
             {
                 await _settingsManager.DeepSaveSettingsAsync(userProfile);
             }
-            return Ok();
+            return NoContent();
         }
     }
 }

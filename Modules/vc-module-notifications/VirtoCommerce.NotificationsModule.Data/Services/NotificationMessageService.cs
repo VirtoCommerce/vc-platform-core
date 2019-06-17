@@ -10,7 +10,6 @@ using VirtoCommerce.NotificationsModule.Data.Model;
 using VirtoCommerce.NotificationsModule.Data.Repositories;
 using VirtoCommerce.NotificationsModule.Data.Validation;
 using VirtoCommerce.Platform.Core.Common;
-using VirtoCommerce.Platform.Core.Domain;
 using VirtoCommerce.Platform.Core.Events;
 
 namespace VirtoCommerce.NotificationsModule.Data.Services
@@ -19,19 +18,21 @@ namespace VirtoCommerce.NotificationsModule.Data.Services
     {
         private readonly Func<INotificationRepository> _repositoryFactory;
         private readonly IEventPublisher _eventPublisher;
+        private readonly INotificationService _notificationService;
 
-        public NotificationMessageService(Func<INotificationRepository> repositoryFactory, IEventPublisher eventPublisher)
+        public NotificationMessageService(Func<INotificationRepository> repositoryFactory, IEventPublisher eventPublisher, INotificationService notificationService)
         {
             _repositoryFactory = repositoryFactory;
             _eventPublisher = eventPublisher;
+            _notificationService = notificationService;
         }
 
         public async Task<NotificationMessage[]> GetNotificationsMessageByIds(string[] ids)
         {
             using (var repository = _repositoryFactory())
             {
-                var messages = await repository.GetMessageByIdAsync(ids);
-                return messages.Select(n => n.ToModel(AbstractTypeFactory<NotificationMessage>.TryCreateInstance())).ToArray();
+                var messages = await repository.GetMessagesByIdsAsync(ids);
+                return messages.Select(x => x.ToModel(AbstractTypeFactory<NotificationMessage>.TryCreateInstance($"{x.Kind}Message"))).ToArray();
             }
         }
 
@@ -40,14 +41,15 @@ namespace VirtoCommerce.NotificationsModule.Data.Services
             ValidateMessageProperties(messages);
 
             var changedEntries = new List<GenericChangedEntry<NotificationMessage>>();
+            var pkMap = new PrimaryKeyResolvingMap();
 
             using (var repository = _repositoryFactory())
             {
-                var existingMessageEntities = await repository.GetMessageByIdAsync(messages.Select(m => m.Id).ToArray());
+                var existingMessageEntities = await repository.GetMessagesByIdsAsync(messages.Select(m => m.Id).ToArray());
                 foreach (var message in messages)
                 {
                     var originalEntity = existingMessageEntities.FirstOrDefault(n => n.Id.Equals(message.Id));
-                    var modifiedEntity = AbstractTypeFactory<NotificationMessageEntity>.TryCreateInstance().FromModel(message);
+                    var modifiedEntity = AbstractTypeFactory<NotificationMessageEntity>.TryCreateInstance($"{message.Kind}MessageEntity").FromModel(message, pkMap);
 
                     if (originalEntity != null)
                     {
@@ -63,6 +65,7 @@ namespace VirtoCommerce.NotificationsModule.Data.Services
 
                 await _eventPublisher.Publish(new NotificationMessageChangingEvent(changedEntries));
                 await repository.UnitOfWork.CommitAsync();
+                pkMap.ResolvePrimaryKeys();
                 await _eventPublisher.Publish(new NotificationMessageChangedEvent(changedEntries));
             }
         }
@@ -74,7 +77,7 @@ namespace VirtoCommerce.NotificationsModule.Data.Services
                 throw new ArgumentNullException(nameof(messages));
             }
 
-            var validator = new NotificationMessageValidator();
+            var validator = AbstractTypeFactory<NotificationMessageValidator>.TryCreateInstance();
             foreach (var notification in messages)
             {
                 validator.ValidateAndThrow(notification);

@@ -204,13 +204,32 @@
         "customer:delete": "Delete customer related data"
     },
     "settings": {
-        "Customer.MemberGroups": {
-            "description": "All available members groups values",
-            "title": "Member groups dictionary"
+        "Customer": {
+            "MemberGroups": {
+                "title": "Member groups dictionary",
+                "description": "All available members groups values"
+            },
+            "ExportImport.PageSize": {
+                "title": "The page size being used for Export / Import",
+                "description": "Large values may decrease performance"
+            }
         },
-        "Customer.ExportImport.PageSize": {
-            "description": "Large values may decrease performance",
-            "title": "The page size being used for Export / Import"
-        } 
+        "VirtoCommerce": {
+            "Search": {
+                "IndexingJobs": {
+                    "IndexationDate": {
+                        "Member": {
+                            "title": "Member indexation date and time",
+                            "description": "Date and time of the member indexation task to start"
+                        }
+                    }
+                }
+            }
+        }
+    },
+    "module": {
+        "VirtoCommerce.Customer": {
+            "description": "Export/Import contacts and organizations"
+        }
     }
 }

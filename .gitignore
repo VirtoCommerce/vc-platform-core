@@ -198,10 +198,11 @@ ClientBin/
 *.publishsettings
 node_modules/
 orleans.codegen.cs
+package-lock.json
 
 # Since there are multiple workflows, uncomment next line to ignore bower_components
 # (https://github.com/github/gitignore/pull/1529#issuecomment-104372622)
-#bower_components/
+bower_components/
 
 # RIA/Silverlight projects
 Generated_Code/
@@ -270,7 +271,10 @@ __pycache__/
 /VirtoCommerce.Platform.Web/App_Data
 /VirtoCommerce.Platform.Web/wwwroot/modules
 /VirtoCommerce.Platform.Web/wwwroot/lib
+/VirtoCommerce.Platform.Web/wwwroot/dist
 /VirtoCommerce.Platform.Web/wwwroot/App_Data
 /VirtoCommerce.Platform.Web/wwwroot/maps
+/VirtoCommerce.Platform.Web/wwwroot/cms-content
 /VirtoCommerce.Platform.Web/wwwroot/assets
 /VirtoCommerce.Platform.Web/wwwroot/dist
+.vscode

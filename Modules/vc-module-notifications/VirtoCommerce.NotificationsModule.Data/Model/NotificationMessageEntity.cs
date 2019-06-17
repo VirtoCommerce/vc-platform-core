@@ -1,5 +1,6 @@
 using System;
 using System.ComponentModel.DataAnnotations;
+using System.ComponentModel.DataAnnotations.Schema;
 using VirtoCommerce.NotificationsModule.Core.Model;
 using VirtoCommerce.Platform.Core.Common;
 
@@ -8,8 +9,11 @@ namespace VirtoCommerce.NotificationsModule.Data.Model
     /// <summary>
     /// Entity is message of notification
     /// </summary>
-    public class NotificationMessageEntity : AuditableEntity
+    public abstract class NotificationMessageEntity : AuditableEntity
     {
+        [NotMapped]
+        public abstract string Kind { get; }
+
         /// <summary>
         /// Tenant id that initiate sending
         /// </summary>
@@ -21,12 +25,6 @@ namespace VirtoCommerce.NotificationsModule.Data.Model
         /// </summary>
         [StringLength(128)]
         public string TenantType { get; set; }
-
-        /// <summary>
-        /// Id of notification
-        /// </summary>
-        [StringLength(128)]
-        public string NotificationId { get; set; }
 
         /// <summary>
         /// Type of notification
@@ -66,22 +64,9 @@ namespace VirtoCommerce.NotificationsModule.Data.Model
         public string LanguageCode { get; set; }
 
         /// <summary>
-        /// Subject of notification
+        /// Id of notification
         /// </summary>
-        [StringLength(512)]
-        public string Subject { get; set; }
-
-        /// <summary>
-        /// Body of notification
-        /// </summary>
-        public string Body { get; set; }
-
-        /// <summary>
-        /// Message of notification
-        /// </summary>
-        [StringLength(1600)]
-        public string Message { get; set; }
-
+        public string NotificationId { get; set; }
         /// <summary>
         /// Notification property
         /// </summary>
@@ -104,13 +89,16 @@ namespace VirtoCommerce.NotificationsModule.Data.Model
             message.CreatedDate = CreatedDate;
             message.ModifiedBy = ModifiedBy;
             message.ModifiedDate = ModifiedDate;
+            message.LanguageCode = LanguageCode;
 
             return message;
         }
 
-        public virtual NotificationMessageEntity FromModel(NotificationMessage message)
+        public virtual NotificationMessageEntity FromModel(NotificationMessage message, PrimaryKeyResolvingMap pkMap)
         {
             if (message == null) throw new ArgumentNullException(nameof(message));
+
+            pkMap.AddPair(message, this);
 
             Id = message.Id;
             TenantId = message.TenantIdentity?.Id;
@@ -126,6 +114,7 @@ namespace VirtoCommerce.NotificationsModule.Data.Model
             CreatedDate = message.CreatedDate;
             ModifiedBy = message.ModifiedBy;
             ModifiedDate = message.ModifiedDate;
+            LanguageCode = message.LanguageCode;
 
             return this;
         }
@@ -134,11 +123,7 @@ namespace VirtoCommerce.NotificationsModule.Data.Model
         {
             message.TenantId = TenantId;
             message.TenantType = TenantType;
-            message.Notification = Notification;
-            message.Body = Body;
             message.LanguageCode = LanguageCode;
-            message.NotificationId = NotificationId;
-            message.NotificationType = NotificationType;
             message.SendAttemptCount = SendAttemptCount;
             message.MaxSendAttemptCount = MaxSendAttemptCount;
             message.LastSendError = LastSendError;

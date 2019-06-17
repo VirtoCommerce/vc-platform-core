@@ -1,0 +1,26 @@
+<?xml version="1.0" encoding="utf-8" ?>
+<module>
+    <id>VirtoCommerce.NotificationsSample</id>
+    <version>3.0.0</version>
+    <platformVersion>3.0.0</platformVersion>
+    <dependencies>
+        <dependency id="VirtoCommerce.Notifications" version="3.0.0" />
+    </dependencies>
+    <title>NotificationsSample module</title>
+    <description>description</description>
+    <authors>
+        <author>Eugeny Tatarincev</author>
+        <author>Andrei Kostyrin</author>
+    </authors>
+    <owners>
+        <owner>Virto Commerce</owner>
+    </owners>
+    <projectUrl>https://virtocommerce.com/apps/extensions/virto-core-module</projectUrl>
+    <iconUrl>Modules/$(VirtoCommerce.Core)/Content/logoVC.png</iconUrl>
+    <releaseNotes></releaseNotes>
+    <copyright>Copyright © 2011-2018 Virto Commerce. All rights reserved</copyright>
+    <tags>notifications</tags>
+
+    <assemblyFile>VirtoCommerce.NotificationsSampleModule.Web.dll</assemblyFile>
+    <moduleType>VirtoCommerce.NotificationsSampleModule.Web.Module, VirtoCommerce.NotificationsSample.Web</moduleType>
+</module>

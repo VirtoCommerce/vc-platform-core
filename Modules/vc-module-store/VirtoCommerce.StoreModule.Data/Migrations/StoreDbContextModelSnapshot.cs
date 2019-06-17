@@ -15,14 +15,62 @@ namespace VirtoCommerce.StoreModule.Data.Migrations
         {
 #pragma warning disable 612, 618
             modelBuilder
-                .HasAnnotation("ProductVersion", "2.1.0-rtm-30799")
+                .HasAnnotation("ProductVersion", "2.2.3-servicing-35854")
                 .HasAnnotation("Relational:MaxIdentifierLength", 128)
                 .HasAnnotation("SqlServer:ValueGenerationStrategy", SqlServerValueGenerationStrategy.IdentityColumn);
+
+            modelBuilder.Entity("VirtoCommerce.StoreModule.Data.Model.SeoInfoEntity", b =>
+                {
+                    b.Property<string>("Id")
+                        .ValueGeneratedOnAdd()
+                        .HasMaxLength(128);
+
+                    b.Property<string>("CreatedBy")
+                        .HasMaxLength(64);
+
+                    b.Property<DateTime>("CreatedDate");
+
+                    b.Property<string>("ImageAltDescription")
+                        .HasMaxLength(255);
+
+                    b.Property<bool>("IsActive");
+
+                    b.Property<string>("Keyword")
+                        .IsRequired()
+                        .HasMaxLength(255);
+
+                    b.Property<string>("Language")
+                        .HasMaxLength(5);
+
+                    b.Property<string>("MetaDescription")
+                        .HasMaxLength(1024);
+
+                    b.Property<string>("MetaKeywords")
+                        .HasMaxLength(255);
+
+                    b.Property<string>("ModifiedBy")
+                        .HasMaxLength(64);
+
+                    b.Property<DateTime?>("ModifiedDate");
+
+                    b.Property<string>("StoreId")
+                        .HasMaxLength(128);
+
+                    b.Property<string>("Title")
+                        .HasMaxLength(255);
+
+                    b.HasKey("Id");
+
+                    b.HasIndex("StoreId");
+
+                    b.ToTable("StoreSeoInfo");
+                });
 
             modelBuilder.Entity("VirtoCommerce.StoreModule.Data.Model.StoreCurrencyEntity", b =>
                 {
                     b.Property<string>("Id")
-                        .ValueGeneratedOnAdd();
+                        .ValueGeneratedOnAdd()
+                        .HasMaxLength(128);
 
                     b.Property<string>("CurrencyCode")
                         .IsRequired()
@@ -112,7 +160,8 @@ namespace VirtoCommerce.StoreModule.Data.Migrations
             modelBuilder.Entity("VirtoCommerce.StoreModule.Data.Model.StoreFulfillmentCenterEntity", b =>
                 {
                     b.Property<string>("Id")
-                        .ValueGeneratedOnAdd();
+                        .ValueGeneratedOnAdd()
+                        .HasMaxLength(128);
 
                     b.Property<string>("FulfillmentCenterId")
                         .IsRequired()
@@ -139,7 +188,8 @@ namespace VirtoCommerce.StoreModule.Data.Migrations
             modelBuilder.Entity("VirtoCommerce.StoreModule.Data.Model.StoreLanguageEntity", b =>
                 {
                     b.Property<string>("Id")
-                        .ValueGeneratedOnAdd();
+                        .ValueGeneratedOnAdd()
+                        .HasMaxLength(128);
 
                     b.Property<string>("LanguageCode")
                         .IsRequired()
@@ -155,108 +205,11 @@ namespace VirtoCommerce.StoreModule.Data.Migrations
                     b.ToTable("StoreLanguage");
                 });
 
-            modelBuilder.Entity("VirtoCommerce.StoreModule.Data.Model.StorePaymentMethodEntity", b =>
-                {
-                    b.Property<string>("Id")
-                        .ValueGeneratedOnAdd();
-
-                    b.Property<string>("Code")
-                        .IsRequired()
-                        .HasMaxLength(128);
-
-                    b.Property<string>("Description");
-
-                    b.Property<bool>("IsActive");
-
-                    b.Property<bool>("IsAvailableForPartial");
-
-                    b.Property<string>("LogoUrl")
-                        .HasMaxLength(2048);
-
-                    b.Property<string>("Name")
-                        .HasMaxLength(128);
-
-                    b.Property<int>("Priority");
-
-                    b.Property<string>("StoreId")
-                        .IsRequired();
-
-                    b.HasKey("Id");
-
-                    b.HasIndex("StoreId");
-
-                    b.ToTable("StorePaymentMethod");
-                });
-
-            modelBuilder.Entity("VirtoCommerce.StoreModule.Data.Model.StoreShippingMethodEntity", b =>
-                {
-                    b.Property<string>("Id")
-                        .ValueGeneratedOnAdd();
-
-                    b.Property<string>("Code")
-                        .IsRequired()
-                        .HasMaxLength(128);
-
-                    b.Property<string>("Description");
-
-                    b.Property<bool>("IsActive");
-
-                    b.Property<string>("LogoUrl")
-                        .HasMaxLength(2048);
-
-                    b.Property<string>("Name")
-                        .HasMaxLength(128);
-
-                    b.Property<int>("Priority");
-
-                    b.Property<string>("StoreId")
-                        .IsRequired();
-
-                    b.Property<string>("TaxType")
-                        .HasMaxLength(64);
-
-                    b.HasKey("Id");
-
-                    b.HasIndex("StoreId");
-
-                    b.ToTable("StoreShippingMethod");
-                });
-
-            modelBuilder.Entity("VirtoCommerce.StoreModule.Data.Model.StoreTaxProviderEntity", b =>
-                {
-                    b.Property<string>("Id")
-                        .ValueGeneratedOnAdd();
-
-                    b.Property<string>("Code")
-                        .IsRequired()
-                        .HasMaxLength(128);
-
-                    b.Property<string>("Description");
-
-                    b.Property<bool>("IsActive");
-
-                    b.Property<string>("LogoUrl")
-                        .HasMaxLength(2048);
-
-                    b.Property<string>("Name")
-                        .HasMaxLength(128);
-
-                    b.Property<int>("Priority");
-
-                    b.Property<string>("StoreId")
-                        .IsRequired();
-
-                    b.HasKey("Id");
-
-                    b.HasIndex("StoreId");
-
-                    b.ToTable("StoreTaxProvider");
-                });
-
             modelBuilder.Entity("VirtoCommerce.StoreModule.Data.Model.StoreTrustedGroupEntity", b =>
                 {
                     b.Property<string>("Id")
-                        .ValueGeneratedOnAdd();
+                        .ValueGeneratedOnAdd()
+                        .HasMaxLength(128);
 
                     b.Property<string>("GroupName")
                         .IsRequired()
@@ -270,6 +223,14 @@ namespace VirtoCommerce.StoreModule.Data.Migrations
                     b.HasIndex("StoreId");
 
                     b.ToTable("StoreTrustedGroup");
+                });
+
+            modelBuilder.Entity("VirtoCommerce.StoreModule.Data.Model.SeoInfoEntity", b =>
+                {
+                    b.HasOne("VirtoCommerce.StoreModule.Data.Model.StoreEntity", "Store")
+                        .WithMany("SeoInfos")
+                        .HasForeignKey("StoreId")
+                        .OnDelete(DeleteBehavior.Cascade);
                 });
 
             modelBuilder.Entity("VirtoCommerce.StoreModule.Data.Model.StoreCurrencyEntity", b =>
@@ -292,30 +253,6 @@ namespace VirtoCommerce.StoreModule.Data.Migrations
                 {
                     b.HasOne("VirtoCommerce.StoreModule.Data.Model.StoreEntity", "Store")
                         .WithMany("Languages")
-                        .HasForeignKey("StoreId")
-                        .OnDelete(DeleteBehavior.Cascade);
-                });
-
-            modelBuilder.Entity("VirtoCommerce.StoreModule.Data.Model.StorePaymentMethodEntity", b =>
-                {
-                    b.HasOne("VirtoCommerce.StoreModule.Data.Model.StoreEntity", "Store")
-                        .WithMany("PaymentMethods")
-                        .HasForeignKey("StoreId")
-                        .OnDelete(DeleteBehavior.Cascade);
-                });
-
-            modelBuilder.Entity("VirtoCommerce.StoreModule.Data.Model.StoreShippingMethodEntity", b =>
-                {
-                    b.HasOne("VirtoCommerce.StoreModule.Data.Model.StoreEntity", "Store")
-                        .WithMany("ShippingMethods")
-                        .HasForeignKey("StoreId")
-                        .OnDelete(DeleteBehavior.Cascade);
-                });
-
-            modelBuilder.Entity("VirtoCommerce.StoreModule.Data.Model.StoreTaxProviderEntity", b =>
-                {
-                    b.HasOne("VirtoCommerce.StoreModule.Data.Model.StoreEntity", "Store")
-                        .WithMany("TaxProviders")
                         .HasForeignKey("StoreId")
                         .OnDelete(DeleteBehavior.Cascade);
                 });

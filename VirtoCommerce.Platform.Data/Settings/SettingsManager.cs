@@ -10,6 +10,7 @@ using VirtoCommerce.Platform.Core.Caching;
 using VirtoCommerce.Platform.Core.Common;
 using VirtoCommerce.Platform.Core.Exceptions;
 using VirtoCommerce.Platform.Core.Settings;
+using VirtoCommerce.Platform.Data.Infrastructure;
 using VirtoCommerce.Platform.Data.Model;
 using VirtoCommerce.Platform.Data.Repositories;
 
@@ -25,8 +26,8 @@ namespace VirtoCommerce.Platform.Data.Settings
     {
         private readonly Func<IPlatformRepository> _repositoryFactory;
         private readonly IMemoryCache _memoryCache;
-        private readonly Dictionary<string, SettingDescriptor> _registeredSettingsLookup = new Dictionary<string, SettingDescriptor>(StringComparer.OrdinalIgnoreCase);
-        private readonly Dictionary<string, IEnumerable<SettingDescriptor>> _registeredTypeSettingsLookup = new Dictionary<string, IEnumerable<SettingDescriptor>>(StringComparer.OrdinalIgnoreCase);
+        private readonly IDictionary<string, SettingDescriptor> _registeredSettingsByNameDict = new Dictionary<string, SettingDescriptor>(StringComparer.OrdinalIgnoreCase).WithDefaultValue(null);
+        private readonly IDictionary<string, IEnumerable<SettingDescriptor>> _registeredTypeSettingsByNameDict = new Dictionary<string, IEnumerable<SettingDescriptor>>(StringComparer.OrdinalIgnoreCase).WithDefaultValue(null);
 
         public SettingsManager(Func<IPlatformRepository> repositoryFactory, IMemoryCache memoryCache)
         {
@@ -42,18 +43,21 @@ namespace VirtoCommerce.Platform.Data.Settings
             {
                 throw new ArgumentNullException(nameof(settings));
             }
-            _registeredTypeSettingsLookup[typeName] = settings;
+            var existTypeSettings = _registeredTypeSettingsByNameDict[typeName];
+            if (existTypeSettings != null)
+            {
+                settings = existTypeSettings.Concat(settings).Distinct().ToList();
+            }
+            _registeredTypeSettingsByNameDict[typeName] = settings;
 
         }
 
         public IEnumerable<SettingDescriptor> GetSettingsForType(string typeName)
         {
-            var result = Enumerable.Empty<SettingDescriptor>();
-            _registeredTypeSettingsLookup.TryGetValue(typeName, out result);
-            return result;
+            return _registeredTypeSettingsByNameDict[typeName] ?? Enumerable.Empty<SettingDescriptor>();
         }
 
-        public IEnumerable<SettingDescriptor> AllRegisteredSettings => _registeredSettingsLookup.Values;
+        public IEnumerable<SettingDescriptor> AllRegisteredSettings => _registeredSettingsByNameDict.Values;
 
         public void RegisterSettings(IEnumerable<SettingDescriptor> settings, string moduleId = null)
         {
@@ -64,7 +68,7 @@ namespace VirtoCommerce.Platform.Data.Settings
             foreach (var setting in settings)
             {
                 setting.ModuleId = moduleId;
-                _registeredSettingsLookup[setting.Name] = setting;
+                _registeredSettingsByNameDict[setting.Name] = setting;
             }
         }
         #endregion
@@ -85,7 +89,7 @@ namespace VirtoCommerce.Platform.Data.Settings
             {
                 throw new ArgumentNullException(nameof(names));
             }
-            var cacheKey = CacheKey.With(GetType(), "GetSettingByNamesAsync", string.Join(";", names));
+            var cacheKey = CacheKey.With(GetType(), "GetSettingByNamesAsync", string.Join(";", names), objectType, objectId);
             var result = await _memoryCache.GetOrCreateExclusiveAsync(cacheKey, async (cacheEntry) =>
             {
                 var resultObjectSettings = new List<ObjectSettingEntry>();
@@ -94,16 +98,17 @@ namespace VirtoCommerce.Platform.Data.Settings
                 //Try to load setting value from DB
                 using (var repository = _repositoryFactory())
                 {
+                    repository.DisableChangesTracking();
                     //try to load setting from db
                     dbStoredSettings.AddRange(await repository.GetObjectSettingsAsync(objectType, objectId));
                 }
 
                 foreach (var name in names)
                 {
-                    _registeredSettingsLookup.TryGetValue(name, out var settingDescriptor);
+                    var settingDescriptor = _registeredSettingsByNameDict[name];
                     if (settingDescriptor == null)
                     {
-                        throw new PlatformException($"Setting with name {name} not registered");
+                        throw new PlatformException($"Setting with name {name} is not registered");
                     }
                     var objectSetting = new ObjectSettingEntry(settingDescriptor);
 
@@ -158,7 +163,7 @@ namespace VirtoCommerce.Platform.Data.Settings
                     .Where(x => settingNames.Contains(x.Name))
                     .ToListAsync());
 
-                foreach (var setting in objectSettings)
+                foreach (var setting in objectSettings.Where(x => x.ItHasValues))
                 {
                     var modifiedEntity = AbstractTypeFactory<SettingEntity>.TryCreateInstance().FromModel(setting);
                     //we need to convert resulting DB entities to model to use valueObject equals

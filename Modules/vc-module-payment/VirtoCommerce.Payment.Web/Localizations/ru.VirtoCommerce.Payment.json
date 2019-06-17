@@ -1,0 +1,57 @@
+{
+    "payment": {
+        "blades": {
+            "payment-method-detail": {
+                "subtitle": "Изменить способ оплаты",
+                "labels": {
+                    "is-active": "Активен",
+                    "is-partial-payments-available": "Доступны частичные платежи",
+                    "name": "Название",
+                    "code": "Код",
+                    "description": "Описание",
+                    "settings": "Настройки"
+                },
+                "placeholders": {
+                    "description": "Введите описание"
+                }
+            },
+            "payment-method-list": {
+                "subtitle": "Изменить способ оплаты",
+                "labels": {
+                    "is-active": "Активен",
+                    "payment-method": "Способ оплаты",
+                    "note": "Укажите порядок отображения способов оплаты в интернет-магазине. Перетащите элементы, чтобы изменить порядок"
+                },
+                "placeholders": {
+                    "description": "Введите описание"
+                }
+            }
+        },
+        "dialogs": {
+            "payment-method-save": {
+                "title": "Сохранить изменения",
+                "message": "Способ оплаты изменился. Хотите сохранить изменения?"
+            }
+        },
+        "widgets": {
+            "store-payment-widget": {
+                "title": "Способы оплаты",
+                "blade-subtitle": "Способы оплаты"
+            }
+        },
+        "labels": {
+            "DefaultManualPaymentMethod": {
+                "name": "Ручной тестовый метод",
+                "description": "Ручной тестовы метод, не использовать в poduction"
+            }
+        }
+    },
+    "settings": {
+        "VirtoCommerce.Payment.DefaultManualPaymentMethod": {
+            "Logo": {
+                "title": "Путь к лого",
+                "description": "Url путь к картинке лого метода оплаты"
+            } 
+        }
+    }
+}

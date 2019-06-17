@@ -108,7 +108,7 @@ namespace VirtoCommerce.OrdersModule.Data.Repositories
                         .HasForeignKey(x => x.CustomerOrderId).OnDelete(DeleteBehavior.Cascade);
 
             modelBuilder.Entity<PaymentInEntity>().HasOne(x => x.Shipment).WithMany(x => x.InPayments)
-                        .HasForeignKey(x => x.ShipmentId).OnDelete(DeleteBehavior.Cascade);
+                        .HasForeignKey(x => x.ShipmentId).OnDelete(DeleteBehavior.Restrict);
 
             modelBuilder.Entity<PaymentInEntity>().ToTable("OrderPaymentIn");
             #endregion

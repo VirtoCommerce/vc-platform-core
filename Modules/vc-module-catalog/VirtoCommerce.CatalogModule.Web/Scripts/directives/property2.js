@@ -1,4 +1,4 @@
-﻿angular.module('virtoCommerce.catalogModule')
+angular.module('virtoCommerce.catalogModule')
 .directive('vaProperty2', ['$compile', '$filter', '$parse', '$templateCache', '$http', function ($compile, $filter, $parse, $templateCache, $http) {
 
     return {
@@ -9,8 +9,10 @@
         templateUrl: 'Modules/$(VirtoCommerce.Catalog)/Scripts/directives/property2.tpl.html',
         scope: {
             languages: "=",
+            hiddenLanguages: "=",
             defaultLanguage: "=",
-            getPropValues: "&"
+            getPropValues: "&",
+            pageSize: "@?"
         },
         link: function (scope, element, attr, ctrls, linker) {
             var ngModelController = ctrls[1];
@@ -23,8 +25,10 @@
             scope.context.langValuesMap = {};
             scope.context.form = ctrls[0];
 
+            scope.pageSize = angular.isDefined(scope.pageSize) ? scope.pageSize : 50;
+
             scope.$watch('context.langValuesMap', function (newValue, oldValue) {
-                if (newValue != oldValue) {
+                if (newValue != oldValue && !scope.currentEntity.dictionary) {
                     scope.context.currentPropValues = [];
                     angular.forEach(scope.context.langValuesMap, function (langGroup, languageCode) {
                         angular.forEach(langGroup.currentPropValues, function (propValue) {
@@ -37,37 +41,54 @@
 
             scope.$watch('context.currentPropValues', function (newValues) {
                 //reflect only real changes
-                if (isValuesDifferent(newValues, scope.currentEntity.values)) {                    
-                    if (scope.currentEntity.dictionary && scope.currentEntity.multilanguage) {
-                        if (scope.currentEntity.multivalue) {
-                            var realAliases = _.pluck(_.where(newValues, { languageCode: scope.defaultLanguage }), 'alias');
-                            scope.currentEntity.values = _.filter(scope.context.allDictionaryValues, function (x) {
-                                return _.contains(realAliases, x.alias);
-                            });
-                        } else {
-                            scope.currentEntity.values = _.where(scope.context.allDictionaryValues, { alias: newValues[0].alias });
-                        }
+                var currentValues = angular.copy(scope.currentEntity.values);
+
+                if (scope.currentEntity.dictionary) {
+                    currentValues = _.uniq(_.map(currentValues, function (x) {
+                        return {
+                            id: x.id,
+                            alias: x.alias,
+                            valueId: x.valueId,
+                            value: x.alias
+                        };
+                    }), function (x) { return x.valueId; });
+                }
+
+                if (isValuesDifferent(newValues, currentValues)) {
+                    if (newValues[0] === undefined) {
+                        scope.currentEntity.values = null;
                     } else {
                         scope.currentEntity.values = newValues;
                     }
-                    	//reset inherited status to force property value override
-                        _.each(scope.currentEntity.values, function (x) { x.isInherited = false; });
+                    //reset inherited status to force property value override
+                    _.each(scope.currentEntity.values, function (x) { x.isInherited = false; });
 
                     ngModelController.$setViewValue(scope.currentEntity);
                 }
+                if (newValues[0] === undefined) {
+                    scope.currentEntity.values = [];
+                } 
             }, true);
 
 
             ngModelController.$render = function () {
                 scope.currentEntity = ngModelController.$modelValue;
-
+                
                 scope.context.currentPropValues = angular.copy(scope.currentEntity.values);
+                //For dictionary multilingual properties need to left only distinct dictionary items
+                if (scope.currentEntity.dictionary) {
+                    scope.context.currentPropValues = _.uniq(_.map(scope.context.currentPropValues, function (x) {
+                        return {
+                            id: x.id,
+                            alias: x.alias,
+                            valueId: x.valueId,
+                            value: x.alias,
+                            selected: true
+                        };
+                    }), function (x) { return x.valueId; });
+                }
                 if (needAddEmptyValue(scope.currentEntity, scope.context.currentPropValues)) {
                     scope.context.currentPropValues.push({ value: null });
-                }
-
-                if (scope.currentEntity.dictionary) {
-                    loadDictionaryValues();
                 }
 
                 initLanguagesValuesMap();
@@ -77,9 +98,9 @@
 
             function isValuesDifferent(newValues, currentValues) {
                 var elementCountIsDifferent = newValues.length != currentValues.length;
-                var elementsNotEqual = _.any(newValues, function (x) {
-                    return _.all(currentValues, function (y) {
-                        return !(y.value === x.value && y.languageCode == x.languageCode);
+                var elementsNotEqual = _.any(newValues, function (newValue) {
+                    return _.all(currentValues, function (currentValue) {
+                        return !(newValue && currentValue.value === newValue.value && currentValue.languageCode == newValue.languageCode);
                     });
                 });
 
@@ -91,8 +112,9 @@
                 return !property.multivalue && !property.dictionary && values.length == 0;
             };
 
+
             function initLanguagesValuesMap() {
-                if (scope.currentEntity.multilanguage) {
+                if (scope.currentEntity.multilanguage && !scope.currentEntity.dictionary) {
                     //Group values by language 
                     angular.forEach(scope.languages, function (language) {
                         //Currently select values
@@ -121,27 +143,54 @@
                 }
             };
 
-            function loadDictionaryValues() {
-                scope.getPropValues()(scope.currentEntity.id).then(function (result) {
-                    scope.context.allDictionaryValues = [];
-                    scope.context.currentPropValues = [];
+            scope.isLanguageVisible = function (language) {
+                if(scope.hiddenLanguages){
+                    if (_.contains(scope.hiddenLanguages, language)) {
+                        return false;
+                    }
+                }
+                
+                return true;
+            }
 
-                    angular.forEach(result, function (dictValue) {
-                        //Need to select already selected values. Dictionary values have same type as standard values.
-                        dictValue.selected = angular.isDefined(_.find(scope.currentEntity.values, function (value) { return value.valueId == dictValue.valueId }));
-                        scope.context.allDictionaryValues.push(dictValue);
-                        if (dictValue.selected) {
-                            //add selected value
-                            scope.context.currentPropValues.push(dictValue);
-                        }
-                    });
+            scope.loadDictionaryValues = function ($select) {
+                $select.page = 0;
+                scope.context.allDictionaryValues = [];
+                return scope.loadNextDictionaryValues($select);
+            };
 
-                    initLanguagesValuesMap();
+            scope.loadNextDictionaryValues = function($select) {
+                var countToSkip = $select.page * scope.pageSize;
+                var countToTake = scope.pageSize;
+
+                return scope.getPropValues()(scope.currentEntity.id, $select.search, countToSkip, countToTake).then(function (result) {
+                    populateDictionaryValues(result.results, scope.currentEntity.name);
+                    $select.page++;
+                    // If there are more items to display, let's prepare to handle these items.
+                    if (scope.context.allDictionaryValues.length < result.totalCount) {
+                        // Reset scrolling for the when-scrolled directive, so it could trigger this method for next page.
+                        scope.$broadcast('scrollCompleted');
+                    }
 
                     return result;
                 });
+            }
 
-            };
+            function populateDictionaryValues(dictItems, propertyName) {
+                angular.forEach(dictItems, function (dictItem) {
+                    var dictValue = _.find(scope.context.currentPropValues, function (x) {
+                        return x.valueId == dictItem.id;
+                    });
+                    if (!dictValue) {
+                        dictValue = {
+                            alias: dictItem.alias,
+                            valueId: dictItem.id,
+                            value: dictItem.alias
+                        };
+                    }
+                    scope.context.allDictionaryValues.push(dictValue);
+                });
+            }
 
             function getTemplateName(property) {
                 var result = property.valueType;

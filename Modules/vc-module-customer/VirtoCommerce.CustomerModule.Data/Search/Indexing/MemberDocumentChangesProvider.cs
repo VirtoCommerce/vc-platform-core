@@ -2,7 +2,7 @@ using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Threading.Tasks;
-using VirtoCommerce.CustomerModule.Data.Model;
+using VirtoCommerce.CustomerModule.Core.Model;
 using VirtoCommerce.CustomerModule.Data.Repositories;
 using VirtoCommerce.Platform.Core.ChangeLog;
 using VirtoCommerce.Platform.Core.Common;
@@ -13,18 +13,18 @@ namespace VirtoCommerce.CustomerModule.Data.Search.Indexing
 {
     public class MemberDocumentChangesProvider : IIndexDocumentChangesProvider
     {
-        public const string ChangeLogObjectType = nameof(MemberEntity);
+        public const string ChangeLogObjectType = nameof(Member);
 
         private readonly Func<IMemberRepository> _memberRepositoryFactory;
-        private readonly IChangeLogService _changeLogService;
+        private readonly IChangeLogSearchService _changeLogSearchService;
 
-        public MemberDocumentChangesProvider(Func<IMemberRepository> memberRepositoryFactory, IChangeLogService changeLogService)
+        public MemberDocumentChangesProvider(Func<IMemberRepository> memberRepositoryFactory, IChangeLogSearchService changeLogSearchService)
         {
             _memberRepositoryFactory = memberRepositoryFactory;
-            _changeLogService = changeLogService;
+            _changeLogSearchService = changeLogSearchService;
         }
 
-        public virtual Task<long> GetTotalChangesCountAsync(DateTime? startDate, DateTime? endDate)
+        public virtual async Task<long> GetTotalChangesCountAsync(DateTime? startDate, DateTime? endDate)
         {
             long result;
 
@@ -38,14 +38,21 @@ namespace VirtoCommerce.CustomerModule.Data.Search.Indexing
             }
             else
             {
+                var criteria = new ChangeLogSearchCriteria
+                {
+                    ObjectType = ChangeLogObjectType,
+                    StartDate = startDate,
+                    EndDate = endDate,
+                    Take = 0
+                };
                 // Get changes count from operation log
-                result = _changeLogService.FindChangeHistory(ChangeLogObjectType, startDate, endDate).Count();
+                result = (await _changeLogSearchService.SearchAsync(criteria)).TotalCount;
             }
 
-            return Task.FromResult(result);
+            return result;
         }
 
-        public virtual Task<IList<IndexDocumentChange>> GetChangesAsync(DateTime? startDate, DateTime? endDate, long skip, long take)
+        public virtual async Task<IList<IndexDocumentChange>> GetChangesAsync(DateTime? startDate, DateTime? endDate, long skip, long take)
         {
             IList<IndexDocumentChange> result;
 
@@ -73,11 +80,17 @@ namespace VirtoCommerce.CustomerModule.Data.Search.Indexing
             }
             else
             {
+                var criteria = new ChangeLogSearchCriteria
+                {
+                    ObjectType = ChangeLogObjectType,
+                    StartDate = startDate,
+                    EndDate = endDate,
+                    Skip = (int)skip,
+                    Take = (int)take
+                };
+
                 // Get changes from operation log
-                var operations = _changeLogService.FindChangeHistory(ChangeLogObjectType, startDate, endDate)
-                    .Skip((int)skip)
-                    .Take((int)take)
-                    .ToArray();
+                var operations = (await _changeLogSearchService.SearchAsync(criteria)).Results;
 
                 result = operations.Select(o =>
                     new IndexDocumentChange
@@ -89,7 +102,7 @@ namespace VirtoCommerce.CustomerModule.Data.Search.Indexing
                 ).ToArray();
             }
 
-            return Task.FromResult(result);
+            return result;
         }
     }
 }

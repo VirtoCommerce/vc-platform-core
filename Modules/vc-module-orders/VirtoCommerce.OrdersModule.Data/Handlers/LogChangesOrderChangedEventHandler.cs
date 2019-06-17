@@ -38,7 +38,7 @@ namespace VirtoCommerce.OrdersModule.Data.Handlers
             _memberService = memberService;
         }
 
-        public virtual Task Handle(OrderChangedEvent message)
+        public virtual async Task Handle(OrderChangedEvent message)
         {
             var operationLogs = new List<OperationLog>();
             foreach (var changedEntry in message.ChangedEntries.Where(x => x.EntryState == EntryState.Modified))
@@ -51,9 +51,8 @@ namespace VirtoCommerce.OrdersModule.Data.Handlers
             }
             if (!operationLogs.IsNullOrEmpty())
             {
-                _changeLogService.SaveChanges(operationLogs.ToArray());
+                await _changeLogService.SaveChangesAsync(operationLogs.ToArray());
             }
-            return Task.CompletedTask;
         }
 
         protected virtual async Task<IEnumerable<OperationLog>> GetChangedEntryOperationLogsAsync(GenericChangedEntry<IOperation> changedEntry)

@@ -10,7 +10,6 @@ using VirtoCommerce.NotificationsModule.Data.Model;
 using VirtoCommerce.NotificationsModule.Data.Repositories;
 using VirtoCommerce.NotificationsModule.Data.Validation;
 using VirtoCommerce.Platform.Core.Common;
-using VirtoCommerce.Platform.Core.Domain;
 using VirtoCommerce.Platform.Core.Events;
 
 namespace VirtoCommerce.NotificationsModule.Data.Services
@@ -27,25 +26,6 @@ namespace VirtoCommerce.NotificationsModule.Data.Services
             _eventPublisher = eventPublisher;
         }
 
-        public async Task<Notification> GetByTypeAsync(string type, string tenantId = null, string tenantType = null, string responseGroup = null)
-        {
-            var notificationType = AbstractTypeFactory<Notification>.AllTypeInfos.FirstOrDefault(t => t.Type.Name.Equals(type))?.Type;
-            if (notificationType == null)
-            {
-                return null;
-            }
-
-            var result = AbstractTypeFactory<Notification>.TryCreateInstance(notificationType.Name);
-            using (var repository = _repositoryFactory())
-            {
-                var notification = await repository.GetByTypeAsync(notificationType.Name, tenantId, tenantType, responseGroup);
-                if (notification != null)
-                {
-                    return notification.ToModel(result);
-                }
-            }
-            return result;
-        }
 
         public async Task<Notification[]> GetByIdsAsync(string[] ids, string responseGroup = null)
         {
@@ -93,7 +73,6 @@ namespace VirtoCommerce.NotificationsModule.Data.Services
                 }
             }
         }
-
 
         public void RegisterNotification<T>() where T : Notification
         {

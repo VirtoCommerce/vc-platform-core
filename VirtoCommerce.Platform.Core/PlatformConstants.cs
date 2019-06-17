@@ -19,15 +19,16 @@ namespace VirtoCommerce.Platform.Core
                 public const string LimitedPermissionsClaimType = "limited_permissions";
             }
 
-            public static class Roles
+            public static class SystemRoles
             {
-                public const string Customer = "Customer";
-                public const string Manager = "Manager";
-                public const string Administrator = "Administrator";
+                public const string Customer = "__customer";
+                public const string Manager = "__manager";
+                public const string Administrator = "__administrator";
             }
 
             public static class Permissions
             {
+                public const string ResetCache = "cache:reset";
                 public const string AssetAccess = "platform:asset:access",
                   AssetDelete = "platform:asset:delete",
                   AssetUpdate = "platform:asset:update",
@@ -56,7 +57,7 @@ namespace VirtoCommerce.Platform.Core
                     PlatformImport = "platform:import",
                     PlatformExport = "platform:export";
 
-                public static string[] AllPermissions = new[] { AssetAccess, AssetDelete, AssetUpdate, AssetCreate, AssetRead, ModuleQuery, ModuleAccess, ModuleManage,
+                public static string[] AllPermissions = new[] { ResetCache, AssetAccess, AssetDelete, AssetUpdate, AssetCreate, AssetRead, ModuleQuery, ModuleAccess, ModuleManage,
                                               SettingQuery, SettingAccess, SettingUpdate, DynamicPropertiesQuery, DynamicPropertiesCreate, DynamicPropertiesAccess, DynamicPropertiesUpdate, DynamicPropertiesDelete,
                                               SecurityQuery, SecurityCreate, SecurityAccess,  SecurityUpdate,  SecurityDelete, SecurityCallApi, BackgroundJobsManage, PlatformExportImportAccess, PlatformImport, PlatformExport};
             }

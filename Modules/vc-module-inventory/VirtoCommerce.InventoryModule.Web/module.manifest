@@ -18,13 +18,10 @@
     <projectUrl>https://virtocommerce.com/apps/extensions/virto-inventory-module</projectUrl>
     <iconUrl>Modules/$(VirtoCommerce.InventoryModule)/Content/logoVC.png</iconUrl>
     <releaseNotes>First version.</releaseNotes>
-    <copyright>Copyright © 2011-2018 Virto Commerce. All rights reserved</copyright>
+    <copyright>Copyright © 2011-2019 Virto Commerce. All rights reserved</copyright>
     <tags>order system</tags>
 
     <assemblyFile>VirtoCommerce.InventoryModule.Web.dll</assemblyFile>
     <moduleType>VirtoCommerce.InventoryModule.Web.Module, VirtoCommerce.InventoryModule.Web</moduleType>
 
-    <scripts>
-        <directory virtualPath="$/Scripts" searchPattern="*.js" searchSubdirectories="true" />
-    </scripts>
 </module>

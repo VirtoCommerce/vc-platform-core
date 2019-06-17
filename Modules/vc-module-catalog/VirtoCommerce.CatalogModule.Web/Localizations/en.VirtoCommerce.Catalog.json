@@ -95,7 +95,7 @@
                     "tax-type": "Tax type"
                 },
                 "validations": {
-                    "code": "Code can't contain $+;=%{}[]|/@ ~!^*&()?:'<>, characters"
+                    "code": "Code can't contain $+;=%{}[]/@ ~!^*&()?'<>, characters"
                 },
                 "placeholders": {
                     "name": "Enter category name",
@@ -129,7 +129,6 @@
                 "virtual-catalog-item-name": "Virtual catalog",
                 "virtual-catalog-item-description": "A subset of products and categories found in master catalogs."
             },
-
             "catalog-property-list": {
                 "subtitle": "Catalog properties",
                 "labels": {
@@ -163,8 +162,10 @@
                     "applies-to": "Applies to",
                     "value-type": "Value Type",
                     "manage-dictionary": "Manage dictionary",
+                    "new-dictionary-property-caution": "You can manage dictionary items only after saving property",
                     "attributes": "Attributes",
-                    "manage-attributes": "Manage property attributes"
+                    "manage-attributes": "Manage property attributes",
+                    "hidden": "Hidden"
                 },
                 "placeholders": {
                     "display-name": "Enter display name..."
@@ -217,7 +218,6 @@
                 "title": "Select Catalog",
                 "subtitle": "Creating a Link inside virtual catalog"
             },
-
             "property-valueType": {
                 "title": "{{name}} value type",
                 "subtitle": "Change value type"
@@ -253,8 +253,12 @@
                     "current-values": "Current values",
                     "value": "Value",
                     "alias": "Alias",
+                    "sort-order": "Sort order",
                     "language-edit": "Edit values",
-                    "language-add": "New values"
+                    "language-add": "New values",
+                    "dictionary-edit": "Dictionary value edit",
+                    "priority": "Priority",
+                    "priority-description": "The lowest value will be used first."
                 },
                 "validations": {
                     "required": "Required",
@@ -262,10 +266,10 @@
                 },
                 "placeholders": {
                     "value": "Enter value",
-                    "alias": "Enter an alias"
+                    "alias": "Enter an alias",
+                    "priority": "Enter priority"
                 }
             },
-
             "item-detail": {
                 "subtitle-variation": "Variation details",
                 "labels": {
@@ -286,11 +290,11 @@
                     "expiration-date": "Download expiration date",
                     "download-type": "Download type",
                     "gtin": "GTIN",
-                    "start-date": "Sale start date",
-                    "end-date": "Sale expiration date"
+                    "start-date": "First listed",
+                    "end-date": "Listing expires on"
                 },
                 "validations": {
-                    "sku": "SKU can't contain $+;=%{}[]|/@ ~!^*&()?:'<>, characters"
+                    "sku": "SKU can't contain $+;=%{}[]|@ ~!^*&()?'<>, characters"
                 },
                 "placeholders": {
                     "sku": "Enter item SKU",
@@ -328,10 +332,10 @@
                     "no-items": "No Variations yet",
                     "picture": "Pic",
                     "name": "Name",
-                    "sku": "SKU"
+                    "sku": "SKU",
+                    "manufacturer-part-number": "Manufacturer part number"
                 }
             },
-
             "editorialReviews-list": {
                 "subtitle": "Item descriptions",
                 "labels": {
@@ -534,6 +538,10 @@
                 "shallow": "Metadata",
                 "full": "Completely"
             },
+            "property-dictionary-item-delete": {
+                "message": "Are you sure you want to delete selected dictionary items?",
+                "warning": "WARNING: this change is permanent and can't be undone afterwards. It can lead to data loss."
+            },
             "virtual-catalog-save": {
                 "title": "Save changes",
                 "message": "The virtual catalog has been modified. Do you want to save changes?"
@@ -599,7 +607,7 @@
                     "code": "Code"
                 },
                 "validations": {
-                    "code": "Code can't contain $+;=%{}[]|/@ ~!^*&()?:'<>, characters"
+                    "code": "Code can't contain $+;=%{}[]|@ ~!^*&()?'<>, characters"
                 },
                 "placeholders": {
                     "name": "Enter category name",
@@ -623,7 +631,7 @@
                     "seo-information-summary-undefined": "Seo information undefined"
                 },
                 "validations": {
-                    "sku": "SKU can't contain $+;=%{}[]|/@ ~!^*&()?:'<>, characters",
+                    "sku": "SKU can't contain $+;=%{}[]|@ ~!^*&()?'<>, characters",
                     "sku-required": "Required",
                     "name-required": "Required"
                 },
@@ -644,7 +652,7 @@
                     "upload-images-summary": "{{ count }} image(s) uploaded"
                 },
                 "validations": {
-                    "sku": "SKU can't contain $+;=%{}[]|/@ ~!^*&()?:'<>, characters",
+                    "sku": "SKU can't contain $+;=%{}[]|@ ~!^*&()?'<>, characters",
                     "sku-required": "Required",
                     "name-required": "Required"
                 },
@@ -692,7 +700,6 @@
             }
         }
     },
-
     "permissions": {
         "catalog:access": "Open catalogs menu",
         "catalog:create": "Create catalog related data",
@@ -703,29 +710,58 @@
         "catalog:import": "Import catalog data"
     },
     "settings": {
-        "Catalog.AssociationGroups": {
-            "description": "Catalog product association groups",
-            "title": "Association Group names"
+        "Catalog": {
+            "ImageCategories": {
+                "description": "Dictionary of possible categories that item's Images can have",
+                "title": "Image categories"
+            },
+            "AssociationGroups": {
+                "description": "Catalog product association groups",
+                "title": "Association Group names"
+            },
+            "EditorialReviewTypes": {
+                "description": "The dictionary of possible types that item's Descriptions can have",
+                "title": "Item description types"
+            },
+            "CodesInOutline": {
+                "description": "Enable or disable using codes instead of ids in outlines",
+                "title": "Use catalog and product codes in outlines"
+            },
+            "ExposeAliasInDictionary": {
+                "description": "Enable or disable exposing the Alias for dictionary values",
+                "title": "Expose Alias In Dictionary"
+            },
+            "Search": {
+                "UseCatalogIndexedSearchInManager": {
+                    "description": "Enable or disable indexed search for catalog module with advanced syntax",
+                    "title": "Use indexed search for catalog"
+                },
+                "UseFullObjectIndexStoring": {
+                    "description": "Store serialized catalog objects in the index and return them in search results",
+                    "title": "Store serialized catalog objects in the index"
+                }
+            }
         },
-        "Catalog.EditorialReviewTypes": {
-            "description": "The dictionary of possible types that item's Descriptions can have",
-            "title": "Item description types"
-        },
-        "Catalog.CodesInOutline": {
-            "description": "Enable or disable using codes instead of ids in outlines",
-            "title": "Use catalog and product codes in outlines"
-        },
-        "Catalog.ExposeAliasInDictionary": {
-            "description": "Enable or disable exposing the Alias for dictionary values",
-            "title": "Expose Alias In Dictionary"
-        },
-        "Catalog.Search.UseCatalogIndexedSearchInManager": {
-            "description": "Enable or disable indexed search for catalog module with advanced syntax",
-            "title": "Use indexed search for catalog"
-        },
-        "Catalog.Search.UseFullObjectIndexStoring": {
-            "description": "Store serialized catalog objects in the index and return them in search results",
-            "title": "Store serialized catalog objects in the index"
+        "VirtoCommerce": {
+            "Search": {
+                "IndexingJobs": {
+                    "IndexationDate": {
+                        "Product": {
+                            "title": "Product indexation date and time",
+                            "description": "Date and time of the product indexation task to start"
+                        },
+                        "Category": {
+                            "title": "Category indexation date and time",
+                            "description": "Date and time of the category indexation task to start"
+                        }
+                    }
+                }
+            }
+        }
+    },
+    "module": {
+        "VirtoCommerce.Catalog": {
+            "description": "Export/Import catalogs, categories, products, properties with images binary if you check binary flag"
         }
     }
 }
