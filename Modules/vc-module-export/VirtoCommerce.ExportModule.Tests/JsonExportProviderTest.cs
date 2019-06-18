@@ -231,8 +231,35 @@ namespace VirtoCommerce.ExportModule.Tests
             Assert.Null(filteredPricelist.Prices);
         }
 
+        [Fact]
+        public async Task ExportPriceTest()
+        {
+            //Arrange
+            var pricelist = new Pricelist() { Id = "1", Name = "Name" };
+            var price = new Price() { Id = "P1", PricelistId = "1", Pricelist = pricelist };
 
-        private Pricelist SerializeAndDeserialize(ExportedTypeMetadata metadata, Pricelist pricelist)
+            var metadata = new ExportedTypeMetadata()
+            {
+                PropertiesInfo = new[]
+                {
+                    new ExportTypePropertyInfo() { Name = "Id"} ,
+                    new ExportTypePropertyInfo() { Name = "Pricelist.Id"} ,
+                }
+            };
+
+            //Act
+            var filteredPrice = SerializeAndDeserialize(metadata, price);
+
+            //Assets
+
+            Assert.Equal("P1", filteredPrice.Id);
+            Assert.NotNull(filteredPrice.Pricelist);
+            Assert.Equal("1", price.Pricelist.Id);
+            Assert.True(string.IsNullOrEmpty(price.Pricelist.Name));
+        }
+
+
+        private T SerializeAndDeserialize<T>(ExportedTypeMetadata metadata, T obj)
         {
             var jsonConfiguration = new JsonProviderConfiguration() { Settings = new JsonSerializerSettings() { NullValueHandling = NullValueHandling.Ignore } };
 
@@ -240,11 +267,11 @@ namespace VirtoCommerce.ExportModule.Tests
             {
                 var jsonExportProvider = new JsonExportProvider(stream, jsonConfiguration);
                 jsonExportProvider.Metadata = metadata;
-                jsonExportProvider.WriteRecord(pricelist);
+                jsonExportProvider.WriteRecord(obj);
 
                 stream.Seek(0, SeekOrigin.Begin);
                 var reader = new StreamReader(stream);
-                return JsonConvert.DeserializeObject<Pricelist>(reader.ReadToEnd());
+                return JsonConvert.DeserializeObject<T>(reader.ReadToEnd());
             }
         }
     }

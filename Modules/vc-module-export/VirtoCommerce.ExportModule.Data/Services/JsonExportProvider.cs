@@ -69,7 +69,7 @@ namespace VirtoCommerce.ExportModule.Data.Services
 
                 if (nestedType.IsSubclassOf(typeof(Entity)))
                 {
-                    if (!Metadata.PropertiesInfo.Any(x => x.Name.Contains($"{propertyName}.", StringComparison.InvariantCultureIgnoreCase)))
+                    if (!Metadata.PropertiesInfo.Any(x => x.Name.StartsWith($"{propertyName}.", StringComparison.InvariantCultureIgnoreCase)))
                     {
                         property.SetValue(obj, null);
                     }
@@ -83,6 +83,15 @@ namespace VirtoCommerce.ExportModule.Data.Services
                                 FilterProperties(value, propertyName);
                             }
                         }
+                        else
+                        {
+                            var objectValue = property.GetValue(obj, null);
+                            if (objectValue != null)
+                            {
+                                FilterProperties(objectValue, propertyName);
+                            }
+                        }
+
                     }
                 }
                 else if (!Metadata.PropertiesInfo.Any(x => x.Name.Equals(propertyName, StringComparison.InvariantCultureIgnoreCase)))
