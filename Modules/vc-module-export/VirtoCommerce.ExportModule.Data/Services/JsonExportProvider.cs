@@ -4,7 +4,7 @@ using VirtoCommerce.ExportModule.Core.Services;
 
 namespace VirtoCommerce.ExportModule.Data.Services
 {
-    public class JsonExportProvider : IExportProvider
+    public sealed class JsonExportProvider : IExportProvider
     {
         private readonly Stream _stream;
 
@@ -26,6 +26,10 @@ namespace VirtoCommerce.ExportModule.Data.Services
         public void WriteRecord(object objectToRecord)
         {
             throw new System.NotImplementedException();
+        }
+
+        public void Dispose()
+        {
         }
     }
 }

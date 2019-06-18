@@ -1,5 +1,6 @@
 using System;
 using System.IO;
+using System.Text;
 using System.Threading.Tasks;
 using Moq;
 using Newtonsoft.Json;
@@ -39,9 +40,19 @@ namespace VirtoCommerce.PricingModule.Test
             {
                 dataExporter.Export(
                     ms,
-                    new ExportDataRequest() { DataQuery = new PriceExportDataQuery(), ExportTypeName = typeof(Price).FullName, ProviderName = nameof(CsvExportProvider) },
+                    new ExportDataRequest()
+                    {
+                        DataQuery = new PriceExportDataQuery()
+                        {
+                            IncludedProperties = new string[] { "Currency", "ProductId", "Sale", "List", "MinQuantity", "StartDate", "EndDate", "EffectiveValue" }
+                        },
+                        ExportTypeName = typeof(Price).FullName,
+                        ProviderName = nameof(CsvExportProvider)
+                    },
                     new System.Action<ExportProgressInfo>(x => Console.WriteLine(x.Description)),
                     new System.Threading.CancellationToken());
+
+                var resultcsv = Encoding.UTF8.GetString(ms.ToArray());
             }
         }
 
