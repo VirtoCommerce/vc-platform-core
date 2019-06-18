@@ -255,7 +255,7 @@ namespace VirtoCommerce.ExportModule.Tests
             Assert.Equal("P1", filteredPrice.Id);
             Assert.NotNull(filteredPrice.Pricelist);
             Assert.Equal("1", price.Pricelist.Id);
-            Assert.True(string.IsNullOrEmpty(price.Pricelist.Name));
+            Assert.Null(price.Pricelist.Name);
         }
 
 

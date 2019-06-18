@@ -19,7 +19,7 @@ namespace VirtoCommerce.ExportModule.Data.Services
         public ExportedTypeMetadata Metadata { get; set; }
 
         private readonly JsonSerializer _serializer;
-        private StreamWriter _writer;
+        private StreamWriter _streamWriter;
 
 
         public JsonExportProvider(Stream stream, IExportProviderConfiguration exportProviderConfiguration)
@@ -45,16 +45,16 @@ namespace VirtoCommerce.ExportModule.Data.Services
         {
             EnsureWriterCreated();
             FilterProperties(objectToRecord);
-            _serializer.Serialize(_writer, objectToRecord);
-            _writer.Flush();
+            _serializer.Serialize(_streamWriter, objectToRecord);
+            _streamWriter.Flush();
         }
 
 
         private void EnsureWriterCreated()
         {
-            if (_writer == null)
+            if (_streamWriter == null)
             {
-                _writer = new StreamWriter(_stream);
+                _streamWriter = new StreamWriter(_stream);
             }
         }
 
@@ -78,9 +78,12 @@ namespace VirtoCommerce.ExportModule.Data.Services
                         if (typeof(IEnumerable).IsAssignableFrom(property.PropertyType))
                         {
                             var objectValues = property.GetValue(obj, null) as IEnumerable;
-                            foreach (var value in objectValues)
+                            if (objectValues != null)
                             {
-                                FilterProperties(value, propertyName);
+                                foreach (var value in objectValues)
+                                {
+                                    FilterProperties(value, propertyName);
+                                }
                             }
                         }
                         else
@@ -103,11 +106,7 @@ namespace VirtoCommerce.ExportModule.Data.Services
 
         public void Dispose()
         {
-
-        }
-
-        public void Dispose()
-        {
+            _streamWriter.Dispose();
         }
     }
 }

@@ -120,10 +120,5 @@ namespace VirtoCommerce.ExportModule.Data.Services
         {
             _streamWriter.Dispose();
         }
-
-        public void Dispose()
-        {
-            throw new System.NotImplementedException();
-        }
     }
 }
