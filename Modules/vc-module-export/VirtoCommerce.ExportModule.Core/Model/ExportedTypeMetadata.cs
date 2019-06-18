@@ -8,57 +8,92 @@ namespace VirtoCommerce.ExportModule.Core.Model
 {
     public class ExportedTypeMetadata : ValueObject
     {
+        /// <summary>
+        /// Extended type info. Stores if specific property is entity (true) or not (false)
+        /// </summary>
+        private class ExportTypePropertyInfoEx
+        {
+            public ExportTypePropertyInfo PropertyInfo { get; set; }
+            public bool IsEntity { get; set; }
+        }
+
         public string Version { get; set; }
         public ExportTypePropertyInfo[] PropertiesInfo { get; set; }
 
+        /// <summary>
+        /// Returns basic info about potentially exported fields of entity
+        /// </summary>
+        /// <typeparam name="T"></typeparam>
+        /// <returns></returns>
         public static ExportedTypeMetadata GetFromType<T>()
         {
             var result = new ExportedTypeMetadata();
-            var t = typeof(T);
+            var type = typeof(T);
             var passedNodes = new List<MemberInfo>();
-            result.PropertiesInfo = result.GetFromType(t, string.Empty, passedNodes);
+            result.PropertiesInfo = result.GetFromType(type, string.Empty, passedNodes).Where(x => !x.IsEntity).Select(x => x.PropertyInfo).ToArray();
             return result;
         }
 
-        private ExportTypePropertyInfo[] GetFromType(Type t, string baseMemberName, List<MemberInfo> passedNodes)
-        {
-            var result = new List<ExportTypePropertyInfo>();
-            foreach (var pi in t.GetProperties().Where(x => x.CanRead))
-            {
-                if (!passedNodes.Contains(pi))
-                {
-                    var derivedMemberName = $"{baseMemberName}{(baseMemberName.IsNullOrEmpty() ? string.Empty : ".")}{pi.Name}";
-                    var nestedType = GetNestedType(pi.PropertyType);
-                    if (nestedType.IsSubclassOf(typeof(Entity)))
-                    {
-                        passedNodes.Add(pi);
-                        result.AddRange(GetFromType(nestedType, derivedMemberName, passedNodes));
-                    }
-                    else
-                    {
-                        result.Add(new ExportTypePropertyInfo()
-                        {
-                            MemberInfo = pi,
-                            Name = derivedMemberName
-                        });
-                    }
-                }
-            }
-            return result.ToArray();
-        }
 
-        private Type GetNestedType(Type t)
+        public static string GetDerivedName(string baseName, PropertyInfo pi) => $"{baseName}{(baseName.IsNullOrEmpty() ? string.Empty : ".")}{pi.Name}";
+
+        /// <summary>
+        /// Check if a type is IEnumerable<T> where T derived from <see cref="Entity"/>. If it is, returns T, otherwise source type.
+        /// </summary>
+        /// <param name="type"></param>
+        /// <returns></returns>
+        public static Type GetNestedType(Type type)
         {
-            var result = t;
-            if (t.GetInterfaces().Any(x => x.IsGenericType && x.GetGenericTypeDefinition() == typeof(IEnumerable<>)))
+            var result = type;
+            if (type.GetInterfaces().Any(x => x.IsGenericType && x.GetGenericTypeDefinition() == typeof(IEnumerable<>)))
             {
-                var definedGenericArgs = t.GetGenericArguments();
+                var definedGenericArgs = type.GetGenericArguments();
                 if (definedGenericArgs.Any() && definedGenericArgs[0].IsSubclassOf(typeof(Entity)))
                 {
                     result = definedGenericArgs[0];
                 }
             }
             return result;
+        }
+
+
+        private ExportTypePropertyInfoEx[] GetFromType(Type type, string baseMemberName, List<MemberInfo> passedNodes)
+        {
+            var result = new List<ExportTypePropertyInfoEx>();
+            var nestedMemberInfos = new List<(MemberInfo MemberInfo, Type NestedType)>();
+
+            foreach (var propertyInfo in type.GetProperties().Where(x => x.CanRead))
+            {
+                if (!passedNodes.Contains(propertyInfo))
+                {
+                    var nestedType = GetNestedType(propertyInfo.PropertyType);
+                    bool isEntity = false;
+                    if (nestedType.IsSubclassOf(typeof(Entity)))
+                    {
+                        isEntity = true;
+                        // Collect nested members for later inspection after all properties in this type
+                        nestedMemberInfos.Add((propertyInfo, nestedType));
+                    }
+                    passedNodes.Add(propertyInfo);
+                    result.Add(new ExportTypePropertyInfoEx()
+                    {
+                        PropertyInfo = new ExportTypePropertyInfo()
+                        {
+                            MemberInfo = propertyInfo,
+                            Name = GetDerivedName(baseMemberName, propertyInfo)
+                        },
+                        IsEntity = isEntity
+                    });
+                }
+            }
+
+            foreach (var nestedMemberInfo in nestedMemberInfos)
+            {
+                //Continue searching for nested members
+                result.AddRange(GetFromType(nestedMemberInfo.NestedType, $"{baseMemberName}{(baseMemberName.IsNullOrEmpty() ? string.Empty : ".")}{nestedMemberInfo.MemberInfo.Name}", passedNodes));
+            }
+
+            return result.ToArray();
         }
     }
 }
