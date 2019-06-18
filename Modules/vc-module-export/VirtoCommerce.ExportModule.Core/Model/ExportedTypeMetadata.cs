@@ -37,7 +37,7 @@ namespace VirtoCommerce.ExportModule.Core.Model
         private ExportTypePropertyInfoEx[] GetFromType(Type type, string baseMemberName, List<MemberInfo> passedNodes)
         {
             var result = new List<ExportTypePropertyInfoEx>();
-            var membersForNodes = new List<(MemberInfo MemberInfo, Type NestedType)>();
+            var nestedMemberInfos = new List<(MemberInfo MemberInfo, Type NestedType)>();
 
             foreach (var propertyInfo in type.GetProperties().Where(x => x.CanRead))
             {
@@ -49,7 +49,7 @@ namespace VirtoCommerce.ExportModule.Core.Model
                     {
                         isEntity = true;
                         // Collect nested members for later inspection after all properties in this type
-                        membersForNodes.Add((propertyInfo, nestedType));
+                        nestedMemberInfos.Add((propertyInfo, nestedType));
                     }
                     passedNodes.Add(propertyInfo);
                     result.Add(new ExportTypePropertyInfoEx()
@@ -64,7 +64,7 @@ namespace VirtoCommerce.ExportModule.Core.Model
                 }
             }
 
-            foreach (var propertyInfo in membersForNodes)
+            foreach (var propertyInfo in nestedMemberInfos)
             {
                 //Continue searching for nested members
                 result.AddRange(GetFromType(propertyInfo.NestedType, $"{baseMemberName}{(baseMemberName.IsNullOrEmpty() ? string.Empty : ".")}{propertyInfo.MemberInfo.Name}", passedNodes));
