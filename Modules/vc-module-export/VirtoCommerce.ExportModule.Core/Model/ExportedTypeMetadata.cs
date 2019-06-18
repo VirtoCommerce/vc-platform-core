@@ -64,10 +64,10 @@ namespace VirtoCommerce.ExportModule.Core.Model
                 }
             }
 
-            foreach (var propertyInfo in nestedMemberInfos)
+            foreach (var nestedMemberInfo in nestedMemberInfos)
             {
                 //Continue searching for nested members
-                result.AddRange(GetFromType(propertyInfo.NestedType, $"{baseMemberName}{(baseMemberName.IsNullOrEmpty() ? string.Empty : ".")}{propertyInfo.MemberInfo.Name}", passedNodes));
+                result.AddRange(GetFromType(nestedMemberInfo.NestedType, $"{baseMemberName}{(baseMemberName.IsNullOrEmpty() ? string.Empty : ".")}{nestedMemberInfo.MemberInfo.Name}", passedNodes));
             }
 
             return result.ToArray();
