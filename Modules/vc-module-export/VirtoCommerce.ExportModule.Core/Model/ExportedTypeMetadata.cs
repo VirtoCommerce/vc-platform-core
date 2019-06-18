@@ -34,6 +34,29 @@ namespace VirtoCommerce.ExportModule.Core.Model
             return result;
         }
 
+
+        public static string GetDerivedName(string baseName, PropertyInfo pi) => $"{baseName}{(baseName.IsNullOrEmpty() ? string.Empty : ".")}{pi.Name}";
+
+        /// <summary>
+        /// Check if a type is IEnumerable<T> where T derived from <see cref="Entity"/>. If it is, returns T, otherwise source type.
+        /// </summary>
+        /// <param name="type"></param>
+        /// <returns></returns>
+        public static Type GetNestedType(Type type)
+        {
+            var result = type;
+            if (type.GetInterfaces().Any(x => x.IsGenericType && x.GetGenericTypeDefinition() == typeof(IEnumerable<>)))
+            {
+                var definedGenericArgs = type.GetGenericArguments();
+                if (definedGenericArgs.Any() && definedGenericArgs[0].IsSubclassOf(typeof(Entity)))
+                {
+                    result = definedGenericArgs[0];
+                }
+            }
+            return result;
+        }
+
+
         private ExportTypePropertyInfoEx[] GetFromType(Type type, string baseMemberName, List<MemberInfo> passedNodes)
         {
             var result = new List<ExportTypePropertyInfoEx>();
@@ -57,7 +80,7 @@ namespace VirtoCommerce.ExportModule.Core.Model
                         PropertyInfo = new ExportTypePropertyInfo()
                         {
                             MemberInfo = propertyInfo,
-                            Name = $"{baseMemberName}{(baseMemberName.IsNullOrEmpty() ? string.Empty : ".")}{propertyInfo.Name}"
+                            Name = GetDerivedName(baseMemberName, propertyInfo)
                         },
                         IsEntity = isEntity
                     });
@@ -71,25 +94,6 @@ namespace VirtoCommerce.ExportModule.Core.Model
             }
 
             return result.ToArray();
-        }
-
-        /// <summary>
-        /// Check if a type is IEnumerable<T> where T derived from <see cref="Entity"/>. If it is, returns T, otherwise source type.
-        /// </summary>
-        /// <param name="type"></param>
-        /// <returns></returns>
-        private Type GetNestedType(Type type)
-        {
-            var result = type;
-            if (type.GetInterfaces().Any(x => x.IsGenericType && x.GetGenericTypeDefinition() == typeof(IEnumerable<>)))
-            {
-                var definedGenericArgs = type.GetGenericArguments();
-                if (definedGenericArgs.Any() && definedGenericArgs[0].IsSubclassOf(typeof(Entity)))
-                {
-                    result = definedGenericArgs[0];
-                }
-            }
-            return result;
         }
     }
 }
