@@ -25,8 +25,9 @@ namespace VirtoCommerce.ExportModule.Tests
             Assert.Contains("Id", props);
 
             // Check it doesn't contains recursive links
-            Assert.DoesNotContain("Pricelist.Price", props);
-            Assert.DoesNotContain("Price.Pricelist.Assignments", props);
+            Assert.DoesNotContain("Prices.Pricelist", props);
+            Assert.DoesNotContain("Prices.Pricelist.Id", props);
+            Assert.DoesNotContain("Assignments.Pricelist", props);
 
         }
     }
