@@ -10,7 +10,7 @@ using VirtoCommerce.Platform.Core.Common;
 
 namespace VirtoCommerce.ExportModule.Data.Services
 {
-    public class JsonExportProvider : IExportProvider
+    public sealed class JsonExportProvider : IExportProvider
     {
         private readonly Stream _stream;
 
@@ -104,6 +104,10 @@ namespace VirtoCommerce.ExportModule.Data.Services
         public void Dispose()
         {
 
+        }
+
+        public void Dispose()
+        {
         }
     }
 }

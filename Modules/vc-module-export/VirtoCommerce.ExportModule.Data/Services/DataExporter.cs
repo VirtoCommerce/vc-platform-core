@@ -1,5 +1,6 @@
 using System;
 using System.IO;
+using System.Linq;
 using System.Threading;
 using VirtoCommerce.ExportModule.Core.Model;
 using VirtoCommerce.ExportModule.Core.Services;
@@ -44,46 +45,54 @@ namespace VirtoCommerce.ExportModule.Data.Services
                 exportProgress.Description = "Creating provider…";
                 progressCallback(exportProgress);
 
-                var exportProvider = _exportProviderFactory.CreateProvider(request.ProviderName, request.ProviderConfig, stream);
-
-                while (exportedCount < totalCount)
+                using (var exportProvider = _exportProviderFactory.CreateProvider(request.ProviderName, request.ProviderConfig, stream))
                 {
-                    if (token.IsCancellationRequested)
+                    //-------------------------------- Some kind of fake below. We need to decide how to limit properties & pass metadata into provider properly
+                    exportedTypeDefinition.MetaData.PropertiesInfo = exportedTypeDefinition.MetaData.PropertiesInfo.Where(x => request.DataQuery.IncludedProperties.Contains(x.Name)).ToArray();
+                    exportProvider.Metadata = exportedTypeDefinition.MetaData;
+                    //---------------------------------
+
+                    exportProvider.WriteMetadata(exportProvider.Metadata);
+
+                    while (exportedCount < totalCount)
                     {
-                        completedMessage = "Export was cancelled by the user";
-                        break;
-                    }
-
-                    exportProgress.Description = "Fetcing …";
-                    progressCallback(exportProgress);
-
-                    var objectBatch = pagedDataSource.FetchNextPage();
-
-                    if (objectBatch == null)
-                    {
-                        break;
-                    }
-
-                    foreach (object obj in objectBatch)
-                    {
-                        try
+                        if (token.IsCancellationRequested)
                         {
-                            exportProvider.WriteRecord(obj);
+                            completedMessage = "Export was cancelled by the user";
+                            break;
                         }
-                        catch (Exception e)
+
+                        exportProgress.Description = "Fetcing …";
+                        progressCallback(exportProgress);
+
+                        var objectBatch = pagedDataSource.FetchNextPage();
+
+                        if (objectBatch == null)
                         {
-                            exportProgress.Errors.Add(e.Message);
+                            break;
+                        }
+
+                        foreach (object obj in objectBatch)
+                        {
+                            try
+                            {
+                                exportProvider.WriteRecord(obj);
+                            }
+                            catch (Exception e)
+                            {
+                                exportProgress.Errors.Add(e.Message);
+                                progressCallback(exportProgress);
+                            }
+                            exportedCount++;
+                        }
+
+                        exportProgress.ProcessedCount = exportedCount;
+
+                        if (exportedCount != totalCount)
+                        {
+                            exportProgress.Description = $"{exportedCount} out of {totalCount} have been exported.";
                             progressCallback(exportProgress);
                         }
-                        exportedCount++;
-                    }
-
-                    exportProgress.ProcessedCount = exportedCount;
-
-                    if (exportedCount != totalCount)
-                    {
-                        exportProgress.Description = $"{exportedCount} out of {totalCount} have been exported.";
-                        progressCallback(exportProgress);
                     }
                 }
             }
