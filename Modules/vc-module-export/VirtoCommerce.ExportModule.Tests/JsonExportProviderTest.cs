@@ -37,8 +37,10 @@ namespace VirtoCommerce.ExportModule.Tests
                     new ExportTypePropertyInfo() { Name = "Id"}
                 }
             };
-            //Act 
+            //Act
+
             var filteredPricelist = SerializeAndDeserialize(metadata, pricelist);
+
             //Assert
             Assert.Null(filteredPricelist.Prices.First().Pricelist);
         }
@@ -83,21 +85,23 @@ namespace VirtoCommerce.ExportModule.Tests
         [Fact]
         public async Task FilteringValuesTest()
         {
+            var date = new DateTime(2020, 10, 20);
             var priceList = new Pricelist()
             {
                 Id = "1",
                 Name = "PA1",
                 Prices = new List<Price>()
                 {
-                    new Price {Id = "P1", PricelistId = "1", List = 25, CreatedDate = DateTime.Today},
-                    new Price {Id = "P2", PricelistId = "1", List = 26, EndDate = DateTime.Today},
+                    new Price {Id = "P1", PricelistId = "1", List = 25, CreatedDate = date},
+                    new Price {Id = "P2", PricelistId = "1", List = 26, EndDate = date},
                 },
                 Assignments = new List<PricelistAssignment>
                 {
-                    new PricelistAssignment {Id = "A1", PricelistId = "1", Name = "name1", EndDate = DateTime.Today},
-                    new PricelistAssignment {Id = "A2", PricelistId = "1", Name = "name2", EndDate = DateTime.Today},
+                    new PricelistAssignment {Id = "A1", PricelistId = "1", Name = "name1", EndDate = date},
+                    new PricelistAssignment {Id = "A2", PricelistId = "1", Name = "name2", EndDate = date},
                 }
             };
+
             var metadata = new ExportedTypeMetadata()
             {
                 PropertiesInfo = new[]
@@ -120,11 +124,111 @@ namespace VirtoCommerce.ExportModule.Tests
             Assert.Equal(2, filteredPricelist.Prices.Count);
             Assert.Equal(1, filteredPricelist.Prices.Count(x => x.List == 25));
             Assert.Equal(1, filteredPricelist.Prices.Count(x => x.List == 26));
-            Assert.Equal(1, filteredPricelist.Prices.Count(x => x.CreatedDate == DateTime.Today));
-            Assert.Equal(0, filteredPricelist.Prices.Count(x => x.EndDate == DateTime.Today));
+            Assert.Equal(1, filteredPricelist.Prices.Count(x => x.CreatedDate == date));
+            Assert.Equal(0, filteredPricelist.Prices.Count(x => x.EndDate == date));
 
             Assert.Equal(2, filteredPricelist.Assignments.Count(x => string.IsNullOrEmpty(x.Name)));
             Assert.Equal(2, filteredPricelist.Assignments.Count(x => x.EndDate == null));
+        }
+
+        [Fact]
+        public async Task ExportOnlyPriceTest()
+        {
+            var date = new DateTime(2020, 10, 20);
+            var priceList = new Pricelist()
+            {
+                Id = "1",
+                Name = "PA1",
+                Prices = new List<Price>()
+                {
+                    new Price {Id = "P1", PricelistId = "1", List = 25, CreatedDate = date},
+                    new Price {Id = "P2", PricelistId = "1", List = 26, EndDate = date},
+                },
+                Assignments = new List<PricelistAssignment>
+                {
+                    new PricelistAssignment {Id = "A1", PricelistId = "1" },
+                    new PricelistAssignment {Id = "A2", PricelistId = "1" },
+                }
+            };
+
+            foreach (var price in priceList.Prices)
+            {
+                price.Pricelist = priceList;
+            }
+
+            var metadata = new ExportedTypeMetadata()
+            {
+                PropertiesInfo = new[]
+                {
+                    new ExportTypePropertyInfo() { Name = "Prices.Id"} ,
+                    new ExportTypePropertyInfo() { Name = "Prices.PricelistId"} ,
+                    new ExportTypePropertyInfo() { Name = "Prices.List"} ,
+                    new ExportTypePropertyInfo() { Name = "Prices.CreatedDate"} ,
+                }
+            };
+
+            //Act
+            var filteredPricelist = SerializeAndDeserialize(metadata, priceList);
+
+            //Assets
+            Assert.True(string.IsNullOrEmpty(filteredPricelist.Name));
+            Assert.True(string.IsNullOrEmpty(filteredPricelist.Id));
+
+            Assert.Equal(1, filteredPricelist.Prices.Count(x => x.List == 25));
+            Assert.Equal(1, filteredPricelist.Prices.Count(x => x.List == 26));
+            Assert.Equal(1, filteredPricelist.Prices.Count(x => x.CreatedDate == date));
+            Assert.Equal(0, filteredPricelist.Prices.Count(x => x.EndDate == date));
+            Assert.Equal(2, filteredPricelist.Prices.Count(x => x.Pricelist == null));
+
+            Assert.Null(filteredPricelist.Assignments);
+        }
+
+        [Fact]
+        public async Task ExportOnlyAssignmentsTest()
+        {
+            var date = new DateTime(2020, 10, 20);
+            var priceList = new Pricelist()
+            {
+                Id = "1",
+                Name = "PA1",
+                Prices = new List<Price>()
+                {
+                    new Price {Id = "P1", PricelistId = "1", List = 25, CreatedDate = date},
+                    new Price {Id = "P2", PricelistId = "1", List = 26, EndDate = date},
+                },
+                Assignments = new List<PricelistAssignment>
+                {
+                    new PricelistAssignment {Id = "A1", PricelistId = "1" },
+                    new PricelistAssignment {Id = "A2", PricelistId = "1" },
+                }
+            };
+
+            foreach (var assignment in priceList.Assignments)
+            {
+                assignment.Pricelist = priceList;
+            }
+
+            var metadata = new ExportedTypeMetadata()
+            {
+                PropertiesInfo = new[]
+                {
+                    new ExportTypePropertyInfo() { Name = "Assignments.Id"} ,
+                    new ExportTypePropertyInfo() { Name = "Assignments.PricelistId"} ,
+                }
+            };
+
+            //Act
+            var filteredPricelist = SerializeAndDeserialize(metadata, priceList);
+
+            //Assets
+            Assert.True(string.IsNullOrEmpty(filteredPricelist.Name));
+            Assert.True(string.IsNullOrEmpty(filteredPricelist.Id));
+
+            Assert.Equal(1, filteredPricelist.Assignments.Count(x => x.Id == "A1"));
+            Assert.Equal(1, filteredPricelist.Assignments.Count(x => x.Id == "A2"));
+            Assert.Equal(2, filteredPricelist.Assignments.Count(x => x.Pricelist == null));
+
+            Assert.Null(filteredPricelist.Prices);
         }
 
 
@@ -141,7 +245,6 @@ namespace VirtoCommerce.ExportModule.Tests
                 stream.Seek(0, SeekOrigin.Begin);
                 var reader = new StreamReader(stream);
                 return JsonConvert.DeserializeObject<Pricelist>(reader.ReadToEnd());
-
             }
         }
     }

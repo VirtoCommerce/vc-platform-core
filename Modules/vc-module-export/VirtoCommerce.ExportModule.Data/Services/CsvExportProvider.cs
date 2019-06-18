@@ -27,5 +27,10 @@ namespace VirtoCommerce.ExportModule.Data.Services
         {
             throw new System.NotImplementedException();
         }
+
+        public void Dispose()
+        {
+            throw new System.NotImplementedException();
+        }
     }
 }

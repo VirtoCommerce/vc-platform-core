@@ -1,6 +1,5 @@
 using System;
 using System.Collections;
-using System.Collections.Generic;
 using System.IO;
 using System.Linq;
 using Newtonsoft.Json;
@@ -19,40 +18,45 @@ namespace VirtoCommerce.ExportModule.Data.Services
         public IExportProviderConfiguration Configuration { get; }
         public ExportedTypeMetadata Metadata { get; set; }
 
-        private JsonSerializer Serializer { get; set; }
-        private StreamWriter Writer { get; set; }
+        private readonly JsonSerializer _serializer;
+        private StreamWriter _writer;
 
 
         public JsonExportProvider(Stream stream, IExportProviderConfiguration exportProviderConfiguration)
         {
-
             if (exportProviderConfiguration is JsonProviderConfiguration jsonProviderConfiguration)
             {
-                Serializer = JsonSerializer.Create(jsonProviderConfiguration.Settings);
+                _serializer = JsonSerializer.Create(jsonProviderConfiguration.Settings);
             }
             else
             {
-                Serializer = JsonSerializer.CreateDefault();
+                _serializer = JsonSerializer.CreateDefault();
             }
 
             _stream = stream;
             Configuration = exportProviderConfiguration;
-
-            Writer = new StreamWriter(_stream);
         }
 
         public void WriteMetadata(ExportedTypeMetadata metadata)
         {
-
         }
 
         public void WriteRecord(object objectToRecord)
         {
+            EnsureWriterCreated();
             FilterProperties(objectToRecord);
-            Serializer.Serialize(Writer, objectToRecord);
-            Writer.Flush();
+            _serializer.Serialize(_writer, objectToRecord);
+            _writer.Flush();
         }
 
+
+        private void EnsureWriterCreated()
+        {
+            if (_writer == null)
+            {
+                _writer = new StreamWriter(_stream);
+            }
+        }
 
         private void FilterProperties(object obj, string baseMemberName = null)
         {
@@ -60,8 +64,8 @@ namespace VirtoCommerce.ExportModule.Data.Services
 
             foreach (var property in type.GetProperties().Where(x => x.CanRead && x.CanWrite))
             {
-                var propertyName = $"{baseMemberName}{(baseMemberName.IsNullOrEmpty() ? string.Empty : ".")}{property.Name}";
-                var nestedType = GetNestedType(property.PropertyType);
+                var propertyName = ExportedTypeMetadata.GetDerivedName(baseMemberName, property);
+                var nestedType = ExportedTypeMetadata.GetNestedType(property.PropertyType);
 
                 if (nestedType.IsSubclassOf(typeof(Entity)))
                 {
@@ -81,27 +85,16 @@ namespace VirtoCommerce.ExportModule.Data.Services
                         }
                     }
                 }
-                else if (!Metadata.PropertiesInfo.Any(x =>
-                    x.Name.Equals(propertyName, StringComparison.InvariantCultureIgnoreCase)))
+                else if (!Metadata.PropertiesInfo.Any(x => x.Name.Equals(propertyName, StringComparison.InvariantCultureIgnoreCase)))
                 {
                     property.SetValue(obj, null);
                 }
             }
         }
 
-        private Type GetNestedType(Type t)
+        public void Dispose()
         {
-            var result = t;
-            if (t.GetInterfaces().Any(x => x.IsGenericType && x.GetGenericTypeDefinition() == typeof(IEnumerable<>)))
-            {
-                var definedGenericArgs = t.GetGenericArguments();
-                if (definedGenericArgs.Any() && definedGenericArgs[0].IsSubclassOf(typeof(Entity)))
-                {
-                    result = definedGenericArgs[0];
-                }
-            }
 
-            return result;
         }
     }
 }
