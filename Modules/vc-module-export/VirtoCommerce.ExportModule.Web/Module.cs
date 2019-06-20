@@ -1,10 +1,13 @@
 using System;
 using System.IO;
 using Microsoft.AspNetCore.Builder;
+using Microsoft.AspNetCore.Mvc;
 using Microsoft.Extensions.DependencyInjection;
+using Microsoft.Extensions.Options;
 using VirtoCommerce.ExportModule.Core.Model;
 using VirtoCommerce.ExportModule.Core.Services;
 using VirtoCommerce.ExportModule.Data.Services;
+using VirtoCommerce.ExportModule.Web.Converters;
 using VirtoCommerce.Platform.Core.Modularity;
 
 namespace VirtoCommerce.ExportModule.Web
@@ -27,6 +30,8 @@ namespace VirtoCommerce.ExportModule.Web
 
         public void PostInitialize(IApplicationBuilder appBuilder)
         {
+            var mvcJsonOptions = appBuilder.ApplicationServices.GetService<IOptions<MvcJsonOptions>>();
+            mvcJsonOptions.Value.SerializerSettings.Converters.Add(new PolymorphicJsonConverter());
         }
 
         public void Uninstall()

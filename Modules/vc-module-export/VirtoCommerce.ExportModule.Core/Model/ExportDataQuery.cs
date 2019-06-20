@@ -1,11 +1,14 @@
 using System.Linq;
+using Newtonsoft.Json;
 using VirtoCommerce.Platform.Core.Common;
 
 namespace VirtoCommerce.ExportModule.Core.Model
 {
     public abstract class ExportDataQuery : ValueObject
     {
-        public string ExportTypeName { get; set; }
+        [JsonProperty("exportTypeName")]
+        public string ExportTypeName => GetType().Name;
+
         public string[] ObjectIds { get; set; } = new string[] { };
         public string Sort { get; set; }
         public string[] IncludedProperties { get; set; } = new string[] { };

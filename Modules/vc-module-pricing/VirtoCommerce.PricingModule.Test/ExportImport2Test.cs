@@ -44,7 +44,7 @@ namespace VirtoCommerce.PricingModule.Test
                 .WithMetadata(ExportedTypeMetadata.GetFromType<Pricelist>());
 
             resolver.ResolveExportedTypeDefinition(typeof(PricelistAssignment).FullName)
-                .WithDataSourceFactory(dataQuery => new PricelistAssignmenExportPagedDataSource(searchServiceMock.Object) { DataQuery = dataQuery })
+                .WithDataSourceFactory(dataQuery => new PricelistAssignmentExportPagedDataSource(searchServiceMock.Object) { DataQuery = dataQuery })
                 .WithMetadata(ExportedTypeMetadata.GetFromType<PricelistAssignment>());
 
             var dataExporter = new DataExporter(resolver, new ExportProviderFactory());
