@@ -23,7 +23,7 @@ namespace VirtoCommerce.ExportModule.Core.Model
         private int _totalCount = -1;
         private SearchCriteriaBase _searchCriteria;
 
-        protected abstract FetchResult FetchUsingService(SearchCriteriaBase searchCriteria);
+        protected abstract FetchResult FetchData(SearchCriteriaBase searchCriteria);
 
         public virtual IEnumerable FetchNextPage()
         {
@@ -35,7 +35,7 @@ namespace VirtoCommerce.ExportModule.Core.Model
             _searchCriteria.Skip = PageSize * CurrentPageNumber;
             _searchCriteria.Take = CurrentPageNumber;
 
-            var result = FetchUsingService(_searchCriteria);
+            var result = FetchData(_searchCriteria);
             _totalCount = result.TotalCount;
             CurrentPageNumber++;
             return result.Results;
@@ -53,7 +53,7 @@ namespace VirtoCommerce.ExportModule.Core.Model
                 _searchCriteria.Skip = 0;
                 _searchCriteria.Take = 0;
 
-                var result = FetchUsingService(_searchCriteria);
+                var result = FetchData(_searchCriteria);
                 _totalCount = result.TotalCount;
             }
             return _totalCount;

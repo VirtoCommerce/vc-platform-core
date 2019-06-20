@@ -5,19 +5,19 @@ using VirtoCommerce.PricingModule.Core.Services;
 
 namespace VirtoCommerce.PricingModule.Data.ExportImport
 {
-    public class PriceExportPagedDataSource : BaseExportPagedDataSource
+    public class PricelistExportPagedDataSource : BaseExportPagedDataSource
     {
         readonly IPricingSearchService _searchService;
 
-        public PriceExportPagedDataSource(IPricingSearchService searchService)
+        public PricelistExportPagedDataSource(IPricingSearchService searchService)
         {
             _searchService = searchService;
         }
 
         protected override FetchResult FetchData(SearchCriteriaBase searchCriteria)
         {
-            var priceSearchResult = _searchService.SearchPricesAsync((PricesSearchCriteria)searchCriteria).Result;
-            return new FetchResult(priceSearchResult.Results, priceSearchResult.TotalCount);
+            var pricelistSearchResult = _searchService.SearchPricelistsAsync((PricelistSearchCriteria)searchCriteria).Result;
+            return new FetchResult(pricelistSearchResult.Results, pricelistSearchResult.TotalCount);
         }
     }
 }
