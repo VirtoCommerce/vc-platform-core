@@ -1,3 +1,4 @@
+using System.Linq;
 using VirtoCommerce.Platform.Core.Common;
 
 namespace VirtoCommerce.ExportModule.Core.Model
@@ -9,7 +10,21 @@ namespace VirtoCommerce.ExportModule.Core.Model
         public string Sort { get; set; }
         public string[] IncludedProperties { get; set; } = new string[] { };
 
-        public abstract SearchCriteriaBase ToSearchCriteria();
-        public abstract void FromSearchCriteria(SearchCriteriaBase searchCriteria);
+        public abstract SearchCriteriaBase CreateSearchCriteria();
+
+        public virtual SearchCriteriaBase ToSearchCriteria()
+        {
+            var result = CreateSearchCriteria();
+            result.ObjectIds = ObjectIds;
+            result.Sort = Sort;
+            return result;
+        }
+
+        public virtual ExportDataQuery FromSearchCriteria(SearchCriteriaBase searchCriteria)
+        {
+            ObjectIds = searchCriteria.ObjectIds.ToArray();
+            Sort = searchCriteria.Sort;
+            return this;
+        }
     }
 }

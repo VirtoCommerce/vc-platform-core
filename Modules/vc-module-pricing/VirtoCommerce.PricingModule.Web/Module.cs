@@ -12,6 +12,9 @@ using Microsoft.Extensions.Options;
 using VirtoCommerce.CoreModule.Core.Conditions;
 using VirtoCommerce.CoreModule.Core.Conditions.Browse;
 using VirtoCommerce.CoreModule.Core.Conditions.GeoConditions;
+using VirtoCommerce.ExportModule.Core.Model;
+using VirtoCommerce.ExportModule.Core.Services;
+using VirtoCommerce.ExportModule.Data.Services;
 using VirtoCommerce.Platform.Core.Bus;
 using VirtoCommerce.Platform.Core.Common;
 using VirtoCommerce.Platform.Core.ExportImport;
@@ -61,6 +64,8 @@ namespace VirtoCommerce.PricingModule.Web
             serviceCollection.AddTransient<ProductPriceDocumentChangesProvider>();
             serviceCollection.AddTransient<ProductPriceDocumentBuilder>();
             serviceCollection.AddSingleton<LogChangesChangedEventHandler>();
+
+            serviceCollection.AddSingleton<IKnownExportTypesRegistrar, KnownExportTypesService>();
         }
 
         public void PostInitialize(IApplicationBuilder appBuilder)
@@ -131,6 +136,21 @@ namespace VirtoCommerce.PricingModule.Web
             {
                 Children = new List<IConditionTree>() { GetPricingDynamicExpression() }
             };
+
+            var registrar = _serviceProvider.GetService<IKnownExportTypesRegistrar>();
+
+            var pricingSearchService = _serviceProvider.GetService<IPricingSearchService>();
+            registrar.RegisterType<Price>()
+                .WithDataSourceFactory(dataQuery => new PriceExportPagedDataSource(pricingSearchService) { DataQuery = dataQuery })
+                .WithMetadata(ExportedTypeMetadata.GetFromType<Price>());
+
+            registrar.RegisterType<Pricelist>()
+                .WithDataSourceFactory(dataQuery => new PricelistExportPagedDataSource(pricingSearchService) { DataQuery = dataQuery })
+                .WithMetadata(ExportedTypeMetadata.GetFromType<Pricelist>());
+
+            registrar.RegisterType<PricelistAssignment>()
+                .WithDataSourceFactory(dataQuery => new PricelistAssignmenExportPagedDataSource(pricingSearchService) { DataQuery = dataQuery })
+                .WithMetadata(ExportedTypeMetadata.GetFromType<PricelistAssignment>());
         }
 
         public void Uninstall()

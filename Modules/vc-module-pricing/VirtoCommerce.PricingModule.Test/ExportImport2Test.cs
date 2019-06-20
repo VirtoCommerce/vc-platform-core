@@ -4,6 +4,7 @@ using System.Text;
 using System.Threading.Tasks;
 using Moq;
 using Newtonsoft.Json;
+using VirtoCommerce.CoreModule.Core.Conditions;
 using VirtoCommerce.ExportModule.Core.Model;
 using VirtoCommerce.ExportModule.Core.Services;
 using VirtoCommerce.ExportModule.Data.Services;
@@ -24,15 +25,27 @@ namespace VirtoCommerce.PricingModule.Test
 
             IKnownExportTypesRegistrar registrar = new KnownExportTypesService();
             registrar.RegisterType<Price>();
+            registrar.RegisterType<Pricelist>();
+            registrar.RegisterType<PricelistAssignment>();
 
             var resolver = (IKnownExportTypesResolver)registrar;
 
             var searchServiceMock = new Mock<IPricingSearchService>();
             searchServiceMock.Setup(x => x.SearchPricesAsync(It.IsAny<PricesSearchCriteria>())).ReturnsAsync(GetTestPriceResult());
+            searchServiceMock.Setup(x => x.SearchPricelistsAsync(It.IsAny<PricelistSearchCriteria>())).ReturnsAsync(GetTestPricelistResult());
+            searchServiceMock.Setup(x => x.SearchPricelistAssignmentsAsync(It.IsAny<PricelistAssignmentsSearchCriteria>())).ReturnsAsync(GetPricelistAssignmentSearchResult());
 
             resolver.ResolveExportedTypeDefinition(typeof(Price).FullName)
                 .WithDataSourceFactory(dataQuery => new PriceExportPagedDataSource(searchServiceMock.Object) { DataQuery = dataQuery })
                 .WithMetadata(ExportedTypeMetadata.GetFromType<Price>());
+
+            resolver.ResolveExportedTypeDefinition(typeof(Pricelist).FullName)
+                .WithDataSourceFactory(dataQuery => new PricelistExportPagedDataSource(searchServiceMock.Object) { DataQuery = dataQuery })
+                .WithMetadata(ExportedTypeMetadata.GetFromType<Pricelist>());
+
+            resolver.ResolveExportedTypeDefinition(typeof(PricelistAssignment).FullName)
+                .WithDataSourceFactory(dataQuery => new PricelistAssignmenExportPagedDataSource(searchServiceMock.Object) { DataQuery = dataQuery })
+                .WithMetadata(ExportedTypeMetadata.GetFromType<PricelistAssignment>());
 
             var dataExporter = new DataExporter(resolver, new ExportProviderFactory());
 
@@ -54,6 +67,48 @@ namespace VirtoCommerce.PricingModule.Test
 
                 var resultcsv = Encoding.UTF8.GetString(ms.ToArray());
             }
+
+
+            using (var ms = new MemoryStream())
+            {
+                dataExporter.Export(
+                    ms,
+                    new ExportDataRequest()
+                    {
+                        DataQuery = new PricelistExportDataQuery()
+                        {
+                            IncludedProperties = new string[] { "Currency", "Id", "Name" }
+                        },
+                        ExportTypeName = typeof(Pricelist).FullName,
+                        ProviderName = nameof(JsonExportProvider)
+                    },
+                    new System.Action<ExportProgressInfo>(x => Console.WriteLine(x.Description)),
+                    new System.Threading.CancellationToken());
+
+                var resultcsv = Encoding.UTF8.GetString(ms.ToArray());
+            }
+
+
+            using (var ms = new MemoryStream())
+            {
+                dataExporter.Export(
+                    ms,
+                    new ExportDataRequest()
+                    {
+                        DataQuery = new PricelistAssignmentExportDataQuery()
+                        {
+                            IncludedProperties = new string[] { "CatalogId", "PricelistId", "Priority", "Id" }
+                        },
+                        ExportTypeName = typeof(PricelistAssignment).FullName,
+                        ProviderName = nameof(JsonExportProvider)
+                    },
+                    new System.Action<ExportProgressInfo>(x => Console.WriteLine(x.Description)),
+                    new System.Threading.CancellationToken());
+
+                var resultcsv = Encoding.UTF8.GetString(ms.ToArray());
+            }
+
+
         }
 
         /// <summary>
@@ -922,6 +977,115 @@ namespace VirtoCommerce.PricingModule.Test
 ";
             #endregion
             return (PriceSearchResult)JsonConvert.DeserializeObject(resultInJSON, typeof(PriceSearchResult));
+        }
+
+        private PricelistSearchResult GetTestPricelistResult()
+        {
+            #region resultInJSON
+            string resultInJSON = @"
+{
+  ""totalCount"": 2,
+  ""results"": [
+    {
+      ""name"": ""BoltsUSD"",
+      ""currency"": ""USD"",
+      ""assignments"": [
+        {
+          ""catalogId"": ""7829d35f417e4dd98851f51322f32c23"",
+          ""name"": ""BoltsUSD"",
+          ""priority"": 1,
+          ""createdDate"": ""0001-01-01T00:00:00Z"",
+          ""id"": ""ba06645e4605430493d9075ff48edbe9""
+        },
+        {
+          ""catalogId"": ""fc596540864a41bf8ab78734ee7353a3"",
+          ""name"": ""B2B-mixed-BOLTS"",
+          ""priority"": 1,
+          ""createdDate"": ""0001-01-01T00:00:00Z"",
+          ""id"": ""cbddca102c54454eb7f203c13419d8c6""
+        }
+      ],
+      ""createdDate"": ""2018-04-27T08:55:16.073Z"",
+      ""modifiedDate"": ""2018-04-27T08:55:16.073Z"",
+      ""createdBy"": ""admin"",
+      ""modifiedBy"": ""admin"",
+      ""id"": ""0456b3ebc0a24c0ab7054ec9a5cea78e""
+    },
+    {
+      ""name"": ""Bolts-USD-Special"",
+      ""currency"": ""USD"",
+      ""assignments"": [
+        {
+          ""catalogId"": ""fc596540864a41bf8ab78734ee7353a3"",
+          ""name"": ""VIPBoltsUSD"",
+          ""priority"": 100,
+          ""createdDate"": ""0001-01-01T00:00:00Z"",
+          ""id"": ""36618d4995474bd0ab58fd518dd090c3""
+        }
+      ],
+      ""createdDate"": ""2018-05-03T14:44:16.227Z"",
+      ""modifiedDate"": ""2018-05-03T14:44:16.227Z"",
+      ""createdBy"": ""admin"",
+      ""modifiedBy"": ""admin"",
+      ""id"": ""34efb7152a2b4d018a86878f9a0868bf""
+    }
+  ]
+}
+";
+            #endregion
+            return (PricelistSearchResult)JsonConvert.DeserializeObject(resultInJSON, typeof(PricelistSearchResult), new ConditionJsonConverter());
+        }
+        private PricelistAssignmentSearchResult GetPricelistAssignmentSearchResult()
+        {
+            #region resultInJSON
+            string resultInJSON = @"
+{
+  ""totalCount"": 14,
+  ""results"": [
+    {
+      ""catalogId"": ""fc596540864a41bf8ab78734ee7353a3"",
+      ""pricelistId"": ""34efb7152a2b4d018a86878f9a0868bf"",
+      ""pricelist"": {
+        ""name"": ""Bolts-USD-Special"",
+        ""currency"": ""USD"",
+        ""createdDate"": ""0001-01-01T00:00:00Z"",
+        ""id"": ""34efb7152a2b4d018a86878f9a0868bf""
+      },
+      ""name"": ""VIPBoltsUSD"",
+      ""priority"": 100,
+      ""conditionExpression"": ""[{\""All\"":false,\""Not\"":false,\""AvailableChildren\"":[{\""Value\"":0,\""SecondValue\"":0,\""CompareCondition\"":\""AtLeast\"",\""AvailableChildren\"":[],\""Children\"":[],\""Id\"":\""ConditionGeoTimeZone\""},{\""Value\"":null,\""MatchCondition\"":\""Contains\"",\""AvailableChildren\"":[],\""Children\"":[],\""Id\"":\""ConditionGeoZipCode\""},{\""Value\"":null,\""MatchCondition\"":\""Contains\"",\""AvailableChildren\"":[],\""Children\"":[],\""Id\"":\""ConditionStoreSearchedPhrase\""},{\""Value\"":0,\""SecondValue\"":0,\""CompareCondition\"":\""AtLeast\"",\""AvailableChildren\"":[],\""Children\"":[],\""Id\"":\""ConditionAgeIs\""},{\""Value\"":\""female\"",\""MatchCondition\"":\""Contains\"",\""AvailableChildren\"":[],\""Children\"":[],\""Id\"":\""ConditionGenderIs\""},{\""Value\"":null,\""MatchCondition\"":\""Contains\"",\""AvailableChildren\"":[],\""Children\"":[],\""Id\"":\""ConditionGeoCity\""},{\""Value\"":null,\""MatchCondition\"":\""Contains\"",\""AvailableChildren\"":[],\""Children\"":[],\""Id\"":\""ConditionGeoCountry\""},{\""Value\"":null,\""MatchCondition\"":\""Contains\"",\""AvailableChildren\"":[],\""Children\"":[],\""Id\"":\""ConditionGeoState\""},{\""Value\"":null,\""MatchCondition\"":\""Contains\"",\""AvailableChildren\"":[],\""Children\"":[],\""Id\"":\""ConditionLanguageIs\""},{\""Group\"":null,\""AvailableChildren\"":[],\""Children\"":[],\""Id\"":\""UserGroupsContainsCondition\""}],\""Children\"":[{\""Group\"":\""VIP\"",\""AvailableChildren\"":[],\""Children\"":[],\""Id\"":\""UserGroupsContainsCondition\""}],\""Id\"":\""BlockPricingCondition\""}]"",
+      ""predicateVisualTreeSerialized"": ""{\""AvailableChildren\"":null,\""Children\"":[{\""All\"":false,\""Not\"":false,\""AvailableChildren\"":null,\""Children\"":[{\""Group\"":\""VIP\"",\""AvailableChildren\"":null,\""Children\"":[],\""Id\"":\""UserGroupsContainsCondition\""}],\""Id\"":\""BlockPricingCondition\""}],\""Id\"":\""PriceConditionTree\""}"",
+      ""createdDate"": ""2018-05-03T14:48:25.263Z"",
+      ""modifiedDate"": ""2018-05-03T14:48:25.263Z"",
+      ""createdBy"": ""admin"",
+      ""modifiedBy"": ""admin"",
+      ""id"": ""36618d4995474bd0ab58fd518dd090c3""
+    },
+    {
+      ""catalogId"": ""4974648a41df4e6ea67ef2ad76d7bbd4"",
+      ""pricelistId"": ""80873a35a34a4cf8997ac87e69cac6d6"",
+      ""pricelist"": {
+        ""name"": ""ElectronicSpecialUSD"",
+        ""currency"": ""USD"",
+        ""createdDate"": ""0001-01-01T00:00:00Z"",
+        ""id"": ""80873a35a34a4cf8997ac87e69cac6d6""
+      },
+      ""name"": ""SpecialElectronic"",
+      ""priority"": 10,
+      ""conditionExpression"": ""[{\""All\"":false,\""Not\"":false,\""AvailableChildren\"":[{\""Value\"":0,\""SecondValue\"":0,\""CompareCondition\"":\""AtLeast\"",\""AvailableChildren\"":[],\""Children\"":[],\""Id\"":\""ConditionGeoTimeZone\""},{\""Value\"":null,\""MatchCondition\"":\""Contains\"",\""AvailableChildren\"":[],\""Children\"":[],\""Id\"":\""ConditionGeoZipCode\""},{\""Value\"":null,\""MatchCondition\"":\""Contains\"",\""AvailableChildren\"":[],\""Children\"":[],\""Id\"":\""ConditionStoreSearchedPhrase\""},{\""Value\"":0,\""SecondValue\"":0,\""CompareCondition\"":\""AtLeast\"",\""AvailableChildren\"":[],\""Children\"":[],\""Id\"":\""ConditionAgeIs\""},{\""Value\"":\""female\"",\""MatchCondition\"":\""Contains\"",\""AvailableChildren\"":[],\""Children\"":[],\""Id\"":\""ConditionGenderIs\""},{\""Value\"":null,\""MatchCondition\"":\""Contains\"",\""AvailableChildren\"":[],\""Children\"":[],\""Id\"":\""ConditionGeoCity\""},{\""Value\"":null,\""MatchCondition\"":\""Contains\"",\""AvailableChildren\"":[],\""Children\"":[],\""Id\"":\""ConditionGeoCountry\""},{\""Value\"":null,\""MatchCondition\"":\""Contains\"",\""AvailableChildren\"":[],\""Children\"":[],\""Id\"":\""ConditionGeoState\""},{\""Value\"":null,\""MatchCondition\"":\""Contains\"",\""AvailableChildren\"":[],\""Children\"":[],\""Id\"":\""ConditionLanguageIs\""},{\""Group\"":null,\""AvailableChildren\"":[],\""Children\"":[],\""Id\"":\""UserGroupsContainsCondition\""}],\""Children\"":[],\""Id\"":\""BlockPricingCondition\""}]"",
+      ""predicateVisualTreeSerialized"": ""{\""AvailableChildren\"":null,\""Children\"":[{\""All\"":false,\""Not\"":false,\""AvailableChildren\"":null,\""Children\"":[],\""Id\"":\""BlockPricingCondition\""}],\""Id\"":\""PriceConditionTree\""}"",
+      ""createdDate"": ""2016-08-15T12:52:25.723Z"",
+      ""modifiedDate"": ""2016-08-15T12:52:25.723Z"",
+      ""createdBy"": ""admin"",
+      ""modifiedBy"": ""admin"",
+      ""id"": ""d4a4e5271046497eaef61ee47efe6215""
+    }
+  ]
+}
+
+ ";
+            #endregion
+            return JsonConvert.DeserializeObject<PricelistAssignmentSearchResult>(resultInJSON, new ConditionJsonConverter());
         }
 
         private PriceSearchResult GetTestProductPriceResult()
