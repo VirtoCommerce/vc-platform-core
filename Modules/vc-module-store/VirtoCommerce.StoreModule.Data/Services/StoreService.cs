@@ -4,7 +4,6 @@ using System.Linq;
 using System.Threading.Tasks;
 using FluentValidation;
 using Microsoft.Extensions.Caching.Memory;
-
 using VirtoCommerce.Platform.Core.Caching;
 using VirtoCommerce.Platform.Core.Common;
 using VirtoCommerce.Platform.Core.DynamicProperties;
@@ -58,11 +57,11 @@ namespace VirtoCommerce.StoreModule.Data.Services
                     repository.DisableChangesTracking();
 
                     var dbStores = await repository.GetStoresByIdsAsync(ids);
+
                     foreach (var dbStore in dbStores)
                     {
                         var store = AbstractTypeFactory<Store>.TryCreateInstance();
                         dbStore.ToModel(store);
-
 
                         await _settingManager.DeepLoadSettingsAsync(store);
                         stores.Add(store);
@@ -70,7 +69,7 @@ namespace VirtoCommerce.StoreModule.Data.Services
                 }
 
                 var result = stores.ToArray();
-                await _dynamicPropertyService.LoadDynamicPropertyValuesAsync(result);
+                await _dynamicPropertyService.LoadDynamicPropertyValuesAsync(result.OfType<IHasDynamicProperties>().ToArray());
 
                 return result;
             });

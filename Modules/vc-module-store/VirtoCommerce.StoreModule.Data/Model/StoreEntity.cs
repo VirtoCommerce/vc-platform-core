@@ -4,6 +4,7 @@ using System.ComponentModel.DataAnnotations;
 using System.Linq;
 using VirtoCommerce.CoreModule.Core.Seo;
 using VirtoCommerce.Platform.Core.Common;
+using VirtoCommerce.Platform.Core.DynamicProperties;
 using VirtoCommerce.StoreModule.Core.Model;
 
 namespace VirtoCommerce.StoreModule.Data.Model
@@ -18,6 +19,7 @@ namespace VirtoCommerce.StoreModule.Data.Model
             TrustedGroups = new NullCollection<StoreTrustedGroupEntity>();
             FulfillmentCenters = new NullCollection<StoreFulfillmentCenterEntity>();
             SeoInfos = new NullCollection<SeoInfoEntity>();
+            DynamicPropertyObjectValues = new NullCollection<StoreDynamicPropertyObjectValueEntity>();
         }
 
         [Required]
@@ -79,6 +81,7 @@ namespace VirtoCommerce.StoreModule.Data.Model
 
         public virtual ObservableCollection<StoreFulfillmentCenterEntity> FulfillmentCenters { get; set; }
         public virtual ObservableCollection<SeoInfoEntity> SeoInfos { get; set; }
+        public virtual ObservableCollection<StoreDynamicPropertyObjectValueEntity> DynamicPropertyObjectValues { get; set; }
 
         #endregion
 
@@ -116,8 +119,15 @@ namespace VirtoCommerce.StoreModule.Data.Model
             store.TrustedGroups = TrustedGroups.Select(x => x.GroupName).ToList();
             store.AdditionalFulfillmentCenterIds = FulfillmentCenters.Where(x => x.Type == FulfillmentCenterType.Main).Select(x => x.FulfillmentCenterId).ToList();
             store.ReturnsFulfillmentCenterIds = FulfillmentCenters.Where(x => x.Type == FulfillmentCenterType.Returns).Select(x => x.FulfillmentCenterId).ToList();
-            // SeoInfos
             store.SeoInfos = SeoInfos.Select(x => x.ToModel(AbstractTypeFactory<SeoInfo>.TryCreateInstance())).ToList();
+
+            store.DynamicProperties = DynamicPropertyObjectValues.GroupBy(x => x.PropertyId).Select(x =>
+            {
+                var property = AbstractTypeFactory<DynamicObjectProperty>.TryCreateInstance();
+                property.Id = x.Key;
+                property.Values = x.Select(v => v.ToModel(AbstractTypeFactory<DynamicPropertyObjectValue>.TryCreateInstance())).ToArray();
+                return property;
+            }).ToArray();
 
             return store;
         }
@@ -153,14 +163,17 @@ namespace VirtoCommerce.StoreModule.Data.Model
             {
                 DefaultCurrency = store.DefaultCurrency;
             }
+
             if (store.MainFulfillmentCenterId != null)
             {
                 FulfillmentCenterId = store.MainFulfillmentCenterId;
             }
+
             if (store.MainReturnsFulfillmentCenterId != null)
             {
                 ReturnsFulfillmentCenterId = store.MainReturnsFulfillmentCenterId;
             }
+
             if (store.Languages != null)
             {
                 Languages = new ObservableCollection<StoreLanguageEntity>(store.Languages.Select(x => new StoreLanguageEntity
@@ -185,7 +198,6 @@ namespace VirtoCommerce.StoreModule.Data.Model
                 }));
             }
 
-
             FulfillmentCenters = new ObservableCollection<StoreFulfillmentCenterEntity>();
             if (store.AdditionalFulfillmentCenterIds != null)
             {
@@ -208,9 +220,18 @@ namespace VirtoCommerce.StoreModule.Data.Model
                     Type = FulfillmentCenterType.Returns
                 }));
             }
+
             if (store.SeoInfos != null)
             {
                 SeoInfos = new ObservableCollection<SeoInfoEntity>(store.SeoInfos.Select(x => AbstractTypeFactory<SeoInfoEntity>.TryCreateInstance().FromModel(x, pkMap)));
+            }
+
+            if (store.DynamicProperties != null)
+            {
+                DynamicPropertyObjectValues = new ObservableCollection<StoreDynamicPropertyObjectValueEntity>(store.DynamicProperties
+                    .SelectMany(p => p.Values
+                        .Select(v => AbstractTypeFactory<StoreDynamicPropertyObjectValueEntity>.TryCreateInstance()
+                            .FromModel(v, store, p))));
             }
 
             return this;
@@ -246,12 +267,14 @@ namespace VirtoCommerce.StoreModule.Data.Model
                 Languages.Patch(target.Languages, languageComparer,
                                       (sourceLang, targetLang) => targetLang.LanguageCode = sourceLang.LanguageCode);
             }
+
             if (!Currencies.IsNullCollection())
             {
                 var currencyComparer = AnonymousComparer.Create((StoreCurrencyEntity x) => x.CurrencyCode);
                 Currencies.Patch(target.Currencies, currencyComparer,
                                       (sourceCurrency, targetCurrency) => targetCurrency.CurrencyCode = sourceCurrency.CurrencyCode);
             }
+
             if (!TrustedGroups.IsNullCollection())
             {
                 var trustedGroupComparer = AnonymousComparer.Create((StoreTrustedGroupEntity x) => x.GroupName);
@@ -265,9 +288,15 @@ namespace VirtoCommerce.StoreModule.Data.Model
                 FulfillmentCenters.Patch(target.FulfillmentCenters, fulfillmentCenterComparer,
                                       (sourceFulfillmentCenter, targetFulfillmentCenter) => sourceFulfillmentCenter.Patch(targetFulfillmentCenter));
             }
+
             if (!SeoInfos.IsNullCollection())
             {
                 SeoInfos.Patch(target.SeoInfos, (sourceSeoInfo, targetSeoInfo) => sourceSeoInfo.Patch(targetSeoInfo));
+            }
+
+            if (!DynamicPropertyObjectValues.IsNullCollection())
+            {
+                DynamicPropertyObjectValues.Patch(target.DynamicPropertyObjectValues, (sourceDynamicPropertyObjectValues, targetDynamicPropertyObjectValues) => sourceDynamicPropertyObjectValues.Patch(targetDynamicPropertyObjectValues));
             }
         }
     }

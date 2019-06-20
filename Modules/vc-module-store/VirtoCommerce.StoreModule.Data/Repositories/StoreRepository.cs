@@ -24,8 +24,9 @@ namespace VirtoCommerce.StoreModule.Data.Repositories
 
             var fulfillmentCenters = StoreFulfillmentCenters.Where(x => ids.Contains(x.StoreId)).ToArrayAsync();
             var seoInfos = SeoInfos.Where(x => ids.Contains(x.StoreId)).ToArrayAsync();
+            var dynamicPropertyValues = DynamicPropertyObjectValues.Where(x => ids.Contains(x.StoreId)).ToArrayAsync();
 
-            await Task.WhenAll(fulfillmentCenters, seoInfos);
+            await Task.WhenAll(fulfillmentCenters, seoInfos, dynamicPropertyValues);
 
             return retVal;
         }
@@ -34,6 +35,7 @@ namespace VirtoCommerce.StoreModule.Data.Repositories
         public IQueryable<StoreFulfillmentCenterEntity> StoreFulfillmentCenters => DbContext.Set<StoreFulfillmentCenterEntity>();
 
         public IQueryable<SeoInfoEntity> SeoInfos => DbContext.Set<SeoInfoEntity>();
+        public IQueryable<StoreDynamicPropertyObjectValueEntity> DynamicPropertyObjectValues => DbContext.Set<StoreDynamicPropertyObjectValueEntity>();
 
         #endregion
     }

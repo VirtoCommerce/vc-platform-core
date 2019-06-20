@@ -10,6 +10,8 @@ namespace VirtoCommerce.StoreModule.Data.Repositories
         IQueryable<StoreEntity> Stores { get; }
 
         IQueryable<SeoInfoEntity> SeoInfos { get; }
+        IQueryable<StoreDynamicPropertyObjectValueEntity> DynamicPropertyObjectValues { get; }
         Task<StoreEntity[]> GetStoresByIdsAsync(string[] ids);
+
     }
 }

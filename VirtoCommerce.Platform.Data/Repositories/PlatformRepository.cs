@@ -1,10 +1,8 @@
 using System;
-using System.Collections.Generic;
 using System.Linq;
 using System.Threading.Tasks;
 using Microsoft.EntityFrameworkCore;
 using VirtoCommerce.Platform.Core.Common;
-using VirtoCommerce.Platform.Data.Assets;
 using VirtoCommerce.Platform.Data.Infrastructure;
 using VirtoCommerce.Platform.Data.Model;
 
@@ -34,11 +32,11 @@ namespace VirtoCommerce.Platform.Data.Repositories
             var properties = await DynamicProperties.Include(x => x.DisplayNames)
                                               .OrderBy(x => x.Name)
                                               .Where(x => objectTypeNames.Contains(x.ObjectType)).ToArrayAsync();
-
-            var propertyIds = properties.Select(x => x.Id).ToArray();
-            var proprValues = await DynamicPropertyObjectValues.Include(x => x.DictionaryItem.DisplayNames)
-                                                         .Where(x => propertyIds.Contains(x.PropertyId) && objectIds.Contains(x.ObjectId))
-                                                         .ToArrayAsync();
+            //TODO
+            //var propertyIds = properties.Select(x => x.Id).ToArray();
+            //var proprValues = await DynamicPropertyObjectValues.Include(x => x.DictionaryItem.DisplayNames)
+            //                                             .Where(x => propertyIds.Contains(x.PropertyId) && objectIds.Contains(x.ObjectId))
+            //                                             .ToArrayAsync();
 
             return properties;
         }
