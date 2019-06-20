@@ -14,7 +14,7 @@ namespace VirtoCommerce.PricingModule.Data.ExportImport
             _searchService = searchService;
         }
 
-        protected override FetchResult FetchUsingService(SearchCriteriaBase searchCriteria)
+        protected override FetchResult FetchData(SearchCriteriaBase searchCriteria)
         {
             var pricelistSearchResult = _searchService.SearchPricelistsAsync((PricelistSearchCriteria)searchCriteria).Result;
             return new FetchResult(pricelistSearchResult.Results, pricelistSearchResult.TotalCount);

@@ -138,16 +138,18 @@ namespace VirtoCommerce.PricingModule.Web
             };
 
             var registrar = _serviceProvider.GetService<IKnownExportTypesRegistrar>();
+
+            var pricingSearchService = _serviceProvider.GetService<IPricingSearchService>();
             registrar.RegisterType<Price>()
-                .WithDataSourceFactory(dataQuery => new PriceExportPagedDataSource(_serviceProvider.GetService<IPricingSearchService>()) { DataQuery = dataQuery })
+                .WithDataSourceFactory(dataQuery => new PriceExportPagedDataSource(pricingSearchService) { DataQuery = dataQuery })
                 .WithMetadata(ExportedTypeMetadata.GetFromType<Price>());
 
             registrar.RegisterType<Pricelist>()
-                .WithDataSourceFactory(dataQuery => new PricelistExportPagedDataSource(_serviceProvider.GetService<IPricingSearchService>()) { DataQuery = dataQuery })
+                .WithDataSourceFactory(dataQuery => new PricelistExportPagedDataSource(pricingSearchService) { DataQuery = dataQuery })
                 .WithMetadata(ExportedTypeMetadata.GetFromType<Pricelist>());
 
             registrar.RegisterType<PricelistAssignment>()
-                .WithDataSourceFactory(dataQuery => new PricelistAssignmenExportPagedDataSource(_serviceProvider.GetService<IPricingSearchService>()) { DataQuery = dataQuery })
+                .WithDataSourceFactory(dataQuery => new PricelistAssignmenExportPagedDataSource(pricingSearchService) { DataQuery = dataQuery })
                 .WithMetadata(ExportedTypeMetadata.GetFromType<PricelistAssignment>());
         }
 
