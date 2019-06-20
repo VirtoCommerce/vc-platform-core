@@ -1,6 +1,8 @@
+using System;
+using System.IO;
 using Microsoft.AspNetCore.Builder;
-using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.DependencyInjection;
+using VirtoCommerce.ExportModule.Core.Model;
 using VirtoCommerce.ExportModule.Core.Services;
 using VirtoCommerce.ExportModule.Data.Services;
 using VirtoCommerce.Platform.Core.Modularity;
@@ -13,11 +15,13 @@ namespace VirtoCommerce.ExportModule.Web
 
         public void Initialize(IServiceCollection serviceCollection)
         {
-            var configuration = serviceCollection.BuildServiceProvider().GetRequiredService<IConfiguration>();
-
             serviceCollection.AddSingleton<IKnownExportTypesRegistrar, KnownExportTypesService>();
             serviceCollection.AddSingleton<IKnownExportTypesResolver, KnownExportTypesService>();
-            serviceCollection.AddScoped<IExportProviderFactory, ExportProviderFactory>();
+
+            serviceCollection.AddTransient<Func<IExportProviderConfiguration, Stream, IExportProvider>>(serviceProvider => (config, stream) => new JsonExportProvider(stream, config));
+            serviceCollection.AddTransient<Func<IExportProviderConfiguration, Stream, IExportProvider>>(serviceProvider => (config, stream) => new CsvExportProvider(stream, config));
+            serviceCollection.AddTransient<IExportProviderFactory, ExportProviderFactory>();
+
             serviceCollection.AddScoped<IDataExporter, DataExporter>();
         }
 

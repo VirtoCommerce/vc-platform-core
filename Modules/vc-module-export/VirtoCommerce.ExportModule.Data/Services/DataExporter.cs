@@ -1,9 +1,10 @@
 using System;
 using System.IO;
 using System.Linq;
-using System.Threading;
 using VirtoCommerce.ExportModule.Core.Model;
 using VirtoCommerce.ExportModule.Core.Services;
+using VirtoCommerce.Platform.Core.Common;
+using VirtoCommerce.Platform.Core.ExportImport;
 
 namespace VirtoCommerce.ExportModule.Data.Services
 {
@@ -18,12 +19,14 @@ namespace VirtoCommerce.ExportModule.Data.Services
             _exportProviderFactory = exportProviderFactory;
         }
 
-        public void Export(Stream stream, ExportDataRequest request, Action<ExportProgressInfo> progressCallback, CancellationToken token)
+        public void Export(Stream stream, ExportDataRequest request, Action<ExportImportProgressInfo> progressCallback, ICancellationToken token)
         {
             if (request == null)
             {
                 throw new ArgumentNullException(nameof(request));
             }
+
+            token.ThrowIfCancellationRequested();
 
             var exportedTypeDefinition = _exportTypesResolver.ResolveExportedTypeDefinition(request.ExportTypeName);
             var pagedDataSource = exportedTypeDefinition.ExportedDataSourceFactory(request.DataQuery);
@@ -31,7 +34,7 @@ namespace VirtoCommerce.ExportModule.Data.Services
             var completedMessage = $"Export completed";
             var totalCount = pagedDataSource.GetTotalCount();
             var exportedCount = 0;
-            var exportProgress = new ExportProgressInfo()
+            var exportProgress = new ExportImportProgressInfo()
             {
                 ProcessedCount = 0,
                 TotalCount = totalCount,
@@ -56,11 +59,7 @@ namespace VirtoCommerce.ExportModule.Data.Services
 
                     while (exportedCount < totalCount)
                     {
-                        if (token.IsCancellationRequested)
-                        {
-                            completedMessage = "Export was cancelled by the user";
-                            break;
-                        }
+                        token.ThrowIfCancellationRequested();
 
                         exportProgress.Description = "Fetcing …";
                         progressCallback(exportProgress);
