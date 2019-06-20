@@ -4,6 +4,7 @@ namespace VirtoCommerce.ExportModule.Core.Services
 {
     public interface IKnownExportTypesRegistrar
     {
+        ExportedTypeDefinition[] GetRegisteredTypes();
         ExportedTypeDefinition RegisterType<T>();
     }
 }

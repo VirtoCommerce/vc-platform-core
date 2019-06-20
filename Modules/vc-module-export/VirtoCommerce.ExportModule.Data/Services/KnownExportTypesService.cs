@@ -11,6 +11,11 @@ namespace VirtoCommerce.ExportModule.Data.Services
     {
         private readonly Dictionary<Type, ExportedTypeDefinition> _knownExportTypes = new Dictionary<Type, ExportedTypeDefinition>();
 
+        public ExportedTypeDefinition[] GetRegisteredTypes()
+        {
+            return _knownExportTypes.Values.ToArray();
+        }
+
         public ExportedTypeDefinition RegisterType<T>()
         {
             var type = typeof(T);

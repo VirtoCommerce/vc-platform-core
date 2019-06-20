@@ -39,6 +39,7 @@ namespace VirtoCommerce.ExportModule.Data.Services
 
         public void WriteMetadata(ExportedTypeMetadata metadata)
         {
+            EnsureWriterCreated();
         }
 
         public void WriteRecord(object objectToRecord)
