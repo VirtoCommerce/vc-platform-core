@@ -1,9 +1,12 @@
+using System;
 using System.Collections.Generic;
+using System.IO;
 using System.Linq;
 using Hangfire;
 using Microsoft.AspNetCore.Mvc;
 using VirtoCommerce.ExportModule.Core.Model;
 using VirtoCommerce.ExportModule.Core.Services;
+using VirtoCommerce.ExportModule.Data.Model;
 using VirtoCommerce.ExportModule.Web.BackgroundJobs;
 using VirtoCommerce.ExportModule.Web.Model;
 using VirtoCommerce.Platform.Core.ExportImport.PushNotifications;
@@ -15,18 +18,18 @@ namespace VirtoCommerce.ExportModule.Web.Controllers
     [Route("api/export")]
     public class ExportController : Controller
     {
-        private readonly IEnumerable<IExportProvider> _exportProviders;
+        private readonly IEnumerable<Func<IExportProviderConfiguration, Stream, IExportProvider>> _exportProviderFactories;
         private readonly IKnownExportTypesRegistrar _knownExportTypesRegistrar;
         private readonly IUserNameResolver _userNameResolver;
         private readonly IPushNotificationManager _pushNotificationManager;
 
         public ExportController(
-            IEnumerable<IExportProvider> exportProviders,
+            IEnumerable<Func<IExportProviderConfiguration, Stream, IExportProvider>> exportProviderFactories,
             IKnownExportTypesRegistrar knownExportTypesRegistrar,
             IUserNameResolver userNameResolver,
             IPushNotificationManager pushNotificationManager)
         {
-            _exportProviders = exportProviders;
+            _exportProviderFactories = exportProviderFactories;
             _knownExportTypesRegistrar = knownExportTypesRegistrar;
             _userNameResolver = userNameResolver;
             _pushNotificationManager = pushNotificationManager;
@@ -51,7 +54,13 @@ namespace VirtoCommerce.ExportModule.Web.Controllers
         [Route("providers")]
         public ActionResult<IExportProvider[]> GetExportProviders()
         {
-            return Ok(_exportProviders.ToArray());
+            return Ok(_exportProviderFactories.Select(x =>
+            {
+                using (var ms = new MemoryStream())
+                {
+                    return x(new EmptyProviderConfiguration(), ms);
+                }
+            }).ToArray());
         }
 
         /// <summary>
