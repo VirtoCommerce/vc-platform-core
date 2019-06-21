@@ -57,12 +57,12 @@ namespace VirtoCommerce.ExportModule.Data.Services
 
                     exportProvider.WriteMetadata(exportProvider.Metadata);
 
+                    exportProgress.Description = "Fetching…";
+                    progressCallback(exportProgress);
+
                     while (exportedCount < totalCount)
                     {
                         token.ThrowIfCancellationRequested();
-
-                        exportProgress.Description = "Fetcing …";
-                        progressCallback(exportProgress);
 
                         var objectBatch = pagedDataSource.FetchNextPage();
 

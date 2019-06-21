@@ -14,7 +14,6 @@ using VirtoCommerce.CoreModule.Core.Conditions.Browse;
 using VirtoCommerce.CoreModule.Core.Conditions.GeoConditions;
 using VirtoCommerce.ExportModule.Core.Model;
 using VirtoCommerce.ExportModule.Core.Services;
-using VirtoCommerce.ExportModule.Data.Services;
 using VirtoCommerce.Platform.Core.Bus;
 using VirtoCommerce.Platform.Core.Common;
 using VirtoCommerce.Platform.Core.ExportImport;
@@ -58,14 +57,13 @@ namespace VirtoCommerce.PricingModule.Web
 
             serviceCollection.AddTransient<IPricingService, PricingServiceImpl>();
             serviceCollection.AddTransient<IPricingSearchService, PricingSearchServiceImpl>();
+            serviceCollection.AddSingleton<Func<IPricingSearchService>>(provider => () => provider.CreateScope().ServiceProvider.GetRequiredService<IPricingSearchService>());
             serviceCollection.AddSingleton<IPricingExtensionManager, DefaultPricingExtensionManagerImpl>();
             serviceCollection.AddSingleton<PricingExportImport>();
             serviceCollection.AddSingleton<PolymorphicPricingJsonConverter>();
             serviceCollection.AddTransient<ProductPriceDocumentChangesProvider>();
             serviceCollection.AddTransient<ProductPriceDocumentBuilder>();
             serviceCollection.AddSingleton<LogChangesChangedEventHandler>();
-
-            serviceCollection.AddSingleton<IKnownExportTypesRegistrar, KnownExportTypesService>();
         }
 
         public void PostInitialize(IApplicationBuilder appBuilder)
@@ -137,20 +135,24 @@ namespace VirtoCommerce.PricingModule.Web
                 Children = new List<IConditionTree>() { GetPricingDynamicExpression() }
             };
 
-            var registrar = _serviceProvider.GetService<IKnownExportTypesRegistrar>();
+            var registrar = appBuilder.ApplicationServices.GetService<IKnownExportTypesRegistrar>();
 
-            var pricingSearchService = _serviceProvider.GetService<IPricingSearchService>();
+            var pricingSearchServiceFactory = appBuilder.ApplicationServices.GetService<Func<IPricingSearchService>>();
             registrar.RegisterType<Price>()
-                .WithDataSourceFactory(dataQuery => new PriceExportPagedDataSource(pricingSearchService) { DataQuery = dataQuery })
+                .WithDataSourceFactory(dataQuery => new PriceExportPagedDataSource(pricingSearchServiceFactory()) { DataQuery = dataQuery })
                 .WithMetadata(ExportedTypeMetadata.GetFromType<Price>());
 
             registrar.RegisterType<Pricelist>()
-                .WithDataSourceFactory(dataQuery => new PricelistExportPagedDataSource(pricingSearchService) { DataQuery = dataQuery })
+                .WithDataSourceFactory(dataQuery => new PricelistExportPagedDataSource(pricingSearchServiceFactory()) { DataQuery = dataQuery })
                 .WithMetadata(ExportedTypeMetadata.GetFromType<Pricelist>());
 
             registrar.RegisterType<PricelistAssignment>()
-                .WithDataSourceFactory(dataQuery => new PricelistAssignmenExportPagedDataSource(pricingSearchService) { DataQuery = dataQuery })
+                .WithDataSourceFactory(dataQuery => new PricelistAssignmentExportPagedDataSource(pricingSearchServiceFactory()) { DataQuery = dataQuery })
                 .WithMetadata(ExportedTypeMetadata.GetFromType<PricelistAssignment>());
+
+            AbstractTypeFactory<ExportDataQuery>.RegisterType<PriceExportDataQuery>();
+            AbstractTypeFactory<ExportDataQuery>.RegisterType<PricelistAssignmentExportDataQuery>();
+            AbstractTypeFactory<ExportDataQuery>.RegisterType<PricelistExportDataQuery>();
         }
 
         public void Uninstall()

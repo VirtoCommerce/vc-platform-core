@@ -1,11 +1,17 @@
+using System;
 using System.Collections.Generic;
+using System.IO;
 using System.Linq;
 using Hangfire;
 using Microsoft.AspNetCore.Mvc;
+using Microsoft.AspNetCore.StaticFiles;
+using Microsoft.Extensions.Options;
 using VirtoCommerce.ExportModule.Core.Model;
 using VirtoCommerce.ExportModule.Core.Services;
+using VirtoCommerce.ExportModule.Data.Model;
 using VirtoCommerce.ExportModule.Web.BackgroundJobs;
 using VirtoCommerce.ExportModule.Web.Model;
+using VirtoCommerce.Platform.Core;
 using VirtoCommerce.Platform.Core.ExportImport.PushNotifications;
 using VirtoCommerce.Platform.Core.PushNotifications;
 using VirtoCommerce.Platform.Core.Security;
@@ -15,21 +21,24 @@ namespace VirtoCommerce.ExportModule.Web.Controllers
     [Route("api/export")]
     public class ExportController : Controller
     {
-        private readonly IEnumerable<IExportProvider> _exportProviders;
+        private readonly IEnumerable<Func<IExportProviderConfiguration, Stream, IExportProvider>> _exportProviderFactories;
         private readonly IKnownExportTypesRegistrar _knownExportTypesRegistrar;
         private readonly IUserNameResolver _userNameResolver;
         private readonly IPushNotificationManager _pushNotificationManager;
+        private readonly PlatformOptions _platformOptions;
 
         public ExportController(
-            IEnumerable<IExportProvider> exportProviders,
+            IEnumerable<Func<IExportProviderConfiguration, Stream, IExportProvider>> exportProviderFactories,
             IKnownExportTypesRegistrar knownExportTypesRegistrar,
             IUserNameResolver userNameResolver,
-            IPushNotificationManager pushNotificationManager)
+            IPushNotificationManager pushNotificationManager,
+            IOptions<PlatformOptions> platformOptions)
         {
-            _exportProviders = exportProviders;
+            _exportProviderFactories = exportProviderFactories;
             _knownExportTypesRegistrar = knownExportTypesRegistrar;
             _userNameResolver = userNameResolver;
             _pushNotificationManager = pushNotificationManager;
+            _platformOptions = platformOptions.Value;
         }
 
         /// <summary>
@@ -51,7 +60,13 @@ namespace VirtoCommerce.ExportModule.Web.Controllers
         [Route("providers")]
         public ActionResult<IExportProvider[]> GetExportProviders()
         {
-            return Ok(_exportProviders.ToArray());
+            return Ok(_exportProviderFactories.Select(x =>
+            {
+                using (var ms = new MemoryStream())
+                {
+                    return x(new EmptyProviderConfiguration(), ms);
+                }
+            }).ToArray());
         }
 
         /// <summary>
@@ -87,6 +102,30 @@ namespace VirtoCommerce.ExportModule.Web.Controllers
         {
             BackgroundJob.Delete(cancellationRequest.JobId);
             return Ok();
+        }
+
+        /// <summary>
+        /// Downloads file by its name
+        /// </summary>
+        /// <param name="fileName"></param>
+        /// <returns></returns>
+        [HttpGet]
+        [Route("download/{fileName}")]
+        public ActionResult DownloadExportFile([FromRoute] string fileName)
+        {
+            var localTmpFolder = Path.GetFullPath(Path.Combine(_platformOptions.DefaultExportFolder));
+            var localPath = Path.Combine(localTmpFolder, Path.GetFileName(_platformOptions.DefaultExportFileName));
+
+            //Load source data only from local file system 
+            using (var stream = System.IO.File.Open(localPath, FileMode.Open))
+            {
+                var provider = new FileExtensionContentTypeProvider();
+                if (!provider.TryGetContentType(localPath, out var contentType))
+                {
+                    contentType = "application/octet-stream";
+                }
+                return PhysicalFile(localPath, contentType);
+            }
         }
     }
 }
