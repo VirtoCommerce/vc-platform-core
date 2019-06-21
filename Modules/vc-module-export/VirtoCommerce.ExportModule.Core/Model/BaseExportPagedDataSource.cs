@@ -1,5 +1,6 @@
 using System.Collections;
 using VirtoCommerce.Platform.Core.Common;
+using VirtoCommerce.Platform.Core.ExportImport;
 
 namespace VirtoCommerce.ExportModule.Core.Model
 {
@@ -17,7 +18,7 @@ namespace VirtoCommerce.ExportModule.Core.Model
             }
         }
 
-        public int PageSize { get; set; }
+        public int PageSize { get; set; } = 50;
         public int CurrentPageNumber { get; private set; }
         public ExportDataQuery DataQuery { get; set; }
         private int _totalCount = -1;
@@ -33,7 +34,7 @@ namespace VirtoCommerce.ExportModule.Core.Model
             }
 
             _searchCriteria.Skip = PageSize * CurrentPageNumber;
-            _searchCriteria.Take = CurrentPageNumber;
+            _searchCriteria.Take = PageSize;
 
             var result = FetchData(_searchCriteria);
             _totalCount = result.TotalCount;

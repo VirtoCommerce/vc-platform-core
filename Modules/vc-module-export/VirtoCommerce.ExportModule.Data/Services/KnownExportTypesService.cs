@@ -1,5 +1,5 @@
 using System;
-using System.Collections.Generic;
+using System.Collections.Concurrent;
 using System.Linq;
 using VirtoCommerce.ExportModule.Core.Model;
 using VirtoCommerce.ExportModule.Core.Services;
@@ -9,7 +9,7 @@ namespace VirtoCommerce.ExportModule.Data.Services
 {
     public class KnownExportTypesService : IKnownExportTypesRegistrar, IKnownExportTypesResolver
     {
-        private readonly Dictionary<Type, ExportedTypeDefinition> _knownExportTypes = new Dictionary<Type, ExportedTypeDefinition>();
+        private readonly ConcurrentDictionary<Type, ExportedTypeDefinition> _knownExportTypes = new ConcurrentDictionary<Type, ExportedTypeDefinition>();
 
         public ExportedTypeDefinition[] GetRegisteredTypes()
         {
@@ -22,7 +22,7 @@ namespace VirtoCommerce.ExportModule.Data.Services
 
             if (!_knownExportTypes.TryGetValue(type, out var result))
             {
-                _knownExportTypes.Add(type, new ExportedTypeDefinition()
+                _knownExportTypes.TryAdd(type, new ExportedTypeDefinition()
                 {
                     TypeName = type.FullName,
                     MetaData = ExportedTypeMetadata.GetFromType<T>(),
