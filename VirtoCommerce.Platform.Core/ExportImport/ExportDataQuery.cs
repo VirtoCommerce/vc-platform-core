@@ -2,7 +2,7 @@ using System.Linq;
 using Newtonsoft.Json;
 using VirtoCommerce.Platform.Core.Common;
 
-namespace VirtoCommerce.ExportModule.Core.Model
+namespace VirtoCommerce.Platform.Core.ExportImport
 {
     public abstract class ExportDataQuery : ValueObject
     {

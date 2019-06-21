@@ -1,6 +1,7 @@
 using System;
 using System.IO;
 using System.Text;
+using System.Threading;
 using System.Threading.Tasks;
 using Moq;
 using Newtonsoft.Json;
@@ -8,6 +9,8 @@ using VirtoCommerce.CoreModule.Core.Conditions;
 using VirtoCommerce.ExportModule.Core.Model;
 using VirtoCommerce.ExportModule.Core.Services;
 using VirtoCommerce.ExportModule.Data.Services;
+using VirtoCommerce.Platform.Core.Common;
+using VirtoCommerce.Platform.Core.ExportImport;
 using VirtoCommerce.PricingModule.Core.Model;
 using VirtoCommerce.PricingModule.Core.Model.Search;
 using VirtoCommerce.PricingModule.Core.Services;
@@ -47,7 +50,12 @@ namespace VirtoCommerce.PricingModule.Test
                 .WithDataSourceFactory(dataQuery => new PricelistAssignmentExportPagedDataSource(searchServiceMock.Object) { DataQuery = dataQuery })
                 .WithMetadata(ExportedTypeMetadata.GetFromType<PricelistAssignment>());
 
-            var dataExporter = new DataExporter(resolver, new ExportProviderFactory());
+            var exportProviderFactories = new[] {
+                new Func<IExportProviderConfiguration, Stream, IExportProvider>((config, stream) => new JsonExportProvider(stream, config)),
+                new Func<IExportProviderConfiguration, Stream, IExportProvider>((config, stream) => new CsvExportProvider(stream, config)),
+            };
+
+            var dataExporter = new DataExporter(resolver, new ExportProviderFactory(exportProviderFactories));
 
             using (var ms = new MemoryStream())
             {
@@ -62,8 +70,8 @@ namespace VirtoCommerce.PricingModule.Test
                         ExportTypeName = typeof(Price).FullName,
                         ProviderName = nameof(CsvExportProvider)
                     },
-                    new System.Action<ExportProgressInfo>(x => Console.WriteLine(x.Description)),
-                    new System.Threading.CancellationToken());
+                    new Action<ExportImportProgressInfo>(x => Console.WriteLine(x.Description)),
+                    new CancellationTokenWrapper(CancellationToken.None));
 
                 var resultcsv = Encoding.UTF8.GetString(ms.ToArray());
             }
@@ -82,8 +90,8 @@ namespace VirtoCommerce.PricingModule.Test
                         ExportTypeName = typeof(Pricelist).FullName,
                         ProviderName = nameof(JsonExportProvider)
                     },
-                    new System.Action<ExportProgressInfo>(x => Console.WriteLine(x.Description)),
-                    new System.Threading.CancellationToken());
+                    new Action<ExportImportProgressInfo>(x => Console.WriteLine(x.Description)),
+                    new CancellationTokenWrapper(CancellationToken.None));
 
                 var resultcsv = Encoding.UTF8.GetString(ms.ToArray());
             }
@@ -102,8 +110,8 @@ namespace VirtoCommerce.PricingModule.Test
                         ExportTypeName = typeof(PricelistAssignment).FullName,
                         ProviderName = nameof(JsonExportProvider)
                     },
-                    new System.Action<ExportProgressInfo>(x => Console.WriteLine(x.Description)),
-                    new System.Threading.CancellationToken());
+                    new Action<ExportImportProgressInfo>(x => Console.WriteLine(x.Description)),
+                    new CancellationTokenWrapper(CancellationToken.None));
 
                 var resultcsv = Encoding.UTF8.GetString(ms.ToArray());
             }

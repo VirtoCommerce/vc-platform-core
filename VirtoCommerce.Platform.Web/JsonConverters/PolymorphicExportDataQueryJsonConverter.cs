@@ -2,12 +2,12 @@ using System;
 using System.Linq;
 using Newtonsoft.Json;
 using Newtonsoft.Json.Linq;
-using VirtoCommerce.ExportModule.Core.Model;
 using VirtoCommerce.Platform.Core.Common;
+using VirtoCommerce.Platform.Core.ExportImport;
 
-namespace VirtoCommerce.ExportModule.Web.Converters
+namespace VirtoCommerce.Platform.Web.JsonConverters
 {
-    public class PolymorphicJsonConverter : JsonConverter
+    public class PolymorphicExportDataQueryJsonConverter : JsonConverter
     {
         private static readonly Type[] _knownTypes = { typeof(ExportDataQuery) };
 

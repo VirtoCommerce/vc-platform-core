@@ -1,3 +1,5 @@
+using VirtoCommerce.Platform.Core.ExportImport;
+
 namespace VirtoCommerce.ExportModule.Core.Model
 {
     public class ExportDataRequest
