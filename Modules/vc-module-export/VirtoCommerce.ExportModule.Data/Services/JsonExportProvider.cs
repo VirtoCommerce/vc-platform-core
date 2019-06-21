@@ -20,7 +20,7 @@ namespace VirtoCommerce.ExportModule.Data.Services
 
         private readonly JsonSerializer _serializer;
         private StreamWriter _streamWriter;
-
+        private JsonTextWriter _jsonTextWriter;
 
         public JsonExportProvider(Stream stream, IExportProviderConfiguration exportProviderConfiguration)
         {
@@ -46,7 +46,7 @@ namespace VirtoCommerce.ExportModule.Data.Services
         {
             EnsureWriterCreated();
             FilterProperties(objectToRecord);
-            _serializer.Serialize(_streamWriter, objectToRecord);
+            _serializer.Serialize(_jsonTextWriter, objectToRecord);
             _streamWriter.Flush();
         }
 
@@ -56,6 +56,8 @@ namespace VirtoCommerce.ExportModule.Data.Services
             if (_streamWriter == null)
             {
                 _streamWriter = new StreamWriter(_stream);
+                _jsonTextWriter = new JsonTextWriter(_streamWriter);
+                _jsonTextWriter.WriteStartArray();
             }
         }
 
@@ -107,6 +109,7 @@ namespace VirtoCommerce.ExportModule.Data.Services
 
         public void Dispose()
         {
+            _jsonTextWriter.WriteEndArray();
             _streamWriter.Dispose();
         }
     }
