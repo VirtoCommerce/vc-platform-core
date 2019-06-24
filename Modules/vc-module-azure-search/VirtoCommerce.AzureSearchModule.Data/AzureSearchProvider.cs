@@ -414,12 +414,12 @@ namespace VirtoCommerce.AzureSearchModule.Data
 
         protected virtual void ThrowException(string message, Exception innerException)
         {
-            throw new SearchException($"{message}. Server name: {_azureSearchOptions.Server}, Scope: {_searchOptions.Scope}", innerException);
+            throw new SearchException($"{message}. Search service name: {_azureSearchOptions.SearchServiceName}, Scope: {_searchOptions.Scope}", innerException);
         }
 
         protected virtual SearchServiceClient CreateSearchServiceClient()
         {
-            var result = new SearchServiceClient(_azureSearchOptions.Server, new SearchCredentials(_azureSearchOptions.Key));
+            var result = new SearchServiceClient(_azureSearchOptions.SearchServiceName, new SearchCredentials(_azureSearchOptions.Key));
             return result;
         }
 
