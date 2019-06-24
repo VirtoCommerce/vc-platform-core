@@ -110,7 +110,7 @@ namespace VirtoCommerce.ExportModule.Data.Services
         public void Dispose()
         {
             _jsonTextWriter?.WriteEndArray();
-            _streamWriter.Dispose();
+            _streamWriter?.Dispose();
         }
     }
 }
