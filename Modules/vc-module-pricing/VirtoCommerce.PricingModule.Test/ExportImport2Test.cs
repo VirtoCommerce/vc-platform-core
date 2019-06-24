@@ -1,5 +1,6 @@
 using System;
 using System.IO;
+using System.Linq;
 using System.Text;
 using System.Threading;
 using System.Threading.Tasks;
@@ -22,33 +23,179 @@ namespace VirtoCommerce.PricingModule.Test
     public class ExportImport2Test
     {
         [Fact]
-        public async Task TestExport()
+        public Task PriceJsonExport()
         {
-            // This is temporary (for debug purposes) full test of prices export
-
+            //Arrange
             IKnownExportTypesRegistrar registrar = new KnownExportTypesService();
             registrar.RegisterType<Price>();
+
+            var searchServiceMock = new Mock<IPricingSearchService>();
+            searchServiceMock.Setup(x => x.SearchPricesAsync(It.IsAny<PricesSearchCriteria>())).ReturnsAsync(GetTestPriceResult());
+
+            var resolver = (IKnownExportTypesResolver)registrar;
+            resolver.ResolveExportedTypeDefinition(typeof(Price).FullName)
+                .WithDataSourceFactory(dataQuery => new PriceExportPagedDataSource(searchServiceMock.Object) { DataQuery = dataQuery })
+                .WithMetadata(ExportedTypeMetadata.GetFromType<Price>());
+
+            var exportProviderFactories = new[] {
+                new Func<IExportProviderConfiguration, Stream, IExportProvider>((config, stream) => new JsonExportProvider(stream, config))
+            };
+
+            var dataExporter = new DataExporter(resolver, new ExportProviderFactory(exportProviderFactories));
+
+            //Act
+            var result = "";
+            using (var ms = new MemoryStream())
+            {
+                dataExporter.Export(
+                    ms,
+                    new ExportDataRequest()
+                    {
+                        DataQuery = new PriceExportDataQuery()
+                        {
+                            IncludedProperties = new string[] { "Currency", "ProductId", "Sale", "List", "MinQuantity", "StartDate", "EndDate", "EffectiveValue" }
+                        },
+                        ExportTypeName = typeof(Price).FullName,
+                        ProviderName = nameof(JsonExportProvider)
+                    },
+                    new Action<ExportImportProgressInfo>(x => Console.WriteLine(x.Description)),
+                    new CancellationTokenWrapper(CancellationToken.None));
+
+                result = Encoding.UTF8.GetString(ms.ToArray());
+            }
+
+            //Assert
+            var prices = JsonConvert.DeserializeObject<Price[]>(result);
+
+            Assert.NotNull(prices);
+            Assert.NotEmpty(prices);
+            Assert.Equal(14, prices.Count(x => x.List == 3.99m));
+
+            return Task.CompletedTask;
+        }
+
+
+        [Fact]
+        public Task PricelistJsonExport()
+        {
+            //Arrange
+            IKnownExportTypesRegistrar registrar = new KnownExportTypesService();
             registrar.RegisterType<Pricelist>();
+
+            var searchServiceMock = new Mock<IPricingSearchService>();
+            searchServiceMock.Setup(x => x.SearchPricelistsAsync(It.IsAny<PricelistSearchCriteria>())).ReturnsAsync(GetTestPricelistResult());
+
+            var resolver = (IKnownExportTypesResolver)registrar;
+            resolver.ResolveExportedTypeDefinition(typeof(Pricelist).FullName)
+                .WithDataSourceFactory(dataQuery => new PricelistExportPagedDataSource(searchServiceMock.Object) { DataQuery = dataQuery })
+                .WithMetadata(ExportedTypeMetadata.GetFromType<Pricelist>());
+
+            var exportProviderFactories = new[] {
+                new Func<IExportProviderConfiguration, Stream, IExportProvider>((config, stream) => new JsonExportProvider(stream, config))
+            };
+
+            var dataExporter = new DataExporter(resolver, new ExportProviderFactory(exportProviderFactories));
+
+            //Act
+            var result = "";
+            using (var ms = new MemoryStream())
+            {
+                dataExporter.Export(
+                    ms,
+                    new ExportDataRequest()
+                    {
+                        DataQuery = new PricelistExportDataQuery()
+                        {
+                            IncludedProperties = new string[] { "Currency", "Id", "Name" }
+                        },
+                        ExportTypeName = typeof(Pricelist).FullName,
+                        ProviderName = nameof(JsonExportProvider)
+                    },
+                    new Action<ExportImportProgressInfo>(x => Console.WriteLine(x.Description)),
+                    new CancellationTokenWrapper(CancellationToken.None));
+
+                result = Encoding.UTF8.GetString(ms.ToArray());
+            }
+
+            //Assert
+            var pricelists = JsonConvert.DeserializeObject<Pricelist[]>(result);
+
+            Assert.NotNull(pricelists);
+            Assert.NotEmpty(pricelists);
+            Assert.Equal(1, pricelists.Count(x => x.Name.Equals("BoltsUSD", StringComparison.InvariantCultureIgnoreCase)));
+
+            return Task.CompletedTask;
+        }
+
+        [Fact]
+        public Task PricelistAssignmentJsonExport()
+        {
+            IKnownExportTypesRegistrar registrar = new KnownExportTypesService();
             registrar.RegisterType<PricelistAssignment>();
+
+            var searchServiceMock = new Mock<IPricingSearchService>();
+            searchServiceMock.Setup(x => x.SearchPricelistAssignmentsAsync(It.IsAny<PricelistAssignmentsSearchCriteria>())).ReturnsAsync(GetPricelistAssignmentSearchResult());
+
+            var resolver = (IKnownExportTypesResolver)registrar;
+            resolver.ResolveExportedTypeDefinition(typeof(PricelistAssignment).FullName)
+                .WithDataSourceFactory(dataQuery => new PricelistAssignmentExportPagedDataSource(searchServiceMock.Object) { DataQuery = dataQuery })
+                .WithMetadata(ExportedTypeMetadata.GetFromType<PricelistAssignment>());
+
+            var exportProviderFactories = new[] {
+                new Func<IExportProviderConfiguration, Stream, IExportProvider>((config, stream) => new JsonExportProvider(stream, config))
+            };
+
+            var dataExporter = new DataExporter(resolver, new ExportProviderFactory(exportProviderFactories));
+
+            //Act
+            var result = "";
+            using (var ms = new MemoryStream())
+            {
+                dataExporter.Export(
+                    ms,
+                    new ExportDataRequest()
+                    {
+                        DataQuery = new PricelistAssignmentExportDataQuery()
+                        {
+                            IncludedProperties = new string[] { "CatalogId", "PricelistId", "Priority", "Id" }
+                        },
+                        ExportTypeName = typeof(PricelistAssignment).FullName,
+                        ProviderName = nameof(JsonExportProvider)
+                    },
+                    new Action<ExportImportProgressInfo>(x => Console.WriteLine(x.Description)),
+                    new CancellationTokenWrapper(CancellationToken.None));
+
+                result = Encoding.UTF8.GetString(ms.ToArray());
+            }
+
+            //Assert
+            var pricelistsAssigments = JsonConvert.DeserializeObject<PricelistAssignment[]>(result);
+
+            Assert.NotNull(pricelistsAssigments);
+            Assert.NotEmpty(pricelistsAssigments);
+            var assigment = pricelistsAssigments.FirstOrDefault(x => x.Id == "d4a4e5271046497eaef61ee47efe6215");
+            Assert.NotNull(assigment);
+            Assert.Null(assigment.Name);
+
+            return Task.CompletedTask;
+        }
+
+
+        [Fact]
+        public async Task PriceCsvExport()
+        {
+            // This is temporary (for debug purposes) full test of prices export
+            IKnownExportTypesRegistrar registrar = new KnownExportTypesService();
+            registrar.RegisterType<Price>();
 
             var resolver = (IKnownExportTypesResolver)registrar;
 
             var searchServiceMock = new Mock<IPricingSearchService>();
             searchServiceMock.Setup(x => x.SearchPricesAsync(It.IsAny<PricesSearchCriteria>())).ReturnsAsync(GetTestPriceResult());
-            searchServiceMock.Setup(x => x.SearchPricelistsAsync(It.IsAny<PricelistSearchCriteria>())).ReturnsAsync(GetTestPricelistResult());
-            searchServiceMock.Setup(x => x.SearchPricelistAssignmentsAsync(It.IsAny<PricelistAssignmentsSearchCriteria>())).ReturnsAsync(GetPricelistAssignmentSearchResult());
 
             resolver.ResolveExportedTypeDefinition(typeof(Price).FullName)
                 .WithDataSourceFactory(dataQuery => new PriceExportPagedDataSource(searchServiceMock.Object) { DataQuery = dataQuery })
                 .WithMetadata(ExportedTypeMetadata.GetFromType<Price>());
-
-            resolver.ResolveExportedTypeDefinition(typeof(Pricelist).FullName)
-                .WithDataSourceFactory(dataQuery => new PricelistExportPagedDataSource(searchServiceMock.Object) { DataQuery = dataQuery })
-                .WithMetadata(ExportedTypeMetadata.GetFromType<Pricelist>());
-
-            resolver.ResolveExportedTypeDefinition(typeof(PricelistAssignment).FullName)
-                .WithDataSourceFactory(dataQuery => new PricelistAssignmentExportPagedDataSource(searchServiceMock.Object) { DataQuery = dataQuery })
-                .WithMetadata(ExportedTypeMetadata.GetFromType<PricelistAssignment>());
 
             var exportProviderFactories = new[] {
                 new Func<IExportProviderConfiguration, Stream, IExportProvider>((config, stream) => new JsonExportProvider(stream, config)),
@@ -75,48 +222,6 @@ namespace VirtoCommerce.PricingModule.Test
 
                 var resultcsv = Encoding.UTF8.GetString(ms.ToArray());
             }
-
-
-            using (var ms = new MemoryStream())
-            {
-                dataExporter.Export(
-                    ms,
-                    new ExportDataRequest()
-                    {
-                        DataQuery = new PricelistExportDataQuery()
-                        {
-                            IncludedProperties = new string[] { "Currency", "Id", "Name" }
-                        },
-                        ExportTypeName = typeof(Pricelist).FullName,
-                        ProviderName = nameof(JsonExportProvider)
-                    },
-                    new Action<ExportImportProgressInfo>(x => Console.WriteLine(x.Description)),
-                    new CancellationTokenWrapper(CancellationToken.None));
-
-                var resultcsv = Encoding.UTF8.GetString(ms.ToArray());
-            }
-
-
-            using (var ms = new MemoryStream())
-            {
-                dataExporter.Export(
-                    ms,
-                    new ExportDataRequest()
-                    {
-                        DataQuery = new PricelistAssignmentExportDataQuery()
-                        {
-                            IncludedProperties = new string[] { "CatalogId", "PricelistId", "Priority", "Id" }
-                        },
-                        ExportTypeName = typeof(PricelistAssignment).FullName,
-                        ProviderName = nameof(JsonExportProvider)
-                    },
-                    new Action<ExportImportProgressInfo>(x => Console.WriteLine(x.Description)),
-                    new CancellationTokenWrapper(CancellationToken.None));
-
-                var resultcsv = Encoding.UTF8.GetString(ms.ToArray());
-            }
-
-
         }
 
         /// <summary>
