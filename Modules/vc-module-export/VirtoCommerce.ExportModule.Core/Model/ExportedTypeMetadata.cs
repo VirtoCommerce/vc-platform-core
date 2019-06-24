@@ -56,6 +56,11 @@ namespace VirtoCommerce.ExportModule.Core.Model
             return result;
         }
 
+        public ExportedTypeMetadata MakeShallowCopy()
+        {
+            return (ExportedTypeMetadata)MemberwiseClone();
+        }
+
 
         private ExportTypePropertyInfoEx[] GetFromType(Type type, string baseMemberName, List<MemberInfo> passedNodes)
         {

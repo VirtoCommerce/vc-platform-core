@@ -50,10 +50,14 @@ namespace VirtoCommerce.ExportModule.Data.Services
 
                 using (var exportProvider = _exportProviderFactory.CreateProvider(request.ProviderName, request.ProviderConfig, stream))
                 {
-                    //-------------------------------- Some kind of fake below. We need to decide how to limit properties & pass metadata into provider properly
-                    exportedTypeDefinition.MetaData.PropertiesInfo = exportedTypeDefinition.MetaData.PropertiesInfo.Where(x => request.DataQuery.IncludedProperties.Contains(x.Name)).ToArray();
-                    exportProvider.Metadata = exportedTypeDefinition.MetaData;
-                    //---------------------------------
+                    var filteredMetadata = exportedTypeDefinition.MetaData.MakeShallowCopy();
+
+                    filteredMetadata.PropertiesInfo = exportedTypeDefinition.MetaData.PropertiesInfo
+                        .Where(x => request.DataQuery.IncludedProperties.IsNullOrEmpty() || request.DataQuery.IncludedProperties.Contains(x.Name))
+                        .Select(x => x.MakeShallowCopy())
+                        .ToArray();
+
+                    exportProvider.Metadata = filteredMetadata;
 
                     exportProvider.WriteMetadata(exportProvider.Metadata);
 

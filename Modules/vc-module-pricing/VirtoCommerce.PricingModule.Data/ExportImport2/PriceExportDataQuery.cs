@@ -1,5 +1,4 @@
 using System;
-using VirtoCommerce.ExportModule.Core.Model;
 using VirtoCommerce.Platform.Core.Common;
 using VirtoCommerce.Platform.Core.ExportImport;
 using VirtoCommerce.PricingModule.Core.Model.Search;
@@ -8,6 +7,11 @@ namespace VirtoCommerce.PricingModule.Data.ExportImport
 {
     public class PriceExportDataQuery : ExportDataQuery
     {
+        public PriceExportDataQuery()
+        {
+            IncludedProperties = new[] { "Id", "PricelistId", "Currency", "ProductId", "Sale", "List", "MinQuantity", "StartDate", "EndDate", "EffectiveValue" };
+        }
+
         public string[] PriceListIds { get; set; }
 
         public string[] ProductIds { get; set; }
