@@ -8,6 +8,7 @@ using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Options;
+using VirtoCommerce.CoreModule.Core.Events;
 using VirtoCommerce.CoreModule.Core.Seo;
 using VirtoCommerce.NotificationsModule.Core.Services;
 using VirtoCommerce.Platform.Core.Bus;
@@ -81,6 +82,8 @@ namespace VirtoCommerce.StoreModule.Web
 
             var inProcessBus = appBuilder.ApplicationServices.GetService<IHandlerRegistrar>();
             inProcessBus.RegisterHandler<StoreChangedEvent>(async (message, token) => await appBuilder.ApplicationServices.GetService<StoreChangedEventHandler>().Handle(message));
+            inProcessBus.RegisterHandler<CurrencyChangedEvent>(async (message, token) => await appBuilder.ApplicationServices.GetService<CurrencyChangedEventHandler>().Handle(message));
+
 
             var registrar = appBuilder.ApplicationServices.GetService<INotificationRegistrar>();
             registrar.RegisterNotification<StoreDynamicEmailNotification>();

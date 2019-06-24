@@ -1,10 +1,12 @@
-﻿using System;
 using System.Collections.Generic;
-using System.Text;
+using VirtoCommerce.Platform.Core.Events;
 
 namespace VirtoCommerce.CoreModule.Core.Events
 {
-    class CurrencyChangedEvent
+    public class CurrencyChangedEvent : GenericChangedEntryEvent<Currency.Currency>
     {
+        public CurrencyChangedEvent(IEnumerable<GenericChangedEntry<Currency.Currency>> changedEntries) : base(changedEntries)
+        {
+        }
     }
 }

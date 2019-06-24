@@ -17,4 +17,8 @@
         <ProjectReference Include="..\VirtoCommerce.CoreModule.Core\VirtoCommerce.CoreModule.Core.csproj" />
     </ItemGroup>
 
+    <ItemGroup>
+      <Folder Include="Handlers\" />
+    </ItemGroup>
+
 </Project>
