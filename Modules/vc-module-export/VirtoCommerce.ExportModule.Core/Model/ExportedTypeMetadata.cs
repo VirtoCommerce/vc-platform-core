@@ -56,10 +56,6 @@ namespace VirtoCommerce.ExportModule.Core.Model
             return result;
         }
 
-        /// <summary>
-        /// Deep copy without ExportTypePropertyInfo.MemberInfo
-        /// </summary>
-        /// <returns></returns>
         public ExportedTypeMetadata MakeShallowCopy()
         {
             return (ExportedTypeMetadata)MemberwiseClone();
