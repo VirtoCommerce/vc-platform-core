@@ -29,7 +29,7 @@ namespace VirtoCommerce.ContentModule.Web.Controllers.Api
         [Authorize(Permissions.Read)]
         public async Task<ActionResult<MenuLinkList[]>> GetListsAsync([FromRoute]string storeId)
         {
-            //ToDo
+            //TODO
             //CheckCurrentUserHasPermissionForObjects(ContentPredefinedPermissions.Read, new ContentScopeObject { StoreId = storeId });
 
             var lists = (await _menuService.GetListsByStoreIdAsync(storeId)).ToArray();
@@ -51,7 +51,7 @@ namespace VirtoCommerce.ContentModule.Web.Controllers.Api
         [Authorize(Permissions.Read)]
         public async Task<ActionResult<MenuLinkList>> GetListAsync([FromRoute]string storeId, [FromRoute]string listId)
         {
-            //ToDo
+            //TODO
             //CheckCurrentUserHasPermissionForObjects(ContentPredefinedPermissions.Read, new ContentScopeObject { StoreId = storeId });
 
             var item = await _menuService.GetListByIdAsync(listId);
@@ -71,7 +71,7 @@ namespace VirtoCommerce.ContentModule.Web.Controllers.Api
         [Authorize(Permissions.Read)]
         public async Task<ActionResult<bool>> CheckNameAsync([FromRoute]string storeId, [FromQuery]string name, [FromQuery]string language = "", [FromQuery]string id = "")
         {
-            //ToDo
+            //TODO
             //CheckCurrentUserHasPermissionForObjects(ContentPredefinedPermissions.Read, new ContentScopeObject { StoreId = storeId });
 
             var retVal = await _menuService.CheckListAsync(storeId, name, language, id);
@@ -85,12 +85,12 @@ namespace VirtoCommerce.ContentModule.Web.Controllers.Api
         [HttpPost]
         [Route("menu")]
         [Authorize(Permissions.Update)]
-        public async Task<ActionResult> UpdateAsync([FromBody]MenuLinkList list)
+        public async Task<ActionResult> UpdateMenuLinkList([FromBody]MenuLinkList list)
         {
             if (list == null)
                 throw new ArgumentNullException(nameof(list));
 
-            //ToDo
+            //TODO
             //CheckCurrentUserHasPermissionForObjects(ContentPredefinedPermissions.Update, new ContentScopeObject { StoreId = list.StoreId });
 
             await _menuService.AddOrUpdateAsync(list);
@@ -104,7 +104,7 @@ namespace VirtoCommerce.ContentModule.Web.Controllers.Api
         [HttpDelete]
         [Route("menu")]
         [Authorize(Permissions.Delete)]
-        public async Task<ActionResult> DeleteAsync([FromQuery] string[] listIds)
+        public async Task<ActionResult> DeleteMenuLinkLists([FromQuery] string[] listIds)
         {
             if (listIds == null)
                 throw new ArgumentNullException(nameof(listIds));
@@ -113,7 +113,7 @@ namespace VirtoCommerce.ContentModule.Web.Controllers.Api
             {
                 var list = await _menuService.GetListByIdAsync(listId);
 
-                //ToDo
+                //TODO
                 //CheckCurrentUserHasPermissionForObjects(ContentPredefinedPermissions.Delete, new ContentScopeObject { StoreId = list.StoreId });
             }
             await _menuService.DeleteListsAsync(listIds);

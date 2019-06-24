@@ -5,7 +5,6 @@ using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 using VirtoCommerce.CatalogModule.Core;
 using VirtoCommerce.CatalogModule.Core.Model;
-using VirtoCommerce.CatalogModule.Core.Model.Search;
 using VirtoCommerce.CatalogModule.Core.Services;
 using VirtoCommerce.Platform.Core.Common;
 
@@ -47,7 +46,7 @@ namespace VirtoCommerce.CatalogModule.Web.Controllers.Api
         /// <param name="id">The Catalog id.</param>
 		[HttpGet]
         [Route("{id}")]
-        public async Task<ActionResult<Catalog>> Get(string id)
+        public async Task<ActionResult<Catalog>> GetCatalog(string id)
         {
             var catalog = (await _catalogService.GetByIdsAsync(new[] { id })).FirstOrDefault();
             if (catalog == null)
@@ -124,7 +123,7 @@ namespace VirtoCommerce.CatalogModule.Web.Controllers.Api
 		[HttpPost]
         [Route("")]
         [Authorize(ModuleConstants.Security.Permissions.CatalogCreate)]
-        public async Task<ActionResult<Catalog>> Create([FromBody]Catalog catalog)
+        public async Task<ActionResult<Catalog>> CreateCatalog([FromBody]Catalog catalog)
         {
             await _catalogService.SaveChangesAsync(new[] { catalog });
             //Need for UI permission checks
@@ -140,7 +139,7 @@ namespace VirtoCommerce.CatalogModule.Web.Controllers.Api
         [HttpPut]
         [Route("")]
         [Authorize(ModuleConstants.Security.Permissions.CatalogUpdate)]
-        public async Task<ActionResult> Update([FromBody]Catalog catalog)
+        public async Task<ActionResult> UpdateCatalog([FromBody]Catalog catalog)
         {
             await _catalogService.SaveChangesAsync(new[] { catalog });
             return NoContent();
@@ -155,7 +154,7 @@ namespace VirtoCommerce.CatalogModule.Web.Controllers.Api
         [HttpDelete]
         [Route("{id}")]
         [Authorize(ModuleConstants.Security.Permissions.CatalogDelete)]
-        public async Task<ActionResult> Delete(string id)
+        public async Task<ActionResult> DeleteCatalog(string id)
         {
             //TODO
             //var catalog = (await _catalogService.GetByIdsAsync(new [] { id})).FirstOrDefault();
