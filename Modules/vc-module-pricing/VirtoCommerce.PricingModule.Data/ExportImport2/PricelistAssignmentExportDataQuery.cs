@@ -8,6 +8,11 @@ namespace VirtoCommerce.PricingModule.Data.ExportImport
     {
         public string[] PriceListIds { get; set; }
 
+        public PricelistAssignmentExportDataQuery()
+        {
+            IncludedProperties = new[] { "Id", "CatalogId", "PricelistId", "Name", "Priority", "ConditionExpression", "PredicateVisualTreeSerialized" };
+        }
+
         public override SearchCriteriaBase CreateSearchCriteria()
         {
             return new PricelistAssignmentsSearchCriteria();

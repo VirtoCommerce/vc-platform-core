@@ -6,6 +6,13 @@ namespace VirtoCommerce.PricingModule.Data.ExportImport
 {
     public class PricelistExportDataQuery : ExportDataQuery
     {
+        public PricelistExportDataQuery()
+        {
+            IncludedProperties = new[]
+            {
+                "Id", "Name", "Currency", "Assignments.Id", "Assignments.CatalogId", "Assignments.PricelistId", "Assignments.Name", "Assignments.Priority", "Assignments.ConditionExpression","Assignments.PredicateVisualTreeSerialized", "Prices.Id", "Prices.PricelistId", "Prices.Currency", "Prices.ProductId", "Prices.Sale", "Prices.List", "Prices.MinQuantity","Prices.StartDate", "Prices.EndDate", "Prices.EffectiveValue" };
+        }
+
         public override SearchCriteriaBase CreateSearchCriteria()
         {
             return new PricelistSearchCriteria();
