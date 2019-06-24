@@ -13,8 +13,8 @@ namespace VirtoCommerce.AzureSearchModule.Tests
     {
         protected override ISearchProvider GetSearchProvider()
         {
-            var searchServiceName = Environment.GetEnvironmentVariable("TestAzureSearchServiceName") ?? "Server";
-            var key = Environment.GetEnvironmentVariable("TestAzureSearchKey") ?? "Key";
+            var searchServiceName = Environment.GetEnvironmentVariable("TestAzureSearchServiceName") ?? "Test SearchServiceName";
+            var key = Environment.GetEnvironmentVariable("TestAzureSearchKey") ?? "Test key";
 
             var azureSearchOptions = Options.Create(new AzureSearchOptions { SearchServiceName = searchServiceName, Key = key });
             var options = Options.Create(new SearchOptions { Scope = "test-core", Provider = "AzureSearch" });

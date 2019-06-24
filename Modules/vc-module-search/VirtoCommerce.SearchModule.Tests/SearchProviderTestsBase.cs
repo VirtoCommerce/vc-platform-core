@@ -1,6 +1,7 @@
 using System;
 using System.Collections.Generic;
 using System.Linq;
+using System.Threading.Tasks;
 using Moq;
 using VirtoCommerce.Platform.Core.Common;
 using VirtoCommerce.Platform.Core.Settings;
@@ -36,7 +37,6 @@ namespace VirtoCommerce.SearchModule.Tests
                 CreateDocument("Item-8", "Blue Shirt", "Blue", "2017-04-23T15:24:31.180Z", 10, "0,50", "Blue Shirt 2", DateTime.UtcNow, new Price("USD", "default", 23.12m)),
             };
         }
-
 
         protected virtual IndexDocument CreateDocument(string id, string name, string color, string date, int size, string location, string name2, DateTime? date2, params Price[] prices)
         {
@@ -90,11 +90,13 @@ namespace VirtoCommerce.SearchModule.Tests
 
         protected virtual ISettingsManager GetSettingsManager()
         {
-            var mock = new Mock<ISettingsManager>();
+            var mock = new Mock<ITestSettingsManager>();
 
             mock.Setup(s => s.GetValue(It.IsAny<string>(), It.IsAny<string>())).Returns((string name, string defaultValue) => defaultValue);
             mock.Setup(s => s.GetValue(It.IsAny<string>(), It.IsAny<bool>())).Returns((string name, bool defaultValue) => defaultValue);
             mock.Setup(s => s.GetValue(It.IsAny<string>(), It.IsAny<int>())).Returns((string name, int defaultValue) => defaultValue);
+            mock.Setup(s => s.GetObjectSettingAsync(It.IsAny<string>(), null, null))
+                .Returns(Task.FromResult(new ObjectSettingEntry()));
 
             return mock.Object;
         }
@@ -170,6 +172,15 @@ namespace VirtoCommerce.SearchModule.Tests
             public string Currency;
             public string Pricelist;
             public decimal Amount;
+        }
+
+        /// <summary>
+        /// Allowing to moq extensions methods
+        /// </summary>
+        protected interface ITestSettingsManager : ISettingsManager
+        {
+            T GetValue<T>(string name, T defaultValue);
+            Task<T> GetValueAsync<T>(string name, T defaultValue);
         }
     }
 }
