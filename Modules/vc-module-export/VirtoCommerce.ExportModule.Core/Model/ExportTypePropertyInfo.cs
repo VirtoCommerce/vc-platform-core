@@ -15,5 +15,12 @@ namespace VirtoCommerce.ExportModule.Core.Model
         public bool IsRequired { get; set; }
 
         public string DefaultValue { get; set; }
+
+        public ExportTypePropertyInfo MakeShallowCopy()
+        {
+            var result = (ExportTypePropertyInfo)MemberwiseClone();
+            result.MemberInfo = MemberInfo;
+            return result;
+        }
     }
 }
