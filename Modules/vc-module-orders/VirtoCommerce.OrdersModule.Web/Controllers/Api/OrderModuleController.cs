@@ -236,17 +236,17 @@ namespace VirtoCommerce.OrdersModule.Web.Controllers.Api
         /// <summary>
         /// Create new customer order based on shopping cart.
         /// </summary>
-        /// <param name="cartId">shopping cart id</param>
+        /// <param name="id">shopping cart id</param>
         [HttpPost]
-        [Route("{cartId}")]
+        [Route("{id}")]
         [Authorize(ModuleConstants.Security.Permissions.Create)]
-        public async Task<ActionResult<CustomerOrder>> CreateOrderFromCart(string cartId)
+        public async Task<ActionResult<CustomerOrder>> CreateOrderFromCart(string id)
         {
             CustomerOrder retVal = null;
 
-            using (await AsyncLock.GetLockByKey(cartId).LockAsync())
+            using (await AsyncLock.GetLockByKey(id).LockAsync())
             {
-                var cart = await _cartService.GetByIdAsync(cartId);
+                var cart = await _cartService.GetByIdAsync(id);
                 retVal = await _customerOrderBuilder.PlaceCustomerOrderFromCartAsync(cart);
             }
 

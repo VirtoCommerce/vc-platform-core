@@ -20,6 +20,7 @@ namespace VirtoCommerce.Platform.Web.Swagger
     public static class SwaggerServiceCollectionExtensions
     {
         private static string platformDocName = "VirtoCommerce.Platform";
+        private static string oauth2SchemeName = "oauth2";
         /// <summary>
         /// 
         /// </summary>
@@ -70,13 +71,18 @@ namespace VirtoCommerce.Platform.Web.Swagger
                 c.MapType<object>(() => new Schema { Type = "object" });
                 c.AddModulesXmlComments(services);
                 //TODO for working swagger use FriendlyId(true) / for working autorest use FriendlyId()
-                c.CustomSchemaIds(x => x.FriendlyId(true));
-                c.AddSecurityDefinition("OAuth2", new OAuth2Scheme
+                c.CustomSchemaIds(x => x.FriendlyId(true)
+                    .Replace("[", "_")
+                    .Replace("]", "_")
+                    .Replace(",", "-")
+                    .Replace("`", "_"));
+                c.AddSecurityDefinition(oauth2SchemeName, new OAuth2Scheme
                 {
-                    Type = "oauth2",
+                    Type = oauth2SchemeName,
                     Description = "OAuth2 Resource Owner Password Grant flow",
                     Flow = "password",
-                    TokenUrl = $"{httpContextAccessor.HttpContext.Request?.Scheme}://{httpContextAccessor.HttpContext.Request?.Host}/connect/token"
+                    TokenUrl = $"{httpContextAccessor.HttpContext.Request?.Scheme}://{httpContextAccessor.HttpContext.Request?.Host}/connect/token",
+                    Scopes = GetPermissions(modules, services)
                 });
 
                 c.DocInclusionPredicate((docName, apiDesc) =>
@@ -187,6 +193,27 @@ namespace VirtoCommerce.Platform.Web.Swagger
                     options.IncludeXmlComments(xmlComment);
                 }
             }
+        }
+
+        //TODO try to not use the Reflection
+        private static IDictionary<string, string> GetPermissions(ManifestModuleInfo[] modules, IServiceCollection serviceCollection)
+        {
+            var assemblyResolver = serviceCollection.BuildServiceProvider()
+                .GetService<IAssemblyResolver>();
+            var types = modules.SelectMany(m => assemblyResolver.LoadAssemblyFrom(m.Ref).GetDependentAssemblies())
+                    .SelectMany(w => w.GetTypes())
+                    .Where(t => t.IsClass
+                                && t.IsSealed
+                                && t.IsAbstract
+                                && t.Namespace != null
+                                && t.FullName.Contains("Security+Permissions"))
+                    .Distinct()
+                    .ToArray();
+
+            var permissions = types.Select(t => t.GetField("AllPermissions", BindingFlags.Public | BindingFlags.Static))
+                .SelectMany(p => (string[])p.GetValue(null)).ToDictionary(v => v, v => string.Empty);
+
+            return permissions;
         }
     }
 }

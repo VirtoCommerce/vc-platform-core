@@ -146,7 +146,7 @@ namespace VirtoCommerce.StoreModule.Web.Controllers.Api
         /// <returns></returns>
         [HttpPost]
         [Route("send/dynamicnotification")]
-        public async Task<ActionResult> SendDynamicNotificationAnStoreEmail(SendDynamicNotificationRequest request)
+        public async Task<ActionResult> SendDynamicNotificationAnStoreEmail([FromBody]SendDynamicNotificationRequest request)
         {
             var store = await _storeService.GetByIdAsync(request.StoreId);
 
