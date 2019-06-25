@@ -21,7 +21,6 @@ namespace VirtoCommerce.Platform.Core.Settings
                 throw new ArgumentNullException(nameof(entity));
             }
 
-
             //Deep load settings values for all object contains settings
             var hasSettingsObjects = entity.GetFlatObjectsListWithInterface<IHasSettings>();
             foreach (var hasSettingsObject in hasSettingsObjects)
@@ -78,6 +77,7 @@ namespace VirtoCommerce.Platform.Core.Settings
         {
             await manager.DeepRemoveSettingsAsync(new[] { entry });
         }
+
         /// <summary>
         /// Deep remove entity and all nested objects settings values
         /// </summary>
