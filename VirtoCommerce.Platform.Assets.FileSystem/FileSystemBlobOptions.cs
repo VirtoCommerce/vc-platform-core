@@ -13,6 +13,7 @@ namespace VirtoCommerce.Platform.Assets.FileSystem
         /// Public base URL for direct access to files stored in the file system
         /// Example:  http://localhost:8906/assets 
         /// </summary>
+        [Url]
         public string PublicUrl { get; set; }
     }
 }
