@@ -177,7 +177,7 @@ namespace VirtoCommerce.SearchModule.Tests
         /// <summary>
         /// Allowing to moq extensions methods
         /// </summary>
-        protected interface ITestSettingsManager : ISettingsManager
+        public interface ITestSettingsManager : ISettingsManager
         {
             T GetValue<T>(string name, T defaultValue);
             Task<T> GetValueAsync<T>(string name, T defaultValue);
