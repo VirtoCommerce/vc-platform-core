@@ -1,4 +1,4 @@
-﻿<div class="blade-content">
+<div class="blade-content">
     <div class="blade-inner">
         <div class="inner-block">
             <form class="form list __info">
@@ -16,7 +16,7 @@
                     <label class="form-label" ng-bind="'platform.blades.user-profile.labels.regional-format' | translate"></label>
                     <ui-select ng-model="userProfile.regionalFormat" on-select="setRegionalFormat()">
                         <ui-select-match allow-clear="true" placeholder="{{ blade.currentRegionalFormat }}">{{ $select.selected.name }}</ui-select-match>
-                        <ui-select-choices repeat="x.id as x in regionalFormats | filter: $select.search">
+                        <ui-select-choices repeat="x.id as x in regionalFormats | filter: $select.search" position="down">
                             <span ng-bind-html="x.name | highlight: $select.search"></span>
                         </ui-select-choices>
                     </ui-select>
