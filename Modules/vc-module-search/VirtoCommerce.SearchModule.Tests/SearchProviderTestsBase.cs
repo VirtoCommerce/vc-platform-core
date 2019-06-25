@@ -38,7 +38,6 @@ namespace VirtoCommerce.SearchModule.Tests
             };
         }
 
-
         protected virtual IndexDocument CreateDocument(string id, string name, string color, string date, int size, string location, string name2, DateTime? date2, params Price[] prices)
         {
             var doc = new IndexDocument(id);
