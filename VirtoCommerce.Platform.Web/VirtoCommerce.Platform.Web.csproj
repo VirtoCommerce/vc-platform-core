@@ -7,6 +7,7 @@
         <GenerateDocumentationFile>true</GenerateDocumentationFile>
         <TypeScriptToolsVersion>3.0</TypeScriptToolsVersion>
         <RunPostBuildEvent>OnBuildSuccess</RunPostBuildEvent>
+        <noWarn>1591</noWarn>
     </PropertyGroup>
     <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Debug|AnyCPU'">
         <NoWarn>1701;1702;1705;1591</NoWarn>

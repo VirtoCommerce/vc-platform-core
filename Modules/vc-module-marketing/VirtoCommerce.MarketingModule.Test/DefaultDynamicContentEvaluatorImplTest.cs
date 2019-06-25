@@ -9,7 +9,6 @@ using VirtoCommerce.CoreModule.Core.Conditions.GeoConditions;
 using VirtoCommerce.MarketingModule.Core.Model;
 using VirtoCommerce.MarketingModule.Core.Model.DynamicContent;
 using VirtoCommerce.MarketingModule.Core.Services;
-using VirtoCommerce.MarketingModule.Data.Model;
 using VirtoCommerce.MarketingModule.Data.Repositories;
 using VirtoCommerce.MarketingModule.Data.Services;
 using VirtoCommerce.Platform.Core.Common;
@@ -21,7 +20,6 @@ namespace VirtoCommerce.MarketingModule.Test
     public class DefaultDynamicContentEvaluatorImplTest
     {
         private readonly Mock<IMarketingRepository> _repositoryMock;
-        private Func<IMarketingRepository> _repositoryFactory;
         private readonly Mock<IDynamicContentService> _dynamicContentServiceMock;
         private readonly Mock<ILogger<DefaultDynamicContentEvaluatorImpl>> _loggerMock;
         private readonly Mock<IUnitOfWork> _mockUnitOfWork;
@@ -72,9 +70,9 @@ namespace VirtoCommerce.MarketingModule.Test
                     DynamicExpression = new DynamicContentConditionTree()
                 }
             };
-            _dynamicContentServiceMock.Setup(dcs => dcs.GetContentPublicationsByStoreIdAndPlaceNameAsync(It.IsAny<string>(), It.IsAny<DateTime>(),                         It.IsAny<string>()))
+            _dynamicContentServiceMock.Setup(dcs => dcs.GetContentPublicationsByStoreIdAndPlaceNameAsync(It.IsAny<string>(), It.IsAny<DateTime>(), It.IsAny<string>()))
                 .ReturnsAsync(groups.ToArray());
-            _dynamicContentServiceMock.Setup(dcs => dcs.GetContentItemsByIdsAsync(new[] {dynamicContentItem.Id}))
+            _dynamicContentServiceMock.Setup(dcs => dcs.GetContentItemsByIdsAsync(new[] { dynamicContentItem.Id }))
                 .ReturnsAsync(expectedArray);
 
             var evaluator = new DefaultDynamicContentEvaluatorImpl(_dynamicContentServiceMock.Object, _loggerMock.Object);

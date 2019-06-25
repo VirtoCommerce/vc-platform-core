@@ -97,7 +97,7 @@ namespace VirtoCommerce.MarketingModule.Test
             {
             }
 
-            public async Task<IEnumerable<Coupon>> FindValidCouponsAsync(ICollection<string> couponCodes, string userId)
+            public new async Task<IEnumerable<Coupon>> FindValidCouponsAsync(ICollection<string> couponCodes, string userId)
             {
                 return await base.FindValidCouponsAsync(couponCodes, userId);
             }

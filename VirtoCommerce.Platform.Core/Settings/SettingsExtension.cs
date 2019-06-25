@@ -13,6 +13,7 @@ namespace VirtoCommerce.Platform.Core.Settings
         /// <summary>
         /// Deep load and populate settings values for entity and all nested objects 
         /// </summary>
+        /// <param name="manager"></param>
         /// <param name="entity"></param>
         public static async Task DeepLoadSettingsAsync(this ISettingsManager manager, IHasSettings entity)
         {
