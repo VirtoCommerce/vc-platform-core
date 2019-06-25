@@ -1,10 +1,12 @@
 using System.Collections.Generic;
 using VirtoCommerce.CoreModule.Core.Common;
 using VirtoCommerce.CoreModule.Core.Tax;
+using VirtoCommerce.Platform.Core.Swagger;
 using VirtoCommerce.ShippingModule.Core.Model;
 
 namespace VirtoCommerce.OrdersModule.Core.Model
 {
+    [SwaggerSchemaId("OrderShipment")]
     public class Shipment : OrderOperation, IHasTaxDetalization, ISupportCancellation, ITaxable, IHasDiscounts
     {
         public string OrganizationId { get; set; }

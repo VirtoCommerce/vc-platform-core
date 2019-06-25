@@ -14,6 +14,7 @@ using Swashbuckle.AspNetCore.SwaggerGen;
 using Swashbuckle.AspNetCore.SwaggerUI;
 using VirtoCommerce.Platform.Core.Common;
 using VirtoCommerce.Platform.Core.Modularity;
+using VirtoCommerce.Platform.Core.Swagger;
 
 namespace VirtoCommerce.Platform.Web.Swagger
 {
@@ -69,8 +70,8 @@ namespace VirtoCommerce.Platform.Web.Swagger
                 c.DocumentFilter<TagsFilter>();
                 c.MapType<object>(() => new Schema { Type = "object" });
                 c.AddModulesXmlComments(services);
-                //TODO for working swagger use FriendlyId(true) / for working autorest use FriendlyId()
-                c.CustomSchemaIds(x => x.FriendlyId(true));
+                // To avoid errors with repeating type names
+                c.CustomSchemaIds(type => (Attribute.GetCustomAttribute(type, typeof(SwaggerSchemaIdAttribute)) as SwaggerSchemaIdAttribute)?.Id ?? type.FriendlyId());
                 c.AddSecurityDefinition("OAuth2", new OAuth2Scheme
                 {
                     Type = "oauth2",
