@@ -1,27 +1,29 @@
 using VirtoCommerce.Platform.Core.Common;
+using VirtoCommerce.Platform.Core.Swagger;
 
 namespace VirtoCommerce.OrdersModule.Core.Model
 {
-	public class ShipmentItem : AuditableEntity
-	{
-		public ShipmentItem()
-		{
-		}
+    [SwaggerSchemaId("OrderShipmentItem")]
+    public class ShipmentItem : AuditableEntity
+    {
+        public ShipmentItem()
+        {
+        }
 
-		public ShipmentItem(LineItem lineItem)
-		{
-			LineItem = lineItem;
-			LineItemId = lineItem.Id;
+        public ShipmentItem(LineItem lineItem)
+        {
+            LineItem = lineItem;
+            LineItemId = lineItem.Id;
 
-			Quantity = lineItem.Quantity;
-		}
+            Quantity = lineItem.Quantity;
+        }
 
-		public string LineItemId { get; set; }
-		public LineItem LineItem { get; set; }
+        public string LineItemId { get; set; }
+        public LineItem LineItem { get; set; }
 
-		public string BarCode { get; set; }
+        public string BarCode { get; set; }
 
-		public int Quantity { get; set; }
-	
-	}
+        public int Quantity { get; set; }
+
+    }
 }

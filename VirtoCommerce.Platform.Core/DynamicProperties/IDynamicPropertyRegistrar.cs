@@ -8,7 +8,6 @@ namespace VirtoCommerce.Platform.Core.DynamicProperties
         /// <summary>
         /// Register new type name which can support dynamic properties
         /// </summary>
-        /// <param name="typeName"></param>
         void RegisterType<T>() where T : IHasDynamicProperties;
     }
 }

@@ -29,7 +29,7 @@ namespace VirtoCommerce.CatalogModule.Web.Controllers.Api
         /// <param name="id">Category id.</param>
         [HttpGet]
         [Route("{id}")]
-        public async Task<ActionResult<Category>> Get(string id)
+        public async Task<ActionResult<Category>> GetCategory(string id)
         {
             var category = (await _categoryService.GetByIdsAsync(new[] { id }, null)).FirstOrDefault();
 
@@ -146,7 +146,7 @@ namespace VirtoCommerce.CatalogModule.Web.Controllers.Api
         /// <param name="ids">The categories ids.</param>
         [HttpDelete]
         [Route("")]
-        public async Task<ActionResult> Delete([FromQuery]string[] ids)
+        public async Task<ActionResult> DeleteCategory([FromQuery]string[] ids)
         {
             //TODO
             //var categories = _categoryService.GetByIds(ids, Domain.Catalog.Model.CategoryResponseGroup.WithParents);

@@ -12,7 +12,6 @@ using Xunit;
 
 namespace VirtoCommerce.SearchModule.Tests
 {
-    [CLSCompliant(false)]
     [Trait("Category", "Unit")]
     public class IndexingManagerTests
     {

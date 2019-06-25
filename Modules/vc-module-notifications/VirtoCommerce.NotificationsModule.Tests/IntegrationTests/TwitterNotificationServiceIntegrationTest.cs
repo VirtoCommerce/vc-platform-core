@@ -21,7 +21,6 @@ namespace VirtoCommerce.NotificationsModule.Tests.IntegrationTests
 {
     public class TwitterNotificationServiceIntegrationTest
     {
-        private readonly TwitterNotificationDbContext _context;
         private readonly INotificationService _notificationService;
         private readonly INotificationSearchService _notificationSearchService;
 

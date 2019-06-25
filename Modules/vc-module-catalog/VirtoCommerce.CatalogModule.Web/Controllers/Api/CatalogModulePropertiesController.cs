@@ -51,7 +51,7 @@ namespace VirtoCommerce.CatalogModule.Web.Controllers.Api
         /// <param name="propertyId">The property id.</param>
 		[HttpGet]
         [Route("{propertyId}")]
-        public async Task<ActionResult<Property>> Get(string propertyId)
+        public async Task<ActionResult<Property>> GetProperty(string propertyId)
         {
             var property = (await _propertyService.GetByIdsAsync(new[] { propertyId })).FirstOrDefault();
             if (property == null)
@@ -142,7 +142,7 @@ namespace VirtoCommerce.CatalogModule.Web.Controllers.Api
         /// <returns></returns>
         [HttpDelete]
         [Route("")]
-        public async Task<ActionResult> Delete(string id, bool doDeleteValues = false)
+        public async Task<ActionResult> DeleteProperty(string id, bool doDeleteValues = false)
         {
             //var property = _propertyService.GetById(id);
 

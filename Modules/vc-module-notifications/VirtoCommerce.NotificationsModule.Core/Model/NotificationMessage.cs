@@ -4,7 +4,7 @@ using VirtoCommerce.Platform.Core.Common;
 namespace VirtoCommerce.NotificationsModule.Core.Model
 {
     /// <summary>
-    /// A parent class for message of a notification with information about sending
+    /// Base class for message of a notification with information about sending
     /// </summary>
     public abstract class NotificationMessage : AuditableEntity, IHasLanguageCode
     {

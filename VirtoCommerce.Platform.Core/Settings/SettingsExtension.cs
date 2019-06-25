@@ -13,6 +13,7 @@ namespace VirtoCommerce.Platform.Core.Settings
         /// <summary>
         /// Deep load and populate settings values for entity and all nested objects 
         /// </summary>
+        /// <param name="manager"></param>
         /// <param name="entity"></param>
         public static async Task DeepLoadSettingsAsync(this ISettingsManager manager, IHasSettings entity)
         {
@@ -20,7 +21,6 @@ namespace VirtoCommerce.Platform.Core.Settings
             {
                 throw new ArgumentNullException(nameof(entity));
             }
-
 
             //Deep load settings values for all object contains settings
             var hasSettingsObjects = entity.GetFlatObjectsListWithInterface<IHasSettings>();
@@ -78,6 +78,7 @@ namespace VirtoCommerce.Platform.Core.Settings
         {
             await manager.DeepRemoveSettingsAsync(new[] { entry });
         }
+
         /// <summary>
         /// Deep remove entity and all nested objects settings values
         /// </summary>

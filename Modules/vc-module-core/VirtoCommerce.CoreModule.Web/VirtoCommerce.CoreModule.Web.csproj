@@ -6,10 +6,11 @@
         <Version>3.0.0</Version>
         <GenerateDocumentationFile>true</GenerateDocumentationFile>
         <!--<CopyLocalLockFileAssemblies>true</CopyLocalLockFileAssemblies>-->
+        <noWarn>1591</noWarn>
     </PropertyGroup>
 
     <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Debug|AnyCPU'">
-        <NoWarn>1701;1702;1705;1591</NoWarn>
+        <NoWarn>1701;1702;1705</NoWarn>
     </PropertyGroup>
 
     <ItemGroup>
