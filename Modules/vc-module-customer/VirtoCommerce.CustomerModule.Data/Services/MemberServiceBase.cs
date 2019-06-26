@@ -78,7 +78,7 @@ namespace VirtoCommerce.CustomerModule.Data.Services
                     }
                 }
 
-                await _dynamicPropertyMetaInfoService.ResolveDynamicPropertyMetaInfoAsync(retVal.ToArray<IHasDynamicProperties>());
+                await _dynamicPropertyMetaInfoService.ResolveMetaInfoAsync(retVal.ToArray<IHasDynamicProperties>());
                 return retVal.ToArray();
             });
         }

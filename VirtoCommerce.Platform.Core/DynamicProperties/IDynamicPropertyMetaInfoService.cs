@@ -8,6 +8,6 @@ namespace VirtoCommerce.Platform.Core.DynamicProperties
         /// Deep loads and populate dynamic properties values for objects
         /// </summary>
         /// <param name="owner"></param>
-        Task ResolveDynamicPropertyMetaInfoAsync(params IHasDynamicProperties[] owner);
+        Task ResolveMetaInfoAsync(params IHasDynamicProperties[] owner);
     }
 }

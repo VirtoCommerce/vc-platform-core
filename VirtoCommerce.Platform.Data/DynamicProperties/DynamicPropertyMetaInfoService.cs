@@ -18,7 +18,7 @@ namespace VirtoCommerce.Platform.Data.DynamicProperties
             _dynamicPropertyService = dynamicPropertyService;
         }
 
-        public virtual async Task ResolveDynamicPropertyMetaInfoAsync(params IHasDynamicProperties[] owners)
+        public virtual async Task ResolveMetaInfoAsync(params IHasDynamicProperties[] owners)
         {
             if (owners == null)
             {
