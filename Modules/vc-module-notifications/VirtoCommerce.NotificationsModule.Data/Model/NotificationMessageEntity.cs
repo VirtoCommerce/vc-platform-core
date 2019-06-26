@@ -81,7 +81,6 @@ namespace VirtoCommerce.NotificationsModule.Data.Model
             message.CreatedDate = CreatedDate;
             message.ModifiedBy = ModifiedBy;
             message.ModifiedDate = ModifiedDate;
-            message.OuterId = OuterId;
 
             message.TenantIdentity = new TenantIdentity(TenantId, TenantType);
             message.NotificationId = NotificationId;
@@ -107,7 +106,6 @@ namespace VirtoCommerce.NotificationsModule.Data.Model
             CreatedDate = message.CreatedDate;
             ModifiedBy = message.ModifiedBy;
             ModifiedDate = message.ModifiedDate;
-            OuterId = message.OuterId;
 
             TenantId = message.TenantIdentity?.Id;
             TenantType = message.TenantIdentity?.Type;
