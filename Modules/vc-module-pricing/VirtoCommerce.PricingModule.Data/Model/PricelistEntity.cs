@@ -26,6 +26,9 @@ namespace VirtoCommerce.PricingModule.Data.Model
         [StringLength(64)]
         public string Currency { get; set; }
 
+        [StringLength(128)]
+        public string OuterId { get; set; }
+
 
         #region Navigation Properties
 

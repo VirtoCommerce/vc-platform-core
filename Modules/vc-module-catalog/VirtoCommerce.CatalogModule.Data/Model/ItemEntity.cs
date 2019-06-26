@@ -9,7 +9,7 @@ using VirtoCommerce.Platform.Core.Common;
 
 namespace VirtoCommerce.CatalogModule.Data.Model
 {
-    public class ItemEntity : AuditableEntity
+    public class ItemEntity : AuditableEntity, IHasOuterId
     {
         public ItemEntity()
         {
@@ -84,6 +84,9 @@ namespace VirtoCommerce.CatalogModule.Data.Model
         public string Vendor { get; set; }
 
         public int Priority { get; set; }
+
+        [StringLength(128)]
+        public string OuterId { get; set; }
 
         #region Navigation Properties
 

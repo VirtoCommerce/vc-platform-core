@@ -5,7 +5,7 @@ using VirtoCommerce.PricingModule.Core.Model;
 
 namespace VirtoCommerce.PricingModule.Data.Model
 {
-    public class PricelistAssignmentEntity : AuditableEntity
+    public class PricelistAssignmentEntity : AuditableEntity, IHasOuterId
     {
         [StringLength(128)]
         [Required]
@@ -27,6 +27,9 @@ namespace VirtoCommerce.PricingModule.Data.Model
         [StringLength(128)]
         [Required]
         public string CatalogId { get; set; }
+
+        [StringLength(128)]
+        public string OuterId { get; set; }
 
 
         #region Navigation Properties

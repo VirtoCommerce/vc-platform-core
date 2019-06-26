@@ -39,7 +39,6 @@ namespace VirtoCommerce.CatalogModule.Data.Model
             review.CreatedDate = CreatedDate;
             review.ModifiedBy = ModifiedBy;
             review.ModifiedDate = ModifiedDate;
-            review.OuterId = OuterId;
 
             review.LanguageCode = Locale;
             review.ReviewType = Source;
@@ -60,7 +59,6 @@ namespace VirtoCommerce.CatalogModule.Data.Model
             CreatedDate = review.CreatedDate;
             ModifiedBy = review.ModifiedBy;
             ModifiedDate = review.ModifiedDate;
-            OuterId = review.OuterId;
 
             Locale = review.LanguageCode;
             Source = review.ReviewType;

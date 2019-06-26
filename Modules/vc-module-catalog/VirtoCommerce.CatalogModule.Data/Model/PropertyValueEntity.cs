@@ -10,7 +10,7 @@ using VirtoCommerce.Platform.Core.Common;
 namespace VirtoCommerce.CatalogModule.Data.Model
 {
 
-    public class PropertyValueEntity : AuditableEntity
+    public class PropertyValueEntity : AuditableEntity, IHasOuterId
     {
 
         [NotMapped]
@@ -38,6 +38,9 @@ namespace VirtoCommerce.CatalogModule.Data.Model
 
         [StringLength(64)]
         public string Locale { get; set; }
+
+        [StringLength(128)]
+        public string OuterId { get; set; }
 
 
         #region Navigation Properties

@@ -5,7 +5,7 @@ using VirtoCommerce.Platform.Core.Common;
 
 namespace VirtoCommerce.CustomerModule.Data.Model
 {
-    public class NoteEntity : AuditableEntity
+    public class NoteEntity : AuditableEntity, IHasOuterId
     {
 
         [StringLength(128)]
@@ -20,6 +20,9 @@ namespace VirtoCommerce.CustomerModule.Data.Model
         public string Body { get; set; }
 
         public bool IsSticky { get; set; }
+
+        [StringLength(128)]
+        public string OuterId { get; set; }
 
         #region Navigation Properties
         public string MemberId { get; set; }

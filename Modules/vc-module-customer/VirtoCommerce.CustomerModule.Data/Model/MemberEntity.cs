@@ -8,7 +8,7 @@ using VirtoCommerce.Platform.Core.Common;
 
 namespace VirtoCommerce.CustomerModule.Data.Model
 {
-    public abstract class MemberEntity : AuditableEntity
+    public abstract class MemberEntity : AuditableEntity, IHasOuterId
     {
         public MemberEntity()
         {
@@ -26,6 +26,9 @@ namespace VirtoCommerce.CustomerModule.Data.Model
 
         [StringLength(128)]
         public string Name { get; set; }
+
+        [StringLength(128)]
+        public string OuterId { get; set; }
 
         #region NavigationProperties
 

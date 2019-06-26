@@ -1,4 +1,4 @@
-﻿using Microsoft.EntityFrameworkCore.Migrations;
+using Microsoft.EntityFrameworkCore.Migrations;
 
 namespace VirtoCommerce.CustomerModule.Data.Migrations
 {
@@ -14,21 +14,10 @@ namespace VirtoCommerce.CustomerModule.Data.Migrations
 
             migrationBuilder.AddColumn<string>(
                 name: "OuterId",
-                table: "MemberSeoInfo",
-                maxLength: 128,
-                nullable: true);
-
-            migrationBuilder.AddColumn<string>(
-                name: "OuterId",
                 table: "Member",
                 maxLength: 128,
                 nullable: true);
 
-            migrationBuilder.AddColumn<string>(
-                name: "OuterId",
-                table: "Address",
-                maxLength: 128,
-                nullable: true);
         }
 
         protected override void Down(MigrationBuilder migrationBuilder)
@@ -39,15 +28,7 @@ namespace VirtoCommerce.CustomerModule.Data.Migrations
 
             migrationBuilder.DropColumn(
                 name: "OuterId",
-                table: "MemberSeoInfo");
-
-            migrationBuilder.DropColumn(
-                name: "OuterId",
                 table: "Member");
-
-            migrationBuilder.DropColumn(
-                name: "OuterId",
-                table: "Address");
         }
     }
 }

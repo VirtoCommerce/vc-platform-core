@@ -7,7 +7,7 @@ using VirtoCommerce.Platform.Core.Common;
 
 namespace VirtoCommerce.ContentModule.Data.Model
 {
-    public class MenuLinkListEntity : AuditableEntity
+    public class MenuLinkListEntity : AuditableEntity, IHasOuterId
     {
         [Required]
         public string Name { get; set; }
@@ -15,6 +15,9 @@ namespace VirtoCommerce.ContentModule.Data.Model
         public string StoreId { get; set; }
 
         public string Language { get; set; }
+        [StringLength(128)]
+        public string OuterId { get; set; }
+
         public virtual ObservableCollection<MenuLinkEntity> MenuLinks { get; set; } = new ObservableCollection<MenuLinkEntity>();
 
         public void Patch(MenuLinkListEntity target)

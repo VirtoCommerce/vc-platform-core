@@ -43,7 +43,6 @@ namespace VirtoCommerce.MarketingModule.Data.Model
             item.CreatedDate = CreatedDate;
             item.ModifiedBy = ModifiedBy;
             item.ModifiedDate = ModifiedDate;
-            item.OuterId = OuterId;
 
             item.Name = Name;
             item.FolderId = FolderId;
@@ -70,7 +69,6 @@ namespace VirtoCommerce.MarketingModule.Data.Model
             CreatedDate = item.CreatedDate;
             ModifiedBy = item.ModifiedBy;
             ModifiedDate = item.ModifiedDate;
-            OuterId = item.OuterId;
 
             Name = item.Name;
             FolderId = item.FolderId;

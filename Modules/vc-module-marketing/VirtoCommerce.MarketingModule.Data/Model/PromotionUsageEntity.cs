@@ -35,7 +35,6 @@ namespace VirtoCommerce.MarketingModule.Data.Model
             usage.CreatedDate = CreatedDate;
             usage.ModifiedBy = ModifiedBy;
             usage.ModifiedDate = ModifiedDate;
-            usage.OuterId = OuterId;
 
             usage.CouponCode = CouponCode;
             usage.ObjectId = ObjectId;
@@ -59,7 +58,6 @@ namespace VirtoCommerce.MarketingModule.Data.Model
             CreatedDate = usage.CreatedDate;
             ModifiedBy = usage.ModifiedBy;
             ModifiedDate = usage.ModifiedDate;
-            OuterId = usage.OuterId;
 
             CouponCode = usage.CouponCode;
             PromotionId = usage.PromotionId;

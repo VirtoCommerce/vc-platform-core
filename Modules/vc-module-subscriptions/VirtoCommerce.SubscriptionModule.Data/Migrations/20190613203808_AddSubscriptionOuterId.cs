@@ -1,4 +1,4 @@
-﻿using Microsoft.EntityFrameworkCore.Migrations;
+using Microsoft.EntityFrameworkCore.Migrations;
 
 namespace VirtoCommerce.SubscriptionModule.Data.Migrations
 {
@@ -14,20 +14,10 @@ namespace VirtoCommerce.SubscriptionModule.Data.Migrations
                 oldClrType: typeof(string),
                 oldMaxLength: 256,
                 oldNullable: true);
-
-            migrationBuilder.AddColumn<string>(
-                name: "OuterId",
-                table: "PaymentPlan",
-                maxLength: 128,
-                nullable: true);
         }
 
         protected override void Down(MigrationBuilder migrationBuilder)
         {
-            migrationBuilder.DropColumn(
-                name: "OuterId",
-                table: "PaymentPlan");
-
             migrationBuilder.AlterColumn<string>(
                 name: "OuterId",
                 table: "Subscription",

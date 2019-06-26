@@ -6,7 +6,7 @@ using VirtoCommerce.SubscriptionModule.Core.Model;
 
 namespace VirtoCommerce.SubscriptionModule.Data.Model
 {
-    public class SubscriptionEntity : AuditableEntity
+    public class SubscriptionEntity : AuditableEntity, IHasOuterId
     {
 
         [Required]
@@ -54,6 +54,9 @@ namespace VirtoCommerce.SubscriptionModule.Data.Model
         public string CustomerOrderPrototypeId { get; set; }
 
         public string Comment { get; set; }
+
+        [StringLength(128)]
+        public string OuterId { get; set; }
 
         public virtual Subscription ToModel(Subscription subscription)
         {

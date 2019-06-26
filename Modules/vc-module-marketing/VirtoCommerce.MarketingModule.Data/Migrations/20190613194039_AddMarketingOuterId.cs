@@ -1,4 +1,4 @@
-﻿using Microsoft.EntityFrameworkCore.Migrations;
+using Microsoft.EntityFrameworkCore.Migrations;
 
 namespace VirtoCommerce.MarketingModule.Data.Migrations
 {
@@ -6,24 +6,6 @@ namespace VirtoCommerce.MarketingModule.Data.Migrations
     {
         protected override void Up(MigrationBuilder migrationBuilder)
         {
-            migrationBuilder.AddColumn<string>(
-                name: "OuterId",
-                table: "PublishingGroupContentPlace",
-                maxLength: 128,
-                nullable: true);
-
-            migrationBuilder.AddColumn<string>(
-                name: "OuterId",
-                table: "PublishingGroupContentItem",
-                maxLength: 128,
-                nullable: true);
-
-            migrationBuilder.AddColumn<string>(
-                name: "OuterId",
-                table: "PromotionUsage",
-                maxLength: 128,
-                nullable: true);
-
             migrationBuilder.AddColumn<string>(
                 name: "OuterId",
                 table: "Promotion",
@@ -38,24 +20,6 @@ namespace VirtoCommerce.MarketingModule.Data.Migrations
 
             migrationBuilder.AddColumn<string>(
                 name: "OuterId",
-                table: "DynamicContentPlace",
-                maxLength: 128,
-                nullable: true);
-
-            migrationBuilder.AddColumn<string>(
-                name: "OuterId",
-                table: "DynamicContentItem",
-                maxLength: 128,
-                nullable: true);
-
-            migrationBuilder.AddColumn<string>(
-                name: "OuterId",
-                table: "DynamicContentFolder",
-                maxLength: 128,
-                nullable: true);
-
-            migrationBuilder.AddColumn<string>(
-                name: "OuterId",
                 table: "Coupon",
                 maxLength: 128,
                 nullable: true);
@@ -65,35 +29,11 @@ namespace VirtoCommerce.MarketingModule.Data.Migrations
         {
             migrationBuilder.DropColumn(
                 name: "OuterId",
-                table: "PublishingGroupContentPlace");
-
-            migrationBuilder.DropColumn(
-                name: "OuterId",
-                table: "PublishingGroupContentItem");
-
-            migrationBuilder.DropColumn(
-                name: "OuterId",
-                table: "PromotionUsage");
-
-            migrationBuilder.DropColumn(
-                name: "OuterId",
                 table: "Promotion");
 
             migrationBuilder.DropColumn(
                 name: "OuterId",
                 table: "DynamicContentPublishingGroup");
-
-            migrationBuilder.DropColumn(
-                name: "OuterId",
-                table: "DynamicContentPlace");
-
-            migrationBuilder.DropColumn(
-                name: "OuterId",
-                table: "DynamicContentItem");
-
-            migrationBuilder.DropColumn(
-                name: "OuterId",
-                table: "DynamicContentFolder");
 
             migrationBuilder.DropColumn(
                 name: "OuterId",

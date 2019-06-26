@@ -5,7 +5,7 @@ using VirtoCommerce.Platform.Core.Common;
 
 namespace VirtoCommerce.CatalogModule.Data.Model
 {
-    public class ImageEntity : AuditableEntity
+    public class ImageEntity : AuditableEntity, IHasOuterId
     {
         [StringLength(2083)]
         [Required]
@@ -20,6 +20,9 @@ namespace VirtoCommerce.CatalogModule.Data.Model
         [StringLength(64)]
         public string Group { get; set; }
         public int SortOrder { get; set; }
+
+        [StringLength(128)]
+        public string OuterId { get; set; }
 
         #region Navigation Properties
 

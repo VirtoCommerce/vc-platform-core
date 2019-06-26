@@ -11,7 +11,7 @@ using VirtoCommerce.Platform.Core.Common;
 
 namespace VirtoCommerce.OrdersModule.Data.Model
 {
-    public abstract class OperationEntity : AuditableEntity
+    public abstract class OperationEntity : AuditableEntity, IHasOuterId
     {
         [Required]
         [StringLength(64)]
@@ -31,6 +31,9 @@ namespace VirtoCommerce.OrdersModule.Data.Model
         public DateTime? CancelledDate { get; set; }
         [StringLength(2048)]
         public string CancelReason { get; set; }
+
+        [StringLength(128)]
+        public string OuterId { get; set; }
 
         public virtual OrderOperation ToModel(OrderOperation operation)
         {

@@ -25,6 +25,9 @@ namespace VirtoCommerce.OrdersModule.Data.Model
         [NotMapped]
         public LineItem ModelLineItem { get; set; }
 
+        [StringLength(128)]
+        public string OuterId { get; set; }
+
         public virtual ShipmentItem ToModel(ShipmentItem shipmentItem)
         {
             if (shipmentItem == null)

@@ -10,7 +10,7 @@ using VirtoCommerce.Platform.Core.Common;
 
 namespace VirtoCommerce.CatalogModule.Data.Model
 {
-    public class CategoryEntity : AuditableEntity
+    public class CategoryEntity : AuditableEntity, IHasOuterId
     {
         public CategoryEntity()
         {
@@ -40,6 +40,9 @@ namespace VirtoCommerce.CatalogModule.Data.Model
 
         [StringLength(64)]
         public string TaxType { get; set; }
+
+        [StringLength(128)]
+        public string OuterId { get; set; }
 
         [NotMapped]
         public CategoryEntity[] AllParents

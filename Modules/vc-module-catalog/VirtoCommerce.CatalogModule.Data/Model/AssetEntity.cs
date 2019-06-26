@@ -5,7 +5,7 @@ using VirtoCommerce.Platform.Core.Common;
 
 namespace VirtoCommerce.CatalogModule.Data.Model
 {
-    public class AssetEntity : AuditableEntity
+    public class AssetEntity : AuditableEntity, IHasOuterId
     {
 
         [StringLength(2083)]
@@ -22,6 +22,9 @@ namespace VirtoCommerce.CatalogModule.Data.Model
 
         [StringLength(5)]
         public string LanguageCode { get; set; }
+
+        [StringLength(128)]
+        public string OuterId { get; set; }
 
 
         #region Navigation Properties
@@ -85,5 +88,7 @@ namespace VirtoCommerce.CatalogModule.Data.Model
             target.Url = Url;
             target.Size = Size;
         }
+
+
     }
 }

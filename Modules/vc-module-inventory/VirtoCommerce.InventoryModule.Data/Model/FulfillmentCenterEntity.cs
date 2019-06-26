@@ -4,13 +4,13 @@ using VirtoCommerce.Platform.Core.Common;
 
 namespace VirtoCommerce.InventoryModule.Data.Model
 {
-    public class FulfillmentCenterEntity : AuditableEntity
+    public class FulfillmentCenterEntity : AuditableEntity, IHasOuterId
     {
         [Required]
         [StringLength(128)]
         public string Name { get; set; }
 
-        public string Description { get; set; }     
+        public string Description { get; set; }
 
         [StringLength(1024)]
         public string Line1 { get; set; }
@@ -51,6 +51,9 @@ namespace VirtoCommerce.InventoryModule.Data.Model
         [StringLength(64)]
         public string GeoLocation { get; set; }
 
+        [StringLength(128)]
+        public string OuterId { get; set; }
+
         public virtual FulfillmentCenter ToModel(FulfillmentCenter center)
         {
             center.Id = Id;
@@ -76,7 +79,7 @@ namespace VirtoCommerce.InventoryModule.Data.Model
             center.Description = Description;
             center.Name = Name;
             center.GeoLocation = GeoLocation;
-          
+
             return center;
         }
 

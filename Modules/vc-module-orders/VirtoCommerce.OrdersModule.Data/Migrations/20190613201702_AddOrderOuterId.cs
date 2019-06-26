@@ -1,4 +1,4 @@
-﻿using Microsoft.EntityFrameworkCore.Migrations;
+using Microsoft.EntityFrameworkCore.Migrations;
 
 namespace VirtoCommerce.OrdersModule.Data.Migrations
 {
@@ -8,12 +8,6 @@ namespace VirtoCommerce.OrdersModule.Data.Migrations
         {
             migrationBuilder.AddColumn<string>(
                 name: "OuterId",
-                table: "OrderShipmentPackage",
-                maxLength: 128,
-                nullable: true);
-
-            migrationBuilder.AddColumn<string>(
-                name: "OuterId",
                 table: "OrderShipmentItem",
                 maxLength: 128,
                 nullable: true);
@@ -21,12 +15,6 @@ namespace VirtoCommerce.OrdersModule.Data.Migrations
             migrationBuilder.AddColumn<string>(
                 name: "OuterId",
                 table: "OrderShipment",
-                maxLength: 128,
-                nullable: true);
-
-            migrationBuilder.AddColumn<string>(
-                name: "OuterId",
-                table: "OrderPaymentGatewayTransaction",
                 maxLength: 128,
                 nullable: true);
 
@@ -47,19 +35,11 @@ namespace VirtoCommerce.OrdersModule.Data.Migrations
         {
             migrationBuilder.DropColumn(
                 name: "OuterId",
-                table: "OrderShipmentPackage");
-
-            migrationBuilder.DropColumn(
-                name: "OuterId",
                 table: "OrderShipmentItem");
 
             migrationBuilder.DropColumn(
                 name: "OuterId",
                 table: "OrderShipment");
-
-            migrationBuilder.DropColumn(
-                name: "OuterId",
-                table: "OrderPaymentGatewayTransaction");
 
             migrationBuilder.DropColumn(
                 name: "OuterId",

@@ -50,7 +50,6 @@ namespace VirtoCommerce.ImageToolsModule.Data.Models
             CreatedDate = option.CreatedDate;
             ModifiedBy = option.ModifiedBy;
             ModifiedDate = option.ModifiedDate;
-            OuterId = option.OuterId;
 
             return this;
         }
@@ -72,7 +71,6 @@ namespace VirtoCommerce.ImageToolsModule.Data.Models
             option.CreatedDate = CreatedDate;
             option.ModifiedBy = ModifiedBy;
             option.ModifiedDate = ModifiedDate;
-            option.OuterId = OuterId;
 
             return option;
         }

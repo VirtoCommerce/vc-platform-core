@@ -9,7 +9,7 @@ using VirtoCommerce.Platform.Core.Common;
 
 namespace VirtoCommerce.MarketingModule.Data.Model
 {
-    public class PromotionEntity : AuditableEntity
+    public class PromotionEntity : AuditableEntity, IHasOuterId
     {
         [StringLength(128)]
         public string StoreId { get; set; }
@@ -48,6 +48,9 @@ namespace VirtoCommerce.MarketingModule.Data.Model
         public int PerCustomerLimit { get; set; }
 
         public int TotalLimit { get; set; }
+
+        [StringLength(128)]
+        public string OuterId { get; set; }
 
         public virtual ObservableCollection<PromotionStoreEntity> Stores { get; set; } = new NullCollection<PromotionStoreEntity>();
 

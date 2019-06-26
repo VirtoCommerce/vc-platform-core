@@ -28,7 +28,6 @@ namespace VirtoCommerce.SubscriptionModule.Data.Model
             paymentPlan.CreatedDate = CreatedDate;
             paymentPlan.ModifiedBy = ModifiedBy;
             paymentPlan.ModifiedDate = ModifiedDate;
-            paymentPlan.OuterId = OuterId;
 
             paymentPlan.IntervalCount = IntervalCount;
             paymentPlan.TrialPeriodDays = TrialPeriodDays;
@@ -51,7 +50,6 @@ namespace VirtoCommerce.SubscriptionModule.Data.Model
             CreatedDate = paymentPlan.CreatedDate;
             ModifiedBy = paymentPlan.ModifiedBy;
             ModifiedDate = paymentPlan.ModifiedDate;
-            OuterId = paymentPlan.OuterId;
 
             IntervalCount = paymentPlan.IntervalCount;
             TrialPeriodDays = paymentPlan.TrialPeriodDays;

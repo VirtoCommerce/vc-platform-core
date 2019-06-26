@@ -7,7 +7,7 @@ using VirtoCommerce.Platform.Core.Common;
 
 namespace VirtoCommerce.MarketingModule.Data.Model
 {
-    public class DynamicContentPublishingGroupEntity : AuditableEntity
+    public class DynamicContentPublishingGroupEntity : AuditableEntity, IHasOuterId
     {
         public DynamicContentPublishingGroupEntity()
         {
@@ -36,6 +36,9 @@ namespace VirtoCommerce.MarketingModule.Data.Model
         public string ConditionExpression { get; set; }
 
         public string PredicateVisualTreeSerialized { get; set; }
+
+        [StringLength(128)]
+        public string OuterId { get; set; }
 
         #region Navigation Properties
         public virtual ObservableCollection<PublishingGroupContentItemEntity> ContentItems { get; set; }

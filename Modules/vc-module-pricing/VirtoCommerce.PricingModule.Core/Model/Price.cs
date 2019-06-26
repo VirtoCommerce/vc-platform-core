@@ -34,6 +34,8 @@ namespace VirtoCommerce.PricingModule.Core.Model
             }
         }
 
+        public string OuterId { get; set; }
+
         #region ICloneable Members
 
         public object Clone()

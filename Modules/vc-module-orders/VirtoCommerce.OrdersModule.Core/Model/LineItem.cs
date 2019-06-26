@@ -88,6 +88,8 @@ namespace VirtoCommerce.OrdersModule.Core.Model
         public string FulfillmentCenterId { get; set; }
         public string FulfillmentCenterName { get; set; }
 
+        public string OuterId { get; set; }
+
 
         #region IHaveDimension Members
         public string WeightUnit { get; set; }

@@ -8,7 +8,7 @@ using VirtoCommerce.StoreModule.Core.Model;
 
 namespace VirtoCommerce.StoreModule.Data.Model
 {
-    public class StoreEntity : AuditableEntity
+    public class StoreEntity : AuditableEntity, IHasOuterId
     {
         public StoreEntity()
         {
@@ -68,6 +68,9 @@ namespace VirtoCommerce.StoreModule.Data.Model
         public string FulfillmentCenterId { get; set; }
         [StringLength(128)]
         public string ReturnsFulfillmentCenterId { get; set; }
+
+        [StringLength(128)]
+        public string OuterId { get; set; }
 
         #region Navigation Properties
 

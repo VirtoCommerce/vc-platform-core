@@ -42,7 +42,6 @@ namespace VirtoCommerce.MarketingModule.Data.Model
             folder.CreatedDate = CreatedDate;
             folder.ModifiedBy = ModifiedBy;
             folder.ModifiedDate = ModifiedDate;
-            folder.OuterId = OuterId;
 
             folder.Name = Name;
             folder.ParentFolderId = ParentFolderId;
@@ -67,7 +66,6 @@ namespace VirtoCommerce.MarketingModule.Data.Model
             CreatedDate = folder.CreatedDate;
             ModifiedBy = folder.ModifiedBy;
             ModifiedDate = folder.ModifiedDate;
-            OuterId = folder.OuterId;
 
             Name = folder.Name;
             ParentFolderId = folder.ParentFolderId;

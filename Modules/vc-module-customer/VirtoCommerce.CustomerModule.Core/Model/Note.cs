@@ -6,5 +6,6 @@ namespace VirtoCommerce.CustomerModule.Core.Model
     {
         public string Title { get; set; }
         public string Body { get; set; }
+        public string OuterId { get; set; }
     }
 }

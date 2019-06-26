@@ -6,7 +6,7 @@ using VirtoCommerce.PricingModule.Core.Model;
 
 namespace VirtoCommerce.PricingModule.Data.Model
 {
-    public class PriceEntity : AuditableEntity
+    public class PriceEntity : AuditableEntity, IHasOuterId
     {
         [Column(TypeName = "Money")]
         public decimal? Sale { get; set; }
@@ -22,6 +22,9 @@ namespace VirtoCommerce.PricingModule.Data.Model
         public string ProductName { get; set; }
 
         public decimal MinQuantity { get; set; }
+
+        [StringLength(128)]
+        public string OuterId { get; set; }
 
         #region Navigation Properties
 

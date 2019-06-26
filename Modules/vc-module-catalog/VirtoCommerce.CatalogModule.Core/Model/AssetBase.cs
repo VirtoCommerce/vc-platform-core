@@ -1,7 +1,6 @@
 using System;
 using System.Collections.Generic;
 using System.Linq;
-using System.Text;
 using VirtoCommerce.CoreModule.Core.Common;
 using VirtoCommerce.CoreModule.Core.Seo;
 using VirtoCommerce.Platform.Core.Common;
@@ -12,7 +11,7 @@ namespace VirtoCommerce.CatalogModule.Core.Model
     /// <summary>
     /// Base class for assets.
     /// </summary>
-    public abstract class AssetBase : AuditableEntity, IHasLanguage, IInheritable, ICloneable, ISeoSupport
+    public abstract class AssetBase : AuditableEntity, IHasLanguage, IInheritable, ICloneable, ISeoSupport, IHasOuterId
     {
         public AssetBase()
         {
@@ -44,6 +43,11 @@ namespace VirtoCommerce.CatalogModule.Core.Model
         /// The name.
         /// </value>
         public string Name { get; set; }
+
+        /// <summary>
+        /// 
+        /// </summary>
+        public string OuterId { get; set; }
 
         #region IHasLanguage members
         /// <summary>

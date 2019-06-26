@@ -1,4 +1,4 @@
-﻿using Microsoft.EntityFrameworkCore.Migrations;
+using Microsoft.EntityFrameworkCore.Migrations;
 
 namespace VirtoCommerce.CatalogModule.Data.Migrations
 {
@@ -9,12 +9,6 @@ namespace VirtoCommerce.CatalogModule.Data.Migrations
             migrationBuilder.AddColumn<string>(
                 name: "OuterId",
                 table: "PropertyValue",
-                maxLength: 128,
-                nullable: true);
-
-            migrationBuilder.AddColumn<string>(
-                name: "OuterId",
-                table: "PropertyAttribute",
                 maxLength: 128,
                 nullable: true);
 
@@ -32,19 +26,7 @@ namespace VirtoCommerce.CatalogModule.Data.Migrations
 
             migrationBuilder.AddColumn<string>(
                 name: "OuterId",
-                table: "EditorialReview",
-                maxLength: 128,
-                nullable: true);
-
-            migrationBuilder.AddColumn<string>(
-                name: "OuterId",
                 table: "Category",
-                maxLength: 128,
-                nullable: true);
-
-            migrationBuilder.AddColumn<string>(
-                name: "OuterId",
-                table: "CatalogSeoInfo",
                 maxLength: 128,
                 nullable: true);
 
@@ -81,10 +63,6 @@ namespace VirtoCommerce.CatalogModule.Data.Migrations
 
             migrationBuilder.DropColumn(
                 name: "OuterId",
-                table: "PropertyAttribute");
-
-            migrationBuilder.DropColumn(
-                name: "OuterId",
                 table: "Property");
 
             migrationBuilder.DropColumn(
@@ -93,15 +71,7 @@ namespace VirtoCommerce.CatalogModule.Data.Migrations
 
             migrationBuilder.DropColumn(
                 name: "OuterId",
-                table: "EditorialReview");
-
-            migrationBuilder.DropColumn(
-                name: "OuterId",
                 table: "Category");
-
-            migrationBuilder.DropColumn(
-                name: "OuterId",
-                table: "CatalogSeoInfo");
 
             migrationBuilder.DropColumn(
                 name: "OuterId",

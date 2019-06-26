@@ -55,7 +55,6 @@ namespace VirtoCommerce.OrdersModule.Data.Model
             transaction.CreatedDate = CreatedDate;
             transaction.ModifiedBy = ModifiedBy;
             transaction.ModifiedDate = ModifiedDate;
-            transaction.OuterId = OuterId;
 
             transaction.Amount = Amount;
             transaction.CurrencyCode = Currency;
@@ -86,7 +85,6 @@ namespace VirtoCommerce.OrdersModule.Data.Model
             CreatedDate = transaction.CreatedDate;
             ModifiedBy = transaction.ModifiedBy;
             ModifiedDate = transaction.ModifiedDate;
-            OuterId = transaction.OuterId;
 
             Amount = transaction.Amount;
             Currency = transaction.CurrencyCode;

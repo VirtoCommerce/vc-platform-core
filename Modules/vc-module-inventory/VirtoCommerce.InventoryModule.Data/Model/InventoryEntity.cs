@@ -5,7 +5,7 @@ using VirtoCommerce.Platform.Core.Common;
 
 namespace VirtoCommerce.InventoryModule.Data.Model
 {
-    public class InventoryEntity : AuditableEntity
+    public class InventoryEntity : AuditableEntity, IHasOuterId
     {
         [Required]
         public decimal InStockQuantity { get; set; }
@@ -43,6 +43,9 @@ namespace VirtoCommerce.InventoryModule.Data.Model
         [Required]
         [StringLength(128)]
         public string Sku { get; set; }
+
+        [StringLength(128)]
+        public string OuterId { get; set; }
 
 
         #region Navigation properties

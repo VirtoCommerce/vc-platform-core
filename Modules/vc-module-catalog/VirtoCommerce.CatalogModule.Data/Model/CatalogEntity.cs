@@ -8,7 +8,7 @@ using VirtoCommerce.Platform.Core.Common;
 
 namespace VirtoCommerce.CatalogModule.Data.Model
 {
-    public class CatalogEntity : AuditableEntity
+    public class CatalogEntity : AuditableEntity, IHasOuterId
     {
         public CatalogEntity()
         {
@@ -30,6 +30,9 @@ namespace VirtoCommerce.CatalogModule.Data.Model
 
         [StringLength(128)]
         public string OwnerId { get; set; }
+
+        [StringLength(128)]
+        public string OuterId { get; set; }
 
         #region Navigation Properties
         public virtual ObservableCollection<CategoryRelationEntity> IncommingLinks { get; set; }

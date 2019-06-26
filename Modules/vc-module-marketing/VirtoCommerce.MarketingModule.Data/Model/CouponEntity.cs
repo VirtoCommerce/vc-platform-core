@@ -6,7 +6,7 @@ using VirtoCommerce.Platform.Core.Common;
 
 namespace VirtoCommerce.MarketingModule.Data.Model
 {
-    public class CouponEntity : AuditableEntity
+    public class CouponEntity : AuditableEntity, IHasOuterId
     {
         public CouponEntity()
         {
@@ -23,6 +23,9 @@ namespace VirtoCommerce.MarketingModule.Data.Model
 
         [NotMapped]
         public long TotalUsesCount { get; set; }
+
+        [StringLength(128)]
+        public string OuterId { get; set; }
 
         #region Navigation Properties
         public string PromotionId { get; set; }

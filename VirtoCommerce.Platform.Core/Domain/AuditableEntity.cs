@@ -4,7 +4,7 @@ using Newtonsoft.Json;
 
 namespace VirtoCommerce.Platform.Core.Common
 {
-    public abstract class AuditableEntity : Entity, IAuditable, IHasOuterId
+    public abstract class AuditableEntity : Entity, IAuditable
     {
         #region IAuditable Members
         public DateTime CreatedDate { get; set; }
@@ -14,9 +14,6 @@ namespace VirtoCommerce.Platform.Core.Common
         [StringLength(64)]
         public string ModifiedBy { get; set; }
         #endregion
-
-        [StringLength(128)]
-        public string OuterId { get; set; }
 
         #region Conditional JSON serialization for properties declared in base type
         [JsonIgnore]

@@ -7,7 +7,7 @@ using VirtoCommerce.Platform.Core.Common;
 
 namespace VirtoCommerce.CatalogModule.Data.Model
 {
-    public class PropertyEntity : AuditableEntity
+    public class PropertyEntity : AuditableEntity, IHasOuterId
     {
         public PropertyEntity()
         {
@@ -49,6 +49,9 @@ namespace VirtoCommerce.CatalogModule.Data.Model
 
         [Required]
         public int PropertyValueType { get; set; }
+
+        [StringLength(128)]
+        public string OuterId { get; set; }
 
         #region Navigation Properties
 
