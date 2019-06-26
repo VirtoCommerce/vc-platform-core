@@ -18,8 +18,8 @@ namespace VirtoCommerce.ExportModule.Tests
             var date = new DateTime(2020, 10, 20);
             var prices = new List<Price>()
             {
-                new Price {Id = "P1", PricelistId = "1", List = 25, CreatedDate = date},
-                new Price {Id = "P2", PricelistId = "1", List = 26, EndDate = date},
+                new Price {Id = "P1", PricelistId = "1", List = 25, CreatedDate = date, Currency = "USD" },
+                new Price {Id = "P2", PricelistId = "1", List = 26, EndDate = date, ModifiedDate = date, Pricelist = new Pricelist() { Id = "1", Name = "Pricelist 1" } },
             };
 
             var metadata = new ExportedTypeMetadata()
@@ -38,9 +38,38 @@ namespace VirtoCommerce.ExportModule.Tests
             var filteredPricesString = SerializeAndRead(metadata, prices);
 
             //Assets
-            Assert.NotNull(filteredPricesString);
-            Assert.Contains("P1", filteredPricesString);
-            Assert.Contains("P2", filteredPricesString);
+            Assert.Equal("Id,PricelistId,List,CreatedDate,EndDate\r\nP1,1,25,10/20/2020 00:00:00,\r\nP2,1,26,01/01/0001 00:00:00,10/20/2020 00:00:00\r\n", filteredPricesString);
+
+            return Task.CompletedTask;
+        }
+
+        [Fact]
+        public Task ExportPricelistAssignments_FilterFields()
+        {
+            var date = new DateTime(2020, 10, 20);
+            var prices = new List<PricelistAssignment>()
+            {
+                new PricelistAssignment {Id = "PA1", PricelistId = "1", Description = "PA1 Description", Priority = 1, Pricelist = new Pricelist() { Name = "Pricelist1"} },
+                new PricelistAssignment {Id = "PA2", PricelistId = "2", EndDate = date, Description = "PA2 Description", ConditionExpression = "<expression/>"},
+            };
+
+            var metadata = new ExportedTypeMetadata()
+            {
+                PropertiesInfo = new[]
+                {
+                    new ExportTypePropertyInfo() { Name = nameof(PricelistAssignment.Id), MemberInfo = typeof(PricelistAssignment).GetProperty(nameof(PricelistAssignment.Id)) },
+                    new ExportTypePropertyInfo() { Name = nameof(PricelistAssignment.Description), MemberInfo = typeof(PricelistAssignment).GetProperty(nameof(PricelistAssignment.Description)) },
+                    new ExportTypePropertyInfo() { Name = nameof(PricelistAssignment.EndDate), MemberInfo = typeof(PricelistAssignment).GetProperty(nameof(PricelistAssignment.EndDate)) },
+                    new ExportTypePropertyInfo() { Name = nameof(PricelistAssignment.Priority), MemberInfo = typeof(PricelistAssignment).GetProperty(nameof(PricelistAssignment.Priority)) },
+                    new ExportTypePropertyInfo() { Name = nameof(PricelistAssignment.ConditionExpression), MemberInfo = typeof(PricelistAssignment).GetProperty(nameof(PricelistAssignment.ConditionExpression)) },
+                }
+            };
+
+            //Act
+            var filteredPricesString = SerializeAndRead(metadata, prices);
+
+            //Assets
+            Assert.Equal("Id,Description,EndDate,Priority,ConditionExpression\r\nPA1,PA1 Description,,1,\r\nPA2,PA2 Description,10/20/2020 00:00:00,0,<expression/>\r\n", filteredPricesString);
 
             return Task.CompletedTask;
         }

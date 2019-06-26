@@ -84,12 +84,12 @@ namespace VirtoCommerce.ExportModule.Data.Services
 
             if (!includedPropertiesInfo.IsNullOrEmpty())
             {
-                var includedMembers = new HashSet<MemberInfo>(includedPropertiesInfo.Select(x => x.MemberInfo));
+                var includedMembers = includedPropertiesInfo.ToDictionary(x => x.MemberInfo);
                 var exportedTypeProperties = exportedType.GetProperties(BindingFlags.Instance | BindingFlags.Public).Where(x => x.CanRead && x.GetMethod.IsPublic).ToArray();
 
                 foreach (var exportedTypeProperty in exportedTypeProperties)
                 {
-                    if (includedMembers.Contains(exportedTypeProperty))
+                    if (includedMembers.TryGetValue(exportedTypeProperty, out var exportTypePropertyInfo))
                     {
                         var memberMap = MemberMap.CreateGeneric(exportedType, exportedTypeProperty);
 
@@ -97,6 +97,12 @@ namespace VirtoCommerce.ExportModule.Data.Services
                         memberMap.Data.TypeConverterOptions.NumberStyle = NumberStyles.Any;
                         memberMap.Data.TypeConverterOptions.BooleanTrueValues.AddRange(new List<string>() { "yes", "true" });
                         memberMap.Data.TypeConverterOptions.BooleanFalseValues.AddRange(new List<string>() { "false", "no" });
+
+                        // Specified default value filling it here, though it is not written: https://github.com/JoshClose/CsvHelper/issues/722
+                        memberMap.Data.Default = exportTypePropertyInfo.DefaultValue;
+                        memberMap.Data.IsOptional = !exportTypePropertyInfo.IsRequired;
+
+                        memberMap.Data.Index = GetMaxIndex() + 1;
 
                         MemberMaps.Add(memberMap);
                     }
