@@ -23,7 +23,6 @@ using VirtoCommerce.CoreModule.Data.Seo;
 using VirtoCommerce.CoreModule.Data.Services;
 using VirtoCommerce.CoreModule.Web.ExportImport;
 using VirtoCommerce.CoreModule.Web.JsonConverters;
-using VirtoCommerce.Platform.Core.Bus;
 using VirtoCommerce.Platform.Core.Common;
 using VirtoCommerce.Platform.Core.ExportImport;
 using VirtoCommerce.Platform.Core.Modularity;
@@ -80,9 +79,6 @@ namespace VirtoCommerce.CoreModule.Web
             AbstractTypeFactory<IConditionTree>.RegisterType<ConditionGeoTimeZone>();
             AbstractTypeFactory<IConditionTree>.RegisterType<ConditionGeoZipCode>();
             AbstractTypeFactory<IConditionTree>.RegisterType<UserGroupsContainsCondition>();
-
-            var inProcessBus = appBuilder.ApplicationServices.GetService<IHandlerRegistrar>();
-            inProcessBus.RegisterHandler<CurrencyChangedEvent>(async (message, token) => await providerSnapshot.GetService<CartChangedEventHandler>().Handle(message));
 
             using (var serviceScope = appBuilder.ApplicationServices.CreateScope())
             {
