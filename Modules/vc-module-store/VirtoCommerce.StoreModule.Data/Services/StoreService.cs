@@ -25,17 +25,17 @@ namespace VirtoCommerce.StoreModule.Data.Services
     {
         private readonly Func<IStoreRepository> _repositoryFactory;
         private readonly ISettingsManager _settingManager;
-        private readonly IDynamicPropertyService _dynamicPropertyService;
+        private readonly IDynamicPropertyMetaInfoService _dynamicPropertyMetaInfoService;
 
         private readonly IEventPublisher _eventPublisher;
         private readonly IPlatformMemoryCache _platformMemoryCache;
 
-        public StoreService(Func<IStoreRepository> repositoryFactory, ISettingsManager settingManager, IDynamicPropertyService dynamicPropertyService,
+        public StoreService(Func<IStoreRepository> repositoryFactory, ISettingsManager settingManager, IDynamicPropertyMetaInfoService dynamicPropertyMetaInfoService,
                             IEventPublisher eventPublisher, IPlatformMemoryCache platformMemoryCache)
         {
             _repositoryFactory = repositoryFactory;
             _settingManager = settingManager;
-            _dynamicPropertyService = dynamicPropertyService;
+            _dynamicPropertyMetaInfoService = dynamicPropertyMetaInfoService;
 
             _eventPublisher = eventPublisher;
             _platformMemoryCache = platformMemoryCache;
@@ -69,7 +69,7 @@ namespace VirtoCommerce.StoreModule.Data.Services
                 }
 
                 var result = stores.ToArray();
-                await _dynamicPropertyService.LoadDynamicPropertyValuesAsync(result.OfType<IHasDynamicProperties>().ToArray());
+                await _dynamicPropertyMetaInfoService.ResolveDynamicPropertyMetaInfoAsync(result.OfType<IHasDynamicProperties>().ToArray());
 
                 return result;
             });

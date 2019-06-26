@@ -7,6 +7,11 @@ namespace VirtoCommerce.Platform.Core.DynamicProperties
     /// </summary>
     public interface IDynamicPropertyService
     {
+        /// <summary>
+        /// 
+        /// </summary>
+        /// <param name="ids"></param>
+        /// <returns></returns>
         Task<DynamicProperty[]> GetDynamicPropertiesAsync(string[] ids);
         /// <summary>
         /// Update or create dynamic properties 
@@ -14,17 +19,22 @@ namespace VirtoCommerce.Platform.Core.DynamicProperties
         /// <param name="properties"></param>
         /// <returns></returns>
         Task<DynamicProperty[]> SaveDynamicPropertiesAsync(DynamicProperty[] properties);
-        Task DeleteDynamicPropertiesAsync(string[] propertyIds);
-
-        Task<DynamicPropertyDictionaryItem[]> GetDynamicPropertyDictionaryItemsAsync(string[] ids);
-        Task SaveDictionaryItemsAsync(DynamicPropertyDictionaryItem[] items);
-        Task DeleteDictionaryItemsAsync(string[] itemIds);
-
         /// <summary>
-        /// Deep loads and populate dynamic properties values for objects
+        /// 
         /// </summary>
-        /// <param name="owner"></param>
-        Task LoadDynamicPropertyValuesAsync(params IHasDynamicProperties[] owner);
+        /// <param name="propertyIds"></param>
+        /// <returns></returns>
+        Task DeleteDynamicPropertiesAsync(string[] propertyIds);
+        /// <summary>
+        /// 
+        /// </summary>
+        /// <param name="objectTypes"></param>
+        /// <returns></returns>
+        Task<DynamicObjectProperty[]> GetObjectDynamicPropertiesByObjectTypesAsync(string[] objectTypes);
+
+
+
+        //TODO remove
         /// <summary>
         /// Deep save dynamic properties values for object
         /// </summary>

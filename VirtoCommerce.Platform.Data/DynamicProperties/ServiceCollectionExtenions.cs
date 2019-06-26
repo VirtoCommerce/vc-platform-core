@@ -10,6 +10,8 @@ namespace VirtoCommerce.Platform.Data.DynamicProperties
             services.AddSingleton<IDynamicPropertyService, DynamicPropertyService>();
             services.AddSingleton<IDynamicPropertySearchService, DynamicPropertySearchService>();
             services.AddSingleton<IDynamicPropertyRegistrar, DynamicPropertyService>();
+            services.AddSingleton<IDynamicPropertyDictionaryItemsService, DynamicPropertyDictionaryItemsService>();
+            services.AddSingleton<IDynamicPropertyMetaInfoService, DynamicPropertyMetaInfoService>();
 
             return services;
         }

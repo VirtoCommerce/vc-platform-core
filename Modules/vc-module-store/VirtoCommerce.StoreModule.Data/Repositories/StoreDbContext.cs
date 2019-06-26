@@ -58,9 +58,14 @@ namespace VirtoCommerce.StoreModule.Data.Repositories
 
             modelBuilder.Entity<StoreDynamicPropertyObjectValueEntity>().ToTable("StoreDynamicPropertyObjectValue").HasKey(x => x.Id);
             modelBuilder.Entity<StoreDynamicPropertyObjectValueEntity>().Property(x => x.Id).HasMaxLength(128);
+            modelBuilder.Entity<StoreDynamicPropertyObjectValueEntity>().Property(x => x.DecimalValue).HasColumnType("decimal(18,5)");
             modelBuilder.Entity<StoreDynamicPropertyObjectValueEntity>().HasOne(p => p.Store)
-                .WithMany(s => s.DynamicPropertyObjectValues).HasForeignKey(k => k.StoreId)
+                .WithMany(s => s.DynamicPropertyObjectValues).HasForeignKey(k => k.ObjectId)
                 .OnDelete(DeleteBehavior.Cascade);
+            modelBuilder.Entity<StoreDynamicPropertyObjectValueEntity>().HasIndex(x => new { x.ObjectType, x.ObjectId })
+                        .IsUnique(false)
+                        .HasName("IX_ObjectType_ObjectId");
+
 
 
             #endregion

@@ -17,12 +17,12 @@ namespace VirtoCommerce.StoreModule.Data.Migrations
                     CreatedBy = table.Column<string>(maxLength: 64, nullable: true),
                     ModifiedBy = table.Column<string>(maxLength: 64, nullable: true),
                     ObjectType = table.Column<string>(maxLength: 256, nullable: true),
-                    StoreId = table.Column<string>(maxLength: 128, nullable: true),
+                    ObjectId = table.Column<string>(maxLength: 128, nullable: true),
                     Locale = table.Column<string>(maxLength: 64, nullable: true),
                     ValueType = table.Column<string>(maxLength: 64, nullable: false),
                     ShortTextValue = table.Column<string>(maxLength: 512, nullable: true),
                     LongTextValue = table.Column<string>(nullable: true),
-                    DecimalValue = table.Column<decimal>(nullable: true),
+                    DecimalValue = table.Column<decimal>(type: "decimal(18,5)", nullable: true),
                     IntegerValue = table.Column<int>(nullable: true),
                     BooleanValue = table.Column<bool>(nullable: true),
                     DateTimeValue = table.Column<DateTime>(nullable: true),
@@ -33,17 +33,22 @@ namespace VirtoCommerce.StoreModule.Data.Migrations
                 {
                     table.PrimaryKey("PK_StoreDynamicPropertyObjectValue", x => x.Id);
                     table.ForeignKey(
-                        name: "FK_StoreDynamicPropertyObjectValue_Store_StoreId",
-                        column: x => x.StoreId,
+                        name: "FK_StoreDynamicPropertyObjectValue_Store_ObjectId",
+                        column: x => x.ObjectId,
                         principalTable: "Store",
                         principalColumn: "Id",
                         onDelete: ReferentialAction.Cascade);
                 });
 
             migrationBuilder.CreateIndex(
-                name: "IX_StoreDynamicPropertyObjectValue_StoreId",
+                name: "IX_StoreDynamicPropertyObjectValue_ObjectId",
                 table: "StoreDynamicPropertyObjectValue",
-                column: "StoreId");
+                column: "ObjectId");
+
+            migrationBuilder.CreateIndex(
+                name: "IX_ObjectType_ObjectId",
+                table: "StoreDynamicPropertyObjectValue",
+                columns: new[] { "ObjectType", "ObjectId" });
         }
 
         protected override void Down(MigrationBuilder migrationBuilder)

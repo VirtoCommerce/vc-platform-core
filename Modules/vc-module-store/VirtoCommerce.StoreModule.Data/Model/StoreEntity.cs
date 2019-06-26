@@ -5,6 +5,7 @@ using System.Linq;
 using VirtoCommerce.CoreModule.Core.Seo;
 using VirtoCommerce.Platform.Core.Common;
 using VirtoCommerce.Platform.Core.DynamicProperties;
+using VirtoCommerce.Platform.Data.Model;
 using VirtoCommerce.StoreModule.Core.Model;
 
 namespace VirtoCommerce.StoreModule.Data.Model
@@ -228,10 +229,9 @@ namespace VirtoCommerce.StoreModule.Data.Model
 
             if (store.DynamicProperties != null)
             {
-                DynamicPropertyObjectValues = new ObservableCollection<StoreDynamicPropertyObjectValueEntity>(store.DynamicProperties
-                    .SelectMany(p => p.Values
-                        .Select(v => AbstractTypeFactory<StoreDynamicPropertyObjectValueEntity>.TryCreateInstance()
-                            .FromModel(v, store, p))));
+                DynamicPropertyObjectValues = new ObservableCollection<StoreDynamicPropertyObjectValueEntity>(store.DynamicProperties.SelectMany(p => p.Values
+                    .Select(v => AbstractTypeFactory<DynamicPropertyObjectValueEntity>.TryCreateInstance($"{nameof(StoreDynamicPropertyObjectValueEntity)}")
+                        .FromModel(v, store, p))).OfType<StoreDynamicPropertyObjectValueEntity>());
             }
 
             return this;

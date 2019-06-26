@@ -24,7 +24,7 @@ namespace VirtoCommerce.StoreModule.Data.Repositories
 
             var fulfillmentCenters = StoreFulfillmentCenters.Where(x => ids.Contains(x.StoreId)).ToArrayAsync();
             var seoInfos = SeoInfos.Where(x => ids.Contains(x.StoreId)).ToArrayAsync();
-            var dynamicPropertyValues = DynamicPropertyObjectValues.Where(x => ids.Contains(x.StoreId)).ToArrayAsync();
+            var dynamicPropertyValues = DynamicPropertyObjectValues.Where(x => ids.Contains(x.ObjectId)).ToArrayAsync();
 
             await Task.WhenAll(fulfillmentCenters, seoInfos, dynamicPropertyValues);
 

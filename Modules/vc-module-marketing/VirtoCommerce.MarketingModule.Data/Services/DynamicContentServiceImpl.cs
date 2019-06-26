@@ -51,7 +51,7 @@ namespace VirtoCommerce.MarketingModule.Data.Services
 
                 if (retVal != null)
                 {
-                    await _dynamicPropertyService.LoadDynamicPropertyValuesAsync(retVal);
+                    await _dynamicPropertyService.ResolveDynamicPropertyMetaInfoAsync(retVal);
                 }
 
                 return retVal;

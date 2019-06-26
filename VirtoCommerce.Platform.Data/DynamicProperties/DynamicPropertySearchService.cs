@@ -16,11 +16,14 @@ namespace VirtoCommerce.Platform.Data.DynamicProperties
         private readonly Func<IPlatformRepository> _repositoryFactory;
         private readonly IDynamicPropertyService _dynamicPropertyService;
         private readonly IPlatformMemoryCache _memoryCache;
-        public DynamicPropertySearchService(Func<IPlatformRepository> repositoryFactory, IDynamicPropertyService dynamicPropertyService, IPlatformMemoryCache memoryCache)
+        private readonly IDynamicPropertyDictionaryItemsService _dynamicPropertyDictionaryItemsService;
+
+        public DynamicPropertySearchService(Func<IPlatformRepository> repositoryFactory, IDynamicPropertyService dynamicPropertyService, IPlatformMemoryCache memoryCache, IDynamicPropertyDictionaryItemsService dynamicPropertyDictionaryItemsService)
         {
             _repositoryFactory = repositoryFactory;
             _dynamicPropertyService = dynamicPropertyService;
             _memoryCache = memoryCache;
+            _dynamicPropertyDictionaryItemsService = dynamicPropertyDictionaryItemsService;
         }
 
 
@@ -60,7 +63,7 @@ namespace VirtoCommerce.Platform.Data.DynamicProperties
                                          .Select(x => x.Id)
                                          .ToListAsync();
 
-                    var properties = await _dynamicPropertyService.GetDynamicPropertyDictionaryItemsAsync(ids.ToArray());
+                    var properties = await _dynamicPropertyDictionaryItemsService.GetDynamicPropertyDictionaryItemsAsync(ids.ToArray());
                     result.Results = properties.OrderBy(x => ids.IndexOf(x.Id))
                                                .ToList();
                 }
@@ -86,9 +89,15 @@ namespace VirtoCommerce.Platform.Data.DynamicProperties
                     {
                         query = query.Where(x => x.ObjectType == criteria.TypeName);
                     }
+
                     if (!string.IsNullOrEmpty(criteria.Keyword))
                     {
                         query = query.Where(x => x.Name.Contains(criteria.Keyword));
+                    }
+
+                    if (!criteria.ObjectTypes.IsNullOrEmpty())
+                    {
+                        query = query.Where(m => criteria.ObjectTypes.Contains(m.ObjectType));
                     }
 
                     var sortInfos = criteria.SortInfos;

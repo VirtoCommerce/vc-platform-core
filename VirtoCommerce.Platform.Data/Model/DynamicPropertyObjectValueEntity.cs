@@ -6,7 +6,7 @@ using VirtoCommerce.Platform.Core.DynamicProperties;
 
 namespace VirtoCommerce.Platform.Data.Model
 {
-    public class DynamicPropertyObjectValueEntity : AuditableEntity
+    public abstract class DynamicPropertyObjectValueEntity : AuditableEntity
     {
         [StringLength(256)]
         public string ObjectType { get; set; }
@@ -28,12 +28,8 @@ namespace VirtoCommerce.Platform.Data.Model
         public int? IntegerValue { get; set; }
         public bool? BooleanValue { get; set; }
         public DateTime? DateTimeValue { get; set; }
-
         public string PropertyId { get; set; }
-        public virtual DynamicPropertyEntity Property { get; set; }
-
         public string DictionaryItemId { get; set; }
-        public virtual DynamicPropertyDictionaryItemEntity DictionaryItem { get; set; }
 
         public virtual DynamicPropertyObjectValue ToModel(DynamicPropertyObjectValue propValue)
         {
@@ -46,11 +42,11 @@ namespace VirtoCommerce.Platform.Data.Model
             propValue.ObjectId = ObjectId;
             propValue.ObjectType = ObjectType;
             propValue.ValueType = EnumUtility.SafeParse(ValueType, DynamicPropertyValueType.LongText);
+            propValue.PropertyId = PropertyId;
 
-            if (DictionaryItem != null)
+            if (!string.IsNullOrEmpty(DictionaryItemId))
             {
-                propValue.ValueId = DictionaryItem.Id;
-                propValue.Value = DictionaryItem.ToModel(AbstractTypeFactory<DynamicPropertyDictionaryItem>.TryCreateInstance());
+                propValue.ValueId = DictionaryItemId;
             }
             else
             {
@@ -59,7 +55,7 @@ namespace VirtoCommerce.Platform.Data.Model
             return propValue;
         }
 
-        public virtual DynamicPropertyObjectValueEntity FromModel(DynamicPropertyObjectValue propValue)
+        public virtual DynamicPropertyObjectValueEntity FromModel(DynamicPropertyObjectValue propValue, IHasDynamicProperties owner, DynamicProperty dynamicProperty)
         {
             if (propValue == null)
             {
@@ -67,9 +63,11 @@ namespace VirtoCommerce.Platform.Data.Model
             }
 
             Locale = propValue.Locale;
-            ObjectId = propValue.ObjectId;
-            ObjectType = propValue.ObjectType;
-            ValueType = propValue.ValueType.ToString();
+            ObjectId = propValue.ObjectId ?? owner.Id;
+            ObjectType = propValue.ObjectType ?? owner.ObjectType ?? owner.GetType().FullName;
+            var dynamicPropertyValueType = propValue.ValueType != dynamicProperty.ValueType ? dynamicProperty.ValueType : propValue.ValueType;
+            ValueType = dynamicPropertyValueType.ToString();
+            PropertyId = propValue.PropertyId ?? dynamicProperty.Id;
             DictionaryItemId = propValue.ValueId;
 
             var dictItem = propValue.Value as DynamicPropertyDictionaryItem;
@@ -84,10 +82,11 @@ namespace VirtoCommerce.Platform.Data.Model
             if (dictItem != null)
             {
                 DictionaryItemId = dictItem.Id;
+                PropertyId = dictItem.PropertyId;
             }
             else
             {
-                SetValue(propValue.ValueType, propValue.Value);
+                SetValue(dynamicPropertyValueType, propValue.Value);
             }
 
             return this;

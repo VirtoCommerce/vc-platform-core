@@ -28,15 +28,17 @@ namespace VirtoCommerce.Platform.Data.ExportImport
         private readonly IDynamicPropertyService _dynamicPropertyService;
         private readonly IDynamicPropertySearchService _dynamicPropertySearchService;
         private readonly IPermissionsRegistrar _permissionsProvider;
+        private readonly IDynamicPropertyDictionaryItemsService _dynamicPropertyDictionaryItemsService;
 
         public PlatformExportImportManager(UserManager<ApplicationUser> userManager, RoleManager<Role> roleManager, IPermissionsRegistrar permissionsProvider, ISettingsManager settingsManager,
-                IDynamicPropertyService dynamicPropertyService, IDynamicPropertySearchService dynamicPropertySearchService, ILocalModuleCatalog moduleCatalog)
+                IDynamicPropertyService dynamicPropertyService, IDynamicPropertySearchService dynamicPropertySearchService, ILocalModuleCatalog moduleCatalog, IDynamicPropertyDictionaryItemsService dynamicPropertyDictionaryItemsService)
         {
             _dynamicPropertyService = dynamicPropertyService;
             _userManager = userManager;
             _roleManager = roleManager;
             _settingsManager = settingsManager;
             _moduleCatalog = moduleCatalog;
+            _dynamicPropertyDictionaryItemsService = dynamicPropertyDictionaryItemsService;
             _permissionsProvider = permissionsProvider;
             _dynamicPropertySearchService = dynamicPropertySearchService;
         }
@@ -212,7 +214,7 @@ namespace VirtoCommerce.Platform.Data.ExportImport
                                 else if (manifest.HandleSettings && reader.Value.ToString() == "DynamicPropertyDictionaryItems")
                                 {
                                     await reader.DeserializeJsonArrayWithPagingAsync<DynamicPropertyDictionaryItem>(jsonSerializer, batchSize,
-                                        items => _dynamicPropertyService.SaveDictionaryItemsAsync(items.ToArray()), processedCount =>
+                                        items => _dynamicPropertyDictionaryItemsService.SaveDictionaryItemsAsync(items.ToArray()), processedCount =>
                                     {
                                         progressInfo.Description = $"{ processedCount } coupons have been imported";
                                         progressCallback(progressInfo);

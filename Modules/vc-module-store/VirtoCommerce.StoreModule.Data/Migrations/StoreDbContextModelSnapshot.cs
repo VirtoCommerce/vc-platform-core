@@ -101,7 +101,8 @@ namespace VirtoCommerce.StoreModule.Data.Migrations
 
                     b.Property<DateTime?>("DateTimeValue");
 
-                    b.Property<decimal?>("DecimalValue");
+                    b.Property<decimal?>("DecimalValue")
+                        .HasColumnType("decimal(18,5)");
 
                     b.Property<string>("DictionaryItemId");
 
@@ -117,6 +118,9 @@ namespace VirtoCommerce.StoreModule.Data.Migrations
 
                     b.Property<DateTime?>("ModifiedDate");
 
+                    b.Property<string>("ObjectId")
+                        .HasMaxLength(128);
+
                     b.Property<string>("ObjectType")
                         .HasMaxLength(256);
 
@@ -125,16 +129,16 @@ namespace VirtoCommerce.StoreModule.Data.Migrations
                     b.Property<string>("ShortTextValue")
                         .HasMaxLength(512);
 
-                    b.Property<string>("StoreId")
-                        .HasMaxLength(128);
-
                     b.Property<string>("ValueType")
                         .IsRequired()
                         .HasMaxLength(64);
 
                     b.HasKey("Id");
 
-                    b.HasIndex("StoreId");
+                    b.HasIndex("ObjectId");
+
+                    b.HasIndex("ObjectType", "ObjectId")
+                        .HasName("IX_ObjectType_ObjectId");
 
                     b.ToTable("StoreDynamicPropertyObjectValue");
                 });
@@ -298,7 +302,7 @@ namespace VirtoCommerce.StoreModule.Data.Migrations
                 {
                     b.HasOne("VirtoCommerce.StoreModule.Data.Model.StoreEntity", "Store")
                         .WithMany("DynamicPropertyObjectValues")
-                        .HasForeignKey("StoreId")
+                        .HasForeignKey("ObjectId")
                         .OnDelete(DeleteBehavior.Cascade);
                 });
 

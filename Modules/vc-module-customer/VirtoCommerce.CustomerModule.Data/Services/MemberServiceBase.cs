@@ -26,13 +26,15 @@ namespace VirtoCommerce.CustomerModule.Data.Services
         private readonly IEventPublisher _eventPublisher;
         private readonly IDynamicPropertyService _dynamicPropertyService;
         private readonly IPlatformMemoryCache _platformMemoryCache;
+        private readonly IDynamicPropertyMetaInfoService _dynamicPropertyMetaInfoService;
 
-        protected MemberServiceBase(Func<IMemberRepository> repositoryFactory, IEventPublisher eventPublisher, IDynamicPropertyService dynamicPropertyService, IPlatformMemoryCache platformMemoryCache)
+        protected MemberServiceBase(Func<IMemberRepository> repositoryFactory, IEventPublisher eventPublisher, IDynamicPropertyService dynamicPropertyService, IPlatformMemoryCache platformMemoryCache, IDynamicPropertyMetaInfoService dynamicPropertyMetaInfoService)
         {
             _repositoryFactory = repositoryFactory;
             _eventPublisher = eventPublisher;
             _dynamicPropertyService = dynamicPropertyService;
             _platformMemoryCache = platformMemoryCache;
+            _dynamicPropertyMetaInfoService = dynamicPropertyMetaInfoService;
         }
 
 
@@ -76,7 +78,7 @@ namespace VirtoCommerce.CustomerModule.Data.Services
                     }
                 }
 
-                await _dynamicPropertyService.LoadDynamicPropertyValuesAsync(retVal.ToArray<IHasDynamicProperties>());
+                await _dynamicPropertyMetaInfoService.ResolveDynamicPropertyMetaInfoAsync(retVal.ToArray<IHasDynamicProperties>());
                 return retVal.ToArray();
             });
         }
