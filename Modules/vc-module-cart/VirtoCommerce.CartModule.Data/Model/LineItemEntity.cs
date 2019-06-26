@@ -139,7 +139,6 @@ namespace VirtoCommerce.CartModule.Data.Model
             lineItem.CreatedDate = CreatedDate;
             lineItem.ModifiedBy = ModifiedBy;
             lineItem.ModifiedDate = ModifiedDate;
-            lineItem.OuterId = OuterId;
 
             lineItem.ListPrice = ListPrice;
             lineItem.ListPriceWithTax = ListPriceWithTax;
@@ -204,7 +203,6 @@ namespace VirtoCommerce.CartModule.Data.Model
             CreatedDate = lineItem.CreatedDate;
             ModifiedBy = lineItem.ModifiedBy;
             ModifiedDate = lineItem.ModifiedDate;
-            OuterId = lineItem.OuterId;
 
             ListPrice = lineItem.ListPrice;
             ListPriceWithTax = lineItem.ListPriceWithTax;

@@ -124,7 +124,6 @@ namespace VirtoCommerce.CartModule.Data.Model
             cart.CreatedDate = CreatedDate;
             cart.ModifiedBy = ModifiedBy;
             cart.ModifiedDate = ModifiedDate;
-            cart.OuterId = OuterId;
 
             cart.StoreId = StoreId;
             cart.Fee = Fee;
@@ -182,7 +181,6 @@ namespace VirtoCommerce.CartModule.Data.Model
             CreatedDate = cart.CreatedDate;
             ModifiedBy = cart.ModifiedBy;
             ModifiedDate = cart.ModifiedDate;
-            OuterId = cart.OuterId;
 
             Fee = cart.Fee;
             FeeWithTax = cart.FeeWithTax;

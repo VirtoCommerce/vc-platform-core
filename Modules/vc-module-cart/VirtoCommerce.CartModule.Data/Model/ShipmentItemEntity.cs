@@ -33,7 +33,6 @@ namespace VirtoCommerce.CartModule.Data.Model
             shipmentItem.CreatedDate = CreatedDate;
             shipmentItem.ModifiedBy = ModifiedBy;
             shipmentItem.ModifiedDate = ModifiedDate;
-            shipmentItem.OuterId = OuterId;
 
             shipmentItem.BarCode = BarCode;
             shipmentItem.Quantity = Quantity;
@@ -51,7 +50,6 @@ namespace VirtoCommerce.CartModule.Data.Model
             CreatedDate = shipmentItem.CreatedDate;
             ModifiedBy = shipmentItem.ModifiedBy;
             ModifiedDate = shipmentItem.ModifiedDate;
-            OuterId = shipmentItem.OuterId;
 
             BarCode = shipmentItem.BarCode;
             Quantity = shipmentItem.Quantity;

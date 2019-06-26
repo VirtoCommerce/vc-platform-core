@@ -95,7 +95,6 @@ namespace VirtoCommerce.CartModule.Data.Model
             shipment.CreatedDate = CreatedDate;
             shipment.ModifiedBy = ModifiedBy;
             shipment.ModifiedDate = ModifiedDate;
-            shipment.OuterId = OuterId;
 
             shipment.Fee = Fee;
             shipment.FeeWithTax = FeeWithTax;
@@ -157,7 +156,6 @@ namespace VirtoCommerce.CartModule.Data.Model
             CreatedDate = shipment.CreatedDate;
             ModifiedBy = shipment.ModifiedBy;
             ModifiedDate = shipment.ModifiedDate;
-            OuterId = shipment.OuterId;
 
             Fee = shipment.Fee;
             FeeWithTax = shipment.FeeWithTax;
