@@ -17,12 +17,14 @@ namespace VirtoCommerce.Platform.Web.Controllers.Api
         private readonly IDynamicPropertyService _dynamicPropertyService;
         private readonly IDynamicPropertySearchService _dynamicPropertySearchService;
         private readonly IDynamicPropertyDictionaryItemsService _dynamicPropertyDictionaryItemsService;
+        private readonly IDynamicPropertyDictionaryItemsSearchService _dynamicPropertyDictionaryItemsSearchService;
 
-        public DynamicPropertiesController(IDynamicPropertyRegistrar dynamicPropertyRegistrar, IDynamicPropertyService dynamicPropertyService, IDynamicPropertySearchService dynamicPropertySearchService, IDynamicPropertyDictionaryItemsService dynamicPropertyDictionaryItemsService)
+        public DynamicPropertiesController(IDynamicPropertyRegistrar dynamicPropertyRegistrar, IDynamicPropertyService dynamicPropertyService, IDynamicPropertySearchService dynamicPropertySearchService, IDynamicPropertyDictionaryItemsService dynamicPropertyDictionaryItemsService, IDynamicPropertyDictionaryItemsSearchService dynamicPropertyDictionaryItemsSearchService)
         {
             _dynamicPropertyService = dynamicPropertyService;
             _dynamicPropertySearchService = dynamicPropertySearchService;
             _dynamicPropertyDictionaryItemsService = dynamicPropertyDictionaryItemsService;
+            _dynamicPropertyDictionaryItemsSearchService = dynamicPropertyDictionaryItemsSearchService;
             _dynamicPropertyRegistrar = dynamicPropertyRegistrar;
         }
 
@@ -97,7 +99,7 @@ namespace VirtoCommerce.Platform.Web.Controllers.Api
         [Route("dictionaryitems/search")]
         public async Task<ActionResult<DynamicPropertyDictionaryItemSearchResult>> SearchDictionaryItems([FromBody]DynamicPropertyDictionaryItemSearchCriteria criteria)
         {
-            var result = await _dynamicPropertySearchService.SearchDictionaryItemsAsync(criteria);
+            var result = await _dynamicPropertyDictionaryItemsSearchService.SearchDictionaryItemsAsync(criteria);
             return Ok(result);
         }
 
@@ -194,7 +196,7 @@ namespace VirtoCommerce.Platform.Web.Controllers.Api
         [Route("types/{typeName}/properties/{propertyId}/dictionaryitems")]
         public async Task<ActionResult<DynamicPropertyDictionaryItem[]>> GetDictionaryItems([FromRoute] string typeName, [FromRoute] string propertyId)
         {
-            var result = await _dynamicPropertySearchService.SearchDictionaryItemsAsync(new DynamicPropertyDictionaryItemSearchCriteria { PropertyId = propertyId, ObjectType = typeName });
+            var result = await _dynamicPropertyDictionaryItemsSearchService.SearchDictionaryItemsAsync(new DynamicPropertyDictionaryItemSearchCriteria { PropertyId = propertyId, ObjectType = typeName });
             return Ok(result.Results);
         }
 

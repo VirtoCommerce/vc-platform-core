@@ -30,7 +30,7 @@ namespace VirtoCommerce.OrdersModule.Data.Services
     {
         private readonly Func<IOrderRepository> _repositoryFactory;
         private readonly IEventPublisher _eventPublisher;
-        private readonly IDynamicPropertyService _dynamicPropertyService;
+        private readonly IDynamicPropertyMetaInfoService _dynamicPropertyMetaInfoService;
         private readonly IStoreService _storeService;
 
         private readonly IUniqueNumberGenerator _uniqueNumberGenerator;
@@ -42,14 +42,13 @@ namespace VirtoCommerce.OrdersModule.Data.Services
 
         public CustomerOrderServiceImpl(
             Func<IOrderRepository> orderRepositoryFactory, IUniqueNumberGenerator uniqueNumberGenerator
-            , IDynamicPropertyService dynamicPropertyService, IStoreService storeService, IChangeLogService changeLogService
+            , IStoreService storeService, IChangeLogService changeLogService
             , IEventPublisher eventPublisher, ICustomerOrderTotalsCalculator totalsCalculator
             , IShippingMethodsSearchService shippingMethodsSearchService, IPaymentMethodsSearchService paymentMethodSearchService,
-            IPlatformMemoryCache platformMemoryCache)
+            IPlatformMemoryCache platformMemoryCache, IDynamicPropertyMetaInfoService dynamicPropertyMetaInfoService)
         {
             _repositoryFactory = orderRepositoryFactory;
             _eventPublisher = eventPublisher;
-            _dynamicPropertyService = dynamicPropertyService;
             _storeService = storeService;
             _changeLogService = changeLogService;
             _totalsCalculator = totalsCalculator;
@@ -57,6 +56,7 @@ namespace VirtoCommerce.OrdersModule.Data.Services
 
             _paymentMethodSearchService = paymentMethodSearchService;
             _platformMemoryCache = platformMemoryCache;
+            _dynamicPropertyMetaInfoService = dynamicPropertyMetaInfoService;
             _uniqueNumberGenerator = uniqueNumberGenerator;
         }
 
@@ -94,7 +94,7 @@ namespace VirtoCommerce.OrdersModule.Data.Services
                     }
                 }
 
-                await _dynamicPropertyService.ResolveDynamicPropertyMetaInfoAsync(retVal.ToArray<IHasDynamicProperties>());
+                await _dynamicPropertyMetaInfoService.ResolveMetaInfoAsync(retVal.ToArray<IHasDynamicProperties>());
                 return retVal.ToArray();
             });
         }
@@ -141,11 +141,12 @@ namespace VirtoCommerce.OrdersModule.Data.Services
                 pkMap.ResolvePrimaryKeys();
             }
 
-            //Save dynamic properties
-            foreach (var order in orders)
-            {
-                await _dynamicPropertyService.SaveDynamicPropertyValuesAsync(order);
-            }
+            //TODO
+            ////Save dynamic properties
+            //foreach (var order in orders)
+            //{
+            //    await _dynamicPropertyService.SaveDynamicPropertyValuesAsync(order);
+            //}
             //Raise domain events
             await _eventPublisher.Publish(new OrderChangedEvent(changedEntries));
             ClearCache(orders);
@@ -162,10 +163,11 @@ namespace VirtoCommerce.OrdersModule.Data.Services
 
                 await repository.RemoveOrdersByIdsAsync(ids);
 
-                foreach (var order in orders)
-                {
-                    await _dynamicPropertyService.DeleteDynamicPropertyValuesAsync(order);
-                }
+                //TODO
+                //foreach (var order in orders)
+                //{
+                //    await _dynamicPropertyService.DeleteDynamicPropertyValuesAsync(order);
+                //}
 
                 await repository.UnitOfWork.CommitAsync();
                 //Raise domain events after deletion

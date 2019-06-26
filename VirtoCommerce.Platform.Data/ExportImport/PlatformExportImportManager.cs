@@ -29,9 +29,10 @@ namespace VirtoCommerce.Platform.Data.ExportImport
         private readonly IDynamicPropertySearchService _dynamicPropertySearchService;
         private readonly IPermissionsRegistrar _permissionsProvider;
         private readonly IDynamicPropertyDictionaryItemsService _dynamicPropertyDictionaryItemsService;
+        private readonly IDynamicPropertyDictionaryItemsSearchService _dynamicPropertyDictionaryItemsSearchService;
 
         public PlatformExportImportManager(UserManager<ApplicationUser> userManager, RoleManager<Role> roleManager, IPermissionsRegistrar permissionsProvider, ISettingsManager settingsManager,
-                IDynamicPropertyService dynamicPropertyService, IDynamicPropertySearchService dynamicPropertySearchService, ILocalModuleCatalog moduleCatalog, IDynamicPropertyDictionaryItemsService dynamicPropertyDictionaryItemsService)
+                IDynamicPropertyService dynamicPropertyService, IDynamicPropertySearchService dynamicPropertySearchService, ILocalModuleCatalog moduleCatalog, IDynamicPropertyDictionaryItemsService dynamicPropertyDictionaryItemsService, IDynamicPropertyDictionaryItemsSearchService dynamicPropertyDictionaryItemsSearchService)
         {
             _dynamicPropertyService = dynamicPropertyService;
             _userManager = userManager;
@@ -39,6 +40,7 @@ namespace VirtoCommerce.Platform.Data.ExportImport
             _settingsManager = settingsManager;
             _moduleCatalog = moduleCatalog;
             _dynamicPropertyDictionaryItemsService = dynamicPropertyDictionaryItemsService;
+            _dynamicPropertyDictionaryItemsSearchService = dynamicPropertyDictionaryItemsSearchService;
             _permissionsProvider = permissionsProvider;
             _dynamicPropertySearchService = dynamicPropertySearchService;
         }
@@ -346,7 +348,7 @@ namespace VirtoCommerce.Platform.Data.ExportImport
                     progressInfo.Description = "Dynamic properties Dictionary Items: load properties...";
                     progressCallback(progressInfo);
 
-                    var dynamicPropertyDictionaryItems = (await _dynamicPropertySearchService.SearchDictionaryItemsAsync(new DynamicPropertyDictionaryItemSearchCriteria { Take = int.MaxValue })).Results;
+                    var dynamicPropertyDictionaryItems = (await _dynamicPropertyDictionaryItemsSearchService.SearchDictionaryItemsAsync(new DynamicPropertyDictionaryItemSearchCriteria { Take = int.MaxValue })).Results;
                     foreach (var dynamicPropertyDictionaryItem in dynamicPropertyDictionaryItems)
                     {
                         serializer.Serialize(writer, dynamicPropertyDictionaryItem);

@@ -30,14 +30,14 @@ namespace VirtoCommerce.Platform.Data.DynamicProperties
             var objectTypes = propOwners.Select(x => x.ObjectType ?? x.GetType().FullName).Distinct().ToArray();
             var dynamicProperties = await _dynamicPropertyService.GetObjectDynamicPropertiesByObjectTypesAsync(objectTypes);
 
-            var dictionaryItemIds = owners
-                .SelectMany(p => p.DynamicProperties)
-                .SelectMany(i => i.Values)
-                .Where(di => !string.IsNullOrEmpty(di.ValueId))
-                .Select(x => x.ValueId)
-                .ToArray();
+            //var dictionaryItemIds = owners
+            //    .SelectMany(p => p.DynamicProperties)
+            //    .SelectMany(i => i.Values)
+            //    .Where(di => !string.IsNullOrEmpty(di.ValueId))
+            //    .Select(x => x.ValueId)
+            //    .ToArray();
 
-            var dictionaryItems = await _dynamicPropertyDictionaryItemsService.GetDynamicPropertyDictionaryItemsAsync(dictionaryItemIds);
+            //var dictionaryItems = await _dynamicPropertyDictionaryItemsService.GetDynamicPropertyDictionaryItemsAsync(dictionaryItemIds);
 
             foreach (var propOwner in propOwners)
             {
@@ -52,11 +52,13 @@ namespace VirtoCommerce.Platform.Data.DynamicProperties
 
                         var ownerDynamicProperty = propOwner.DynamicProperties.FirstOrDefault(x => x.Id.EqualsInvariant(prop.Id));
                         prop.Values = ownerDynamicProperty == null ? new List<DynamicPropertyObjectValue>() :
-                            ownerDynamicProperty.Values.Select(v =>
-                                    {
-                                        if (!string.IsNullOrEmpty(v.ValueId)) v.Value = dictionaryItems.FirstOrDefault(x => x.Id.EqualsInvariant(v.ValueId));
-                                        return v;
-                                    }).ToList();
+                            ownerDynamicProperty.Values
+                            //.Select(v =>
+                            //    {
+                            //        if (!string.IsNullOrEmpty(v.ValueId)) v.Value = dictionaryItems.FirstOrDefault(x => x.Id.EqualsInvariant(v.ValueId));
+                            //        return v;
+                            //    }).ToList()
+                            ;
 
                         return prop;
                     })
