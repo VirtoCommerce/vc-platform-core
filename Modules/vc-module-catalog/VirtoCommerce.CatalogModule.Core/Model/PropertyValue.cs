@@ -6,7 +6,7 @@ using VirtoCommerce.Platform.Core.Domain;
 
 namespace VirtoCommerce.CatalogModule.Core.Model
 {
-    public class PropertyValue : AuditableEntity, IHasLanguage, IInheritable, ICloneable
+    public class PropertyValue : AuditableEntity, IHasLanguage, IInheritable, ICloneable, IHasOuterId
     {
         public string PropertyName { get; set; }
         public string PropertyId { get; set; }
@@ -22,6 +22,7 @@ namespace VirtoCommerce.CatalogModule.Core.Model
         public bool PropertyMultivalue => Property?.Multivalue ?? false;
         [JsonIgnore]
         public virtual bool IsEmpty => string.IsNullOrEmpty(ValueId) && string.IsNullOrEmpty(Value?.ToString());
+        public string OuterId { get; set; }
 
 
         public override string ToString()

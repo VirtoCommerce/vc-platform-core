@@ -25,6 +25,9 @@ namespace VirtoCommerce.OrdersModule.Data.Model
         [NotMapped]
         public LineItem ModelLineItem { get; set; }
 
+        [StringLength(128)]
+        public string OuterId { get; set; }
+
         public virtual ShipmentItem ToModel(ShipmentItem shipmentItem)
         {
             if (shipmentItem == null)
@@ -35,6 +38,7 @@ namespace VirtoCommerce.OrdersModule.Data.Model
             shipmentItem.CreatedBy = CreatedBy;
             shipmentItem.ModifiedDate = ModifiedDate;
             shipmentItem.ModifiedBy = ModifiedBy;
+            shipmentItem.OuterId = OuterId;
 
             shipmentItem.BarCode = BarCode;
             shipmentItem.Quantity = Quantity;
@@ -52,6 +56,7 @@ namespace VirtoCommerce.OrdersModule.Data.Model
             CreatedBy = shipmentItem.CreatedBy;
             ModifiedDate = shipmentItem.ModifiedDate;
             ModifiedBy = shipmentItem.ModifiedBy;
+            OuterId = shipmentItem.OuterId;
 
             BarCode = shipmentItem.BarCode;
             shipmentItem.Quantity = shipmentItem.Quantity;

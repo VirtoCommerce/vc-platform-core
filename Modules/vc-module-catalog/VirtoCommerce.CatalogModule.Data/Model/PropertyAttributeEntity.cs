@@ -55,6 +55,7 @@ namespace VirtoCommerce.CatalogModule.Data.Model
             CreatedDate = attribute.CreatedDate;
             ModifiedBy = attribute.ModifiedBy;
             ModifiedDate = attribute.ModifiedDate;
+
             PropertyId = attribute.PropertyId;
             PropertyAttributeName = attribute.Name;
             PropertyAttributeValue = attribute.Value;

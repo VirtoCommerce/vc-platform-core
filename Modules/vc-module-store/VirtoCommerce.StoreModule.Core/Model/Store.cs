@@ -7,7 +7,7 @@ using VirtoCommerce.Platform.Core.Settings;
 
 namespace VirtoCommerce.StoreModule.Core.Model
 {
-    public class Store : AuditableEntity, IHasDynamicProperties, IHasSettings, ISeoSupport, ISupportSecurityScopes
+    public class Store : AuditableEntity, IHasDynamicProperties, IHasSettings, ISeoSupport, ISupportSecurityScopes, IHasOuterId
     {
         public string Name { get; set; }
         public string Description { get; set; }
@@ -42,6 +42,7 @@ namespace VirtoCommerce.StoreModule.Core.Model
         public string Email { get; set; }
         public string AdminEmail { get; set; }
         public bool DisplayOutOfStock { get; set; }
+        public string OuterId { get; set; }
 
         /// <summary>
         /// Primary (default) fulfillment center id
@@ -73,7 +74,7 @@ namespace VirtoCommerce.StoreModule.Core.Model
         /// </summary>
         public ICollection<string> TrustedGroups { get; set; }
 
-       
+
         #region ISeoSupport Members
         public string SeoObjectType { get { return GetType().Name; } }
         public IList<SeoInfo> SeoInfos { get; set; }

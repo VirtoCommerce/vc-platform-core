@@ -37,12 +37,14 @@ namespace VirtoCommerce.SitemapsModule.Data.Models
                 throw new ArgumentNullException(nameof(sitemap));
             }
 
+            sitemap.Id = Id;
             sitemap.CreatedBy = CreatedBy;
             sitemap.CreatedDate = CreatedDate;
-            sitemap.Location = Filename;
-            sitemap.Id = Id;
             sitemap.ModifiedBy = ModifiedBy;
             sitemap.ModifiedDate = ModifiedDate;
+            sitemap.OuterId = OuterId;
+
+            sitemap.Location = Filename;
             sitemap.StoreId = StoreId;
             sitemap.UrlTemplate = UrlTemplate;
             sitemap.TotalItemsCount = TotalItemsCount;
@@ -64,6 +66,12 @@ namespace VirtoCommerce.SitemapsModule.Data.Models
             pkMap.AddPair(sitemap, this);
 
             Id = sitemap.Id;
+            CreatedBy = sitemap.CreatedBy;
+            CreatedDate = sitemap.CreatedDate;
+            ModifiedBy = sitemap.ModifiedBy;
+            ModifiedDate = sitemap.ModifiedDate;
+            OuterId = sitemap.OuterId;
+
             Filename = sitemap.Location;
             StoreId = sitemap.StoreId;
             UrlTemplate = sitemap.UrlTemplate;

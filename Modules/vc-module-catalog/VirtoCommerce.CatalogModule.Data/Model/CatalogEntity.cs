@@ -8,7 +8,7 @@ using VirtoCommerce.Platform.Core.Common;
 
 namespace VirtoCommerce.CatalogModule.Data.Model
 {
-    public class CatalogEntity : AuditableEntity
+    public class CatalogEntity : AuditableEntity, IHasOuterId
     {
         public CatalogEntity()
         {
@@ -31,6 +31,9 @@ namespace VirtoCommerce.CatalogModule.Data.Model
         [StringLength(128)]
         public string OwnerId { get; set; }
 
+        [StringLength(128)]
+        public string OuterId { get; set; }
+
         #region Navigation Properties
         public virtual ObservableCollection<CategoryRelationEntity> IncommingLinks { get; set; }
 
@@ -48,6 +51,7 @@ namespace VirtoCommerce.CatalogModule.Data.Model
             catalog.Id = Id;
             catalog.Name = Name;
             catalog.IsVirtual = Virtual;
+            catalog.OuterId = OuterId;
 
             catalog.Languages = new List<CatalogLanguage>();
             var defaultLanguage = (new CatalogLanguageEntity { Language = string.IsNullOrEmpty(DefaultLanguage) ? "en-us" : DefaultLanguage }).ToModel(AbstractTypeFactory<CatalogLanguage>.TryCreateInstance());
@@ -91,6 +95,8 @@ namespace VirtoCommerce.CatalogModule.Data.Model
             Id = catalog.Id;
             Name = catalog.Name;
             Virtual = catalog.IsVirtual;
+            OuterId = catalog.OuterId;
+
             DefaultLanguage = catalog.DefaultLanguage.LanguageCode;
 
             if (!catalog.Properties.IsNullOrEmpty())

@@ -9,7 +9,7 @@ using VirtoCommerce.Platform.Core.Common;
 
 namespace VirtoCommerce.CatalogModule.Data.Model
 {
-    public class ItemEntity : AuditableEntity
+    public class ItemEntity : AuditableEntity, IHasOuterId
     {
         public ItemEntity()
         {
@@ -85,6 +85,9 @@ namespace VirtoCommerce.CatalogModule.Data.Model
 
         public int Priority { get; set; }
 
+        [StringLength(128)]
+        public string OuterId { get; set; }
+
         #region Navigation Properties
 
         public virtual ObservableCollection<CategoryItemRelationEntity> CategoryLinks { get; set; }
@@ -129,6 +132,7 @@ namespace VirtoCommerce.CatalogModule.Data.Model
             product.CreatedBy = CreatedBy;
             product.ModifiedDate = ModifiedDate;
             product.ModifiedBy = ModifiedBy;
+            product.OuterId = OuterId;
 
             product.CatalogId = CatalogId;
             product.CategoryId = CategoryId;
@@ -236,6 +240,7 @@ namespace VirtoCommerce.CatalogModule.Data.Model
             CreatedBy = product.CreatedBy;
             ModifiedDate = product.ModifiedDate;
             ModifiedBy = product.ModifiedBy;
+            OuterId = product.OuterId;
 
             CatalogId = product.CatalogId;
             CategoryId = product.CategoryId;

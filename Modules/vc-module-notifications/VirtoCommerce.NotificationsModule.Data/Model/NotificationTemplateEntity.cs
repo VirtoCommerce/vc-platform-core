@@ -36,6 +36,7 @@ namespace VirtoCommerce.NotificationsModule.Data.Model
             template.CreatedDate = CreatedDate;
             template.ModifiedBy = ModifiedBy;
             template.ModifiedDate = ModifiedDate;
+            template.OuterId = OuterId;
 
             return template;
         }
@@ -53,6 +54,7 @@ namespace VirtoCommerce.NotificationsModule.Data.Model
             CreatedDate = template.CreatedDate;
             ModifiedBy = template.ModifiedBy;
             ModifiedDate = template.ModifiedDate;
+            OuterId = template.OuterId;
 
             return this;
         }

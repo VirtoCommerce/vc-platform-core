@@ -95,6 +95,7 @@ namespace VirtoCommerce.CartModule.Data.Model
             shipment.CreatedDate = CreatedDate;
             shipment.ModifiedBy = ModifiedBy;
             shipment.ModifiedDate = ModifiedDate;
+            shipment.OuterId = OuterId;
 
             shipment.Fee = Fee;
             shipment.FeeWithTax = FeeWithTax;
@@ -119,7 +120,7 @@ namespace VirtoCommerce.CartModule.Data.Model
             shipment.ShipmentMethodOption = ShipmentMethodOption;
             //TODO
             //shipment.TaxIncluded = TaxIncluded;
-            //shipment.MeasureUnit = 
+            //shipment.MeasureUnit =
 
             if (!Addresses.IsNullOrEmpty())
             {
@@ -156,6 +157,7 @@ namespace VirtoCommerce.CartModule.Data.Model
             CreatedDate = shipment.CreatedDate;
             ModifiedBy = shipment.ModifiedBy;
             ModifiedDate = shipment.ModifiedDate;
+            OuterId = shipment.OuterId;
 
             Fee = shipment.Fee;
             FeeWithTax = shipment.FeeWithTax;
@@ -180,7 +182,7 @@ namespace VirtoCommerce.CartModule.Data.Model
             ShipmentMethodOption = shipment.ShipmentMethodOption;
             //TODO
             //TaxIncluded = shipment.TaxIncluded;
-            //MeasureUnit = 
+            //MeasureUnit =
 
             //Allow to empty address
             Addresses = new ObservableCollection<AddressEntity>();

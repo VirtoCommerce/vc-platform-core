@@ -13,9 +13,6 @@ namespace VirtoCommerce.CartModule.Data.Model
 {
     public class PaymentEntity : AuditableEntity
     {
-        [StringLength(128)]
-        public string OuterId { get; set; }
-
         [Required]
         [StringLength(64)]
         public string Currency { get; set; }
@@ -73,6 +70,7 @@ namespace VirtoCommerce.CartModule.Data.Model
             payment.CreatedDate = CreatedDate;
             payment.ModifiedBy = ModifiedBy;
             payment.ModifiedDate = ModifiedDate;
+            payment.OuterId = OuterId;
 
             payment.Amount = Amount;
             payment.PaymentGatewayCode = PaymentGatewayCode;
@@ -87,7 +85,6 @@ namespace VirtoCommerce.CartModule.Data.Model
             payment.TotalWithTax = TotalWithTax;
             //TODO
             //payment.Purpose = Purpose;
-            payment.OuterId = OuterId;
             payment.Currency = Currency;
 
             if (!TaxDetails.IsNullOrEmpty())
@@ -120,6 +117,7 @@ namespace VirtoCommerce.CartModule.Data.Model
             CreatedDate = payment.CreatedDate;
             ModifiedBy = payment.ModifiedBy;
             ModifiedDate = payment.ModifiedDate;
+            OuterId = payment.OuterId;
 
             Amount = payment.Amount;
             PaymentGatewayCode = payment.PaymentGatewayCode;
@@ -132,7 +130,6 @@ namespace VirtoCommerce.CartModule.Data.Model
             TaxTotal = payment.TaxTotal;
             Total = payment.Total;
             TotalWithTax = payment.TotalWithTax;
-            OuterId = payment.OuterId;
             Currency = payment.Currency;
             //TODO
             //Purpose = payment.Purpose;

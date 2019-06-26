@@ -39,6 +39,9 @@ namespace VirtoCommerce.SitemapsModule.Data.Migrations
 
                     b.Property<DateTime?>("ModifiedDate");
 
+                    b.Property<string>("OuterId")
+                        .HasMaxLength(128);
+
                     b.Property<string>("StoreId")
                         .IsRequired()
                         .HasMaxLength(64);
@@ -77,6 +80,9 @@ namespace VirtoCommerce.SitemapsModule.Data.Migrations
 
                     b.Property<string>("ObjectType")
                         .IsRequired()
+                        .HasMaxLength(128);
+
+                    b.Property<string>("OuterId")
                         .HasMaxLength(128);
 
                     b.Property<string>("SitemapId")

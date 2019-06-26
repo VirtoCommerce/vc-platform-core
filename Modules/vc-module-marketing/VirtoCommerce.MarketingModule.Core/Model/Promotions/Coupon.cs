@@ -27,5 +27,6 @@ namespace VirtoCommerce.MarketingModule.Core.Model.Promotions
         /// Total number of uses 
         /// </summary>
         public long TotalUsesCount { get; set; }
+        public string OuterId { get; set; }
     }
 }
