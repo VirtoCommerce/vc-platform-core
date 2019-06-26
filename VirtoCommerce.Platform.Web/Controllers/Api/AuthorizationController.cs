@@ -49,15 +49,15 @@ namespace Mvc.Server
         // you must provide your own token endpoint action:
 
         [HttpPost("~/connect/token"), Produces("application/json")]
-        public async Task<ActionResult> Exchange(OpenIdConnectRequest request)
+        public async Task<ActionResult> Exchange(OpenIdConnectRequest openIdConnectRequest)
         {
-            Debug.Assert(request.IsTokenRequest(),
+            Debug.Assert(openIdConnectRequest.IsTokenRequest(),
                 "The OpenIddict binder for ASP.NET Core MVC is not registered. " +
                 "Make sure services.AddOpenIddict().AddMvcBinders() is correctly called.");
 
-            if (request.IsPasswordGrantType())
+            if (openIdConnectRequest.IsPasswordGrantType())
             {
-                var user = await _userManager.FindByNameAsync(request.Username);
+                var user = await _userManager.FindByNameAsync(openIdConnectRequest.Username);
 
                 if (user == null)
                 {
@@ -69,7 +69,7 @@ namespace Mvc.Server
                 }
 
                 // Validate the username/password parameters and ensure the account is not locked out.
-                var result = await _signInManager.CheckPasswordSignInAsync(user, request.Password, lockoutOnFailure: true);
+                var result = await _signInManager.CheckPasswordSignInAsync(user, openIdConnectRequest.Password, lockoutOnFailure: true);
                 if (!result.Succeeded)
                 {
                     return BadRequest(new OpenIdConnectResponse
@@ -80,7 +80,7 @@ namespace Mvc.Server
                 }
 
                 // Create a new authentication ticket.
-                var ticket = await CreateTicketAsync(request, user);
+                var ticket = await CreateTicketAsync(openIdConnectRequest, user);
                 var claimsPrincipal = await _userClaimsPrincipalFactory.CreateAsync(user);
                 var limitedPermissions = _authorizationOptions.LimitedCookiePermissions?.Split(PlatformConstants.Security.Claims.PermissionClaimTypeDelimiter, StringSplitOptions.RemoveEmptyEntries) ?? new string[0];
 
@@ -111,7 +111,7 @@ namespace Mvc.Server
                 return SignIn(ticket.Principal, ticket.Properties, ticket.AuthenticationScheme);
             }
 
-            else if (request.IsAuthorizationCodeGrantType() || request.IsRefreshTokenGrantType())
+            else if (openIdConnectRequest.IsAuthorizationCodeGrantType() || openIdConnectRequest.IsRefreshTokenGrantType())
             {
                 // Retrieve the claims principal stored in the authorization code/refresh token.
                 var info = await HttpContext.AuthenticateAsync(OpenIdConnectServerDefaults.AuthenticationScheme);
@@ -142,15 +142,15 @@ namespace Mvc.Server
 
                 // Create a new authentication ticket, but reuse the properties stored in the
                 // authorization code/refresh token, including the scopes originally granted.
-                var ticket = await CreateTicketAsync(request, user, info.Properties);
+                var ticket = await CreateTicketAsync(openIdConnectRequest, user, info.Properties);
 
                 return SignIn(ticket.Principal, ticket.Properties, ticket.AuthenticationScheme);
             }
-            else if (request.IsClientCredentialsGrantType())
+            else if (openIdConnectRequest.IsClientCredentialsGrantType())
             {
                 // Note: the client credentials are automatically validated by OpenIddict:
                 // if client_id or client_secret are invalid, this action won't be invoked.
-                var application = await _applicationManager.FindByClientIdAsync(request.ClientId, HttpContext.RequestAborted);
+                var application = await _applicationManager.FindByClientIdAsync(openIdConnectRequest.ClientId, HttpContext.RequestAborted);
                 if (application == null)
                 {
                     return BadRequest(new OpenIdConnectResponse
@@ -161,7 +161,7 @@ namespace Mvc.Server
                 }
 
                 // Create a new authentication ticket.
-                var ticket = CreateTicket(request, application);
+                var ticket = CreateTicket(openIdConnectRequest, application);
 
                 return SignIn(ticket.Principal, ticket.Properties, ticket.AuthenticationScheme);
             }

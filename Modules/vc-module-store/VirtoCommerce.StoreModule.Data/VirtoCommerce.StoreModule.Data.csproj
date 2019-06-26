@@ -2,11 +2,11 @@
 
     <PropertyGroup>
         <TargetFramework>netcoreapp2.2</TargetFramework>
-
+        <noWarn>1591</noWarn>
     </PropertyGroup>
 
     <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Debug|AnyCPU'">
-        <NoWarn>1701;1702;1705;1591</NoWarn>
+        <NoWarn>1701;1702;1705</NoWarn>
     </PropertyGroup>
     <ItemGroup>
         <PackageReference Include="EntityFrameworkCore.Triggers" Version="1.1.1" />

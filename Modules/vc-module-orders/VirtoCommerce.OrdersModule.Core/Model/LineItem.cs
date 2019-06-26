@@ -4,9 +4,11 @@ using VirtoCommerce.CoreModule.Core.Common;
 using VirtoCommerce.CoreModule.Core.Tax;
 using VirtoCommerce.Platform.Core.Common;
 using VirtoCommerce.Platform.Core.DynamicProperties;
+using VirtoCommerce.Platform.Core.Swagger;
 
 namespace VirtoCommerce.OrdersModule.Core.Model
 {
+    [SwaggerSchemaId("OrderLineItem")]
     public class LineItem : AuditableEntity, IHasTaxDetalization, ISupportCancellation, IHasDimension, IHasDynamicProperties, ITaxable, IHasDiscounts
     {
         /// <summary>

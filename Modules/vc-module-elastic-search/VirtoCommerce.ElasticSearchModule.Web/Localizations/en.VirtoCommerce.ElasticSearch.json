@@ -1,0 +1,24 @@
+{
+    "settings": {
+        "VirtoCommerce.Search.ElasticSearch": {
+            "IndexTotalFieldsLimit": {
+                "title": "Maximum number of fields in an index",
+                "description": "index.mapping.total_fields.limit https://www.elastic.co/guide/en/elasticsearch/reference/current/mapping.html#mapping-limit-settings"
+            },
+            "TokenFilter": {
+                "title": "Token filter",
+                "description": "Select which token filter should be used when indexing searchable fields (requires rebuilding an index)"
+            },
+            "NGramTokenFilter": {
+                "MinGram": {
+                    "title": "Min Gram",
+                    "description": "Minimum number of characters in a gram (requires rebuilding an index)"
+                },
+                "MaxGram": {
+                    "title": "Max Gram",
+                    "description": "Maximum number of characters in a gram (requires rebuilding an index)"
+                }
+            }
+        }
+    }
+}

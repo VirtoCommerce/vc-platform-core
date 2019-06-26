@@ -9,7 +9,7 @@ namespace VirtoCommerce.CatalogModule.Core.Model
 {
     public class Property : AuditableEntity, IInheritable, ICloneable
     {
-        // <summary>
+        /// <summary>
         /// Gets or sets a value indicating whether user can change property value.
         /// </summary>     
         public bool IsReadOnly { get; set; }

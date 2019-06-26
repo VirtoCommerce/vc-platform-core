@@ -5,12 +5,13 @@
         <GenerateDocumentationFile>true</GenerateDocumentationFile>
         <AssemblyVersion>3.0.0.0</AssemblyVersion>
         <Version>3.0.0</Version>
+        <noWarn>1591</noWarn>
         <!--This line is necessary to copy all dependencies in the bin folder-->
         <!--<CopyLocalLockFileAssemblies>true</CopyLocalLockFileAssemblies>-->
     </PropertyGroup>
 
     <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Debug|AnyCPU'">
-        <NoWarn>1701;1702;1705;1591</NoWarn>
+        <NoWarn>1701;1702;1705</NoWarn>
     </PropertyGroup>
 
     <ItemGroup>
