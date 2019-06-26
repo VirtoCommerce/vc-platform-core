@@ -1,5 +1,4 @@
-angular.module('platformWebApp')
-.controller('platformWebApp.settingsDetailController', ['$scope', 'platformWebApp.dialogService', 'platformWebApp.settings.helper', 'platformWebApp.bladeNavigationService', 'platformWebApp.settings', function ($scope, dialogService, settingsHelper, bladeNavigationService, settings) {
+angular.module('platformWebApp').controller('platformWebApp.settingsDetailController', ['$scope', 'platformWebApp.dialogService', 'platformWebApp.settings.helper', 'platformWebApp.bladeNavigationService', 'platformWebApp.settings', function ($scope, dialogService, settingsHelper, bladeNavigationService, settingsApi) {
     var blade = $scope.blade;
     blade.updatePermission = 'platform:setting:update';
 
@@ -7,16 +6,14 @@ angular.module('platformWebApp')
         if (blade.moduleId && !blade.data) {
             blade.isLoading = true;
 
-            settings.getSettings({ id: blade.moduleId }, initializeBlade);
+            settingsApi.getSettings({ id: blade.moduleId }, initializeBlade);
         } else {
             initializeBlade(angular.copy(blade.data));
         }
     }
 
-    function initializeBlade(results) {
-        settingsHelper.fixValues(results);
-
-        _.each(results, function (setting) {
+    function initializeBlade(settings) {
+        _.each(settings, function (setting) {
             // set group names to show.
             if (setting.groupName) {
                 var paths = setting.groupName.split('|');
@@ -24,8 +21,8 @@ angular.module('platformWebApp')
             }
 
             // transform to va-generic-value-input suitable structure
-            if (!setting.value && setting.defaultValue) {
-                setting.value =  setting.defaultValue;
+            if (setting.value == undefined && setting.defaultValue) {
+                setting.value = setting.defaultValue;
             }
             setting.values = setting.isDictionary ? [{ value: { id: setting.value, name: setting.value } }] : [{ id: setting.value, value: setting.value }];
             if (setting.allowedValues) {
@@ -34,10 +31,11 @@ angular.module('platformWebApp')
                 });
             }
         });
-        results = _.groupBy(results, 'groupName');
-        blade.groupNames = _.keys(results);
-        blade.currentEntities = angular.copy(results);
-        blade.origEntity = results;
+
+        settings = _.groupBy(settings, 'groupName');
+        blade.groupNames = _.keys(settings);
+        blade.currentEntities = angular.copy(settings);
+        blade.origEntity = settings;
         blade.isLoading = false;
     }
 
@@ -52,7 +50,7 @@ angular.module('platformWebApp')
     }
 
     var formScope;
-    $scope.setForm = function (form) { formScope = form; };
+    $scope.setForm = function (form) { formScope = form; }
 
     function isDirty() {
         return !angular.equals(blade.currentEntities, blade.origEntity) && blade.hasUpdatePermission();
@@ -64,6 +62,7 @@ angular.module('platformWebApp')
 
     function saveChanges() {
         blade.isLoading = true;
+
         var objects = _.flatten(_.map(blade.currentEntities, _.values));
         objects = _.map(objects, function (x) {
             x.value = x.isDictionary ? x.values[0].value.id : x.values[0].value;
@@ -72,8 +71,7 @@ angular.module('platformWebApp')
 
         settingsHelper.toApiFormat(objects);
 
-        //console.log('saveChanges3: ' + angular.toJson(objects, true));
-        settings.update({}, objects, function () {
+        settingsApi.update({}, objects, function () {
             if (blade.moduleId) {
                 blade.data = undefined;
                 blade.refresh();
