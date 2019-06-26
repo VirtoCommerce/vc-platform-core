@@ -27,6 +27,9 @@ using SystemFile = System.IO.File;
 
 namespace VirtoCommerce.SitemapsModule.Web.Controllers.Api
 {
+    /// <summary>
+    /// 
+    /// </summary>
     [Route("api/sitemaps")]
     [Authorize(ModuleConstants.Security.Permissions.Read)]
     public class SitemapsModuleApiController : Controller
@@ -42,6 +45,19 @@ namespace VirtoCommerce.SitemapsModule.Web.Controllers.Api
         private readonly IBlobUrlResolver _blobUrlResolver;
         private readonly IHostingEnvironment _hostingEnvironment;
 
+        /// <summary>
+        /// 
+        /// </summary>
+        /// <param name="sitemapService"></param>
+        /// <param name="sitemapItemService"></param>
+        /// <param name="sitemapSearchService"></param>
+        /// <param name="sitemapItemSearchService"></param>
+        /// <param name="sitemapXmlGenerator"></param>
+        /// <param name="userNameResolver"></param>
+        /// <param name="notifier"></param>
+        /// <param name="blobStorageProvider"></param>
+        /// <param name="blobUrlResolver"></param>
+        /// <param name="hostingEnvironment"></param>
         public SitemapsModuleApiController(
             ISitemapService sitemapService,
             ISitemapItemService sitemapItemService,
@@ -66,6 +82,11 @@ namespace VirtoCommerce.SitemapsModule.Web.Controllers.Api
             _hostingEnvironment = hostingEnvironment;
         }
 
+        /// <summary>
+        /// 
+        /// </summary>
+        /// <param name="request"></param>
+        /// <returns></returns>
         [HttpPost]
         [Route("search")]
         public async Task<ActionResult<SitemapSearchResult>> SearchSitemaps([FromBody] SitemapSearchCriteria request)
@@ -80,6 +101,11 @@ namespace VirtoCommerce.SitemapsModule.Web.Controllers.Api
             return Ok(sitemapSearchResponse);
         }
 
+        /// <summary>
+        /// 
+        /// </summary>
+        /// <param name="id"></param>
+        /// <returns></returns>
         [HttpGet]
         [Route("{id}")]
         public async Task<ActionResult<Sitemap>> GetSitemapById(string id)
@@ -99,6 +125,11 @@ namespace VirtoCommerce.SitemapsModule.Web.Controllers.Api
             return Ok(sitemap);
         }
 
+        /// <summary>
+        /// 
+        /// </summary>
+        /// <param name="sitemap"></param>
+        /// <returns></returns>
         [HttpPost]
         [Route("")]
         [Authorize(ModuleConstants.Security.Permissions.Create)]
@@ -114,6 +145,11 @@ namespace VirtoCommerce.SitemapsModule.Web.Controllers.Api
             return NoContent();
         }
 
+        /// <summary>
+        /// 
+        /// </summary>
+        /// <param name="sitemap"></param>
+        /// <returns></returns>
         [HttpPut]
         [Route("")]
         [Authorize(ModuleConstants.Security.Permissions.Update)]
@@ -129,6 +165,11 @@ namespace VirtoCommerce.SitemapsModule.Web.Controllers.Api
             return NoContent();
         }
 
+        /// <summary>
+        /// 
+        /// </summary>
+        /// <param name="ids"></param>
+        /// <returns></returns>
         [HttpDelete]
         [Route("")]
         [Authorize(ModuleConstants.Security.Permissions.Delete)]
@@ -144,6 +185,11 @@ namespace VirtoCommerce.SitemapsModule.Web.Controllers.Api
             return NoContent();
         }
 
+        /// <summary>
+        /// 
+        /// </summary>
+        /// <param name="request"></param>
+        /// <returns></returns>
         [HttpPost]
         [Route("items/search")]
         public async Task<ActionResult<SitemapItemsSearchResult>> SearchSitemapItems([FromBody] SitemapItemSearchCriteria request)
@@ -158,6 +204,12 @@ namespace VirtoCommerce.SitemapsModule.Web.Controllers.Api
             return Ok(result);
         }
 
+        /// <summary>
+        /// 
+        /// </summary>
+        /// <param name="sitemapId"></param>
+        /// <param name="items"></param>
+        /// <returns></returns>
         [HttpPost]
         [Route("{sitemapId}/items")]
         public async Task<ActionResult> AddSitemapItems(string sitemapId, [FromBody]SitemapItem[] items)
@@ -180,6 +232,11 @@ namespace VirtoCommerce.SitemapsModule.Web.Controllers.Api
             return NoContent();
         }
 
+        /// <summary>
+        /// 
+        /// </summary>
+        /// <param name="itemIds"></param>
+        /// <returns></returns>
         [HttpDelete]
         [Route("items")]
         public async Task<ActionResult> RemoveSitemapItems(string[] itemIds)
@@ -194,6 +251,11 @@ namespace VirtoCommerce.SitemapsModule.Web.Controllers.Api
             return NoContent();
         }
 
+        /// <summary>
+        /// 
+        /// </summary>
+        /// <param name="storeId"></param>
+        /// <returns></returns>
         [HttpGet]
         [Route("schema")]
         public async Task<ActionResult<string[]>> GetSitemapsSchema(string storeId)
@@ -207,6 +269,13 @@ namespace VirtoCommerce.SitemapsModule.Web.Controllers.Api
             return Ok(sitemapUrls);
         }
 
+        /// <summary>
+        /// 
+        /// </summary>
+        /// <param name="storeId"></param>
+        /// <param name="baseUrl"></param>
+        /// <param name="sitemapUrl"></param>
+        /// <returns></returns>
         [HttpGet]
         [Route("generate")]
         [SwaggerFileResponse]
@@ -220,6 +289,12 @@ namespace VirtoCommerce.SitemapsModule.Web.Controllers.Api
             return result;
         }
 
+        /// <summary>
+        /// 
+        /// </summary>
+        /// <param name="storeId"></param>
+        /// <param name="baseUrl"></param>
+        /// <returns></returns>
         [HttpGet]
         [Route("download")]
         public async Task<ActionResult<SitemapDownloadNotification>> DownloadSitemap(string storeId, string baseUrl)
@@ -237,6 +312,13 @@ namespace VirtoCommerce.SitemapsModule.Web.Controllers.Api
             return Ok(notification);
         }
 
+        /// <summary>
+        /// 
+        /// </summary>
+        /// <param name="storeId"></param>
+        /// <param name="baseUrl"></param>
+        /// <param name="notification"></param>
+        /// <returns></returns>
         [ApiExplorerSettings(IgnoreApi = true)]
         public async Task BackgroundDownload(string storeId, string baseUrl, SitemapDownloadNotification notification)
         {

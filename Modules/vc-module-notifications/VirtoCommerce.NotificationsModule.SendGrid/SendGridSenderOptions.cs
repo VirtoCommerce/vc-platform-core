@@ -1,3 +1,5 @@
+using System.ComponentModel.DataAnnotations;
+
 namespace VirtoCommerce.NotificationsModule.SendGrid
 {
     public class SendGridSenderOptions
@@ -5,6 +7,7 @@ namespace VirtoCommerce.NotificationsModule.SendGrid
         /// <summary>
         /// key of SendGrid API
         /// </summary>
+        [Required]
         public string ApiKey { get; set; }
     }
 }

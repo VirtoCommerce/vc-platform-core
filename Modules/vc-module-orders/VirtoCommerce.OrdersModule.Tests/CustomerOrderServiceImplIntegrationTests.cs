@@ -20,7 +20,6 @@ using VirtoCommerce.Platform.Core.Bus;
 using VirtoCommerce.Platform.Core.Caching;
 using VirtoCommerce.Platform.Core.ChangeLog;
 using VirtoCommerce.Platform.Core.Common;
-using VirtoCommerce.Platform.Core.Domain;
 using VirtoCommerce.Platform.Core.DynamicProperties;
 using VirtoCommerce.Platform.Core.Events;
 using VirtoCommerce.ShippingModule.Core.Services;
@@ -38,12 +37,10 @@ namespace VirtoCommerce.OrdersModule.Tests
         private readonly Mock<IPaymentMethodsRegistrar> _paymentMethodRegistrarMock;
         private readonly Mock<ICustomerOrderTotalsCalculator> _customerOrderTotalsCalculatorMock;
         private readonly Mock<IUniqueNumberGenerator> _uniqueNumberGeneratorMock;
-        private readonly Mock<IEventPublisher> _eventPublisherMock;
         private readonly Mock<IDynamicPropertyService> _dynamicPropertyServiceMock;
         private readonly Mock<IPlatformMemoryCache> _platformMemoryCacheMock;
         private readonly Mock<IChangeLogService> _changeLogServiceMock;
         private readonly Mock<ICacheEntry> _cacheEntryMock;
-        private static IUnitOfWork _unitOfWorkMock;
         private readonly ICustomerOrderService _customerOrderService;
         private readonly ICustomerOrderSearchService _customerOrderSearchService;
 

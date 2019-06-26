@@ -51,12 +51,12 @@ namespace VirtoCommerce.ContentModule.Web
             var contentProvider = configuration.GetSection("Content:Provider").Value;
             if (contentProvider.EqualsInvariant(AzureBlobProvider.ProviderName))
             {
-                serviceCollection.Configure<AzureContentBlobOptions>(configuration.GetSection("Content:AzureBlobStorage"));
+                serviceCollection.AddOptions<AzureContentBlobOptions>().Bind(configuration.GetSection("Content:AzureBlobStorage")).ValidateDataAnnotations();
                 serviceCollection.AddAzureContentBlobProvider();
             }
             else
             {
-                serviceCollection.Configure<FileSystemContentBlobOptions>(configuration.GetSection("Content:FileSystem"));
+                serviceCollection.AddOptions<FileSystemContentBlobOptions>().Bind(configuration.GetSection("Content:FileSystem")).ValidateDataAnnotations();
                 serviceCollection.AddFileSystemContentBlobProvider(options =>
                 {
                     options.RootPath = hostingEnvironment.MapPath(options.RootPath);

@@ -5,7 +5,7 @@ using VirtoCommerce.Platform.Core.Common;
 namespace VirtoCommerce.NotificationsModule.Core.Model
 {
     /// <summary>
-    /// A parent class for Notification
+    /// Base class for Notification
     /// </summary>
     public abstract class Notification : AuditableEntity
     {

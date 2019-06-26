@@ -1,3 +1,5 @@
+using System.ComponentModel.DataAnnotations;
+
 namespace VirtoCommerce.NotificationsModule.Smtp
 {
     /// <summary>
@@ -8,6 +10,7 @@ namespace VirtoCommerce.NotificationsModule.Smtp
         /// <summary>
         /// Server of Sending
         /// </summary>
+        [Url]
         public string SmtpServer { get; set; }
 
         /// <summary>

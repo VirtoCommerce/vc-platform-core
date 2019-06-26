@@ -1,4 +1,4 @@
-﻿using System;
+using System;
 using System.Collections.Generic;
 using System.IO;
 
@@ -16,7 +16,7 @@ namespace VirtoCommerce.Platform.Core.Modularity
         private readonly IAssemblyResolver assemblyResolver;
         private HashSet<Uri> downloadedUris = new HashSet<Uri>();
 
-       
+
         /// <summary>
         /// Initializes a new instance of the <see cref="FileModuleTypeLoader"/> class.
         /// </summary>
@@ -33,14 +33,14 @@ namespace VirtoCommerce.Platform.Core.Modularity
 
         private void RaiseModuleDownloadProgressChanged(ModuleInfo moduleInfo, long bytesReceived, long totalBytesToReceive)
         {
-            this.RaiseModuleDownloadProgressChanged(new ModuleDownloadProgressChangedEventArgs(moduleInfo, bytesReceived, totalBytesToReceive));
+            RaiseModuleDownloadProgressChanged(new ModuleDownloadProgressChangedEventArgs(moduleInfo, bytesReceived, totalBytesToReceive));
         }
 
         private void RaiseModuleDownloadProgressChanged(ModuleDownloadProgressChangedEventArgs e)
         {
-            if (this.ModuleDownloadProgressChanged != null)
+            if (ModuleDownloadProgressChanged != null)
             {
-                this.ModuleDownloadProgressChanged(this, e);
+                ModuleDownloadProgressChanged(this, e);
             }
         }
 
@@ -51,14 +51,14 @@ namespace VirtoCommerce.Platform.Core.Modularity
 
         private void RaiseLoadModuleCompleted(ModuleInfo moduleInfo, Exception error)
         {
-            this.RaiseLoadModuleCompleted(new LoadModuleCompletedEventArgs(moduleInfo, error));
+            RaiseLoadModuleCompleted(new LoadModuleCompletedEventArgs(moduleInfo, error));
         }
 
         private void RaiseLoadModuleCompleted(LoadModuleCompletedEventArgs e)
         {
-            if (this.LoadModuleCompleted != null)
+            if (LoadModuleCompleted != null)
             {
-                this.LoadModuleCompleted(this, e);
+                LoadModuleCompleted(this, e);
             }
         }
 
@@ -97,12 +97,12 @@ namespace VirtoCommerce.Platform.Core.Modularity
 
             try
             {
-                Uri uri = new Uri(moduleInfo.Ref, UriKind.RelativeOrAbsolute);
+                var uri = new Uri(moduleInfo.Ref, UriKind.RelativeOrAbsolute);
 
                 // If this module has already been downloaded, I fire the completed event.
-                if (this.IsSuccessfullyDownloaded(uri))
+                if (IsSuccessfullyDownloaded(uri))
                 {
-                    this.RaiseLoadModuleCompleted(moduleInfo, null);
+                    RaiseLoadModuleCompleted(moduleInfo, null);
                 }
                 else
                 {
@@ -117,46 +117,46 @@ namespace VirtoCommerce.Platform.Core.Modularity
                         path = moduleInfo.Ref.Substring(RefFilePrefix.Length);
                     }
 
-                    long fileSize = -1L;
+                    var fileSize = -1L;
                     if (File.Exists(path))
                     {
-                        FileInfo fileInfo = new FileInfo(path);
+                        var fileInfo = new FileInfo(path);
                         fileSize = fileInfo.Length;
                     }
 
                     // Although this isn't asynchronous, nor expected to take very long, I raise progress changed for consistency.
-                    this.RaiseModuleDownloadProgressChanged(moduleInfo, 0, fileSize);
+                    RaiseModuleDownloadProgressChanged(moduleInfo, 0, fileSize);
 
-                    moduleInfo.Assembly = this.assemblyResolver.LoadAssemblyFrom(moduleInfo.Ref);
+                    moduleInfo.Assembly = assemblyResolver.LoadAssemblyFrom(moduleInfo.Ref);
 
                     // Although this isn't asynchronous, nor expected to take very long, I raise progress changed for consistency.
-                    this.RaiseModuleDownloadProgressChanged(moduleInfo, fileSize, fileSize);
+                    RaiseModuleDownloadProgressChanged(moduleInfo, fileSize, fileSize);
 
                     // I remember the downloaded URI.
-                    this.RecordDownloadSuccess(uri);
+                    RecordDownloadSuccess(uri);
 
-                    this.RaiseLoadModuleCompleted(moduleInfo, null);
+                    RaiseLoadModuleCompleted(moduleInfo, null);
                 }
             }
             catch (Exception ex)
             {
-                this.RaiseLoadModuleCompleted(moduleInfo, ex);
+                RaiseLoadModuleCompleted(moduleInfo, ex);
             }
         }
 
         private bool IsSuccessfullyDownloaded(Uri uri)
         {
-            lock (this.downloadedUris)
+            lock (downloadedUris)
             {
-                return this.downloadedUris.Contains(uri);
+                return downloadedUris.Contains(uri);
             }
         }
 
         private void RecordDownloadSuccess(Uri uri)
         {
-            lock (this.downloadedUris)
+            lock (downloadedUris)
             {
-                this.downloadedUris.Add(uri);
+                downloadedUris.Add(uri);
             }
         }
 
@@ -169,17 +169,17 @@ namespace VirtoCommerce.Platform.Core.Modularity
         /// <filterpriority>2</filterpriority>
         public void Dispose()
         {
-            this.Dispose(true);
+            Dispose(true);
             GC.SuppressFinalize(this);
         }
 
         /// <summary>
-        /// Disposes the associated <see cref="AssemblyResolver"/>.
+        /// Disposes the associated <see cref="assemblyResolver"/>.
         /// </summary>
         /// <param name="disposing">When <see langword="true"/>, it is being called from the Dispose method.</param>
         protected virtual void Dispose(bool disposing)
         {
-            IDisposable disposableResolver = this.assemblyResolver as IDisposable;
+            var disposableResolver = assemblyResolver as IDisposable;
             if (disposableResolver != null)
             {
                 disposableResolver.Dispose();

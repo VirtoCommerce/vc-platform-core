@@ -1,13 +1,11 @@
-using System;
 using System.Collections.Generic;
 using System.Linq;
-using VirtoCommerce.SearchModule.Data.Search.SearchPhraseParsing.Antlr;
 using VirtoCommerce.Platform.Core.Common;
 using VirtoCommerce.SearchModule.Core.Model;
+using VirtoCommerce.SearchModule.Data.Search.SearchPhraseParsing.Antlr;
 
 namespace VirtoCommerce.SearchModule.Data.Search.SearchPhraseParsing
 {
-    [CLSCompliant(false)]
     public class SearchPhraseListener : SearchPhraseBaseListener
     {
         public IList<string> Keywords { get; } = new List<string>();
