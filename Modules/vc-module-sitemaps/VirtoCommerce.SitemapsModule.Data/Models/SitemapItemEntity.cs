@@ -40,7 +40,6 @@ namespace VirtoCommerce.SitemapsModule.Data.Models
             sitemapItem.CreatedDate = CreatedDate;
             sitemapItem.ModifiedBy = ModifiedBy;
             sitemapItem.ModifiedDate = ModifiedDate;
-            sitemapItem.OuterId = OuterId;
 
             sitemapItem.ImageUrl = ImageUrl;
             sitemapItem.ObjectId = ObjectId;
@@ -70,7 +69,6 @@ namespace VirtoCommerce.SitemapsModule.Data.Models
             CreatedDate = sitemapItem.CreatedDate;
             ModifiedBy = sitemapItem.ModifiedBy;
             ModifiedDate = sitemapItem.ModifiedDate;
-            OuterId = sitemapItem.OuterId;
 
             ImageUrl = sitemapItem.ImageUrl;
             ObjectId = sitemapItem.ObjectId;

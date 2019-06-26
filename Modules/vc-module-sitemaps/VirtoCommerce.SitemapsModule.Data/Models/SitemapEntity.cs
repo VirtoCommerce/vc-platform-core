@@ -42,7 +42,6 @@ namespace VirtoCommerce.SitemapsModule.Data.Models
             sitemap.CreatedDate = CreatedDate;
             sitemap.ModifiedBy = ModifiedBy;
             sitemap.ModifiedDate = ModifiedDate;
-            sitemap.OuterId = OuterId;
 
             sitemap.Location = Filename;
             sitemap.StoreId = StoreId;
@@ -70,7 +69,6 @@ namespace VirtoCommerce.SitemapsModule.Data.Models
             CreatedDate = sitemap.CreatedDate;
             ModifiedBy = sitemap.ModifiedBy;
             ModifiedDate = sitemap.ModifiedDate;
-            OuterId = sitemap.OuterId;
 
             Filename = sitemap.Location;
             StoreId = sitemap.StoreId;
