@@ -47,13 +47,15 @@ namespace VirtoCommerce.NotificationsModule.Data.Model
         {
             if (notification == null) throw new ArgumentNullException(nameof(notification));
             notification.Id = Id;
-            notification.TenantIdentity = string.IsNullOrEmpty(TenantId) ? TenantIdentity.Empty : new TenantIdentity(TenantId, TenantType);
-            notification.IsActive = IsActive;
-            notification.Type = Type;
             notification.CreatedBy = CreatedBy;
             notification.CreatedDate = CreatedDate;
             notification.ModifiedBy = ModifiedBy;
             notification.ModifiedDate = ModifiedDate;
+            notification.OuterId = OuterId;
+
+            notification.TenantIdentity = string.IsNullOrEmpty(TenantId) ? TenantIdentity.Empty : new TenantIdentity(TenantId, TenantType);
+            notification.IsActive = IsActive;
+            notification.Type = Type;
 
             notification.Templates = Templates
                 .Select(t => t.ToModel(AbstractTypeFactory<NotificationTemplate>.TryCreateInstance($"{Kind}Template"))).ToList();
@@ -68,14 +70,16 @@ namespace VirtoCommerce.NotificationsModule.Data.Model
             pkMap.AddPair(notification, this);
 
             Id = notification.Id;
-            TenantId = notification.TenantIdentity?.Id;
-            TenantType = notification.TenantIdentity?.Type;
-            Type = notification.Type;
-            IsActive = notification.IsActive;
             CreatedBy = notification.CreatedBy;
             CreatedDate = notification.CreatedDate;
             ModifiedBy = notification.ModifiedBy;
             ModifiedDate = notification.ModifiedDate;
+            OuterId = notification.OuterId;
+
+            TenantId = notification.TenantIdentity?.Id;
+            TenantType = notification.TenantIdentity?.Type;
+            Type = notification.Type;
+            IsActive = notification.IsActive;
             Kind = notification.Kind;
 
             if (notification.Templates != null && notification.Templates.Any())

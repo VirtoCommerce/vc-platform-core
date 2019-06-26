@@ -10,7 +10,7 @@ using VirtoCommerce.Platform.Core.Common;
 
 namespace VirtoCommerce.CatalogModule.Data.Model
 {
-    public class CategoryEntity : AuditableEntity
+    public class CategoryEntity : AuditableEntity, IHasOuterId
     {
         public CategoryEntity()
         {
@@ -40,6 +40,9 @@ namespace VirtoCommerce.CatalogModule.Data.Model
 
         [StringLength(64)]
         public string TaxType { get; set; }
+
+        [StringLength(128)]
+        public string OuterId { get; set; }
 
         [NotMapped]
         public CategoryEntity[] AllParents
@@ -93,6 +96,7 @@ namespace VirtoCommerce.CatalogModule.Data.Model
             category.CreatedDate = CreatedDate;
             category.ModifiedBy = ModifiedBy;
             category.ModifiedDate = ModifiedDate;
+            category.OuterId = OuterId;
 
             category.Code = Code;
             category.Name = Name;
@@ -167,6 +171,7 @@ namespace VirtoCommerce.CatalogModule.Data.Model
             CreatedDate = category.CreatedDate;
             ModifiedBy = category.ModifiedBy;
             ModifiedDate = category.ModifiedDate;
+            OuterId = category.OuterId;
 
             Code = category.Code;
             Name = category.Name;

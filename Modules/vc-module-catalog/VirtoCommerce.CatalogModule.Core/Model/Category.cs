@@ -8,7 +8,7 @@ using VirtoCommerce.Platform.Core.Common;
 
 namespace VirtoCommerce.CatalogModule.Core.Model
 {
-    public class Category : AuditableEntity, IHasLinks, ISeoSupport, IHasOutlines, IHasImages, IHasProperties, ICloneable, IHasTaxType, IHasName
+    public class Category : AuditableEntity, IHasLinks, ISeoSupport, IHasOutlines, IHasImages, IHasProperties, ICloneable, IHasTaxType, IHasName, IHasOuterId
     {
         public Category()
         {
@@ -45,6 +45,7 @@ namespace VirtoCommerce.CatalogModule.Core.Model
         public int Priority { get; set; }
 
         public bool? IsActive { get; set; }
+        public string OuterId { get; set; }
         [JsonIgnore]
         public IList<Category> Children { get; set; }
 

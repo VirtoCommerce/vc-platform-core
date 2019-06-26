@@ -25,5 +25,7 @@ namespace VirtoCommerce.OrdersModule.Core.Model
 
         public int Quantity { get; set; }
 
+        public string OuterId { get; set; }
+
     }
 }

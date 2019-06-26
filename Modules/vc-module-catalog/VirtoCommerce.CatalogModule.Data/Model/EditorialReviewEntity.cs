@@ -39,6 +39,7 @@ namespace VirtoCommerce.CatalogModule.Data.Model
             review.CreatedDate = CreatedDate;
             review.ModifiedBy = ModifiedBy;
             review.ModifiedDate = ModifiedDate;
+
             review.LanguageCode = Locale;
             review.ReviewType = Source;
 
@@ -58,6 +59,7 @@ namespace VirtoCommerce.CatalogModule.Data.Model
             CreatedDate = review.CreatedDate;
             ModifiedBy = review.ModifiedBy;
             ModifiedDate = review.ModifiedDate;
+
             Locale = review.LanguageCode;
             Source = review.ReviewType;
 

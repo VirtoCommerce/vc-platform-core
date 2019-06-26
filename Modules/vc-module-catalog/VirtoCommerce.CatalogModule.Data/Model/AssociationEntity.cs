@@ -5,7 +5,7 @@ using VirtoCommerce.Platform.Core.Common;
 
 namespace VirtoCommerce.CatalogModule.Data.Model
 {
-    public class AssociationEntity : AuditableEntity
+    public class AssociationEntity : AuditableEntity, IHasOuterId
     {
         /// <summary>
         /// Gets or sets the type of the association. 
@@ -24,6 +24,9 @@ namespace VirtoCommerce.CatalogModule.Data.Model
         [StringLength(1024)]
         public string Tags { get; set; }
 
+        [StringLength(128)]
+        public string OuterId { get; set; }
+
         #region Navigation Properties
 
         public string ItemId { get; set; }
@@ -41,6 +44,7 @@ namespace VirtoCommerce.CatalogModule.Data.Model
             if (association == null)
                 throw new ArgumentNullException(nameof(association));
 
+            association.OuterId = OuterId;
             association.Type = AssociationType;
             association.Priority = Priority;
             association.AssociatedObjectId = ItemId;
@@ -65,6 +69,7 @@ namespace VirtoCommerce.CatalogModule.Data.Model
             if (association == null)
                 throw new ArgumentNullException(nameof(association));
 
+            association.OuterId = OuterId;
             association.Type = AssociationType;
             association.Priority = Priority;
             association.AssociatedObjectId = AssociatedItemId ?? AssociatedCategoryId;
