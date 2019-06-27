@@ -9,6 +9,7 @@ using VirtoCommerce.CatalogModule.Core.Model.Search;
 using VirtoCommerce.CatalogModule.Core.Search;
 using VirtoCommerce.Platform.Core.Common;
 using VirtoCommerce.Platform.Core.DynamicProperties;
+using VirtoCommerce.StoreModule.Core.Model;
 using VirtoCommerce.StoreModule.Core.Services;
 
 namespace VirtoCommerce.CatalogModule.Data.Search.BrowseFilters
@@ -84,14 +85,14 @@ namespace VirtoCommerce.CatalogModule.Data.Search.BrowseFilters
 
         protected virtual async Task<string> GetSerializedValue(string storeId)
         {
-            var store = await _storeService.GetByIdAsync(storeId);
+            var store = await _storeService.GetByIdAsync(storeId, StoreResponseGroup.WithDynamicPropertyObjectValues.ToString());
             var result = store?.GetDynamicPropertyValue(FilteredBrowsingPropertyName, string.Empty);
             return result;
         }
 
         protected virtual async Task SaveSerializedValue(string storeId, string serializedValue)
         {
-            var store = await _storeService.GetByIdAsync(storeId);
+            var store = await _storeService.GetByIdAsync(storeId, StoreResponseGroup.WithDynamicPropertyObjectValues.ToString());
             if (store != null)
             {
                 var property = store.DynamicProperties.FirstOrDefault(p => p.Name == FilteredBrowsingPropertyName);

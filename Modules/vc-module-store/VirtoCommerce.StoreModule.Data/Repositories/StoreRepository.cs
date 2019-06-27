@@ -2,6 +2,7 @@ using System.Linq;
 using System.Threading.Tasks;
 using Microsoft.EntityFrameworkCore;
 using VirtoCommerce.Platform.Data.Infrastructure;
+using VirtoCommerce.StoreModule.Core.Model;
 using VirtoCommerce.StoreModule.Data.Model;
 
 namespace VirtoCommerce.StoreModule.Data.Repositories
@@ -14,7 +15,7 @@ namespace VirtoCommerce.StoreModule.Data.Repositories
 
         #region IStoreRepository Members
 
-        public async Task<StoreEntity[]> GetStoresByIdsAsync(string[] ids)
+        public async Task<StoreEntity[]> GetStoresByIdsAsync(string[] ids, StoreResponseGroup responseGroup = StoreResponseGroup.Full)
         {
             var retVal = await Stores.Where(x => ids.Contains(x.Id))
                                .Include(x => x.Languages)
@@ -22,11 +23,20 @@ namespace VirtoCommerce.StoreModule.Data.Repositories
                                .Include(x => x.TrustedGroups)
                                .ToArrayAsync();
 
-            var fulfillmentCenters = StoreFulfillmentCenters.Where(x => ids.Contains(x.StoreId)).ToArrayAsync();
-            var seoInfos = SeoInfos.Where(x => ids.Contains(x.StoreId)).ToArrayAsync();
-            var dynamicPropertyValues = DynamicPropertyObjectValues.Where(x => ids.Contains(x.ObjectId)).ToArrayAsync();
+            if (responseGroup.HasFlag(StoreResponseGroup.StoreFulfillmentCenters))
+            {
+                var fulfillmentCenters = await StoreFulfillmentCenters.Where(x => ids.Contains(x.StoreId)).ToArrayAsync();
+            }
 
-            await Task.WhenAll(fulfillmentCenters, seoInfos, dynamicPropertyValues);
+            if (responseGroup.HasFlag(StoreResponseGroup.StoreSeoInfos))
+            {
+                var seoInfos = await SeoInfos.Where(x => ids.Contains(x.StoreId)).ToArrayAsync();
+            }
+
+            if (responseGroup.HasFlag(StoreResponseGroup.StoreDynamicPropertyObjectValues))
+            {
+                var dynamicPropertyValues = await DynamicPropertyObjectValues.Where(x => ids.Contains(x.ObjectId)).ToArrayAsync();
+            }
 
             return retVal;
         }

@@ -10,6 +10,7 @@ using VirtoCommerce.CatalogModule.Core.Services;
 using VirtoCommerce.CatalogModule.Data.Search.BrowseFilters;
 using VirtoCommerce.CatalogModule.Web.Model;
 using VirtoCommerce.Platform.Core.Common;
+using VirtoCommerce.StoreModule.Core.Model;
 using VirtoCommerce.StoreModule.Core.Services;
 
 namespace VirtoCommerce.CatalogModule.Web.Controllers.Api
@@ -50,7 +51,7 @@ namespace VirtoCommerce.CatalogModule.Web.Controllers.Api
         [Route("{storeId}/properties")]
         public async Task<ActionResult<AggregationProperty[]>> GetAggregationProperties(string storeId)
         {
-            var store = await _storeService.GetByIdAsync(storeId);
+            var store = await _storeService.GetByIdAsync(storeId, StoreResponseGroup.StoreInfo.ToString());
             if (store == null)
             {
                 return NoContent();
@@ -79,7 +80,7 @@ namespace VirtoCommerce.CatalogModule.Web.Controllers.Api
         [Route("{storeId}/properties")]
         public async Task<ActionResult> SetAggregationProperties(string storeId, [FromBody]AggregationProperty[] browseFilterProperties)
         {
-            var store = await _storeService.GetByIdAsync(storeId);
+            var store = await _storeService.GetByIdAsync(storeId, StoreResponseGroup.StoreInfo.ToString());
             if (store == null)
             {
                 return NoContent();
@@ -106,7 +107,7 @@ namespace VirtoCommerce.CatalogModule.Web.Controllers.Api
         public async Task<ActionResult<string[]>> GetPropertyValues(string storeId, string propertyName)
         {
             var result = Array.Empty<string>();
-            var store = await _storeService.GetByIdAsync(storeId);
+            var store = await _storeService.GetByIdAsync(storeId, StoreResponseGroup.StoreInfo.ToString());
             if (store == null)
             {
                 return NoContent();

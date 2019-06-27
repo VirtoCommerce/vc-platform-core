@@ -22,6 +22,7 @@ using VirtoCommerce.Platform.Core.Settings;
 using VirtoCommerce.Platform.Data.Infrastructure;
 using VirtoCommerce.ShippingModule.Core.Model.Search;
 using VirtoCommerce.ShippingModule.Core.Services;
+using VirtoCommerce.StoreModule.Core.Model;
 using VirtoCommerce.StoreModule.Core.Services;
 
 namespace VirtoCommerce.OrdersModule.Data.Services
@@ -205,7 +206,7 @@ namespace VirtoCommerce.OrdersModule.Data.Services
 
         protected virtual async Task EnsureThatAllOperationsHaveNumber(CustomerOrder order)
         {
-            var store = await _storeService.GetByIdAsync(order.StoreId);
+            var store = await _storeService.GetByIdAsync(order.StoreId, StoreResponseGroup.StoreInfo.ToString());
 
             foreach (var operation in order.GetFlatObjectsListWithInterface<IOperation>())
             {

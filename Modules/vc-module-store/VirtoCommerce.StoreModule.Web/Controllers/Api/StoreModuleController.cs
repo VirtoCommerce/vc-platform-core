@@ -61,7 +61,7 @@ namespace VirtoCommerce.StoreModule.Web.Controllers.Api
             //        throw new HttpResponseException(HttpStatusCode.Unauthorized);
             //    }
             //}
-
+            criteria.ResponseGroup = StoreResponseGroup.StoreInfo.ToString();
             var result = await _storeSearchService.SearchStoresAsync(criteria);
             return result;
         }
@@ -90,7 +90,7 @@ namespace VirtoCommerce.StoreModule.Web.Controllers.Api
         [Route("{id}")]
         public async Task<ActionResult<Store>> GetStoreById(string id)
         {
-            var result = await _storeService.GetByIdAsync(id);
+            var result = await _storeService.GetByIdAsync(id, StoreResponseGroup.Full.ToString());
             //TODO
             //CheckCurrentUserHasPermissionForObjects(StorePredefinedPermissions.Read, result);
             //result.Scopes = _permissionScopeService.GetObjectPermissionScopeStrings(result).ToArray();
@@ -148,7 +148,7 @@ namespace VirtoCommerce.StoreModule.Web.Controllers.Api
         [Route("send/dynamicnotification")]
         public async Task<ActionResult> SendDynamicNotificationAnStoreEmail(SendDynamicNotificationRequest request)
         {
-            var store = await _storeService.GetByIdAsync(request.StoreId);
+            var store = await _storeService.GetByIdAsync(request.StoreId, StoreResponseGroup.StoreInfo.ToString());
 
             if (store == null)
                 throw new InvalidOperationException(string.Concat("Store not found. StoreId: ", request.StoreId));
@@ -204,7 +204,7 @@ namespace VirtoCommerce.StoreModule.Web.Controllers.Api
             if (user != null)
             {
                 var storeIds = await _storeService.GetUserAllowedStoreIdsAsync(user);
-                var stores = await _storeService.GetByIdsAsync(storeIds.ToArray());
+                var stores = await _storeService.GetByIdsAsync(storeIds.ToArray(), StoreResponseGroup.StoreInfo.ToString());
                 return Ok(stores);
             }
 

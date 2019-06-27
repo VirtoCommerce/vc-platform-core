@@ -65,9 +65,6 @@ namespace VirtoCommerce.StoreModule.Data.Repositories
             modelBuilder.Entity<StoreDynamicPropertyObjectValueEntity>().HasIndex(x => new { x.ObjectType, x.ObjectId })
                         .IsUnique(false)
                         .HasName("IX_ObjectType_ObjectId");
-
-
-
             #endregion
         }
     }

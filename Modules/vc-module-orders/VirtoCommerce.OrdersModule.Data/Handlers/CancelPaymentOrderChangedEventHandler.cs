@@ -11,6 +11,7 @@ using VirtoCommerce.PaymentModule.Core.Services;
 using VirtoCommerce.PaymentModule.Model.Requests;
 using VirtoCommerce.Platform.Core.Common;
 using VirtoCommerce.Platform.Core.Events;
+using VirtoCommerce.StoreModule.Core.Model;
 using VirtoCommerce.StoreModule.Core.Services;
 
 namespace VirtoCommerce.OrdersModule.Data.Handlers
@@ -43,7 +44,7 @@ namespace VirtoCommerce.OrdersModule.Data.Handlers
 
         protected virtual async Task TryToCancelOrder(GenericChangedEntry<CustomerOrder> changedEntry)
         {
-            var store = await _storeService.GetByIdAsync(changedEntry.NewEntry.StoreId);
+            var store = await _storeService.GetByIdAsync(changedEntry.NewEntry.StoreId, StoreResponseGroup.StoreInfo.ToString());
 
             //Try to load payment methods for payments
             var gatewayCodes = changedEntry.NewEntry.InPayments.Select(x => x.GatewayCode).ToArray();

@@ -10,6 +10,7 @@ using VirtoCommerce.OrdersModule.Core.Model;
 using VirtoCommerce.Platform.Core.Common;
 using VirtoCommerce.Platform.Core.Events;
 using VirtoCommerce.Platform.Core.Settings;
+using VirtoCommerce.StoreModule.Core.Model;
 using VirtoCommerce.StoreModule.Core.Services;
 
 namespace VirtoCommerce.OrdersModule.Data.Handlers
@@ -48,7 +49,7 @@ namespace VirtoCommerce.OrdersModule.Data.Handlers
             //Skip prototypes
             if (customerOrder.IsPrototype)
                 return;
-                       
+
             var origLineItems = new LineItem[] { };
             var changedLineItems = new LineItem[] { };
 
@@ -83,7 +84,7 @@ namespace VirtoCommerce.OrdersModule.Data.Handlers
         protected virtual async Task AdjustInventory(IEnumerable<InventoryInfo> inventories, HashSet<InventoryInfo> changedInventories, CustomerOrder order, EntryState action, LineItem changedLineItem, LineItem origLineItem)
         {
             var fulfillmentCenterId = await GetFullfilmentCenterForLineItem(order, origLineItem);
-            var inventoryInfo = inventories.Where(x=> x.FulfillmentCenterId == (fulfillmentCenterId ?? x.FulfillmentCenterId))
+            var inventoryInfo = inventories.Where(x => x.FulfillmentCenterId == (fulfillmentCenterId ?? x.FulfillmentCenterId))
                                            .FirstOrDefault(x => x.ProductId.EqualsInvariant(origLineItem.ProductId));
             if (inventoryInfo != null)
             {
@@ -119,7 +120,7 @@ namespace VirtoCommerce.OrdersModule.Data.Handlers
         /// <returns></returns>
         protected virtual async Task<string> GetFullfilmentCenterForLineItem(CustomerOrder order, LineItem lineItem)
         {
-            if(order == null)
+            if (order == null)
             {
                 throw new ArgumentNullException(nameof(order));
             }
@@ -130,7 +131,7 @@ namespace VirtoCommerce.OrdersModule.Data.Handlers
 
             var result = lineItem.FulfillmentCenterId;
 
-            if(string.IsNullOrEmpty(result))
+            if (string.IsNullOrEmpty(result))
             {
                 //Try to find a concrete shipment for given line item 
                 var shipment = order.Shipments?.Where(x => x.Items != null)
@@ -143,9 +144,9 @@ namespace VirtoCommerce.OrdersModule.Data.Handlers
             }
 
             //Use a default fulfillment center defined for store
-            if(string.IsNullOrEmpty(result))
+            if (string.IsNullOrEmpty(result))
             {
-                var store = await _storeService.GetByIdAsync(order.StoreId);
+                var store = await _storeService.GetByIdAsync(order.StoreId, StoreResponseGroup.StoreInfo.ToString());
                 result = store?.MainFulfillmentCenterId;
             }
             return result;

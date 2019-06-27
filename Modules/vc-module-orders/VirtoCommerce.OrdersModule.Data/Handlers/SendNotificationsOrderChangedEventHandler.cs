@@ -170,7 +170,7 @@ namespace VirtoCommerce.OrdersModule.Data.Handlers
         protected virtual async Task SetNotificationParametersAsync(Notification notification, GenericChangedEntry<CustomerOrder> changedEntry)
         {
             var order = changedEntry.NewEntry;
-            var store = await _storeService.GetByIdAsync(order.StoreId);
+            var store = await _storeService.GetByIdAsync(order.StoreId, StoreResponseGroup.StoreInfo.ToString());
 
             notification.IsActive = true;
 

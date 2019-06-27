@@ -28,6 +28,7 @@ using VirtoCommerce.Platform.Core.Caching;
 using VirtoCommerce.Platform.Core.ChangeLog;
 using VirtoCommerce.Platform.Core.Common;
 using VirtoCommerce.Platform.Core.Settings;
+using VirtoCommerce.StoreModule.Core.Model;
 using VirtoCommerce.StoreModule.Core.Services;
 using CustomerOrderSearchResult = VirtoCommerce.OrdersModule.Core.Model.Search.CustomerOrderSearchResult;
 
@@ -305,7 +306,7 @@ namespace VirtoCommerce.OrdersModule.Web.Controllers.Api
                 retVal.Currency = order.Currency;
                 retVal.Status = "New";
 
-                var store = await _storeService.GetByIdAsync(order.StoreId);
+                var store = await _storeService.GetByIdAsync(order.StoreId, StoreResponseGroup.StoreInfo.ToString());
                 var numberTemplate = store.Settings.GetSettingValue(
                     ModuleConstants.Settings.General.OrderShipmentNewNumberTemplate.Name,
                     ModuleConstants.Settings.General.OrderShipmentNewNumberTemplate.DefaultValue);
@@ -344,7 +345,7 @@ namespace VirtoCommerce.OrdersModule.Web.Controllers.Api
                 retVal.CustomerId = order.CustomerId;
                 retVal.Status = retVal.PaymentStatus.ToString();
 
-                var store = await _storeService.GetByIdAsync(order.StoreId);
+                var store = await _storeService.GetByIdAsync(order.StoreId, StoreResponseGroup.StoreInfo.ToString());
                 var numberTemplate = store.Settings.GetSettingValue(
                     ModuleConstants.Settings.General.OrderPaymentInNewNumberTemplate.Name,
                     ModuleConstants.Settings.General.OrderPaymentInNewNumberTemplate.DefaultValue);
