@@ -43,7 +43,7 @@ namespace VirtoCommerce.StoreModule.Data.Services
 
         #region IStoreService Members
 
-        public virtual async Task<Store[]> GetByIdsAsync(string[] ids, string responseGroup)
+        public virtual async Task<Store[]> GetByIdsAsync(string[] ids, string responseGroup = null)
         {
             var storeResponseGroup = EnumUtility.SafeParseFlags(responseGroup, StoreResponseGroup.Full);
 
@@ -76,7 +76,7 @@ namespace VirtoCommerce.StoreModule.Data.Services
             });
         }
 
-        public virtual async Task<Store> GetByIdAsync(string id, string responseGroup)
+        public virtual async Task<Store> GetByIdAsync(string id, string responseGroup = null)
         {
             var stores = await GetByIdsAsync(new[] { id }, responseGroup);
             return stores.FirstOrDefault();

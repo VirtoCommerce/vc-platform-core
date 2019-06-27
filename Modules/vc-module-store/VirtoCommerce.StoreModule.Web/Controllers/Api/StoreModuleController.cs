@@ -90,7 +90,7 @@ namespace VirtoCommerce.StoreModule.Web.Controllers.Api
         [Route("{id}")]
         public async Task<ActionResult<Store>> GetStoreById(string id)
         {
-            var result = await _storeService.GetByIdAsync(id, StoreResponseGroup.Full.ToString());
+            var result = await _storeService.GetByIdAsync(id);
             //TODO
             //CheckCurrentUserHasPermissionForObjects(StorePredefinedPermissions.Read, result);
             //result.Scopes = _permissionScopeService.GetObjectPermissionScopeStrings(result).ToArray();
@@ -148,7 +148,7 @@ namespace VirtoCommerce.StoreModule.Web.Controllers.Api
         [Route("send/dynamicnotification")]
         public async Task<ActionResult> SendDynamicNotificationAnStoreEmail(SendDynamicNotificationRequest request)
         {
-            var store = await _storeService.GetByIdAsync(request.StoreId, StoreResponseGroup.StoreInfo.ToString());
+            var store = await _storeService.GetByIdAsync(request.StoreId);
 
             if (store == null)
                 throw new InvalidOperationException(string.Concat("Store not found. StoreId: ", request.StoreId));
