@@ -15,10 +15,9 @@
 
 	$scope.$watch('widget.blade.currentEntity', function (entity) {
 		if (angular.isDefined(entity)) {
-			dynamicPropertiesApi.search({objectType: entity.objectType}, function(response) {
-				var groupedByProperty = _.groupBy(response.results, function (x) { return x.id; });
-				entity.dynamicPropertyCount = _.keys(groupedByProperty).length;
-				$scope.dynamicPropertyCount = entity.dynamicPropertyCount;
+			dynamicPropertiesApi.search({objectType: entity.objectType, take: 0}, function(response) {
+				entity.dynamicPropertyCount = response.totalCount;
+				$scope.dynamicPropertyCount = response.totalCount;
 			})
 			
 		}

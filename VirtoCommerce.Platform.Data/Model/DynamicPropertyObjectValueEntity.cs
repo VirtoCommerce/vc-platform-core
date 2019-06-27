@@ -65,7 +65,7 @@ namespace VirtoCommerce.Platform.Data.Model
             Locale = propValue.Locale;
             ObjectId = propValue.ObjectId ?? owner.Id;
             ObjectType = propValue.ObjectType ?? owner.ObjectType ?? owner.GetType().FullName;
-            var dynamicPropertyValueType = propValue.ValueType != dynamicProperty.ValueType ? dynamicProperty.ValueType : propValue.ValueType;
+            var dynamicPropertyValueType = propValue.ValueType == DynamicPropertyValueType.Undefined ? dynamicProperty.ValueType : propValue.ValueType;
             ValueType = dynamicPropertyValueType.ToString();
             PropertyId = propValue.PropertyId ?? dynamicProperty.Id;
             DictionaryItemId = propValue.ValueId;

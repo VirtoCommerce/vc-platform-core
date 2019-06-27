@@ -64,14 +64,17 @@ namespace VirtoCommerce.Platform.Data.DynamicProperties
                     }
                     query = query.OrderBySortInfos(sortInfos);
                     result.TotalCount = await query.CountAsync();
-                    var ids = await query.Skip(criteria.Skip)
+                    if (criteria.Take > 0)
+                    {
+                        var ids = await query.Skip(criteria.Skip)
                                          .Take(criteria.Take)
                                          .Select(x => x.Id)
                                          .ToListAsync();
 
-                    var properties = await _dynamicPropertyService.GetDynamicPropertiesAsync(ids.ToArray());
-                    result.Results = properties.OrderBy(x => ids.IndexOf(x.Id))
-                                               .ToList();
+                        var properties = await _dynamicPropertyService.GetDynamicPropertiesAsync(ids.ToArray());
+                        result.Results = properties.OrderBy(x => ids.IndexOf(x.Id))
+                            .ToList();
+                    }
                 }
                 return result;
             });
