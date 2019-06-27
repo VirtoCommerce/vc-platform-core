@@ -1,11 +1,8 @@
-using System;
-using System.Collections.Generic;
-using System.Text;
 using VirtoCommerce.Platform.Core.Common;
 
 namespace VirtoCommerce.ContentModule.Core.Model
 {
-    public class MenuLink : AuditableEntity
+    public class MenuLink : AuditableEntity, IHasOuterId
     {
 
         /// <summary>
@@ -41,5 +38,7 @@ namespace VirtoCommerce.ContentModule.Core.Model
         public string AssociatedObjectType { get; set; }
 
         public string[] SecurityScopes { get; set; }
+
+        public string OuterId { get; set; }
     }
 }

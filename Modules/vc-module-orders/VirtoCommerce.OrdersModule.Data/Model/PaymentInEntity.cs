@@ -26,8 +26,6 @@ namespace VirtoCommerce.OrdersModule.Data.Model
         public string CustomerName { get; set; }
 
         public DateTime? IncomingDate { get; set; }
-        [StringLength(128)]
-        public string OuterId { get; set; }
         [StringLength(1024)]
         public string Purpose { get; set; }
         [StringLength(64)]

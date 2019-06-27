@@ -1,14 +1,14 @@
 using System;
-using System.Linq;
-using System.ComponentModel.DataAnnotations;
 using System.Collections.ObjectModel;
+using System.ComponentModel.DataAnnotations;
+using System.Linq;
+using VirtoCommerce.CoreModule.Core.Seo;
 using VirtoCommerce.CustomerModule.Core.Model;
 using VirtoCommerce.Platform.Core.Common;
-using VirtoCommerce.CoreModule.Core.Seo;
 
 namespace VirtoCommerce.CustomerModule.Data.Model
 {
-    public abstract class MemberEntity : AuditableEntity
+    public abstract class MemberEntity : AuditableEntity, IHasOuterId
     {
         public MemberEntity()
         {
@@ -26,6 +26,9 @@ namespace VirtoCommerce.CustomerModule.Data.Model
 
         [StringLength(128)]
         public string Name { get; set; }
+
+        [StringLength(128)]
+        public string OuterId { get; set; }
 
         #region NavigationProperties
 
@@ -56,6 +59,7 @@ namespace VirtoCommerce.CustomerModule.Data.Model
             member.ModifiedDate = ModifiedDate;
             member.MemberType = MemberType;
             member.Name = Name;
+            member.OuterId = OuterId;
 
             member.Addresses = Addresses.OrderBy(x => x.Id).Select(x => x.ToModel(AbstractTypeFactory<Address>.TryCreateInstance())).ToList();
             member.Emails = Emails.OrderBy(x => x.Id).Select(x => x.Address).ToList();
@@ -82,6 +86,7 @@ namespace VirtoCommerce.CustomerModule.Data.Model
             ModifiedDate = member.ModifiedDate;
             MemberType = member.MemberType;
             Name = member.Name;
+            OuterId = member.OuterId;
 
             if (member.Phones != null)
             {
@@ -97,7 +102,7 @@ namespace VirtoCommerce.CustomerModule.Data.Model
 
             if (member.Groups != null)
             {
-                this.Groups = new ObservableCollection<MemberGroupEntity>();
+                Groups = new ObservableCollection<MemberGroupEntity>();
                 foreach (var group in member.Groups)
                 {
                     var groupEntity = AbstractTypeFactory<MemberGroupEntity>.TryCreateInstance();

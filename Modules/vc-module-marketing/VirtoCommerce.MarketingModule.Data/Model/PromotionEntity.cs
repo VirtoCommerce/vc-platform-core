@@ -9,7 +9,7 @@ using VirtoCommerce.Platform.Core.Common;
 
 namespace VirtoCommerce.MarketingModule.Data.Model
 {
-    public class PromotionEntity : AuditableEntity
+    public class PromotionEntity : AuditableEntity, IHasOuterId
     {
         [StringLength(128)]
         public string StoreId { get; set; }
@@ -49,6 +49,9 @@ namespace VirtoCommerce.MarketingModule.Data.Model
 
         public int TotalLimit { get; set; }
 
+        [StringLength(128)]
+        public string OuterId { get; set; }
+
         public virtual ObservableCollection<PromotionStoreEntity> Stores { get; set; } = new NullCollection<PromotionStoreEntity>();
 
         public virtual Promotion ToModel(DynamicPromotion promotion)
@@ -61,6 +64,8 @@ namespace VirtoCommerce.MarketingModule.Data.Model
             promotion.CreatedDate = CreatedDate;
             promotion.ModifiedBy = ModifiedBy;
             promotion.ModifiedDate = ModifiedDate;
+            promotion.OuterId = OuterId;
+
             promotion.StartDate = StartDate;
             promotion.EndDate = EndDate;
             promotion.Store = StoreId;
@@ -103,6 +108,8 @@ namespace VirtoCommerce.MarketingModule.Data.Model
             CreatedDate = promotion.CreatedDate;
             ModifiedBy = promotion.ModifiedBy;
             ModifiedDate = promotion.ModifiedDate;
+            OuterId = promotion.OuterId;
+
             StartDate = promotion.StartDate ?? DateTime.UtcNow;
             EndDate = promotion.EndDate;
             StoreId = promotion.Store;

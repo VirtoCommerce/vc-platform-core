@@ -30,6 +30,8 @@ Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "VirtoCommerce.SearchModule.
 EndProject
 Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "VirtoCommerce.InventoryModule.Core", "..\vc-module-inventory\VirtoCommerce.InventoryModule.Core\VirtoCommerce.InventoryModule.Core.csproj", "{FC119225-C16A-4215-8437-85BE052C51B7}"
 EndProject
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "VirtoCommerce.ContentModule.Core", "..\vc-module-content\VirtoCommerce.ContentModule.Core\VirtoCommerce.ContentModule.Core.csproj", "{0CAD6E8C-A748-455F-B895-EF5B02932E37}"
+EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
 		Debug|Any CPU = Debug|Any CPU
@@ -92,6 +94,10 @@ Global
 		{FC119225-C16A-4215-8437-85BE052C51B7}.Debug|Any CPU.Build.0 = Debug|Any CPU
 		{FC119225-C16A-4215-8437-85BE052C51B7}.Release|Any CPU.ActiveCfg = Release|Any CPU
 		{FC119225-C16A-4215-8437-85BE052C51B7}.Release|Any CPU.Build.0 = Release|Any CPU
+		{0CAD6E8C-A748-455F-B895-EF5B02932E37}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{0CAD6E8C-A748-455F-B895-EF5B02932E37}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{0CAD6E8C-A748-455F-B895-EF5B02932E37}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{0CAD6E8C-A748-455F-B895-EF5B02932E37}.Release|Any CPU.Build.0 = Release|Any CPU
 	EndGlobalSection
 	GlobalSection(SolutionProperties) = preSolution
 		HideSolutionNode = FALSE

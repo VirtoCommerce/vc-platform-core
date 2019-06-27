@@ -119,7 +119,7 @@ namespace VirtoCommerce.CartModule.Data.Model
             shipment.ShipmentMethodOption = ShipmentMethodOption;
             //TODO
             //shipment.TaxIncluded = TaxIncluded;
-            //shipment.MeasureUnit = 
+            //shipment.MeasureUnit =
 
             if (!Addresses.IsNullOrEmpty())
             {
@@ -180,7 +180,7 @@ namespace VirtoCommerce.CartModule.Data.Model
             ShipmentMethodOption = shipment.ShipmentMethodOption;
             //TODO
             //TaxIncluded = shipment.TaxIncluded;
-            //MeasureUnit = 
+            //MeasureUnit =
 
             //Allow to empty address
             Addresses = new ObservableCollection<AddressEntity>();

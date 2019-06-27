@@ -7,7 +7,7 @@ using VirtoCommerce.Platform.Core.Common;
 
 namespace VirtoCommerce.MarketingModule.Data.Model
 {
-    public class DynamicContentPublishingGroupEntity : AuditableEntity
+    public class DynamicContentPublishingGroupEntity : AuditableEntity, IHasOuterId
     {
         public DynamicContentPublishingGroupEntity()
         {
@@ -37,6 +37,9 @@ namespace VirtoCommerce.MarketingModule.Data.Model
 
         public string PredicateVisualTreeSerialized { get; set; }
 
+        [StringLength(128)]
+        public string OuterId { get; set; }
+
         #region Navigation Properties
         public virtual ObservableCollection<PublishingGroupContentItemEntity> ContentItems { get; set; }
 
@@ -52,9 +55,10 @@ namespace VirtoCommerce.MarketingModule.Data.Model
             publication.Id = Id;
             publication.CreatedBy = CreatedBy;
             publication.CreatedDate = CreatedDate;
-            publication.Description = Description;
             publication.ModifiedBy = ModifiedBy;
             publication.ModifiedDate = ModifiedDate;
+            publication.OuterId = OuterId;
+
             publication.Name = Name;
             publication.Priority = Priority;
             publication.IsActive = IsActive;
@@ -62,6 +66,7 @@ namespace VirtoCommerce.MarketingModule.Data.Model
             publication.StartDate = StartDate;
             publication.EndDate = EndDate;
             publication.PredicateVisualTreeSerialized = PredicateVisualTreeSerialized;
+            publication.Description = Description;
 
             if (ContentItems != null)
             {
@@ -87,9 +92,10 @@ namespace VirtoCommerce.MarketingModule.Data.Model
             Id = publication.Id;
             CreatedBy = publication.CreatedBy;
             CreatedDate = publication.CreatedDate;
-            Description = publication.Description;
             ModifiedBy = publication.ModifiedBy;
             ModifiedDate = publication.ModifiedDate;
+            OuterId = publication.OuterId;
+
             Name = publication.Name;
             Priority = publication.Priority;
             IsActive = publication.IsActive;
@@ -97,6 +103,7 @@ namespace VirtoCommerce.MarketingModule.Data.Model
             StartDate = publication.StartDate;
             EndDate = publication.EndDate;
             PredicateVisualTreeSerialized = publication.PredicateVisualTreeSerialized;
+            Description = publication.Description;
 
             if (publication.ContentItems != null)
             {

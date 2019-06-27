@@ -45,5 +45,7 @@ namespace VirtoCommerce.PricingModule.Core.Model
         /// List of conditions and rules to define Prices Assignment is valid
         /// </summary>
         public IConditionTree DynamicExpression { get; set; }
+
+        public string OuterId { get; set; }
     }
 }
