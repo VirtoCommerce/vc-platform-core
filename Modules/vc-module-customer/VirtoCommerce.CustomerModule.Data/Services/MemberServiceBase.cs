@@ -26,15 +26,13 @@ namespace VirtoCommerce.CustomerModule.Data.Services
         private readonly IEventPublisher _eventPublisher;
         private readonly IDynamicPropertyService _dynamicPropertyService;
         private readonly IPlatformMemoryCache _platformMemoryCache;
-        private readonly IDynamicPropertyMetaInfoService _dynamicPropertyMetaInfoService;
 
-        protected MemberServiceBase(Func<IMemberRepository> repositoryFactory, IEventPublisher eventPublisher, IDynamicPropertyService dynamicPropertyService, IPlatformMemoryCache platformMemoryCache, IDynamicPropertyMetaInfoService dynamicPropertyMetaInfoService)
+        protected MemberServiceBase(Func<IMemberRepository> repositoryFactory, IEventPublisher eventPublisher, IDynamicPropertyService dynamicPropertyService, IPlatformMemoryCache platformMemoryCache)
         {
             _repositoryFactory = repositoryFactory;
             _eventPublisher = eventPublisher;
             _dynamicPropertyService = dynamicPropertyService;
             _platformMemoryCache = platformMemoryCache;
-            _dynamicPropertyMetaInfoService = dynamicPropertyMetaInfoService;
         }
 
 
@@ -78,7 +76,9 @@ namespace VirtoCommerce.CustomerModule.Data.Services
                     }
                 }
 
-                await _dynamicPropertyMetaInfoService.ResolveMetaInfoAsync(retVal.ToArray<IHasDynamicProperties>());
+                //TODO remove
+                //await _dynamicPropertyMetaInfoService.ResolveMetaInfoAsync(retVal.ToArray<IHasDynamicProperties>());
+
                 return retVal.ToArray();
             });
         }
@@ -130,11 +130,6 @@ namespace VirtoCommerce.CustomerModule.Data.Services
                 await _eventPublisher.Publish(new MemberChangingEvent(changedEntries));
                 await repository.UnitOfWork.CommitAsync();
                 pkMap.ResolvePrimaryKeys();
-
-                foreach (var member in members)
-                {
-                    await _dynamicPropertyService.SaveDynamicPropertyValuesAsync(member);
-                }
 
                 await _eventPublisher.Publish(new MemberChangedEvent(changedEntries));
             }

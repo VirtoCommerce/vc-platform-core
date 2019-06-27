@@ -213,6 +213,11 @@ namespace VirtoCommerce.CustomerModule.Data.Model
             {
                 SeoInfos.Patch(target.SeoInfos, (sourceSeoInfo, targetSeoInfo) => sourceSeoInfo.Patch(targetSeoInfo));
             }
+
+            if (!DynamicPropertyObjectValues.IsNullCollection())
+            {
+                DynamicPropertyObjectValues.Patch(target.DynamicPropertyObjectValues, (sourceDynamicPropertyObjectValues, targetDynamicPropertyObjectValues) => sourceDynamicPropertyObjectValues.Patch(targetDynamicPropertyObjectValues));
+            }
         }
     }
 }

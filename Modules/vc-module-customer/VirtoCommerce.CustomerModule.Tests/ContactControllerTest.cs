@@ -1,12 +1,10 @@
 using System;
 using System.Linq;
 using System.Threading.Tasks;
-using Microsoft.AspNetCore.Mvc;
 using VirtoCommerce.CoreModule.Core.Common;
 using VirtoCommerce.CustomerModule.Core.Model;
 using VirtoCommerce.CustomerModule.Core.Model.Search;
 using VirtoCommerce.CustomerModule.Web.Controllers.Api;
-using VirtoCommerce.Platform.Core.Common;
 using Xunit;
 using Address = VirtoCommerce.CustomerModule.Core.Model.Address;
 
@@ -18,7 +16,7 @@ namespace VirtoCommerce.CustomerModule.Tests
         public async Task SearchContactsTest()
         {
             var controller = GetContactController();
-            var result = await controller.Search(new MembersSearchCriteria());
+            var result = await controller.SearchMember(new MembersSearchCriteria());
             Assert.NotNull(result?.Value);
         }
 
@@ -43,7 +41,7 @@ namespace VirtoCommerce.CustomerModule.Tests
         public void SearchTest()
         {
             var controller = GetContactController();
-            var result = controller.Search(new MembersSearchCriteria { MemberId = "org1" });
+            var result = controller.SearchOrganizations(new MembersSearchCriteria { MemberId = "org1" });
         }
 
         [Fact]
