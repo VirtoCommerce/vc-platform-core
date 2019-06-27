@@ -9,12 +9,10 @@ namespace VirtoCommerce.Platform.Data.DynamicProperties
 {
     public class DynamicPropertyMetaInfoService : IDynamicPropertyMetaInfoService
     {
-        private readonly IDynamicPropertyDictionaryItemsService _dynamicPropertyDictionaryItemsService;
         private readonly IDynamicPropertyService _dynamicPropertyService;
 
-        public DynamicPropertyMetaInfoService(IDynamicPropertyDictionaryItemsService dynamicPropertyDictionaryItemsService, IDynamicPropertySearchService dynamicPropertySearchService, IDynamicPropertyService dynamicPropertyService)
+        public DynamicPropertyMetaInfoService(IDynamicPropertyService dynamicPropertyService)
         {
-            _dynamicPropertyDictionaryItemsService = dynamicPropertyDictionaryItemsService;
             _dynamicPropertyService = dynamicPropertyService;
         }
 
@@ -30,15 +28,6 @@ namespace VirtoCommerce.Platform.Data.DynamicProperties
             var objectTypes = propOwners.Select(x => x.ObjectType ?? x.GetType().FullName).Distinct().ToArray();
             var dynamicProperties = await _dynamicPropertyService.GetObjectDynamicPropertiesByObjectTypesAsync(objectTypes);
 
-            //var dictionaryItemIds = owners
-            //    .SelectMany(p => p.DynamicProperties)
-            //    .SelectMany(i => i.Values)
-            //    .Where(di => !string.IsNullOrEmpty(di.ValueId))
-            //    .Select(x => x.ValueId)
-            //    .ToArray();
-
-            //var dictionaryItems = await _dynamicPropertyDictionaryItemsService.GetDynamicPropertyDictionaryItemsAsync(dictionaryItemIds);
-
             foreach (var propOwner in propOwners)
             {
                 var objectType = propOwner.ObjectType ?? propOwner.GetType().FullName;
@@ -51,14 +40,7 @@ namespace VirtoCommerce.Platform.Data.DynamicProperties
                         prop.ObjectId = propOwner.Id;
 
                         var ownerDynamicProperty = propOwner.DynamicProperties.FirstOrDefault(x => x.Id.EqualsInvariant(prop.Id));
-                        prop.Values = ownerDynamicProperty == null ? new List<DynamicPropertyObjectValue>() :
-                            ownerDynamicProperty.Values
-                            //.Select(v =>
-                            //    {
-                            //        if (!string.IsNullOrEmpty(v.ValueId)) v.Value = dictionaryItems.FirstOrDefault(x => x.Id.EqualsInvariant(v.ValueId));
-                            //        return v;
-                            //    }).ToList()
-                            ;
+                        prop.Values = ownerDynamicProperty == null ? new List<DynamicPropertyObjectValue>() : ownerDynamicProperty.Values;
 
                         return prop;
                     })
