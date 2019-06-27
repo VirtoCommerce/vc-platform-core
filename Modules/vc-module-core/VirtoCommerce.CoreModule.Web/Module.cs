@@ -81,9 +81,6 @@ namespace VirtoCommerce.CoreModule.Web
             AbstractTypeFactory<IConditionTree>.RegisterType<ConditionGeoZipCode>();
             AbstractTypeFactory<IConditionTree>.RegisterType<UserGroupsContainsCondition>();
 
-            var inProcessBus = appBuilder.ApplicationServices.GetService<IHandlerRegistrar>();
-            inProcessBus.RegisterHandler<CurrencyChangedEvent>(async (message, token) => await providerSnapshot.GetService<CartChangedEventHandler>().Handle(message));
-
             using (var serviceScope = appBuilder.ApplicationServices.CreateScope())
             {
                 var dbContext = serviceScope.ServiceProvider.GetRequiredService<CoreDbContext>();
