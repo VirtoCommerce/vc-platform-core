@@ -13,7 +13,7 @@ namespace VirtoCommerce.ExportModule.Tests
     public class CsvExportProviderTests
     {
         [Fact]
-        public Task ExportPrices_FilterFields()
+        public Task ExportPrices_FilterPlainMembers()
         {
             var date = new DateTime(2020, 10, 20);
             var prices = new List<Price>()
@@ -44,10 +44,10 @@ namespace VirtoCommerce.ExportModule.Tests
         }
 
         [Fact]
-        public Task ExportPricelistAssignments_FilterFields()
+        public Task ExportPricelistAssignments_FilterPlainMembers()
         {
             var date = new DateTime(2020, 10, 20);
-            var prices = new List<PricelistAssignment>()
+            var assignments = new List<PricelistAssignment>()
             {
                 new PricelistAssignment {Id = "PA1", PricelistId = "1", Description = "PA1 Description", Priority = 1, Pricelist = new Pricelist() { Name = "Pricelist1"} },
                 new PricelistAssignment {Id = "PA2", PricelistId = "2", EndDate = date, Description = "PA2 Description", ConditionExpression = "<expression/>"},
@@ -66,7 +66,7 @@ namespace VirtoCommerce.ExportModule.Tests
             };
 
             //Act
-            var filteredPricesString = SerializeAndRead(metadata, prices);
+            var filteredPricesString = SerializeAndRead(metadata, assignments);
 
             //Assets
             Assert.Equal("Id,Description,EndDate,Priority,ConditionExpression\r\nPA1,PA1 Description,,1,\r\nPA2,PA2 Description,10/20/2020 00:00:00,0,<expression/>\r\n", filteredPricesString);
@@ -74,9 +74,95 @@ namespace VirtoCommerce.ExportModule.Tests
             return Task.CompletedTask;
         }
 
-        private string SerializeAndRead<T>(ExportedTypeMetadata metadata, IEnumerable<T> items)
+        [Fact]
+        public Task ExportPricelists_FilterPlainMembers()
         {
-            var csvConfiguration = new CsvProviderConfiguration() { Configuration = new Configuration() };
+            var pricelists = new List<Pricelist>()
+            {
+                new Pricelist
+                {
+                    Id = "PL1",
+                    Name = "Pricelist 1",
+                    Currency = "USD",
+                    Assignments = new List<PricelistAssignment>()
+                    {
+                        new PricelistAssignment {Id = "PA1_1", Description = "PA1_1 Description", Priority = 1 },
+                        new PricelistAssignment {Id = "PA1_2", Description = "PA1_2 Description", Priority = 2 },
+                    },
+                    Prices = new List<Price>()
+                    {
+                        new Price {Id = "P1_1", List = 25 },
+                        new Price {Id = "P1_2", List = 26 },
+                    },
+                },
+                new Pricelist
+                {
+                    Id = "PL2",
+                    Name = "Pricelist 2",
+                    Currency = "EUR",
+                    Assignments = new List<PricelistAssignment>()
+                    {
+                        new PricelistAssignment {Id = "PA2_1", Description = "PA2_1 Description", Priority = 1, CatalogId = "Cat1" },
+                        new PricelistAssignment {Id = "PA2_2", Description = "PA2_2 Description", Priority = 2, CatalogId = "Cat2" },
+                        new PricelistAssignment {Id = "PA2_3", Description = "PA2_3 Description", Priority = 10 },
+                    },
+                    Prices = new List<Price>()
+                    {
+                        new Price {Id = "P2_1", List = 12 },
+                        new Price {Id = "P2_2", List = 17 },
+                        new Price {Id = "P2_3", List = 19 },
+                    },
+                },
+            };
+            foreach (var pricelist in pricelists)
+            {
+                foreach (var assignment in pricelist.Assignments)
+                {
+                    assignment.Pricelist = pricelist;
+                    assignment.PricelistId = pricelist.Id;
+                }
+
+                foreach (var price in pricelist.Prices)
+                {
+                    price.Pricelist = pricelist;
+                    price.PricelistId = pricelist.Id;
+                }
+            }
+
+            var metadata = new ExportedTypeMetadata()
+            {
+                PropertiesInfo = new[]
+                {
+                    new ExportTypePropertyInfo() { Name = nameof(Pricelist.Id), MemberInfo = typeof(Pricelist).GetProperty(nameof(Pricelist.Id)) },
+                    new ExportTypePropertyInfo() { Name = nameof(Pricelist.Name), MemberInfo = typeof(Pricelist).GetProperty(nameof(Pricelist.Name)) },
+                    new ExportTypePropertyInfo() { Name = nameof(Pricelist.Currency), MemberInfo = typeof(Pricelist).GetProperty(nameof(Pricelist.Currency)) },
+                }
+            };
+
+            //Act
+            var filteredPricesString = SerializeAndRead(metadata, pricelists);
+
+            //Assets
+            Assert.Equal("Id,Name,Currency\r\nPL1,Pricelist 1,USD\r\nPL2,Pricelist 2,EUR\r\n", filteredPricesString);
+
+            return Task.CompletedTask;
+        }
+
+        [Fact]
+        public Task ExportPricelists_FilterNestedMembers()
+        {
+            return Task.CompletedTask;
+        }
+
+        [Fact]
+        public Task ExportPricelists_UseCustomMap()
+        {
+            return Task.CompletedTask;
+        }
+
+        private string SerializeAndRead<T>(ExportedTypeMetadata metadata, IEnumerable<T> items, Configuration configuration = null)
+        {
+            var csvConfiguration = new CsvProviderConfiguration() { Configuration = configuration ?? new Configuration() };
 
             using (Stream stream = new MemoryStream())
             {
