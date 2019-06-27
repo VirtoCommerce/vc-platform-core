@@ -5,6 +5,7 @@ using System.Linq;
 using VirtoCommerce.CoreModule.Core.Seo;
 using VirtoCommerce.CustomerModule.Core.Model;
 using VirtoCommerce.Platform.Core.Common;
+using VirtoCommerce.Platform.Core.DynamicProperties;
 
 namespace VirtoCommerce.CustomerModule.Data.Model
 {
@@ -19,6 +20,7 @@ namespace VirtoCommerce.CustomerModule.Data.Model
             Emails = new NullCollection<EmailEntity>();
             Groups = new NullCollection<MemberGroupEntity>();
             SeoInfos = new NullCollection<SeoInfoEntity>();
+            DynamicPropertyObjectValues = new NullCollection<MemberDynamicPropertyObjectValueEntity>();
         }
 
         [StringLength(64)]
@@ -46,6 +48,8 @@ namespace VirtoCommerce.CustomerModule.Data.Model
 
         public ObservableCollection<SeoInfoEntity> SeoInfos { get; set; }
 
+        public ObservableCollection<MemberDynamicPropertyObjectValueEntity> DynamicPropertyObjectValues { get; set; }
+
         #endregion
 
         public virtual Member ToModel(Member member)
@@ -67,6 +71,14 @@ namespace VirtoCommerce.CustomerModule.Data.Model
             member.Phones = Phones.OrderBy(x => x.Id).Select(x => x.Number).ToList();
             member.Groups = Groups.OrderBy(x => x.Id).Select(x => x.Group).ToList();
             member.SeoInfos = SeoInfos.Select(x => x.ToModel(AbstractTypeFactory<SeoInfo>.TryCreateInstance())).ToList();
+
+            member.DynamicProperties = DynamicPropertyObjectValues.GroupBy(x => x.PropertyId).Select(x =>
+            {
+                var property = AbstractTypeFactory<DynamicObjectProperty>.TryCreateInstance();
+                property.Id = x.Key;
+                property.Values = x.Select(v => v.ToModel(AbstractTypeFactory<DynamicPropertyObjectValue>.TryCreateInstance())).ToArray();
+                return property;
+            }).ToArray();
 
             return member;
         }
@@ -146,6 +158,13 @@ namespace VirtoCommerce.CustomerModule.Data.Model
             {
                 SeoInfos = new ObservableCollection<SeoInfoEntity>(member.SeoInfos.Select(x => AbstractTypeFactory<SeoInfoEntity>.TryCreateInstance().FromModel(x, pkMap)));
             }
+
+            if (member.DynamicProperties != null)
+            {
+                DynamicPropertyObjectValues = new ObservableCollection<MemberDynamicPropertyObjectValueEntity>(member.DynamicProperties.SelectMany(p => p.Values
+                    .Select(v => AbstractTypeFactory<MemberDynamicPropertyObjectValueEntity>.TryCreateInstance().FromModel(v, member, p))).OfType<MemberDynamicPropertyObjectValueEntity>());
+            }
+
             return this;
         }
 
