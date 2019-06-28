@@ -11,7 +11,7 @@ using VirtoCommerce.Platform.Core.Common;
 
 namespace VirtoCommerce.OrdersModule.Data.Model
 {
-    public abstract class OperationEntity : AuditableEntity
+    public abstract class OperationEntity : AuditableEntity, IHasOuterId
     {
         [Required]
         [StringLength(64)]
@@ -32,6 +32,9 @@ namespace VirtoCommerce.OrdersModule.Data.Model
         [StringLength(2048)]
         public string CancelReason { get; set; }
 
+        [StringLength(128)]
+        public string OuterId { get; set; }
+
         public virtual OrderOperation ToModel(OrderOperation operation)
         {
             if (operation == null)
@@ -42,6 +45,7 @@ namespace VirtoCommerce.OrdersModule.Data.Model
             operation.CreatedBy = CreatedBy;
             operation.ModifiedDate = ModifiedDate;
             operation.ModifiedBy = ModifiedBy;
+            operation.OuterId = OuterId;
 
             operation.Comment = Comment;
             operation.Currency = Currency;
@@ -68,6 +72,7 @@ namespace VirtoCommerce.OrdersModule.Data.Model
             CreatedBy = operation.CreatedBy;
             ModifiedDate = operation.ModifiedDate;
             ModifiedBy = operation.ModifiedBy;
+            OuterId = operation.OuterId;
 
             Comment = operation.Comment;
             Currency = operation.Currency;

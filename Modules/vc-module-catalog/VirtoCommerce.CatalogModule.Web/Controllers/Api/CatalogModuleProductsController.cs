@@ -260,7 +260,7 @@ namespace VirtoCommerce.CatalogModule.Web.Controllers.Api
         /// <param name="ids">The items ids.</param>
         [HttpDelete]
         [Route("")]
-        public async Task<ActionResult> Delete([FromQuery] string[] ids)
+        public async Task<ActionResult> DeleteProduct([FromQuery] string[] ids)
         {
             //var products = await _itemsService.GetByIdsAsync(ids, ItemResponseGroup.ItemInfo);
             //CheckCurrentUserHasPermissionForObjects(CatalogPredefinedPermissions.Delete, products);

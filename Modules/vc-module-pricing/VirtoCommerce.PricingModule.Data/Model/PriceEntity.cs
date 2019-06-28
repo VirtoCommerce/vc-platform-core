@@ -6,7 +6,7 @@ using VirtoCommerce.PricingModule.Core.Model;
 
 namespace VirtoCommerce.PricingModule.Data.Model
 {
-    public class PriceEntity : AuditableEntity
+    public class PriceEntity : AuditableEntity, IHasOuterId
     {
         [Column(TypeName = "Money")]
         public decimal? Sale { get; set; }
@@ -23,6 +23,9 @@ namespace VirtoCommerce.PricingModule.Data.Model
 
         public decimal MinQuantity { get; set; }
 
+        [StringLength(128)]
+        public string OuterId { get; set; }
+
         #region Navigation Properties
 
         public string PricelistId { get; set; }
@@ -37,18 +40,22 @@ namespace VirtoCommerce.PricingModule.Data.Model
             if (price == null)
                 throw new ArgumentNullException(nameof(price));
 
-            price.Id = this.Id;
-            price.List = this.List;
-            price.MinQuantity = (int)this.MinQuantity;
-            price.ModifiedBy = this.ModifiedBy;
-            price.ModifiedDate = this.ModifiedDate;
-            price.PricelistId = this.PricelistId;
-            price.ProductId = this.ProductId;
-            price.Sale = this.Sale;
+            price.Id = Id;
+            price.CreatedBy = CreatedBy;
+            price.CreatedDate = CreatedDate;
+            price.ModifiedBy = ModifiedBy;
+            price.ModifiedDate = ModifiedDate;
+            price.OuterId = OuterId;
 
-            if (this.Pricelist != null)
+            price.List = List;
+            price.MinQuantity = (int)MinQuantity;
+            price.PricelistId = PricelistId;
+            price.ProductId = ProductId;
+            price.Sale = Sale;
+
+            if (Pricelist != null)
             {
-                price.Currency = this.Pricelist.Currency;
+                price.Currency = Pricelist.Currency;
             }
 
             return price;
@@ -61,14 +68,18 @@ namespace VirtoCommerce.PricingModule.Data.Model
 
             pkMap.AddPair(price, this);
 
-            this.Id = price.Id;
-            this.List = price.List;
-            this.MinQuantity = price.MinQuantity;
-            this.ModifiedBy = price.ModifiedBy;
-            this.ModifiedDate = price.ModifiedDate;
-            this.PricelistId = price.PricelistId;
-            this.ProductId = price.ProductId;
-            this.Sale = price.Sale;
+            Id = price.Id;
+            CreatedBy = price.CreatedBy;
+            CreatedDate = price.CreatedDate;
+            ModifiedBy = price.ModifiedBy;
+            ModifiedDate = price.ModifiedDate;
+            OuterId = price.OuterId;
+
+            List = price.List;
+            MinQuantity = price.MinQuantity;
+            PricelistId = price.PricelistId;
+            ProductId = price.ProductId;
+            Sale = price.Sale;
 
             return this;
         }
@@ -78,10 +89,10 @@ namespace VirtoCommerce.PricingModule.Data.Model
             if (target == null)
                 throw new ArgumentNullException(nameof(target));
 
-            target.ProductId = this.ProductId;
-            target.List = this.List;
-            target.Sale = this.Sale;
-            target.MinQuantity = this.MinQuantity;
+            target.ProductId = ProductId;
+            target.List = List;
+            target.Sale = Sale;
+            target.MinQuantity = MinQuantity;
         }
     }
 }

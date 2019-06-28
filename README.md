@@ -102,7 +102,7 @@ Our development efforts were focused on moving to ASP.NET Core, performance, arc
 **Removed modules**: 
 -  ~~**VirtoCommerce.Domain**~~ project and nuget package (now each module defines self domain model and abstractions in Core project)
 -  ~~**VirtoCommerce.Cache**~~
-- ~~**VirtoCommerce.DynamicExpressions**~~
+-  ~~**VirtoCommerce.DynamicExpressions**~~
 
 **Next steps**:
 - Implement cache synchronization logic between multiple platform instances use `Redis` cache for this purposes 
@@ -113,6 +113,7 @@ Our development efforts were focused on moving to ASP.NET Core, performance, arc
     - AzureSearch
     
 # Getting started:
+
 ## Precompiled binary getting started
 - Download archive with platform precompiled version [VirtoCommerce.Platform.3.0.0.beta.zip](https://github.com/VirtoCommerce/vc-platform-core/releases/tag/v3.0.0.beta)
 - Unpack follow zip to local disk to path `C:\vc-platform-3`. In result you should get the folder which contains platform precompiled code. 
@@ -137,7 +138,6 @@ Our development efforts were focused on moving to ASP.NET Core, performance, arc
    ```
    - repeat previous command for each module in `Modules` folder
    
-   
 ## Run [storefront](https://github.com/VirtoCommerce/vc-storefront-core) with new platform version
 - Deploy  the latest storefront version from `dev` branch by any of preffered way described there https://virtocommerce.com/docs/vc2devguide/deployment/storefront-deployment
 - Make changes  in  `appsettings.json`    
@@ -150,9 +150,22 @@ Our development efforts were focused on moving to ASP.NET Core, performance, arc
 //Uncomment the follow settings
 "UserName": "admin",
 "Password": "store"
-```    
+```
+
+## Run platform with Https support
+
+### Using VisualStudio
+Open `VirtoCommerce.Platform.Web` project properties and in `Debug` section set checkbox - `Enable SSL`. VisualStudio can ask you to install Certificate, just accept and platform will be running with Https support.
+
+### Using CLI
+- Make shure that you have installed latest version of dot.net core SDK 2.2
+- Install SSL certificate with CLI command `dotnet dev-certs https --trust`
+- Restart your machine
+- To run platform navigate to `VirtoCommerce.Platform.Web` folder via CLI and run `dotnet run -c Release --no-launch-profile`. You can add `--no-build` flag to speed up start if you already compile solution.
+- Browse to `https://localhost:5001`
+
 # How to migrate your solution from 2.x to 3.0 platform version
-- If your solution doesn't have any custom modules and extensions you just need to use the connection string to the old database for the new 3.0 platfrom version and after first run the update scripts will transfer all your data to the new scheme otherwise, you need to convert your models according to this instruction (Coming soon).
+- If your solution doesn't have any custom modules and extensions you just need to use the connection string to the old database for the new 3.0 platfrom version and after first run the update scripts will transfer all your data to the new scheme otherwise, you need to convert your models according to this instruction https://github.com/VirtoCommerce/vc-platform-core/wiki/Migrate-Extension-module-from-the-Platform-2.0-to-3.0-version.
 
 # License
 Copyright (c) Virto Solutions LTD.  All rights reserved.

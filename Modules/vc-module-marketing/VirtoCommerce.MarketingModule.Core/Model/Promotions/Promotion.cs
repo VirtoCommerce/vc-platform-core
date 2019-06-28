@@ -55,6 +55,8 @@ namespace VirtoCommerce.MarketingModule.Core.Model.Promotions
 
         public DateTime? EndDate { get; set; }
 
+        public string OuterId { get; set; }
+
         public virtual PromotionReward[] EvaluatePromotion(IEvaluationContext context)
         {
             return new PromotionReward[] { };

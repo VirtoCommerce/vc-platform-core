@@ -2,6 +2,7 @@ using System;
 using System.Collections.Generic;
 using System.Data.SqlClient;
 using System.Linq;
+using System.Text;
 using System.Threading.Tasks;
 using Microsoft.EntityFrameworkCore;
 using VirtoCommerce.CatalogModule.Core.Model;
@@ -482,7 +483,9 @@ namespace VirtoCommerce.CatalogModule.Data.Repositories
                 ) 
                 SELECT COUNT(Id) FROM Item_CTE";
 
-            var querySqlCommandText = @"
+            //var groupString = "";
+            var querySqlCommandText = new StringBuilder();
+            querySqlCommandText.Append(@"
                     ;WITH Association_CTE AS
                     (
 	                    SELECT
@@ -498,10 +501,17 @@ namespace VirtoCommerce.CatalogModule.Data.Repositories
 		                    ,AssociatedCategoryId
 		                    ,Tags
 		                    ,Quantity
+							,OuterId
 	                    FROM Association
-	                    WHERE ItemId IN({0})"
-                    + (!string.IsNullOrEmpty(criteria.Group) ? $" AND AssociationType = @group" : string.Empty) +
-                    @"), Category_CTE AS
+	                    WHERE ItemId IN({0})")
+                ;
+
+            if (!string.IsNullOrEmpty(criteria.Group))
+            {
+                querySqlCommandText.Append(" AND AssociationType = @group");
+            }
+
+            querySqlCommandText.Append(@"), Category_CTE AS
                     (
 	                    SELECT AssociatedCategoryId Id, AssociatedCategoryId
 	                    FROM Association_CTE
@@ -526,6 +536,7 @@ namespace VirtoCommerce.CatalogModule.Data.Repositories
 		                    ,a.AssociatedCategoryId
 		                    ,a.Tags
 		                    ,a.Quantity
+							,a.OuterId
 	                    FROM Category_CTE cat
 	                    LEFT JOIN Item i ON cat.Id=i.CategoryId
 	                    LEFT JOIN Association a ON cat.AssociatedCategoryId=a.AssociatedCategoryId
@@ -533,11 +544,12 @@ namespace VirtoCommerce.CatalogModule.Data.Repositories
 	                    UNION
 	                    SELECT * FROM Association_CTE
                     ) 
-                    SELECT  * FROM Item_CTE WHERE AssociatedItemId IS NOT NULL ORDER BY Priority " +
-                    $"OFFSET {criteria.Skip} ROWS FETCH NEXT {criteria.Take} ROWS ONLY";
+                    SELECT  * FROM Item_CTE WHERE AssociatedItemId IS NOT NULL ORDER BY Priority ");
+            querySqlCommandText.Append($"OFFSET {criteria.Skip} ROWS FETCH NEXT {criteria.Take} ROWS ONLY");
+
 
             var countSqlCommand = CreateCommand(countSqlCommandText, criteria.ObjectIds);
-            var querySqlCommand = CreateCommand(querySqlCommandText, criteria.ObjectIds);
+            var querySqlCommand = CreateCommand(querySqlCommandText.ToString(), criteria.ObjectIds);
             if (!string.IsNullOrEmpty(criteria.Group))
             {
                 countSqlCommand.Parameters = countSqlCommand.Parameters.Concat(new[] { new SqlParameter($"@group", criteria.Group) }).ToArray();

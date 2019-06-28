@@ -1,11 +1,8 @@
-using System;
-using System.Collections.Generic;
-using System.Linq;
-using VirtoCommerce.CoreModule.Core.Common;
-using VirtoCommerce.Platform.Core.Common;
+using VirtoCommerce.Platform.Core.Swagger;
 
 namespace VirtoCommerce.OrdersModule.Core.Model
 {
+    [SwaggerSchemaId("OrderAddress")]
     public class Address : CoreModule.Core.Common.Address
     {
     }

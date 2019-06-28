@@ -76,7 +76,6 @@ namespace VirtoCommerce.StoreModule.Web
             }
 
             var mvcJsonOptions = appBuilder.ApplicationServices.GetService<IOptions<MvcJsonOptions>>();
-          
             mvcJsonOptions.Value.SerializerSettings.Converters.Add(new PolymorphicStoreJsonConverter());
 
             var inProcessBus = appBuilder.ApplicationServices.GetService<IHandlerRegistrar>();

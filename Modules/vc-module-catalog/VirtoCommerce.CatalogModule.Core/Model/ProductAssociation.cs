@@ -4,7 +4,7 @@ using VirtoCommerce.Platform.Core.Common;
 
 namespace VirtoCommerce.CatalogModule.Core.Model
 {
-    public class ProductAssociation : ValueObject
+    public class ProductAssociation : ValueObject, IHasOuterId
     {
         /// <summary>
         /// Association type (Accessories, Up-Sales, Cross-Sales, Related etc)
@@ -28,6 +28,10 @@ namespace VirtoCommerce.CatalogModule.Core.Model
         /// </summary>
         [JsonIgnore]
         public Entity AssociatedObject { get; set; }
+        /// <summary>
+        /// 
+        /// </summary>
+        public string OuterId { get; set; }
 
         /// <summary>
         /// Display name for associated object

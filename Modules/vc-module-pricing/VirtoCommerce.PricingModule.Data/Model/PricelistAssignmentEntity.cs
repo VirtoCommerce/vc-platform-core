@@ -5,7 +5,7 @@ using VirtoCommerce.PricingModule.Core.Model;
 
 namespace VirtoCommerce.PricingModule.Data.Model
 {
-    public class PricelistAssignmentEntity : AuditableEntity
+    public class PricelistAssignmentEntity : AuditableEntity, IHasOuterId
     {
         [StringLength(128)]
         [Required]
@@ -28,6 +28,9 @@ namespace VirtoCommerce.PricingModule.Data.Model
         [Required]
         public string CatalogId { get; set; }
 
+        [StringLength(128)]
+        public string OuterId { get; set; }
+
 
         #region Navigation Properties
         public string PricelistId { get; set; }
@@ -42,13 +45,15 @@ namespace VirtoCommerce.PricingModule.Data.Model
                 throw new ArgumentNullException("assignment");
 
             assignment.Id = Id;
-            assignment.CatalogId = CatalogId;
             assignment.CreatedBy = CreatedBy;
             assignment.CreatedDate = CreatedDate;
-            assignment.Description = Description;
-            assignment.EndDate = EndDate;
             assignment.ModifiedBy = ModifiedBy;
             assignment.ModifiedDate = ModifiedDate;
+            assignment.OuterId = OuterId;
+
+            assignment.CatalogId = CatalogId;
+            assignment.Description = Description;
+            assignment.EndDate = EndDate;
             assignment.Name = Name;
             assignment.PredicateVisualTreeSerialized = PredicateVisualTreeSerialized;
             assignment.PricelistId = PricelistId;
@@ -77,13 +82,15 @@ namespace VirtoCommerce.PricingModule.Data.Model
             pkMap.AddPair(assignment, this);
 
             Id = assignment.Id;
-            CatalogId = assignment.CatalogId;
             CreatedBy = assignment.CreatedBy;
             CreatedDate = assignment.CreatedDate;
-            Description = assignment.Description;
-            EndDate = assignment.EndDate;
             ModifiedBy = assignment.ModifiedBy;
             ModifiedDate = assignment.ModifiedDate;
+            OuterId = assignment.OuterId;
+
+            CatalogId = assignment.CatalogId;
+            Description = assignment.Description;
+            EndDate = assignment.EndDate;
             Name = assignment.Name;
             PredicateVisualTreeSerialized = assignment.PredicateVisualTreeSerialized;
             PricelistId = assignment.PricelistId;

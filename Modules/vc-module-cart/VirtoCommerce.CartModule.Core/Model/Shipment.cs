@@ -3,29 +3,31 @@ using VirtoCommerce.CoreModule.Core.Common;
 using VirtoCommerce.CoreModule.Core.Tax;
 using VirtoCommerce.Platform.Core.Common;
 using VirtoCommerce.Platform.Core.DynamicProperties;
+using VirtoCommerce.Platform.Core.Swagger;
 
 namespace VirtoCommerce.CartModule.Core.Model
 {
-	public class Shipment : AuditableEntity, IHasTaxDetalization, ITaxable, IHasDiscounts, IHasDynamicProperties
+    [SwaggerSchemaId("CartShipment")]
+    public class Shipment : AuditableEntity, IHasTaxDetalization, ITaxable, IHasDiscounts, IHasDynamicProperties
     {
-		public string ShipmentMethodCode { get; set; }
+        public string ShipmentMethodCode { get; set; }
         public string ShipmentMethodOption { get; set; }
         public string FulfillmentCenterId { get; set; }
         public string FulfillmentCenterName { get; set; }
-        public string  WarehouseLocation { get; set; }
+        public string WarehouseLocation { get; set; }
 
-		public string Currency { get; set; }
-		public decimal? VolumetricWeight { get; set; }
+        public string Currency { get; set; }
+        public decimal? VolumetricWeight { get; set; }
 
-		public string WeightUnit { get; set; }
-		public decimal? Weight { get; set; }
+        public string WeightUnit { get; set; }
+        public decimal? Weight { get; set; }
 
-		public string MeasureUnit { get; set; }
-		public decimal? Height { get; set; }
-		public decimal? Length { get; set; }
-		public decimal? Width { get; set; }
+        public string MeasureUnit { get; set; }
+        public decimal? Height { get; set; }
+        public decimal? Length { get; set; }
+        public decimal? Width { get; set; }
 
-		public virtual decimal Price { get; set; }
+        public virtual decimal Price { get; set; }
 
         public virtual decimal PriceWithTax { get; set; }
 
@@ -58,7 +60,7 @@ namespace VirtoCommerce.CartModule.Core.Model
 
         public Address DeliveryAddress { get; set; }
 
-		public ICollection<ShipmentItem> Items { get; set; }
+        public ICollection<ShipmentItem> Items { get; set; }
 
 
         #region IHasDiscounts

@@ -18,6 +18,8 @@ namespace VirtoCommerce.MarketingModule.Core.Model
         public DateTime? StartDate { get; set; }
         public DateTime? EndDate { get; set; }
 
+        public string OuterId { get; set; }
+
         public ICollection<DynamicContentItem> ContentItems { get; set; }
         public ICollection<DynamicContentPlace> ContentPlaces { get; set; }
 

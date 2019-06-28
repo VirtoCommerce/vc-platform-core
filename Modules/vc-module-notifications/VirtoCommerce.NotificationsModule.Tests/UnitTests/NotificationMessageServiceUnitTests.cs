@@ -79,7 +79,11 @@ namespace VirtoCommerce.NotificationsModule.Tests.UnitTests
                 {
                     Id = id,
                     NotificationId = Guid.NewGuid().ToString(),
-                    NotificationType = nameof(RegistrationEmailNotification)
+                    NotificationType = nameof(RegistrationEmailNotification),
+                    From = "test@test.com",
+                    To = "test@test.com",
+                    Subject = "subj",
+                    Body = "body"
                 }
             };
             var messageEntity = new EmailNotificationMessageEntity() { Id = id, NotificationType = nameof(EmailNotificationMessage) };

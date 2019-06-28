@@ -3,9 +3,11 @@ using VirtoCommerce.CoreModule.Core.Common;
 using VirtoCommerce.CoreModule.Core.Tax;
 using VirtoCommerce.Platform.Core.Common;
 using VirtoCommerce.Platform.Core.DynamicProperties;
+using VirtoCommerce.Platform.Core.Swagger;
 
 namespace VirtoCommerce.CartModule.Core.Model
 {
+    [SwaggerSchemaId("CartLineItem")]
     public class LineItem : AuditableEntity, IHasTaxDetalization, IHasDynamicProperties, ITaxable, IHasDiscounts
     {
         public string ProductId { get; set; }

@@ -5,7 +5,7 @@ using VirtoCommerce.Platform.Core.Common;
 
 namespace VirtoCommerce.InventoryModule.Data.Model
 {
-    public class InventoryEntity : AuditableEntity
+    public class InventoryEntity : AuditableEntity, IHasOuterId
     {
         [Required]
         public decimal InStockQuantity { get; set; }
@@ -44,6 +44,9 @@ namespace VirtoCommerce.InventoryModule.Data.Model
         [StringLength(128)]
         public string Sku { get; set; }
 
+        [StringLength(128)]
+        public string OuterId { get; set; }
+
 
         #region Navigation properties
         public string FulfillmentCenterId { get; set; }
@@ -58,6 +61,7 @@ namespace VirtoCommerce.InventoryModule.Data.Model
             inventory.CreatedDate = CreatedDate;
             inventory.ModifiedBy = ModifiedBy;
             inventory.ModifiedDate = ModifiedDate;
+            inventory.OuterId = OuterId;
 
             inventory.AllowBackorder = AllowBackorder;
             inventory.AllowPreorder = AllowPreorder;
@@ -87,6 +91,7 @@ namespace VirtoCommerce.InventoryModule.Data.Model
             CreatedDate = inventory.CreatedDate;
             ModifiedBy = inventory.ModifiedBy;
             ModifiedDate = inventory.ModifiedDate;
+            OuterId = inventory.OuterId;
 
             AllowBackorder = inventory.AllowBackorder;
             AllowPreorder = inventory.AllowPreorder;
