@@ -54,7 +54,7 @@ namespace VirtoCommerce.StoreModule.Data.Services
                     if (criteria.Take > 0)
                     {
                         var storeIds = await query.Select(x => x.Id).Skip(criteria.Skip).Take(criteria.Take).ToArrayAsync();
-                        result.Results = (await _storeService.GetByIdsAsync(storeIds)).AsQueryable().OrderBySortInfos(sortInfos).ToList();
+                        result.Results = (await _storeService.GetByIdsAsync(storeIds, criteria.ResponseGroup)).AsQueryable().OrderBySortInfos(sortInfos).ToList();
                     }
                 }
                 return result;

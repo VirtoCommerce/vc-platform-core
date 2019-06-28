@@ -7,8 +7,8 @@ namespace VirtoCommerce.StoreModule.Core.Services
 {
     public interface IStoreService
     {
-        Task<Store[]> GetByIdsAsync(string[] ids);
-        Task<Store> GetByIdAsync(string id);
+        Task<Store[]> GetByIdsAsync(string[] ids, string responseGroup = null);
+        Task<Store> GetByIdAsync(string id, string responseGroup = null);
         Task SaveChangesAsync(Store[] stores);
         Task DeleteAsync(string[] ids);
 

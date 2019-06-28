@@ -301,7 +301,7 @@ namespace VirtoCommerce.CartModule.Data.Services
 
         #endregion
 
-        protected Store Store => _store ?? (_store = _storeService.GetByIdAsync(Cart.StoreId).GetAwaiter().GetResult());
+        protected Store Store => _store ?? (_store = _storeService.GetByIdAsync(Cart.StoreId, StoreResponseGroup.StoreInfo.ToString()).GetAwaiter().GetResult());
 
         protected virtual void InnerChangeItemQuantity(LineItem lineItem, int quantity)
         {

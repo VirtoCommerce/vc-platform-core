@@ -1,6 +1,5 @@
 using System.Threading.Tasks;
 using Hangfire;
-using VirtoCommerce.CoreModule.Core.Seo;
 using VirtoCommerce.Platform.Core.Common;
 using VirtoCommerce.Platform.Core.DynamicProperties;
 using VirtoCommerce.Platform.Core.Events;
@@ -51,9 +50,11 @@ namespace VirtoCommerce.StoreModule.Data.Handlers
 
         protected virtual async Task SaveDynamicPropertyValuesAsync(Store entry)
         {
-            var taskSaveDynamicPropertyValues = _dynamicPropertyService.SaveDynamicPropertyValuesAsync(entry);
-            var taskSaveEntitySettingsValues = _settingManager.DeepSaveSettingsAsync(entry);
-            await Task.WhenAll(taskSaveDynamicPropertyValues, taskSaveEntitySettingsValues);
+            //TODO
+            await _settingManager.DeepSaveSettingsAsync(entry);
+            //var taskSaveDynamicPropertyValues = _dynamicPropertyService.SaveDynamicPropertyValuesAsync(entry);
+            //var taskSaveEntitySettingsValues = _settingManager.DeepSaveSettingsAsync(entry);
+            //await Task.WhenAll(taskSaveDynamicPropertyValues, taskSaveEntitySettingsValues);
         }
 
         [DisableConcurrentExecution(60 * 60 * 24)]
@@ -64,9 +65,11 @@ namespace VirtoCommerce.StoreModule.Data.Handlers
 
         protected virtual async Task DeleteDynamicPropertyValuesAsync(Store entry)
         {
-            var taskDeleteDynamicPropertyValues = _dynamicPropertyService.DeleteDynamicPropertyValuesAsync(entry);
-            var taskRemoveEntitySettingsValues = _settingManager.DeepRemoveSettingsAsync(entry);
-            await Task.WhenAll(taskDeleteDynamicPropertyValues, taskRemoveEntitySettingsValues);
+            //TODO
+            await _settingManager.DeepRemoveSettingsAsync(entry);
+            //var taskDeleteDynamicPropertyValues = _dynamicPropertyService.DeleteDynamicPropertyValuesAsync(entry);
+            //var taskRemoveEntitySettingsValues = _settingManager.DeepRemoveSettingsAsync(entry);
+            //await Task.WhenAll(taskDeleteDynamicPropertyValues, taskRemoveEntitySettingsValues);
         }
     }
 }

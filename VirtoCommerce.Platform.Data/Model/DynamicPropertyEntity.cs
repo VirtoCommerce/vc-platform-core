@@ -14,7 +14,7 @@ namespace VirtoCommerce.Platform.Data.Model
         {
             DisplayNames = new NullCollection<DynamicPropertyNameEntity>();
             DictionaryItems = new NullCollection<DynamicPropertyDictionaryItemEntity>();
-            ObjectValues = new NullCollection<DynamicPropertyObjectValueEntity>();
+            //ObjectValues = new NullCollection<DynamicPropertyObjectValueEntity>();
         }
 
         [StringLength(256)]
@@ -37,7 +37,7 @@ namespace VirtoCommerce.Platform.Data.Model
 
         public virtual ObservableCollection<DynamicPropertyNameEntity> DisplayNames { get; set; }
         public virtual ObservableCollection<DynamicPropertyDictionaryItemEntity> DictionaryItems { get; set; }
-        public virtual ObservableCollection<DynamicPropertyObjectValueEntity> ObjectValues { get; set; }
+        //public virtual ObservableCollection<DynamicPropertyObjectValueEntity> ObjectValues { get; set; }
 
 
         public virtual DynamicProperty ToModel(DynamicProperty dynamicProp)
@@ -63,10 +63,10 @@ namespace VirtoCommerce.Platform.Data.Model
 
             dynamicProp.ValueType = EnumUtility.SafeParse(ValueType, DynamicPropertyValueType.LongText);
             dynamicProp.DisplayNames = DisplayNames.Select(x => x.ToModel(AbstractTypeFactory<DynamicPropertyName>.TryCreateInstance())).ToArray();
-            if (dynamicProp is DynamicObjectProperty dynamicObjectProp)
-            {
-                dynamicObjectProp.Values = ObjectValues.Select(x => x.ToModel(AbstractTypeFactory<DynamicPropertyObjectValue>.TryCreateInstance())).ToArray();
-            }
+            //if (dynamicProp is DynamicObjectProperty dynamicObjectProp)
+            //{
+            //    dynamicObjectProp.Values = ObjectValues.Select(x => x.ToModel(AbstractTypeFactory<DynamicPropertyObjectValue>.TryCreateInstance())).ToArray();
+            //}
             return dynamicProp;
         }
 
@@ -110,7 +110,7 @@ namespace VirtoCommerce.Platform.Data.Model
                         value.ObjectType = dynamicObjectProp.ObjectType;
                         value.ValueType = dynamicObjectProp.ValueType;
                     }
-                    ObjectValues = new ObservableCollection<DynamicPropertyObjectValueEntity>(dynamicObjectProp.Values.Select(x => AbstractTypeFactory<DynamicPropertyObjectValueEntity>.TryCreateInstance().FromModel(x)));
+                    //ObjectValues = new ObservableCollection<DynamicPropertyObjectValueEntity>(dynamicObjectProp.Values.Select(x => AbstractTypeFactory<DynamicPropertyObjectValueEntity>.TryCreateInstance().FromModel(x)));
 
                 }
             }
@@ -131,11 +131,11 @@ namespace VirtoCommerce.Platform.Data.Model
                 DisplayNames.Patch(target.DisplayNames, comparer, (sourceItem, targetItem) => { });
             }
 
-            if (!ObjectValues.IsNullCollection())
-            {
-                var comparer = AnonymousComparer.Create((DynamicPropertyObjectValueEntity x) => $"{x.ObjectId}:{x.ObjectType}:{x.Locale}:{x.GetValue(EnumUtility.SafeParse(x.ValueType, DynamicPropertyValueType.LongText))}");
-                ObjectValues.Patch(target.ObjectValues, comparer, (sourceValue, targetValue) => sourceValue.Patch(targetValue));
-            }
+            //if (!ObjectValues.IsNullCollection())
+            //{
+            //    var comparer = AnonymousComparer.Create((DynamicPropertyObjectValueEntity x) => $"{x.ObjectId}:{x.ObjectType}:{x.Locale}:{x.GetValue(EnumUtility.SafeParse(x.ValueType, DynamicPropertyValueType.LongText))}");
+            //    ObjectValues.Patch(target.ObjectValues, comparer, (sourceValue, targetValue) => sourceValue.Patch(targetValue));
+            //}
         }
     }
 }

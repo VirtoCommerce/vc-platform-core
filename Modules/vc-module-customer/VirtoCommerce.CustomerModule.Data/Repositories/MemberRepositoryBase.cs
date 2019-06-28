@@ -26,6 +26,7 @@ namespace VirtoCommerce.CustomerModule.Data.Repositories
         public IQueryable<MemberEntity> Members => DbContext.Set<MemberEntity>();
         public IQueryable<MemberRelationEntity> MemberRelations => DbContext.Set<MemberRelationEntity>();
         public IQueryable<SeoInfoEntity> SeoInfos => DbContext.Set<SeoInfoEntity>();
+        public IQueryable<MemberDynamicPropertyObjectValueEntity> DynamicPropertyObjectValues => DbContext.Set<MemberDynamicPropertyObjectValueEntity>();
 
         public virtual async Task<MemberEntity[]> GetMembersByIdsAsync(string[] ids, string responseGroup = null, string[] memberTypes = null)
         {
@@ -122,6 +123,11 @@ namespace VirtoCommerce.CustomerModule.Data.Repositories
                 if (memberResponseGroup.HasFlag(MemberResponseGroup.WithSeo))
                 {
                     tasks.Add(SeoInfos.Where(x => ids.Contains(x.MemberId)).ToArrayAsync());
+                }
+
+                if (memberResponseGroup.HasFlag(MemberResponseGroup.WithDynamicPropertyObjectValues))
+                {
+                    tasks.Add(DynamicPropertyObjectValues.Where(x => ids.Contains(x.ObjectId)).ToArrayAsync());
                 }
             }
             await Task.WhenAll(tasks);

@@ -11,50 +11,40 @@ using VirtoCommerce.Platform.Data.Repositories;
 
 namespace VirtoCommerce.Platform.Data.DynamicProperties
 {
-    public class DynamicPropertySearchService : IDynamicPropertySearchService
+    public class DynamicPropertyDictionaryItemsSearchService : IDynamicPropertyDictionaryItemsSearchService
     {
         private readonly Func<IPlatformRepository> _repositoryFactory;
-        private readonly IDynamicPropertyService _dynamicPropertyService;
         private readonly IPlatformMemoryCache _memoryCache;
+        private readonly IDynamicPropertyDictionaryItemsService _dynamicPropertyDictionaryItemsService;
 
-        public DynamicPropertySearchService(Func<IPlatformRepository> repositoryFactory, IDynamicPropertyService dynamicPropertyService, IPlatformMemoryCache memoryCache)
+        public DynamicPropertyDictionaryItemsSearchService(Func<IPlatformRepository> repositoryFactory, IPlatformMemoryCache memoryCache, IDynamicPropertyDictionaryItemsService dynamicPropertyDictionaryItemsService)
         {
             _repositoryFactory = repositoryFactory;
-            _dynamicPropertyService = dynamicPropertyService;
             _memoryCache = memoryCache;
+            _dynamicPropertyDictionaryItemsService = dynamicPropertyDictionaryItemsService;
         }
 
-
-        #region IDynamicPropertySearchService members
-
-
-        public virtual async Task<DynamicPropertySearchResult> SearchDynamicPropertiesAsync(DynamicPropertySearchCriteria criteria)
+        public virtual async Task<DynamicPropertyDictionaryItemSearchResult> SearchDictionaryItemsAsync(DynamicPropertyDictionaryItemSearchCriteria criteria)
         {
-            var cacheKey = CacheKey.With(GetType(), "SearchDynamicPropertiesAsync", criteria.GetCacheKey());
+            var cacheKey = CacheKey.With(GetType(), "SearchDictionaryItemsAsync", criteria.GetHashCode().ToString());
             return await _memoryCache.GetOrCreateExclusiveAsync(cacheKey, async (cacheEntry) =>
             {
                 cacheEntry.AddExpirationToken(DynamicPropertiesCacheRegion.CreateChangeToken());
-                var result = AbstractTypeFactory<DynamicPropertySearchResult>.TryCreateInstance();
+                var result = AbstractTypeFactory<DynamicPropertyDictionaryItemSearchResult>.TryCreateInstance();
                 using (var repository = _repositoryFactory())
                 {
                     //Optimize performance and CPU usage
                     repository.DisableChangesTracking();
 
-                    var query = repository.DynamicProperties;
+                    var query = repository.DynamicPropertyDictionaryItems;
 
-                    if (!string.IsNullOrEmpty(criteria.TypeName))
+                    if (!string.IsNullOrEmpty(criteria.PropertyId))
                     {
-                        query = query.Where(x => x.ObjectType == criteria.TypeName);
+                        query = query.Where(x => x.PropertyId == criteria.PropertyId);
                     }
-
                     if (!string.IsNullOrEmpty(criteria.Keyword))
                     {
                         query = query.Where(x => x.Name.Contains(criteria.Keyword));
-                    }
-
-                    if (!criteria.ObjectTypes.IsNullOrEmpty())
-                    {
-                        query = query.Where(m => criteria.ObjectTypes.Contains(m.ObjectType));
                     }
 
                     var sortInfos = criteria.SortInfos;
@@ -64,21 +54,17 @@ namespace VirtoCommerce.Platform.Data.DynamicProperties
                     }
                     query = query.OrderBySortInfos(sortInfos);
                     result.TotalCount = await query.CountAsync();
-                    if (criteria.Take > 0)
-                    {
-                        var ids = await query.Skip(criteria.Skip)
+                    var ids = await query.Skip(criteria.Skip)
                                          .Take(criteria.Take)
                                          .Select(x => x.Id)
                                          .ToListAsync();
 
-                        var properties = await _dynamicPropertyService.GetDynamicPropertiesAsync(ids.ToArray());
-                        result.Results = properties.OrderBy(x => ids.IndexOf(x.Id))
-                            .ToList();
-                    }
+                    var properties = await _dynamicPropertyDictionaryItemsService.GetDynamicPropertyDictionaryItemsAsync(ids.ToArray());
+                    result.Results = properties.OrderBy(x => ids.IndexOf(x.Id))
+                                               .ToList();
                 }
                 return result;
             });
         }
-        #endregion
     }
 }

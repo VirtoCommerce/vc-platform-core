@@ -126,6 +126,19 @@ namespace VirtoCommerce.CustomerModule.Data.Repositories
 
             #endregion
 
+            #region DynamicProperty
+
+            modelBuilder.Entity<MemberDynamicPropertyObjectValueEntity>().ToTable("MemberDynamicPropertyObjectValue").HasKey(x => x.Id);
+            modelBuilder.Entity<MemberDynamicPropertyObjectValueEntity>().Property(x => x.Id).HasMaxLength(128);
+            modelBuilder.Entity<MemberDynamicPropertyObjectValueEntity>().Property(x => x.DecimalValue).HasColumnType("decimal(18,5)");
+            modelBuilder.Entity<MemberDynamicPropertyObjectValueEntity>().HasOne(p => p.Member)
+                .WithMany(s => s.DynamicPropertyObjectValues).HasForeignKey(k => k.ObjectId)
+                .OnDelete(DeleteBehavior.Cascade);
+            modelBuilder.Entity<MemberDynamicPropertyObjectValueEntity>().HasIndex(x => new { x.ObjectType, x.ObjectId })
+                .IsUnique(false)
+                .HasName("IX_ObjectType_ObjectId");
+            #endregion
+
             base.OnModelCreating(modelBuilder);
         }
     }

@@ -12,13 +12,13 @@ namespace VirtoCommerce.Platform.Data.Repositories
 
         IQueryable<DynamicPropertyEntity> DynamicProperties { get; }
         IQueryable<DynamicPropertyDictionaryItemEntity> DynamicPropertyDictionaryItems { get; }
-        IQueryable<DynamicPropertyObjectValueEntity> DynamicPropertyObjectValues { get; }
+        //IQueryable<DynamicPropertyObjectValueEntity> DynamicPropertyObjectValues { get; }
         IQueryable<OperationLogEntity> OperationLogs { get; }
 
         Task<DynamicPropertyDictionaryItemEntity[]> GetDynamicPropertyDictionaryItemByIdsAsync(string[] ids);
         Task<DynamicPropertyEntity[]> GetDynamicPropertiesForTypesAsync(string[] objectTypes);
         Task<DynamicPropertyEntity[]> GetDynamicPropertiesByIdsAsync(string[] ids);
-        Task<DynamicPropertyEntity[]> GetObjectDynamicPropertiesAsync(string[] objectTypes, string[] objectIds);
+        Task<DynamicPropertyEntity[]> GetObjectDynamicPropertiesAsync(string[] objectTypes);
 
         Task<SettingEntity[]> GetObjectSettingsAsync(string objectType, string objectId);
 

@@ -20,18 +20,18 @@ namespace VirtoCommerce.MarketingModule.Data.Services
     public class DynamicContentServiceImpl : IDynamicContentService
     {
         private readonly Func<IMarketingRepository> _repositoryFactory;
-        private readonly IDynamicPropertyService _dynamicPropertyService;
+        private readonly IDynamicPropertyMetaInfoService _dynamicPropertyMetaInfoService;
         private readonly IEventPublisher _eventPublisher;
         private readonly IPlatformMemoryCache _platformMemoryCache;
         private readonly IMarketingExtensionManager _marketingExtensionManager;
 
-        public DynamicContentServiceImpl(Func<IMarketingRepository> repositoryFactory, IDynamicPropertyService dynamicPropertyService, IEventPublisher eventPublisher, IPlatformMemoryCache platformMemoryCache, IMarketingExtensionManager marketingExtensionManager)
+        public DynamicContentServiceImpl(Func<IMarketingRepository> repositoryFactory, IEventPublisher eventPublisher, IPlatformMemoryCache platformMemoryCache, IMarketingExtensionManager marketingExtensionManager, IDynamicPropertyMetaInfoService dynamicPropertyMetaInfoService)
         {
             _repositoryFactory = repositoryFactory;
-            _dynamicPropertyService = dynamicPropertyService;
             _eventPublisher = eventPublisher;
             _platformMemoryCache = platformMemoryCache;
             _marketingExtensionManager = marketingExtensionManager;
+            _dynamicPropertyMetaInfoService = dynamicPropertyMetaInfoService;
         }
 
         #region IDynamicContentService Members
@@ -51,7 +51,7 @@ namespace VirtoCommerce.MarketingModule.Data.Services
 
                 if (retVal != null)
                 {
-                    await _dynamicPropertyService.LoadDynamicPropertyValuesAsync(retVal);
+                    await _dynamicPropertyMetaInfoService.ResolveMetaInfoAsync(retVal);
                 }
 
                 return retVal;

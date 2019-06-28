@@ -12,6 +12,7 @@ using VirtoCommerce.Platform.Core.Common;
 using VirtoCommerce.Platform.Core.Events;
 using VirtoCommerce.Platform.Core.Settings;
 using VirtoCommerce.Platform.Data.Infrastructure;
+using VirtoCommerce.StoreModule.Core.Model;
 using VirtoCommerce.StoreModule.Core.Services;
 using VirtoCommerce.SubscriptionModule.Core.Events;
 using VirtoCommerce.SubscriptionModule.Core.Model;
@@ -119,7 +120,7 @@ namespace VirtoCommerce.SubscriptionModule.Data.Services
                     //Generate numbers for new subscriptions
                     if (string.IsNullOrEmpty(subscription.Number))
                     {
-                        var store = await _storeService.GetByIdAsync(subscription.StoreId);
+                        var store = await _storeService.GetByIdAsync(subscription.StoreId, StoreResponseGroup.StoreInfo.ToString());
                         var numberTemplate = store.Settings.GetSettingValue("Subscription.SubscriptionNewNumberTemplate", "SU{0:yyMMdd}-{1:D5}");
                         subscription.Number = _uniqueNumberGenerator.GenerateNumber(numberTemplate);
                     }

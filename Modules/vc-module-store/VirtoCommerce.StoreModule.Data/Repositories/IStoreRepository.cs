@@ -1,6 +1,7 @@
 using System.Linq;
 using System.Threading.Tasks;
 using VirtoCommerce.Platform.Core.Common;
+using VirtoCommerce.StoreModule.Core.Model;
 using VirtoCommerce.StoreModule.Data.Model;
 
 namespace VirtoCommerce.StoreModule.Data.Repositories
@@ -10,6 +11,8 @@ namespace VirtoCommerce.StoreModule.Data.Repositories
         IQueryable<StoreEntity> Stores { get; }
 
         IQueryable<SeoInfoEntity> SeoInfos { get; }
-        Task<StoreEntity[]> GetStoresByIdsAsync(string[] ids);
+        IQueryable<StoreDynamicPropertyObjectValueEntity> DynamicPropertyObjectValues { get; }
+        Task<StoreEntity[]> GetStoresByIdsAsync(string[] ids, StoreResponseGroup responseGroup = StoreResponseGroup.Full);
+
     }
 }
