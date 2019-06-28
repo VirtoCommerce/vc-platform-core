@@ -501,6 +501,7 @@ namespace VirtoCommerce.CatalogModule.Data.Repositories
 		                    ,AssociatedCategoryId
 		                    ,Tags
 		                    ,Quantity
+							,OuterId
 	                    FROM Association
 	                    WHERE ItemId IN({0})")
                 ;
@@ -535,6 +536,7 @@ namespace VirtoCommerce.CatalogModule.Data.Repositories
 		                    ,a.AssociatedCategoryId
 		                    ,a.Tags
 		                    ,a.Quantity
+							,a.OuterId
 	                    FROM Category_CTE cat
 	                    LEFT JOIN Item i ON cat.Id=i.CategoryId
 	                    LEFT JOIN Association a ON cat.AssociatedCategoryId=a.AssociatedCategoryId
