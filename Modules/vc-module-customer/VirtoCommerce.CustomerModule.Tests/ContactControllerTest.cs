@@ -41,7 +41,7 @@ namespace VirtoCommerce.CustomerModule.Tests
         public void SearchTest()
         {
             var controller = GetContactController();
-            var result = controller.SearchOrganizations(new MembersSearchCriteria { MemberId = "org1" });
+            var result = controller.SearchMember(new MembersSearchCriteria { MemberId = "org1" });
         }
 
         [Fact]
