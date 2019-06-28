@@ -46,7 +46,7 @@ namespace VirtoCommerce.ExportModule.Data.Services
 
                 if (mapForType == null)
                 {
-                    var constructor = typeof(PlainFilteredMap<>).MakeGenericType(objectType).GetConstructor(new[] { typeof(ExportedTypeMetadata) });
+                    var constructor = typeof(MetadataFilteredMap<>).MakeGenericType(objectType).GetConstructor(new[] { typeof(ExportedTypeMetadata) });
                     var classMap = (ClassMap)constructor.Invoke(new[] { Metadata });
                     csvConfiguration.RegisterClassMap(classMap);
                 }
@@ -75,9 +75,14 @@ namespace VirtoCommerce.ExportModule.Data.Services
         }
     }
 
-    public class PlainFilteredMap<T> : ClassMap<T>
+    /// <summary>
+    /// Custom ClassMap implementation which includes only type members that are presented in <see cref="ExportedTypeMetadata"/>. Supports nested properties.
+    /// Does not map <see cref="IEnumerable<Entity>"/> as these are not representable in CSV structure in suitable manner.
+    /// </summary>
+    /// <typeparam name="T">Mapped type.</typeparam>
+    public class MetadataFilteredMap<T> : ClassMap<T>
     {
-        public PlainFilteredMap(ExportedTypeMetadata exportedTypeMetadata)
+        public MetadataFilteredMap(ExportedTypeMetadata exportedTypeMetadata)
         {
             var exportedType = typeof(T);
 
@@ -134,10 +139,14 @@ namespace VirtoCommerce.ExportModule.Data.Services
             }
         }
 
+
         private static bool IsEnumerableEntityProperty(PropertyInfo propertyInfo)
         {
             var type = propertyInfo.PropertyType;
-            return type.GetInterfaces().Any(x => x.IsGenericType && x.GetGenericTypeDefinition() == typeof(IEnumerable<>))
+
+            return type.GetInterfaces().Any(x =>
+                x.IsGenericType
+                && x.GetGenericTypeDefinition() == typeof(IEnumerable<>))
                 && type.GetGenericArguments().Any(x => x.IsSubclassOf(typeof(Entity)));
         }
 

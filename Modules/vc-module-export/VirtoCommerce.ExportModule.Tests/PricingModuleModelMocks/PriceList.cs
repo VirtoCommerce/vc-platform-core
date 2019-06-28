@@ -10,6 +10,7 @@ namespace VirtoCommerce.ExportModule.Tests
         public string Currency { get; set; }
         public ICollection<Price> Prices { get; set; }
         public ICollection<PricelistAssignment> Assignments { get; set; }
+
         /// <summary>
         /// Added for testing purposes as 1 to 1 related entity, does not exists in original Pricelist object
         /// </summary>
