@@ -125,7 +125,7 @@ namespace VirtoCommerce.CustomerModule.Data.Repositories
                     tasks.Add(SeoInfos.Where(x => ids.Contains(x.MemberId)).ToArrayAsync());
                 }
 
-                if (memberResponseGroup.HasFlag(MemberResponseGroup.WithDynamicPropertyObjectValues))
+                if (memberResponseGroup.HasFlag(MemberResponseGroup.WithDynamicProperties))
                 {
                     tasks.Add(DynamicPropertyObjectValues.Where(x => ids.Contains(x.ObjectId)).ToArrayAsync());
                 }

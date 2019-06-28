@@ -6,20 +6,14 @@ namespace VirtoCommerce.StoreModule.Core.Model
     public enum StoreResponseGroup
     {
         None = 0,
-        /// <summary>
-        /// 
-        /// </summary>
         StoreInfo = 1,
-        /// <summary>
-        /// 
-        /// </summary>
         StoreFulfillmentCenters = 1 << 1,
         WithFulfillmentCenters = StoreFulfillmentCenters,
         StoreSeoInfos = 1 << 2,
         WithSeoInfos = StoreSeoInfos,
-        StoreDynamicPropertyObjectValues = 1 << 3,
-        WithDynamicPropertyObjectValues = StoreDynamicPropertyObjectValues,
+        DynamicProperties = 1 << 3,
+        WithDynamicProperties = DynamicProperties,
 
-        Full = StoreFulfillmentCenters | StoreSeoInfos | StoreDynamicPropertyObjectValues
+        Full = StoreFulfillmentCenters | StoreSeoInfos | DynamicProperties
     }
 }

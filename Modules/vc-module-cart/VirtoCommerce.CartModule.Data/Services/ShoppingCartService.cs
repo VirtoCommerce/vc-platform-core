@@ -17,23 +17,21 @@ using VirtoCommerce.Platform.Data.Infrastructure;
 
 namespace VirtoCommerce.CartModule.Data.Services
 {
-    public class ShoppingCartServiceImpl : IShoppingCartService
+    public class ShoppingCartService : IShoppingCartService
     {
         private readonly Func<ICartRepository> _repositoryFactory;
-        private readonly IDynamicPropertyMetaInfoService _dynamicPropertyMetaInfoService;
         private readonly IShoppingCartTotalsCalculator _totalsCalculator;
         private readonly IEventPublisher _eventPublisher;
         private readonly IPlatformMemoryCache _platformMemoryCache;
 
-        public ShoppingCartServiceImpl(Func<ICartRepository> repositoryFactory,
+        public ShoppingCartService(Func<ICartRepository> repositoryFactory,
                                       IShoppingCartTotalsCalculator totalsCalculator, IEventPublisher eventPublisher,
-                                      IPlatformMemoryCache platformMemoryCache, IDynamicPropertyMetaInfoService dynamicPropertyMetaInfoService)
+                                      IPlatformMemoryCache platformMemoryCache)
         {
             _repositoryFactory = repositoryFactory;
             _totalsCalculator = totalsCalculator;
             _eventPublisher = eventPublisher;
             _platformMemoryCache = platformMemoryCache;
-            _dynamicPropertyMetaInfoService = dynamicPropertyMetaInfoService;
         }
 
         #region IShoppingCartService Members
@@ -62,9 +60,6 @@ namespace VirtoCommerce.CartModule.Data.Services
                         cacheEntry.AddExpirationToken(CartCacheRegion.CreateChangeToken(cart));
                     }
                 }
-
-                await _dynamicPropertyMetaInfoService.ResolveMetaInfoAsync(retVal.ToArray<IHasDynamicProperties>());
-
                 return retVal;
             });
         }

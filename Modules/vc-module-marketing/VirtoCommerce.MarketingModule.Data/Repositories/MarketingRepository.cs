@@ -9,10 +9,10 @@ using VirtoCommerce.Platform.Data.Infrastructure;
 
 namespace VirtoCommerce.MarketingModule.Data.Repositories
 {
-    public class MarketingRepositoryImpl : DbContextRepositoryBase<MarketingDbContext>, IMarketingRepository
+    public class MarketingRepository : DbContextRepositoryBase<MarketingDbContext>, IMarketingRepository
     {
         private readonly MarketingDbContext _dbContext;
-        public MarketingRepositoryImpl(MarketingDbContext dbContext) : base(dbContext)
+        public MarketingRepository(MarketingDbContext dbContext) : base(dbContext)
         {
             _dbContext = dbContext;
         }

@@ -15,14 +15,14 @@ using VirtoCommerce.Platform.Core.Common;
 
 namespace VirtoCommerce.MarketingModule.Data.Services
 {
-    public class MarketingSearchServiceImpl : IDynamicContentSearchService, IPromotionSearchService
+    public class MarketingSearchService : IDynamicContentSearchService, IPromotionSearchService
     {
         private readonly Func<IMarketingRepository> _repositoryFactory;
         private readonly IDynamicContentService _dynamicContentService;
         private readonly IPromotionService _promotionService;
         private readonly IPlatformMemoryCache _platformMemoryCache;
 
-        public MarketingSearchServiceImpl(Func<IMarketingRepository> repositoryFactory, IDynamicContentService dynamicContentService, IPromotionService promotionService
+        public MarketingSearchService(Func<IMarketingRepository> repositoryFactory, IDynamicContentService dynamicContentService, IPromotionService promotionService
             , IPlatformMemoryCache platformMemoryCache)
         {
             _repositoryFactory = repositoryFactory;

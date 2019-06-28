@@ -27,11 +27,10 @@ using VirtoCommerce.StoreModule.Core.Services;
 
 namespace VirtoCommerce.OrdersModule.Data.Services
 {
-    public class CustomerOrderServiceImpl : ICustomerOrderService
+    public class CustomerOrderService : ICustomerOrderService
     {
         private readonly Func<IOrderRepository> _repositoryFactory;
         private readonly IEventPublisher _eventPublisher;
-        private readonly IDynamicPropertyMetaInfoService _dynamicPropertyMetaInfoService;
         private readonly IStoreService _storeService;
 
         private readonly IUniqueNumberGenerator _uniqueNumberGenerator;
@@ -41,12 +40,12 @@ namespace VirtoCommerce.OrdersModule.Data.Services
         private readonly ICustomerOrderTotalsCalculator _totalsCalculator;
         private readonly IPlatformMemoryCache _platformMemoryCache;
 
-        public CustomerOrderServiceImpl(
+        public CustomerOrderService(
             Func<IOrderRepository> orderRepositoryFactory, IUniqueNumberGenerator uniqueNumberGenerator
             , IStoreService storeService, IChangeLogService changeLogService
             , IEventPublisher eventPublisher, ICustomerOrderTotalsCalculator totalsCalculator
             , IShippingMethodsSearchService shippingMethodsSearchService, IPaymentMethodsSearchService paymentMethodSearchService,
-            IPlatformMemoryCache platformMemoryCache, IDynamicPropertyMetaInfoService dynamicPropertyMetaInfoService)
+            IPlatformMemoryCache platformMemoryCache)
         {
             _repositoryFactory = orderRepositoryFactory;
             _eventPublisher = eventPublisher;
@@ -57,7 +56,6 @@ namespace VirtoCommerce.OrdersModule.Data.Services
 
             _paymentMethodSearchService = paymentMethodSearchService;
             _platformMemoryCache = platformMemoryCache;
-            _dynamicPropertyMetaInfoService = dynamicPropertyMetaInfoService;
             _uniqueNumberGenerator = uniqueNumberGenerator;
         }
 
@@ -94,8 +92,6 @@ namespace VirtoCommerce.OrdersModule.Data.Services
                         }
                     }
                 }
-
-                await _dynamicPropertyMetaInfoService.ResolveMetaInfoAsync(retVal.ToArray<IHasDynamicProperties>());
                 return retVal.ToArray();
             });
         }

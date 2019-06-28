@@ -1,4 +1,4 @@
-﻿using System;
+using System;
 using Microsoft.EntityFrameworkCore.Migrations;
 
 namespace VirtoCommerce.StoreModule.Data.Migrations
@@ -50,6 +50,18 @@ namespace VirtoCommerce.StoreModule.Data.Migrations
                 name: "IX_ObjectType_ObjectId",
                 table: "StoreDynamicPropertyObjectValue",
                 columns: new[] { "ObjectType", "ObjectId" });
+
+
+
+            migrationBuilder.Sql(@"IF (EXISTS (SELECT * 
+                 FROM INFORMATION_SCHEMA.TABLES 
+                 WHERE TABLE_NAME = '__MigrationHistory'))
+                    BEGIN
+                        INSERT INTO [dbo].[StoreDynamicPropertyObjectValue] ([Id],[CreatedDate],[ModifiedDate],[CreatedBy],[ModifiedBy],[ObjectType],[ObjectId],[Locale],[ValueType],[ShortTextValue],[LongTextValue],[DecimalValue],[IntegerValue],[BooleanValue],[DateTimeValue],[PropertyId],[DictionaryItemId])
+                        SELECT [Id],[CreatedDate],[ModifiedDate],[CreatedBy],[ModifiedBy],[ObjectType],[ObjectId],[Locale],[ValueType],[ShortTextValue],[LongTextValue],[DecimalValue],[IntegerValue],[BooleanValue],[DateTimeValue],[PropertyId],[DictionaryItemId]
+                        FROM [PlatformDynamicPropertyObjectValue]
+                        WHERE ObjectType = 'VirtoCommerce.StoreModule.Core.Model.Store'
+                    END");
         }
 
         protected override void Down(MigrationBuilder migrationBuilder)

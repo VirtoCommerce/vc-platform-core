@@ -13,13 +13,13 @@ using VirtoCommerce.Platform.Core.Common;
 
 namespace VirtoCommerce.MarketingModule.Data.Services
 {
-    public class DefaultDynamicContentEvaluatorImpl : IMarketingDynamicContentEvaluator
+    public class DefaultDynamicContentEvaluator : IMarketingDynamicContentEvaluator
     {
         private readonly IDynamicContentSearchService _dynamicContentSearchService;
         private readonly IDynamicContentService _dynamicContentService;
         private readonly ILogger _logger;
 
-        public DefaultDynamicContentEvaluatorImpl(IDynamicContentSearchService dynamicContentSearchService, IDynamicContentService dynamicContentService, ILogger<DefaultDynamicContentEvaluatorImpl> logger)
+        public DefaultDynamicContentEvaluator(IDynamicContentSearchService dynamicContentSearchService, IDynamicContentService dynamicContentService, ILogger<DefaultDynamicContentEvaluator> logger)
         {
             _dynamicContentSearchService = dynamicContentSearchService;
             _dynamicContentService = dynamicContentService;

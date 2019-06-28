@@ -8,7 +8,7 @@ using VirtoCommerce.Platform.Core.Domain;
 
 namespace VirtoCommerce.OrdersModule2.Web.Repositories
 {
-    public class OrderRepository2 : OrderRepositoryImpl
+    public class OrderRepository2 : OrderRepository
     {
         public OrderRepository2(Order2DbContext dbContext, IUnitOfWork unitOfWork = null) : base(dbContext, unitOfWork)
         {

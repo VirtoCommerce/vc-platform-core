@@ -1,6 +1,7 @@
 using System.Linq;
 using System.Threading.Tasks;
 using Microsoft.EntityFrameworkCore;
+using VirtoCommerce.Platform.Core.Common;
 using VirtoCommerce.Platform.Data.Infrastructure;
 using VirtoCommerce.StoreModule.Core.Model;
 using VirtoCommerce.StoreModule.Data.Model;
@@ -15,25 +16,27 @@ namespace VirtoCommerce.StoreModule.Data.Repositories
 
         #region IStoreRepository Members
 
-        public async Task<StoreEntity[]> GetStoresByIdsAsync(string[] ids, StoreResponseGroup responseGroup = StoreResponseGroup.Full)
+        public async Task<StoreEntity[]> GetStoresByIdsAsync(string[] ids, string responseGroup = null)
         {
+            var storeResponseGroup = EnumUtility.SafeParseFlags(responseGroup, StoreResponseGroup.Full);
+
             var retVal = await Stores.Where(x => ids.Contains(x.Id))
                                .Include(x => x.Languages)
                                .Include(x => x.Currencies)
                                .Include(x => x.TrustedGroups)
                                .ToArrayAsync();
 
-            if (responseGroup.HasFlag(StoreResponseGroup.StoreFulfillmentCenters))
+            if (storeResponseGroup.HasFlag(StoreResponseGroup.StoreFulfillmentCenters))
             {
                 var fulfillmentCenters = await StoreFulfillmentCenters.Where(x => ids.Contains(x.StoreId)).ToArrayAsync();
             }
 
-            if (responseGroup.HasFlag(StoreResponseGroup.StoreSeoInfos))
+            if (storeResponseGroup.HasFlag(StoreResponseGroup.StoreSeoInfos))
             {
                 var seoInfos = await SeoInfos.Where(x => ids.Contains(x.StoreId)).ToArrayAsync();
             }
 
-            if (responseGroup.HasFlag(StoreResponseGroup.StoreDynamicPropertyObjectValues))
+            if (storeResponseGroup.HasFlag(StoreResponseGroup.DynamicProperties))
             {
                 var dynamicPropertyValues = await DynamicPropertyObjectValues.Where(x => ids.Contains(x.ObjectId)).ToArrayAsync();
             }

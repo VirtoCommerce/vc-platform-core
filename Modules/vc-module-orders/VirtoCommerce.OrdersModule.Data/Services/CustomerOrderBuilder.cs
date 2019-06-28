@@ -15,11 +15,11 @@ using ShipmentItem = VirtoCommerce.OrdersModule.Core.Model.ShipmentItem;
 
 namespace VirtoCommerce.OrdersModule.Data.Services
 {
-    public class CustomerOrderBuilderImpl : ICustomerOrderBuilder
+    public class CustomerOrderBuilder : ICustomerOrderBuilder
     {
         private readonly ICustomerOrderService _customerOrderService;
 
-        public CustomerOrderBuilderImpl(ICustomerOrderService customerOrderService)
+        public CustomerOrderBuilder(ICustomerOrderService customerOrderService)
         {
             _customerOrderService = customerOrderService;
         }

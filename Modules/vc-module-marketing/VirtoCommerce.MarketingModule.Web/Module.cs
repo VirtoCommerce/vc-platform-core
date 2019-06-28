@@ -47,22 +47,22 @@ namespace VirtoCommerce.MarketingModule.Web
             var configuration = serviceCollection.BuildServiceProvider().GetRequiredService<IConfiguration>();
             var connectionString = configuration.GetConnectionString("VirtoCommerce.Marketing") ?? configuration.GetConnectionString("VirtoCommerce");
 
-            serviceCollection.AddTransient<IMarketingRepository, MarketingRepositoryImpl>();
+            serviceCollection.AddTransient<IMarketingRepository, MarketingRepository>();
             serviceCollection.AddDbContext<MarketingDbContext>(options => options.UseSqlServer(connectionString));
             serviceCollection.AddSingleton<Func<IMarketingRepository>>(provider => () => provider.CreateScope().ServiceProvider.GetRequiredService<IMarketingRepository>());
 
-            var promotionExtensionManager = new DefaultMarketingExtensionManagerImpl();
+            var promotionExtensionManager = new DefaultMarketingExtensionManager();
 
             serviceCollection.AddSingleton<IMarketingExtensionManager>(promotionExtensionManager);
-            serviceCollection.AddSingleton<IPromotionService, PromotionServiceImpl>();
+            serviceCollection.AddSingleton<IPromotionService, PromotionService>();
             serviceCollection.AddSingleton<ICouponService, CouponService>();
             serviceCollection.AddSingleton<IPromotionUsageService, PromotionUsageService>();
-            serviceCollection.AddSingleton<IMarketingDynamicContentEvaluator, DefaultDynamicContentEvaluatorImpl>();
-            serviceCollection.AddSingleton<IDynamicContentService, DynamicContentServiceImpl>();
+            serviceCollection.AddSingleton<IMarketingDynamicContentEvaluator, DefaultDynamicContentEvaluator>();
+            serviceCollection.AddSingleton<IDynamicContentService, DynamicContentService>();
 
-            serviceCollection.AddSingleton<IPromotionSearchService, MarketingSearchServiceImpl>();
+            serviceCollection.AddSingleton<IPromotionSearchService, MarketingSearchService>();
             serviceCollection.AddSingleton<ICouponService, CouponService>();
-            serviceCollection.AddSingleton<IDynamicContentSearchService, MarketingSearchServiceImpl>();
+            serviceCollection.AddSingleton<IDynamicContentSearchService, MarketingSearchService>();
             serviceCollection.AddSingleton<CsvCouponImporter>();
 
 

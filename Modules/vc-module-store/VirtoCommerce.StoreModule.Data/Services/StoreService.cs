@@ -25,17 +25,13 @@ namespace VirtoCommerce.StoreModule.Data.Services
     {
         private readonly Func<IStoreRepository> _repositoryFactory;
         private readonly ISettingsManager _settingManager;
-        private readonly IDynamicPropertyMetaInfoService _dynamicPropertyMetaInfoService;
-
         private readonly IEventPublisher _eventPublisher;
         private readonly IPlatformMemoryCache _platformMemoryCache;
 
-        public StoreService(Func<IStoreRepository> repositoryFactory, ISettingsManager settingManager, IDynamicPropertyMetaInfoService dynamicPropertyMetaInfoService,
-                            IEventPublisher eventPublisher, IPlatformMemoryCache platformMemoryCache)
+        public StoreService(Func<IStoreRepository> repositoryFactory, ISettingsManager settingManager, IEventPublisher eventPublisher, IPlatformMemoryCache platformMemoryCache)
         {
             _repositoryFactory = repositoryFactory;
             _settingManager = settingManager;
-            _dynamicPropertyMetaInfoService = dynamicPropertyMetaInfoService;
 
             _eventPublisher = eventPublisher;
             _platformMemoryCache = platformMemoryCache;
@@ -45,8 +41,6 @@ namespace VirtoCommerce.StoreModule.Data.Services
 
         public virtual async Task<Store[]> GetByIdsAsync(string[] ids, string responseGroup = null)
         {
-            var storeResponseGroup = EnumUtility.SafeParseFlags(responseGroup, StoreResponseGroup.Full);
-
             var cacheKey = CacheKey.With(GetType(), "GetByIdsAsync", string.Join("-", ids), responseGroup);
             return await _platformMemoryCache.GetOrCreateExclusiveAsync(cacheKey, async (cacheEntry) =>
             {
@@ -58,7 +52,7 @@ namespace VirtoCommerce.StoreModule.Data.Services
                 {
                     repository.DisableChangesTracking();
 
-                    var dbStores = await repository.GetStoresByIdsAsync(ids, storeResponseGroup);
+                    var dbStores = await repository.GetStoresByIdsAsync(ids, responseGroup);
 
                     foreach (var dbStore in dbStores)
                     {

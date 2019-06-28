@@ -8,9 +8,9 @@ using VirtoCommerce.Platform.Data.Infrastructure;
 
 namespace VirtoCommerce.OrdersModule.Data.Repositories
 {
-    public class OrderRepositoryImpl : DbContextRepositoryBase<OrderDbContext>, IOrderRepository
+    public class OrderRepository : DbContextRepositoryBase<OrderDbContext>, IOrderRepository
     {
-        public OrderRepositoryImpl(OrderDbContext dbContext, IUnitOfWork unitOfWork = null) : base(dbContext, unitOfWork)
+        public OrderRepository(OrderDbContext dbContext, IUnitOfWork unitOfWork = null) : base(dbContext, unitOfWork)
         {
         }
 
@@ -81,6 +81,6 @@ namespace VirtoCommerce.OrdersModule.Data.Repositories
             }
         }
 
-        
+
     }
 }

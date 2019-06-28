@@ -105,24 +105,7 @@ namespace VirtoCommerce.Platform.Data.Repositories
                         .HasName("IX_PlatformDynamicPropertyDictionaryItemName_DictionaryItemId_Locale_Name")
                         .IsUnique(true);
 
-            //modelBuilder.Entity<DynamicPropertyObjectValueEntity>().ToTable("PlatformDynamicPropertyObjectValue").HasKey(x => x.Id);
-            //modelBuilder.Entity<DynamicPropertyObjectValueEntity>().Property(x => x.Id).HasMaxLength(128);
-            //modelBuilder.Entity<DynamicPropertyObjectValueEntity>().Property(x => x.CreatedBy).HasMaxLength(64);
-            //modelBuilder.Entity<DynamicPropertyObjectValueEntity>().Property(x => x.ModifiedBy).HasMaxLength(64);
-            //modelBuilder.Entity<DynamicPropertyObjectValueEntity>().HasOne(x => x.Property)
-            //            .WithMany(x => x.ObjectValues)
-            //            .HasForeignKey(x => x.PropertyId)
-            //            .OnDelete(DeleteBehavior.Cascade);
-            //modelBuilder.Entity<DynamicPropertyObjectValueEntity>().HasOne(x => x.DictionaryItem)
-            //            .WithMany(x => x.ObjectValues)
-            //            .HasForeignKey(x => x.DictionaryItemId);
-            //modelBuilder.Entity<DynamicPropertyObjectValueEntity>().HasIndex(x => new { x.ObjectType, x.ObjectId })
-            //            .IsUnique(false)
-            //            .HasName("IX_ObjectType_ObjectId");
 
-            //modelBuilder.Entity<DynamicPropertyObjectValueEntity>()
-            //    .Property(x => x.DecimalValue)
-            //    .HasColumnType("decimal(18,5)");
             #endregion
 
             #region Assets
@@ -144,32 +127,5 @@ namespace VirtoCommerce.Platform.Data.Repositories
 
     }
 
-    //public class PlatformPKMigrationsSqlGenerator : SqlServerMigrationsSqlGenerator
-    //{
-    //    private static readonly string PREFIX = "PK_dbo.";
-    //    public PlatformPKMigrationsSqlGenerator(MigrationsSqlGeneratorDependencies dependencies, IMigrationsAnnotationProvider migrationsAnnotations) : base(dependencies, migrationsAnnotations)
-    //    {
-    //    }
 
-    //    protected override void Generate(AddPrimaryKeyOperation operation, IModel model, MigrationCommandListBuilder builder, bool terminate)
-    //    {
-    //        operation.Name = GetPkName(operation.Table);
-    //        base.Generate(operation, model, builder, terminate);
-    //    }
-
-    //    protected override void Generate(DropPrimaryKeyOperation operation, IModel model, MigrationCommandListBuilder builder, bool terminate)
-    //    {
-    //        operation.Name = GetPkName(operation.Table);
-    //        base.Generate(operation, model, builder, terminate);
-    //    }
-
-
-    //    // Prefix + Table name without schema
-    //    private string GetPkName(string tableName)
-    //    {
-    //        return PREFIX + tableName.Substring(tableName.IndexOf('.') + 1);
-    //    }
-
-
-    //}
 }

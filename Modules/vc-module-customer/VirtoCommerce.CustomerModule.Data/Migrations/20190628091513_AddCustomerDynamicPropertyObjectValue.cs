@@ -1,4 +1,4 @@
-﻿using System;
+using System;
 using Microsoft.EntityFrameworkCore.Migrations;
 
 namespace VirtoCommerce.CustomerModule.Data.Migrations
@@ -50,6 +50,17 @@ namespace VirtoCommerce.CustomerModule.Data.Migrations
                 name: "IX_ObjectType_ObjectId",
                 table: "MemberDynamicPropertyObjectValue",
                 columns: new[] { "ObjectType", "ObjectId" });
+
+
+            migrationBuilder.Sql(@"IF (EXISTS (SELECT * 
+                 FROM INFORMATION_SCHEMA.TABLES 
+                 WHERE TABLE_NAME = '__MigrationHistory'))
+                    BEGIN
+                        INSERT INTO [dbo].[MemberDynamicPropertyObjectValue] ([Id],[CreatedDate],[ModifiedDate],[CreatedBy],[ModifiedBy],[ObjectType],[ObjectId],[Locale],[ValueType],[ShortTextValue],[LongTextValue],[DecimalValue],[IntegerValue],[BooleanValue],[DateTimeValue],[PropertyId],[DictionaryItemId])
+                        SELECT [Id],[CreatedDate],[ModifiedDate],[CreatedBy],[ModifiedBy],[ObjectType],[ObjectId],[Locale],[ValueType],[ShortTextValue],[LongTextValue],[DecimalValue],[IntegerValue],[BooleanValue],[DateTimeValue],[PropertyId],[DictionaryItemId]
+                        FROM [PlatformDynamicPropertyObjectValue]
+                        WHERE ObjectType like 'VirtoCommerce.CustomerModule.Core.Model%'
+                    END");
         }
 
         protected override void Down(MigrationBuilder migrationBuilder)

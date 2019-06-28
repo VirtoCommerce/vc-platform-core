@@ -16,13 +16,13 @@ using VirtoCommerce.Platform.Data.Infrastructure;
 
 namespace VirtoCommerce.OrdersModule.Data.Services
 {
-    public class CustomerOrderSearchServiceImpl : ICustomerOrderSearchService
+    public class CustomerOrderSearchService : ICustomerOrderSearchService
     {
         private readonly Func<IOrderRepository> _repositoryFactory;
         private readonly IPlatformMemoryCache _platformMemoryCache;
         private readonly ICustomerOrderService _customerOrderService;
 
-        public CustomerOrderSearchServiceImpl(Func<IOrderRepository> repositoryFactory, ICustomerOrderService customerOrderService, IPlatformMemoryCache platformMemoryCache)
+        public CustomerOrderSearchService(Func<IOrderRepository> repositoryFactory, ICustomerOrderService customerOrderService, IPlatformMemoryCache platformMemoryCache)
         {
             _repositoryFactory = repositoryFactory;
             _platformMemoryCache = platformMemoryCache;

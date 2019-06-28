@@ -12,9 +12,9 @@ using VirtoCommerce.Platform.Core.Common;
 
 namespace VirtoCommerce.CustomerModule.Data.Services
 {
-    public class CommerceMembersSearchServiceImpl : MemberSearchServiceBase
+    public class CommerceMembersSearchService : MemberSearchServiceBase
     {
-        public CommerceMembersSearchServiceImpl(Func<IMemberRepository> repositoryFactory, IMemberService memberService, IPlatformMemoryCache platformMemoryCache) : base(repositoryFactory, memberService, platformMemoryCache)
+        public CommerceMembersSearchService(Func<IMemberRepository> repositoryFactory, IMemberService memberService, IPlatformMemoryCache platformMemoryCache) : base(repositoryFactory, memberService, platformMemoryCache)
         {
         }
 

@@ -62,23 +62,6 @@ namespace VirtoCommerce.Platform.Data.DynamicProperties
             });
         }
 
-        public virtual async Task<DynamicObjectProperty[]> GetObjectDynamicPropertiesByObjectTypesAsync(string[] objectTypes)
-        {
-            var cacheKey = CacheKey.With(GetType(), "GetObjectDynamicPropertiesAsync", string.Join("-", objectTypes));
-            return await _memoryCache.GetOrCreateExclusiveAsync(cacheKey, async (cacheEntry) =>
-            {
-                //Add cache  expiration token
-                cacheEntry.AddExpirationToken(DynamicPropertiesCacheRegion.CreateChangeToken());
-                using (var repository = _repositoryFactory())
-                {
-                    var dynamicPropertyEntities = await repository.GetObjectDynamicPropertiesAsync(objectTypes);
-                    return dynamicPropertyEntities.Select(x =>
-                            x.ToModel(AbstractTypeFactory<DynamicObjectProperty>.TryCreateInstance()))
-                        .OfType<DynamicObjectProperty>().ToArray();
-                }
-            });
-        }
-
         public virtual async Task<DynamicProperty[]> SaveDynamicPropertiesAsync(DynamicProperty[] properties)
         {
             if (properties == null)

@@ -17,21 +17,19 @@ using VirtoCommerce.Platform.Core.Events;
 
 namespace VirtoCommerce.MarketingModule.Data.Services
 {
-    public class DynamicContentServiceImpl : IDynamicContentService
+    public class DynamicContentService : IDynamicContentService
     {
         private readonly Func<IMarketingRepository> _repositoryFactory;
-        private readonly IDynamicPropertyMetaInfoService _dynamicPropertyMetaInfoService;
         private readonly IEventPublisher _eventPublisher;
         private readonly IPlatformMemoryCache _platformMemoryCache;
         private readonly IMarketingExtensionManager _marketingExtensionManager;
 
-        public DynamicContentServiceImpl(Func<IMarketingRepository> repositoryFactory, IEventPublisher eventPublisher, IPlatformMemoryCache platformMemoryCache, IMarketingExtensionManager marketingExtensionManager, IDynamicPropertyMetaInfoService dynamicPropertyMetaInfoService)
+        public DynamicContentService(Func<IMarketingRepository> repositoryFactory, IEventPublisher eventPublisher, IPlatformMemoryCache platformMemoryCache, IMarketingExtensionManager marketingExtensionManager)
         {
             _repositoryFactory = repositoryFactory;
             _eventPublisher = eventPublisher;
             _platformMemoryCache = platformMemoryCache;
             _marketingExtensionManager = marketingExtensionManager;
-            _dynamicPropertyMetaInfoService = dynamicPropertyMetaInfoService;
         }
 
         #region IDynamicContentService Members
@@ -48,12 +46,6 @@ namespace VirtoCommerce.MarketingModule.Data.Services
                 {
                     retVal = (await repository.GetContentItemsByIdsAsync(ids)).Select(x => x.ToModel(AbstractTypeFactory<DynamicContentItem>.TryCreateInstance())).ToArray();
                 }
-
-                if (retVal != null)
-                {
-                    await _dynamicPropertyMetaInfoService.ResolveMetaInfoAsync(retVal);
-                }
-
                 return retVal;
             });
 

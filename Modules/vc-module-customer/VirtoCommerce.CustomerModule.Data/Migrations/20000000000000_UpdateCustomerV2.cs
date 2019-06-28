@@ -111,59 +111,8 @@ namespace VirtoCommerce.CustomerModule.Data.Migrations
                     BEGIN
                         INSERT INTO [MemberSeoInfo] ([Id], [CreatedDate], [ModifiedDate], [CreatedBy], [ModifiedBy], [Keyword], [StoreId], [IsActive], [Language], [Title], [MetaDescription], [MetaKeywords], [ImageAltDescription], [MemberId])
                               SELECT [Id], [CreatedDate], [ModifiedDate], [CreatedBy], [ModifiedBy], [Keyword], [StoreId], [IsActive], [Language], [Title], [MetaDescription], [MetaKeywords], [ImageAltDescription], [ObjectId] as [MemberId]  FROM [SeoUrlKeyword] WHERE ObjectType = 'Vendor'
-				    END");
+				    END");      
 
-            migrationBuilder.Sql(@"IF (EXISTS (SELECT * 
-                 FROM INFORMATION_SCHEMA.TABLES 
-                 WHERE TABLE_NAME = '__MigrationHistory'))
-                    BEGIN
-                        CREATE TABLE [dbo].[MemberDynamicPropertyObjectValue](
-	                        [Id] [nvarchar](128) NOT NULL,
-	                        [CreatedDate] [datetime2](7) NOT NULL,
-	                        [ModifiedDate] [datetime2](7) NULL,
-	                        [CreatedBy] [nvarchar](64) NULL,
-	                        [ModifiedBy] [nvarchar](64) NULL,
-	                        [ObjectType] [nvarchar](256) NULL,
-	                        [ObjectId] [nvarchar](128) NULL,
-	                        [Locale] [nvarchar](64) NULL,
-	                        [ValueType] [nvarchar](64) NOT NULL,
-	                        [ShortTextValue] [nvarchar](512) NULL,
-	                        [LongTextValue] [nvarchar](max) NULL,
-	                        [DecimalValue] [decimal](18, 5) NULL,
-	                        [IntegerValue] [int] NULL,
-	                        [BooleanValue] [bit] NULL,
-	                        [DateTimeValue] [datetime2](7) NULL,
-	                        [PropertyId] [nvarchar](max) NULL,
-	                        [DictionaryItemId] [nvarchar](max) NULL,
-                         CONSTRAINT [PK_MemberDynamicPropertyObjectValue] PRIMARY KEY CLUSTERED 
-                        (
-	                        [Id] ASC
-                        )WITH (PAD_INDEX = OFF, STATISTICS_NORECOMPUTE = OFF, IGNORE_DUP_KEY = OFF, ALLOW_ROW_LOCKS = ON, ALLOW_PAGE_LOCKS = ON) ON [PRIMARY]
-                        ) ON [PRIMARY] TEXTIMAGE_ON [PRIMARY]
-
-                        BEGIN
-                            ALTER TABLE [dbo].[MemberDynamicPropertyObjectValue]  WITH CHECK ADD  CONSTRAINT [FK_MemberDynamicPropertyObjectValue_Member_ObjectId] FOREIGN KEY([ObjectId])
-                            REFERENCES [dbo].[Member] ([Id])
-                            ON DELETE CASCADE
-                            ALTER TABLE [dbo].[MemberDynamicPropertyObjectValue] CHECK CONSTRAINT [FK_MemberDynamicPropertyObjectValue_Member_ObjectId]
-                        END
-
-                        BEGIN
-                            CREATE NONCLUSTERED INDEX [IX_ObjectType_ObjectId] ON [dbo].[MemberDynamicPropertyObjectValue] ([ObjectType] ASC,[ObjectId] ASC)
-                                WITH (PAD_INDEX = OFF, STATISTICS_NORECOMPUTE = OFF, SORT_IN_TEMPDB = OFF, DROP_EXISTING = OFF, ONLINE = OFF, ALLOW_ROW_LOCKS = ON, ALLOW_PAGE_LOCKS = ON) ON [PRIMARY]
-                        END
-
-                    END");
-
-            migrationBuilder.Sql(@"IF (EXISTS (SELECT * 
-                 FROM INFORMATION_SCHEMA.TABLES 
-                 WHERE TABLE_NAME = '__MigrationHistory'))
-                    BEGIN
-                        INSERT INTO [dbo].[MemberDynamicPropertyObjectValue] ([Id],[CreatedDate],[ModifiedDate],[CreatedBy],[ModifiedBy],[ObjectType],[ObjectId],[Locale],[ValueType],[ShortTextValue],[LongTextValue],[DecimalValue],[IntegerValue],[BooleanValue],[DateTimeValue],[PropertyId],[DictionaryItemId])
-                        SELECT [Id],[CreatedDate],[ModifiedDate],[CreatedBy],[ModifiedBy],[ObjectType],[ObjectId],[Locale],[ValueType],[ShortTextValue],[LongTextValue],[DecimalValue],[IntegerValue],[BooleanValue],[DateTimeValue],[PropertyId],[DictionaryItemId]
-                        FROM [PlatformDynamicPropertyObjectValue]
-                        WHERE ObjectType like 'VirtoCommerce.CustomerModule.Core.Model%'
-                    END");
         }
 
         protected override void Down(MigrationBuilder migrationBuilder)

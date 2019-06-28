@@ -19,7 +19,7 @@ namespace VirtoCommerce.Platform.Data.Repositories
         public virtual IQueryable<SettingEntity> Settings { get { return DbContext.Set<SettingEntity>(); } }
 
         public virtual IQueryable<DynamicPropertyEntity> DynamicProperties { get { return DbContext.Set<DynamicPropertyEntity>(); } }
-        //public virtual IQueryable<DynamicPropertyObjectValueEntity> DynamicPropertyObjectValues { get { return DbContext.Set<DynamicPropertyObjectValueEntity>(); } }
+
         public virtual IQueryable<DynamicPropertyDictionaryItemEntity> DynamicPropertyDictionaryItems { get { return DbContext.Set<DynamicPropertyDictionaryItemEntity>(); } }
 
 

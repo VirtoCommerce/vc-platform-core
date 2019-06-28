@@ -22,7 +22,7 @@ namespace VirtoCommerce.MarketingModule.Test
         private readonly Mock<IMarketingRepository> _repositoryMock;
         private readonly Mock<IDynamicContentSearchService> _dynamicContentSearchServiceMock;
         private readonly Mock<IDynamicContentService> _dynamicContentServiceMock;
-        private readonly Mock<ILogger<DefaultDynamicContentEvaluatorImpl>> _loggerMock;
+        private readonly Mock<ILogger<DefaultDynamicContentEvaluator>> _loggerMock;
         private readonly Mock<IUnitOfWork> _mockUnitOfWork;
 
         public DefaultDynamicContentEvaluatorImplTest()
@@ -32,7 +32,7 @@ namespace VirtoCommerce.MarketingModule.Test
             _dynamicContentSearchServiceMock = new Mock<IDynamicContentSearchService>();
             _dynamicContentServiceMock = new Mock<IDynamicContentService>();
             //_expressionSerializerMock = new Mock<IExpressionSerializer>();
-            _loggerMock = new Mock<ILogger<DefaultDynamicContentEvaluatorImpl>>();
+            _loggerMock = new Mock<ILogger<DefaultDynamicContentEvaluator>>();
             _mockUnitOfWork = new Mock<IUnitOfWork>();
             _repositoryMock.Setup(ss => ss.UnitOfWork).Returns(_mockUnitOfWork.Object);
 
@@ -77,7 +77,7 @@ namespace VirtoCommerce.MarketingModule.Test
             _dynamicContentServiceMock.Setup(dcs => dcs.GetContentItemsByIdsAsync(new[] { dynamicContentItem.Id }))
                 .ReturnsAsync(expectedArray);
 
-            var evaluator = new DefaultDynamicContentEvaluatorImpl(_dynamicContentSearchServiceMock.Object, _dynamicContentServiceMock.Object, _loggerMock.Object);
+            var evaluator = new DefaultDynamicContentEvaluator(_dynamicContentSearchServiceMock.Object, _dynamicContentServiceMock.Object, _loggerMock.Object);
 
             //Act
             var results = evaluator.EvaluateItemsAsync(evalContext).GetAwaiter().GetResult();
