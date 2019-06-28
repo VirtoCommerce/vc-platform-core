@@ -106,18 +106,6 @@ namespace VirtoCommerce.MarketingModule.Data.Repositories
                                     .ToArrayAsync();
         }
 
-        public Task<DynamicContentPublishingGroupEntity[]> GetContentPublicationsByStoreIdAndPlaceNameAsync(string storeId, DateTime intervalDate, string placeName)
-        {
-            return PublishingGroups
-                .Include(x => x.ContentItems)
-                .Where(x => x.IsActive)
-                .Where(x => x.StoreId == storeId)
-                .Where(x => (x.StartDate == null || intervalDate >= x.StartDate) && (x.EndDate == null || x.EndDate >= intervalDate))
-                .Where(x => x.ContentPlaces.Any(y => y.ContentPlace.Name == placeName))
-                .OrderBy(x => x.Priority)
-                .ToArrayAsync();
-        }
-
         public Task RemoveFoldersAsync(string[] ids)
         {
             const string queryPattern = @"DELETE FROM DynamicContentFolder WHERE Id IN (@Ids)";

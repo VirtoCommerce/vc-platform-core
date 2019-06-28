@@ -188,6 +188,18 @@ namespace VirtoCommerce.MarketingModule.Data.Services
                     {
                         query = query.Where(x => x.IsActive == true);
                     }
+                    if (criteria.StartDate != null)
+                    {
+                        query = query.Where(x => x.StartDate == null || criteria.StartDate >= x.StartDate);
+                    }
+                    if (criteria.EndDate != null)
+                    {
+                        query = query.Where(x => x.EndDate == null || x.EndDate >= criteria.EndDate);
+                    }
+                    if (!string.IsNullOrEmpty(criteria.PlaceName))
+                    {
+                        query = query.Where(x => x.ContentPlaces.Any(y => y.ContentPlace.Name == criteria.PlaceName));
+                    }
                     if (!string.IsNullOrEmpty(criteria.Keyword))
                     {
                         query = query.Where(q => q.Name.Contains(criteria.Keyword));
@@ -195,7 +207,7 @@ namespace VirtoCommerce.MarketingModule.Data.Services
                     var sortInfos = criteria.SortInfos;
                     if (sortInfos.IsNullOrEmpty())
                     {
-                        sortInfos = new[] { new SortInfo { SortColumn = ReflectionUtility.GetPropertyName<DynamicContentPublication>(x => x.Name), SortDirection = SortDirection.Ascending } };
+                        sortInfos = new[] { new SortInfo { SortColumn = ReflectionUtility.GetPropertyName<DynamicContentPublication>(x => x.Priority), SortDirection = SortDirection.Ascending } };
                     }
                     query = query.OrderBySortInfos(sortInfos);
 
