@@ -57,6 +57,7 @@ namespace VirtoCommerce.ExportModule.Data.Services
 
         public void WriteMetadata(ExportedTypeMetadata metadata)
         {
+            throw new NotSupportedException($"{nameof(CsvExportProvider)} does not support writing metadata.");
         }
 
         public void WriteRecord(object objectToRecord)
@@ -81,33 +82,80 @@ namespace VirtoCommerce.ExportModule.Data.Services
             var exportedType = typeof(T);
 
             var includedPropertiesInfo = exportedTypeMetadata.PropertiesInfo;
+            int columnIndex = 0;
 
-            if (!includedPropertiesInfo.IsNullOrEmpty())
+            foreach (var includedPropertyInfo in includedPropertiesInfo)
             {
-                var includedMembers = includedPropertiesInfo.ToDictionary(x => x.MemberInfo);
-                var exportedTypeProperties = exportedType.GetProperties(BindingFlags.Instance | BindingFlags.Public).Where(x => x.CanRead && x.GetMethod.IsPublic).ToArray();
+                var propertyNames = includedPropertyInfo.Name.Split('.');
+                var currentType = exportedType;
+                ClassMap currentClassMap = this;
 
-                foreach (var exportedTypeProperty in exportedTypeProperties)
+                for (int i = 0; i < propertyNames.Length; i++)
                 {
-                    if (includedMembers.TryGetValue(exportedTypeProperty, out var exportTypePropertyInfo))
+                    var propertyName = propertyNames[i];
+                    var propertyInfo = currentType.GetProperty(propertyName, BindingFlags.Public | BindingFlags.Instance);
+
+                    if (propertyInfo?.CanRead != true)
                     {
-                        var memberMap = MemberMap.CreateGeneric(exportedType, exportedTypeProperty);
+                        break;
+                    }
 
-                        memberMap.Data.TypeConverterOptions.CultureInfo = CultureInfo.InvariantCulture;
-                        memberMap.Data.TypeConverterOptions.NumberStyle = NumberStyles.Any;
-                        memberMap.Data.TypeConverterOptions.BooleanTrueValues.AddRange(new List<string>() { "yes", "true" });
-                        memberMap.Data.TypeConverterOptions.BooleanFalseValues.AddRange(new List<string>() { "false", "no" });
+                    // Do not write enumerables (ICollection, etc.)
+                    if (IsEnumerableEntityProperty(propertyInfo))
+                    {
+                        break;
+                    }
 
-                        // Specified default value filling it here, though it is not written: https://github.com/JoshClose/CsvHelper/issues/722
-                        memberMap.Data.Default = exportTypePropertyInfo.DefaultValue;
-                        memberMap.Data.IsOptional = !exportTypePropertyInfo.IsRequired;
+                    // Add memberMap
+                    if (i == propertyNames.Length - 1)
+                    {
+                        var memberMap = CreateMemberMap(currentType, propertyInfo, includedPropertyInfo.Name, ref columnIndex);
 
-                        memberMap.Data.Index = GetMaxIndex() + 1;
+                        currentClassMap.MemberMaps.Add(memberMap);
+                        currentClassMap = this;
+                    }
+                    // Working with nested properties - create or get References
+                    else
+                    {
+                        var referenceMap = currentClassMap.ReferenceMaps.Find(propertyInfo);
+                        currentType = propertyInfo.PropertyType;
 
-                        MemberMaps.Add(memberMap);
+                        if (referenceMap == null)
+                        {
+                            var referenceClassMapType = typeof(EmptyClassMapImpl<>).MakeGenericType(new[] { currentType });
+
+                            referenceMap = new MemberReferenceMap(propertyInfo, (ClassMap)Activator.CreateInstance(referenceClassMapType));
+                            currentClassMap.ReferenceMaps.Add(referenceMap);
+                        }
+
+                        currentClassMap = referenceMap.Data.Mapping;
                     }
                 }
             }
         }
+
+        private static bool IsEnumerableEntityProperty(PropertyInfo propertyInfo)
+        {
+            var type = propertyInfo.PropertyType;
+            return type.GetInterfaces().Any(x => x.IsGenericType && x.GetGenericTypeDefinition() == typeof(IEnumerable<>))
+                && type.GetGenericArguments().Any(x => x.IsSubclassOf(typeof(Entity)));
+        }
+
+        private static MemberMap CreateMemberMap(Type currentType, PropertyInfo propertyInfo, string columnName, ref int columnIndex)
+        {
+            var memberMap = MemberMap.CreateGeneric(currentType, propertyInfo);
+
+            memberMap.Data.TypeConverterOptions.CultureInfo = CultureInfo.InvariantCulture;
+            memberMap.Data.TypeConverterOptions.NumberStyle = NumberStyles.Any;
+            memberMap.Data.TypeConverterOptions.BooleanTrueValues.AddRange(new List<string>() { "yes", "true" });
+            memberMap.Data.TypeConverterOptions.BooleanFalseValues.AddRange(new List<string>() { "false", "no" });
+            memberMap.Data.Names.Add(columnName);
+            memberMap.Data.NameIndex = memberMap.Data.Names.Count - 1;
+            memberMap.Data.Index = ++columnIndex;
+
+            return memberMap;
+        }
     }
+
+    public class EmptyClassMapImpl<T> : ClassMap<T> { }
 }
