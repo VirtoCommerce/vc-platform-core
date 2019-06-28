@@ -1,16 +1,15 @@
-﻿angular.module('platformWebApp')
-.controller('platformWebApp.entitySettingListController', ['$scope', 'platformWebApp.settings.helper', 'platformWebApp.bladeNavigationService', function ($scope, settingsHelper, bladeNavigationService) {
+﻿angular.module('platformWebApp').controller('platformWebApp.entitySettingListController', ['$scope', 'platformWebApp.settings.helper', 'platformWebApp.bladeNavigationService', function ($scope, settingsHelper, bladeNavigationService) {
     var blade = $scope.blade;
-    // blade.updatePermission = // Use predefined (parent) permission
     blade.title = 'platform.blades.entitySetting-list.title';
 
-    function initializeBlade(results) {
-        blade.data = results;
-        results = angular.copy(results);
+    function refresh(settings) {
+        blade.data = settings;
+        settings = angular.copy(settings);
+        initializeBlade(settings);
+    }
 
-        // settingsHelper.fixValues(results);
-        
-        _.each(results, function (setting) {
+    function initializeBlade(settings) {
+        _.each(settings, function (setting) {
             // set group names to show.
             if (setting.groupName) {
                 var paths = setting.groupName.split('|');
@@ -18,20 +17,21 @@
             }
 
             // transform to va-generic-value-input suitable structure
-            setting.isDictionary = _.any(setting.allowedValues);
+            if (setting.value == undefined && setting.defaultValue) {
+                setting.value = setting.defaultValue;
+            }
             setting.values = setting.isDictionary ? [{ value: { id: setting.value, name: setting.value } }] : [{ id: setting.value, value: setting.value }];
             if (setting.allowedValues) {
                 setting.allowedValues = _.map(setting.allowedValues, function (x) {
-                    return { id: x, name: x };
+                    return { value: x };
                 });
             }
         });
 
-
-        results = _.groupBy(results, 'groupName');
-        blade.groupNames = _.keys(results);
-        blade.currentEntities = angular.copy(results);
-        blade.origEntity = results;
+        settings = _.groupBy(settings, 'groupName');
+        blade.groupNames = _.keys(settings);
+        blade.currentEntities = angular.copy(settings);
+        blade.origEntity = settings;
         blade.isLoading = false;
     }
 
@@ -45,6 +45,9 @@
         bladeNavigationService.showBlade(newBlade, blade);
     }
 
+    var formScope;
+    $scope.setForm = function (form) { formScope = form; }
+
     function isDirty() {
         return !angular.equals(blade.currentEntities, blade.origEntity) && blade.hasUpdatePermission();
     }
@@ -53,9 +56,6 @@
         return isDirty() && formScope && formScope.$valid;
     }
 
-    var formScope;
-    $scope.setForm = function (form) { formScope = form; }
-
     $scope.cancelChanges = function () {
         angular.copy(blade.origEntity, blade.currentEntities);
         $scope.bladeClose();
@@ -63,19 +63,14 @@
 
     $scope.saveChanges = function () {
         if (!blade.hasUpdatePermission()) return;
-
         blade.isLoading = true;
+
         var objects = _.flatten(_.map(blade.currentEntities, _.values));
         objects = _.map(objects, function (x) {
             x.value = x.isDictionary ? x.values[0].value.id : x.values[0].value;
-            x.values = undefined;
-            x.allowedValues = _.pluck(x.allowedValues, 'id');
             return x;
         });
 
-        //settingsHelper.toApiFormat(objects);
-        
-        //console.log('saveChanges3: ' + angular.toJson(objects, true));
         angular.copy(objects, blade.data);
         angular.copy(blade.currentEntities, blade.origEntity);
         $scope.bladeClose();
@@ -103,5 +98,5 @@
     };
 
     // actions on load
-    $scope.$watch('blade.parentBlade.currentEntity.settings', initializeBlade);
+    $scope.$watch('blade.parentBlade.currentEntity.settings', refresh);
 }]);
