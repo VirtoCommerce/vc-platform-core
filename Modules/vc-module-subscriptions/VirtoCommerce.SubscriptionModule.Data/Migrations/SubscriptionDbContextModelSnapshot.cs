@@ -40,6 +40,9 @@ namespace VirtoCommerce.SubscriptionModule.Data.Migrations
 
                     b.Property<DateTime?>("ModifiedDate");
 
+                    b.Property<string>("OuterId")
+                        .HasMaxLength(128);
+
                     b.Property<string>("ProductId")
                         .HasMaxLength(128);
 
@@ -103,7 +106,7 @@ namespace VirtoCommerce.SubscriptionModule.Data.Migrations
                         .HasMaxLength(64);
 
                     b.Property<string>("OuterId")
-                        .HasMaxLength(256);
+                        .HasMaxLength(128);
 
                     b.Property<DateTime?>("StartDate");
 

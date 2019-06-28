@@ -46,6 +46,9 @@ namespace VirtoCommerce.ContentModule.Data.Migrations
 
                     b.Property<DateTime?>("ModifiedDate");
 
+                    b.Property<string>("OuterId")
+                        .HasMaxLength(128);
+
                     b.Property<int>("Priority");
 
                     b.Property<string>("Title")
@@ -83,6 +86,9 @@ namespace VirtoCommerce.ContentModule.Data.Migrations
 
                     b.Property<string>("Name")
                         .IsRequired();
+
+                    b.Property<string>("OuterId")
+                        .HasMaxLength(128);
 
                     b.Property<string>("StoreId")
                         .IsRequired();

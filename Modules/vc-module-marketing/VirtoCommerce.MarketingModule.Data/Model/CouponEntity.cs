@@ -6,7 +6,7 @@ using VirtoCommerce.Platform.Core.Common;
 
 namespace VirtoCommerce.MarketingModule.Data.Model
 {
-    public class CouponEntity : AuditableEntity
+    public class CouponEntity : AuditableEntity, IHasOuterId
     {
         public CouponEntity()
         {
@@ -24,6 +24,9 @@ namespace VirtoCommerce.MarketingModule.Data.Model
         [NotMapped]
         public long TotalUsesCount { get; set; }
 
+        [StringLength(128)]
+        public string OuterId { get; set; }
+
         #region Navigation Properties
         public string PromotionId { get; set; }
         public virtual PromotionEntity Promotion { get; set; }
@@ -38,11 +41,13 @@ namespace VirtoCommerce.MarketingModule.Data.Model
             coupon.Code = Code;
             coupon.CreatedBy = CreatedBy;
             coupon.CreatedDate = CreatedDate;
+            coupon.ModifiedBy = ModifiedBy;
+            coupon.ModifiedDate = ModifiedDate;
+            coupon.OuterId = OuterId;
+
             coupon.ExpirationDate = ExpirationDate;
             coupon.Id = Id;
             coupon.MaxUsesNumber = MaxUsesNumber;
-            coupon.ModifiedBy = ModifiedBy;
-            coupon.ModifiedDate = ModifiedDate;
             coupon.MaxUsesNumber = MaxUsesNumber;
             coupon.PromotionId = PromotionId;
             coupon.TotalUsesCount = TotalUsesCount;
@@ -61,12 +66,14 @@ namespace VirtoCommerce.MarketingModule.Data.Model
             Code = coupon.Code;
             CreatedBy = coupon.CreatedBy;
             CreatedDate = coupon.CreatedDate;
+            ModifiedBy = coupon.ModifiedBy;
+            ModifiedDate = coupon.ModifiedDate;
+            OuterId = coupon.OuterId;
+
             ExpirationDate = coupon.ExpirationDate;
             Id = coupon.Id;
             MaxUsesNumber = coupon.MaxUsesNumber;
             MaxUsesPerUser = coupon.MaxUsesPerUser;
-            ModifiedBy = coupon.ModifiedBy;
-            ModifiedDate = coupon.ModifiedDate;
             MaxUsesNumber = coupon.MaxUsesNumber;
             PromotionId = coupon.PromotionId;
             TotalUsesCount = coupon.TotalUsesCount;

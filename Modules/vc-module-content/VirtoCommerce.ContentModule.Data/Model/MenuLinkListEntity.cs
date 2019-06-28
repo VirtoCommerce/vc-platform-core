@@ -7,7 +7,7 @@ using VirtoCommerce.Platform.Core.Common;
 
 namespace VirtoCommerce.ContentModule.Data.Model
 {
-    public class MenuLinkListEntity : AuditableEntity
+    public class MenuLinkListEntity : AuditableEntity, IHasOuterId
     {
         [Required]
         public string Name { get; set; }
@@ -15,6 +15,9 @@ namespace VirtoCommerce.ContentModule.Data.Model
         public string StoreId { get; set; }
 
         public string Language { get; set; }
+        [StringLength(128)]
+        public string OuterId { get; set; }
+
         public virtual ObservableCollection<MenuLinkEntity> MenuLinks { get; set; } = new ObservableCollection<MenuLinkEntity>();
 
         public void Patch(MenuLinkListEntity target)
@@ -32,6 +35,8 @@ namespace VirtoCommerce.ContentModule.Data.Model
         public MenuLinkList ToModel(MenuLinkList menuLinkList)
         {
             menuLinkList.Id = Id;
+            menuLinkList.OuterId = OuterId;
+
             menuLinkList.Name = Name;
             menuLinkList.StoreId = StoreId;
             menuLinkList.Language = Language;
@@ -52,6 +57,8 @@ namespace VirtoCommerce.ContentModule.Data.Model
             pkMap.AddPair(menuLinkList, this);
 
             Id = menuLinkList.Id;
+            OuterId = menuLinkList.OuterId;
+
             StoreId = menuLinkList.StoreId;
             Name = menuLinkList.Name;
             Language = menuLinkList.Language;

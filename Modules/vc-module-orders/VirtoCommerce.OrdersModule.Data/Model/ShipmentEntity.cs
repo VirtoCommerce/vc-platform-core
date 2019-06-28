@@ -93,6 +93,7 @@ namespace VirtoCommerce.OrdersModule.Data.Model
             shipment.CreatedBy = CreatedBy;
             shipment.ModifiedDate = ModifiedDate;
             shipment.ModifiedBy = ModifiedBy;
+            shipment.OuterId = OuterId;
 
             shipment.Price = Price;
             shipment.PriceWithTax = PriceWithTax;
@@ -138,7 +139,7 @@ namespace VirtoCommerce.OrdersModule.Data.Model
             var shipment = operation as Shipment;
             if (shipment == null)
                 throw new ArgumentException(@"operation argument must be of type Shipment", nameof(operation));
-            
+
             base.FromModel(shipment, pkMap);
 
             Id = shipment.Id;

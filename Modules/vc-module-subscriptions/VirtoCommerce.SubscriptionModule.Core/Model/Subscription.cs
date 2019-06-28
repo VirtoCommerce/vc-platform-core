@@ -1,8 +1,5 @@
 using System;
 using System.Collections.Generic;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
 using VirtoCommerce.CoreModule.Core.Common;
 using VirtoCommerce.OrdersModule.Core.Model;
 using VirtoCommerce.Platform.Core.ChangeLog;
@@ -10,7 +7,7 @@ using VirtoCommerce.Platform.Core.Common;
 
 namespace VirtoCommerce.SubscriptionModule.Core.Model
 {
-    public class Subscription : AuditableEntity, IHasChangesHistory, ISupportCancellation
+    public class Subscription : AuditableEntity, IHasChangesHistory, ISupportCancellation, IHasOuterId
     {
         public string StoreId { get; set; }
 

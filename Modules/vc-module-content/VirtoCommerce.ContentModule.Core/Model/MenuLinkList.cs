@@ -21,5 +21,6 @@ namespace VirtoCommerce.ContentModule.Core.Model
         public ICollection<MenuLink> MenuLinks { get; set; }
 
         public string[] SecurityScopes { get; set; }
+        public string OuterId { get; set; }
     }
 }

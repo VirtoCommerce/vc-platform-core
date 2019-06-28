@@ -5,7 +5,7 @@ using VirtoCommerce.Platform.Core.DynamicProperties;
 
 namespace VirtoCommerce.CustomerModule.Core.Model
 {
-    public abstract class Member : AuditableEntity, IHasDynamicProperties, ISeoSupport
+    public abstract class Member : AuditableEntity, IHasDynamicProperties, ISeoSupport, IHasOuterId
     {
         protected Member()
         {
@@ -14,6 +14,8 @@ namespace VirtoCommerce.CustomerModule.Core.Model
 
         public string Name { get; set; }
         public string MemberType { get; set; }
+        public string OuterId { get; set; }
+
         public IList<Address> Addresses { get; set; }
         public IList<string> Phones { get; set; }
         public IList<string> Emails { get; set; }

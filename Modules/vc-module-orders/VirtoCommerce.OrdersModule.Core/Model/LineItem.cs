@@ -4,9 +4,11 @@ using VirtoCommerce.CoreModule.Core.Common;
 using VirtoCommerce.CoreModule.Core.Tax;
 using VirtoCommerce.Platform.Core.Common;
 using VirtoCommerce.Platform.Core.DynamicProperties;
+using VirtoCommerce.Platform.Core.Swagger;
 
 namespace VirtoCommerce.OrdersModule.Core.Model
 {
+    [SwaggerSchemaId("OrderLineItem")]
     public class LineItem : AuditableEntity, IHasTaxDetalization, ISupportCancellation, IHasDimension, IHasDynamicProperties, ITaxable, IHasDiscounts
     {
         /// <summary>
@@ -85,6 +87,8 @@ namespace VirtoCommerce.OrdersModule.Core.Model
         public string FulfillmentLocationCode { get; set; }
         public string FulfillmentCenterId { get; set; }
         public string FulfillmentCenterName { get; set; }
+
+        public string OuterId { get; set; }
 
 
         #region IHaveDimension Members

@@ -41,13 +41,14 @@ namespace VirtoCommerce.MarketingModule.Data.Model
             item.Id = Id;
             item.CreatedBy = CreatedBy;
             item.CreatedDate = CreatedDate;
-            item.Description = Description;
             item.ModifiedBy = ModifiedBy;
             item.ModifiedDate = ModifiedDate;
+
             item.Name = Name;
             item.FolderId = FolderId;
             item.ImageUrl = ImageUrl;
             item.ContentType = ContentTypeId;
+            item.Description = Description;
 
             if (Folder != null)
             {
@@ -66,13 +67,14 @@ namespace VirtoCommerce.MarketingModule.Data.Model
             Id = item.Id;
             CreatedBy = item.CreatedBy;
             CreatedDate = item.CreatedDate;
-            Description = item.Description;
             ModifiedBy = item.ModifiedBy;
             ModifiedDate = item.ModifiedDate;
+
             Name = item.Name;
             FolderId = item.FolderId;
             ImageUrl = item.ImageUrl;
             ContentTypeId = item.ContentType;
+            Description = item.Description;
 
             if (item.DynamicProperties != null)
             {

@@ -5,10 +5,11 @@ using VirtoCommerce.Platform.Core.Common;
 
 namespace VirtoCommerce.CatalogModule.Core.Model
 {
-    public class Catalog : AuditableEntity, IHasProperties, ICloneable
+    public class Catalog : AuditableEntity, IHasProperties, ICloneable, IHasOuterId
     {
         public string Name { get; set; }
         public bool IsVirtual { get; set; }
+        public string OuterId { get; set; }
         public CatalogLanguage DefaultLanguage
         {
             get
