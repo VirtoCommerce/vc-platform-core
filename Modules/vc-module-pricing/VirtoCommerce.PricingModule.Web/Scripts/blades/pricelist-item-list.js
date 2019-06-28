@@ -2,6 +2,9 @@ angular.module('virtoCommerce.pricingModule')
 .controller('virtoCommerce.pricingModule.pricelistItemListController', ['$scope', 'virtoCommerce.pricingModule.prices', '$filter', 'platformWebApp.bladeNavigationService', 'uiGridConstants', 'platformWebApp.uiGridHelper', 'platformWebApp.bladeUtils', 'platformWebApp.dialogService', function ($scope, prices, $filter, bladeNavigationService, uiGridConstants, uiGridHelper, bladeUtils, dialogService) {
     $scope.uiGridConstants = uiGridConstants;
     var blade = $scope.blade;
+    var dataQuery = {
+        exportTypeName: "Price"
+    };
 
     blade.refresh = function () {
         blade.isLoading = true;
@@ -62,17 +65,17 @@ angular.module('virtoCommerce.pricingModule')
 
         newBlade.options = {
             checkItemFn: function (listItem, isSelected) {
-                if (listItem.type == 'category') {
+                if (listItem.type === 'category') {
                     newBlade.error = 'Categories are not supported';
                     listItem.selected = undefined;
                 } else {
                     if (isSelected) {
-                        if (_.all(selectedProducts, function (x) { return x.id != listItem.id; })) {
+                        if (_.all(selectedProducts, function (x) { return x.id !== listItem.id; })) {
                             selectedProducts.push(listItem);
                         }
                     }
                     else {
-                        selectedProducts = _.reject(selectedProducts, function (x) { return x.id == listItem.id; });
+                        selectedProducts = _.reject(selectedProducts, function (x) { return x.id === listItem.id; });
                     }
                     newBlade.error = undefined;
                 }
@@ -92,7 +95,7 @@ angular.module('virtoCommerce.pricingModule')
         }, function (data) {
             var newItems = _.filter(products, function (product) {
                 return _.all(data.results, function (x) {
-                    return x.productId != product.id;
+                    return x.productId !== product.id;
                 })
             });
 
@@ -162,19 +165,8 @@ angular.module('virtoCommerce.pricingModule')
                 return true;
             },
             executeMethod: function () {
-                var selectedRows = $scope.gridApi.selection.getSelectedRows();
-                if (selectedRows && selectedRows.length > 0) {
-                    var productIds = _.map(selectedRows, function (product) {
-                        return product.productId;
-                    });
-                }
 
-                var dataQuery = {
-                    exportTypeName: "Price",
-                    productIds: productIds || null,
-                    keyword: filter.keyword || null,
-                    pricelistIds : [blade.currentEntityId]
-                };
+                dataQuery = angular.extend(dataQuery, getSearchCriteria());
 
                 var newBlade = {
                     id: 'priceExport',
@@ -189,12 +181,28 @@ angular.module('virtoCommerce.pricingModule')
         }
     ];
 
+    function getSearchCriteria() {
+        var result = {};
+        var selectedRows = $scope.gridApi.selection.getSelectedRows();
+        if (selectedRows && selectedRows.length) {
+            var productIds = _.map(selectedRows, function (product) {
+                return product.productId;
+            });
+        }
+
+        result.productIds = productIds || null;
+        result.keyword = filter.keyword || null;
+        result.pricelistIds = [blade.currentEntityId];
+
+        return result;
+    }
+
     $scope.getPriceRange = function (priceGroup) {
         var retVal;
         var allPrices = _.union(_.pluck(priceGroup.prices, 'list'), _.pluck(priceGroup.prices, 'sale'));
         var minprice = $filter('currency')(_.min(allPrices), '', 2);
         var maxprice = $filter('currency')(_.max(allPrices), '', 2);
-        retVal = (minprice == maxprice ? minprice : minprice + '-' + maxprice);
+        retVal = (minprice === maxprice ? minprice : minprice + '-' + maxprice);
 
         //else {
         //    retVal = 'NO PRICE';

@@ -4,7 +4,6 @@ angular.module('virtoCommerce.exportModule')
             getProviders: { method: 'GET', isArray: true, url: 'api/export/providers'},
             getKnowntypes: { method: 'GET', isArray: true ,url: 'api/export/knowntypes' },
             runExport: {method: 'POST', url: 'api/export/run'},
-            download: { method: 'GET', url: '"download/{fileName}' },
             cancel: {method: 'POST', url: 'api/export/task/cancel'}
         });
     }]);

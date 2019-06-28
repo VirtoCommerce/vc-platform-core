@@ -9,7 +9,7 @@ angular.module('virtoCommerce.exportModule')
             blade.exportDataRequest.dataQuery = blade.dataQuery;
 
             exportApi.getKnowntypes(function (result) {
-                if (result && result.length > 0 && blade.exportDataRequest.dataQuery.exportTypeName) {
+                if (result && result.length && blade.exportDataRequest.dataQuery.exportTypeName) {
                     blade.knowntypes = result;
                     var type = _.find(blade.knowntypes, function (item) {
                         return item.typeName.endsWith('.' + blade.exportDataRequest.dataQuery.exportTypeName);
@@ -22,7 +22,7 @@ angular.module('virtoCommerce.exportModule')
             });
 
             exportApi.getProviders(function (result) {
-                if (result && result.length > 0) {
+                if (result && result.length) {
                     blade.providers =
                         _.map(result, function (item) { return { id: item.typeName, name: item.typeName } });
                     blade.exportDataRequest.providerName = blade.providers[0];
