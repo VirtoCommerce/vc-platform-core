@@ -1,4 +1,4 @@
-﻿angular.module('virtoCommerce.pricingModule')
+angular.module('virtoCommerce.pricingModule')
 .controller('virtoCommerce.pricingModule.pricelistItemListController', ['$scope', 'virtoCommerce.pricingModule.prices', '$filter', 'platformWebApp.bladeNavigationService', 'uiGridConstants', 'platformWebApp.uiGridHelper', 'platformWebApp.bladeUtils', 'platformWebApp.dialogService', function ($scope, prices, $filter, bladeNavigationService, uiGridConstants, uiGridHelper, bladeUtils, dialogService) {
     $scope.uiGridConstants = uiGridConstants;
     var blade = $scope.blade;
@@ -154,6 +154,38 @@
                 return $scope.gridApi && _.any($scope.gridApi.selection.getSelectedRows());
             },
             permission: blade.updatePermission
+        },
+        {
+            name: "platform.commands.export",
+            icon: 'fa fa-upload',
+            canExecuteMethod: function () {
+                return true;
+            },
+            executeMethod: function () {
+                var selectedRows = $scope.gridApi.selection.getSelectedRows();
+                if (selectedRows && selectedRows.length > 0) {
+                    var productIds = _.map(selectedRows, function (product) {
+                        return product.productId;
+                    });
+                }
+
+                var dataQuery = {
+                    exportTypeName: "Price",
+                    productIds: productIds || null,
+                    keyword: filter.keyword || null,
+                    pricelistIds : [blade.currentEntityId]
+                };
+
+                var newBlade = {
+                    id: 'priceExport',
+                    title: 'pricing.blades.exporter.title',
+                    subtitle: 'pricing.blades.exporter.subtitle',
+                    controller: 'virtoCommerce.exportModule.exporterController',
+                    template: 'Modules/$(VirtoCommerce.Export)/Scripts/blades/exportSetting.tml.html',
+                    dataQuery: dataQuery
+                };
+                bladeNavigationService.showBlade(newBlade, blade);
+            }
         }
     ];
 

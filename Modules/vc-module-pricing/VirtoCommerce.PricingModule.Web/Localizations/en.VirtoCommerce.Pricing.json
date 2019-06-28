@@ -128,7 +128,11 @@
                     "sale-price": "Sale price",
                     "min-quantity": "Min. quantity"
                 }
-            }
+            },
+            "exporter": {
+                "title": "Prices export",
+                "subtitle": "Export prices to json or csv"
+            } 
         },
         "widgets": {
             "assignments": {

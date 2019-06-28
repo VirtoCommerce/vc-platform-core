@@ -1,0 +1,70 @@
+<div class="blade-static __bottom">
+    <button class="btn" ng-click="startExport()" ng-disabled="blade.notification">
+        <span>{{ 'platform.blades.export-main.labels.start-export' | translate }}</span>
+    </button>
+</div>
+<div class="blade-content">
+    <div class="blade-inner">
+        <div class="inner-block">
+            <form class="form" name="exportForm" ng-if="!blade.notification">
+                <div class="column">
+                    <div class="form-group">
+                        <label class="form-label">{{ 'export.blades.export-settings.labels.template' | translate }}</label>
+                        <div class="form-input">
+                            <ui-select ng-model="blade.template" required>
+                                <ui-select-match placeholder="{{ 'stores.blades.store-detail.placeholders.state' | translate }}">{{$select.selected.name}}</ui-select-match>
+                                <ui-select-choices repeat="x in (blade.templates | filter: {name: $select.search})">
+                                    <span ng-bind-html="x.name | highlight: $select.search"></span>
+                                </ui-select-choices>
+                            </ui-select>
+                        </div>
+
+                        <label class="form-label">{{ 'export.blades.export-settings.labels.provider' | translate }}</label>
+                        <div class="form-input">
+                            <ui-select ng-model="blade.exportDataRequest.providerName" required>
+                                <ui-select-match placeholder="{{ 'stores.blades.store-detail.placeholders.state' | translate }}">{{$select.selected.name}}</ui-select-match>
+                                <ui-select-choices repeat="x in (blade.providers | filter: {name: $select.search})">
+                                    <span ng-bind-html="x.name | highlight: $select.search"></span>
+                                </ui-select-choices>
+                            </ui-select>
+                        </div>
+                    </div>
+                </div>
+            </form>
+            <div class="form" ng-if="blade.notification">
+                <div class="block">
+                    <div>
+                        <div class="sub-t">{{blade.notification.description}}</div>
+                        <div class="block" ng-if="blade.notification.created || blade.notification.finished">
+                            <p ng-if="blade.notification.created" ng-class="{'no-data': blade.notification.created}" class="text">{{ 'platform.blades.export-main.labels.start' | translate }} — <i class="fa fa-clock-o"></i>&nbsp;{{ blade.notification.created | amParse | date:'mediumTime' }}</p>
+                            <p ng-if="blade.notification.finished" ng-class="{'no-data': blade.notification.finished}" class="text">{{ 'platform.blades.export-main.labels.end' | translate }} — <i class="fa fa-clock-o"></i>&nbsp;{{ blade.notification.finished | amParse | date:'mediumTime' }}</p>
+                        </div>
+                        <div class="block" ng-if="blade.notification.totalCount || blade.notification.processedCount || blade.notification.errorCount">
+                            <ul class="list __info">
+                                <li class="list-item">
+                                    <div class="list-t">{{ 'export.blades.export-settings.labels.total' | translate }}</div>
+                                    <div class="list-descr">{{blade.notification.totalCount | number:0}}</div>
+                                </li>
+                                <li class="list-item">
+                                    <div class="list-t">{{ 'export.blades.export-settings.labels.processed' | translate }}</div>
+                                    <div class="list-descr">{{blade.notification.processedCount | number:0}}</div>
+                                </li>
+                                <li class="list-item">
+                                    <div class="list-t">{{ 'export.blades.export-settings.labels.errors-count' | translate }}</div>
+                                    <div class="list-descr">{{blade.notification.errorCount | number:0}}</div>
+                                </li>
+                            </ul>
+                        </div>
+                        <div ng-if="blade.notification.errorCount > 0">
+                            <span class="sub-t">{{ 'platform.blades.export-main.labels.errors' | translate }}</span>
+                            <div class="log">
+                                <p ng-repeat="error in blade.notification.errors track by $index" class="error">{{error}}</p>
+                            </div>
+                        </div>
+                        <p class="text" ng-if="blade.notification.downloadUrl">{{ 'platform.blades.export-main.labels.download-url' | translate }}: <a href="{{blade.notification.downloadUrl}}" target="_blank">{{blade.notification.downloadUrl}}</a></p>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
