@@ -2,7 +2,6 @@ using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Threading.Tasks;
-using Microsoft.Extensions.Caching.Memory;
 using Moq;
 using VirtoCommerce.Platform.Core.Caching;
 using VirtoCommerce.Platform.Core.Common;
@@ -70,16 +69,17 @@ namespace VirtoCommerce.Platform.Tests.UnitTests
             Assert.Null(result.First().ModifiedDate);
         }
 
-        [Fact]
-        public async Task SaveDictionaryItemsAsync_SaveDictionaryItem()
-        {
-            //Arrange
-            var name = "Some item";
-            var properties = new List<DynamicPropertyDictionaryItem>() { new DynamicPropertyDictionaryItem() { Name = name, } };
+        //TODO remove to separate UnitTests
+        //[Fact]
+        //public async Task SaveDictionaryItemsAsync_SaveDictionaryItem()
+        //{
+        //    //Arrange
+        //    var name = "Some item";
+        //    var properties = new List<DynamicPropertyDictionaryItem>() { new DynamicPropertyDictionaryItem() { Name = name, } };
 
-            //Act
-            await _dynamicPropertyService.SaveDictionaryItemsAsync(properties.ToArray());
-        }
+        //    //Act
+        //    await _dynamicPropertyService.SaveDictionaryItemsAsync(properties.ToArray());
+        //}
     }
 
     public class SomeClass : Entity, IHasDynamicProperties

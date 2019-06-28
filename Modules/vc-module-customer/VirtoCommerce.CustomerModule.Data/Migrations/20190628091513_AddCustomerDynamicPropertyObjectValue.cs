@@ -1,14 +1,14 @@
 ﻿using System;
 using Microsoft.EntityFrameworkCore.Migrations;
 
-namespace VirtoCommerce.StoreModule.Data.Migrations
+namespace VirtoCommerce.CustomerModule.Data.Migrations
 {
-    public partial class AddStoreDynamicProperty : Migration
+    public partial class AddCustomerDynamicPropertyObjectValue : Migration
     {
         protected override void Up(MigrationBuilder migrationBuilder)
         {
             migrationBuilder.CreateTable(
-                name: "StoreDynamicPropertyObjectValue",
+                name: "MemberDynamicPropertyObjectValue",
                 columns: table => new
                 {
                     Id = table.Column<string>(maxLength: 128, nullable: false),
@@ -26,35 +26,36 @@ namespace VirtoCommerce.StoreModule.Data.Migrations
                     IntegerValue = table.Column<int>(nullable: true),
                     BooleanValue = table.Column<bool>(nullable: true),
                     DateTimeValue = table.Column<DateTime>(nullable: true),
-                    PropertyId = table.Column<string>(nullable: true),
-                    DictionaryItemId = table.Column<string>(nullable: true)
+                    PropertyId = table.Column<string>(maxLength: 128, nullable: true),
+                    DictionaryItemId = table.Column<string>(maxLength: 128, nullable: true),
+                    PropertyName = table.Column<string>(maxLength: 256, nullable: true)
                 },
                 constraints: table =>
                 {
-                    table.PrimaryKey("PK_StoreDynamicPropertyObjectValue", x => x.Id);
+                    table.PrimaryKey("PK_MemberDynamicPropertyObjectValue", x => x.Id);
                     table.ForeignKey(
-                        name: "FK_StoreDynamicPropertyObjectValue_Store_ObjectId",
+                        name: "FK_MemberDynamicPropertyObjectValue_Member_ObjectId",
                         column: x => x.ObjectId,
-                        principalTable: "Store",
+                        principalTable: "Member",
                         principalColumn: "Id",
                         onDelete: ReferentialAction.Cascade);
                 });
 
             migrationBuilder.CreateIndex(
-                name: "IX_StoreDynamicPropertyObjectValue_ObjectId",
-                table: "StoreDynamicPropertyObjectValue",
+                name: "IX_MemberDynamicPropertyObjectValue_ObjectId",
+                table: "MemberDynamicPropertyObjectValue",
                 column: "ObjectId");
 
             migrationBuilder.CreateIndex(
                 name: "IX_ObjectType_ObjectId",
-                table: "StoreDynamicPropertyObjectValue",
+                table: "MemberDynamicPropertyObjectValue",
                 columns: new[] { "ObjectType", "ObjectId" });
         }
 
         protected override void Down(MigrationBuilder migrationBuilder)
         {
             migrationBuilder.DropTable(
-                name: "StoreDynamicPropertyObjectValue");
+                name: "MemberDynamicPropertyObjectValue");
         }
     }
 }

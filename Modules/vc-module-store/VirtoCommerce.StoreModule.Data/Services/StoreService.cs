@@ -70,8 +70,6 @@ namespace VirtoCommerce.StoreModule.Data.Services
                     }
                 }
 
-                //await _dynamicPropertyMetaInfoService.ResolveMetaInfoAsync(result.OfType<IHasDynamicProperties>().ToArray());
-
                 return stores.ToArray();
             });
         }

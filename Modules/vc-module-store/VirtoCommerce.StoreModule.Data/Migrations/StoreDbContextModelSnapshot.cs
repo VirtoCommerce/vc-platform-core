@@ -3,7 +3,6 @@ using System;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.Infrastructure;
 using Microsoft.EntityFrameworkCore.Metadata;
-using Microsoft.EntityFrameworkCore.Storage.ValueConversion;
 using VirtoCommerce.StoreModule.Data.Repositories;
 
 namespace VirtoCommerce.StoreModule.Data.Migrations
@@ -53,9 +52,6 @@ namespace VirtoCommerce.StoreModule.Data.Migrations
 
                     b.Property<DateTime?>("ModifiedDate");
 
-                    b.Property<string>("OuterId")
-                        .HasMaxLength(128);
-
                     b.Property<string>("StoreId")
                         .HasMaxLength(128);
 
@@ -87,63 +83,6 @@ namespace VirtoCommerce.StoreModule.Data.Migrations
                     b.HasIndex("StoreId");
 
                     b.ToTable("StoreCurrency");
-                });
-
-            modelBuilder.Entity("VirtoCommerce.StoreModule.Data.Model.StoreDynamicPropertyObjectValueEntity", b =>
-                {
-                    b.Property<string>("Id")
-                        .ValueGeneratedOnAdd()
-                        .HasMaxLength(128);
-
-                    b.Property<bool?>("BooleanValue");
-
-                    b.Property<string>("CreatedBy")
-                        .HasMaxLength(64);
-
-                    b.Property<DateTime>("CreatedDate");
-
-                    b.Property<DateTime?>("DateTimeValue");
-
-                    b.Property<decimal?>("DecimalValue")
-                        .HasColumnType("decimal(18,5)");
-
-                    b.Property<string>("DictionaryItemId");
-
-                    b.Property<int?>("IntegerValue");
-
-                    b.Property<string>("Locale")
-                        .HasMaxLength(64);
-
-                    b.Property<string>("LongTextValue");
-
-                    b.Property<string>("ModifiedBy")
-                        .HasMaxLength(64);
-
-                    b.Property<DateTime?>("ModifiedDate");
-
-                    b.Property<string>("ObjectId")
-                        .HasMaxLength(128);
-
-                    b.Property<string>("ObjectType")
-                        .HasMaxLength(256);
-
-                    b.Property<string>("PropertyId");
-
-                    b.Property<string>("ShortTextValue")
-                        .HasMaxLength(512);
-
-                    b.Property<string>("ValueType")
-                        .IsRequired()
-                        .HasMaxLength(64);
-
-                    b.HasKey("Id");
-
-                    b.HasIndex("ObjectId");
-
-                    b.HasIndex("ObjectType", "ObjectId")
-                        .HasName("IX_ObjectType_ObjectId");
-
-                    b.ToTable("StoreDynamicPropertyObjectValue");
                 });
 
             modelBuilder.Entity("VirtoCommerce.StoreModule.Data.Model.StoreEntity", b =>
@@ -301,14 +240,6 @@ namespace VirtoCommerce.StoreModule.Data.Migrations
                     b.HasOne("VirtoCommerce.StoreModule.Data.Model.StoreEntity", "Store")
                         .WithMany("Currencies")
                         .HasForeignKey("StoreId")
-                        .OnDelete(DeleteBehavior.Cascade);
-                });
-
-            modelBuilder.Entity("VirtoCommerce.StoreModule.Data.Model.StoreDynamicPropertyObjectValueEntity", b =>
-                {
-                    b.HasOne("VirtoCommerce.StoreModule.Data.Model.StoreEntity", "Store")
-                        .WithMany("DynamicPropertyObjectValues")
-                        .HasForeignKey("ObjectId")
                         .OnDelete(DeleteBehavior.Cascade);
                 });
 

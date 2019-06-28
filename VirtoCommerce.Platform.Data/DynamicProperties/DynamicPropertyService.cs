@@ -138,13 +138,13 @@ namespace VirtoCommerce.Platform.Data.DynamicProperties
         //TODO remove
         public virtual Task SaveDynamicPropertyValuesAsync(IHasDynamicProperties owner)
         {
-            throw new NotImplementedException();
+            return Task.CompletedTask;
         }
 
         //TODO remove
         public virtual Task DeleteDynamicPropertyValuesAsync(IHasDynamicProperties owner)
         {
-            throw new NotImplementedException();
+            return Task.CompletedTask;
         }
 
         #endregion

@@ -149,7 +149,8 @@ namespace VirtoCommerce.CustomerModule.Data.Migrations
                     b.Property<decimal?>("DecimalValue")
                         .HasColumnType("decimal(18,5)");
 
-                    b.Property<string>("DictionaryItemId");
+                    b.Property<string>("DictionaryItemId")
+                        .HasMaxLength(128);
 
                     b.Property<int?>("IntegerValue");
 
@@ -169,7 +170,11 @@ namespace VirtoCommerce.CustomerModule.Data.Migrations
                     b.Property<string>("ObjectType")
                         .HasMaxLength(256);
 
-                    b.Property<string>("PropertyId");
+                    b.Property<string>("PropertyId")
+                        .HasMaxLength(128);
+
+                    b.Property<string>("PropertyName")
+                        .HasMaxLength(256);
 
                     b.Property<string>("ShortTextValue")
                         .HasMaxLength(512);

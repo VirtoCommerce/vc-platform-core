@@ -125,10 +125,11 @@ namespace VirtoCommerce.StoreModule.Data.Model
             store.ReturnsFulfillmentCenterIds = FulfillmentCenters.Where(x => x.Type == FulfillmentCenterType.Returns).Select(x => x.FulfillmentCenterId).ToList();
             store.SeoInfos = SeoInfos.Select(x => x.ToModel(AbstractTypeFactory<SeoInfo>.TryCreateInstance())).ToList();
 
-            store.DynamicProperties = DynamicPropertyObjectValues.GroupBy(x => x.PropertyId).Select(x =>
+            store.DynamicProperties = DynamicPropertyObjectValues.GroupBy(g => g.PropertyId).Select(x =>
             {
                 var property = AbstractTypeFactory<DynamicObjectProperty>.TryCreateInstance();
                 property.Id = x.Key;
+                property.Name = x.FirstOrDefault()?.PropertyName;
                 property.Values = x.Select(v => v.ToModel(AbstractTypeFactory<DynamicPropertyObjectValue>.TryCreateInstance())).ToArray();
                 return property;
             }).ToArray();

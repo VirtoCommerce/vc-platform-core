@@ -28,8 +28,13 @@ namespace VirtoCommerce.Platform.Data.Model
         public int? IntegerValue { get; set; }
         public bool? BooleanValue { get; set; }
         public DateTime? DateTimeValue { get; set; }
+
+        [StringLength(128)]
         public string PropertyId { get; set; }
+        [StringLength(128)]
         public string DictionaryItemId { get; set; }
+        [StringLength(256)]
+        public string PropertyName { get; set; }
 
         public virtual DynamicPropertyObjectValue ToModel(DynamicPropertyObjectValue propValue)
         {
@@ -43,6 +48,7 @@ namespace VirtoCommerce.Platform.Data.Model
             propValue.ObjectType = ObjectType;
             propValue.ValueType = EnumUtility.SafeParse(ValueType, DynamicPropertyValueType.LongText);
             propValue.PropertyId = PropertyId;
+            propValue.PropertyName = PropertyName;
 
             if (!string.IsNullOrEmpty(DictionaryItemId))
             {
@@ -68,6 +74,7 @@ namespace VirtoCommerce.Platform.Data.Model
             var dynamicPropertyValueType = propValue.ValueType == DynamicPropertyValueType.Undefined ? dynamicProperty.ValueType : propValue.ValueType;
             ValueType = dynamicPropertyValueType.ToString();
             PropertyId = propValue.PropertyId ?? dynamicProperty.Id;
+            PropertyName = propValue.PropertyName ?? dynamicProperty.Name;
             DictionaryItemId = propValue.ValueId;
 
             var dictItem = propValue.Value as DynamicPropertyDictionaryItem;
