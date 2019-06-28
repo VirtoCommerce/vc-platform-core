@@ -1,5 +1,4 @@
 using System;
-using System.Linq;
 using System.Net;
 using System.Net.Mail;
 using System.Threading.Tasks;
@@ -31,7 +30,7 @@ namespace VirtoCommerce.NotificationsModule.Smtp
 
             try
             {
-                using (MailMessage mailMsg = new MailMessage())
+                using (var mailMsg = new MailMessage())
                 {
                     mailMsg.From = new MailAddress(emailNotificationMessage.From);
                     mailMsg.To.Add(new MailAddress(emailNotificationMessage.To));
@@ -72,13 +71,8 @@ namespace VirtoCommerce.NotificationsModule.Smtp
             }
             catch (SmtpException ex)
             {
-                throw new SentNotificationException(ex.Message, ex);
+                throw new SentNotificationException(ex);
             }
-            catch (InvalidOperationException ex)
-            {
-                throw new SentNotificationException(ex.Message, ex);
-            }
-
         }
 
         private SmtpClient CreateClient()

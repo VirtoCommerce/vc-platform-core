@@ -11,6 +11,7 @@ angular.module('virtoCommerce.notificationsModule')
 			titleValues: { id: blade.currentEntity.id },
 			objectId: objectId,
 			objectTypeId: objectTypeId,
+			notificationType: blade.currentEntity.type,
 			languages: blade.currentEntity.languages,
             subtitle: 'notifications.widgets.notificationsLogWidget.blade-subtitle',
             controller: 'virtoCommerce.notificationsModule.notificationsJournalController',
