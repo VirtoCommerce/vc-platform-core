@@ -25,7 +25,6 @@ namespace VirtoCommerce.OrdersModule.Core.Model
         public string CustomerName { get; set; }
 
         public DateTime? IncomingDate { get; set; }
-        public string OuterId { get; set; }
         public Address BillingAddress { get; set; }
 
         public PaymentStatus PaymentStatus { get; set; }

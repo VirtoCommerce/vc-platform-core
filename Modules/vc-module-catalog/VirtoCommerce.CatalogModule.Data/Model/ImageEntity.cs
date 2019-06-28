@@ -5,7 +5,7 @@ using VirtoCommerce.Platform.Core.Common;
 
 namespace VirtoCommerce.CatalogModule.Data.Model
 {
-    public class ImageEntity : AuditableEntity
+    public class ImageEntity : AuditableEntity, IHasOuterId
     {
         [StringLength(2083)]
         [Required]
@@ -20,6 +20,9 @@ namespace VirtoCommerce.CatalogModule.Data.Model
         [StringLength(64)]
         public string Group { get; set; }
         public int SortOrder { get; set; }
+
+        [StringLength(128)]
+        public string OuterId { get; set; }
 
         #region Navigation Properties
 
@@ -41,6 +44,7 @@ namespace VirtoCommerce.CatalogModule.Data.Model
             image.CreatedDate = CreatedDate;
             image.ModifiedBy = ModifiedBy;
             image.ModifiedDate = ModifiedDate;
+            image.OuterId = OuterId;
 
             image.Group = Group;
             image.LanguageCode = LanguageCode;
@@ -64,6 +68,7 @@ namespace VirtoCommerce.CatalogModule.Data.Model
             CreatedDate = image.CreatedDate;
             ModifiedBy = image.ModifiedBy;
             ModifiedDate = image.ModifiedDate;
+            OuterId = image.OuterId;
 
             Group = image.Group;
             LanguageCode = image.LanguageCode;

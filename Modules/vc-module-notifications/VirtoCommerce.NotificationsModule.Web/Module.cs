@@ -51,13 +51,22 @@ namespace VirtoCommerce.NotificationsModule.Web
             serviceCollection.AddSingleton<INotificationSender, NotificationSender>();
             serviceCollection.AddSingleton<INotificationTemplateRenderer, LiquidTemplateRenderer>();
             serviceCollection.AddSingleton<INotificationMessageSenderProviderFactory, NotificationMessageSenderProviderFactory>();
-            serviceCollection.AddTransient<INotificationMessageSender, SmtpEmailNotificationMessageSender>();
-            serviceCollection.AddTransient<INotificationMessageSender, SendGridEmailNotificationMessageSender>();
             serviceCollection.AddTransient<IEmailSender, EmailNotificationMessageSender>();
             serviceCollection.AddSingleton<NotificationsExportImport>();
-            serviceCollection.Configure<EmailSendingOptions>(configuration.GetSection("Notifications"));
-            serviceCollection.Configure<SmtpSenderOptions>(configuration.GetSection("Notifications:Smtp"));
-            serviceCollection.Configure<SendGridSenderOptions>(configuration.GetSection("Notifications:SendGrid"));
+
+            serviceCollection.AddOptions<EmailSendingOptions>().Bind(configuration.GetSection("Notifications")).ValidateDataAnnotations();
+            var emailSendingOptions = serviceCollection.BuildServiceProvider().GetService<IOptions<EmailSendingOptions>>().Value;
+            if (emailSendingOptions.Gateway.Equals("Smtp"))
+            {
+                serviceCollection.AddOptions<SmtpSenderOptions>().Bind(configuration.GetSection("Notifications:Smtp")).ValidateDataAnnotations();
+                serviceCollection.AddTransient<INotificationMessageSender, SmtpEmailNotificationMessageSender>();
+            }
+            else if (emailSendingOptions.Gateway.Equals("SendGrid"))
+            {
+                serviceCollection.AddOptions<SendGridSenderOptions>().Bind(configuration.GetSection("Notifications:SendGrid")).ValidateDataAnnotations();
+                serviceCollection.AddTransient<INotificationMessageSender, SendGridEmailNotificationMessageSender>();
+            }
+
         }
 
         public void PostInitialize(IApplicationBuilder appBuilder)

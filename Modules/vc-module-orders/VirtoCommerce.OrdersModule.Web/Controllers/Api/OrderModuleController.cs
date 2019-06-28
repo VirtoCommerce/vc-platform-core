@@ -88,7 +88,7 @@ namespace VirtoCommerce.OrdersModule.Web.Controllers.Api
         /// <param name="criteria">criteria</param>
         [HttpPost]
         [Route("search")]
-        public async Task<ActionResult<CustomerOrderSearchResult>> Search([FromBody]CustomerOrderSearchCriteria criteria)
+        public async Task<ActionResult<CustomerOrderSearchResult>> SearchCustomerOrder([FromBody]CustomerOrderSearchCriteria criteria)
         {
             //Scope bound ACL filtration
             criteria = FilterOrderSearchCriteria(User.Identity.Name, criteria);
@@ -276,7 +276,7 @@ namespace VirtoCommerce.OrdersModule.Web.Controllers.Api
         /// <param name="customerOrder">customer order</param>
         [HttpPut]
         [Route("")]
-        public async Task<ActionResult> Update([FromBody]CustomerOrder customerOrder)
+        public async Task<ActionResult> UpdateOrder([FromBody]CustomerOrder customerOrder)
         {
             //Check scope bound permission
             //var scopes = _permissionScopeService.GetObjectPermissionScopeStrings(customerOrder).ToArray();

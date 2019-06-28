@@ -4,7 +4,7 @@ using VirtoCommerce.Platform.Core.Common;
 
 namespace VirtoCommerce.ContentModule.Data.Model
 {
-    public class MenuLinkEntity : AuditableEntity
+    public class MenuLinkEntity : AuditableEntity, IHasOuterId
     {
         [Required]
         [StringLength(1024)]
@@ -22,6 +22,8 @@ namespace VirtoCommerce.ContentModule.Data.Model
         public string AssociatedObjectId { get; set; }
         public virtual MenuLinkListEntity MenuLinkList { get; set; }
         public string MenuLinkListId { get; set; }
+        [StringLength(128)]
+        public string OuterId { get; set; }
 
 
         public void Patch(MenuLinkEntity target)
@@ -38,6 +40,8 @@ namespace VirtoCommerce.ContentModule.Data.Model
         public MenuLink ToModel(MenuLink link)
         {
             link.Id = Id;
+            link.OuterId = OuterId;
+
             link.Title = Title;
             link.Url = Url;
             link.Priority = Priority;
@@ -53,6 +57,8 @@ namespace VirtoCommerce.ContentModule.Data.Model
         public MenuLinkEntity FromModel(MenuLink link)
         {
             Id = link.Id;
+            OuterId = link.OuterId;
+
             Title = link.Title;
             Url = link.Url;
             Priority = link.Priority;

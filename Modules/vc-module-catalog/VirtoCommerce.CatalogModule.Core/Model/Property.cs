@@ -7,9 +7,9 @@ using VirtoCommerce.Platform.Core.Common;
 
 namespace VirtoCommerce.CatalogModule.Core.Model
 {
-    public class Property : AuditableEntity, IInheritable, ICloneable
+    public class Property : AuditableEntity, IInheritable, ICloneable, IHasOuterId
     {
-        // <summary>
+        /// <summary>
         /// Gets or sets a value indicating whether user can change property value.
         /// </summary>     
         public bool IsReadOnly { get; set; }
@@ -53,6 +53,9 @@ namespace VirtoCommerce.CatalogModule.Core.Model
 
         public PropertyValueType ValueType { get; set; }
         public PropertyType Type { get; set; }
+        public string OuterId { get; set; }
+
+
         public IList<PropertyValue> Values { get; set; } = new List<PropertyValue>();
         public IList<PropertyAttribute> Attributes { get; set; }
         public IList<PropertyDisplayName> DisplayNames { get; set; }

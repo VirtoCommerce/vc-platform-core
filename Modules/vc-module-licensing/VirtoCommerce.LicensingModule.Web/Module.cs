@@ -37,7 +37,7 @@ namespace VirtoCommerce.LicensingModule.Web
             inProcessBus.RegisterHandler<LicenseChangedEvent>(async (message, token) => await providerSnapshot.GetService<LogLicenseChangedEventHandler>().Handle(message));
             inProcessBus.RegisterHandler<LicenseSignedEvent>(async (message, token) => await providerSnapshot.GetService<LogLicenseChangedEventHandler>().Handle(message));
             serviceCollection.AddSingleton<ILicenseService, LicenseService>();
-            serviceCollection.Configure<LicenseOptions>(configuration.GetSection("VirtoCommerce"));
+            serviceCollection.AddOptions<LicenseOptions>().Bind(configuration.GetSection("VirtoCommerce")).ValidateDataAnnotations();
         }
 
         public void PostInitialize(IApplicationBuilder applicationBuilder)

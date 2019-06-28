@@ -11,7 +11,7 @@ using VirtoCommerce.Platform.Core.Common;
 
 namespace VirtoCommerce.CatalogModule.Core.Model
 {
-    public class CatalogProduct : AuditableEntity, IHasLinks, ISeoSupport, IHasOutlines, IHasDimension, IHasAssociations, IHasProperties, IHasImages, IHasAssets, IInheritable, IHasTaxType, IHasName, ICloneable
+    public class CatalogProduct : AuditableEntity, IHasLinks, ISeoSupport, IHasOutlines, IHasDimension, IHasAssociations, IHasProperties, IHasImages, IHasAssets, IInheritable, IHasTaxType, IHasName, ICloneable, IHasOuterId
     {
         /// <summary>
         /// SKU code
@@ -94,6 +94,8 @@ namespace VirtoCommerce.CatalogModule.Core.Model
         /// Product order position in catalog
         /// </summary>
         public int Priority { get; set; }
+
+        public string OuterId { get; set; }
 
 
         #region IHasProperties members

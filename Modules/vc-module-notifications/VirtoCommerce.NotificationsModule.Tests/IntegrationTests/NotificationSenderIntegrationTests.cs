@@ -41,7 +41,7 @@ namespace VirtoCommerce.NotificationsModule.Tests.IntegrationTests
         {
             _emailSendingOptions = new SmtpSenderOptions()
             {
-                SmtpServer = "smtp.gmail.com",
+                SmtpServer = "http://smtp.gmail.com/",
                 Port = 587,
                 Login = "tasker.for.test@gmail.com",
                 Password = ""

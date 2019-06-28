@@ -105,7 +105,7 @@ namespace VirtoCommerce.StoreModule.Web.Controllers.Api
         [HttpPost]
         [Route("")]
         [Authorize(ModuleConstants.Security.Permissions.Create)]
-        public async Task<ActionResult<Store>> Create([FromBody]Store store)
+        public async Task<ActionResult<Store>> CreateStore([FromBody]Store store)
         {
             await _storeService.SaveChangesAsync(new[] { store });
             return Ok(store);
@@ -117,7 +117,7 @@ namespace VirtoCommerce.StoreModule.Web.Controllers.Api
         /// <param name="store">Store</param>
         [HttpPut]
         [Route("")]
-        public async Task<ActionResult> Update([FromBody]Store store)
+        public async Task<ActionResult> UpdateStore([FromBody]Store store)
         {
             //TODO
             //CheckCurrentUserHasPermissionForObjects(StorePredefinedPermissions.Update, store);
@@ -131,7 +131,7 @@ namespace VirtoCommerce.StoreModule.Web.Controllers.Api
         /// <param name="ids">Ids of store that needed to delete</param>
         [HttpDelete]
         [Route("")]
-        public async Task<ActionResult> Delete([FromQuery] string[] ids)
+        public async Task<ActionResult> DeleteStore([FromQuery] string[] ids)
         {
             //TODO
             //CheckCurrentUserHasPermissionForObjects(StorePredefinedPermissions.Delete, stores);

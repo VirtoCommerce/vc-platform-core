@@ -11,7 +11,7 @@ using VirtoCommerce.Platform.Core.Common;
 
 namespace VirtoCommerce.OrdersModule.Data.Model
 {
-    public class LineItemEntity : AuditableEntity
+    public class LineItemEntity : AuditableEntity, IHasOuterId
     {
         [StringLength(128)]
         public string PriceId { get; set; }
@@ -82,6 +82,9 @@ namespace VirtoCommerce.OrdersModule.Data.Model
         [NotMapped]
         public LineItem ModelLineItem { get; set; }
 
+        [StringLength(128)]
+        public string OuterId { get; set; }
+
         public virtual ObservableCollection<DiscountEntity> Discounts { get; set; } = new NullCollection<DiscountEntity>();
         public virtual ObservableCollection<TaxDetailEntity> TaxDetails { get; set; } = new NullCollection<TaxDetailEntity>();
 
@@ -100,6 +103,7 @@ namespace VirtoCommerce.OrdersModule.Data.Model
             lineItem.CreatedBy = CreatedBy;
             lineItem.ModifiedDate = ModifiedDate;
             lineItem.ModifiedBy = ModifiedBy;
+            lineItem.OuterId = OuterId;
 
             lineItem.PriceId = PriceId;
             lineItem.CatalogId = CatalogId;
@@ -153,6 +157,7 @@ namespace VirtoCommerce.OrdersModule.Data.Model
             CreatedBy = lineItem.CreatedBy;
             ModifiedDate = lineItem.ModifiedDate;
             ModifiedBy = lineItem.ModifiedBy;
+            OuterId = lineItem.OuterId;
 
             PriceId = lineItem.PriceId;
             CatalogId = lineItem.CatalogId;

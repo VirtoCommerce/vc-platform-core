@@ -8,5 +8,6 @@ namespace VirtoCommerce.InventoryModule.Core.Model
         public string Description { get; set; }
         public string GeoLocation { get; set; }
         public Address Address { get; set; }
+        public string OuterId { get; set; }
     }
 }

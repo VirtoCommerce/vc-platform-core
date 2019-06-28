@@ -96,6 +96,7 @@ namespace VirtoCommerce.OrdersModule.Data.Model
             shipment.CreatedBy = CreatedBy;
             shipment.ModifiedDate = ModifiedDate;
             shipment.ModifiedBy = ModifiedBy;
+            shipment.OuterId = OuterId;
 
             shipment.Price = Price;
             shipment.PriceWithTax = PriceWithTax;

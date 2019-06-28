@@ -77,6 +77,11 @@ namespace VirtoCommerce.NotificationsModule.Data.Model
             if (message == null) throw new ArgumentNullException(nameof(message));
 
             message.Id = Id;
+            message.CreatedBy = CreatedBy;
+            message.CreatedDate = CreatedDate;
+            message.ModifiedBy = ModifiedBy;
+            message.ModifiedDate = ModifiedDate;
+
             message.TenantIdentity = new TenantIdentity(TenantId, TenantType);
             message.NotificationId = NotificationId;
             message.NotificationType = NotificationType;
@@ -85,10 +90,6 @@ namespace VirtoCommerce.NotificationsModule.Data.Model
             message.LastSendError = LastSendError;
             message.LastSendAttemptDate = LastSendAttemptDate;
             message.SendDate = SendDate;
-            message.CreatedBy = CreatedBy;
-            message.CreatedDate = CreatedDate;
-            message.ModifiedBy = ModifiedBy;
-            message.ModifiedDate = ModifiedDate;
             message.LanguageCode = LanguageCode;
 
             return message;
@@ -101,6 +102,11 @@ namespace VirtoCommerce.NotificationsModule.Data.Model
             pkMap.AddPair(message, this);
 
             Id = message.Id;
+            CreatedBy = message.CreatedBy;
+            CreatedDate = message.CreatedDate;
+            ModifiedBy = message.ModifiedBy;
+            ModifiedDate = message.ModifiedDate;
+
             TenantId = message.TenantIdentity?.Id;
             TenantType = message.TenantIdentity?.Type;
             NotificationId = message.NotificationId;
@@ -110,10 +116,6 @@ namespace VirtoCommerce.NotificationsModule.Data.Model
             LastSendError = message.LastSendError;
             LastSendAttemptDate = message.LastSendAttemptDate;
             SendDate = message.SendDate;
-            CreatedBy = message.CreatedBy;
-            CreatedDate = message.CreatedDate;
-            ModifiedBy = message.ModifiedBy;
-            ModifiedDate = message.ModifiedDate;
             LanguageCode = message.LanguageCode;
 
             return this;

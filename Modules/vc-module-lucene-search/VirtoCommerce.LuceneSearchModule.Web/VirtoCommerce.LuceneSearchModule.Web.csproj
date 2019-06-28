@@ -6,6 +6,7 @@
         <Version>3.0.0</Version>
         <!--This line is necessary to copy all dependencies in the bin folder-->
         <!--<CopyLocalLockFileAssemblies>true</CopyLocalLockFileAssemblies>-->
+        <noWarn>1591</noWarn>
     </PropertyGroup>
 
     <ItemGroup>

@@ -1,6 +1,4 @@
 using System;
-using System.Collections.Generic;
-using System.Text;
 using VirtoCommerce.Platform.Core.Common;
 
 namespace VirtoCommerce.InventoryModule.Core.Model
@@ -23,6 +21,7 @@ namespace VirtoCommerce.InventoryModule.Core.Model
         public DateTime? PreorderAvailabilityDate { get; set; }
         public DateTime? BackorderAvailabilityDate { get; set; }
         public InventoryStatus Status { get; set; }
+        public string OuterId { get; set; }
 
 
         public virtual bool IsAvailableOn(DateTime date)

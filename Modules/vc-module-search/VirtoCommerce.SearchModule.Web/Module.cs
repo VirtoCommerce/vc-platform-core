@@ -42,7 +42,7 @@ namespace VirtoCommerce.SearchModule.Web
             serviceCollection.AddSingleton<IndexProgressHandler>();
 
             var configuration = serviceCollection.BuildServiceProvider().GetService<IConfiguration>();
-            serviceCollection.Configure<SearchOptions>(configuration.GetSection("Search"));
+            serviceCollection.AddOptions<SearchOptions>().Bind(configuration.GetSection("Search")).ValidateDataAnnotations();
         }
 
         public void PostInitialize(IApplicationBuilder appBuilder)
