@@ -25,8 +25,7 @@ namespace VirtoCommerce.MarketingModule.Data.Services
                 throw new ArgumentNullException(nameof(context));
             }
 
-            var promoContext = context as PromotionEvaluationContext;
-            if (promoContext == null)
+            if (!(context is PromotionEvaluationContext promoContext))
             {
                 throw new ArgumentException($"{nameof(context)} type {context.GetType()} must be derived from PromotionEvaluationContext");
             }

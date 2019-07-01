@@ -26,8 +26,7 @@ namespace VirtoCommerce.MarketingModule.Data.Services
                 throw new ArgumentNullException(nameof(context));
             }
 
-            var promoContext = context as PromotionEvaluationContext;
-            if (promoContext == null)
+            if (!(context is PromotionEvaluationContext promoContext))
             {
                 throw new ArgumentException($"{nameof(context)} type {context.GetType()} must be derived from PromotionEvaluationContext");
             }
@@ -38,17 +37,18 @@ namespace VirtoCommerce.MarketingModule.Data.Services
                 StoreIds = string.IsNullOrEmpty(promoContext.StoreId) ? null : new[] { promoContext.StoreId },
                 Take = int.MaxValue
             };
+
             var promotions = await _promotionSearchService.SearchPromotionsAsync(promotionSearchCriteria);
 
             var result = new PromotionResult();
 
             var rewards = promotions.Results.SelectMany(x => x.EvaluatePromotion(context)).Where(x => x.IsValid).ToArray();
 
-            var firstOrderExlusiveReward = rewards.FirstOrDefault(x => x.Promotion.IsExclusive);
-            if (firstOrderExlusiveReward != null)
+            var firstOrderExclusiveReward = rewards.FirstOrDefault(x => x.Promotion.IsExclusive);
+            if (firstOrderExclusiveReward != null)
             {
                 //Add only rewards from exclusive promotion
-                result.Rewards.AddRange(rewards.Where(x => x.Promotion == firstOrderExlusiveReward.Promotion));
+                result.Rewards.AddRange(rewards.Where(x => x.Promotion == firstOrderExclusiveReward.Promotion));
             }
             else
             {
@@ -88,6 +88,7 @@ namespace VirtoCommerce.MarketingModule.Data.Services
                 {
                     result.Rewards.Add(cartSubtotalReward);
                 }
+
                 //Gifts
                 rewards.OfType<GiftReward>().ToList().ForEach(x => result.Rewards.Add(x));
 
@@ -109,20 +110,12 @@ namespace VirtoCommerce.MarketingModule.Data.Services
                 .Where(y => y.AmountType == RewardAmountType.Relative)
                 .OrderByDescending(y => y.GetRewardAmount(currentAmount, 1)).FirstOrDefault();
 
-
             var absDiscountAmount = maxAbsoluteReward != null ? maxAbsoluteReward.GetRewardAmount(currentAmount, 1) : 0;
             var relDiscountAmount = maxRelativeReward != null ? currentAmount * maxRelativeReward.GetRewardAmount(currentAmount, 1) : 0;
 
             if (maxAbsoluteReward != null && maxRelativeReward != null)
             {
-                if (absDiscountAmount > relDiscountAmount)
-                {
-                    retVal = maxAbsoluteReward;
-                }
-                else
-                {
-                    retVal = maxRelativeReward;
-                }
+                retVal = absDiscountAmount > relDiscountAmount ? maxAbsoluteReward : maxRelativeReward;
             }
             else if (maxAbsoluteReward != null)
             {

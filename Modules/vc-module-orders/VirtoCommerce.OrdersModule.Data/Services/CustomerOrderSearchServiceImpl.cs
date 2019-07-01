@@ -83,9 +83,9 @@ namespace VirtoCommerce.OrdersModule.Data.Services
                 query = query.Where(x => x.SubscriptionId != null);
             }
 
-            if (criteria.CustomerId != null)
+            if (!criteria.CustomerIds.IsNullOrEmpty())
             {
-                query = query.Where(x => x.CustomerId == criteria.CustomerId);
+                query = query.Where(x => criteria.CustomerIds.Contains(x.CustomerId));
             }
 
             if (criteria.EmployeeId != null)
@@ -108,12 +108,12 @@ namespace VirtoCommerce.OrdersModule.Data.Services
                 query = query.Where(x => criteria.SubscriptionIds.Contains(x.SubscriptionId));
             }
 
-            if (criteria.Statuses != null && criteria.Statuses.Any())
+            if (!criteria.Statuses.IsNullOrEmpty())
             {
                 query = query.Where(x => criteria.Statuses.Contains(x.Status));
             }
 
-            if (criteria.StoreIds != null && criteria.StoreIds.Any())
+            if (!criteria.StoreIds.IsNullOrEmpty())
             {
                 query = query.Where(x => criteria.StoreIds.Contains(x.StoreId));
             }
