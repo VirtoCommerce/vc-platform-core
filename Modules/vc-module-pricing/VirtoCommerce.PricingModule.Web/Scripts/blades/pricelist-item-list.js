@@ -2,20 +2,17 @@ angular.module('virtoCommerce.pricingModule')
 .controller('virtoCommerce.pricingModule.pricelistItemListController', ['$scope', 'virtoCommerce.pricingModule.prices', '$filter', 'platformWebApp.bladeNavigationService', 'uiGridConstants', 'platformWebApp.uiGridHelper', 'platformWebApp.bladeUtils', 'platformWebApp.dialogService', function ($scope, prices, $filter, bladeNavigationService, uiGridConstants, uiGridHelper, bladeUtils, dialogService) {
     $scope.uiGridConstants = uiGridConstants;
     var blade = $scope.blade;
-    var dataQuery = {
-        exportTypeName: "Price"
+    var exportDataRequest = {
+        exportTypeName: 'VirtoCommerce.PricingModule.Core.Model.Price',
+        dataQuery: {
+             exportTypeName: 'PriceExportDataQuery'
+        }
     };
 
     blade.refresh = function () {
         blade.isLoading = true;
 
-        prices.search({
-            priceListId: blade.currentEntityId,
-            keyword: filter.keyword,
-            sort: uiGridHelper.getSortExpression($scope),
-            skip: ($scope.pageSettings.currentPage - 1) * $scope.pageSettings.itemsPerPageCount,
-            take: $scope.pageSettings.itemsPerPageCount
-        }, function (data) {
+        prices.search(getSearchCriteria(), function (data) {
             blade.currentEntities = data.results;
             $scope.pageSettings.totalItems = data.totalCount;
 
@@ -166,7 +163,15 @@ angular.module('virtoCommerce.pricingModule')
             },
             executeMethod: function () {
 
-                dataQuery = angular.extend(dataQuery, getSearchCriteria());
+                var selectedRows = $scope.gridApi.selection.getSelectedRows();
+                exportDataRequest.dataQuery.productIds = [];
+                if (selectedRows && selectedRows.length) {
+                    exportDataRequest.dataQuery.productIds = _.map(selectedRows, function (product) {
+                        return product.productId;
+                    });
+                }
+
+                exportDataRequest.dataQuery = angular.extend(exportDataRequest.dataQuery, getSearchCriteria());
 
                 var newBlade = {
                     id: 'priceExport',
@@ -174,7 +179,7 @@ angular.module('virtoCommerce.pricingModule')
                     subtitle: 'pricing.blades.exporter.subtitle',
                     controller: 'virtoCommerce.exportModule.exporterController',
                     template: 'Modules/$(VirtoCommerce.Export)/Scripts/blades/exportSetting.tml.html',
-                    dataQuery: dataQuery
+                    exportDataRequest: exportDataRequest
                 };
                 bladeNavigationService.showBlade(newBlade, blade);
             }
@@ -182,18 +187,13 @@ angular.module('virtoCommerce.pricingModule')
     ];
 
     function getSearchCriteria() {
-        var result = {};
-        var selectedRows = $scope.gridApi.selection.getSelectedRows();
-        if (selectedRows && selectedRows.length) {
-            var productIds = _.map(selectedRows, function (product) {
-                return product.productId;
-            });
+        var result = {
+            priceListId: blade.currentEntityId,
+            keyword: filter.keyword,
+            sort: uiGridHelper.getSortExpression($scope),
+            skip: ($scope.pageSettings.currentPage - 1) * $scope.pageSettings.itemsPerPageCount,
+            take: $scope.pageSettings.itemsPerPageCount
         }
-
-        result.productIds = productIds || null;
-        result.keyword = filter.keyword || null;
-        result.pricelistIds = [blade.currentEntityId];
-
         return result;
     }
 

@@ -2,24 +2,9 @@ angular.module('virtoCommerce.exportModule')
     .controller('virtoCommerce.exportModule.exporterController', ['$scope', 'platformWebApp.bladeNavigationService', 'virtoCommerce.exportModule.exportModuleApi', function ($scope, bladeNavigationService, exportApi) {
         var blade = $scope.blade;
         blade.canStartProcess = false;
-        blade.exportDataRequest = {};
         blade.isLoading = true;
 
         function initializeBlade() {
-            blade.exportDataRequest.dataQuery = blade.dataQuery;
-
-            exportApi.getKnowntypes(function (result) {
-                if (result && result.length && blade.exportDataRequest.dataQuery.exportTypeName) {
-                    blade.knowntypes = result;
-                    var type = _.find(blade.knowntypes, function (item) {
-                        return item.typeName.endsWith('.' + blade.exportDataRequest.dataQuery.exportTypeName);
-                    });
-                    if (type) {
-                        blade.exportDataRequest.ExportTypeName = type.typeName;
-                        blade.exportDataRequest.dataQuery.exportTypeName += 'ExportDataQuery';
-                    }
-                }
-            });
 
             exportApi.getProviders(function (result) {
                 if (result && result.length) {
