@@ -1,0 +1,292 @@
+using System;
+using System.Collections.Generic;
+using System.IO;
+using System.Linq;
+using System.Threading.Tasks;
+using CsvHelper.Configuration;
+using VirtoCommerce.ExportModule.Core.Model;
+using VirtoCommerce.ExportModule.Data.Model;
+using VirtoCommerce.ExportModule.Data.Services;
+using Xunit;
+
+namespace VirtoCommerce.ExportModule.Tests
+{
+    public class CsvExportProviderTests
+    {
+        [Fact]
+        public Task ExportPrices_FilterPlainMembers()
+        {
+            var date = new DateTime(2020, 10, 20);
+            var prices = new List<Price>()
+            {
+                new Price {Id = "P1", PricelistId = "1", List = 25, CreatedDate = date, Currency = "USD" },
+                new Price {Id = "P2", PricelistId = "1", List = 26, EndDate = date, ModifiedDate = date, Pricelist = new Pricelist() { Id = "1", Name = "Pricelist 1" } },
+            };
+
+            var metadata = new ExportedTypeMetadata()
+            {
+                PropertiesInfo = new[]
+                {
+                    new ExportTypePropertyInfo() { Name = nameof(Price.Id), MemberInfo = typeof(Price).GetProperty(nameof(Price.Id)) },
+                    new ExportTypePropertyInfo() { Name = nameof(Price.PricelistId), MemberInfo = typeof(Price).GetProperty(nameof(Price.PricelistId)) },
+                    new ExportTypePropertyInfo() { Name = nameof(Price.List), MemberInfo = typeof(Price).GetProperty(nameof(Price.List)) },
+                    new ExportTypePropertyInfo() { Name = nameof(Price.CreatedDate), MemberInfo = typeof(Price).GetProperty(nameof(Price.CreatedDate)) },
+                    new ExportTypePropertyInfo() { Name = nameof(Price.EndDate), MemberInfo = typeof(Price).GetProperty(nameof(Price.EndDate)) },
+                }
+            };
+
+            //Act
+            var filteredPricesString = SerializeAndRead(metadata, prices);
+
+            //Assets
+            Assert.Equal("Id,PricelistId,List,CreatedDate,EndDate\r\nP1,1,25,10/20/2020 00:00:00,\r\nP2,1,26,01/01/0001 00:00:00,10/20/2020 00:00:00\r\n", filteredPricesString);
+
+            return Task.CompletedTask;
+        }
+
+        [Fact]
+        public Task ExportPricelistAssignments_FilterPlainMembers()
+        {
+            var date = new DateTime(2020, 10, 20);
+            var assignments = new List<PricelistAssignment>()
+            {
+                new PricelistAssignment {Id = "PA1", PricelistId = "1", Description = "PA1 Description", Priority = 1, Pricelist = new Pricelist() { Name = "Pricelist1"} },
+                new PricelistAssignment {Id = "PA2", PricelistId = "2", EndDate = date, Description = "PA2 Description", ConditionExpression = "<expression/>"},
+            };
+
+            var metadata = new ExportedTypeMetadata()
+            {
+                PropertiesInfo = new[]
+                {
+                    new ExportTypePropertyInfo() { Name = nameof(PricelistAssignment.Id), MemberInfo = typeof(PricelistAssignment).GetProperty(nameof(PricelistAssignment.Id)) },
+                    new ExportTypePropertyInfo() { Name = nameof(PricelistAssignment.Description), MemberInfo = typeof(PricelistAssignment).GetProperty(nameof(PricelistAssignment.Description)) },
+                    new ExportTypePropertyInfo() { Name = nameof(PricelistAssignment.EndDate), MemberInfo = typeof(PricelistAssignment).GetProperty(nameof(PricelistAssignment.EndDate)) },
+                    new ExportTypePropertyInfo() { Name = nameof(PricelistAssignment.Priority), MemberInfo = typeof(PricelistAssignment).GetProperty(nameof(PricelistAssignment.Priority)) },
+                    new ExportTypePropertyInfo() { Name = nameof(PricelistAssignment.ConditionExpression), MemberInfo = typeof(PricelistAssignment).GetProperty(nameof(PricelistAssignment.ConditionExpression)) },
+                }
+            };
+
+            //Act
+            var filteredPricesString = SerializeAndRead(metadata, assignments);
+
+            //Assets
+            Assert.Equal("Id,Description,EndDate,Priority,ConditionExpression\r\nPA1,PA1 Description,,1,\r\nPA2,PA2 Description,10/20/2020 00:00:00,0,<expression/>\r\n", filteredPricesString);
+
+            return Task.CompletedTask;
+        }
+
+        [Fact]
+        public Task ExportPricelists_FilterPlainMembers()
+        {
+            var pricelists = CreatePricelists();
+
+            var metadata = new ExportedTypeMetadata()
+            {
+                PropertiesInfo = new[]
+                {
+                    new ExportTypePropertyInfo() { Name = nameof(Pricelist.Id), MemberInfo = typeof(Pricelist).GetProperty(nameof(Pricelist.Id)) },
+                    new ExportTypePropertyInfo() { Name = nameof(Pricelist.Name), MemberInfo = typeof(Pricelist).GetProperty(nameof(Pricelist.Name)) },
+                    new ExportTypePropertyInfo() { Name = nameof(Pricelist.Currency), MemberInfo = typeof(Pricelist).GetProperty(nameof(Pricelist.Currency)) },
+                }
+            };
+
+            //Act
+            var filteredPricesString = SerializeAndRead(metadata, pricelists);
+
+            //Assets
+            Assert.Equal("Id,Name,Currency\r\nPL1,Pricelist 1,USD\r\nPL2,Pricelist 2,EUR\r\n", filteredPricesString);
+
+            return Task.CompletedTask;
+        }
+
+        [Fact]
+        public Task ExportPricelists_FilterNestedMembers()
+        {
+            var pricelists = CreatePricelists();
+
+            var metadata = new ExportedTypeMetadata()
+            {
+                PropertiesInfo = new[]
+                {
+                    new ExportTypePropertyInfo() { Name = nameof(Pricelist.Id), MemberInfo = typeof(Pricelist).GetProperty(nameof(Pricelist.Id)) },
+                    new ExportTypePropertyInfo() { Name = nameof(Pricelist.Name), MemberInfo = typeof(Pricelist).GetProperty(nameof(Pricelist.Name)) },
+                    new ExportTypePropertyInfo() { Name = nameof(Pricelist.Currency), MemberInfo = typeof(Pricelist).GetProperty(nameof(Pricelist.Currency)) },
+                    new ExportTypePropertyInfo() { Name = $"{nameof(Pricelist.ActiveAssignment)}.{nameof(PricelistAssignment.Id)}", MemberInfo = typeof(PricelistAssignment).GetProperty(nameof(PricelistAssignment.Id)) },
+                    new ExportTypePropertyInfo() { Name = $"{nameof(Pricelist.ActiveAssignment)}.{nameof(PricelistAssignment.Name)}", MemberInfo = typeof(PricelistAssignment).GetProperty(nameof(PricelistAssignment.Name)) },
+                    new ExportTypePropertyInfo() { Name = $"{nameof(Pricelist.ActiveAssignment)}.{nameof(PricelistAssignment.Priority)}", MemberInfo = typeof(PricelistAssignment).GetProperty(nameof(PricelistAssignment.Priority)) },
+                }
+            };
+
+            //Act
+            var filteredPricesString = SerializeAndRead(metadata, pricelists);
+
+            //Assets
+            Assert.Equal("Id,Name,Currency,ActiveAssignment.Id,ActiveAssignment.Name,ActiveAssignment.Priority\r\nPL1,Pricelist 1,USD,PA1_1,PA1_1 Name,1\r\nPL2,Pricelist 2,EUR,PA2_1,PA2_1 Name,1\r\n", filteredPricesString);
+
+            return Task.CompletedTask;
+        }
+
+        [Fact]
+        public Task ExportPricelists_DoesNotWriteEnumerableProperties()
+        {
+            var pricelists = CreatePricelists();
+
+            var metadata = new ExportedTypeMetadata()
+            {
+                PropertiesInfo = new[]
+                {
+                    new ExportTypePropertyInfo() { Name = nameof(Pricelist.Id), MemberInfo = typeof(Pricelist).GetProperty(nameof(Pricelist.Id)) },
+                    new ExportTypePropertyInfo() { Name = nameof(Pricelist.Name), MemberInfo = typeof(Pricelist).GetProperty(nameof(Pricelist.Name)) },
+                    new ExportTypePropertyInfo() { Name = nameof(Pricelist.Currency), MemberInfo = typeof(Pricelist).GetProperty(nameof(Pricelist.Currency)) },
+                    new ExportTypePropertyInfo() { Name = $"{nameof(Pricelist.Prices)}.{nameof(Price.Id)}", MemberInfo = typeof(Price).GetProperty(nameof(Price.Id)) },
+                    new ExportTypePropertyInfo() { Name = $"{nameof(Pricelist.Prices)}.{nameof(Price.List)}", MemberInfo = typeof(Price).GetProperty(nameof(Price.List)) },
+                }
+            };
+
+            //Act
+            var filteredPricesString = SerializeAndRead(metadata, pricelists);
+
+            //Assets
+            Assert.Equal("Id,Name,Currency\r\nPL1,Pricelist 1,USD\r\nPL2,Pricelist 2,EUR\r\n", filteredPricesString);
+
+            return Task.CompletedTask;
+        }
+
+
+        [Fact]
+        public Task ExportPricelists_UseCustomMap()
+        {
+            var pricelists = CreatePricelists();
+
+            var metadata = new ExportedTypeMetadata()
+            {
+                PropertiesInfo = new[]
+                {
+                    new ExportTypePropertyInfo() { Name = nameof(Pricelist.Id), MemberInfo = typeof(Pricelist).GetProperty(nameof(Pricelist.Id)) },
+                    new ExportTypePropertyInfo() { Name = nameof(Pricelist.Name), MemberInfo = typeof(Pricelist).GetProperty(nameof(Pricelist.Name)) },
+                    new ExportTypePropertyInfo() { Name = nameof(Pricelist.Currency), MemberInfo = typeof(Pricelist).GetProperty(nameof(Pricelist.Currency)) },
+                    new ExportTypePropertyInfo() { Name = $"{nameof(Pricelist.ActiveAssignment)}.{nameof(PricelistAssignment.Id)}", MemberInfo = typeof(PricelistAssignment).GetProperty(nameof(PricelistAssignment.Id)) },
+                    new ExportTypePropertyInfo() { Name = $"{nameof(Pricelist.ActiveAssignment)}.{nameof(PricelistAssignment.Name)}", MemberInfo = typeof(PricelistAssignment).GetProperty(nameof(PricelistAssignment.Name)) },
+                    new ExportTypePropertyInfo() { Name = $"{nameof(Pricelist.ActiveAssignment)}.{nameof(PricelistAssignment.Priority)}", MemberInfo = typeof(PricelistAssignment).GetProperty(nameof(PricelistAssignment.Priority)) },
+                    new ExportTypePropertyInfo() { Name = $"{nameof(Pricelist.Prices)}.{nameof(Price.Id)}", MemberInfo = typeof(Price).GetProperty(nameof(Price.Id)) },
+                    new ExportTypePropertyInfo() { Name = $"{nameof(Pricelist.Prices)}.{nameof(Price.List)}", MemberInfo = typeof(Price).GetProperty(nameof(Price.List)) },
+                }
+            };
+
+            var configuration = new Configuration();
+            configuration.RegisterClassMap<PricelistTestMapping>();
+
+            //Act
+            var filteredPricesString = SerializeAndRead(metadata, pricelists, configuration);
+
+            //Assets
+            Assert.Equal("Id,Name,Currency,ActiveAssignment.Id,ActiveAssignment.Name\r\nPL1,Pricelist 1,USD,PA1_1,PA1_1 Name\r\nPL2,Pricelist 2,EUR,PA2_1,PA2_1 Name\r\n", filteredPricesString);
+
+            return Task.CompletedTask;
+        }
+
+        private string SerializeAndRead<T>(ExportedTypeMetadata metadata, IEnumerable<T> items, Configuration configuration = null)
+        {
+            var csvConfiguration = new CsvProviderConfiguration() { Configuration = configuration ?? new Configuration() };
+
+            using (Stream stream = new MemoryStream())
+            {
+                using (var csvExportProvider = new CsvExportProvider(stream, csvConfiguration))
+                {
+                    csvExportProvider.Metadata = metadata;
+
+                    foreach (var item in items)
+                    {
+                        csvExportProvider.WriteRecord(item);
+                    }
+                }
+
+                stream.Seek(0, SeekOrigin.Begin);
+
+                return new StreamReader(stream).ReadToEnd();
+            }
+        }
+
+        private static List<Pricelist> CreatePricelists()
+        {
+            var result = new List<Pricelist>()
+            {
+                new Pricelist
+                {
+                    Id = "PL1",
+                    Name = "Pricelist 1",
+                    Currency = "USD",
+                    Assignments = new List<PricelistAssignment>()
+                    {
+                        new PricelistAssignment {Id = "PA1_1", Name = "PA1_1 Name", Priority = 1 },
+                        new PricelistAssignment {Id = "PA1_2", Name = "PA1_2 Name", Priority = 2 },
+                    },
+                    Prices = new List<Price>()
+                    {
+                        new Price {Id = "P1_1", List = 25 },
+                        new Price {Id = "P1_2", List = 26 },
+                    },
+                },
+                new Pricelist
+                {
+                    Id = "PL2",
+                    Name = "Pricelist 2",
+                    Currency = "EUR",
+                    Assignments = new List<PricelistAssignment>()
+                    {
+                        new PricelistAssignment {Id = "PA2_1", Name = "PA2_1 Name", Priority = 1, CatalogId = "Cat1" },
+                        new PricelistAssignment {Id = "PA2_2", Name = "PA2_2 Name", Priority = 2, CatalogId = "Cat2" },
+                        new PricelistAssignment {Id = "PA2_3", Name = "PA2_3 Name", Priority = 10 },
+                    },
+                    Prices = new List<Price>()
+                    {
+                        new Price {Id = "P2_1", List = 12 },
+                        new Price {Id = "P2_2", List = 17 },
+                        new Price {Id = "P2_3", List = 19 },
+                    },
+                },
+            };
+
+            foreach (var pricelist in result)
+            {
+                foreach (var assignment in pricelist.Assignments)
+                {
+                    assignment.Pricelist = pricelist;
+                    assignment.PricelistId = pricelist.Id;
+                }
+
+                foreach (var price in pricelist.Prices)
+                {
+                    price.Pricelist = pricelist;
+                    price.PricelistId = pricelist.Id;
+                }
+                pricelist.ActiveAssignment = pricelist?.Assignments?.FirstOrDefault();
+            }
+
+            return result;
+        }
+    }
+
+    public class PricelistTestMapping : ClassMap<Pricelist>
+    {
+        public PricelistTestMapping()
+        {
+            Map(x => x.Id).Index(0);
+            Map(x => x.Name).Index(1);
+            Map(x => x.Currency).Index(2);
+            Map(x => x.ActiveAssignment.Id).Name("ActiveAssignment.Id").Index(3);
+            Map(x => x.ActiveAssignment.Name).Name("ActiveAssignment.Name").Index(4);
+            // Equals to following, but without indexes set explicitly
+            // ReferenceMaps.Add(new MemberReferenceMap(typeof(Pricelist).GetProperty(nameof(Pricelist.ActiveAssignment)), new PricelistAssignmentTestMapping(nameof(Pricelist.ActiveAssignment))));
+        }
+    }
+
+    public class PricelistAssignmentTestMapping : ClassMap<PricelistAssignment>
+    {
+        public PricelistAssignmentTestMapping(string pathName)
+        {
+            Map(x => x.Id).Name($"{pathName}.{nameof(PricelistAssignment.Id)}");
+            Map(x => x.Name).Name($"{pathName}.{nameof(PricelistAssignment.Name)}");
+        }
+    }
+}
