@@ -2,123 +2,169 @@ using System;
 using System.Collections.Generic;
 using System.Globalization;
 using System.IO;
+using System.Linq;
 using System.Reflection;
-using System.Reflection.Emit;
+using System.Text;
+using CsvHelper;
+using CsvHelper.Configuration;
 using VirtoCommerce.ExportModule.Core.Model;
 using VirtoCommerce.ExportModule.Core.Services;
+using VirtoCommerce.ExportModule.Data.Model;
+using VirtoCommerce.Platform.Core.Common;
 
 namespace VirtoCommerce.ExportModule.Data.Services
 {
     public sealed class CsvExportProvider : IExportProvider
     {
-        private static class DynamicMethodGenerator
-        {
-            public delegate object GetMethodDelegate(object source);
-
-            /// <summary>
-            /// Generate dynamic method to call get-accessor of property
-            /// </summary>
-            /// <param name="type">Type of object to access</param>
-            /// <param name="propertyInfo"><see cref="PropertyInfo"/> for object property</param>
-            /// <returns></returns>
-            public static GetMethodDelegate CreateDynamicMethod(Type type, PropertyInfo propertyInfo)
-            {
-                var getMethodInfo = propertyInfo.GetGetMethod(true);
-                var dynamicGet = CreateGetDynamicMethod(type);
-                var getGenerator = dynamicGet.GetILGenerator();
-
-                getGenerator.Emit(OpCodes.Ldarg_0);
-                getGenerator.Emit(OpCodes.Call, getMethodInfo);
-                BoxIfNeeded(getMethodInfo.ReturnType, getGenerator);
-                getGenerator.Emit(OpCodes.Ret);
-
-                return (GetMethodDelegate)dynamicGet.CreateDelegate(typeof(GetMethodDelegate));
-            }
-
-            public static DynamicMethod CreateGetDynamicMethod(Type type)
-            {
-                return new DynamicMethod("DynamicGet", typeof(object), new Type[] { typeof(object) }, type, true);
-            }
-
-            public static void BoxIfNeeded(Type type, ILGenerator generator)
-            {
-                if (type.IsValueType)
-                {
-                    generator.Emit(OpCodes.Box, type);
-                }
-            }
-        }
-
         public string TypeName => nameof(CsvExportProvider);
         public IExportProviderConfiguration Configuration { get; }
         public ExportedTypeMetadata Metadata { get; set; }
 
-        private readonly StreamWriter _streamWriter;
+        private readonly Stream _stream;
 
-        private readonly Dictionary<MemberInfo, DynamicMethodGenerator.GetMethodDelegate> cacheGetMethods = new Dictionary<MemberInfo, DynamicMethodGenerator.GetMethodDelegate>();
+        private TextWriter _textWriter;
+        private CsvWriter _csvWriter;
 
         public CsvExportProvider(Stream stream, IExportProviderConfiguration exportProviderConfiguration)
         {
-            _streamWriter = new StreamWriter(stream);
+            _stream = stream;
             Configuration = exportProviderConfiguration;
         }
 
-        /// <summary>
-        /// Returns property value using precached dynamic method.
-        /// It's about 15x faster than <see cref="PropertyInfo.GetValue(object)"/>
-        /// </summary>
-        /// <param name="obj"></param>
-        /// <param name="memberInfo"></param>
-        /// <returns></returns>
-        private object GetPropertyValue(object obj, MemberInfo memberInfo)
+        private void EnsureWriterCreated(Type objectType)
         {
-            // Checks cache for dynamic method then add it if still not in
-            if (!cacheGetMethods.ContainsKey(memberInfo))
+            if (Metadata == null)
             {
-                lock (cacheGetMethods)
-                {
-                    if (!cacheGetMethods.ContainsKey(memberInfo))
-                    {
-                        var getMethod = DynamicMethodGenerator.CreateDynamicMethod(obj.GetType(), (PropertyInfo)memberInfo);
-                        cacheGetMethods.Add(memberInfo, getMethod);
-                    }
-                }
+                throw new ArgumentNullException(nameof(Metadata));
             }
-            return cacheGetMethods[memberInfo](obj);
+            if (_csvWriter == null)
+            {
+                _textWriter = new StreamWriter(_stream, Encoding.UTF8, 1024, true) { AutoFlush = true };
+
+                var csvConfiguration = (Configuration as CsvProviderConfiguration)?.Configuration ?? new Configuration();
+                var mapForType = csvConfiguration.Maps[objectType];
+
+                if (mapForType == null)
+                {
+                    var constructor = typeof(MetadataFilteredMap<>).MakeGenericType(objectType).GetConstructor(new[] { typeof(ExportedTypeMetadata) });
+                    var classMap = (ClassMap)constructor.Invoke(new[] { Metadata });
+                    csvConfiguration.RegisterClassMap(classMap);
+                }
+
+                _csvWriter = new CsvWriter(_textWriter, csvConfiguration);
+            }
         }
 
         public void WriteMetadata(ExportedTypeMetadata metadata)
         {
-            var firstProperty = true;
-            foreach (var propertyInfo in metadata.PropertiesInfo)
-            {
-                if (!firstProperty) _streamWriter.Write(";");
-                _streamWriter.Write(@"""");
-                _streamWriter.Write(string.IsNullOrEmpty(propertyInfo.ExportName) ? propertyInfo.Name : propertyInfo.ExportName);
-                _streamWriter.Write(@"""");
-                firstProperty = false;
-            }
-            _streamWriter.WriteLine();
+            throw new NotSupportedException($"{nameof(CsvExportProvider)} does not support writing metadata.");
         }
 
         public void WriteRecord(object objectToRecord)
         {
-            var firstProperty = true;
-            foreach (var propertyInfo in Metadata.PropertiesInfo)
-            {
-                if (!firstProperty) _streamWriter.Write(";");
-                _streamWriter.Write(@"""");
-                // Write value in culture invariant format. Convert is faster than string.format
-                _streamWriter.Write(Convert.ToString(GetPropertyValue(objectToRecord, propertyInfo.MemberInfo), CultureInfo.InvariantCulture).Replace(@"""", @""""""));
-                _streamWriter.Write(@"""");
-                firstProperty = false;
-            }
-            _streamWriter.WriteLine();
+            EnsureWriterCreated(objectToRecord.GetType());
+
+            _csvWriter.WriteRecords(new[] { objectToRecord });
+            _csvWriter.Flush();
         }
 
         public void Dispose()
         {
-            _streamWriter.Dispose();
+            _csvWriter?.Dispose();
+            _textWriter?.Dispose();
         }
     }
+
+    /// <summary>
+    /// Custom ClassMap implementation which includes only type members that are presented in <see cref="ExportedTypeMetadata"/>. Supports nested properties.
+    /// Does not map <see cref="IEnumerable<Entity>"/> as these are not representable in CSV structure in suitable manner.
+    /// </summary>
+    /// <typeparam name="T">Mapped type.</typeparam>
+    public class MetadataFilteredMap<T> : ClassMap<T>
+    {
+        public MetadataFilteredMap(ExportedTypeMetadata exportedTypeMetadata)
+        {
+            var exportedType = typeof(T);
+
+            var includedPropertiesInfo = exportedTypeMetadata.PropertiesInfo;
+            int columnIndex = 0;
+
+            foreach (var includedPropertyInfo in includedPropertiesInfo)
+            {
+                var propertyNames = includedPropertyInfo.Name.Split('.');
+                var currentType = exportedType;
+                ClassMap currentClassMap = this;
+
+                for (int i = 0; i < propertyNames.Length; i++)
+                {
+                    var propertyName = propertyNames[i];
+                    var propertyInfo = currentType.GetProperty(propertyName, BindingFlags.Public | BindingFlags.Instance);
+
+                    if (propertyInfo?.CanRead != true)
+                    {
+                        break;
+                    }
+
+                    // Do not write enumerables (ICollection, etc.)
+                    if (IsEnumerableEntityProperty(propertyInfo))
+                    {
+                        break;
+                    }
+
+                    // Add memberMap
+                    if (i == propertyNames.Length - 1)
+                    {
+                        var memberMap = CreateMemberMap(currentType, propertyInfo, includedPropertyInfo.Name, ref columnIndex);
+
+                        currentClassMap.MemberMaps.Add(memberMap);
+                        currentClassMap = this;
+                    }
+                    // Working with nested properties - create or get References
+                    else
+                    {
+                        var referenceMap = currentClassMap.ReferenceMaps.Find(propertyInfo);
+                        currentType = propertyInfo.PropertyType;
+
+                        if (referenceMap == null)
+                        {
+                            var referenceClassMapType = typeof(EmptyClassMapImpl<>).MakeGenericType(new[] { currentType });
+
+                            referenceMap = new MemberReferenceMap(propertyInfo, (ClassMap)Activator.CreateInstance(referenceClassMapType));
+                            currentClassMap.ReferenceMaps.Add(referenceMap);
+                        }
+
+                        currentClassMap = referenceMap.Data.Mapping;
+                    }
+                }
+            }
+        }
+
+
+        private static bool IsEnumerableEntityProperty(PropertyInfo propertyInfo)
+        {
+            var type = propertyInfo.PropertyType;
+
+            return type.GetInterfaces().Any(x =>
+                x.IsGenericType
+                && x.GetGenericTypeDefinition() == typeof(IEnumerable<>))
+                && type.GetGenericArguments().Any(x => x.IsSubclassOf(typeof(Entity)));
+        }
+
+        private static MemberMap CreateMemberMap(Type currentType, PropertyInfo propertyInfo, string columnName, ref int columnIndex)
+        {
+            var memberMap = MemberMap.CreateGeneric(currentType, propertyInfo);
+
+            memberMap.Data.TypeConverterOptions.CultureInfo = CultureInfo.InvariantCulture;
+            memberMap.Data.TypeConverterOptions.NumberStyle = NumberStyles.Any;
+            memberMap.Data.TypeConverterOptions.BooleanTrueValues.AddRange(new List<string>() { "yes", "true" });
+            memberMap.Data.TypeConverterOptions.BooleanFalseValues.AddRange(new List<string>() { "false", "no" });
+            memberMap.Data.Names.Add(columnName);
+            memberMap.Data.NameIndex = memberMap.Data.Names.Count - 1;
+            memberMap.Data.Index = ++columnIndex;
+
+            return memberMap;
+        }
+    }
+
+    public class EmptyClassMapImpl<T> : ClassMap<T> { }
 }
