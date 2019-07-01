@@ -55,7 +55,7 @@ namespace VirtoCommerce.ExportModule.Web.BackgroundJobs
                 using (var stream = File.OpenWrite(localTmpPath))
                 {
                     _dataExporter.Export(stream, request, progressCallback, new JobCancellationTokenWrapper(cancellationToken));
-                    notification.DownloadUrl = $"api/platform/export/download/{_platformOptions.DefaultExportFileName}";
+                    notification.DownloadUrl = $"api/export/download/{_platformOptions.DefaultExportFileName}";
                 }
             }
             catch (JobAbortedException)

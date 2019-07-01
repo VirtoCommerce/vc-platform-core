@@ -8,7 +8,7 @@ namespace VirtoCommerce.Platform.Core.ExportImport
     {
         [JsonProperty("exportTypeName")]
         public string ExportTypeName => GetType().Name;
-
+        public string Keyword { get; set; }
         public string[] ObjectIds { get; set; } = new string[] { };
         public string Sort { get; set; }
         public string[] IncludedProperties { get; set; } = new string[] { };

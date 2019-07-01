@@ -128,7 +128,12 @@
                     "sale-price": "Цена со скидкой",
                     "min-quantity": "Минимальное количество"
                 }
+            },
+            "exporter": {
+                "title": "Экспорт цен",
+                "subtitle": "Экспорт цен в формате json или CSV"
             }
+
         },
         "widgets": {
             "assignments": {

@@ -1,18 +1,18 @@
-﻿angular.module('virtoCommerce.pricingModule')
+angular.module('virtoCommerce.pricingModule')
 .controller('virtoCommerce.pricingModule.pricelistItemListController', ['$scope', 'virtoCommerce.pricingModule.prices', '$filter', 'platformWebApp.bladeNavigationService', 'uiGridConstants', 'platformWebApp.uiGridHelper', 'platformWebApp.bladeUtils', 'platformWebApp.dialogService', function ($scope, prices, $filter, bladeNavigationService, uiGridConstants, uiGridHelper, bladeUtils, dialogService) {
     $scope.uiGridConstants = uiGridConstants;
     var blade = $scope.blade;
+    var exportDataRequest = {
+        exportTypeName: 'VirtoCommerce.PricingModule.Core.Model.Price',
+        dataQuery: {
+             exportTypeName: 'PriceExportDataQuery'
+        }
+    };
 
     blade.refresh = function () {
         blade.isLoading = true;
 
-        prices.search({
-            priceListId: blade.currentEntityId,
-            keyword: filter.keyword,
-            sort: uiGridHelper.getSortExpression($scope),
-            skip: ($scope.pageSettings.currentPage - 1) * $scope.pageSettings.itemsPerPageCount,
-            take: $scope.pageSettings.itemsPerPageCount
-        }, function (data) {
+        prices.search(getSearchCriteria(), function (data) {
             blade.currentEntities = data.results;
             $scope.pageSettings.totalItems = data.totalCount;
 
@@ -62,17 +62,17 @@
 
         newBlade.options = {
             checkItemFn: function (listItem, isSelected) {
-                if (listItem.type == 'category') {
+                if (listItem.type === 'category') {
                     newBlade.error = 'Categories are not supported';
                     listItem.selected = undefined;
                 } else {
                     if (isSelected) {
-                        if (_.all(selectedProducts, function (x) { return x.id != listItem.id; })) {
+                        if (_.all(selectedProducts, function (x) { return x.id !== listItem.id; })) {
                             selectedProducts.push(listItem);
                         }
                     }
                     else {
-                        selectedProducts = _.reject(selectedProducts, function (x) { return x.id == listItem.id; });
+                        selectedProducts = _.reject(selectedProducts, function (x) { return x.id === listItem.id; });
                     }
                     newBlade.error = undefined;
                 }
@@ -92,7 +92,7 @@
         }, function (data) {
             var newItems = _.filter(products, function (product) {
                 return _.all(data.results, function (x) {
-                    return x.productId != product.id;
+                    return x.productId !== product.id;
                 })
             });
 
@@ -154,15 +154,55 @@
                 return $scope.gridApi && _.any($scope.gridApi.selection.getSelectedRows());
             },
             permission: blade.updatePermission
+        },
+        {
+            name: "platform.commands.export",
+            icon: 'fa fa-upload',
+            canExecuteMethod: function () {
+                return true;
+            },
+            executeMethod: function () {
+
+                var selectedRows = $scope.gridApi.selection.getSelectedRows();
+                exportDataRequest.dataQuery.productIds = [];
+                if (selectedRows && selectedRows.length) {
+                    exportDataRequest.dataQuery.productIds = _.map(selectedRows, function (product) {
+                        return product.productId;
+                    });
+                }
+
+                exportDataRequest.dataQuery = angular.extend(exportDataRequest.dataQuery, getSearchCriteria());
+
+                var newBlade = {
+                    id: 'priceExport',
+                    title: 'pricing.blades.exporter.title',
+                    subtitle: 'pricing.blades.exporter.subtitle',
+                    controller: 'virtoCommerce.exportModule.exporterController',
+                    template: 'Modules/$(VirtoCommerce.Export)/Scripts/blades/exportSetting.tml.html',
+                    exportDataRequest: exportDataRequest
+                };
+                bladeNavigationService.showBlade(newBlade, blade);
+            }
         }
     ];
+
+    function getSearchCriteria() {
+        var result = {
+            priceListId: blade.currentEntityId,
+            keyword: filter.keyword,
+            sort: uiGridHelper.getSortExpression($scope),
+            skip: ($scope.pageSettings.currentPage - 1) * $scope.pageSettings.itemsPerPageCount,
+            take: $scope.pageSettings.itemsPerPageCount
+        }
+        return result;
+    }
 
     $scope.getPriceRange = function (priceGroup) {
         var retVal;
         var allPrices = _.union(_.pluck(priceGroup.prices, 'list'), _.pluck(priceGroup.prices, 'sale'));
         var minprice = $filter('currency')(_.min(allPrices), '', 2);
         var maxprice = $filter('currency')(_.max(allPrices), '', 2);
-        retVal = (minprice == maxprice ? minprice : minprice + '-' + maxprice);
+        retVal = (minprice === maxprice ? minprice : minprice + '-' + maxprice);
 
         //else {
         //    retVal = 'NO PRICE';
