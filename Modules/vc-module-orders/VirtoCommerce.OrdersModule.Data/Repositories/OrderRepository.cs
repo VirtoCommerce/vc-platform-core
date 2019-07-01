@@ -3,6 +3,7 @@ using System.Threading.Tasks;
 using Microsoft.EntityFrameworkCore;
 using VirtoCommerce.OrdersModule.Core.Model;
 using VirtoCommerce.OrdersModule.Data.Model;
+using VirtoCommerce.Platform.Core.Common;
 using VirtoCommerce.Platform.Core.Domain;
 using VirtoCommerce.Platform.Data.Infrastructure;
 
@@ -25,19 +26,21 @@ namespace VirtoCommerce.OrdersModule.Data.Repositories
         public IQueryable<LineItemEntity> LineItems => DbContext.Set<LineItemEntity>();
         public IQueryable<PaymentGatewayTransactionEntity> Transactions => DbContext.Set<PaymentGatewayTransactionEntity>();
 
-        public virtual async Task<CustomerOrderEntity[]> GetCustomerOrdersByIdsAsync(string[] ids, CustomerOrderResponseGroup responseGroup)
+        public virtual async Task<CustomerOrderEntity[]> GetCustomerOrdersByIdsAsync(string[] ids, string responseGroup = null)
         {
+            var customerOrderResponseGroup = EnumUtility.SafeParseFlags(responseGroup, CustomerOrderResponseGroup.Full);
+
             var result = await CustomerOrders.Where(x => ids.Contains(x.Id)).ToArrayAsync();
             var orderDiscounts = Discounts.Where(x => ids.Contains(x.CustomerOrderId)).ToArrayAsync();
             var orderTaxDetails = TaxDetails.Where(x => ids.Contains(x.CustomerOrderId)).ToArrayAsync();
             await Task.WhenAll(orderDiscounts, orderTaxDetails);
 
-            if ((responseGroup & CustomerOrderResponseGroup.WithAddresses) == CustomerOrderResponseGroup.WithAddresses)
+            if ((customerOrderResponseGroup & CustomerOrderResponseGroup.WithAddresses) == CustomerOrderResponseGroup.WithAddresses)
             {
                 var addresses = await Addresses.Where(x => ids.Contains(x.CustomerOrderId)).ToArrayAsync();
             }
 
-            if ((responseGroup & CustomerOrderResponseGroup.WithInPayments) == CustomerOrderResponseGroup.WithInPayments)
+            if ((customerOrderResponseGroup & CustomerOrderResponseGroup.WithInPayments) == CustomerOrderResponseGroup.WithInPayments)
             {
                 var inPayments = await InPayments.Where(x => ids.Contains(x.CustomerOrderId)).ToArrayAsync();
                 var paymentsIds = inPayments.Select(x => x.Id).ToArray();
@@ -48,7 +51,7 @@ namespace VirtoCommerce.OrdersModule.Data.Repositories
                 await Task.WhenAll(paymentDiscounts, paymentTaxDetails, paymentAddresses, transactions);
             }
 
-            if ((responseGroup & CustomerOrderResponseGroup.WithItems) == CustomerOrderResponseGroup.WithItems)
+            if ((customerOrderResponseGroup & CustomerOrderResponseGroup.WithItems) == CustomerOrderResponseGroup.WithItems)
             {
                 var lineItems = await LineItems.Where(x => ids.Contains(x.CustomerOrderId))
                                          .OrderByDescending(x => x.CreatedDate).ToArrayAsync();
@@ -58,7 +61,7 @@ namespace VirtoCommerce.OrdersModule.Data.Repositories
                 await Task.WhenAll(lineItemDiscounts, lineItemTaxDetails);
             }
 
-            if ((responseGroup & CustomerOrderResponseGroup.WithShipments) == CustomerOrderResponseGroup.WithShipments)
+            if ((customerOrderResponseGroup & CustomerOrderResponseGroup.WithShipments) == CustomerOrderResponseGroup.WithShipments)
             {
                 var shipments = await Shipments.Where(x => ids.Contains(x.CustomerOrderId)).ToArrayAsync();
                 var shipmentIds = shipments.Select(x => x.Id).ToArray();
@@ -69,18 +72,17 @@ namespace VirtoCommerce.OrdersModule.Data.Repositories
                 var packages = ShipmentPackagesPackages.Include(x => x.Items).Where(x => shipmentIds.Contains(x.ShipmentId)).ToArrayAsync();
                 await Task.WhenAll(shipmentDiscounts, shipmentTaxDetails, addresses, shipmentItems, packages);
             }
+
             return result;
         }
 
         public virtual async Task RemoveOrdersByIdsAsync(string[] ids)
         {
-            var orders = await GetCustomerOrdersByIdsAsync(ids, CustomerOrderResponseGroup.Full);
+            var orders = await GetCustomerOrdersByIdsAsync(ids);
             foreach (var order in orders)
             {
                 Remove(order);
             }
         }
-
-
     }
 }
