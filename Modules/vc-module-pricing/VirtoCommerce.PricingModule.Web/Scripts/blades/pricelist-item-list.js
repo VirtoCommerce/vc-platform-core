@@ -188,7 +188,7 @@ angular.module('virtoCommerce.pricingModule')
 
     function getSearchCriteria() {
         var result = {
-            priceListId: blade.currentEntityId,
+            priceListIds: [blade.currentEntityId],
             keyword: filter.keyword,
             sort: uiGridHelper.getSortExpression($scope),
             skip: ($scope.pageSettings.currentPage - 1) * $scope.pageSettings.itemsPerPageCount,
