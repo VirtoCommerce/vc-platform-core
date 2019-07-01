@@ -1,0 +1,17 @@
+{
+    "export": {
+        "blades": {
+            "export-settings": {
+                "labels": {
+                    "provider": "Select provider for export",
+                    "template": "Select export template",
+                    "column-selected": "Select column for export",
+                    "row-selected": "Select records for export",
+                    "total": "Total count",
+                    "processed": "Processed count",
+                    "errors-count": "Error count"
+                }
+            }
+        } 
+    }
+}
