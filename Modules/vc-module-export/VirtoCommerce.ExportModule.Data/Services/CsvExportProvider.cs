@@ -57,7 +57,6 @@ namespace VirtoCommerce.ExportModule.Data.Services
 
         public void WriteMetadata(ExportedTypeMetadata metadata)
         {
-            throw new NotSupportedException($"{nameof(CsvExportProvider)} does not support writing metadata.");
         }
 
         public void WriteRecord(object objectToRecord)
