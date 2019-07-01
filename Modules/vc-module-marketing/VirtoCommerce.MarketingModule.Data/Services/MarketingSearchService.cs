@@ -17,14 +17,14 @@ using VirtoCommerce.Platform.Core.Common;
 
 namespace VirtoCommerce.MarketingModule.Data.Services
 {
-    public class MarketingSearchServiceImpl : IDynamicContentSearchService, IPromotionSearchService
+    public class MarketingSearchService : IDynamicContentSearchService, IPromotionSearchService
     {
         private readonly Func<IMarketingRepository> _repositoryFactory;
         private readonly IDynamicContentService _dynamicContentService;
         private readonly IPromotionService _promotionService;
         private readonly IPlatformMemoryCache _platformMemoryCache;
 
-        public MarketingSearchServiceImpl(Func<IMarketingRepository> repositoryFactory, IDynamicContentService dynamicContentService, IPromotionService promotionService
+        public MarketingSearchService(Func<IMarketingRepository> repositoryFactory, IDynamicContentService dynamicContentService, IPromotionService promotionService
             , IPlatformMemoryCache platformMemoryCache)
         {
             _repositoryFactory = repositoryFactory;
@@ -54,8 +54,9 @@ namespace VirtoCommerce.MarketingModule.Data.Services
                         var ids = await query.Select(x => x.Id)
                             .Skip(criteria.Skip)
                             .Take(criteria.Take).ToArrayAsync();
-                        var promotions = await _promotionService.GetPromotionsByIdsAsync(ids);
-                        retVal.Results = promotions.OrderBy(x => Array.IndexOf(ids, x.Id)).ToList();
+                        
+                        retVal.Results = (await _promotionService.GetPromotionsByIdsAsync(ids))
+                            .OrderBy(x => Array.IndexOf(ids, x.Id)).ToList();
                     }
                 }
                 return retVal;
@@ -75,15 +76,6 @@ namespace VirtoCommerce.MarketingModule.Data.Services
                         SortDirection = SortDirection.Descending
                     }
                 };
-            }
-
-            if (sortInfos.Count < 2)
-            {
-                sortInfos.Add(new SortInfo
-                {
-                    SortColumn = ReflectionUtility.GetPropertyName<Promotion>(x => x.Id),
-                    SortDirection = SortDirection.Ascending
-                });
             }
 
             return sortInfos;
@@ -115,7 +107,6 @@ namespace VirtoCommerce.MarketingModule.Data.Services
             }
 
             query = query.OrderBySortInfos(sortInfos);
-
             return query;
         }
 
@@ -141,7 +132,7 @@ namespace VirtoCommerce.MarketingModule.Data.Services
                     {
                         var ids = await query.Select(x => x.Id).Skip(criteria.Skip).Take(criteria.Take).ToArrayAsync();
                         retVal.Results = (await _dynamicContentService.GetContentItemsByIdsAsync(ids))
-                                        .OrderBy(x => Array.IndexOf(ids, x.Id)).ToList();
+                            .OrderBy(x => Array.IndexOf(ids, x.Id)).ToList();
                     }
                 }
                 return retVal;
@@ -166,10 +157,9 @@ namespace VirtoCommerce.MarketingModule.Data.Services
                     {
                         var ids = await query.Select(x => x.Id).Skip(criteria.Skip).Take(criteria.Take).ToArrayAsync();
                         retVal.Results = (await _dynamicContentService.GetPlacesByIdsAsync(ids))
-                                        .OrderBy(x => Array.IndexOf(ids, x.Id)).ToList();
+                            .OrderBy(x => Array.IndexOf(ids, x.Id)).ToList();
                     }
                 }
-
                 return retVal;
             });
         }
@@ -184,6 +174,7 @@ namespace VirtoCommerce.MarketingModule.Data.Services
                 using (var repository = _repositoryFactory())
                 {
                     var sortInfos = GetContentPublicationsSortInfos(criteria);
+                    
                     var query = GetContentPublicationsQuery(criteria, repository, sortInfos);
 
                     retVal.TotalCount = await query.CountAsync();
@@ -192,10 +183,9 @@ namespace VirtoCommerce.MarketingModule.Data.Services
                     {
                         var ids = await query.Select(x => x.Id).Skip(criteria.Skip).Take(criteria.Take).ToArrayAsync();
                         retVal.Results = (await _dynamicContentService.GetPublicationsByIdsAsync(ids))
-                                         .OrderBy(x => Array.IndexOf(ids, x.Id)).ToList();
+                            .OrderBy(x => Array.IndexOf(ids, x.Id)).ToList();
                     }
                 }
-
                 return retVal;
             });
         }
@@ -210,7 +200,7 @@ namespace VirtoCommerce.MarketingModule.Data.Services
                 using (var repository = _repositoryFactory())
                 {
                     var sortInfos = GetFoldersSortInfos(criteria);
-                    var query = GetFoldersQuery(criteria, repository, sortInfos);
+                    var query = GetFolderQuery(criteria, repository, sortInfos);
 
                     retVal.TotalCount = await query.CountAsync();
 
@@ -218,7 +208,7 @@ namespace VirtoCommerce.MarketingModule.Data.Services
                     {
                         var ids = await query.Select(x => x.Id).ToArrayAsync();
                         retVal.Results = (await _dynamicContentService.GetFoldersByIdsAsync(ids))
-                                        .OrderBy(x => Array.IndexOf(ids, x.Id)).ToList();
+                            .OrderBy(x => Array.IndexOf(ids, x.Id)).ToList();
                     }
                 }
                 return retVal;
@@ -241,15 +231,6 @@ namespace VirtoCommerce.MarketingModule.Data.Services
                 };
             }
 
-            if (sortInfos.Count < 2)
-            {
-                sortInfos.Add(new SortInfo
-                {
-                    SortColumn = ReflectionUtility.GetPropertyName<DynamicContentItem>(x => x.Id),
-                    SortDirection = SortDirection.Ascending
-                });
-            }
-
             return sortInfos;
         }
 
@@ -268,15 +249,6 @@ namespace VirtoCommerce.MarketingModule.Data.Services
                 };
             }
 
-            if (sortInfos.Count < 2)
-            {
-                sortInfos.Add(new SortInfo
-                {
-                    SortColumn = ReflectionUtility.GetPropertyName<DynamicContentPlace>(x => x.Id),
-                    SortDirection = SortDirection.Ascending
-                });
-            }
-
             return sortInfos;
         }
 
@@ -289,19 +261,10 @@ namespace VirtoCommerce.MarketingModule.Data.Services
                 {
                     new SortInfo
                     {
-                        SortColumn = ReflectionUtility.GetPropertyName<DynamicContentPublication>(x => x.Name),
+                        SortColumn = ReflectionUtility.GetPropertyName<DynamicContentPublication>(x => x.Priority),
                         SortDirection = SortDirection.Ascending
                     }
                 };
-            }
-
-            if (sortInfos.Count < 2)
-            {
-                sortInfos.Add(new SortInfo
-                {
-                    SortColumn = ReflectionUtility.GetPropertyName<DynamicContentPublication>(x => x.Id),
-                    SortDirection = SortDirection.Ascending
-                });
             }
 
             return sortInfos;
@@ -322,18 +285,8 @@ namespace VirtoCommerce.MarketingModule.Data.Services
                 };
             }
 
-            if (sortInfos.Count < 2)
-            {
-                sortInfos.Add(new SortInfo
-                {
-                    SortColumn = ReflectionUtility.GetPropertyName<DynamicContentFolder>(x => x.Id),
-                    SortDirection = SortDirection.Ascending
-                });
-            }
-
             return sortInfos;
         }
-
 
         protected virtual IQueryable<DynamicContentItemEntity> GetContentItemsQuery(DynamicContentItemSearchCriteria criteria,
             IMarketingRepository repository, IList<SortInfo> sortInfos)
@@ -368,7 +321,6 @@ namespace VirtoCommerce.MarketingModule.Data.Services
             }
 
             query = query.OrderBySortInfos(sortInfos);
-
             return query;
         }
 
@@ -383,7 +335,22 @@ namespace VirtoCommerce.MarketingModule.Data.Services
 
             if (criteria.OnlyActive)
             {
-                query = query.Where(x => x.IsActive);
+                query = query.Where(x => x.IsActive == true);
+            }
+
+            if (criteria.StartDate != null)
+            {
+                query = query.Where(x => x.StartDate == null || criteria.StartDate >= x.StartDate);
+            }
+
+            if (criteria.EndDate != null)
+            {
+                query = query.Where(x => x.EndDate == null || x.EndDate >= criteria.EndDate);
+            }
+
+            if (!string.IsNullOrEmpty(criteria.PlaceName))
+            {
+                query = query.Where(x => x.ContentPlaces.Any(y => y.ContentPlace.Name == criteria.PlaceName));
             }
 
             if (!string.IsNullOrEmpty(criteria.Keyword))
@@ -395,8 +362,8 @@ namespace VirtoCommerce.MarketingModule.Data.Services
             return query;
         }
 
-        protected virtual IQueryable<DynamicContentFolderEntity> GetFoldersQuery(DynamicContentFolderSearchCriteria criteria, IMarketingRepository repository,
-            IList<SortInfo> sortInfos)
+        protected virtual IQueryable<DynamicContentFolderEntity> GetFolderQuery(DynamicContentFolderSearchCriteria criteria,
+            IMarketingRepository repository, IList<SortInfo> sortInfos)
         {
             var query = repository.Folders.Where(x => x.ParentFolderId == criteria.FolderId);
             if (!string.IsNullOrEmpty(criteria.Keyword))

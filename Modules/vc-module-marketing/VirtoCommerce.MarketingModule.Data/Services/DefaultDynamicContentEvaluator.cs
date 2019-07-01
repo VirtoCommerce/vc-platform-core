@@ -9,16 +9,19 @@ using VirtoCommerce.CoreModule.Core.Conditions;
 using VirtoCommerce.MarketingModule.Core.Model;
 using VirtoCommerce.MarketingModule.Core.Model.DynamicContent;
 using VirtoCommerce.MarketingModule.Core.Services;
+using VirtoCommerce.Platform.Core.Common;
 
 namespace VirtoCommerce.MarketingModule.Data.Services
 {
-    public class DefaultDynamicContentEvaluatorImpl : IMarketingDynamicContentEvaluator
+    public class DefaultDynamicContentEvaluator : IMarketingDynamicContentEvaluator
     {
+        private readonly IDynamicContentSearchService _dynamicContentSearchService;
         private readonly IDynamicContentService _dynamicContentService;
         private readonly ILogger _logger;
 
-        public DefaultDynamicContentEvaluatorImpl(IDynamicContentService dynamicContentService, ILogger<DefaultDynamicContentEvaluatorImpl> logger)
+        public DefaultDynamicContentEvaluator(IDynamicContentSearchService dynamicContentSearchService, IDynamicContentService dynamicContentService, ILogger<DefaultDynamicContentEvaluator> logger)
         {
+            _dynamicContentSearchService = dynamicContentSearchService;
             _dynamicContentService = dynamicContentService;
             _logger = logger;
         }
@@ -35,12 +38,13 @@ namespace VirtoCommerce.MarketingModule.Data.Services
             {
                 dynamicContext.ToDate = DateTime.UtcNow;
             }
-            var retVal = new List<DynamicContentItem>();
+            var result = new List<DynamicContentItem>();
+            var criteria = AbstractTypeFactory<DynamicContentPublicationSearchCriteria>.TryCreateInstance();
+            criteria = criteria.FromEvalContext(dynamicContext);
 
-            var publishings = await _dynamicContentService.GetContentPublicationsByStoreIdAndPlaceNameAsync(dynamicContext.StoreId, dynamicContext.ToDate, dynamicContext.PlaceName);
+            var publishings = await _dynamicContentSearchService.SearchContentPublicationsAsync(criteria);
 
-            var contentItemIds = new List<string>();
-            foreach (var publishing in publishings.Where(x => x.DynamicExpression != null))
+            foreach (var publishing in publishings.Results)
             {
                 try
                 {
@@ -51,7 +55,7 @@ namespace VirtoCommerce.MarketingModule.Data.Services
                         var conditions = dynamicContentConditionTree.GetConditions();
                         if (conditions.All(c => c.Evaluate(context)))
                         {
-                            contentItemIds.AddRange(publishing.ContentItems.Select(x => x.Id));
+                            result.AddRange(publishing.ContentItems);
                         }
                     }
 
@@ -62,10 +66,7 @@ namespace VirtoCommerce.MarketingModule.Data.Services
                 }
             }
 
-            var dynamicContentItems = await _dynamicContentService.GetContentItemsByIdsAsync(contentItemIds.ToArray());
-            retVal.AddRange(dynamicContentItems);
-
-            return retVal.ToArray();
+            return await _dynamicContentService.GetContentItemsByIdsAsync(result.Select(x => x.Id).ToArray());
         }
 
         #endregion

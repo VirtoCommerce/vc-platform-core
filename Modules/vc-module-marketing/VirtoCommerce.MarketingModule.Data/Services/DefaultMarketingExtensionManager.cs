@@ -10,7 +10,7 @@ namespace VirtoCommerce.MarketingModule.Data.Services
     /// <summary>
     /// Uses for extensions of promotions and dynamic content dynamic expressions
     /// </summary>
-	public class DefaultMarketingExtensionManagerImpl : IMarketingExtensionManager
+	public class DefaultMarketingExtensionManager : IMarketingExtensionManager
     {
         private List<Promotion> _promotions = new List<Promotion>();
 

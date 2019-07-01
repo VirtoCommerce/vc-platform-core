@@ -41,17 +41,17 @@ namespace VirtoCommerce.CustomerModule.Web
         public void Initialize(IServiceCollection serviceCollection)
         {
             var configuration = serviceCollection.BuildServiceProvider().GetRequiredService<IConfiguration>();
-            serviceCollection.AddTransient<ICustomerRepository, CustomerRepositoryImpl>();
+            serviceCollection.AddTransient<ICustomerRepository, CustomerRepository>();
             var connectionString = configuration.GetConnectionString("VirtoCommerce.Customer") ?? configuration.GetConnectionString("VirtoCommerce");
             serviceCollection.AddDbContext<CustomerDbContext>(options => options.UseSqlServer(connectionString));
             serviceCollection.AddSingleton<Func<ICustomerRepository>>(provider => () => provider.CreateScope().ServiceProvider.GetRequiredService<ICustomerRepository>());
             serviceCollection.AddSingleton<Func<IMemberRepository>>(provider => () => provider.CreateScope().ServiceProvider.GetRequiredService<ICustomerRepository>());
-            serviceCollection.AddSingleton<IMemberService, CommerceMembersServiceImpl>();
+            serviceCollection.AddSingleton<IMemberService, CommerceMembersService>();
 
             serviceCollection.AddSingleton<ISearchRequestBuilder, MemberSearchRequestBuilder>();
             serviceCollection.AddSingleton<MemberSearchServiceBase>();
             serviceCollection.AddSingleton<MemberIndexedSearchService>();
-            serviceCollection.AddSingleton<CommerceMembersSearchServiceImpl>();
+            serviceCollection.AddSingleton<CommerceMembersSearchService>();
             serviceCollection.AddSingleton<IMemberSearchService, MemberSearchServiceDecorator>();
             serviceCollection.AddSingleton<CustomerExportImport>();
 

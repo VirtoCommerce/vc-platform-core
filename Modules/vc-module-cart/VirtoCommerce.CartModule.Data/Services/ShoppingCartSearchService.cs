@@ -14,13 +14,13 @@ using VirtoCommerce.Platform.Core.Common;
 
 namespace VirtoCommerce.CartModule.Data.Services
 {
-    public class ShoppingCartSearchServiceImpl : IShoppingCartSearchService
+    public class ShoppingCartSearchService : IShoppingCartSearchService
     {
         private readonly Func<ICartRepository> _repositoryFactory;
         private readonly IPlatformMemoryCache _platformMemoryCache;
         private readonly IShoppingCartService _cartService;
 
-        public ShoppingCartSearchServiceImpl(Func<ICartRepository> repositoryFactory, IPlatformMemoryCache platformMemoryCache, IShoppingCartService cartService)
+        public ShoppingCartSearchService(Func<ICartRepository> repositoryFactory, IPlatformMemoryCache platformMemoryCache, IShoppingCartService cartService)
         {
             _repositoryFactory = repositoryFactory;
             _platformMemoryCache = platformMemoryCache;

@@ -76,7 +76,9 @@ namespace VirtoCommerce.CustomerModule.Data.Services
                     }
                 }
 
-                await _dynamicPropertyService.LoadDynamicPropertyValuesAsync(retVal.ToArray<IHasDynamicProperties>());
+                //TODO remove
+                //await _dynamicPropertyMetaInfoService.ResolveMetaInfoAsync(retVal.ToArray<IHasDynamicProperties>());
+
                 return retVal.ToArray();
             });
         }
@@ -128,11 +130,6 @@ namespace VirtoCommerce.CustomerModule.Data.Services
                 await _eventPublisher.Publish(new MemberChangingEvent(changedEntries));
                 await repository.UnitOfWork.CommitAsync();
                 pkMap.ResolvePrimaryKeys();
-
-                foreach (var member in members)
-                {
-                    await _dynamicPropertyService.SaveDynamicPropertyValuesAsync(member);
-                }
 
                 await _eventPublisher.Publish(new MemberChangedEvent(changedEntries));
             }

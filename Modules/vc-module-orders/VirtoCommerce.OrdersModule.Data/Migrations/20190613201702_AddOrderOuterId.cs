@@ -24,11 +24,13 @@ namespace VirtoCommerce.OrdersModule.Data.Migrations
                 maxLength: 128,
                 nullable: true);
 
-            migrationBuilder.AddColumn<string>(
-                name: "OuterId",
-                table: "CustomerOrder",
-                maxLength: 128,
-                nullable: true);
+            migrationBuilder.Sql(@"IF (NOT EXISTS (SELECT * 
+                 FROM INFORMATION_SCHEMA.TABLES 
+                 WHERE TABLE_NAME = '__MigrationHistory'))
+                    BEGIN
+                         ALTER TABLE [CustomerOrder] ADD [OuterId] nvarchar(128) NULL
+                    END");
+
         }
 
         protected override void Down(MigrationBuilder migrationBuilder)

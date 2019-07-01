@@ -3,9 +3,9 @@ using VirtoCommerce.CustomerModule.Data.Model;
 
 namespace VirtoCommerce.CustomerModule.Data.Repositories
 {
-    public class CustomerRepositoryImpl : MemberRepositoryBase, ICustomerRepository
+    public class CustomerRepository : MemberRepositoryBase, ICustomerRepository
     {
-        public CustomerRepositoryImpl(CustomerDbContext dbContext) : base(dbContext)
+        public CustomerRepository(CustomerDbContext dbContext) : base(dbContext)
         {
         }
 

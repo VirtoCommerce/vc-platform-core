@@ -9,5 +9,7 @@ namespace VirtoCommerce.MarketingModule.Core.Model
 
         public string ParentFolderId { get; set; }
         public DynamicContentFolder ParentFolder { get; set; }
+
+        public override string ObjectType => nameof(DynamicContentFolder);
     }
 }

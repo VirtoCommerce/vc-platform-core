@@ -82,6 +82,13 @@ namespace VirtoCommerce.OrdersModule.Data.Migrations
                              ALTER TABLE [dbo].[OrderShipment] DROP CONSTRAINT [FK_dbo.OrderShipment_dbo.OrderOperation_Id]
                         END
 
+                        BEGIN
+                            UPDATE [PlatformDynamicProperty] SET ObjectType = 'VirtoCommerce.OrderModule.Core.Model.CustomerOrder' WHERE ObjectType = 'VirtoCommerce.Domain.Order.Model.CustomerOrder'
+                            UPDATE [PlatformDynamicProperty] SET ObjectType = 'VirtoCommerce.OrderModule.Core.Model.LineItem' WHERE ObjectType = 'VirtoCommerce.Domain.Order.Model.LineItem'
+                            UPDATE [PlatformDynamicPropertyObjectValue] SET ObjectType = 'VirtoCommerce.OrderModule.Core.Model.CustomerOrder' WHERE ObjectType = 'VirtoCommerce.Domain.Order.Model.CustomerOrder'
+                            UPDATE [PlatformDynamicPropertyObjectValue] SET ObjectType = 'VirtoCommerce.OrderModule.Core.Model.LineItem' WHERE ObjectType = 'VirtoCommerce.Domain.Order.Model.LineItem'
+                        END
+
                     END");
         }
 

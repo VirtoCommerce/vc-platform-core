@@ -37,13 +37,13 @@ namespace VirtoCommerce.OrdersModule.Web
         public void Initialize(IServiceCollection serviceCollection)
         {
             var configuration = serviceCollection.BuildServiceProvider().GetRequiredService<IConfiguration>();
-            serviceCollection.AddTransient<IOrderRepository, OrderRepositoryImpl>();
+            serviceCollection.AddTransient<IOrderRepository, OrderRepository>();
             var connectionString = configuration.GetConnectionString("VirtoCommerce.Orders") ?? configuration.GetConnectionString("VirtoCommerce");
             serviceCollection.AddDbContext<OrderDbContext>(options => options.UseSqlServer(connectionString));
             serviceCollection.AddSingleton<Func<IOrderRepository>>(provider => () => provider.CreateScope().ServiceProvider.GetRequiredService<IOrderRepository>());
-            serviceCollection.AddSingleton<ICustomerOrderSearchService, CustomerOrderSearchServiceImpl>();
-            serviceCollection.AddSingleton<ICustomerOrderService, CustomerOrderServiceImpl>();
-            serviceCollection.AddSingleton<ICustomerOrderBuilder, CustomerOrderBuilderImpl>();
+            serviceCollection.AddSingleton<ICustomerOrderSearchService, CustomerOrderSearchService>();
+            serviceCollection.AddSingleton<ICustomerOrderService, CustomerOrderService>();
+            serviceCollection.AddSingleton<ICustomerOrderBuilder, CustomerOrderBuilder>();
             serviceCollection.AddSingleton<ICustomerOrderTotalsCalculator, DefaultCustomerOrderTotalsCalculator>();
             serviceCollection.AddSingleton<OrderExportImport>();
             serviceCollection.AddSingleton<OrderChangedEvent>();

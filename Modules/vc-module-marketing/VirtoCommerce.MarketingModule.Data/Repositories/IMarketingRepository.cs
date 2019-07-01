@@ -25,8 +25,6 @@ namespace VirtoCommerce.MarketingModule.Data.Repositories
         Task<DynamicContentPlaceEntity[]> GetContentPlacesByIdsAsync(string[] ids);
         Task<DynamicContentPublishingGroupEntity[]> GetContentPublicationsByIdsAsync(string[] ids);
 
-        Task<DynamicContentPublishingGroupEntity[]> GetContentPublicationsByStoreIdAndPlaceNameAsync(string storeId, DateTime intervalDate, string placeName);
-
         Task RemoveFoldersAsync(string[] ids);
         Task RemoveContentPublicationsAsync(string[] ids);
         Task RemovePlacesAsync(string[] ids);

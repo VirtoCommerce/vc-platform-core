@@ -16,6 +16,7 @@ namespace VirtoCommerce.StoreModule.Data.Repositories
             #region Store
             modelBuilder.Entity<StoreEntity>().ToTable("Store").HasKey(x => x.Id);
             modelBuilder.Entity<StoreEntity>().Property(x => x.Id).HasMaxLength(128);
+
             #endregion
 
             #region StoreCurrency
@@ -51,6 +52,19 @@ namespace VirtoCommerce.StoreModule.Data.Repositories
             modelBuilder.Entity<SeoInfoEntity>().HasOne(x => x.Store).WithMany(x => x.SeoInfos).HasForeignKey(x => x.StoreId)
                 .OnDelete(DeleteBehavior.Cascade);
 
+            #endregion
+
+            #region DynamicProperty
+
+            modelBuilder.Entity<StoreDynamicPropertyObjectValueEntity>().ToTable("StoreDynamicPropertyObjectValue").HasKey(x => x.Id);
+            modelBuilder.Entity<StoreDynamicPropertyObjectValueEntity>().Property(x => x.Id).HasMaxLength(128);
+            modelBuilder.Entity<StoreDynamicPropertyObjectValueEntity>().Property(x => x.DecimalValue).HasColumnType("decimal(18,5)");
+            modelBuilder.Entity<StoreDynamicPropertyObjectValueEntity>().HasOne(p => p.Store)
+                .WithMany(s => s.DynamicPropertyObjectValues).HasForeignKey(k => k.ObjectId)
+                .OnDelete(DeleteBehavior.Cascade);
+            modelBuilder.Entity<StoreDynamicPropertyObjectValueEntity>().HasIndex(x => new { x.ObjectType, x.ObjectId })
+                        .IsUnique(false)
+                        .HasName("IX_ObjectType_ObjectId");
             #endregion
         }
     }

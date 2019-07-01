@@ -16,11 +16,11 @@ namespace VirtoCommerce.CustomerModule.Data.Services
     /// <summary>
     /// Members service support CRUD and search for Contact, Organization, Vendor and Employee member types
     /// </summary>
-    public class CommerceMembersServiceImpl : MemberServiceBase
+    public class CommerceMembersService : MemberServiceBase
     {
         private readonly IUserSearchService _userSearchService;
 
-        public CommerceMembersServiceImpl(Func<ICustomerRepository> repositoryFactory, IEventPublisher eventPublisher
+        public CommerceMembersService(Func<ICustomerRepository> repositoryFactory, IEventPublisher eventPublisher
             , IDynamicPropertyService dynamicPropertyService, IPlatformMemoryCache platformMemoryCache, IUserSearchService userSearchService)
             : base(repositoryFactory, eventPublisher, dynamicPropertyService, platformMemoryCache)
         {

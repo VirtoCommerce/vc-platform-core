@@ -9,10 +9,10 @@ using VirtoCommerce.Platform.Data.Infrastructure;
 
 namespace VirtoCommerce.MarketingModule.Data.Repositories
 {
-    public class MarketingRepositoryImpl : DbContextRepositoryBase<MarketingDbContext>, IMarketingRepository
+    public class MarketingRepository : DbContextRepositoryBase<MarketingDbContext>, IMarketingRepository
     {
         private readonly MarketingDbContext _dbContext;
-        public MarketingRepositoryImpl(MarketingDbContext dbContext) : base(dbContext)
+        public MarketingRepository(MarketingDbContext dbContext) : base(dbContext)
         {
             _dbContext = dbContext;
         }
@@ -104,18 +104,6 @@ namespace VirtoCommerce.MarketingModule.Data.Repositories
                 .Include(x => x.ContentItems).ThenInclude(y => y.ContentItem)
                 .Include(x => x.ContentPlaces).ThenInclude(y => y.ContentPlace)
                                     .ToArrayAsync();
-        }
-
-        public Task<DynamicContentPublishingGroupEntity[]> GetContentPublicationsByStoreIdAndPlaceNameAsync(string storeId, DateTime intervalDate, string placeName)
-        {
-            return PublishingGroups
-                .Include(x => x.ContentItems)
-                .Where(x => x.IsActive)
-                .Where(x => x.StoreId == storeId)
-                .Where(x => (x.StartDate == null || intervalDate >= x.StartDate) && (x.EndDate == null || x.EndDate >= intervalDate))
-                .Where(x => x.ContentPlaces.Any(y => y.ContentPlace.Name == placeName))
-                .OrderBy(x => x.Priority)
-                .ToArrayAsync();
         }
 
         public Task RemoveFoldersAsync(string[] ids)

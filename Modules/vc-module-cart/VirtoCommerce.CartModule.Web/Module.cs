@@ -27,14 +27,14 @@ namespace VirtoCommerce.CartModule.Web
         public void Initialize(IServiceCollection serviceCollection)
         {
             var configuration = serviceCollection.BuildServiceProvider().GetRequiredService<IConfiguration>();
-            serviceCollection.AddTransient<ICartRepository, CartRepositoryImpl>();
+            serviceCollection.AddTransient<ICartRepository, CartRepository>();
             var connectionString = configuration.GetConnectionString("VirtoCommerce.Cart") ?? configuration.GetConnectionString("VirtoCommerce");
             serviceCollection.AddDbContext<CartDbContext>(options => options.UseSqlServer(connectionString));
             serviceCollection.AddSingleton<Func<ICartRepository>>(provider => () => provider.CreateScope().ServiceProvider.GetRequiredService<ICartRepository>());
-            serviceCollection.AddSingleton<IShoppingCartService, ShoppingCartServiceImpl>();
-            serviceCollection.AddSingleton<IShoppingCartSearchService, ShoppingCartSearchServiceImpl>();
+            serviceCollection.AddSingleton<IShoppingCartService, ShoppingCartService>();
+            serviceCollection.AddSingleton<IShoppingCartSearchService, ShoppingCartSearchService>();
             serviceCollection.AddSingleton<IShoppingCartTotalsCalculator, DefaultShoppingCartTotalsCalculator>();
-            serviceCollection.AddSingleton<IShoppingCartBuilder, ShoppingCartBuilderImpl>();
+            serviceCollection.AddSingleton<IShoppingCartBuilder, ShoppingCartBuilder>();
 
             serviceCollection.AddSingleton<CartChangedEventHandler>();
             var providerSnapshot = serviceCollection.BuildServiceProvider();

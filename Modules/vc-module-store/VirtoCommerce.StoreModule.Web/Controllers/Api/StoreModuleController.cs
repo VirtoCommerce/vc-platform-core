@@ -61,7 +61,7 @@ namespace VirtoCommerce.StoreModule.Web.Controllers.Api
             //        throw new HttpResponseException(HttpStatusCode.Unauthorized);
             //    }
             //}
-
+            criteria.ResponseGroup = StoreResponseGroup.StoreInfo.ToString();
             var result = await _storeSearchService.SearchStoresAsync(criteria);
             return result;
         }
@@ -204,7 +204,7 @@ namespace VirtoCommerce.StoreModule.Web.Controllers.Api
             if (user != null)
             {
                 var storeIds = await _storeService.GetUserAllowedStoreIdsAsync(user);
-                var stores = await _storeService.GetByIdsAsync(storeIds.ToArray());
+                var stores = await _storeService.GetByIdsAsync(storeIds.ToArray(), StoreResponseGroup.StoreInfo.ToString());
                 return Ok(stores);
             }
 

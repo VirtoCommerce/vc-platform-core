@@ -18,7 +18,7 @@ using VirtoCommerce.StoreModule.Core.Services;
 
 namespace VirtoCommerce.CartModule.Data.Services
 {
-    public class ShoppingCartBuilderImpl : IShoppingCartBuilder
+    public class ShoppingCartBuilder : IShoppingCartBuilder
     {
         private readonly IStoreService _storeService;
         private readonly IShoppingCartService _shoppingCartService;
@@ -30,7 +30,7 @@ namespace VirtoCommerce.CartModule.Data.Services
 
         private Store _store;
 
-        public ShoppingCartBuilderImpl(
+        public ShoppingCartBuilder(
             IStoreService storeService,
             IShoppingCartService shoppingShoppingCartService,
             IShoppingCartSearchService shoppingCartSearchService,
@@ -301,7 +301,7 @@ namespace VirtoCommerce.CartModule.Data.Services
 
         #endregion
 
-        protected Store Store => _store ?? (_store = _storeService.GetByIdAsync(Cart.StoreId).GetAwaiter().GetResult());
+        protected Store Store => _store ?? (_store = _storeService.GetByIdAsync(Cart.StoreId, StoreResponseGroup.StoreInfo.ToString()).GetAwaiter().GetResult());
 
         protected virtual void InnerChangeItemQuantity(LineItem lineItem, int quantity)
         {

@@ -17,18 +17,16 @@ using VirtoCommerce.Platform.Core.Events;
 
 namespace VirtoCommerce.MarketingModule.Data.Services
 {
-    public class DynamicContentServiceImpl : IDynamicContentService
+    public class DynamicContentService : IDynamicContentService
     {
         private readonly Func<IMarketingRepository> _repositoryFactory;
-        private readonly IDynamicPropertyService _dynamicPropertyService;
         private readonly IEventPublisher _eventPublisher;
         private readonly IPlatformMemoryCache _platformMemoryCache;
         private readonly IMarketingExtensionManager _marketingExtensionManager;
 
-        public DynamicContentServiceImpl(Func<IMarketingRepository> repositoryFactory, IDynamicPropertyService dynamicPropertyService, IEventPublisher eventPublisher, IPlatformMemoryCache platformMemoryCache, IMarketingExtensionManager marketingExtensionManager)
+        public DynamicContentService(Func<IMarketingRepository> repositoryFactory, IEventPublisher eventPublisher, IPlatformMemoryCache platformMemoryCache, IMarketingExtensionManager marketingExtensionManager)
         {
             _repositoryFactory = repositoryFactory;
-            _dynamicPropertyService = dynamicPropertyService;
             _eventPublisher = eventPublisher;
             _platformMemoryCache = platformMemoryCache;
             _marketingExtensionManager = marketingExtensionManager;
@@ -48,12 +46,6 @@ namespace VirtoCommerce.MarketingModule.Data.Services
                 {
                     retVal = (await repository.GetContentItemsByIdsAsync(ids)).Select(x => x.ToModel(AbstractTypeFactory<DynamicContentItem>.TryCreateInstance())).ToArray();
                 }
-
-                if (retVal != null)
-                {
-                    await _dynamicPropertyService.LoadDynamicPropertyValuesAsync(retVal);
-                }
-
                 return retVal;
             });
 
@@ -221,20 +213,6 @@ namespace VirtoCommerce.MarketingModule.Data.Services
             }
 
             DynamicContentPublicationCacheRegion.ExpireRegion();
-        }
-
-        public async Task<DynamicContentPublication[]> GetContentPublicationsByStoreIdAndPlaceNameAsync(string storeId, DateTime intervalDate, string placeName)
-        {
-            var cacheKey = CacheKey.With(GetType(), "GetContentPublicationsByStoreIdAndPlaceName", storeId, intervalDate.ToString("s"), placeName);
-            return await _platformMemoryCache.GetOrCreateExclusiveAsync(cacheKey, async (cacheEntry) =>
-            {
-                cacheEntry.AddExpirationToken(DynamicContentPublicationCacheRegion.CreateChangeToken());
-                using (var repository = _repositoryFactory())
-                {
-                    var publications = await repository.GetContentPublicationsByStoreIdAndPlaceNameAsync(storeId, intervalDate, placeName);
-                    return publications.Select(x => x.ToModel(AbstractTypeFactory<DynamicContentPublication>.TryCreateInstance())).ToArray();
-                }
-            });
         }
 
         public async Task DeletePublicationsAsync(string[] ids)

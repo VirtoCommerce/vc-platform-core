@@ -7,9 +7,9 @@ using VirtoCommerce.Platform.Data.Infrastructure;
 
 namespace VirtoCommerce.CartModule.Data.Repositories
 {
-    public class CartRepositoryImpl : DbContextRepositoryBase<CartDbContext>, ICartRepository
+    public class CartRepository : DbContextRepositoryBase<CartDbContext>, ICartRepository
     {
-        public CartRepositoryImpl(CartDbContext dbContext) : base(dbContext)
+        public CartRepository(CartDbContext dbContext) : base(dbContext)
         {
         }
 
