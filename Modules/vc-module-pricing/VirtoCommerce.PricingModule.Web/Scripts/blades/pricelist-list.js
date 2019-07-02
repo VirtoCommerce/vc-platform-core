@@ -4,14 +4,16 @@ function ($scope, pricelists, dialogService, uiGridHelper, bladeUtils) {
     var blade = $scope.blade;
     var bladeNavigationService = bladeUtils.bladeNavigationService;
 
+    var exportDataRequest = {
+        exportTypeName: 'VirtoCommerce.PricingModule.Core.Model.Pricelist',
+        dataQuery: {
+            exportTypeName: 'PricelistExportDataQuery'
+        }
+    };
+
     blade.refresh = function (parentRefresh) {
         blade.isLoading = true;
-        return pricelists.search({
-            keyword: filter.keyword,
-            sort: uiGridHelper.getSortExpression($scope),
-            skip: ($scope.pageSettings.currentPage - 1) * $scope.pageSettings.itemsPerPageCount,
-            take: $scope.pageSettings.itemsPerPageCount
-        }, function (data) {
+        return pricelists.search(getSearchCriteria(), function (data) {
             blade.isLoading = false;
             blade.currentEntities = data.results;
             $scope.pageSettings.totalItems = data.totalCount;
@@ -106,7 +108,36 @@ function ($scope, pricelists, dialogService, uiGridHelper, bladeUtils) {
         },
         canExecuteMethod: isItemsChecked,
         permission: 'pricing:delete'
-    }
+        },
+        {
+            name: "platform.commands.export",
+            icon: 'fa fa-upload',
+            canExecuteMethod: function () {
+                return true;
+            },
+            executeMethod: function () {
+
+                var selectedRows = $scope.gridApi.selection.getSelectedRows();
+                exportDataRequest.dataQuery.objectIds = [];
+                if (selectedRows && selectedRows.length) {
+                    exportDataRequest.dataQuery.objectIds = _.map(selectedRows, function (pricelist) {
+                        return pricelist.id;
+                    });
+                }
+
+                exportDataRequest.dataQuery = angular.extend(exportDataRequest.dataQuery, getSearchCriteria());
+
+                var newBlade = {
+                    id: 'pricelistExport',
+                    title: 'pricing.blades.exporter.priceListTitle',
+                    subtitle: 'pricing.blades.exporter.pricelistSubtitle',
+                    controller: 'virtoCommerce.exportModule.exporterController',
+                    template: 'Modules/$(VirtoCommerce.Export)/Scripts/blades/exportSetting.tml.html',
+                    exportDataRequest: exportDataRequest
+                };
+                bladeNavigationService.showBlade(newBlade, blade);
+            }
+        }
     ];
 
     var filter = $scope.filter = {};
@@ -130,6 +161,16 @@ function ($scope, pricelists, dialogService, uiGridHelper, bladeUtils) {
 
         bladeUtils.initializePagination($scope);
     };
+
+    function getSearchCriteria() {
+        var result = {
+            keyword: filter.keyword,
+            sort: uiGridHelper.getSortExpression($scope),
+            skip: ($scope.pageSettings.currentPage - 1) * $scope.pageSettings.itemsPerPageCount,
+            take: $scope.pageSettings.itemsPerPageCount
+        }
+        return result;
+    }
 
     // actions on load
     //blade.refresh();

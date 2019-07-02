@@ -130,8 +130,12 @@
                 }
             },
             "exporter": {
-                "title": "Prices export",
-                "subtitle": "Export prices to json or csv"
+                "priceTitle": "Prices export",
+                "priceSubtitle": "Export prices to json or csv",
+                "priceListTitle": "Pricelist export",
+                "pricelistSubtitle": "Export priceslist to json or csv",
+                "priceAssignmentTitle": "Price Assignment export",
+                "priceAssignmentSubtitle":  "Export price assignment to json or csv" 
             } 
         },
         "widgets": {
