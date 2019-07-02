@@ -10,7 +10,8 @@ namespace VirtoCommerce.PricingModule.Data.ExportImport
         {
             IncludedProperties = new[]
             {
-                "Id", "Name", "Currency", "Assignments.Id", "Assignments.CatalogId", "Assignments.Name", "Assignments.Priority", "Assignments.ConditionExpression","Assignments.PredicateVisualTreeSerialized", "Prices.Id", "Prices.Currency", "Prices.ProductId", "Prices.Sale", "Prices.List", "Prices.MinQuantity","Prices.StartDate", "Prices.EndDate", "Prices.EffectiveValue" };
+                "Id", "Name", "Currency", "Assignments.Id", "Assignments.CatalogId", "Assignments.Name", "Assignments.Priority", "Assignments.ConditionExpression","Assignments.PredicateVisualTreeSerialized", "Prices.Id", "Prices.Currency", "Prices.ProductId", "Prices.Sale", "Prices.List", "Prices.MinQuantity","Prices.StartDate", "Prices.EndDate", "Prices.EffectiveValue"
+            };
         }
 
         public override SearchCriteriaBase CreateSearchCriteria()
