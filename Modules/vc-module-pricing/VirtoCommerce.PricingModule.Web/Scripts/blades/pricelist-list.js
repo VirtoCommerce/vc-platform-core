@@ -11,7 +11,6 @@ function ($scope, pricelists, dialogService, uiGridHelper, bladeUtils) {
         }
     };
 
-
     blade.refresh = function (parentRefresh) {
         blade.isLoading = true;
         return pricelists.search(getSearchCriteria(), function (data) {
