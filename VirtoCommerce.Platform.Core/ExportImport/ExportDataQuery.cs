@@ -19,6 +19,7 @@ namespace VirtoCommerce.Platform.Core.ExportImport
         {
             var result = CreateSearchCriteria();
             result.ObjectIds = ObjectIds;
+            result.Keyword = Keyword;
             result.Sort = Sort;
             return result;
         }
@@ -27,6 +28,7 @@ namespace VirtoCommerce.Platform.Core.ExportImport
         {
             ObjectIds = searchCriteria.ObjectIds.ToArray();
             Sort = searchCriteria.Sort;
+            Keyword = searchCriteria.Keyword;
             return this;
         }
     }

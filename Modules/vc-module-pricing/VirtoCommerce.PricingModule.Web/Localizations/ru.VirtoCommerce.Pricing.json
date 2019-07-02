@@ -130,8 +130,12 @@
                 }
             },
             "exporter": {
-                "title": "Экспорт цен",
-                "subtitle": "Экспорт цен в формате json или CSV"
+                "priceTitle": "Экспорт цен",
+                "priceSubtitle": "Экспорт цен в формате json или CSV",
+                "priceListTitle": "Экспорт прайс-листов",
+                "pricelistSubtitle": "Экспорт прайс-листов в json или csv",
+                "priceAssignmentTitle": "Экспорт товарных запасов",
+                "priceAssignmentSubtitle": "Экспорт товарных запасов в json или csv"
             }
 
         },
