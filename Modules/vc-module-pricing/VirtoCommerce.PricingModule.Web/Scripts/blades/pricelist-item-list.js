@@ -175,8 +175,8 @@ angular.module('virtoCommerce.pricingModule')
 
                 var newBlade = {
                     id: 'priceExport',
-                    title: 'pricing.blades.exporter.title',
-                    subtitle: 'pricing.blades.exporter.subtitle',
+                    title: 'pricing.blades.exporter.priceTitle',
+                    subtitle: 'pricing.blades.exporter.priceSubtitle',
                     controller: 'virtoCommerce.exportModule.exporterController',
                     template: 'Modules/$(VirtoCommerce.Export)/Scripts/blades/exportSetting.tml.html',
                     exportDataRequest: exportDataRequest
