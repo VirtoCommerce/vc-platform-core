@@ -39,10 +39,11 @@ namespace VirtoCommerce.ExportModule.Tests
             };
             //Act
 
-            var filteredPricelist = SerializeAndDeserialize(metadata, pricelist);
+            var pricelists = SerializeAndDeserialize(metadata, pricelist);
 
             //Assert
-            Assert.Null(filteredPricelist.Prices.First().Pricelist);
+            Assert.Single(pricelists);
+            Assert.Null(pricelists.First().Prices.First().Pricelist);
         }
 
         [Fact]
@@ -74,12 +75,13 @@ namespace VirtoCommerce.ExportModule.Tests
             };
 
             //Act
-            var filteredPricelist = SerializeAndDeserialize(metadata, priceList);
+            var pricelists = SerializeAndDeserialize(metadata, priceList);
 
             //Assets
-            Assert.NotNull(filteredPricelist);
-            Assert.Equal(2, filteredPricelist.Prices.Count);
-            Assert.Null(filteredPricelist.Assignments);
+            Assert.NotNull(pricelists);
+            Assert.Single(pricelists);
+            Assert.Equal(2, pricelists.First().Prices.Count);
+            Assert.Null(pricelists.First().Assignments);
         }
 
         [Fact]
@@ -118,17 +120,19 @@ namespace VirtoCommerce.ExportModule.Tests
             };
 
             //Act
-            var filteredPricelist = SerializeAndDeserialize(metadata, priceList);
+            var pricelists = SerializeAndDeserialize(metadata, priceList);
 
             //Assets
-            Assert.Equal(2, filteredPricelist.Prices.Count);
-            Assert.Equal(1, filteredPricelist.Prices.Count(x => x.List == 25));
-            Assert.Equal(1, filteredPricelist.Prices.Count(x => x.List == 26));
-            Assert.Equal(1, filteredPricelist.Prices.Count(x => x.CreatedDate == date));
-            Assert.Equal(0, filteredPricelist.Prices.Count(x => x.EndDate == date));
+            Assert.Single(pricelists);
 
-            Assert.Equal(2, filteredPricelist.Assignments.Count(x => string.IsNullOrEmpty(x.Name)));
-            Assert.Equal(2, filteredPricelist.Assignments.Count(x => x.EndDate == null));
+            Assert.Equal(2, pricelists.First().Prices.Count);
+            Assert.Equal(1, pricelists.First().Prices.Count(x => x.List == 25));
+            Assert.Equal(1, pricelists.First().Prices.Count(x => x.List == 26));
+            Assert.Equal(1, pricelists.First().Prices.Count(x => x.CreatedDate == date));
+            Assert.Equal(0, pricelists.First().Prices.Count(x => x.EndDate == date));
+
+            Assert.Equal(2, pricelists.First().Assignments.Count(x => string.IsNullOrEmpty(x.Name)));
+            Assert.Equal(2, pricelists.First().Assignments.Count(x => x.EndDate == null));
         }
 
         [Fact]
@@ -168,19 +172,22 @@ namespace VirtoCommerce.ExportModule.Tests
             };
 
             //Act
-            var filteredPricelist = SerializeAndDeserialize(metadata, priceList);
+            var pricelists = SerializeAndDeserialize(metadata, priceList);
 
             //Assets
-            Assert.True(string.IsNullOrEmpty(filteredPricelist.Name));
-            Assert.True(string.IsNullOrEmpty(filteredPricelist.Id));
+            Assert.Single(pricelists);
 
-            Assert.Equal(1, filteredPricelist.Prices.Count(x => x.List == 25));
-            Assert.Equal(1, filteredPricelist.Prices.Count(x => x.List == 26));
-            Assert.Equal(1, filteredPricelist.Prices.Count(x => x.CreatedDate == date));
-            Assert.Equal(0, filteredPricelist.Prices.Count(x => x.EndDate == date));
-            Assert.Equal(2, filteredPricelist.Prices.Count(x => x.Pricelist == null));
 
-            Assert.Null(filteredPricelist.Assignments);
+            Assert.True(string.IsNullOrEmpty(pricelists.First().Name));
+            Assert.True(string.IsNullOrEmpty(pricelists.First().Id));
+
+            Assert.Equal(1, pricelists.First().Prices.Count(x => x.List == 25));
+            Assert.Equal(1, pricelists.First().Prices.Count(x => x.List == 26));
+            Assert.Equal(1, pricelists.First().Prices.Count(x => x.CreatedDate == date));
+            Assert.Equal(0, pricelists.First().Prices.Count(x => x.EndDate == date));
+            Assert.Equal(2, pricelists.First().Prices.Count(x => x.Pricelist == null));
+
+            Assert.Null(pricelists.First().Assignments);
         }
 
         [Fact]
@@ -218,17 +225,19 @@ namespace VirtoCommerce.ExportModule.Tests
             };
 
             //Act
-            var filteredPricelist = SerializeAndDeserialize(metadata, priceList);
+            var pricelists = SerializeAndDeserialize(metadata, priceList);
 
             //Assets
-            Assert.True(string.IsNullOrEmpty(filteredPricelist.Name));
-            Assert.True(string.IsNullOrEmpty(filteredPricelist.Id));
+            Assert.Single(pricelists);
 
-            Assert.Equal(1, filteredPricelist.Assignments.Count(x => x.Id == "A1"));
-            Assert.Equal(1, filteredPricelist.Assignments.Count(x => x.Id == "A2"));
-            Assert.Equal(2, filteredPricelist.Assignments.Count(x => x.Pricelist == null));
+            Assert.True(string.IsNullOrEmpty(pricelists.First().Name));
+            Assert.True(string.IsNullOrEmpty(pricelists.First().Id));
 
-            Assert.Null(filteredPricelist.Prices);
+            Assert.Equal(1, pricelists.First().Assignments.Count(x => x.Id == "A1"));
+            Assert.Equal(1, pricelists.First().Assignments.Count(x => x.Id == "A2"));
+            Assert.Equal(2, pricelists.First().Assignments.Count(x => x.Pricelist == null));
+
+            Assert.Null(pricelists.First().Prices);
         }
 
         [Fact]
@@ -248,30 +257,35 @@ namespace VirtoCommerce.ExportModule.Tests
             };
 
             //Act
-            var filteredPrice = SerializeAndDeserialize(metadata, price);
+            var prices = SerializeAndDeserialize(metadata, price);
 
             //Assets
+            Assert.Single(prices);
 
-            Assert.Equal("P1", filteredPrice.Id);
-            Assert.NotNull(filteredPrice.Pricelist);
+            Assert.Equal("P1", prices.First().Id);
+            Assert.NotNull(prices.First().Pricelist);
             Assert.Equal("1", price.Pricelist.Id);
             Assert.Null(price.Pricelist.Name);
         }
 
 
-        private T SerializeAndDeserialize<T>(ExportedTypeMetadata metadata, T obj)
+        private T[] SerializeAndDeserialize<T>(ExportedTypeMetadata metadata, T obj)
         {
             var jsonConfiguration = new JsonProviderConfiguration() { Settings = new JsonSerializerSettings() { NullValueHandling = NullValueHandling.Ignore } };
 
             using (Stream stream = new MemoryStream())
             {
-                var jsonExportProvider = new JsonExportProvider(stream, jsonConfiguration);
-                jsonExportProvider.Metadata = metadata;
-                jsonExportProvider.WriteRecord(obj);
+                using (var jsonExportProvider = new JsonExportProvider(stream, jsonConfiguration))
+                {
+                    jsonExportProvider.Metadata = metadata;
+                    jsonExportProvider.WriteRecord(obj);
+                }
 
                 stream.Seek(0, SeekOrigin.Begin);
                 var reader = new StreamReader(stream);
-                return JsonConvert.DeserializeObject<T>(reader.ReadToEnd());
+                var streamString = reader.ReadToEnd();
+
+                return JsonConvert.DeserializeObject<T[]>(streamString);
             }
         }
     }
