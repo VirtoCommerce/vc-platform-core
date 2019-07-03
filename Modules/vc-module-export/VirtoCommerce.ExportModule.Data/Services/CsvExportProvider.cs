@@ -122,7 +122,7 @@ namespace VirtoCommerce.ExportModule.Data.Services
                     // Add memberMap
                     if (i == propertyNames.Length - 1)
                     {
-                        var memberMap = CreateMemberMap(currentType, propertyInfo, includedPropertyInfo.Name, ref columnIndex);
+                        var memberMap = CreateMemberMap(currentType, propertyInfo, includedPropertyInfo.ExportName, ref columnIndex);
 
                         currentClassMap.MemberMaps.Add(memberMap);
                         currentClassMap = this;

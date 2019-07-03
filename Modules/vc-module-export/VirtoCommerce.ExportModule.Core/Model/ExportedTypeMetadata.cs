@@ -72,20 +72,26 @@ namespace VirtoCommerce.ExportModule.Core.Model
                 if (!passedNodes.Contains(propertyInfo))
                 {
                     var nestedType = GetNestedType(propertyInfo.PropertyType);
-                    bool isEntity = false;
+                    var isEntity = false;
+
                     if (nestedType.IsSubclassOf(typeof(Entity)))
                     {
                         isEntity = true;
                         // Collect nested members for later inspection after all properties in this type
                         nestedMemberInfos.Add((propertyInfo, nestedType));
                     }
+
                     passedNodes.Add(propertyInfo);
+
+                    var memberName = GetDerivedName(baseMemberName, propertyInfo);
+
                     result.Add(new ExportTypePropertyInfoEx()
                     {
                         PropertyInfo = new ExportTypePropertyInfo()
                         {
                             MemberInfo = propertyInfo,
-                            Name = GetDerivedName(baseMemberName, propertyInfo)
+                            Name = memberName,
+                            ExportName = memberName,
                         },
                         IsEntity = isEntity
                     });
@@ -95,7 +101,10 @@ namespace VirtoCommerce.ExportModule.Core.Model
             foreach (var nestedMemberInfo in nestedMemberInfos)
             {
                 //Continue searching for nested members
-                result.AddRange(GetFromType(nestedMemberInfo.NestedType, $"{baseMemberName}{(baseMemberName.IsNullOrEmpty() ? string.Empty : ".")}{nestedMemberInfo.MemberInfo.Name}", passedNodes));
+                result.AddRange(GetFromType(
+                    nestedMemberInfo.NestedType,
+                    GetDerivedName(baseMemberName, (PropertyInfo)nestedMemberInfo.MemberInfo),
+                    passedNodes));
             }
 
             return result.ToArray();
