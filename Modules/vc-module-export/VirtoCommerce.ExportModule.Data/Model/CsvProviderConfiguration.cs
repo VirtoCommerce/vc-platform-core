@@ -6,5 +6,7 @@ namespace VirtoCommerce.ExportModule.Data.Model
     public class CsvProviderConfiguration : IExportProviderConfiguration
     {
         public Configuration Configuration { get; set; }
+
+        public string ExportedFileExtension => "csv";
     }
 }

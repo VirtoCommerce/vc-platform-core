@@ -41,21 +41,30 @@ namespace VirtoCommerce.ExportModule.Web.BackgroundJobs
             try
             {
                 var localTmpFolder = Path.GetFullPath(Path.Combine(_platformOptions.DefaultExportFolder));
-                var localTmpPath = Path.Combine(localTmpFolder, Path.GetFileName(_platformOptions.DefaultExportFileName));
+                var fileName = Path.GetFileName(_platformOptions.DefaultExportFileName);
+
+                if (request.ProviderConfig != null)
+                {
+                    fileName = Path.ChangeExtension(Path.GetFileName(_platformOptions.DefaultExportFileName), request.ProviderConfig.ExportedFileExtension);
+                }
+
+                var localTmpPath = Path.Combine(localTmpFolder, fileName);
 
                 if (!Directory.Exists(localTmpFolder))
                 {
                     Directory.CreateDirectory(localTmpFolder);
                 }
+
                 if (File.Exists(localTmpPath))
                 {
                     File.Delete(localTmpPath);
                 }
+
                 //Import first to local tmp folder because Azure blob storage doesn't support some special file access mode 
                 using (var stream = File.OpenWrite(localTmpPath))
                 {
                     _dataExporter.Export(stream, request, progressCallback, new JobCancellationTokenWrapper(cancellationToken));
-                    notification.DownloadUrl = $"api/export/download/{_platformOptions.DefaultExportFileName}";
+                    notification.DownloadUrl = $"api/export/download/{fileName}";
                 }
             }
             catch (JobAbortedException)

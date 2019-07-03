@@ -3,6 +3,7 @@ using System.Collections;
 using System.IO;
 using System.Linq;
 using Newtonsoft.Json;
+using Newtonsoft.Json.Linq;
 using VirtoCommerce.ExportModule.Core.Model;
 using VirtoCommerce.ExportModule.Core.Services;
 using VirtoCommerce.ExportModule.Data.Model;
@@ -24,17 +25,23 @@ namespace VirtoCommerce.ExportModule.Data.Services
 
         public JsonExportProvider(Stream stream, IExportProviderConfiguration exportProviderConfiguration)
         {
+            Configuration = exportProviderConfiguration;
+
             if (exportProviderConfiguration is JsonProviderConfiguration jsonProviderConfiguration)
             {
                 _serializer = JsonSerializer.Create(jsonProviderConfiguration.Settings);
             }
             else
             {
+#if DEBUG
+                _serializer = JsonSerializer.Create(new JsonSerializerSettings() { Formatting = Formatting.Indented });
+#else
                 _serializer = JsonSerializer.CreateDefault();
+#endif
             }
 
+            _serializer.Converters.Add(new ObjectDiscriminatorJsonConverter(typeof(Entity)));
             _stream = stream;
-            Configuration = exportProviderConfiguration;
         }
 
         public void WriteMetadata(ExportedTypeMetadata metadata)
@@ -44,8 +51,14 @@ namespace VirtoCommerce.ExportModule.Data.Services
 
         public void WriteRecord(object objectToRecord)
         {
+            if (objectToRecord == null)
+            {
+                throw new ArgumentNullException(nameof(objectToRecord));
+            }
+
             EnsureWriterCreated();
             FilterProperties(objectToRecord);
+
             _serializer.Serialize(_jsonTextWriter, objectToRecord);
             _streamWriter.Flush();
         }
@@ -97,7 +110,6 @@ namespace VirtoCommerce.ExportModule.Data.Services
                                 FilterProperties(objectValue, propertyName);
                             }
                         }
-
                     }
                 }
                 else if (!Metadata.PropertiesInfo.Any(x => x.Name.Equals(propertyName, StringComparison.InvariantCultureIgnoreCase)))
@@ -111,6 +123,46 @@ namespace VirtoCommerce.ExportModule.Data.Services
         {
             _jsonTextWriter?.WriteEndArray();
             _streamWriter?.Dispose();
+        }
+    }
+
+    public class ObjectDiscriminatorJsonConverter : JsonConverter
+    {
+        private readonly Type[] _types;
+
+        public override bool CanRead => false;
+        public override bool CanWrite => true;
+
+        public ObjectDiscriminatorJsonConverter(params Type[] types)
+        {
+            _types = types;
+        }
+
+        public override bool CanConvert(Type objectType)
+        {
+            return _types.Any(x => x.IsAssignableFrom(objectType));
+        }
+
+        public override object ReadJson(JsonReader reader, Type objectType, object existingValue, JsonSerializer serializer)
+        {
+            throw new NotImplementedException();
+        }
+
+        public override void WriteJson(JsonWriter writer, object value, JsonSerializer serializer)
+        {
+            var jToken = JToken.FromObject(value);
+
+            if (jToken.Type == JTokenType.Object)
+            {
+                var jObject = (JObject)jToken;
+
+                jObject.AddFirst(new JProperty("$discriminator", value.GetType().FullName));
+                jObject.WriteTo(writer);
+            }
+            else
+            {
+                jToken.WriteTo(writer);
+            }
         }
     }
 }

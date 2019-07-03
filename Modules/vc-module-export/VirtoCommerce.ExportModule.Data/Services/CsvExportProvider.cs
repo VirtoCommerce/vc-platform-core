@@ -31,27 +31,34 @@ namespace VirtoCommerce.ExportModule.Data.Services
             Configuration = exportProviderConfiguration;
         }
 
-        private void EnsureWriterCreated(Type objectType)
+        private void EnsureWriterCreated()
         {
             if (Metadata == null)
             {
                 throw new ArgumentNullException(nameof(Metadata));
             }
+
             if (_csvWriter == null)
             {
                 _textWriter = new StreamWriter(_stream, Encoding.UTF8, 1024, true) { AutoFlush = true };
 
-                var csvConfiguration = (Configuration as CsvProviderConfiguration)?.Configuration ?? new Configuration();
-                var mapForType = csvConfiguration.Maps[objectType];
-
-                if (mapForType == null)
-                {
-                    var constructor = typeof(MetadataFilteredMap<>).MakeGenericType(objectType).GetConstructor(new[] { typeof(ExportedTypeMetadata) });
-                    var classMap = (ClassMap)constructor.Invoke(new[] { Metadata });
-                    csvConfiguration.RegisterClassMap(classMap);
-                }
+                var csvConfiguration = (Configuration as CsvProviderConfiguration)?.Configuration ?? new Configuration() { Delimiter = "\t" };
 
                 _csvWriter = new CsvWriter(_textWriter, csvConfiguration);
+            }
+        }
+
+        private void AddClassMap(Type objectType)
+        {
+            var csvConfiguration = _csvWriter.Configuration;
+            var mapForType = csvConfiguration.Maps[objectType];
+
+            if (mapForType == null)
+            {
+                var constructor = typeof(MetadataFilteredMap<>).MakeGenericType(objectType).GetConstructor(new[] { typeof(ExportedTypeMetadata) });
+                var classMap = (ClassMap)constructor.Invoke(new[] { Metadata });
+
+                csvConfiguration.RegisterClassMap(classMap);
             }
         }
 
@@ -61,7 +68,9 @@ namespace VirtoCommerce.ExportModule.Data.Services
 
         public void WriteRecord(object objectToRecord)
         {
-            EnsureWriterCreated(objectToRecord.GetType());
+            EnsureWriterCreated();
+
+            AddClassMap(objectToRecord.GetType());
 
             _csvWriter.WriteRecords(new[] { objectToRecord });
             _csvWriter.Flush();
