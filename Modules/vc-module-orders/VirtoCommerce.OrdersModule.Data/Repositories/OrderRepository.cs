@@ -35,12 +35,12 @@ namespace VirtoCommerce.OrdersModule.Data.Repositories
             var orderTaxDetails = TaxDetails.Where(x => ids.Contains(x.CustomerOrderId)).ToArrayAsync();
             await Task.WhenAll(orderDiscounts, orderTaxDetails);
 
-            if ((customerOrderResponseGroup & CustomerOrderResponseGroup.WithAddresses) == CustomerOrderResponseGroup.WithAddresses)
+            if (customerOrderResponseGroup.HasFlag(CustomerOrderResponseGroup.WithAddresses))
             {
                 var addresses = await Addresses.Where(x => ids.Contains(x.CustomerOrderId)).ToArrayAsync();
             }
 
-            if ((customerOrderResponseGroup & CustomerOrderResponseGroup.WithInPayments) == CustomerOrderResponseGroup.WithInPayments)
+            if (customerOrderResponseGroup.HasFlag(CustomerOrderResponseGroup.WithInPayments))
             {
                 var inPayments = await InPayments.Where(x => ids.Contains(x.CustomerOrderId)).ToArrayAsync();
                 var paymentsIds = inPayments.Select(x => x.Id).ToArray();
@@ -51,7 +51,7 @@ namespace VirtoCommerce.OrdersModule.Data.Repositories
                 await Task.WhenAll(paymentDiscounts, paymentTaxDetails, paymentAddresses, transactions);
             }
 
-            if ((customerOrderResponseGroup & CustomerOrderResponseGroup.WithItems) == CustomerOrderResponseGroup.WithItems)
+            if (customerOrderResponseGroup.HasFlag(CustomerOrderResponseGroup.WithItems))
             {
                 var lineItems = await LineItems.Where(x => ids.Contains(x.CustomerOrderId))
                                          .OrderByDescending(x => x.CreatedDate).ToArrayAsync();
@@ -61,7 +61,7 @@ namespace VirtoCommerce.OrdersModule.Data.Repositories
                 await Task.WhenAll(lineItemDiscounts, lineItemTaxDetails);
             }
 
-            if ((customerOrderResponseGroup & CustomerOrderResponseGroup.WithShipments) == CustomerOrderResponseGroup.WithShipments)
+            if (customerOrderResponseGroup.HasFlag(CustomerOrderResponseGroup.WithShipments))
             {
                 var shipments = await Shipments.Where(x => ids.Contains(x.CustomerOrderId)).ToArrayAsync();
                 var shipmentIds = shipments.Select(x => x.Id).ToArray();
