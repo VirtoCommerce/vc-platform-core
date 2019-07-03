@@ -1,5 +1,4 @@
 using System;
-using System.Linq;
 using System.Net.Mail;
 using System.Threading.Tasks;
 using Microsoft.Extensions.Options;
@@ -62,9 +61,9 @@ namespace VirtoCommerce.NotificationsModule.SendGrid
             }
             catch (SmtpException ex)
             {
-                throw new SentNotificationException(ex.Message, ex);
+                throw new SentNotificationException(ex);
             }
-            
+
         }
     }
 }
