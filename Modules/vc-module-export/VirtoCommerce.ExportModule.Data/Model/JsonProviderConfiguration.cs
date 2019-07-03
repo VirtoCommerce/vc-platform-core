@@ -6,5 +6,7 @@ namespace VirtoCommerce.ExportModule.Data.Model
     public class JsonProviderConfiguration : IExportProviderConfiguration
     {
         public JsonSerializerSettings Settings { get; set; }
+
+        public string ExportedFileExtension => "json";
     }
 }
