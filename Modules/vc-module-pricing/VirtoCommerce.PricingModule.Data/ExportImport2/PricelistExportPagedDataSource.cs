@@ -35,6 +35,16 @@ namespace VirtoCommerce.PricingModule.Data.ExportImport
                 totalCount = pricelistSearchResult.TotalCount;
             }
 
+            if (!result.IsNullOrEmpty() && searchCriteria.Take > 0)
+            {
+                var pricelistIds = result.Select(x => x.Id).ToArray();
+                var prices = _searchService.SearchPricesAsync(new PricesSearchCriteria() { PriceListIds = pricelistIds, Take = int.MaxValue }).Result;
+                foreach (var pricelist in result)
+                {
+                    pricelist.Prices = prices.Results.Where(x => x.PricelistId == pricelist.Id).ToArray();
+                }
+            }
+
             return new FetchResult(result, totalCount);
         }
     }
