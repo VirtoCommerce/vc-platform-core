@@ -1,4 +1,5 @@
 using System;
+using System.Collections;
 using System.Collections.Generic;
 using System.IO;
 using System.Linq;
@@ -19,19 +20,59 @@ namespace VirtoCommerce.ExportModule.Tests
             var date = new DateTime(2020, 10, 20);
             var prices = new List<Price>()
             {
-                new Price {Id = "P1", PricelistId = "1", List = 25, CreatedDate = date, Currency = "USD" },
-                new Price {Id = "P2", PricelistId = "1", List = 26, EndDate = date, ModifiedDate = date, Pricelist = new Pricelist() { Id = "1", Name = "Pricelist 1" } },
+                new Price
+                {
+                    Id = "P1",
+                    PricelistId = "1",
+                    List = 25,
+                    CreatedDate = date,
+                    Currency = "USD",
+                },
+                new Price
+                {
+                    Id = "P2",
+                    PricelistId = "1",
+                    List = 26,
+                    EndDate = date,
+                    ModifiedDate = date,
+                    Pricelist = new Pricelist() { Id = "1", Name = "Pricelist 1" },
+                },
             };
 
             var metadata = new ExportedTypeMetadata()
             {
                 PropertiesInfo = new[]
                 {
-                    new ExportTypePropertyInfo() { Name = nameof(Price.Id), MemberInfo = typeof(Price).GetProperty(nameof(Price.Id)) },
-                    new ExportTypePropertyInfo() { Name = nameof(Price.PricelistId), MemberInfo = typeof(Price).GetProperty(nameof(Price.PricelistId)) },
-                    new ExportTypePropertyInfo() { Name = nameof(Price.List), MemberInfo = typeof(Price).GetProperty(nameof(Price.List)) },
-                    new ExportTypePropertyInfo() { Name = nameof(Price.CreatedDate), MemberInfo = typeof(Price).GetProperty(nameof(Price.CreatedDate)) },
-                    new ExportTypePropertyInfo() { Name = nameof(Price.EndDate), MemberInfo = typeof(Price).GetProperty(nameof(Price.EndDate)) },
+                    new ExportTypePropertyInfo()
+                    {
+                        Name = nameof(Price.Id),
+                        MemberInfo = typeof(Price).GetProperty(nameof(Price.Id)),
+                        ExportName = nameof(Price.Id),
+                    },
+                    new ExportTypePropertyInfo()
+                    {
+                        Name = nameof(Price.PricelistId),
+                        MemberInfo = typeof(Price).GetProperty(nameof(Price.PricelistId)),
+                        ExportName = nameof(Price.PricelistId),
+                    },
+                    new ExportTypePropertyInfo()
+                    {
+                        Name = nameof(Price.List),
+                        MemberInfo = typeof(Price).GetProperty(nameof(Price.List)),
+                        ExportName = nameof(Price.List),
+                    },
+                    new ExportTypePropertyInfo()
+                    {
+                        Name = nameof(Price.CreatedDate),
+                        MemberInfo = typeof(Price).GetProperty(nameof(Price.CreatedDate)),
+                        ExportName = nameof(Price.CreatedDate),
+                    },
+                    new ExportTypePropertyInfo()
+                    {
+                        Name = nameof(Price.EndDate),
+                        MemberInfo = typeof(Price).GetProperty(nameof(Price.EndDate)),
+                        ExportName = nameof(Price.EndDate),
+                    },
                 }
             };
 
@@ -45,24 +86,116 @@ namespace VirtoCommerce.ExportModule.Tests
         }
 
         [Fact]
-        public Task ExportPricelistAssignments_FilterPlainMembers()
+        public Task ExportPrices_ExportNameTest()
         {
             var date = new DateTime(2020, 10, 20);
-            var assignments = new List<PricelistAssignment>()
+            var prices = new List<Price>()
             {
-                new PricelistAssignment {Id = "PA1", PricelistId = "1", Description = "PA1 Description", Priority = 1, Pricelist = new Pricelist() { Name = "Pricelist1"} },
-                new PricelistAssignment {Id = "PA2", PricelistId = "2", EndDate = date, Description = "PA2 Description", ConditionExpression = "<expression/>"},
+                new Price
+                {
+                    Id = "P1",
+                    PricelistId = "1",
+                    List = 25,
+                    CreatedDate = date,
+                    Currency = "USD",
+                },
+                new Price
+                {
+                    Id = "P2",
+                    PricelistId = "1",
+                    List = 26,
+                    EndDate = date,
+                    ModifiedDate = date,
+                    Pricelist = new Pricelist() { Id = "1", Name = "Pricelist 1" },
+                },
             };
 
             var metadata = new ExportedTypeMetadata()
             {
                 PropertiesInfo = new[]
                 {
-                    new ExportTypePropertyInfo() { Name = nameof(PricelistAssignment.Id), MemberInfo = typeof(PricelistAssignment).GetProperty(nameof(PricelistAssignment.Id)) },
-                    new ExportTypePropertyInfo() { Name = nameof(PricelistAssignment.Description), MemberInfo = typeof(PricelistAssignment).GetProperty(nameof(PricelistAssignment.Description)) },
-                    new ExportTypePropertyInfo() { Name = nameof(PricelistAssignment.EndDate), MemberInfo = typeof(PricelistAssignment).GetProperty(nameof(PricelistAssignment.EndDate)) },
-                    new ExportTypePropertyInfo() { Name = nameof(PricelistAssignment.Priority), MemberInfo = typeof(PricelistAssignment).GetProperty(nameof(PricelistAssignment.Priority)) },
-                    new ExportTypePropertyInfo() { Name = nameof(PricelistAssignment.ConditionExpression), MemberInfo = typeof(PricelistAssignment).GetProperty(nameof(PricelistAssignment.ConditionExpression)) },
+                    new ExportTypePropertyInfo()
+                    {
+                        Name = nameof(Price.Id),
+                        MemberInfo = typeof(Price).GetProperty(nameof(Price.Id)),
+                        ExportName = $"{nameof(Price)}.{nameof(Price.Id)}",
+                    },
+                    new ExportTypePropertyInfo()
+                    {
+                        Name = nameof(Price.PricelistId),
+                        MemberInfo = typeof(Price).GetProperty(nameof(Price.PricelistId)),
+                        ExportName = $"{nameof(Price)}.{nameof(Price.PricelistId)}",
+                    },
+                }
+            };
+
+            //Act
+            var filteredPricesString = SerializeAndRead(metadata, prices);
+
+            //Assets
+            Assert.Equal("Price.Id,Price.PricelistId\r\nP1,1\r\nP2,1\r\n", filteredPricesString);
+
+            return Task.CompletedTask;
+        }
+
+        [Fact]
+        public Task ExportPricelistAssignments_FilterPlainMembers()
+        {
+            var date = new DateTime(2020, 10, 20);
+            var assignments = new List<PricelistAssignment>()
+            {
+                new PricelistAssignment
+                {
+                    Id = "PA1",
+                    PricelistId = "1",
+                    Description = "PA1 Description",
+                    Priority = 1,
+                    Pricelist = new Pricelist() { Name = "Pricelist1"},
+                },
+                new PricelistAssignment
+                {
+                    Id = "PA2",
+                    PricelistId = "2",
+                    EndDate = date,
+                    Description = "PA2 Description",
+                    ConditionExpression = "<expression/>",
+                },
+            };
+
+            var metadata = new ExportedTypeMetadata()
+            {
+                PropertiesInfo = new[]
+                {
+                    new ExportTypePropertyInfo()
+                    {
+                        Name = nameof(PricelistAssignment.Id),
+                        MemberInfo = typeof(PricelistAssignment).GetProperty(nameof(PricelistAssignment.Id)),
+                        ExportName = nameof(PricelistAssignment.Id),
+                    },
+                    new ExportTypePropertyInfo()
+                    {
+                        Name = nameof(PricelistAssignment.Description),
+                        MemberInfo = typeof(PricelistAssignment).GetProperty(nameof(PricelistAssignment.Description)),
+                        ExportName = nameof(PricelistAssignment.Description),
+                    },
+                    new ExportTypePropertyInfo()
+                    {
+                        Name = nameof(PricelistAssignment.EndDate),
+                        MemberInfo = typeof(PricelistAssignment).GetProperty(nameof(PricelistAssignment.EndDate)),
+                        ExportName = nameof(PricelistAssignment.EndDate),
+                    },
+                    new ExportTypePropertyInfo()
+                    {
+                        Name = nameof(PricelistAssignment.Priority),
+                        MemberInfo = typeof(PricelistAssignment).GetProperty(nameof(PricelistAssignment.Priority)),
+                        ExportName = nameof(PricelistAssignment.Priority),
+                    },
+                    new ExportTypePropertyInfo()
+                    {
+                        Name = nameof(PricelistAssignment.ConditionExpression),
+                        MemberInfo = typeof(PricelistAssignment).GetProperty(nameof(PricelistAssignment.ConditionExpression)),
+                        ExportName = nameof(PricelistAssignment.ConditionExpression),
+                    },
                 }
             };
 
@@ -84,9 +217,24 @@ namespace VirtoCommerce.ExportModule.Tests
             {
                 PropertiesInfo = new[]
                 {
-                    new ExportTypePropertyInfo() { Name = nameof(Pricelist.Id), MemberInfo = typeof(Pricelist).GetProperty(nameof(Pricelist.Id)) },
-                    new ExportTypePropertyInfo() { Name = nameof(Pricelist.Name), MemberInfo = typeof(Pricelist).GetProperty(nameof(Pricelist.Name)) },
-                    new ExportTypePropertyInfo() { Name = nameof(Pricelist.Currency), MemberInfo = typeof(Pricelist).GetProperty(nameof(Pricelist.Currency)) },
+                    new ExportTypePropertyInfo()
+                    {
+                        Name = nameof(Pricelist.Id),
+                        MemberInfo = typeof(Pricelist).GetProperty(nameof(Pricelist.Id)),
+                        ExportName = nameof(Pricelist.Id),
+                    },
+                    new ExportTypePropertyInfo()
+                    {
+                        Name = nameof(Pricelist.Name),
+                        MemberInfo = typeof(Pricelist).GetProperty(nameof(Pricelist.Name)),
+                        ExportName = nameof(Pricelist.Name),
+                    },
+                    new ExportTypePropertyInfo()
+                    {
+                        Name = nameof(Pricelist.Currency),
+                        MemberInfo = typeof(Pricelist).GetProperty(nameof(Pricelist.Currency)),
+                        ExportName = nameof(Pricelist.Currency),
+                    },
                 }
             };
 
@@ -108,12 +256,42 @@ namespace VirtoCommerce.ExportModule.Tests
             {
                 PropertiesInfo = new[]
                 {
-                    new ExportTypePropertyInfo() { Name = nameof(Pricelist.Id), MemberInfo = typeof(Pricelist).GetProperty(nameof(Pricelist.Id)) },
-                    new ExportTypePropertyInfo() { Name = nameof(Pricelist.Name), MemberInfo = typeof(Pricelist).GetProperty(nameof(Pricelist.Name)) },
-                    new ExportTypePropertyInfo() { Name = nameof(Pricelist.Currency), MemberInfo = typeof(Pricelist).GetProperty(nameof(Pricelist.Currency)) },
-                    new ExportTypePropertyInfo() { Name = $"{nameof(Pricelist.ActiveAssignment)}.{nameof(PricelistAssignment.Id)}", MemberInfo = typeof(PricelistAssignment).GetProperty(nameof(PricelistAssignment.Id)) },
-                    new ExportTypePropertyInfo() { Name = $"{nameof(Pricelist.ActiveAssignment)}.{nameof(PricelistAssignment.Name)}", MemberInfo = typeof(PricelistAssignment).GetProperty(nameof(PricelistAssignment.Name)) },
-                    new ExportTypePropertyInfo() { Name = $"{nameof(Pricelist.ActiveAssignment)}.{nameof(PricelistAssignment.Priority)}", MemberInfo = typeof(PricelistAssignment).GetProperty(nameof(PricelistAssignment.Priority)) },
+                    new ExportTypePropertyInfo()
+                    {
+                        Name = nameof(Pricelist.Id),
+                        MemberInfo = typeof(Pricelist).GetProperty(nameof(Pricelist.Id)),
+                        ExportName = nameof(Pricelist.Id),
+                    },
+                    new ExportTypePropertyInfo()
+                    {
+                        Name = nameof(Pricelist.Name),
+                        MemberInfo = typeof(Pricelist).GetProperty(nameof(Pricelist.Name)),
+                        ExportName = nameof(Pricelist.Name),
+                    },
+                    new ExportTypePropertyInfo()
+                    {
+                        Name = nameof(Pricelist.Currency),
+                        MemberInfo = typeof(Pricelist).GetProperty(nameof(Pricelist.Currency)),
+                        ExportName = nameof(Pricelist.Currency),
+                    },
+                    new ExportTypePropertyInfo()
+                    {
+                        Name = $"{nameof(Pricelist.ActiveAssignment)}.{nameof(PricelistAssignment.Id)}",
+                        MemberInfo = typeof(PricelistAssignment).GetProperty(nameof(PricelistAssignment.Id)),
+                        ExportName = $"{nameof(Pricelist.ActiveAssignment)}.{nameof(PricelistAssignment.Id)}",
+                    },
+                    new ExportTypePropertyInfo()
+                    {
+                        Name = $"{nameof(Pricelist.ActiveAssignment)}.{nameof(PricelistAssignment.Name)}",
+                        MemberInfo = typeof(PricelistAssignment).GetProperty(nameof(PricelistAssignment.Name)),
+                        ExportName = $"{nameof(Pricelist.ActiveAssignment)}.{nameof(PricelistAssignment.Name)}",
+                    },
+                    new ExportTypePropertyInfo()
+                    {
+                        Name = $"{nameof(Pricelist.ActiveAssignment)}.{nameof(PricelistAssignment.Priority)}",
+                        MemberInfo = typeof(PricelistAssignment).GetProperty(nameof(PricelistAssignment.Priority)),
+                        ExportName = $"{nameof(Pricelist.ActiveAssignment)}.{nameof(PricelistAssignment.Priority)}",
+                    },
                 }
             };
 
@@ -121,7 +299,7 @@ namespace VirtoCommerce.ExportModule.Tests
             var filteredPricesString = SerializeAndRead(metadata, pricelists);
 
             //Assets
-            Assert.Equal("Id,Name,Currency,ActiveAssignment.Id,ActiveAssignment.Name,ActiveAssignment.Priority\r\nPL1,Pricelist 1,USD,PA1_1,PA1_1 Name,1\r\nPL2,Pricelist 2,EUR,PA2_1,PA2_1 Name,1\r\n", filteredPricesString);
+            Assert.Equal("Id,Name,Currency,ActiveAssignment.Id,ActiveAssignment.Name,ActiveAssignment.Priority\r\nPL1,Pricelist 1,USD,PA1_1,PA1_1 Name,1\r\nPL2,Pricelist 2,EUR,PA2_1,PA2_1 Name,11\r\n", filteredPricesString);
 
             return Task.CompletedTask;
         }
@@ -135,11 +313,36 @@ namespace VirtoCommerce.ExportModule.Tests
             {
                 PropertiesInfo = new[]
                 {
-                    new ExportTypePropertyInfo() { Name = nameof(Pricelist.Id), MemberInfo = typeof(Pricelist).GetProperty(nameof(Pricelist.Id)) },
-                    new ExportTypePropertyInfo() { Name = nameof(Pricelist.Name), MemberInfo = typeof(Pricelist).GetProperty(nameof(Pricelist.Name)) },
-                    new ExportTypePropertyInfo() { Name = nameof(Pricelist.Currency), MemberInfo = typeof(Pricelist).GetProperty(nameof(Pricelist.Currency)) },
-                    new ExportTypePropertyInfo() { Name = $"{nameof(Pricelist.Prices)}.{nameof(Price.Id)}", MemberInfo = typeof(Price).GetProperty(nameof(Price.Id)) },
-                    new ExportTypePropertyInfo() { Name = $"{nameof(Pricelist.Prices)}.{nameof(Price.List)}", MemberInfo = typeof(Price).GetProperty(nameof(Price.List)) },
+                    new ExportTypePropertyInfo()
+                    {
+                        Name = nameof(Pricelist.Id),
+                        MemberInfo = typeof(Pricelist).GetProperty(nameof(Pricelist.Id)),
+                        ExportName = nameof(Pricelist.Id),
+                    },
+                    new ExportTypePropertyInfo()
+                    {
+                        Name = nameof(Pricelist.Name),
+                        MemberInfo = typeof(Pricelist).GetProperty(nameof(Pricelist.Name)),
+                        ExportName = nameof(Pricelist.Name),
+                    },
+                    new ExportTypePropertyInfo()
+                    {
+                        Name = nameof(Pricelist.Currency),
+                        MemberInfo = typeof(Pricelist).GetProperty(nameof(Pricelist.Currency)),
+                        ExportName = nameof(Pricelist.Currency),
+                    },
+                    new ExportTypePropertyInfo()
+                    {
+                        Name = $"{nameof(Pricelist.Prices)}.{nameof(Price.Id)}",
+                        MemberInfo = typeof(Price).GetProperty(nameof(Price.Id)),
+                        ExportName = $"{nameof(Pricelist.Prices)}.{nameof(Price.Id)}",
+                    },
+                    new ExportTypePropertyInfo()
+                    {
+                        Name = $"{nameof(Pricelist.Prices)}.{nameof(Price.List)}",
+                        MemberInfo = typeof(Price).GetProperty(nameof(Price.List)),
+                        ExportName = $"{nameof(Pricelist.Prices)}.{nameof(Price.List)}",
+                    },
                 }
             };
 
@@ -162,14 +365,54 @@ namespace VirtoCommerce.ExportModule.Tests
             {
                 PropertiesInfo = new[]
                 {
-                    new ExportTypePropertyInfo() { Name = nameof(Pricelist.Id), MemberInfo = typeof(Pricelist).GetProperty(nameof(Pricelist.Id)) },
-                    new ExportTypePropertyInfo() { Name = nameof(Pricelist.Name), MemberInfo = typeof(Pricelist).GetProperty(nameof(Pricelist.Name)) },
-                    new ExportTypePropertyInfo() { Name = nameof(Pricelist.Currency), MemberInfo = typeof(Pricelist).GetProperty(nameof(Pricelist.Currency)) },
-                    new ExportTypePropertyInfo() { Name = $"{nameof(Pricelist.ActiveAssignment)}.{nameof(PricelistAssignment.Id)}", MemberInfo = typeof(PricelistAssignment).GetProperty(nameof(PricelistAssignment.Id)) },
-                    new ExportTypePropertyInfo() { Name = $"{nameof(Pricelist.ActiveAssignment)}.{nameof(PricelistAssignment.Name)}", MemberInfo = typeof(PricelistAssignment).GetProperty(nameof(PricelistAssignment.Name)) },
-                    new ExportTypePropertyInfo() { Name = $"{nameof(Pricelist.ActiveAssignment)}.{nameof(PricelistAssignment.Priority)}", MemberInfo = typeof(PricelistAssignment).GetProperty(nameof(PricelistAssignment.Priority)) },
-                    new ExportTypePropertyInfo() { Name = $"{nameof(Pricelist.Prices)}.{nameof(Price.Id)}", MemberInfo = typeof(Price).GetProperty(nameof(Price.Id)) },
-                    new ExportTypePropertyInfo() { Name = $"{nameof(Pricelist.Prices)}.{nameof(Price.List)}", MemberInfo = typeof(Price).GetProperty(nameof(Price.List)) },
+                    new ExportTypePropertyInfo()
+                    {
+                        Name = nameof(Pricelist.Id),
+                        MemberInfo = typeof(Pricelist).GetProperty(nameof(Pricelist.Id)),
+                        ExportName = nameof(Pricelist.Id),
+                    },
+                    new ExportTypePropertyInfo()
+                    {
+                        Name = nameof(Pricelist.Name),
+                        MemberInfo = typeof(Pricelist).GetProperty(nameof(Pricelist.Name)),
+                        ExportName = nameof(Pricelist.Name),
+                    },
+                    new ExportTypePropertyInfo()
+                    {
+                        Name = nameof(Pricelist.Currency),
+                        MemberInfo = typeof(Pricelist).GetProperty(nameof(Pricelist.Currency)),
+                        ExportName = nameof(Pricelist.Name),
+                    },
+                    new ExportTypePropertyInfo()
+                    {
+                        Name = $"{nameof(Pricelist.ActiveAssignment)}.{nameof(PricelistAssignment.Id)}",
+                        MemberInfo = typeof(PricelistAssignment).GetProperty(nameof(PricelistAssignment.Id)),
+                        ExportName = $"{nameof(Pricelist.ActiveAssignment)}.{nameof(PricelistAssignment.Id)}",
+                    },
+                    new ExportTypePropertyInfo()
+                    {
+                        Name = $"{nameof(Pricelist.ActiveAssignment)}.{nameof(PricelistAssignment.Name)}",
+                        MemberInfo = typeof(PricelistAssignment).GetProperty(nameof(PricelistAssignment.Name)),
+                        ExportName = $"{nameof(Pricelist.ActiveAssignment)}.{nameof(PricelistAssignment.Name)}",
+                    },
+                    new ExportTypePropertyInfo()
+                    {
+                        Name = $"{nameof(Pricelist.ActiveAssignment)}.{nameof(PricelistAssignment.Priority)}",
+                        MemberInfo = typeof(PricelistAssignment).GetProperty(nameof(PricelistAssignment.Priority)),
+                        ExportName = $"{nameof(Pricelist.ActiveAssignment)}.{nameof(PricelistAssignment.Priority)}",
+                    },
+                    new ExportTypePropertyInfo()
+                    {
+                        Name = $"{nameof(Pricelist.Prices)}.{nameof(Price.Id)}",
+                        MemberInfo = typeof(Price).GetProperty(nameof(Price.Id)),
+                        ExportName = $"{nameof(Pricelist.Prices)}.{nameof(Price.Id)}",
+                    },
+                    new ExportTypePropertyInfo()
+                    {
+                        Name = $"{nameof(Pricelist.Prices)}.{nameof(Price.List)}",
+                        MemberInfo = typeof(Price).GetProperty(nameof(Price.List)),
+                        ExportName = $"{nameof(Pricelist.Prices)}.{nameof(Price.List)}",
+                    },
                 }
             };
 
@@ -185,7 +428,77 @@ namespace VirtoCommerce.ExportModule.Tests
             return Task.CompletedTask;
         }
 
-        private string SerializeAndRead<T>(ExportedTypeMetadata metadata, IEnumerable<T> items, Configuration configuration = null)
+        [Fact]
+        public Task ExportPricelists_SameTypePropertiesMapping()
+        {
+            var pricelists = CreatePricelists();
+
+            var metadata = new ExportedTypeMetadata()
+            {
+                PropertiesInfo = new[]
+                {
+                    new ExportTypePropertyInfo()
+                    {
+                        Name = nameof(Pricelist.Id),
+                        MemberInfo = typeof(Pricelist).GetProperty(nameof(Pricelist.Id)),
+                        ExportName = nameof(Pricelist.Id),
+                    },
+                    new ExportTypePropertyInfo()
+                    {
+                        Name = nameof(Pricelist.Name),
+                        MemberInfo = typeof(Pricelist).GetProperty(nameof(Pricelist.Name)),
+                        ExportName = nameof(Pricelist.Name),
+                    },
+                    new ExportTypePropertyInfo()
+                    {
+                        Name = $"{nameof(Pricelist.ActiveAssignment)}.{nameof(PricelistAssignment.Id)}",
+                        MemberInfo = typeof(PricelistAssignment).GetProperty(nameof(PricelistAssignment.Id)),
+                        ExportName = $"{nameof(Pricelist.ActiveAssignment)}.{nameof(PricelistAssignment.Id)}",
+                    },
+                    new ExportTypePropertyInfo()
+                    {
+                        Name = $"{nameof(Pricelist.ActiveAssignment)}.{nameof(PricelistAssignment.Name)}",
+                        MemberInfo = typeof(PricelistAssignment).GetProperty(nameof(PricelistAssignment.Name)),
+                        ExportName = $"{nameof(Pricelist.ActiveAssignment)}.{nameof(PricelistAssignment.Name)}",
+                    },
+                    new ExportTypePropertyInfo()
+                    {
+                        Name = $"{nameof(Pricelist.ActiveAssignment)}.{nameof(PricelistAssignment.Priority)}",
+                        MemberInfo = typeof(PricelistAssignment).GetProperty(nameof(PricelistAssignment.Priority)),
+                        ExportName = $"{nameof(Pricelist.ActiveAssignment)}.{nameof(PricelistAssignment.Priority)}",
+                    },
+                    new ExportTypePropertyInfo()
+                    {
+                        Name = $"{nameof(Pricelist.InactiveAssignment)}.{nameof(PricelistAssignment.Id)}",
+                        MemberInfo = typeof(PricelistAssignment).GetProperty(nameof(PricelistAssignment.Id)),
+                        ExportName = $"{nameof(Pricelist.InactiveAssignment)}.{nameof(PricelistAssignment.Id)}",
+                    },
+                    new ExportTypePropertyInfo()
+                    {
+                        Name = $"{nameof(Pricelist.InactiveAssignment)}.{nameof(PricelistAssignment.Name)}",
+                        MemberInfo = typeof(PricelistAssignment).GetProperty(nameof(PricelistAssignment.Name)),
+                        ExportName = $"{nameof(Pricelist.InactiveAssignment)}.{nameof(PricelistAssignment.Name)}",
+                    },
+                    new ExportTypePropertyInfo()
+                    {
+                        Name = $"{nameof(Pricelist.InactiveAssignment)}.{nameof(PricelistAssignment.Priority)}",
+                        MemberInfo = typeof(PricelistAssignment).GetProperty(nameof(PricelistAssignment.Priority)),
+                        ExportName = $"{nameof(Pricelist.InactiveAssignment)}.{nameof(PricelistAssignment.Priority)}",
+                    },
+                }
+            };
+
+            //Act
+            var filteredPricesString = SerializeAndRead(metadata, pricelists);
+
+            //Assets
+            Assert.Equal("Id,Name,ActiveAssignment.Id,ActiveAssignment.Name,ActiveAssignment.Priority,InactiveAssignment.Id,InactiveAssignment.Name,InactiveAssignment.Priority\r\nPL1,Pricelist 1,PA1_1,PA1_1 Name,1,PA1_2,PA1_2 Name,2\r\nPL2,Pricelist 2,PA2_1,PA2_1 Name,11,PA2_2,PA2_2 Name,12\r\n", filteredPricesString);
+
+            return Task.CompletedTask;
+
+        }
+
+        private string SerializeAndRead(ExportedTypeMetadata metadata, IEnumerable items, Configuration configuration = null)
         {
             var csvConfiguration = new CsvProviderConfiguration() { Configuration = configuration ?? new Configuration() };
 
@@ -218,13 +531,31 @@ namespace VirtoCommerce.ExportModule.Tests
                     Currency = "USD",
                     Assignments = new List<PricelistAssignment>()
                     {
-                        new PricelistAssignment {Id = "PA1_1", Name = "PA1_1 Name", Priority = 1 },
-                        new PricelistAssignment {Id = "PA1_2", Name = "PA1_2 Name", Priority = 2 },
+                        new PricelistAssignment
+                        {
+                            Id = "PA1_1",
+                            Name = "PA1_1 Name",
+                            Priority = 1,
+                        },
+                        new PricelistAssignment
+                        {
+                            Id = "PA1_2",
+                            Name = "PA1_2 Name",
+                            Priority = 2,
+                        },
                     },
                     Prices = new List<Price>()
                     {
-                        new Price {Id = "P1_1", List = 25 },
-                        new Price {Id = "P1_2", List = 26 },
+                        new Price
+                        {
+                            Id = "P1_1",
+                            List = 25,
+                        },
+                        new Price
+                        {
+                            Id = "P1_2",
+                            List = 26,
+                        },
                     },
                 },
                 new Pricelist
@@ -234,15 +565,44 @@ namespace VirtoCommerce.ExportModule.Tests
                     Currency = "EUR",
                     Assignments = new List<PricelistAssignment>()
                     {
-                        new PricelistAssignment {Id = "PA2_1", Name = "PA2_1 Name", Priority = 1, CatalogId = "Cat1" },
-                        new PricelistAssignment {Id = "PA2_2", Name = "PA2_2 Name", Priority = 2, CatalogId = "Cat2" },
-                        new PricelistAssignment {Id = "PA2_3", Name = "PA2_3 Name", Priority = 10 },
+                        new PricelistAssignment
+                        {
+                            Id = "PA2_1",
+                            Name = "PA2_1 Name",
+                            Priority = 11,
+                            CatalogId = "Cat1",
+                        },
+                        new PricelistAssignment
+                        {
+                            Id = "PA2_2",
+                            Name = "PA2_2 Name",
+                            Priority = 12,
+                            CatalogId = "Cat2",
+                        },
+                        new PricelistAssignment
+                        {
+                            Id = "PA2_3",
+                            Name = "PA2_3 Name",
+                            Priority = 13,
+                        },
                     },
                     Prices = new List<Price>()
                     {
-                        new Price {Id = "P2_1", List = 12 },
-                        new Price {Id = "P2_2", List = 17 },
-                        new Price {Id = "P2_3", List = 19 },
+                        new Price
+                        {
+                            Id = "P2_1",
+                            List = 12,
+                        },
+                        new Price
+                        {
+                            Id = "P2_2",
+                            List = 17,
+                        },
+                        new Price
+                        {
+                            Id = "P2_3",
+                            List = 19,
+                        },
                     },
                 },
             };
@@ -260,7 +620,9 @@ namespace VirtoCommerce.ExportModule.Tests
                     price.Pricelist = pricelist;
                     price.PricelistId = pricelist.Id;
                 }
+
                 pricelist.ActiveAssignment = pricelist?.Assignments?.FirstOrDefault();
+                pricelist.InactiveAssignment = pricelist?.Assignments?.Skip(1).First();
             }
 
             return result;
