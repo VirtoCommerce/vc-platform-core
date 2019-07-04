@@ -3,6 +3,7 @@ using System.Collections;
 using System.Collections.Generic;
 using System.IO;
 using System.Linq;
+using System.Text;
 using System.Threading.Tasks;
 using CsvHelper.Configuration;
 using VirtoCommerce.ExportModule.Core.Model;
@@ -502,15 +503,16 @@ namespace VirtoCommerce.ExportModule.Tests
         {
             var csvConfiguration = new CsvProviderConfiguration() { Configuration = configuration ?? new Configuration() };
 
-            using (Stream stream = new MemoryStream())
+            using (var stream = new MemoryStream())
+            using (var writer = new StreamWriter(stream, Encoding.UTF8) { AutoFlush = true })
             {
-                using (var csvExportProvider = new CsvExportProvider(stream, csvConfiguration))
+                using (var csvExportProvider = new CsvExportProvider(csvConfiguration))
                 {
                     csvExportProvider.Metadata = metadata;
 
                     foreach (var item in items)
                     {
-                        csvExportProvider.WriteRecord(item);
+                        csvExportProvider.WriteRecord(writer, item);
                     }
                 }
 

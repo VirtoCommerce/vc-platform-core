@@ -1,6 +1,7 @@
 using System;
 using System.IO;
 using System.Linq;
+using System.Text;
 using VirtoCommerce.ExportModule.Core.Model;
 using VirtoCommerce.ExportModule.Core.Services;
 using VirtoCommerce.Platform.Core.Common;
@@ -48,7 +49,8 @@ namespace VirtoCommerce.ExportModule.Data.Services
                 exportProgress.Description = "Creating provider…";
                 progressCallback(exportProgress);
 
-                using (var exportProvider = _exportProviderFactory.CreateProvider(request.ProviderName, request.ProviderConfig, stream))
+                using (var writer = new StreamWriter(stream, Encoding.UTF8, 1024, true) { AutoFlush = true })
+                using (var exportProvider = _exportProviderFactory.CreateProvider(request.ProviderName, request.ProviderConfig))
                 {
                     var filteredMetadata = exportedTypeDefinition.MetaData.MakeShallowCopy();
 
@@ -58,8 +60,6 @@ namespace VirtoCommerce.ExportModule.Data.Services
                         .ToArray();
 
                     exportProvider.Metadata = filteredMetadata;
-
-                    exportProvider.WriteMetadata(exportProvider.Metadata);
 
                     exportProgress.Description = "Fetching…";
                     progressCallback(exportProgress);
@@ -79,7 +79,7 @@ namespace VirtoCommerce.ExportModule.Data.Services
                         {
                             try
                             {
-                                exportProvider.WriteRecord(obj);
+                                exportProvider.WriteRecord(writer, obj);
                             }
                             catch (Exception e)
                             {
