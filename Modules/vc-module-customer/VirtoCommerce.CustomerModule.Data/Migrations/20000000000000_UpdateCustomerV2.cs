@@ -31,7 +31,7 @@ namespace VirtoCommerce.CustomerModule.Data.Migrations
                             ALTER TABLE [Member] ADD [Salutation] nvarchar(256) NULL
                             ALTER TABLE [Member] ADD [Type] nvarchar(64) NULL
                             ALTER TABLE [Member] ADD [IsActive] [bit] NULL
-                            ALTER TABLE [Member] ADD [Description] nvarchar(256) NULL
+                            ALTER TABLE [Member] ADD [Description] nvarchar(max) NULL
                             ALTER TABLE [Member] ADD [BusinessCategory] nvarchar(64) NULL
                             ALTER TABLE [Member] ADD [OwnerId] nvarchar(128) NULL
                             ALTER TABLE [Member] ADD [SiteUrl] nvarchar(2048) NULL

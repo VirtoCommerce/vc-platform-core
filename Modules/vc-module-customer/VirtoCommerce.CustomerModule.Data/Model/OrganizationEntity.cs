@@ -9,7 +9,6 @@ namespace VirtoCommerce.CustomerModule.Data.Model
 {
     public class OrganizationEntity : MemberEntity
     {
-        [StringLength(256)]
         public string Description { get; set; }
 
         [StringLength(64)]
