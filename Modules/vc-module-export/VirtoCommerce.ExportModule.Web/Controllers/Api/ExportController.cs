@@ -21,14 +21,14 @@ namespace VirtoCommerce.ExportModule.Web.Controllers
     [Route("api/export")]
     public class ExportController : Controller
     {
-        private readonly IEnumerable<Func<IExportProviderConfiguration, Stream, IExportProvider>> _exportProviderFactories;
+        private readonly IEnumerable<Func<IExportProviderConfiguration, IExportProvider>> _exportProviderFactories;
         private readonly IKnownExportTypesRegistrar _knownExportTypesRegistrar;
         private readonly IUserNameResolver _userNameResolver;
         private readonly IPushNotificationManager _pushNotificationManager;
         private readonly PlatformOptions _platformOptions;
 
         public ExportController(
-            IEnumerable<Func<IExportProviderConfiguration, Stream, IExportProvider>> exportProviderFactories,
+            IEnumerable<Func<IExportProviderConfiguration, IExportProvider>> exportProviderFactories,
             IKnownExportTypesRegistrar knownExportTypesRegistrar,
             IUserNameResolver userNameResolver,
             IPushNotificationManager pushNotificationManager,
@@ -60,13 +60,7 @@ namespace VirtoCommerce.ExportModule.Web.Controllers
         [Route("providers")]
         public ActionResult<IExportProvider[]> GetExportProviders()
         {
-            return Ok(_exportProviderFactories.Select(x =>
-            {
-                using (var ms = new MemoryStream())
-                {
-                    return x(new EmptyProviderConfiguration(), ms);
-                }
-            }).ToArray());
+            return Ok(_exportProviderFactories.Select(x => x(new EmptyProviderConfiguration())).ToArray());
         }
 
         /// <summary>
@@ -114,7 +108,7 @@ namespace VirtoCommerce.ExportModule.Web.Controllers
         public ActionResult DownloadExportFile([FromRoute] string fileName)
         {
             var localTmpFolder = Path.GetFullPath(Path.Combine(_platformOptions.DefaultExportFolder));
-            var localPath = Path.Combine(localTmpFolder, Path.GetFileName(_platformOptions.DefaultExportFileName));
+            var localPath = Path.Combine(localTmpFolder, Path.GetFileName(fileName));
 
             //Load source data only from local file system 
             using (var stream = System.IO.File.Open(localPath, FileMode.Open))
