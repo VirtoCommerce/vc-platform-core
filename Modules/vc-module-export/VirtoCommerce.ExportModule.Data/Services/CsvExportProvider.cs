@@ -4,7 +4,6 @@ using System.Globalization;
 using System.IO;
 using System.Linq;
 using System.Reflection;
-using System.Text;
 using CsvHelper;
 using CsvHelper.Configuration;
 using VirtoCommerce.ExportModule.Core.Model;
@@ -17,21 +16,34 @@ namespace VirtoCommerce.ExportModule.Data.Services
     public sealed class CsvExportProvider : IExportProvider
     {
         public string TypeName => nameof(CsvExportProvider);
+        public string ExportedFileExtension => "csv";
         public IExportProviderConfiguration Configuration { get; }
         public ExportedTypeMetadata Metadata { get; set; }
 
-        private readonly Stream _stream;
-
-        private TextWriter _textWriter;
         private CsvWriter _csvWriter;
 
-        public CsvExportProvider(Stream stream, IExportProviderConfiguration exportProviderConfiguration)
+        public CsvExportProvider(IExportProviderConfiguration exportProviderConfiguration)
         {
-            _stream = stream;
             Configuration = exportProviderConfiguration;
         }
 
-        private void EnsureWriterCreated()
+        public void WriteRecord(TextWriter writer, object objectToRecord)
+        {
+            EnsureWriterCreated(writer);
+
+            AddClassMap(objectToRecord.GetType());
+
+            _csvWriter.WriteRecords(new[] { objectToRecord });
+        }
+
+        public void Dispose()
+        {
+            _csvWriter?.Flush();
+            _csvWriter?.Dispose();
+        }
+
+
+        private void EnsureWriterCreated(TextWriter textWriter)
         {
             if (Metadata == null)
             {
@@ -40,11 +52,9 @@ namespace VirtoCommerce.ExportModule.Data.Services
 
             if (_csvWriter == null)
             {
-                _textWriter = new StreamWriter(_stream, Encoding.UTF8, 1024, true) { AutoFlush = true };
-
                 var csvConfiguration = (Configuration as CsvProviderConfiguration)?.Configuration ?? new Configuration() { Delimiter = "\t" };
 
-                _csvWriter = new CsvWriter(_textWriter, csvConfiguration);
+                _csvWriter = new CsvWriter(textWriter, csvConfiguration, true);
             }
         }
 
@@ -60,26 +70,6 @@ namespace VirtoCommerce.ExportModule.Data.Services
 
                 csvConfiguration.RegisterClassMap(classMap);
             }
-        }
-
-        public void WriteMetadata(ExportedTypeMetadata metadata)
-        {
-        }
-
-        public void WriteRecord(object objectToRecord)
-        {
-            EnsureWriterCreated();
-
-            AddClassMap(objectToRecord.GetType());
-
-            _csvWriter.WriteRecords(new[] { objectToRecord });
-            _csvWriter.Flush();
-        }
-
-        public void Dispose()
-        {
-            _csvWriter?.Dispose();
-            _textWriter?.Dispose();
         }
     }
 
@@ -122,7 +112,7 @@ namespace VirtoCommerce.ExportModule.Data.Services
                     // Add memberMap
                     if (i == propertyNames.Length - 1)
                     {
-                        var memberMap = CreateMemberMap(currentType, propertyInfo, includedPropertyInfo.Name, ref columnIndex);
+                        var memberMap = CreateMemberMap(currentType, propertyInfo, includedPropertyInfo.ExportName, ref columnIndex);
 
                         currentClassMap.MemberMaps.Add(memberMap);
                         currentClassMap = this;

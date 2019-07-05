@@ -1,10 +1,10 @@
 using System;
 using System.IO;
 using System.Linq;
+using System.Text;
 using VirtoCommerce.ExportModule.Core.Model;
 using VirtoCommerce.ExportModule.Core.Services;
 using VirtoCommerce.Platform.Core.Common;
-using VirtoCommerce.Platform.Core.ExportImport;
 
 namespace VirtoCommerce.ExportModule.Data.Services
 {
@@ -19,7 +19,7 @@ namespace VirtoCommerce.ExportModule.Data.Services
             _exportProviderFactory = exportProviderFactory;
         }
 
-        public void Export(Stream stream, ExportDataRequest request, Action<ExportImportProgressInfo> progressCallback, ICancellationToken token)
+        public void Export(Stream stream, ExportDataRequest request, Action<ExportProgressInfo> progressCallback, ICancellationToken token)
         {
             if (request == null)
             {
@@ -34,7 +34,7 @@ namespace VirtoCommerce.ExportModule.Data.Services
             var completedMessage = $"Export completed";
             var totalCount = pagedDataSource.GetTotalCount();
             var exportedCount = 0;
-            var exportProgress = new ExportImportProgressInfo()
+            var exportProgress = new ExportProgressInfo()
             {
                 ProcessedCount = 0,
                 TotalCount = totalCount,
@@ -48,7 +48,8 @@ namespace VirtoCommerce.ExportModule.Data.Services
                 exportProgress.Description = "Creating provider…";
                 progressCallback(exportProgress);
 
-                using (var exportProvider = _exportProviderFactory.CreateProvider(request.ProviderName, request.ProviderConfig, stream))
+                using (var writer = new StreamWriter(stream, Encoding.UTF8, 1024, true) { AutoFlush = true })
+                using (var exportProvider = _exportProviderFactory.CreateProvider(request.ProviderName, request.ProviderConfig))
                 {
                     var filteredMetadata = exportedTypeDefinition.MetaData.MakeShallowCopy();
 
@@ -58,8 +59,6 @@ namespace VirtoCommerce.ExportModule.Data.Services
                         .ToArray();
 
                     exportProvider.Metadata = filteredMetadata;
-
-                    exportProvider.WriteMetadata(exportProvider.Metadata);
 
                     exportProgress.Description = "Fetching…";
                     progressCallback(exportProgress);
@@ -79,7 +78,7 @@ namespace VirtoCommerce.ExportModule.Data.Services
                         {
                             try
                             {
-                                exportProvider.WriteRecord(obj);
+                                exportProvider.WriteRecord(writer, obj);
                             }
                             catch (Exception e)
                             {

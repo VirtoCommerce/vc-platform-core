@@ -1,6 +1,5 @@
 using System;
 using Newtonsoft.Json;
-using VirtoCommerce.Platform.Core.ExportImport;
 
 namespace VirtoCommerce.ExportModule.Core.Model
 {

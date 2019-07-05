@@ -8,8 +8,6 @@ using VirtoCommerce.ExportModule.Core.Model;
 using VirtoCommerce.ExportModule.Core.Services;
 using VirtoCommerce.Platform.Core;
 using VirtoCommerce.Platform.Core.Exceptions;
-using VirtoCommerce.Platform.Core.ExportImport;
-using VirtoCommerce.Platform.Core.ExportImport.PushNotifications;
 using VirtoCommerce.Platform.Core.PushNotifications;
 
 namespace VirtoCommerce.ExportModule.Web.BackgroundJobs
@@ -19,21 +17,24 @@ namespace VirtoCommerce.ExportModule.Web.BackgroundJobs
         private readonly IPushNotificationManager _pushNotificationManager;
         private readonly PlatformOptions _platformOptions;
         private readonly IDataExporter _dataExporter;
+        private readonly IExportProviderFactory _exportProviderFactory;
 
         public ExportJob(IDataExporter dataExporter,
             IPushNotificationManager pushNotificationManager,
-            IOptions<PlatformOptions> platformOptions)
+            IOptions<PlatformOptions> platformOptions,
+            IExportProviderFactory exportProviderFactory)
         {
             _dataExporter = dataExporter;
             _pushNotificationManager = pushNotificationManager;
             _platformOptions = platformOptions.Value;
+            _exportProviderFactory = exportProviderFactory;
         }
 
-        public async Task ExportBackgroundAsync(ExportDataRequest request, PlatformExportPushNotification notification, IJobCancellationToken cancellationToken, PerformContext context)
+        public async Task ExportBackgroundAsync(ExportDataRequest request, ExportPushNotification notification, IJobCancellationToken cancellationToken, PerformContext context)
         {
-            void progressCallback(ExportImportProgressInfo x)
+            void progressCallback(ExportProgressInfo x)
             {
-                notification.Path(x);
+                notification.Patch(x);
                 notification.JobId = context.BackgroundJob.Id;
                 _pushNotificationManager.Send(notification);
             }
@@ -43,9 +44,13 @@ namespace VirtoCommerce.ExportModule.Web.BackgroundJobs
                 var localTmpFolder = Path.GetFullPath(Path.Combine(_platformOptions.DefaultExportFolder));
                 var fileName = Path.GetFileName(_platformOptions.DefaultExportFileName);
 
-                if (request.ProviderConfig != null)
+                // Do not like provider creation here to get file extension, maybe need to pass created provider to Exporter.
+                // Create stream inside Exporter is not good as it is not Exporter resposibility to decide where to write.
+                var provider = _exportProviderFactory.CreateProvider(request.ProviderName, request.ProviderConfig);
+
+                if (!string.IsNullOrEmpty(provider.ExportedFileExtension))
                 {
-                    fileName = Path.ChangeExtension(Path.GetFileName(_platformOptions.DefaultExportFileName), request.ProviderConfig.ExportedFileExtension);
+                    fileName = Path.ChangeExtension(Path.GetFileName(_platformOptions.DefaultExportFileName), provider.ExportedFileExtension);
                 }
 
                 var localTmpPath = Path.Combine(localTmpFolder, fileName);

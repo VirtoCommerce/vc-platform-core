@@ -1,4 +1,6 @@
 using System;
+using System.Collections.Generic;
+using System.Diagnostics.CodeAnalysis;
 using System.IO;
 using System.Linq;
 using System.Text;
@@ -11,7 +13,6 @@ using VirtoCommerce.ExportModule.Core.Model;
 using VirtoCommerce.ExportModule.Core.Services;
 using VirtoCommerce.ExportModule.Data.Services;
 using VirtoCommerce.Platform.Core.Common;
-using VirtoCommerce.Platform.Core.ExportImport;
 using VirtoCommerce.PricingModule.Core.Model;
 using VirtoCommerce.PricingModule.Core.Model.Search;
 using VirtoCommerce.PricingModule.Core.Services;
@@ -23,6 +24,7 @@ namespace VirtoCommerce.PricingModule.Test
     public class ExportImport2Test
     {
         [Fact]
+        [SuppressMessage("Sonar", "S3966:Objects should not be disposed more than once")]
         public Task PriceJsonExport()
         {
             //Arrange
@@ -40,17 +42,18 @@ namespace VirtoCommerce.PricingModule.Test
                 .WithMetadata(ExportedTypeMetadata.GetFromType<Price>());
 
             var exportProviderFactories = new[] {
-                new Func<IExportProviderConfiguration, Stream, IExportProvider>((config, stream) => new JsonExportProvider(stream, config))
+                new Func<IExportProviderConfiguration, IExportProvider>(config => new JsonExportProvider(config)),
             };
 
             var dataExporter = new DataExporter(resolver, new ExportProviderFactory(exportProviderFactories));
 
             //Act
-            var result = "";
-            using (var ms = new MemoryStream())
+            var result = string.Empty;
+            using (var stream = new MemoryStream())
+            using (var writer = new StreamWriter(stream, Encoding.UTF8) { AutoFlush = true })
             {
                 dataExporter.Export(
-                    ms,
+                    stream,
                     new ExportDataRequest()
                     {
                         DataQuery = new PriceExportDataQuery()
@@ -60,10 +63,13 @@ namespace VirtoCommerce.PricingModule.Test
                         ExportTypeName = typeof(Price).FullName,
                         ProviderName = nameof(JsonExportProvider)
                     },
-                    new Action<ExportImportProgressInfo>(x => Console.WriteLine(x.Description)),
+                    new Action<ExportProgressInfo>(x => Console.WriteLine(x.Description)),
                     new CancellationTokenWrapper(CancellationToken.None));
 
-                result = Encoding.UTF8.GetString(ms.ToArray());
+                stream.Seek(0, SeekOrigin.Begin);
+
+                var reader = new StreamReader(stream);
+                result = reader.ReadToEnd();
             }
 
             //Assert
@@ -78,6 +84,7 @@ namespace VirtoCommerce.PricingModule.Test
 
 
         [Fact]
+        [SuppressMessage("Sonar", "S3966:Objects should not be disposed more than once")]
         public Task PricelistJsonExport()
         {
             //Arrange
@@ -86,6 +93,11 @@ namespace VirtoCommerce.PricingModule.Test
 
             var searchServiceMock = new Mock<IPricingSearchService>();
             searchServiceMock.Setup(x => x.SearchPricelistsAsync(It.IsAny<PricelistSearchCriteria>())).ReturnsAsync(GetTestPricelistResult());
+            searchServiceMock.Setup(x => x.SearchPricesAsync(It.IsAny<PricesSearchCriteria>())).ReturnsAsync(new PriceSearchResult()
+            {
+                TotalCount = 0,
+                Results = new List<Price>(),
+            });
 
             var priceServiceMock = new Mock<IPricingService>();
 
@@ -95,17 +107,18 @@ namespace VirtoCommerce.PricingModule.Test
                 .WithMetadata(ExportedTypeMetadata.GetFromType<Pricelist>());
 
             var exportProviderFactories = new[] {
-                new Func<IExportProviderConfiguration, Stream, IExportProvider>((config, stream) => new JsonExportProvider(stream, config))
+                new Func<IExportProviderConfiguration, IExportProvider>(config => new JsonExportProvider(config))
             };
 
             var dataExporter = new DataExporter(resolver, new ExportProviderFactory(exportProviderFactories));
 
             //Act
-            var result = "";
-            using (var ms = new MemoryStream())
+            var result = string.Empty;
+            using (var stream = new MemoryStream())
+            using (var writer = new StreamWriter(stream, Encoding.UTF8) { AutoFlush = true })
             {
                 dataExporter.Export(
-                    ms,
+                    stream,
                     new ExportDataRequest()
                     {
                         DataQuery = new PricelistExportDataQuery()
@@ -115,10 +128,13 @@ namespace VirtoCommerce.PricingModule.Test
                         ExportTypeName = typeof(Pricelist).FullName,
                         ProviderName = nameof(JsonExportProvider)
                     },
-                    new Action<ExportImportProgressInfo>(x => Console.WriteLine(x.Description)),
+                    new Action<ExportProgressInfo>(x => Console.WriteLine(x.Description)),
                     new CancellationTokenWrapper(CancellationToken.None));
 
-                result = Encoding.UTF8.GetString(ms.ToArray());
+                stream.Seek(0, SeekOrigin.Begin);
+
+                var reader = new StreamReader(stream);
+                result = reader.ReadToEnd();
             }
 
             //Assert
@@ -132,6 +148,7 @@ namespace VirtoCommerce.PricingModule.Test
         }
 
         [Fact]
+        [SuppressMessage("Sonar", "S3966:Objects should not be disposed more than once")]
         public Task PricelistAssignmentJsonExport()
         {
             IKnownExportTypesRegistrar registrar = new KnownExportTypesService();
@@ -148,17 +165,18 @@ namespace VirtoCommerce.PricingModule.Test
                 .WithMetadata(ExportedTypeMetadata.GetFromType<PricelistAssignment>());
 
             var exportProviderFactories = new[] {
-                new Func<IExportProviderConfiguration, Stream, IExportProvider>((config, stream) => new JsonExportProvider(stream, config))
+                new Func<IExportProviderConfiguration, IExportProvider>(config => new JsonExportProvider(config))
             };
 
             var dataExporter = new DataExporter(resolver, new ExportProviderFactory(exportProviderFactories));
 
             //Act
-            var result = "";
-            using (var ms = new MemoryStream())
+            var result = string.Empty;
+            using (var stream = new MemoryStream())
+            using (var writer = new StreamWriter(stream, Encoding.UTF8) { AutoFlush = true })
             {
                 dataExporter.Export(
-                    ms,
+                    stream,
                     new ExportDataRequest()
                     {
                         DataQuery = new PricelistAssignmentExportDataQuery()
@@ -168,10 +186,13 @@ namespace VirtoCommerce.PricingModule.Test
                         ExportTypeName = typeof(PricelistAssignment).FullName,
                         ProviderName = nameof(JsonExportProvider)
                     },
-                    new Action<ExportImportProgressInfo>(x => Console.WriteLine(x.Description)),
+                    new Action<ExportProgressInfo>(x => Console.WriteLine(x.Description)),
                     new CancellationTokenWrapper(CancellationToken.None));
 
-                result = Encoding.UTF8.GetString(ms.ToArray());
+                stream.Seek(0, SeekOrigin.Begin);
+
+                var reader = new StreamReader(stream);
+                result = reader.ReadToEnd();
             }
 
             //Assert
@@ -188,7 +209,8 @@ namespace VirtoCommerce.PricingModule.Test
 
 
         [Fact]
-        public async Task PriceCsvExport()
+        [SuppressMessage("Sonar", "S3966:Objects should not be disposed more than once")]
+        public Task PriceCsvExport()
         {
             // This is temporary (for debug purposes) full test of prices export
             IKnownExportTypesRegistrar registrar = new KnownExportTypesService();
@@ -205,17 +227,20 @@ namespace VirtoCommerce.PricingModule.Test
                 .WithDataSourceFactory(dataQuery => new PriceExportPagedDataSource(searchServiceMock.Object, priceServiceMock.Object) { DataQuery = dataQuery })
                 .WithMetadata(ExportedTypeMetadata.GetFromType<Price>());
 
-            var exportProviderFactories = new[] {
-                new Func<IExportProviderConfiguration, Stream, IExportProvider>((config, stream) => new JsonExportProvider(stream, config)),
-                new Func<IExportProviderConfiguration, Stream, IExportProvider>((config, stream) => new CsvExportProvider(stream, config)),
+            var exportProviderFactories = new[]
+            {
+                new Func<IExportProviderConfiguration, IExportProvider>(config => new JsonExportProvider(config)),
+                new Func<IExportProviderConfiguration, IExportProvider>(config => new CsvExportProvider(config)),
             };
 
             var dataExporter = new DataExporter(resolver, new ExportProviderFactory(exportProviderFactories));
 
-            using (var ms = new MemoryStream())
+            var result = string.Empty;
+            using (var stream = new MemoryStream())
+            using (var writer = new StreamWriter(stream, Encoding.UTF8) { AutoFlush = true })
             {
                 dataExporter.Export(
-                    ms,
+                    stream,
                     new ExportDataRequest()
                     {
                         DataQuery = new PriceExportDataQuery()
@@ -225,11 +250,18 @@ namespace VirtoCommerce.PricingModule.Test
                         ExportTypeName = typeof(Price).FullName,
                         ProviderName = nameof(CsvExportProvider)
                     },
-                    new Action<ExportImportProgressInfo>(x => Console.WriteLine(x.Description)),
+                    new Action<ExportProgressInfo>(x => Console.WriteLine(x.Description)),
                     new CancellationTokenWrapper(CancellationToken.None));
 
-                var resultcsv = Encoding.UTF8.GetString(ms.ToArray());
+                stream.Seek(0, SeekOrigin.Begin);
+
+                var reader = new StreamReader(stream);
+                result = reader.ReadToEnd();
             }
+
+            Assert.NotNull(result);
+
+            return Task.CompletedTask;
         }
 
         /// <summary>

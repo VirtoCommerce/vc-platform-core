@@ -13,17 +13,15 @@ namespace VirtoCommerce.ExportModule.Data.Services
 {
     public sealed class JsonExportProvider : IExportProvider
     {
-        private readonly Stream _stream;
-
         public string TypeName => nameof(JsonExportProvider);
+        public string ExportedFileExtension => "json";
         public IExportProviderConfiguration Configuration { get; }
         public ExportedTypeMetadata Metadata { get; set; }
 
         private readonly JsonSerializer _serializer;
-        private StreamWriter _streamWriter;
         private JsonTextWriter _jsonTextWriter;
 
-        public JsonExportProvider(Stream stream, IExportProviderConfiguration exportProviderConfiguration)
+        public JsonExportProvider(IExportProviderConfiguration exportProviderConfiguration)
         {
             Configuration = exportProviderConfiguration;
 
@@ -41,35 +39,35 @@ namespace VirtoCommerce.ExportModule.Data.Services
             }
 
             _serializer.Converters.Add(new ObjectDiscriminatorJsonConverter(typeof(Entity)));
-            _stream = stream;
         }
 
-        public void WriteMetadata(ExportedTypeMetadata metadata)
-        {
-            EnsureWriterCreated();
-        }
-
-        public void WriteRecord(object objectToRecord)
+        public void WriteRecord(TextWriter writer, object objectToRecord)
         {
             if (objectToRecord == null)
             {
                 throw new ArgumentNullException(nameof(objectToRecord));
             }
 
-            EnsureWriterCreated();
+            EnsureWriterCreated(writer);
             FilterProperties(objectToRecord);
 
             _serializer.Serialize(_jsonTextWriter, objectToRecord);
-            _streamWriter.Flush();
+        }
+
+        public void Dispose()
+        {
+            _jsonTextWriter?.WriteEndArray();
+            _jsonTextWriter?.Flush();
+            _jsonTextWriter?.Close();
         }
 
 
-        private void EnsureWriterCreated()
+        private void EnsureWriterCreated(TextWriter writer)
         {
-            if (_streamWriter == null)
+            if (_jsonTextWriter == null)
             {
-                _streamWriter = new StreamWriter(_stream);
-                _jsonTextWriter = new JsonTextWriter(_streamWriter);
+                _jsonTextWriter = new JsonTextWriter(writer);
+                _jsonTextWriter.CloseOutput = false;
                 _jsonTextWriter.WriteStartArray();
             }
         }
@@ -117,12 +115,6 @@ namespace VirtoCommerce.ExportModule.Data.Services
                     property.SetValue(obj, null);
                 }
             }
-        }
-
-        public void Dispose()
-        {
-            _jsonTextWriter?.WriteEndArray();
-            _streamWriter?.Dispose();
         }
     }
 

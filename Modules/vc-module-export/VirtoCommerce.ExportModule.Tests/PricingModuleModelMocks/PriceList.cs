@@ -15,5 +15,10 @@ namespace VirtoCommerce.ExportModule.Tests
         /// Added for testing purposes as 1 to 1 related entity, does not exists in original Pricelist object
         /// </summary>
         public PricelistAssignment ActiveAssignment { get; set; }
+
+        /// <summary>
+        /// Added for testing purposes to check same type properties mapping inside one entity for CSV export (tabular)
+        /// </summary>
+        public PricelistAssignment InactiveAssignment { get; set; }
     }
 }
