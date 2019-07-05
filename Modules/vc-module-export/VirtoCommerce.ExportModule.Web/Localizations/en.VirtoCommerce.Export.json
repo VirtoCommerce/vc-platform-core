@@ -12,6 +12,10 @@
                     "processed": "Processed count",
                     "errors-count": "Error count"
                 }
+            },
+            "exporter": {
+                "title": "Export settings",
+                "subtitle": "Select columns and data for export"
             }
         }
     }

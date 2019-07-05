@@ -81,8 +81,8 @@ angular.module('virtoCommerce.exportModule')
                     };
                     var newBlade = {
                         id: 'exportSettings',
-                        title: 'pricing.blades.exporter.' + selectedTypes[0].name +'Title',
-                        subtitle: 'pricing.blades.exporter.' + selectedTypes[0].name + 'Subtitle',
+                        title: 'export.blades.exporter.title',
+                        subtitle: 'export.blades.exporter.subtitle',
                         controller: 'virtoCommerce.exportModule.exporterController',
                         template: 'Modules/$(VirtoCommerce.Export)/Scripts/blades/exportSetting.tpl.html',
                         exportDataRequest: exportDataRequest,

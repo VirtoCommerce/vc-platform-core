@@ -34,29 +34,4 @@ angular.module(moduleName, ['ui.grid.cellNav', 'ui.grid.edit', 'ui.grid.validate
                     permission: 'export:access'
                 };
                 mainMenuService.addMenuItem(menuItem);
-
-                ////Register item prices widget
-                //var itemPricesWidget = {
-                //    isVisible: function (blade) { return authService.checkPermission('pricing:read'); },
-                //    controller: 'virtoCommerce.pricingModule.itemPricesWidgetController',
-                //    size: [2, 1],
-                //    template: 'Modules/$(VirtoCommerce.Pricing)/Scripts/widgets/itemPricesWidget.tpl.html',
-                //};
-                //widgetService.registerWidget(itemPricesWidget, 'itemDetail');
-
-                ////Register pricelist widgets
-                //widgetService.registerWidget({
-                //    isVisible: function (blade) { return !blade.isNew; },
-                //    controller: 'virtoCommerce.pricingModule.pricesWidgetController',
-                //    template: 'Modules/$(VirtoCommerce.Pricing)/Scripts/widgets/pricesWidget.tpl.html',
-                //}, 'pricelistDetail');
-                //widgetService.registerWidget({
-                //    controller: 'virtoCommerce.pricingModule.assignmentsWidgetController',
-                //    template: 'Modules/$(VirtoCommerce.Pricing)/Scripts/widgets/assignmentsWidget.tpl.html',
-                //}, 'pricelistDetail');
-
-                //$http.get('Modules/$(VirtoCommerce.Pricing)/Scripts/dynamicConditions/templates.html').then(function (response) {
-                //    // compile the response, which will put stuff into the cache
-                //    $compile(response.data);
-                //});
             }]);
