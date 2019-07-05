@@ -320,9 +320,6 @@ namespace VirtoCommerce.CartModule.Data.Migrations
 
                 b.Property<DateTime?>("ModifiedDate");
 
-                b.Property<string>("OuterId")
-                    .HasMaxLength(128);
-
                 b.Property<string>("PaymentGatewayCode")
                     .HasMaxLength(64);
 

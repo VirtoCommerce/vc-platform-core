@@ -69,6 +69,8 @@ namespace VirtoCommerce.OrdersModule.Data.Model
         public string CustomerOrderId { get; set; }
         public virtual CustomerOrderEntity CustomerOrder { get; set; }
 
+        #region NavigationProperties
+
         public virtual ObservableCollection<ShipmentItemEntity> Items { get; set; } = new NullCollection<ShipmentItemEntity>();
         public virtual ObservableCollection<ShipmentPackageEntity> Packages { get; set; } = new NullCollection<ShipmentPackageEntity>();
         public virtual ObservableCollection<PaymentInEntity> InPayments { get; set; } = new NullCollection<PaymentInEntity>();
@@ -76,6 +78,7 @@ namespace VirtoCommerce.OrdersModule.Data.Model
         public virtual ObservableCollection<DiscountEntity> Discounts { get; set; } = new NullCollection<DiscountEntity>();
         public virtual ObservableCollection<TaxDetailEntity> TaxDetails { get; set; } = new NullCollection<TaxDetailEntity>();
 
+        #endregion
 
         public override OrderOperation ToModel(OrderOperation operation)
         {

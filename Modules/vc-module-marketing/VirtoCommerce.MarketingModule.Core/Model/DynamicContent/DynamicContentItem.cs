@@ -15,7 +15,9 @@ namespace VirtoCommerce.MarketingModule.Core.Model
         #endregion
 
         #region IHasDynamicProperties Members
+
         public ICollection<DynamicObjectProperty> DynamicProperties { get; set; }
+
         #endregion
     }
 }

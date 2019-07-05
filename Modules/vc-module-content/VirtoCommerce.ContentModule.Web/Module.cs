@@ -10,6 +10,7 @@ using Microsoft.Extensions.DependencyInjection;
 using VirtoCommerce.ContentModule.Azure;
 using VirtoCommerce.ContentModule.Azure.Extensions;
 using VirtoCommerce.ContentModule.Core;
+using VirtoCommerce.ContentModule.Core.Model;
 using VirtoCommerce.ContentModule.Core.Services;
 using VirtoCommerce.ContentModule.Data.ExportImport;
 using VirtoCommerce.ContentModule.Data.Repositories;

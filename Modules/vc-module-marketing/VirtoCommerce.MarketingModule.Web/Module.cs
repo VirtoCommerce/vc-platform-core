@@ -120,6 +120,9 @@ namespace VirtoCommerce.MarketingModule.Web
                 dbContext.Database.Migrate();
             }
 
+            var dynamicPropertyRegistrar = appBuilder.ApplicationServices.GetRequiredService<IDynamicPropertyRegistrar>();
+            dynamicPropertyRegistrar.RegisterType<DynamicContentItem>();
+
             var dynamicContentService = appBuilder.ApplicationServices.GetService<IDynamicContentService>();
             foreach (var id in new[] { ModuleConstants.MarketingConstants.ContentPlacesRootFolderId, ModuleConstants.MarketingConstants.CotentItemRootFolderId })
             {
@@ -221,7 +224,6 @@ namespace VirtoCommerce.MarketingModule.Web
         {
             await _appBuilder.ApplicationServices.GetRequiredService<MarketingExportImport>().DoImportAsync(inputStream, progressCallback, cancellationToken);
         }
-
 
         private List<IConditionTree> GetConditionsAndRewards()
         {

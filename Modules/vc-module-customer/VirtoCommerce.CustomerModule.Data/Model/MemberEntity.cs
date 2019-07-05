@@ -34,21 +34,21 @@ namespace VirtoCommerce.CustomerModule.Data.Model
 
         #region NavigationProperties
 
-        public ObservableCollection<NoteEntity> Notes { get; set; }
+        public virtual ObservableCollection<NoteEntity> Notes { get; set; }
 
-        public ObservableCollection<AddressEntity> Addresses { get; set; }
+        public virtual ObservableCollection<AddressEntity> Addresses { get; set; }
 
-        public ObservableCollection<MemberRelationEntity> MemberRelations { get; set; }
+        public virtual ObservableCollection<MemberRelationEntity> MemberRelations { get; set; }
 
-        public ObservableCollection<PhoneEntity> Phones { get; set; }
+        public virtual ObservableCollection<PhoneEntity> Phones { get; set; }
 
-        public ObservableCollection<EmailEntity> Emails { get; set; }
+        public virtual ObservableCollection<EmailEntity> Emails { get; set; }
 
-        public ObservableCollection<MemberGroupEntity> Groups { get; set; }
+        public virtual ObservableCollection<MemberGroupEntity> Groups { get; set; }
 
-        public ObservableCollection<SeoInfoEntity> SeoInfos { get; set; }
+        public virtual ObservableCollection<SeoInfoEntity> SeoInfos { get; set; }
 
-        public ObservableCollection<MemberDynamicPropertyObjectValueEntity> DynamicPropertyObjectValues { get; set; }
+        public virtual ObservableCollection<MemberDynamicPropertyObjectValueEntity> DynamicPropertyObjectValues { get; set; }
 
         #endregion
 
@@ -84,11 +84,10 @@ namespace VirtoCommerce.CustomerModule.Data.Model
             return member;
         }
 
-
         public virtual MemberEntity FromModel(Member member, PrimaryKeyResolvingMap pkMap)
         {
             if (member == null)
-                throw new ArgumentNullException("member");
+                throw new ArgumentNullException(nameof(member));
 
             pkMap.AddPair(member, this);
 
@@ -168,7 +167,6 @@ namespace VirtoCommerce.CustomerModule.Data.Model
 
             return this;
         }
-
 
         public virtual void Patch(MemberEntity target)
         {

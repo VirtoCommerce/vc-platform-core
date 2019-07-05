@@ -61,6 +61,8 @@ namespace VirtoCommerce.OrdersModule.Web
 
             var dynamicPropertyRegistrar = appBuilder.ApplicationServices.GetRequiredService<IDynamicPropertyRegistrar>();
             dynamicPropertyRegistrar.RegisterType<CustomerOrder>();
+            dynamicPropertyRegistrar.RegisterType<PaymentIn>();
+            dynamicPropertyRegistrar.RegisterType<Shipment>();
             dynamicPropertyRegistrar.RegisterType<LineItem>();
 
             var settingsRegistrar = appBuilder.ApplicationServices.GetRequiredService<ISettingsRegistrar>();

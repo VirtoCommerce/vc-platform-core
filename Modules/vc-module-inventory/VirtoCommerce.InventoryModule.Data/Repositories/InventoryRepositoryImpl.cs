@@ -29,7 +29,7 @@ namespace VirtoCommerce.InventoryModule.Data.Repositories
 
             foreach (var inventory in inventories)
             {
-                if (inventoryResponseGroup.HasFlag(InventoryResponseGroup.WithFulfillmentCenter)
+                if (inventoryResponseGroup.HasFlag(InventoryResponseGroup.WithFulfillmentCenter))
                 {
                     var fulfillmentCenter = await DbContext.Set<FulfillmentCenterEntity>().FirstOrDefaultAsync(t => t.Id.Equals(inventory.FulfillmentCenterId));
                 }

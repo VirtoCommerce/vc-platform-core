@@ -78,7 +78,6 @@ namespace VirtoCommerce.CartModule.Core.Model
         public virtual decimal HandlingTotal { get; set; }
         public virtual decimal HandlingTotalWithTax { get; set; }
 
-    
         public virtual decimal DiscountAmount { get; set; }
         public virtual decimal DiscountAmountWithTax { get; set; }
 
@@ -135,6 +134,7 @@ namespace VirtoCommerce.CartModule.Core.Model
         public  decimal TaxPercentRate { get; set; }
 
         #endregion
+
         #region IHaveTaxDetalization Members
         public ICollection<TaxDetail> TaxDetails { get; set; }
         #endregion

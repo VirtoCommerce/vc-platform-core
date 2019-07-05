@@ -69,7 +69,6 @@ namespace VirtoCommerce.OrdersModule.Data.Model
         public virtual ObservableCollection<DiscountEntity> Discounts { get; set; } = new NullCollection<DiscountEntity>();
         public virtual ObservableCollection<TaxDetailEntity> TaxDetails { get; set; } = new NullCollection<TaxDetailEntity>();
 
-
         public override OrderOperation ToModel(OrderOperation operation)
         {
             var payment = operation as PaymentIn;

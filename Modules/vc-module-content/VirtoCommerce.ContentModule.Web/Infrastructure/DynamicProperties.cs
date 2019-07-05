@@ -1,4 +1,5 @@
 using System.Collections.Generic;
+using VirtoCommerce.ContentModule.Core.Model;
 using VirtoCommerce.Platform.Core.DynamicProperties;
 
 namespace VirtoCommerce.ContentModule.Web.Infrastructure
