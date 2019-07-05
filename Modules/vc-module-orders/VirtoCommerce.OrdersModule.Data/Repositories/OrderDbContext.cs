@@ -184,9 +184,18 @@ namespace VirtoCommerce.OrdersModule.Data.Repositories
             modelBuilder.Entity<OperationDynamicPropertyObjectValueEntity>().ToTable("OrderOperationItemDynamicPropertyObjectValue").HasKey(x => x.Id);
             modelBuilder.Entity<OperationDynamicPropertyObjectValueEntity>().Property(x => x.Id).HasMaxLength(128);
             modelBuilder.Entity<OperationDynamicPropertyObjectValueEntity>().Property(x => x.DecimalValue).HasColumnType("decimal(18,5)");
-            modelBuilder.Entity<OperationDynamicPropertyObjectValueEntity>().HasOne(p => p.Operation)
+
+            // because we do not have Operation table, we need to store FK for each derived class
+            modelBuilder.Entity<OperationDynamicPropertyObjectValueEntity>().HasOne(p => p.PaymentIn)
                 .WithMany(s => s.DynamicPropertyObjectValues).HasForeignKey(k => k.ObjectId)
                 .OnDelete(DeleteBehavior.Cascade);
+            modelBuilder.Entity<OperationDynamicPropertyObjectValueEntity>().HasOne(p => p.CustomerOrder)
+                .WithMany(s => s.DynamicPropertyObjectValues).HasForeignKey(k => k.ObjectId)
+                .OnDelete(DeleteBehavior.Cascade);
+            modelBuilder.Entity<OperationDynamicPropertyObjectValueEntity>().HasOne(p => p.Shipment)
+                .WithMany(s => s.DynamicPropertyObjectValues).HasForeignKey(k => k.ObjectId)
+                .OnDelete(DeleteBehavior.Cascade);
+
             modelBuilder.Entity<OperationDynamicPropertyObjectValueEntity>().HasIndex(x => new { x.ObjectType, x.ObjectId })
                 .IsUnique(false)
                 .HasName("IX_ObjectType_ObjectId");
