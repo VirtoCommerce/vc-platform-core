@@ -1,6 +1,5 @@
 using System.Collections;
 using VirtoCommerce.Platform.Core.Common;
-using VirtoCommerce.Platform.Core.ExportImport;
 
 namespace VirtoCommerce.ExportModule.Core.Model
 {

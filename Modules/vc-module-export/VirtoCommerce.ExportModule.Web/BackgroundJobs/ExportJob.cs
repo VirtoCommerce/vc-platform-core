@@ -8,8 +8,6 @@ using VirtoCommerce.ExportModule.Core.Model;
 using VirtoCommerce.ExportModule.Core.Services;
 using VirtoCommerce.Platform.Core;
 using VirtoCommerce.Platform.Core.Exceptions;
-using VirtoCommerce.Platform.Core.ExportImport;
-using VirtoCommerce.Platform.Core.ExportImport.PushNotifications;
 using VirtoCommerce.Platform.Core.PushNotifications;
 
 namespace VirtoCommerce.ExportModule.Web.BackgroundJobs
@@ -32,11 +30,11 @@ namespace VirtoCommerce.ExportModule.Web.BackgroundJobs
             _exportProviderFactory = exportProviderFactory;
         }
 
-        public async Task ExportBackgroundAsync(ExportDataRequest request, PlatformExportPushNotification notification, IJobCancellationToken cancellationToken, PerformContext context)
+        public async Task ExportBackgroundAsync(ExportDataRequest request, ExportPushNotification notification, IJobCancellationToken cancellationToken, PerformContext context)
         {
-            void progressCallback(ExportImportProgressInfo x)
+            void progressCallback(ExportProgressInfo x)
             {
-                notification.Path(x);
+                notification.Patch(x);
                 notification.JobId = context.BackgroundJob.Id;
                 _pushNotificationManager.Send(notification);
             }

@@ -1,9 +1,13 @@
 using System;
+using Hangfire.Common;
 using Microsoft.AspNetCore.Builder;
+using Microsoft.AspNetCore.Mvc;
 using Microsoft.Extensions.DependencyInjection;
+using Microsoft.Extensions.Options;
 using VirtoCommerce.ExportModule.Core.Model;
 using VirtoCommerce.ExportModule.Core.Services;
 using VirtoCommerce.ExportModule.Data.Services;
+using VirtoCommerce.ExportModule.Web.JsonConverters;
 using VirtoCommerce.Platform.Core.Modularity;
 
 namespace VirtoCommerce.ExportModule.Web
@@ -27,6 +31,12 @@ namespace VirtoCommerce.ExportModule.Web
 
         public void PostInitialize(IApplicationBuilder appBuilder)
         {
+            var mvcJsonOptions = appBuilder.ApplicationServices.GetRequiredService<IOptions<MvcJsonOptions>>();
+
+            mvcJsonOptions.Value.SerializerSettings.Converters.Add(new PolymorphicExportDataQueryJsonConverter());
+
+            // This line refreshes Hangfire JsonConverter with the current JsonSerializerSettings - PolymorphicExportDataQueryJsonConverter needs to be included
+            JobHelper.SetSerializerSettings(mvcJsonOptions.Value.SerializerSettings);
         }
 
         public void Uninstall()
