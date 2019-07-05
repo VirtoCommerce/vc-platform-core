@@ -16,7 +16,7 @@ namespace VirtoCommerce.ExportModule.Data.Services
             return _knownExportTypes.Values.ToArray();
         }
 
-        public ExportedTypeDefinition RegisterType<T>()
+        public ExportedTypeDefinition RegisterType<T>(string group)
         {
             var type = typeof(T);
 
@@ -25,6 +25,7 @@ namespace VirtoCommerce.ExportModule.Data.Services
                 _knownExportTypes.TryAdd(type, new ExportedTypeDefinition()
                 {
                     TypeName = type.FullName,
+                    Group = group,
                     MetaData = ExportedTypeMetadata.GetFromType<T>(),
                 });
             }

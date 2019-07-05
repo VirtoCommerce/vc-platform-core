@@ -11,6 +11,7 @@
             "security": "Security",
             "modules": "Modules",
             "export-import": "Export & Import",
+            "export-new": "Export New",
             "user-profile": "User profile",
             "assets": "Assets",
             "toggle-favorites": "Shift + Space to toggle favorites",

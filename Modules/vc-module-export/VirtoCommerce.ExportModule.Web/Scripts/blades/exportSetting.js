@@ -3,54 +3,30 @@ angular.module('virtoCommerce.exportModule')
         var blade = $scope.blade;
         blade.canStartProcess = false;
         blade.isLoading = true;
-
+        
         function initializeBlade() {
-
             exportApi.getProviders(function (result) {
                 if (result && result.length) {
-                    blade.providers =
-                        _.map(result, function (item) { return { id: item.typeName, name: item.typeName } });
-                    blade.exportDataRequest.providerName = blade.providers[0];
+                    $scope.providers = _.map(result, function (item) { return { id: item.typeName, name: item.typeName } });
+                    $scope.selectedPrivider = $scope.providers[0];
                 }
             });
-
             blade.isLoading = false;
         }
 
-        $scope.$on("new-notification-event", function (event, notification) {
-            if (blade.notification && notification.id === blade.notification.id) {
-                angular.copy(notification, blade.notification);
-                if (notification.errorCount > 0) {
-                    bladeNavigationService.setError('Export error', blade);
-                }
-            }
-        });
-
-        var commandCancel = {
-            name: 'platform.commands.cancel',
-            icon: 'fa fa-times',
-            canExecuteMethod: function () {
-                return blade.notification && !blade.notification.finished;
-            },
-            executeMethod: function () {
-                exportApi.cancel({ jobId: blade.notification.jobId }, function (data) {
-                });
-            }
-        };
-
         $scope.startExport = function () {
-            blade.isLoading = true;
-            blade.exportDataRequest.providerName = blade.exportDataRequest.providerName.name;
-            exportApi.runExport(blade.exportDataRequest,
-                function (data) {
-                    blade.notification = data;
-                    blade.isLoading = false;
-                });
-
-            blade.toolbarCommands = [commandCancel];
+            blade.exportDataRequest.providerName = $scope.selectedProvider.name;
+                    var progressBlade = {
+                        id: 'exportProgress',
+                        title: 'Exporting...',
+                        controller: 'virtoCommerce.exportModule.exportProcessController',
+                        template: 'Modules/$(VirtoCommerce.Export)/Scripts/blades/exportProgress.tpl.html',
+                        exportDataRequest: blade.exportDataRequest,
+                        isClosingDisabled: false
+                    };
+            bladeNavigationService.showBlade(progressBlade);
         };
 
         $scope.blade.headIcon = 'fa-upload';
-
         initializeBlade();
     }]);
