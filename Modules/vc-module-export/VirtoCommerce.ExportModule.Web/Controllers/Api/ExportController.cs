@@ -72,7 +72,7 @@ namespace VirtoCommerce.ExportModule.Web.Controllers
         [Route("run")]
         public ActionResult<PlatformExportPushNotification> RunExport([FromBody]ExportDataRequest request)
         {
-            var notification = new PlatformExportPushNotification(_userNameResolver.GetCurrentUserName())
+            var notification = new ExportPushNotification(_userNameResolver.GetCurrentUserName())
             {
                 Title = $"{request.ExportTypeName} export task",
                 Description = "starting export...."

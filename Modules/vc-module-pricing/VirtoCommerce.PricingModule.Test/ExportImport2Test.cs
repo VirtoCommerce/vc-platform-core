@@ -13,7 +13,6 @@ using VirtoCommerce.ExportModule.Core.Model;
 using VirtoCommerce.ExportModule.Core.Services;
 using VirtoCommerce.ExportModule.Data.Services;
 using VirtoCommerce.Platform.Core.Common;
-using VirtoCommerce.Platform.Core.ExportImport;
 using VirtoCommerce.PricingModule.Core.Model;
 using VirtoCommerce.PricingModule.Core.Model.Search;
 using VirtoCommerce.PricingModule.Core.Services;
@@ -64,7 +63,7 @@ namespace VirtoCommerce.PricingModule.Test
                         ExportTypeName = typeof(Price).FullName,
                         ProviderName = nameof(JsonExportProvider)
                     },
-                    new Action<ExportImportProgressInfo>(x => Console.WriteLine(x.Description)),
+                    new Action<ExportProgressInfo>(x => Console.WriteLine(x.Description)),
                     new CancellationTokenWrapper(CancellationToken.None));
 
                 stream.Seek(0, SeekOrigin.Begin);
@@ -129,7 +128,7 @@ namespace VirtoCommerce.PricingModule.Test
                         ExportTypeName = typeof(Pricelist).FullName,
                         ProviderName = nameof(JsonExportProvider)
                     },
-                    new Action<ExportImportProgressInfo>(x => Console.WriteLine(x.Description)),
+                    new Action<ExportProgressInfo>(x => Console.WriteLine(x.Description)),
                     new CancellationTokenWrapper(CancellationToken.None));
 
                 stream.Seek(0, SeekOrigin.Begin);
@@ -187,7 +186,7 @@ namespace VirtoCommerce.PricingModule.Test
                         ExportTypeName = typeof(PricelistAssignment).FullName,
                         ProviderName = nameof(JsonExportProvider)
                     },
-                    new Action<ExportImportProgressInfo>(x => Console.WriteLine(x.Description)),
+                    new Action<ExportProgressInfo>(x => Console.WriteLine(x.Description)),
                     new CancellationTokenWrapper(CancellationToken.None));
 
                 stream.Seek(0, SeekOrigin.Begin);
@@ -251,7 +250,7 @@ namespace VirtoCommerce.PricingModule.Test
                         ExportTypeName = typeof(Price).FullName,
                         ProviderName = nameof(CsvExportProvider)
                     },
-                    new Action<ExportImportProgressInfo>(x => Console.WriteLine(x.Description)),
+                    new Action<ExportProgressInfo>(x => Console.WriteLine(x.Description)),
                     new CancellationTokenWrapper(CancellationToken.None));
 
                 stream.Seek(0, SeekOrigin.Begin);

@@ -5,7 +5,6 @@ using System.Text;
 using VirtoCommerce.ExportModule.Core.Model;
 using VirtoCommerce.ExportModule.Core.Services;
 using VirtoCommerce.Platform.Core.Common;
-using VirtoCommerce.Platform.Core.ExportImport;
 
 namespace VirtoCommerce.ExportModule.Data.Services
 {
@@ -20,7 +19,7 @@ namespace VirtoCommerce.ExportModule.Data.Services
             _exportProviderFactory = exportProviderFactory;
         }
 
-        public void Export(Stream stream, ExportDataRequest request, Action<ExportImportProgressInfo> progressCallback, ICancellationToken token)
+        public void Export(Stream stream, ExportDataRequest request, Action<ExportProgressInfo> progressCallback, ICancellationToken token)
         {
             if (request == null)
             {
@@ -35,7 +34,7 @@ namespace VirtoCommerce.ExportModule.Data.Services
             var completedMessage = $"Export completed";
             var totalCount = pagedDataSource.GetTotalCount();
             var exportedCount = 0;
-            var exportProgress = new ExportImportProgressInfo()
+            var exportProgress = new ExportProgressInfo()
             {
                 ProcessedCount = 0,
                 TotalCount = totalCount,
