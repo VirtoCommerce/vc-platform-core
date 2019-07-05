@@ -8,7 +8,7 @@ angular.module('virtoCommerce.exportModule')
             exportApi.getProviders(function (result) {
                 if (result && result.length) {
                     $scope.providers = _.map(result, function (item) { return { id: item.typeName, name: item.typeName } });
-                    $scope.selectedPrivider = $scope.providers[0];
+                    $scope.selectedProvider = $scope.providers[0];
                 }
             });
             blade.isLoading = false;

@@ -1,8 +1,8 @@
 angular.module('virtoCommerce.exportModule')
     .controller('virtoCommerce.exportModule.exportGroupsController', ['$scope', 'platformWebApp.bladeNavigationService', 'virtoCommerce.exportModule.exportModuleApi', function ($scope, bladeNavigationService, exportApi) {
-        var settingsTree;
+        var typeTree;
         var blade = $scope.blade;
-        blade.title = 'Export type groups';
+        blade.title = 'Exported types';
         blade.headIcon = 'fa-folder';
 
         blade.refresh = function (disableOpenAnimation) {
@@ -15,10 +15,10 @@ angular.module('virtoCommerce.exportModule')
                         item.name = item.typeName.substring(lastIndex + 1);
                     });
                 blade.allGroups = results;
-                settingsTree = {};
-                _.each(results, function (setting) {
-                    var paths = (setting.groupName ? setting.groupName : 'General').split('|');
-                    var lastParent = settingsTree;
+                typeTree = {};
+                _.each(results, function (exportedType ) {
+                    var paths = (exportedType.groupName ? exportedType.groupName : 'General').split('|');
+                    var lastParent = typeTree;
                     var lastParentId = '';
                     _.each(paths, function (path, i) {
                         lastParentId += '|' + path;
@@ -26,7 +26,7 @@ angular.module('virtoCommerce.exportModule')
                             var lastIndex = path.lastIndexOf('.');
                             var treeNode = { name: path.substring(lastIndex + 1), groupName: lastParentId.substring(1) }
                             lastParent[path] = treeNode;
-                            if (setting.groupName && _.all(blade.allGroups, function (x) { return x.groupName !== treeNode.groupName; })) {
+                            if (exportedType.groupName && _.all(blade.allGroups, function (x) { return x.groupName !== treeNode.groupName; })) {
                                 blade.allGroups.push(treeNode);
                             }
                         }
@@ -44,10 +44,10 @@ angular.module('virtoCommerce.exportModule')
 
                 // restore previous selection
                 if (blade.searchText) {
-                    blade.currentEntities = settingsTree;
+                    blade.currentEntities = typeTree;
                 } else {
                     // reconstruct tree by breadCrumbs
-                    var lastchildren = settingsTree;
+                    var lastchildren = typeTree;
                     for (var i = 1; i < blade.breadcrumbs.length; i++) {
                         lastchildren = lastchildren[blade.breadcrumbs[i].name].children;
                     }
@@ -72,7 +72,6 @@ angular.module('virtoCommerce.exportModule')
                     setBreadcrumbs(node);
                 } else {
                     var selectedTypes = _.filter(blade.allGroups, function (x) { return x.groupName === node.groupName || (node.groupName === 'General' && !x.groupName); });
-                    console.log(selectedTypes[0]);
                     var exportDataRequest = {
                         exportTypeName: selectedTypes[0].typeName,
                         dataQuery: {
@@ -80,11 +79,10 @@ angular.module('virtoCommerce.exportModule')
                             take: 10000
                         }
                     };
-                    console.log(exportDataRequest);
                     var newBlade = {
-                        id: 'pricelistExport',
-                        title: 'pricing.blades.exporter.priceListTitle',
-                        subtitle: 'pricing.blades.exporter.pricelistSubtitle',
+                        id: 'exportSettings',
+                        title: 'pricing.blades.exporter.' + selectedTypes[0].name +'Title',
+                        subtitle: 'pricing.blades.exporter.' + selectedTypes[0].name + 'Subtitle',
                         controller: 'virtoCommerce.exportModule.exporterController',
                         template: 'Modules/$(VirtoCommerce.Export)/Scripts/blades/exportSetting.tpl.html',
                         exportDataRequest: exportDataRequest,
@@ -102,7 +100,7 @@ angular.module('virtoCommerce.exportModule')
 
             if (node.groupName) {
                 var lastParentId = '';
-                var lastchildren = settingsTree;
+                var lastchildren = typeTree;
                 var paths = node.groupName.split('|');
                 _.each(paths, function (path) {
                     lastchildren = lastchildren[path].children;
@@ -125,13 +123,13 @@ angular.module('virtoCommerce.exportModule')
             id: null,
             name: "platform.navigation.bread-crumb-top",
             navigate: function () {
-                $scope.selectNode({ groupName: null, children: settingsTree });
+                $scope.selectNode({ groupName: null, children: typeTree });
             }
         }];
 
         $scope.$watch('blade.searchText', function (newVal) {
             if (newVal) {
-                blade.currentEntities = settingsTree;
+                blade.currentEntities = typeTree;
                 setBreadcrumbs({ groupName: null });
             }
         });

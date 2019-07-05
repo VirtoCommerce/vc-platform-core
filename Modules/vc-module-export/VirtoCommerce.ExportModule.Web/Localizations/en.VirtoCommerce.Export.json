@@ -1,5 +1,6 @@
 {
     "export": {
+        "main-menu-title": "Export New",
         "blades": {
             "export-settings": {
                 "labels": {
@@ -12,6 +13,6 @@
                     "errors-count": "Error count"
                 }
             }
-        } 
+        }
     }
 }
