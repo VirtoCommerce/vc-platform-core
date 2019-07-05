@@ -88,9 +88,6 @@ namespace VirtoCommerce.MarketingModule.Data.Migrations
                         .IsRequired()
                         .HasMaxLength(128);
 
-                    b.Property<string>("OuterId")
-                        .HasMaxLength(128);
-
                     b.Property<string>("ParentFolderId");
 
                     b.HasKey("Id");
@@ -133,9 +130,6 @@ namespace VirtoCommerce.MarketingModule.Data.Migrations
                         .IsRequired()
                         .HasMaxLength(128);
 
-                    b.Property<string>("OuterId")
-                        .HasMaxLength(128);
-
                     b.HasKey("Id");
 
                     b.HasIndex("FolderId");
@@ -169,9 +163,6 @@ namespace VirtoCommerce.MarketingModule.Data.Migrations
 
                     b.Property<string>("Name")
                         .IsRequired()
-                        .HasMaxLength(128);
-
-                    b.Property<string>("OuterId")
                         .HasMaxLength(128);
 
                     b.HasKey("Id");
@@ -333,9 +324,6 @@ namespace VirtoCommerce.MarketingModule.Data.Migrations
                     b.Property<string>("ObjectType")
                         .HasMaxLength(128);
 
-                    b.Property<string>("OuterId")
-                        .HasMaxLength(128);
-
                     b.Property<string>("PromotionId")
                         .IsRequired();
 
@@ -373,9 +361,6 @@ namespace VirtoCommerce.MarketingModule.Data.Migrations
 
                     b.Property<DateTime?>("ModifiedDate");
 
-                    b.Property<string>("OuterId")
-                        .HasMaxLength(128);
-
                     b.HasKey("Id");
 
                     b.HasIndex("DynamicContentItemId");
@@ -406,9 +391,6 @@ namespace VirtoCommerce.MarketingModule.Data.Migrations
                         .HasMaxLength(64);
 
                     b.Property<DateTime?>("ModifiedDate");
-
-                    b.Property<string>("OuterId")
-                        .HasMaxLength(128);
 
                     b.HasKey("Id");
 
