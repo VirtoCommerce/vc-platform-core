@@ -419,6 +419,9 @@ namespace VirtoCommerce.OrdersModule.Data.Migrations
                     b.Property<string>("Note")
                         .HasMaxLength(2048);
 
+                    b.Property<string>("OuterId")
+                        .HasMaxLength(128);
+
                     b.Property<string>("PaymentInId")
                         .IsRequired();
 
@@ -751,6 +754,9 @@ namespace VirtoCommerce.OrdersModule.Data.Migrations
                         .HasMaxLength(64);
 
                     b.Property<DateTime?>("ModifiedDate");
+
+                    b.Property<string>("OuterId")
+                        .HasMaxLength(128);
 
                     b.Property<string>("PackageType")
                         .HasMaxLength(64);
