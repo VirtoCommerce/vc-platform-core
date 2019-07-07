@@ -10,7 +10,7 @@ using VirtoCommerce.OrdersModule.Data.Repositories;
 namespace VirtoCommerce.OrdersModule.Data.Migrations
 {
     [DbContext(typeof(OrderDbContext))]
-    [Migration("20190707112158_AddOrderDynamicPropertyObjectValue")]
+    [Migration("20190707123534_AddOrderDynamicPropertyObjectValue")]
     partial class AddOrderDynamicPropertyObjectValue
     {
         protected override void BuildTargetModel(ModelBuilder modelBuilder)
@@ -995,17 +995,17 @@ namespace VirtoCommerce.OrdersModule.Data.Migrations
                     b.HasOne("VirtoCommerce.OrdersModule.Data.Model.CustomerOrderEntity", "CustomerOrder")
                         .WithMany("DynamicPropertyObjectValues")
                         .HasForeignKey("ObjectId")
-                        .OnDelete(DeleteBehavior.Cascade);
+                        .OnDelete(DeleteBehavior.Restrict);
 
                     b.HasOne("VirtoCommerce.OrdersModule.Data.Model.PaymentInEntity", "PaymentIn")
                         .WithMany("DynamicPropertyObjectValues")
                         .HasForeignKey("ObjectId")
-                        .OnDelete(DeleteBehavior.Cascade);
+                        .OnDelete(DeleteBehavior.Restrict);
 
                     b.HasOne("VirtoCommerce.OrdersModule.Data.Model.ShipmentEntity", "Shipment")
                         .WithMany("DynamicPropertyObjectValues")
                         .HasForeignKey("ObjectId")
-                        .OnDelete(DeleteBehavior.Cascade);
+                        .OnDelete(DeleteBehavior.Restrict);
                 });
 
             modelBuilder.Entity("VirtoCommerce.OrdersModule.Data.Model.PaymentGatewayTransactionEntity", b =>

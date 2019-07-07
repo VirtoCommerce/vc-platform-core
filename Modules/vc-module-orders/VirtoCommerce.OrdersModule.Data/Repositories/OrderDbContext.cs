@@ -189,13 +189,13 @@ namespace VirtoCommerce.OrdersModule.Data.Repositories
             // because we do not have Operation table, we need to store FK for each derived class
             modelBuilder.Entity<OperationDynamicPropertyObjectValueEntity>().HasOne(p => p.PaymentIn)
                 .WithMany(s => s.DynamicPropertyObjectValues).HasForeignKey(k => k.ObjectId)
-                .OnDelete(DeleteBehavior.Cascade);
+                .OnDelete(DeleteBehavior.Restrict);
             modelBuilder.Entity<OperationDynamicPropertyObjectValueEntity>().HasOne(p => p.CustomerOrder)
                 .WithMany(s => s.DynamicPropertyObjectValues).HasForeignKey(k => k.ObjectId)
-                .OnDelete(DeleteBehavior.Cascade);
+                .OnDelete(DeleteBehavior.Restrict);
             modelBuilder.Entity<OperationDynamicPropertyObjectValueEntity>().HasOne(p => p.Shipment)
                 .WithMany(s => s.DynamicPropertyObjectValues).HasForeignKey(k => k.ObjectId)
-                .OnDelete(DeleteBehavior.Cascade);
+                .OnDelete(DeleteBehavior.Restrict);
 
             modelBuilder.Entity<OperationDynamicPropertyObjectValueEntity>().HasIndex(x => new { x.ObjectType, x.ObjectId })
                 .IsUnique(false)

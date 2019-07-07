@@ -72,19 +72,19 @@ namespace VirtoCommerce.OrdersModule.Data.Migrations
                         column: x => x.ObjectId,
                         principalTable: "CustomerOrder",
                         principalColumn: "Id",
-                        onDelete: ReferentialAction.Cascade);
+                        onDelete: ReferentialAction.Restrict);
                     table.ForeignKey(
                         name: "FK_OrderOperationItemDynamicPropertyObjectValue_OrderPaymentIn_ObjectId",
                         column: x => x.ObjectId,
                         principalTable: "OrderPaymentIn",
                         principalColumn: "Id",
-                        onDelete: ReferentialAction.Cascade);
+                        onDelete: ReferentialAction.Restrict);
                     table.ForeignKey(
                         name: "FK_OrderOperationItemDynamicPropertyObjectValue_OrderShipment_ObjectId",
                         column: x => x.ObjectId,
                         principalTable: "OrderShipment",
                         principalColumn: "Id",
-                        onDelete: ReferentialAction.Cascade);
+                        onDelete: ReferentialAction.Restrict);
                 });
 
             migrationBuilder.CreateIndex(

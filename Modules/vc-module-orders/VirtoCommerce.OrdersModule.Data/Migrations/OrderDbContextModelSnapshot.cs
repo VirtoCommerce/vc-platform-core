@@ -993,17 +993,17 @@ namespace VirtoCommerce.OrdersModule.Data.Migrations
                     b.HasOne("VirtoCommerce.OrdersModule.Data.Model.CustomerOrderEntity", "CustomerOrder")
                         .WithMany("DynamicPropertyObjectValues")
                         .HasForeignKey("ObjectId")
-                        .OnDelete(DeleteBehavior.Cascade);
+                        .OnDelete(DeleteBehavior.Restrict);
 
                     b.HasOne("VirtoCommerce.OrdersModule.Data.Model.PaymentInEntity", "PaymentIn")
                         .WithMany("DynamicPropertyObjectValues")
                         .HasForeignKey("ObjectId")
-                        .OnDelete(DeleteBehavior.Cascade);
+                        .OnDelete(DeleteBehavior.Restrict);
 
                     b.HasOne("VirtoCommerce.OrdersModule.Data.Model.ShipmentEntity", "Shipment")
                         .WithMany("DynamicPropertyObjectValues")
                         .HasForeignKey("ObjectId")
-                        .OnDelete(DeleteBehavior.Cascade);
+                        .OnDelete(DeleteBehavior.Restrict);
                 });
 
             modelBuilder.Entity("VirtoCommerce.OrdersModule.Data.Model.PaymentGatewayTransactionEntity", b =>
