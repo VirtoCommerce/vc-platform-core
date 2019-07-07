@@ -132,10 +132,10 @@
             "exporter": {
                 "priceTitle": "Prices export",
                 "priceSubtitle": "Export prices to json or csv",
-                "pricelistTitle": "Pricelist export",
+                "priceListTitle": "Pricelist export",
                 "pricelistSubtitle": "Export priceslist to json or csv",
-                "pricelistAssignmentTitle": "Price Assignment export",
-                "pricelistAssignmentSubtitle": "Export price assignment to json or csv"
+                "priceAssignmentTitle": "Price Assignment export",
+                "priceAssignmentSubtitle": "Export price assignment to json or csv"
             } 
         },
         "widgets": {
