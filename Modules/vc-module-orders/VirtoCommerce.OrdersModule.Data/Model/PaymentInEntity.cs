@@ -8,6 +8,7 @@ using VirtoCommerce.CoreModule.Core.Tax;
 using VirtoCommerce.OrdersModule.Core.Model;
 using VirtoCommerce.PaymentModule.Core.Model;
 using VirtoCommerce.Platform.Core.Common;
+using VirtoCommerce.Platform.Core.DynamicProperties;
 using Address = VirtoCommerce.OrdersModule.Core.Model.Address;
 
 namespace VirtoCommerce.OrdersModule.Data.Model
@@ -68,6 +69,7 @@ namespace VirtoCommerce.OrdersModule.Data.Model
 
         public virtual ObservableCollection<DiscountEntity> Discounts { get; set; } = new NullCollection<DiscountEntity>();
         public virtual ObservableCollection<TaxDetailEntity> TaxDetails { get; set; } = new NullCollection<TaxDetailEntity>();
+        public virtual ObservableCollection<PaymentInDynamicPropertyObjectValueEntity> DynamicPropertyObjectValues { get; set; } = new NullCollection<PaymentInDynamicPropertyObjectValueEntity>();
 
         public override OrderOperation ToModel(OrderOperation operation)
         {
@@ -109,6 +111,15 @@ namespace VirtoCommerce.OrdersModule.Data.Model
             payment.Transactions = Transactions.Select(x => x.ToModel(AbstractTypeFactory<PaymentGatewayTransaction>.TryCreateInstance())).ToList();
             payment.TaxDetails = TaxDetails.Select(x => x.ToModel(AbstractTypeFactory<TaxDetail>.TryCreateInstance())).ToList();
             payment.Discounts = Discounts.Select(x => x.ToModel(AbstractTypeFactory<Discount>.TryCreateInstance())).ToList();
+
+            payment.DynamicProperties = DynamicPropertyObjectValues.GroupBy(g => g.PropertyId).Select(x =>
+            {
+                var property = AbstractTypeFactory<DynamicObjectProperty>.TryCreateInstance();
+                property.Id = x.Key;
+                property.Name = x.FirstOrDefault()?.PropertyName;
+                property.Values = x.Select(v => v.ToModel(AbstractTypeFactory<DynamicPropertyObjectValue>.TryCreateInstance())).ToArray();
+                return property;
+            }).ToArray();
 
             base.ToModel(payment);
 
@@ -181,6 +192,12 @@ namespace VirtoCommerce.OrdersModule.Data.Model
                 Status = payment.PaymentStatus.ToString();
             }
 
+            if (payment.DynamicProperties != null)
+            {
+                DynamicPropertyObjectValues = new ObservableCollection<PaymentInDynamicPropertyObjectValueEntity>(payment.DynamicProperties.SelectMany(p => p.Values
+                    .Select(v => AbstractTypeFactory<PaymentInDynamicPropertyObjectValueEntity>.TryCreateInstance().FromModel(v, payment, p))).OfType<PaymentInDynamicPropertyObjectValueEntity>());
+            }
+
             return this;
         }
 
@@ -238,6 +255,11 @@ namespace VirtoCommerce.OrdersModule.Data.Model
             if (!Transactions.IsNullCollection())
             {
                 Transactions.Patch(target.Transactions, (sourceTran, targetTran) => sourceTran.Patch(targetTran));
+            }
+
+            if (!DynamicPropertyObjectValues.IsNullCollection())
+            {
+                DynamicPropertyObjectValues.Patch(target.DynamicPropertyObjectValues, (sourceDynamicPropertyObjectValues, targetDynamicPropertyObjectValues) => sourceDynamicPropertyObjectValues.Patch(targetDynamicPropertyObjectValues));
             }
         }
     }

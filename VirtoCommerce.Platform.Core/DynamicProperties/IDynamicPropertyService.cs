@@ -25,14 +25,5 @@ namespace VirtoCommerce.Platform.Core.DynamicProperties
         /// <param name="propertyIds"></param>
         /// <returns></returns>
         Task DeleteDynamicPropertiesAsync(string[] propertyIds);
-
-
-        //TODO remove
-        /// <summary>
-        /// Deep save dynamic properties values for object
-        /// </summary>
-        /// <param name="owner"></param>
-        Task SaveDynamicPropertyValuesAsync(IHasDynamicProperties owner);
-        Task DeleteDynamicPropertyValuesAsync(IHasDynamicProperties owner);
     }
 }

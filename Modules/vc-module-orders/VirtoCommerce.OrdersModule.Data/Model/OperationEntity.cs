@@ -1,7 +1,6 @@
 using System;
 using System.Collections;
 using System.Collections.Generic;
-using System.Collections.ObjectModel;
 using System.ComponentModel.DataAnnotations;
 using System.ComponentModel.DataAnnotations.Schema;
 using System.Linq;
@@ -9,7 +8,6 @@ using System.Reflection;
 using VirtoCommerce.CoreModule.Core.Common;
 using VirtoCommerce.OrdersModule.Core.Model;
 using VirtoCommerce.Platform.Core.Common;
-using VirtoCommerce.Platform.Core.DynamicProperties;
 
 namespace VirtoCommerce.OrdersModule.Data.Model
 {
@@ -39,9 +37,6 @@ namespace VirtoCommerce.OrdersModule.Data.Model
 
         #region NavigationProperties
 
-        public ObservableCollection<OperationDynamicPropertyObjectValueEntity> DynamicPropertyObjectValues { get; set; }
-            = new NullCollection<OperationDynamicPropertyObjectValueEntity>();
-
         #endregion
 
         public virtual OrderOperation ToModel(OrderOperation operation)
@@ -66,15 +61,6 @@ namespace VirtoCommerce.OrdersModule.Data.Model
             operation.IsApproved = IsApproved;
             operation.Sum = Sum;
             operation.ChildrenOperations = GetAllChildOperations(operation);
-
-            operation.DynamicProperties = DynamicPropertyObjectValues.GroupBy(g => g.PropertyId).Select(x =>
-            {
-                var property = AbstractTypeFactory<DynamicObjectProperty>.TryCreateInstance();
-                property.Id = x.Key;
-                property.Name = x.FirstOrDefault()?.PropertyName;
-                property.Values = x.Select(v => v.ToModel(AbstractTypeFactory<DynamicPropertyObjectValue>.TryCreateInstance())).ToArray();
-                return property;
-            }).ToArray();
 
             return operation;
         }
@@ -103,12 +89,6 @@ namespace VirtoCommerce.OrdersModule.Data.Model
             IsApproved = operation.IsApproved;
             Sum = operation.Sum;
 
-            if (operation.DynamicProperties != null)
-            {
-                DynamicPropertyObjectValues = new ObservableCollection<OperationDynamicPropertyObjectValueEntity>(operation.DynamicProperties.SelectMany(p => p.Values
-                    .Select(v => AbstractTypeFactory<OperationDynamicPropertyObjectValueEntity>.TryCreateInstance().FromModel(v, operation, p))).OfType<OperationDynamicPropertyObjectValueEntity>());
-            }
-
             return this;
         }
 
@@ -126,11 +106,6 @@ namespace VirtoCommerce.OrdersModule.Data.Model
             target.CancelReason = CancelReason;
             target.IsApproved = IsApproved;
             target.Sum = Sum;
-
-            if (!DynamicPropertyObjectValues.IsNullCollection())
-            {
-                DynamicPropertyObjectValues.Patch(target.DynamicPropertyObjectValues, (sourceDynamicPropertyObjectValues, targetDynamicPropertyObjectValues) => sourceDynamicPropertyObjectValues.Patch(targetDynamicPropertyObjectValues));
-            }
         }
 
         private static IEnumerable<IOperation> GetAllChildOperations(IOperation operation)

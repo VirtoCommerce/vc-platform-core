@@ -25,6 +25,10 @@ namespace VirtoCommerce.OrdersModule.Data.Repositories
         public IQueryable<AddressEntity> Addresses => DbContext.Set<AddressEntity>();
         public IQueryable<LineItemEntity> LineItems => DbContext.Set<LineItemEntity>();
         public IQueryable<PaymentGatewayTransactionEntity> Transactions => DbContext.Set<PaymentGatewayTransactionEntity>();
+        public IQueryable<CustomerOrderDynamicPropertyObjectValueEntity> OrderDynamicPropertyObjectValues => DbContext.Set<CustomerOrderDynamicPropertyObjectValueEntity>();
+        public IQueryable<ShipmentDynamicPropertyObjectValueEntity> ShipmentDynamicPropertyObjectValues => DbContext.Set<ShipmentDynamicPropertyObjectValueEntity>();
+        public IQueryable<PaymentInDynamicPropertyObjectValueEntity> PaymentInDynamicPropertyObjectValues => DbContext.Set<PaymentInDynamicPropertyObjectValueEntity>();
+        public IQueryable<LineItemDynamicPropertyObjectValueEntity> LineItemDynamicPropertyObjectValues => DbContext.Set<LineItemDynamicPropertyObjectValueEntity>();
 
         public virtual async Task<CustomerOrderEntity[]> GetCustomerOrdersByIdsAsync(string[] ids, string responseGroup = null)
         {
@@ -48,7 +52,8 @@ namespace VirtoCommerce.OrdersModule.Data.Repositories
                 var paymentTaxDetails = TaxDetails.Where(x => paymentsIds.Contains(x.PaymentInId)).ToArrayAsync();
                 var paymentAddresses = Addresses.Where(x => paymentsIds.Contains(x.PaymentInId)).ToArrayAsync();
                 var transactions = Transactions.Where(x => paymentsIds.Contains(x.PaymentInId)).ToArrayAsync();
-                await Task.WhenAll(paymentDiscounts, paymentTaxDetails, paymentAddresses, transactions);
+                var paymentDynamicPropertyValues = PaymentInDynamicPropertyObjectValues.Where(x => paymentsIds.Contains(x.ObjectId)).ToArrayAsync();
+                await Task.WhenAll(paymentDiscounts, paymentTaxDetails, paymentAddresses, transactions, paymentDynamicPropertyValues);
             }
 
             if (customerOrderResponseGroup.HasFlag(CustomerOrderResponseGroup.WithItems))
@@ -58,7 +63,8 @@ namespace VirtoCommerce.OrdersModule.Data.Repositories
                 var lineItemIds = lineItems.Select(x => x.Id).ToArray();
                 var lineItemDiscounts = Discounts.Where(x => lineItemIds.Contains(x.LineItemId)).ToArrayAsync();
                 var lineItemTaxDetails = TaxDetails.Where(x => lineItemIds.Contains(x.LineItemId)).ToArrayAsync();
-                await Task.WhenAll(lineItemDiscounts, lineItemTaxDetails);
+                var lineItemDynamicPropertyValues = LineItemDynamicPropertyObjectValues.Where(x => lineItemIds.Contains(x.ObjectId)).ToArrayAsync();
+                await Task.WhenAll(lineItemDiscounts, lineItemTaxDetails, lineItemDynamicPropertyValues);
             }
 
             if (customerOrderResponseGroup.HasFlag(CustomerOrderResponseGroup.WithShipments))
@@ -70,7 +76,13 @@ namespace VirtoCommerce.OrdersModule.Data.Repositories
                 var addresses = Addresses.Where(x => shipmentIds.Contains(x.ShipmentId)).ToArrayAsync();
                 var shipmentItems = ShipmentItems.Where(x => shipmentIds.Contains(x.ShipmentId)).ToArrayAsync();
                 var packages = ShipmentPackagesPackages.Include(x => x.Items).Where(x => shipmentIds.Contains(x.ShipmentId)).ToArrayAsync();
-                await Task.WhenAll(shipmentDiscounts, shipmentTaxDetails, addresses, shipmentItems, packages);
+                var shipmentDynamicPropertyValues = ShipmentDynamicPropertyObjectValues.Where(x => shipmentIds.Contains(x.ObjectId)).ToArrayAsync();
+                await Task.WhenAll(shipmentDiscounts, shipmentTaxDetails, addresses, shipmentItems, packages, shipmentDynamicPropertyValues);
+            }
+
+            if (customerOrderResponseGroup.HasFlag(CustomerOrderResponseGroup.WithDynamicPropertyValues))
+            {
+                var dynamicPropertyObjectValues = await OrderDynamicPropertyObjectValues.Where(x => ids.Contains(x.ObjectId)).ToArrayAsync();
             }
 
             return result;

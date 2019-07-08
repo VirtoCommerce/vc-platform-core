@@ -16,6 +16,8 @@ namespace VirtoCommerce.MarketingModule.Core.Model
 
         #region IHasDynamicProperties Members
 
+        public override string ObjectType => GetType().FullName;
+
         public ICollection<DynamicObjectProperty> DynamicProperties { get; set; }
 
         #endregion

@@ -6,26 +6,26 @@ using VirtoCommerce.Platform.Core.DynamicProperties;
 
 namespace VirtoCommerce.CartModule.Core.Model
 {
-	public class ShoppingCart : AuditableEntity, IHasTaxDetalization, IHasDynamicProperties, ITaxable, IHasDiscounts
+    public class ShoppingCart : AuditableEntity, IHasTaxDetalization, IHasDynamicProperties, ITaxable, IHasDiscounts
     {
-		public string Name { get; set; }
-		public string StoreId { get; set; }
-		public string ChannelId { get; set; }
-		public bool IsAnonymous { get; set; }
-		public string CustomerId { get; set; }
-		public string CustomerName { get; set; }
-		public string OrganizationId { get; set; }
-		public string Currency { get; set; }
-	
-		public string LanguageCode { get; set; }
-		public bool? TaxIncluded { get; set; }
-		public bool? IsRecuring { get; set; }
-		public string Comment { get; set; }
+        public string Name { get; set; }
+        public string StoreId { get; set; }
+        public string ChannelId { get; set; }
+        public bool IsAnonymous { get; set; }
+        public string CustomerId { get; set; }
+        public string CustomerName { get; set; }
+        public string OrganizationId { get; set; }
+        public string Currency { get; set; }
+
+        public string LanguageCode { get; set; }
+        public bool? TaxIncluded { get; set; }
+        public bool? IsRecuring { get; set; }
+        public string Comment { get; set; }
 
         public string Status { get; set; }
 
-		public string WeightUnit { get; set; }
-		public decimal? Weight { get; set; }
+        public string WeightUnit { get; set; }
+        public decimal? Weight { get; set; }
 
         /// <summary>
         /// Represent any line item validation type (noPriceValidate, noQuantityValidate etc) this value can be used in storefront 
@@ -94,9 +94,9 @@ namespace VirtoCommerce.CartModule.Core.Model
         public virtual decimal FeeTotalWithTax { get; set; }
 
         public ICollection<Address> Addresses { get; set; }
-		public ICollection<LineItem> Items { get; set; }
-		public ICollection<Payment> Payments { get; set; }
-		public ICollection<Shipment> Shipments { get; set; }
+        public ICollection<LineItem> Items { get; set; }
+        public ICollection<Payment> Payments { get; set; }
+        public ICollection<Shipment> Shipments { get; set; }
         /// <summary>
         /// Entered multiple coupons
         /// </summary>
@@ -119,7 +119,7 @@ namespace VirtoCommerce.CartModule.Core.Model
         public string Coupon { get; set; }
 
         #region IHasDiscounts
-        public ICollection<Discount> Discounts { get; set; } 
+        public ICollection<Discount> Discounts { get; set; }
         #endregion
 
         #region ITaxable Members
@@ -131,7 +131,7 @@ namespace VirtoCommerce.CartModule.Core.Model
 
         public virtual decimal TaxTotal { get; set; }
 
-        public  decimal TaxPercentRate { get; set; }
+        public decimal TaxPercentRate { get; set; }
 
         #endregion
 
@@ -140,7 +140,7 @@ namespace VirtoCommerce.CartModule.Core.Model
         #endregion
 
         #region IHasDynamicProperties Members
-        public string ObjectType { get; set; }
+        public string ObjectType => GetType().FullName;
         public ICollection<DynamicObjectProperty> DynamicProperties { get; set; }
 
         #endregion

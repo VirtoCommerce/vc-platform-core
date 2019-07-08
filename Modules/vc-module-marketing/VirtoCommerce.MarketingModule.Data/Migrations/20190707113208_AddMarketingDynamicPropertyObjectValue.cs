@@ -1,4 +1,4 @@
-﻿using System;
+using System;
 using Microsoft.EntityFrameworkCore.Migrations;
 
 namespace VirtoCommerce.MarketingModule.Data.Migrations
@@ -8,7 +8,7 @@ namespace VirtoCommerce.MarketingModule.Data.Migrations
         protected override void Up(MigrationBuilder migrationBuilder)
         {
             migrationBuilder.CreateTable(
-                name: "MarketingDynamicContentItemDynamicPropertyObjectValue",
+                name: "DynamicContentItemDynamicPropertyObjectValue",
                 columns: table => new
                 {
                     Id = table.Column<string>(maxLength: 128, nullable: false),
@@ -32,9 +32,9 @@ namespace VirtoCommerce.MarketingModule.Data.Migrations
                 },
                 constraints: table =>
                 {
-                    table.PrimaryKey("PK_MarketingDynamicContentItemDynamicPropertyObjectValue", x => x.Id);
+                    table.PrimaryKey("PK_DynamicContentItemDynamicPropertyObjectValue", x => x.Id);
                     table.ForeignKey(
-                        name: "FK_MarketingDynamicContentItemDynamicPropertyObjectValue_DynamicContentItem_ObjectId",
+                        name: "FK_DynamicContentItemDynamicPropertyObjectValue_DynamicContentItem_ObjectId",
                         column: x => x.ObjectId,
                         principalTable: "DynamicContentItem",
                         principalColumn: "Id",
@@ -42,20 +42,31 @@ namespace VirtoCommerce.MarketingModule.Data.Migrations
                 });
 
             migrationBuilder.CreateIndex(
-                name: "IX_MarketingDynamicContentItemDynamicPropertyObjectValue_ObjectId",
-                table: "MarketingDynamicContentItemDynamicPropertyObjectValue",
+                name: "IX_DynamicContentItemDynamicPropertyObjectValue_ObjectId",
+                table: "DynamicContentItemDynamicPropertyObjectValue",
                 column: "ObjectId");
 
             migrationBuilder.CreateIndex(
                 name: "IX_ObjectType_ObjectId",
-                table: "MarketingDynamicContentItemDynamicPropertyObjectValue",
+                table: "DynamicContentItemDynamicPropertyObjectValue",
                 columns: new[] { "ObjectType", "ObjectId" });
+
+            migrationBuilder.Sql(@"IF (EXISTS (SELECT * 
+                 FROM INFORMATION_SCHEMA.TABLES 
+                 WHERE TABLE_NAME = '__MigrationHistory'))
+                    BEGIN
+                        INSERT INTO [dbo].[DynamicContentItemDynamicPropertyObjectValue] ([Id],[CreatedDate],[ModifiedDate],[CreatedBy],[ModifiedBy],[ObjectType],[ObjectId],[Locale],[ValueType],[ShortTextValue],[LongTextValue],[DecimalValue],[IntegerValue],[BooleanValue],[DateTimeValue],[PropertyId],[DictionaryItemId],[PropertyName])
+                        SELECT OV.[Id],OV.[CreatedDate],OV.[ModifiedDate],OV.[CreatedBy],OV.[ModifiedBy],OV.[ObjectType],OV.[ObjectId],[Locale],OV.[ValueType],[ShortTextValue],[LongTextValue],[DecimalValue],[IntegerValue],[BooleanValue],[DateTimeValue],[PropertyId],[DictionaryItemId], PDP.[Name]
+                        FROM [PlatformDynamicPropertyObjectValue] OV
+						INNER JOIN [PlatformDynamicProperty] PDP ON PDP.Id = OV.PropertyId
+                        WHERE OV.ObjectType = 'VirtoCommerce.MarketingModule.Core.Model.DynamicContentItem'
+                    END");
         }
 
         protected override void Down(MigrationBuilder migrationBuilder)
         {
             migrationBuilder.DropTable(
-                name: "MarketingDynamicContentItemDynamicPropertyObjectValue");
+                name: "DynamicContentItemDynamicPropertyObjectValue");
         }
     }
 }

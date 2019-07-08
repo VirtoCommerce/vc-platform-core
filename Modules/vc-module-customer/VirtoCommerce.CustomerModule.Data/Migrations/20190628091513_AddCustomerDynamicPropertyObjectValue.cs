@@ -56,10 +56,11 @@ namespace VirtoCommerce.CustomerModule.Data.Migrations
                  FROM INFORMATION_SCHEMA.TABLES 
                  WHERE TABLE_NAME = '__MigrationHistory'))
                     BEGIN
-                        INSERT INTO [dbo].[MemberDynamicPropertyObjectValue] ([Id],[CreatedDate],[ModifiedDate],[CreatedBy],[ModifiedBy],[ObjectType],[ObjectId],[Locale],[ValueType],[ShortTextValue],[LongTextValue],[DecimalValue],[IntegerValue],[BooleanValue],[DateTimeValue],[PropertyId],[DictionaryItemId])
-                        SELECT [Id],[CreatedDate],[ModifiedDate],[CreatedBy],[ModifiedBy],[ObjectType],[ObjectId],[Locale],[ValueType],[ShortTextValue],[LongTextValue],[DecimalValue],[IntegerValue],[BooleanValue],[DateTimeValue],[PropertyId],[DictionaryItemId]
-                        FROM [PlatformDynamicPropertyObjectValue]
-                        WHERE ObjectType like 'VirtoCommerce.CustomerModule.Core.Model%'
+                        INSERT INTO [dbo].[MemberDynamicPropertyObjectValue] ([Id],[CreatedDate],[ModifiedDate],[CreatedBy],[ModifiedBy],[ObjectType],[ObjectId],[Locale],[ValueType],[ShortTextValue],[LongTextValue],[DecimalValue],[IntegerValue],[BooleanValue],[DateTimeValue],[PropertyId],[DictionaryItemId], [PropertyName])
+                        SELECT OV.[Id],OV.[CreatedDate],OV.[ModifiedDate],OV.[CreatedBy],OV.[ModifiedBy],OV.[ObjectType],OV.[ObjectId],[Locale],OV.[ValueType],[ShortTextValue],[LongTextValue],[DecimalValue],[IntegerValue],[BooleanValue],[DateTimeValue],[PropertyId],[DictionaryItemId], PDP.[Name]
+                        FROM [PlatformDynamicPropertyObjectValue] OV
+						INNER JOIN [PlatformDynamicProperty] PDP ON PDP.Id = OV.PropertyId
+                        WHERE OV.ObjectType like 'VirtoCommerce.CustomerModule.Core.Model%'
                     END");
         }
 

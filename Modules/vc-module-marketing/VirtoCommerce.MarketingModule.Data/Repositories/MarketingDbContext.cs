@@ -124,7 +124,7 @@ namespace VirtoCommerce.MarketingModule.Data.Repositories
 
             #region DynamicProperty
 
-            modelBuilder.Entity<DynamicContentItemDynamicPropertyObjectValueEntity>().ToTable("MarketingDynamicContentItemDynamicPropertyObjectValue").HasKey(x => x.Id);
+            modelBuilder.Entity<DynamicContentItemDynamicPropertyObjectValueEntity>().ToTable("DynamicContentItemDynamicPropertyObjectValue").HasKey(x => x.Id);
             modelBuilder.Entity<DynamicContentItemDynamicPropertyObjectValueEntity>().Property(x => x.Id).HasMaxLength(128);
             modelBuilder.Entity<DynamicContentItemDynamicPropertyObjectValueEntity>().Property(x => x.DecimalValue).HasColumnType("decimal(18,5)");
             modelBuilder.Entity<DynamicContentItemDynamicPropertyObjectValueEntity>().HasOne(p => p.DynamicContentItem)

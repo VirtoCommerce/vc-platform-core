@@ -1,14 +1,14 @@
 using System;
 using Microsoft.EntityFrameworkCore.Migrations;
 
-namespace VirtoCommerce.CartModule.Data.Migrations
+namespace VirtoCommerce.OrdersModule.Data.Migrations
 {
-    public partial class AddCartDynamicPropertyObjectValue : Migration
+    public partial class AddOrderDynamicPropertyObjectValue : Migration
     {
         protected override void Up(MigrationBuilder migrationBuilder)
         {
             migrationBuilder.CreateTable(
-                name: "CartLineItemDynamicPropertyObjectValue",
+                name: "OrderDynamicPropertyObjectValue",
                 columns: table => new
                 {
                     Id = table.Column<string>(maxLength: 128, nullable: false),
@@ -32,17 +32,51 @@ namespace VirtoCommerce.CartModule.Data.Migrations
                 },
                 constraints: table =>
                 {
-                    table.PrimaryKey("PK_CartLineItemDynamicPropertyObjectValue", x => x.Id);
+                    table.PrimaryKey("PK_OrderDynamicPropertyObjectValue", x => x.Id);
                     table.ForeignKey(
-                        name: "FK_CartLineItemDynamicPropertyObjectValue_CartLineItem_ObjectId",
+                        name: "FK_OrderDynamicPropertyObjectValue_CustomerOrder_ObjectId",
                         column: x => x.ObjectId,
-                        principalTable: "CartLineItem",
+                        principalTable: "CustomerOrder",
+                        principalColumn: "Id",
+                        onDelete: ReferentialAction.Restrict);
+                });
+
+            migrationBuilder.CreateTable(
+                name: "OrderLineItemDynamicPropertyObjectValue",
+                columns: table => new
+                {
+                    Id = table.Column<string>(maxLength: 128, nullable: false),
+                    CreatedDate = table.Column<DateTime>(nullable: false),
+                    ModifiedDate = table.Column<DateTime>(nullable: true),
+                    CreatedBy = table.Column<string>(maxLength: 64, nullable: true),
+                    ModifiedBy = table.Column<string>(maxLength: 64, nullable: true),
+                    ObjectType = table.Column<string>(maxLength: 256, nullable: true),
+                    ObjectId = table.Column<string>(maxLength: 128, nullable: true),
+                    Locale = table.Column<string>(maxLength: 64, nullable: true),
+                    ValueType = table.Column<string>(maxLength: 64, nullable: false),
+                    ShortTextValue = table.Column<string>(maxLength: 512, nullable: true),
+                    LongTextValue = table.Column<string>(nullable: true),
+                    DecimalValue = table.Column<decimal>(type: "decimal(18,5)", nullable: true),
+                    IntegerValue = table.Column<int>(nullable: true),
+                    BooleanValue = table.Column<bool>(nullable: true),
+                    DateTimeValue = table.Column<DateTime>(nullable: true),
+                    PropertyId = table.Column<string>(maxLength: 128, nullable: true),
+                    DictionaryItemId = table.Column<string>(maxLength: 128, nullable: true),
+                    PropertyName = table.Column<string>(maxLength: 256, nullable: true)
+                },
+                constraints: table =>
+                {
+                    table.PrimaryKey("PK_OrderLineItemDynamicPropertyObjectValue", x => x.Id);
+                    table.ForeignKey(
+                        name: "FK_OrderLineItemDynamicPropertyObjectValue_OrderLineItem_ObjectId",
+                        column: x => x.ObjectId,
+                        principalTable: "OrderLineItem",
                         principalColumn: "Id",
                         onDelete: ReferentialAction.Cascade);
                 });
 
             migrationBuilder.CreateTable(
-                name: "CartPaymentDynamicPropertyObjectValue",
+                name: "OrderPaymentInDynamicPropertyObjectValue",
                 columns: table => new
                 {
                     Id = table.Column<string>(maxLength: 128, nullable: false),
@@ -66,17 +100,17 @@ namespace VirtoCommerce.CartModule.Data.Migrations
                 },
                 constraints: table =>
                 {
-                    table.PrimaryKey("PK_CartPaymentDynamicPropertyObjectValue", x => x.Id);
+                    table.PrimaryKey("PK_OrderPaymentInDynamicPropertyObjectValue", x => x.Id);
                     table.ForeignKey(
-                        name: "FK_CartPaymentDynamicPropertyObjectValue_CartPayment_ObjectId",
+                        name: "FK_OrderPaymentInDynamicPropertyObjectValue_OrderPaymentIn_ObjectId",
                         column: x => x.ObjectId,
-                        principalTable: "CartPayment",
+                        principalTable: "OrderPaymentIn",
                         principalColumn: "Id",
-                        onDelete: ReferentialAction.Cascade);
+                        onDelete: ReferentialAction.Restrict);
                 });
 
             migrationBuilder.CreateTable(
-                name: "CartShipmentDynamicPropertyObjectValue",
+                name: "OrderShipmentInDynamicPropertyObjectValue",
                 columns: table => new
                 {
                     Id = table.Column<string>(maxLength: 128, nullable: false),
@@ -100,147 +134,113 @@ namespace VirtoCommerce.CartModule.Data.Migrations
                 },
                 constraints: table =>
                 {
-                    table.PrimaryKey("PK_CartShipmentDynamicPropertyObjectValue", x => x.Id);
+                    table.PrimaryKey("PK_OrderShipmentInDynamicPropertyObjectValue", x => x.Id);
                     table.ForeignKey(
-                        name: "FK_CartShipmentDynamicPropertyObjectValue_CartShipment_ObjectId",
+                        name: "FK_OrderShipmentInDynamicPropertyObjectValue_OrderShipment_ObjectId",
                         column: x => x.ObjectId,
-                        principalTable: "CartShipment",
+                        principalTable: "OrderShipment",
                         principalColumn: "Id",
-                        onDelete: ReferentialAction.Cascade);
-                });
-
-            migrationBuilder.CreateTable(
-                name: "CartShoppingCartDynamicPropertyObjectValue",
-                columns: table => new
-                {
-                    Id = table.Column<string>(maxLength: 128, nullable: false),
-                    CreatedDate = table.Column<DateTime>(nullable: false),
-                    ModifiedDate = table.Column<DateTime>(nullable: true),
-                    CreatedBy = table.Column<string>(maxLength: 64, nullable: true),
-                    ModifiedBy = table.Column<string>(maxLength: 64, nullable: true),
-                    ObjectType = table.Column<string>(maxLength: 256, nullable: true),
-                    ObjectId = table.Column<string>(maxLength: 128, nullable: true),
-                    Locale = table.Column<string>(maxLength: 64, nullable: true),
-                    ValueType = table.Column<string>(maxLength: 64, nullable: false),
-                    ShortTextValue = table.Column<string>(maxLength: 512, nullable: true),
-                    LongTextValue = table.Column<string>(nullable: true),
-                    DecimalValue = table.Column<decimal>(type: "decimal(18,5)", nullable: true),
-                    IntegerValue = table.Column<int>(nullable: true),
-                    BooleanValue = table.Column<bool>(nullable: true),
-                    DateTimeValue = table.Column<DateTime>(nullable: true),
-                    PropertyId = table.Column<string>(maxLength: 128, nullable: true),
-                    DictionaryItemId = table.Column<string>(maxLength: 128, nullable: true),
-                    PropertyName = table.Column<string>(maxLength: 256, nullable: true)
-                },
-                constraints: table =>
-                {
-                    table.PrimaryKey("PK_CartShoppingCartDynamicPropertyObjectValue", x => x.Id);
-                    table.ForeignKey(
-                        name: "FK_CartShoppingCartDynamicPropertyObjectValue_Cart_ObjectId",
-                        column: x => x.ObjectId,
-                        principalTable: "Cart",
-                        principalColumn: "Id",
-                        onDelete: ReferentialAction.Cascade);
+                        onDelete: ReferentialAction.Restrict);
                 });
 
             migrationBuilder.CreateIndex(
-                name: "IX_CartLineItemDynamicPropertyObjectValue_ObjectId",
-                table: "CartLineItemDynamicPropertyObjectValue",
+                name: "IX_OrderDynamicPropertyObjectValue_ObjectId",
+                table: "OrderDynamicPropertyObjectValue",
                 column: "ObjectId");
 
             migrationBuilder.CreateIndex(
                 name: "IX_ObjectType_ObjectId",
-                table: "CartLineItemDynamicPropertyObjectValue",
+                table: "OrderDynamicPropertyObjectValue",
                 columns: new[] { "ObjectType", "ObjectId" });
 
             migrationBuilder.CreateIndex(
-                name: "IX_CartPaymentDynamicPropertyObjectValue_ObjectId",
-                table: "CartPaymentDynamicPropertyObjectValue",
+                name: "IX_OrderLineItemDynamicPropertyObjectValue_ObjectId",
+                table: "OrderLineItemDynamicPropertyObjectValue",
                 column: "ObjectId");
 
             migrationBuilder.CreateIndex(
                 name: "IX_ObjectType_ObjectId",
-                table: "CartPaymentDynamicPropertyObjectValue",
+                table: "OrderLineItemDynamicPropertyObjectValue",
                 columns: new[] { "ObjectType", "ObjectId" });
 
             migrationBuilder.CreateIndex(
-                name: "IX_CartShipmentDynamicPropertyObjectValue_ObjectId",
-                table: "CartShipmentDynamicPropertyObjectValue",
+                name: "IX_OrderPaymentInDynamicPropertyObjectValue_ObjectId",
+                table: "OrderPaymentInDynamicPropertyObjectValue",
                 column: "ObjectId");
 
             migrationBuilder.CreateIndex(
                 name: "IX_ObjectType_ObjectId",
-                table: "CartShipmentDynamicPropertyObjectValue",
+                table: "OrderPaymentInDynamicPropertyObjectValue",
                 columns: new[] { "ObjectType", "ObjectId" });
 
             migrationBuilder.CreateIndex(
-                name: "IX_CartShoppingCartDynamicPropertyObjectValue_ObjectId",
-                table: "CartShoppingCartDynamicPropertyObjectValue",
+                name: "IX_OrderShipmentInDynamicPropertyObjectValue_ObjectId",
+                table: "OrderShipmentInDynamicPropertyObjectValue",
                 column: "ObjectId");
 
             migrationBuilder.CreateIndex(
                 name: "IX_ObjectType_ObjectId",
-                table: "CartShoppingCartDynamicPropertyObjectValue",
+                table: "OrderShipmentInDynamicPropertyObjectValue",
                 columns: new[] { "ObjectType", "ObjectId" });
 
             migrationBuilder.Sql(@"IF (EXISTS (SELECT * 
                  FROM INFORMATION_SCHEMA.TABLES 
                  WHERE TABLE_NAME = '__MigrationHistory'))
                     BEGIN
-                        INSERT INTO [dbo].[CartLineItemDynamicPropertyObjectValue] ([Id],[CreatedDate],[ModifiedDate],[CreatedBy],[ModifiedBy],[ObjectType],[ObjectId],[Locale],[ValueType],[ShortTextValue],[LongTextValue],[DecimalValue],[IntegerValue],[BooleanValue],[DateTimeValue],[PropertyId],[DictionaryItemId],[PropertyName])
+                        INSERT INTO [dbo].[OrderLineItemDynamicPropertyObjectValue] ([Id],[CreatedDate],[ModifiedDate],[CreatedBy],[ModifiedBy],[ObjectType],[ObjectId],[Locale],[ValueType],[ShortTextValue],[LongTextValue],[DecimalValue],[IntegerValue],[BooleanValue],[DateTimeValue],[PropertyId],[DictionaryItemId],[PropertyName])
                         SELECT OV.[Id],OV.[CreatedDate],OV.[ModifiedDate],OV.[CreatedBy],OV.[ModifiedBy],OV.[ObjectType],OV.[ObjectId],[Locale],OV.[ValueType],[ShortTextValue],[LongTextValue],[DecimalValue],[IntegerValue],[BooleanValue],[DateTimeValue],[PropertyId],[DictionaryItemId], PDP.[Name]
                         FROM [PlatformDynamicPropertyObjectValue] OV
 						INNER JOIN [PlatformDynamicProperty] PDP ON PDP.Id = OV.PropertyId
-                        WHERE OV.ObjectType = 'VirtoCommerce.CartModule.Core.Model.LineItem'
+                        WHERE OV.ObjectType = 'VirtoCommerce.OrderModule.Core.Model.LineItem'
                     END");
 
             migrationBuilder.Sql(@"IF (EXISTS (SELECT * 
                  FROM INFORMATION_SCHEMA.TABLES 
                  WHERE TABLE_NAME = '__MigrationHistory'))
                     BEGIN
-                        INSERT INTO [dbo].[CartPaymentDynamicPropertyObjectValue] ([Id],[CreatedDate],[ModifiedDate],[CreatedBy],[ModifiedBy],[ObjectType],[ObjectId],[Locale],[ValueType],[ShortTextValue],[LongTextValue],[DecimalValue],[IntegerValue],[BooleanValue],[DateTimeValue],[PropertyId],[DictionaryItemId],[PropertyName])
+                        INSERT INTO [dbo].[OrderDynamicPropertyObjectValue] ([Id],[CreatedDate],[ModifiedDate],[CreatedBy],[ModifiedBy],[ObjectType],[ObjectId],[Locale],[ValueType],[ShortTextValue],[LongTextValue],[DecimalValue],[IntegerValue],[BooleanValue],[DateTimeValue],[PropertyId],[DictionaryItemId],[PropertyName])
                         SELECT OV.[Id],OV.[CreatedDate],OV.[ModifiedDate],OV.[CreatedBy],OV.[ModifiedBy],OV.[ObjectType],OV.[ObjectId],[Locale],OV.[ValueType],[ShortTextValue],[LongTextValue],[DecimalValue],[IntegerValue],[BooleanValue],[DateTimeValue],[PropertyId],[DictionaryItemId], PDP.[Name]
                         FROM [PlatformDynamicPropertyObjectValue] OV
 						INNER JOIN [PlatformDynamicProperty] PDP ON PDP.Id = OV.PropertyId
-                        WHERE OV.ObjectType = 'VirtoCommerce.CartModule.Core.Model.Payment'
+                        WHERE OV.ObjectType = 'VirtoCommerce.OrderModule.Core.Model.CustomerOrder'
                     END");
 
             migrationBuilder.Sql(@"IF (EXISTS (SELECT * 
                  FROM INFORMATION_SCHEMA.TABLES 
                  WHERE TABLE_NAME = '__MigrationHistory'))
                     BEGIN
-                        INSERT INTO [dbo].[CartShipmentDynamicPropertyObjectValue] ([Id],[CreatedDate],[ModifiedDate],[CreatedBy],[ModifiedBy],[ObjectType],[ObjectId],[Locale],[ValueType],[ShortTextValue],[LongTextValue],[DecimalValue],[IntegerValue],[BooleanValue],[DateTimeValue],[PropertyId],[DictionaryItemId],[PropertyName])
+                        INSERT INTO [dbo].[OrderPaymentInDynamicPropertyObjectValue] ([Id],[CreatedDate],[ModifiedDate],[CreatedBy],[ModifiedBy],[ObjectType],[ObjectId],[Locale],[ValueType],[ShortTextValue],[LongTextValue],[DecimalValue],[IntegerValue],[BooleanValue],[DateTimeValue],[PropertyId],[DictionaryItemId],[PropertyName])
                         SELECT OV.[Id],OV.[CreatedDate],OV.[ModifiedDate],OV.[CreatedBy],OV.[ModifiedBy],OV.[ObjectType],OV.[ObjectId],[Locale],OV.[ValueType],[ShortTextValue],[LongTextValue],[DecimalValue],[IntegerValue],[BooleanValue],[DateTimeValue],[PropertyId],[DictionaryItemId], PDP.[Name]
                         FROM [PlatformDynamicPropertyObjectValue] OV
 						INNER JOIN [PlatformDynamicProperty] PDP ON PDP.Id = OV.PropertyId
-                        WHERE OV.ObjectType = 'VirtoCommerce.CartModule.Core.Model.Shipment'
+                        WHERE OV.ObjectType = 'VirtoCommerce.OrderModule.Core.Model.PaymentIn'
                     END");
 
             migrationBuilder.Sql(@"IF (EXISTS (SELECT * 
                  FROM INFORMATION_SCHEMA.TABLES 
                  WHERE TABLE_NAME = '__MigrationHistory'))
                     BEGIN
-                        INSERT INTO [dbo].[CartShoppingCartDynamicPropertyObjectValue] ([Id],[CreatedDate],[ModifiedDate],[CreatedBy],[ModifiedBy],[ObjectType],[ObjectId],[Locale],[ValueType],[ShortTextValue],[LongTextValue],[DecimalValue],[IntegerValue],[BooleanValue],[DateTimeValue],[PropertyId],[DictionaryItemId],[PropertyName])
+                        INSERT INTO [dbo].[OrderShipmentInDynamicPropertyObjectValue] ([Id],[CreatedDate],[ModifiedDate],[CreatedBy],[ModifiedBy],[ObjectType],[ObjectId],[Locale],[ValueType],[ShortTextValue],[LongTextValue],[DecimalValue],[IntegerValue],[BooleanValue],[DateTimeValue],[PropertyId],[DictionaryItemId],[PropertyName])
                         SELECT OV.[Id],OV.[CreatedDate],OV.[ModifiedDate],OV.[CreatedBy],OV.[ModifiedBy],OV.[ObjectType],OV.[ObjectId],[Locale],OV.[ValueType],[ShortTextValue],[LongTextValue],[DecimalValue],[IntegerValue],[BooleanValue],[DateTimeValue],[PropertyId],[DictionaryItemId], PDP.[Name]
                         FROM [PlatformDynamicPropertyObjectValue] OV
 						INNER JOIN [PlatformDynamicProperty] PDP ON PDP.Id = OV.PropertyId
-                        WHERE OV.ObjectType = 'VirtoCommerce.CartModule.Core.Model.ShoppingCart'
+                        WHERE OV.ObjectType = 'VirtoCommerce.OrderModule.Core.Model.Shipment'
                     END");
         }
 
         protected override void Down(MigrationBuilder migrationBuilder)
         {
             migrationBuilder.DropTable(
-                name: "CartLineItemDynamicPropertyObjectValue");
+                name: "OrderDynamicPropertyObjectValue");
 
             migrationBuilder.DropTable(
-                name: "CartPaymentDynamicPropertyObjectValue");
+                name: "OrderLineItemDynamicPropertyObjectValue");
 
             migrationBuilder.DropTable(
-                name: "CartShipmentDynamicPropertyObjectValue");
+                name: "OrderPaymentInDynamicPropertyObjectValue");
 
             migrationBuilder.DropTable(
-                name: "CartShoppingCartDynamicPropertyObjectValue");
+                name: "OrderShipmentInDynamicPropertyObjectValue");
         }
     }
 }
