@@ -51,11 +51,11 @@ namespace VirtoCommerce.ExportModule.Data.Services
                 using (var writer = new StreamWriter(stream, Encoding.UTF8, 1024, true) { AutoFlush = true })
                 using (var exportProvider = _exportProviderFactory.CreateProvider(request.ProviderName, request.ProviderConfig))
                 {
-                    var filteredMetadata = exportedTypeDefinition.MetaData.MakeShallowCopy();
+                    var filteredMetadata = (ExportedTypeMetadata)exportedTypeDefinition.MetaData.Clone();
 
-                    filteredMetadata.PropertiesInfo = exportedTypeDefinition.MetaData.PropertiesInfo
-                        .Where(x => request.DataQuery.IncludedProperties.IsNullOrEmpty() || request.DataQuery.IncludedProperties.Contains(x.Name))
-                        .Select(x => x.MakeShallowCopy())
+                    var includedColumnNames = request.DataQuery.IncludedColumns.Select(x => x.Name).ToArray();
+                    filteredMetadata.PropertyInfos = exportedTypeDefinition.MetaData.PropertyInfos
+                        .Where(x => request.DataQuery.IncludedColumns.IsNullOrEmpty() || includedColumnNames.Contains(x.Name))
                         .ToArray();
 
                     exportProvider.Metadata = filteredMetadata;

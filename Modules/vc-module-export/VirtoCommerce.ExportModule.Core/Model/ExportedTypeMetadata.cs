@@ -8,29 +8,33 @@ namespace VirtoCommerce.ExportModule.Core.Model
 {
     public class ExportedTypeMetadata : ValueObject
     {
-        /// <summary>
-        /// Extended type info. Stores if specific property is entity (true) or not (false)
-        /// </summary>
         private class ExportTypePropertyInfoEx
         {
-            public ExportTypePropertyInfo PropertyInfo { get; set; }
-            public bool IsEntity { get; set; }
+            public ExportedTypeColumnInfo ColumnInfo { get; set; }
+            public bool IsReference { get; set; }
+            public PropertyInfo PropertyInfo { get; set; }
         }
 
         public string Version { get; set; }
-        public ExportTypePropertyInfo[] PropertiesInfo { get; set; }
+        public ExportedTypeColumnInfo[] PropertyInfos { get; set; }
 
         /// <summary>
-        /// Returns basic info about potentially exported fields of entity
+        /// Returns basic info about potentially exported fields of entity.
         /// </summary>
-        /// <typeparam name="T"></typeparam>
-        /// <returns></returns>
-        public static ExportedTypeMetadata GetFromType<T>()
+        /// <typeparam name="T">Type for getting metadata.</typeparam>
+        /// <param name="extractReferenceProperties">If true, reference properties properties (<see cref="Enitity"/> and collection of <see cref="Enitity"/>) will be extracted recursively.</param>
+        /// <returns>Metadata for the T type.</returns>
+        public static ExportedTypeMetadata GetFromType<T>(bool extractReferenceProperties)
         {
             var result = new ExportedTypeMetadata();
             var type = typeof(T);
             var passedNodes = new List<MemberInfo>();
-            result.PropertiesInfo = result.GetFromType(type, string.Empty, passedNodes).Where(x => !x.IsEntity).Select(x => x.PropertyInfo).ToArray();
+
+            result.PropertyInfos = result.GetFromType(type, typeof(T).Name, string.Empty, passedNodes, extractReferenceProperties)
+                .Where(x => !x.IsReference)
+                .Select(x => x.ColumnInfo)
+                .ToArray();
+
             return result;
         }
 
@@ -56,28 +60,32 @@ namespace VirtoCommerce.ExportModule.Core.Model
             return result;
         }
 
-        public ExportedTypeMetadata MakeShallowCopy()
+        public override object Clone()
         {
-            return (ExportedTypeMetadata)MemberwiseClone();
+            var result = (ExportedTypeMetadata)base.Clone();
+
+            result.PropertyInfos = PropertyInfos?.Select(x => (ExportedTypeColumnInfo)x.Clone()).ToArray();
+
+            return result;
         }
 
 
-        private ExportTypePropertyInfoEx[] GetFromType(Type type, string baseMemberName, List<MemberInfo> passedNodes)
+        private ExportTypePropertyInfoEx[] GetFromType(Type type, string groupName, string baseMemberName, List<MemberInfo> passedNodes, bool extractNestedProperties)
         {
             var result = new List<ExportTypePropertyInfoEx>();
             var nestedMemberInfos = new List<(MemberInfo MemberInfo, Type NestedType)>();
+            var properties = type.GetProperties(BindingFlags.Instance | BindingFlags.Public).Where(x => x.CanRead && x.CanWrite);
 
-            foreach (var propertyInfo in type.GetProperties().Where(x => x.CanRead))
+            foreach (var propertyInfo in properties)
             {
                 if (!passedNodes.Contains(propertyInfo))
                 {
                     var nestedType = GetNestedType(propertyInfo.PropertyType);
-                    var isEntity = false;
+                    var isNested = nestedType.IsSubclassOf(typeof(Entity));
 
-                    if (nestedType.IsSubclassOf(typeof(Entity)))
+                    // Collect nested members for later inspection after all properties in this type
+                    if (extractNestedProperties && isNested)
                     {
-                        isEntity = true;
-                        // Collect nested members for later inspection after all properties in this type
                         nestedMemberInfos.Add((propertyInfo, nestedType));
                     }
 
@@ -85,16 +93,20 @@ namespace VirtoCommerce.ExportModule.Core.Model
 
                     var memberName = GetDerivedName(baseMemberName, propertyInfo);
 
-                    result.Add(new ExportTypePropertyInfoEx()
+                    if (extractNestedProperties || !isNested)
                     {
-                        PropertyInfo = new ExportTypePropertyInfo()
+                        result.Add(new ExportTypePropertyInfoEx()
                         {
-                            MemberInfo = propertyInfo,
-                            Name = memberName,
-                            ExportName = memberName,
-                        },
-                        IsEntity = isEntity
-                    });
+                            ColumnInfo = new ExportedTypeColumnInfo
+                            {
+                                Name = memberName,
+                                ExportName = memberName,
+                                Group = groupName,
+                            },
+                            PropertyInfo = propertyInfo,
+                            IsReference = isNested,
+                        });
+                    }
                 }
             }
 
@@ -103,8 +115,10 @@ namespace VirtoCommerce.ExportModule.Core.Model
                 //Continue searching for nested members
                 result.AddRange(GetFromType(
                     nestedMemberInfo.NestedType,
+                    groupName,
                     GetDerivedName(baseMemberName, (PropertyInfo)nestedMemberInfo.MemberInfo),
-                    passedNodes));
+                    passedNodes,
+                    extractNestedProperties));
             }
 
             return result.ToArray();

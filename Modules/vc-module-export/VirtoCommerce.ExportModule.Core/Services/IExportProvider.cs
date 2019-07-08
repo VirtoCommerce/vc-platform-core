@@ -8,6 +8,7 @@ namespace VirtoCommerce.ExportModule.Core.Services
     {
         string TypeName { get; }
         string ExportedFileExtension { get; }
+        bool IsTabular { get; }
         IExportProviderConfiguration Configuration { get; }
         ExportedTypeMetadata Metadata { get; set; }
 

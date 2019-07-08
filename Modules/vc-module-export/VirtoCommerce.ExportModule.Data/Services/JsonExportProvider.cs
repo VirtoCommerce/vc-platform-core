@@ -15,6 +15,7 @@ namespace VirtoCommerce.ExportModule.Data.Services
     {
         public string TypeName => nameof(JsonExportProvider);
         public string ExportedFileExtension => "json";
+        public bool IsTabular => false;
         public IExportProviderConfiguration Configuration { get; }
         public ExportedTypeMetadata Metadata { get; set; }
 
@@ -83,7 +84,7 @@ namespace VirtoCommerce.ExportModule.Data.Services
 
                 if (nestedType.IsSubclassOf(typeof(Entity)))
                 {
-                    if (!Metadata.PropertiesInfo.Any(x => x.Name.StartsWith($"{propertyName}.", StringComparison.InvariantCultureIgnoreCase)))
+                    if (!Metadata.PropertyInfos.Any(x => x.Name.StartsWith($"{propertyName}.", StringComparison.InvariantCultureIgnoreCase)))
                     {
                         property.SetValue(obj, null);
                     }
@@ -110,7 +111,7 @@ namespace VirtoCommerce.ExportModule.Data.Services
                         }
                     }
                 }
-                else if (!Metadata.PropertiesInfo.Any(x => x.Name.Equals(propertyName, StringComparison.InvariantCultureIgnoreCase)))
+                else if (!Metadata.PropertyInfos.Any(x => x.Name.Equals(propertyName, StringComparison.InvariantCultureIgnoreCase)))
                 {
                     property.SetValue(obj, null);
                 }

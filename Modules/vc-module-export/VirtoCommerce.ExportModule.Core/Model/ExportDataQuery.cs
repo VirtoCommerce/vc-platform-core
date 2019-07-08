@@ -1,3 +1,4 @@
+using System;
 using System.Linq;
 using Newtonsoft.Json;
 using VirtoCommerce.Platform.Core.Common;
@@ -11,7 +12,7 @@ namespace VirtoCommerce.ExportModule.Core.Model
         public string Keyword { get; set; }
         public string[] ObjectIds { get; set; } = new string[] { };
         public string Sort { get; set; }
-        public string[] IncludedProperties { get; set; } = new string[] { };
+        public ExportedTypeColumnInfo[] IncludedColumns { get; set; } = Array.Empty<ExportedTypeColumnInfo>();
 
         public abstract SearchCriteriaBase CreateSearchCriteria();
 

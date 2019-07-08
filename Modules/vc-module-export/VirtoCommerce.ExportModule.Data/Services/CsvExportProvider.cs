@@ -17,6 +17,7 @@ namespace VirtoCommerce.ExportModule.Data.Services
     {
         public string TypeName => nameof(CsvExportProvider);
         public string ExportedFileExtension => "csv";
+        public bool IsTabular => true;
         public IExportProviderConfiguration Configuration { get; }
         public ExportedTypeMetadata Metadata { get; set; }
 
@@ -52,7 +53,7 @@ namespace VirtoCommerce.ExportModule.Data.Services
 
             if (_csvWriter == null)
             {
-                var csvConfiguration = (Configuration as CsvProviderConfiguration)?.Configuration ?? new Configuration() { Delimiter = "\t" };
+                var csvConfiguration = (Configuration as CsvProviderConfiguration)?.Configuration ?? new Configuration();
 
                 _csvWriter = new CsvWriter(textWriter, csvConfiguration, true);
             }
@@ -84,7 +85,7 @@ namespace VirtoCommerce.ExportModule.Data.Services
         {
             var exportedType = typeof(T);
 
-            var includedPropertiesInfo = exportedTypeMetadata.PropertiesInfo;
+            var includedPropertiesInfo = exportedTypeMetadata.PropertyInfos;
             int columnIndex = 0;
 
             foreach (var includedPropertyInfo in includedPropertiesInfo)

@@ -26,7 +26,7 @@ namespace VirtoCommerce.ExportModule.Data.Services
                 {
                     TypeName = type.FullName,
                     Group = group,
-                    MetaData = ExportedTypeMetadata.GetFromType<T>(),
+                    MetaData = ExportedTypeMetadata.GetFromType<T>(true),
                 });
             }
             return _knownExportTypes[type];
