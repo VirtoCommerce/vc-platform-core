@@ -29,7 +29,7 @@ namespace VirtoCommerce.PricingModule.Test
         {
             //Arrange
             IKnownExportTypesRegistrar registrar = new KnownExportTypesService();
-            registrar.RegisterType<Price>();
+            registrar.RegisterType<Price>("Pricing");
 
             var searchServiceMock = new Mock<IPricingSearchService>();
             searchServiceMock.Setup(x => x.SearchPricesAsync(It.IsAny<PricesSearchCriteria>())).ReturnsAsync(GetTestPriceResult());
@@ -89,7 +89,7 @@ namespace VirtoCommerce.PricingModule.Test
         {
             //Arrange
             IKnownExportTypesRegistrar registrar = new KnownExportTypesService();
-            registrar.RegisterType<Pricelist>();
+            registrar.RegisterType<Pricelist>("Pricing");
 
             var searchServiceMock = new Mock<IPricingSearchService>();
             searchServiceMock.Setup(x => x.SearchPricelistsAsync(It.IsAny<PricelistSearchCriteria>())).ReturnsAsync(GetTestPricelistResult());
@@ -152,7 +152,7 @@ namespace VirtoCommerce.PricingModule.Test
         public Task PricelistAssignmentJsonExport()
         {
             IKnownExportTypesRegistrar registrar = new KnownExportTypesService();
-            registrar.RegisterType<PricelistAssignment>();
+            registrar.RegisterType<PricelistAssignment>("Pricing");
 
             var searchServiceMock = new Mock<IPricingSearchService>();
             searchServiceMock.Setup(x => x.SearchPricelistAssignmentsAsync(It.IsAny<PricelistAssignmentsSearchCriteria>())).ReturnsAsync(GetPricelistAssignmentSearchResult());
@@ -214,7 +214,7 @@ namespace VirtoCommerce.PricingModule.Test
         {
             // This is temporary (for debug purposes) full test of prices export
             IKnownExportTypesRegistrar registrar = new KnownExportTypesService();
-            registrar.RegisterType<Price>();
+            registrar.RegisterType<Price>("Pricing");
 
             var resolver = (IKnownExportTypesResolver)registrar;
 

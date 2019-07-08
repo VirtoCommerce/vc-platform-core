@@ -135,7 +135,7 @@
                 "priceListTitle": "Pricelist export",
                 "pricelistSubtitle": "Export priceslist to json or csv",
                 "priceAssignmentTitle": "Price Assignment export",
-                "priceAssignmentSubtitle":  "Export price assignment to json or csv" 
+                "priceAssignmentSubtitle": "Export price assignment to json or csv"
             } 
         },
         "widgets": {
