@@ -125,7 +125,6 @@ namespace VirtoCommerce.Platform.Core
                     ValueType = SettingValueType.ShortText,
                     DefaultValue = null
                 };
-
                 public static SettingDescriptor SampleDataState = new SettingDescriptor
                 {
                     Name = "VirtoCommerce.SampleDataState",
@@ -140,7 +139,6 @@ namespace VirtoCommerce.Platform.Core
                     ValueType = SettingValueType.ShortText,
                     DefaultValue = AutoInstallState.Undefined
                 };
-
                 public static SettingDescriptor ModulesAutoInstalled = new SettingDescriptor
                 {
                     Name = "VirtoCommerce.ModulesAutoInstalled",
@@ -148,6 +146,15 @@ namespace VirtoCommerce.Platform.Core
                     ValueType = SettingValueType.Boolean,
                     DefaultValue = false
                 };
+                public static SettingDescriptor NonEditableUsers = new SettingDescriptor
+                {
+                    Name = "VirtoCommerce.NonEditableUsers",
+                    GroupName = "Platform|Setup",
+                    ValueType = SettingValueType.ShortText,
+                    DefaultValue = null,
+                    RestartRequired = true
+                };
+
                 public static IEnumerable<SettingDescriptor> AllSettings
                 {
                     get
@@ -156,6 +163,7 @@ namespace VirtoCommerce.Platform.Core
                         yield return SampleDataState;
                         yield return ModulesAutoInstallState;
                         yield return ModulesAutoInstalled;
+                        yield return NonEditableUsers;
                     }
                 }
             }

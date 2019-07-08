@@ -1,3 +1,4 @@
+using System;
 using System.IO;
 using System.Linq;
 using System.Net;
@@ -30,6 +31,7 @@ using VirtoCommerce.Platform.Core.Common;
 using VirtoCommerce.Platform.Core.Jobs;
 using VirtoCommerce.Platform.Core.Modularity;
 using VirtoCommerce.Platform.Core.Security;
+using VirtoCommerce.Platform.Core.Settings;
 using VirtoCommerce.Platform.Data.Extensions;
 using VirtoCommerce.Platform.Data.PushNotifications;
 using VirtoCommerce.Platform.Data.Repositories;
@@ -143,10 +145,7 @@ namespace VirtoCommerce.Platform.Web
             });
 
             services.AddAuthentication().AddCookie();
-            services.AddSecurityServices(options =>
-            {
-                options.NonEditableUsers = new[] { "admin" };
-            });
+            services.AddSecurityServices();
 
             services.AddIdentity<ApplicationUser, Role>(options => options.Stores.MaxLengthForKeys = 128)
                     .AddEntityFrameworkStores<SecurityDbContext>()
@@ -320,7 +319,7 @@ namespace VirtoCommerce.Platform.Web
         }
 
         // This method gets called by the runtime. Use this method to configure the HTTP request pipeline.
-        public void Configure(IApplicationBuilder app, IHostingEnvironment env)
+        public void Configure(IApplicationBuilder app, IHostingEnvironment env, IServiceCollection services, ISettingsManager settingManager, IOptions<Core.Security.AuthorizationOptions> securityOptions)
         {
 
             if (env.IsDevelopment())
@@ -398,6 +397,9 @@ namespace VirtoCommerce.Platform.Web
             app.UseDbTriggers();
             //Register platform settings
             app.UsePlatformSettings();
+            var nonEditableUsers = settingManager.GetValue(PlatformConstants.Settings.Setup.NonEditableUsers.Name, string.Empty);
+            securityOptions.Value.NonEditableUsers = nonEditableUsers.Split(new[] { ',' }, StringSplitOptions.RemoveEmptyEntries);
+
             app.UseModules();
             //Register platform permissions
             app.UsePlatformPermissions();
