@@ -172,7 +172,7 @@ angular.module('virtoCommerce.pricingModule')
                             title: 'pricing.blades.exporter.priceAssignmentTitle',
                             subtitle: 'pricing.blades.exporter.priceAssignmentSubtitle',
                             controller: 'virtoCommerce.exportModule.exporterController',
-                            template: 'Modules/$(VirtoCommerce.Export)/Scripts/blades/exportSetting.tml.html',
+                            template: 'Modules/$(VirtoCommerce.Export)/Scripts/blades/exportSetting.tpl.html',
                             exportDataRequest: exportDataRequest
                         };
                         bladeNavigationService.showBlade(newBlade, blade);

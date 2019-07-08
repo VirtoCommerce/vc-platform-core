@@ -7,6 +7,8 @@ namespace VirtoCommerce.ExportModule.Core.Model
     {
         public string TypeName { get; set; }
 
+        public string Group { get; set; }
+
         public ExportedTypeMetadata MetaData { get; set; }
 
         [JsonIgnore]
