@@ -27,7 +27,6 @@ namespace VirtoCommerce.CartModule.Data.Repositories
         public virtual async Task<ShoppingCartEntity[]> GetShoppingCartsByIdsAsync(string[] ids, string responseGroup = null)
         {
             var carts = await ShoppingCarts.Where(x => ids.Contains(x.Id)).ToArrayAsync();
-
             var cartResponseGroup = EnumUtility.SafeParseFlags(responseGroup, CartResponseGroup.Full);
 
             var cartTaxDetails = TaxDetails.Where(x => ids.Contains(x.ShoppingCartId)).ToArrayAsync();
@@ -36,7 +35,7 @@ namespace VirtoCommerce.CartModule.Data.Repositories
             var cartCoupons = Coupons.Where(x => ids.Contains(x.ShoppingCartId)).ToArrayAsync();
             await Task.WhenAll(cartTaxDetails, cartDiscounts, cartAddresses, cartCoupons);
 
-            if ((cartResponseGroup & CartResponseGroup.WithPayments) == CartResponseGroup.WithPayments)
+            if (cartResponseGroup.HasFlag(CartResponseGroup.WithPayments))
             {
                 var payments = await Payments.Include(x => x.Addresses).Where(x => ids.Contains(x.ShoppingCartId)).ToArrayAsync();
                 var paymentIds = payments.Select(x => x.Id).ToArray();
@@ -46,7 +45,7 @@ namespace VirtoCommerce.CartModule.Data.Repositories
                 await Task.WhenAll(paymentTaxDetails, paymentDiscounts);
             }
 
-            if ((cartResponseGroup & CartResponseGroup.WithLineItems) == CartResponseGroup.WithLineItems)
+            if (cartResponseGroup.HasFlag(CartResponseGroup.WithLineItems))
             {
                 var lineItems = await LineItems.Where(x => ids.Contains(x.ShoppingCartId)).ToArrayAsync();
                 var lineItemIds = lineItems.Select(x => x.Id).ToArray();
@@ -55,7 +54,7 @@ namespace VirtoCommerce.CartModule.Data.Repositories
                 await Task.WhenAll(lineItemsTaxDetails, lineItemsDiscounts);
             }
 
-            if ((cartResponseGroup & CartResponseGroup.WithShipments) == CartResponseGroup.WithShipments)
+            if (cartResponseGroup.HasFlag(CartResponseGroup.WithShipments))
             {
                 var shipments = await Shipments.Include(x => x.Items).Where(x => ids.Contains(x.ShoppingCartId)).ToArrayAsync();
                 var shipmentIds = shipments.Select(x => x.Id).ToArray();
@@ -70,7 +69,6 @@ namespace VirtoCommerce.CartModule.Data.Repositories
 
         public virtual async Task RemoveCartsAsync(string[] ids)
         {
-
             var carts = await GetShoppingCartsByIdsAsync(ids);
             if (!carts.IsNullOrEmpty())
             {

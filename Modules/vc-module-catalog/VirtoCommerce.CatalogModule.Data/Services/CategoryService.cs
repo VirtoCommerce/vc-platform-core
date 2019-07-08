@@ -44,6 +44,7 @@ namespace VirtoCommerce.CatalogModule.Data.Services
         }
 
         #region ICategoryService Members
+
         public virtual async Task<Category[]> GetByIdsAsync(string[] categoryIds, string responseGroup, string catalogId = null)
         {
             var categoryResponseGroup = EnumUtility.SafeParseFlags(responseGroup, CategoryResponseGroup.Full);
@@ -73,7 +74,8 @@ namespace VirtoCommerce.CatalogModule.Data.Services
 
             using (var repository = _repositoryFactory())
             {
-                var dbExistCategories = await repository.GetCategoriesByIdsAsync(categories.Where(x => !x.IsTransient()).Select(x => x.Id).ToArray(), CategoryResponseGroup.Full);
+                var categoriesIds = categories.Where(x => !x.IsTransient()).Select(x => x.Id).ToArray();
+                var dbExistCategories = await repository.GetCategoriesByIdsAsync(categoriesIds, CategoryResponseGroup.Full.ToString());
                 foreach (var category in categories)
                 {
                     var originalEntity = dbExistCategories.FirstOrDefault(x => x.Id == category.Id);
@@ -133,8 +135,8 @@ namespace VirtoCommerce.CatalogModule.Data.Services
                using (var repository = _repositoryFactory())
                {
                    repository.DisableChangesTracking();
-
-                   entities = await repository.GetCategoriesByIdsAsync(repository.Categories.Select(x => x.Id).ToArray(), CategoryResponseGroup.Full);
+                   var categoriesIds = repository.Categories.Select(x => x.Id).ToArray();
+                   entities = await repository.GetCategoriesByIdsAsync(categoriesIds, CategoryResponseGroup.Full.ToString());
                }
                var result = entities.Select(x => x.ToModel(AbstractTypeFactory<Category>.TryCreateInstance()))
                                     .ToDictionary(x => x.Id, StringComparer.OrdinalIgnoreCase)
@@ -205,7 +207,6 @@ namespace VirtoCommerce.CatalogModule.Data.Services
             }
         }
 
-
         protected virtual async Task ValidateCategoryPropertiesAsync(IEnumerable<Category> categories)
         {
             if (categories == null)
@@ -227,14 +228,13 @@ namespace VirtoCommerce.CatalogModule.Data.Services
 
                 foreach (var category in group)
                 {
-                    var validatioResult = _hasPropertyValidator.Validate(category);
-                    if (!validatioResult.IsValid)
+                    var validationResult = _hasPropertyValidator.Validate(category);
+                    if (!validationResult.IsValid)
                     {
-                        throw new Exception($"Category properties has validation error: {string.Join(Environment.NewLine, validatioResult.Errors.Select(x => x.ToString()))}");
+                        throw new Exception($"Category properties has validation error: {string.Join(Environment.NewLine, validationResult.Errors.Select(x => x.ToString()))}");
                     }
                 }
             }
         }
-
     }
 }

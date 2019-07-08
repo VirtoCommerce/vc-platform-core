@@ -45,6 +45,11 @@ namespace VirtoCommerce.NotificationsModule.Data.Services
                     query = query.Where(n => criteria.ObjectTypes.Contains(n.TenantType));
                 }
 
+                if (!string.IsNullOrEmpty(criteria.NotificationType))
+                {
+                    query = query.Where(x => x.NotificationType.EqualsInvariant(criteria.NotificationType));
+                }
+
                 result.TotalCount = await query.CountAsync();
 
                 if (criteria.Take > 0)

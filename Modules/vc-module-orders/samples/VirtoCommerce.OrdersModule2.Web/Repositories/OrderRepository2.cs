@@ -17,12 +17,11 @@ namespace VirtoCommerce.OrdersModule2.Web.Repositories
         public IQueryable<CustomerOrder2Entity> CustomerOrders2 => DbContext.Set<CustomerOrder2Entity>();
         public IQueryable<InvoiceEntity> Invoices => DbContext.Set<InvoiceEntity>();
 
-        public override async Task<CustomerOrderEntity[]> GetCustomerOrdersByIdsAsync(string[] ids, CustomerOrderResponseGroup responseGroup)
+        public override async Task<CustomerOrderEntity[]> GetCustomerOrdersByIdsAsync(string[] ids, string responseGroup = null)
         {
             var retVal = await base.GetCustomerOrdersByIdsAsync(ids, responseGroup);
             var invoices = Invoices.Where(x => ids.Contains(x.CustomerOrder2Id)).ToArray();
             return retVal;
         }
-
     }
 }

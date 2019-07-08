@@ -16,7 +16,6 @@ using VirtoCommerce.PaymentModule.Core.Services;
 using VirtoCommerce.Platform.Core.Caching;
 using VirtoCommerce.Platform.Core.ChangeLog;
 using VirtoCommerce.Platform.Core.Common;
-using VirtoCommerce.Platform.Core.DynamicProperties;
 using VirtoCommerce.Platform.Core.Events;
 using VirtoCommerce.Platform.Core.Settings;
 using VirtoCommerce.Platform.Data.Infrastructure;
@@ -73,7 +72,7 @@ namespace VirtoCommerce.OrdersModule.Data.Services
                 {
                     repository.DisableChangesTracking();
 
-                    var orderEntities = await repository.GetCustomerOrdersByIdsAsync(orderIds, orderResponseGroup);
+                    var orderEntities = await repository.GetCustomerOrdersByIdsAsync(orderIds, responseGroup);
                     foreach (var orderEntity in orderEntities)
                     {
                         var customerOrder = AbstractTypeFactory<CustomerOrder>.TryCreateInstance();
@@ -109,7 +108,8 @@ namespace VirtoCommerce.OrdersModule.Data.Services
 
             using (var repository = _repositoryFactory())
             {
-                var dataExistOrders = await repository.GetCustomerOrdersByIdsAsync(orders.Where(x => !x.IsTransient()).Select(x => x.Id).ToArray(), CustomerOrderResponseGroup.Full);
+                var orderIds = orders.Where(x => !x.IsTransient()).Select(x => x.Id).ToArray();
+                var dataExistOrders = await repository.GetCustomerOrdersByIdsAsync(orderIds, CustomerOrderResponseGroup.Full.ToString());
                 foreach (var order in orders)
                 {
                     await EnsureThatAllOperationsHaveNumber(order);

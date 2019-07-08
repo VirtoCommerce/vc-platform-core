@@ -61,7 +61,7 @@ namespace VirtoCommerce.CatalogModule.Data.Services
                     //Optimize performance and CPU usage
                     repository.DisableChangesTracking();
 
-                    result = (await repository.GetItemByIdsAsync(itemIds, itemResponseGroup))
+                    result = (await repository.GetItemByIdsAsync(itemIds, responseGroup))
                                        .Select(x => x.ToModel(AbstractTypeFactory<CatalogProduct>.TryCreateInstance()))
                                        .ToArray();
                 }
@@ -78,7 +78,6 @@ namespace VirtoCommerce.CatalogModule.Data.Services
                 {
                     _outlineService.FillOutlinesForObjects(productsWithVariationsList, catalogId);
                 }
-
 
                 //Reduce details according to response group
                 foreach (var product in productsWithVariationsList)
@@ -170,7 +169,6 @@ namespace VirtoCommerce.CatalogModule.Data.Services
             }
         }
 
-
         public virtual async Task LoadDependenciesAsync(IEnumerable<CatalogProduct> products)
         {
             await InnerLoadDependenciesAsync(products);
@@ -226,7 +224,6 @@ namespace VirtoCommerce.CatalogModule.Data.Services
             }
         }
 
-
         protected virtual void ApplyInheritanceRules(IEnumerable<CatalogProduct> products)
         {
             foreach (var product in products)
@@ -238,7 +235,6 @@ namespace VirtoCommerce.CatalogModule.Data.Services
                 }
             }
         }
-
 
         protected virtual async Task ValidateProductsAsync(CatalogProduct[] products)
         {
@@ -260,10 +256,10 @@ namespace VirtoCommerce.CatalogModule.Data.Services
             var targets = products.OfType<IHasProperties>();
             foreach (var item in targets)
             {
-                var validatioResult = await _hasPropertyValidator.ValidateAsync(item);
-                if (!validatioResult.IsValid)
+                var validationResult = await _hasPropertyValidator.ValidateAsync(item);
+                if (!validationResult.IsValid)
                 {
-                    throw new ValidationException($"Product properties has validation error: {string.Join(Environment.NewLine, validatioResult.Errors.Select(x => x.ToString()))}");
+                    throw new ValidationException($"Product properties has validation error: {string.Join(Environment.NewLine, validationResult.Errors.Select(x => x.ToString()))}");
                 }
             }
         }

@@ -141,7 +141,6 @@ namespace VirtoCommerce.CartModule.Data.Migrations
                     ModifiedDate = table.Column<DateTime>(nullable: true),
                     CreatedBy = table.Column<string>(maxLength: 64, nullable: true),
                     ModifiedBy = table.Column<string>(maxLength: 64, nullable: true),
-                    OuterId = table.Column<string>(maxLength: 128, nullable: true),
                     Currency = table.Column<string>(maxLength: 64, nullable: false),
                     PaymentGatewayCode = table.Column<string>(maxLength: 64, nullable: true),
                     Amount = table.Column<decimal>(type: "Money", nullable: false),

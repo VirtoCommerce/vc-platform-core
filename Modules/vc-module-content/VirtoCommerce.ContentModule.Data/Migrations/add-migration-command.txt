@@ -1,0 +1,3 @@
+Add-Migration MigrationName -Context VirtoCommerce.ContentModule.Data.Repositories.MenuDbContext  -Verbose -OutputDir Migrations -Project VirtoCommerce.ContentModule.Data -StartupProject VirtoCommerce.ContentModule.Data  -Debug
+
+Remove-Migration -Context VirtoCommerce.ContentModule.Data.Repositories.MenuDbContext  -Verbose -Project VirtoCommerce.ContentModule.Data -StartupProject VirtoCommerce.ContentModule.Data  -Debug
