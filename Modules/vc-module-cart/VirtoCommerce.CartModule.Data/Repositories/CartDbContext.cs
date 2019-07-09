@@ -152,7 +152,7 @@ namespace VirtoCommerce.CartModule.Data.Repositories
 
             #region ShoppingCart
 
-            modelBuilder.Entity<ShoppingCartDynamicPropertyObjectValueEntity>().ToTable("CartShoppingCartDynamicPropertyObjectValue").HasKey(x => x.Id);
+            modelBuilder.Entity<ShoppingCartDynamicPropertyObjectValueEntity>().ToTable("CartDynamicPropertyObjectValue").HasKey(x => x.Id);
             modelBuilder.Entity<ShoppingCartDynamicPropertyObjectValueEntity>().Property(x => x.Id).HasMaxLength(128);
             modelBuilder.Entity<ShoppingCartDynamicPropertyObjectValueEntity>().Property(x => x.DecimalValue).HasColumnType("decimal(18,5)");
             modelBuilder.Entity<ShoppingCartDynamicPropertyObjectValueEntity>().HasOne(p => p.ShoppingCart)

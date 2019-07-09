@@ -110,7 +110,7 @@ namespace VirtoCommerce.CartModule.Data.Migrations
                 });
 
             migrationBuilder.CreateTable(
-                name: "CartShoppingCartDynamicPropertyObjectValue",
+                name: "CartDynamicPropertyObjectValue",
                 columns: table => new
                 {
                     Id = table.Column<string>(maxLength: 128, nullable: false),
@@ -134,9 +134,9 @@ namespace VirtoCommerce.CartModule.Data.Migrations
                 },
                 constraints: table =>
                 {
-                    table.PrimaryKey("PK_CartShoppingCartDynamicPropertyObjectValue", x => x.Id);
+                    table.PrimaryKey("PK_CartDynamicPropertyObjectValue", x => x.Id);
                     table.ForeignKey(
-                        name: "FK_CartShoppingCartDynamicPropertyObjectValue_Cart_ObjectId",
+                        name: "FK_CartDynamicPropertyObjectValue_Cart_ObjectId",
                         column: x => x.ObjectId,
                         principalTable: "Cart",
                         principalColumn: "Id",
@@ -174,13 +174,13 @@ namespace VirtoCommerce.CartModule.Data.Migrations
                 columns: new[] { "ObjectType", "ObjectId" });
 
             migrationBuilder.CreateIndex(
-                name: "IX_CartShoppingCartDynamicPropertyObjectValue_ObjectId",
-                table: "CartShoppingCartDynamicPropertyObjectValue",
+                name: "IX_CartDynamicPropertyObjectValue_ObjectId",
+                table: "CartDynamicPropertyObjectValue",
                 column: "ObjectId");
 
             migrationBuilder.CreateIndex(
                 name: "IX_ObjectType_ObjectId",
-                table: "CartShoppingCartDynamicPropertyObjectValue",
+                table: "CartDynamicPropertyObjectValue",
                 columns: new[] { "ObjectType", "ObjectId" });
 
             migrationBuilder.Sql(@"IF (EXISTS (SELECT * 
@@ -220,7 +220,7 @@ namespace VirtoCommerce.CartModule.Data.Migrations
                  FROM INFORMATION_SCHEMA.TABLES 
                  WHERE TABLE_NAME = '__MigrationHistory'))
                     BEGIN
-                        INSERT INTO [dbo].[CartShoppingCartDynamicPropertyObjectValue] ([Id],[CreatedDate],[ModifiedDate],[CreatedBy],[ModifiedBy],[ObjectType],[ObjectId],[Locale],[ValueType],[ShortTextValue],[LongTextValue],[DecimalValue],[IntegerValue],[BooleanValue],[DateTimeValue],[PropertyId],[DictionaryItemId],[PropertyName])
+                        INSERT INTO [dbo].[CartDynamicPropertyObjectValue] ([Id],[CreatedDate],[ModifiedDate],[CreatedBy],[ModifiedBy],[ObjectType],[ObjectId],[Locale],[ValueType],[ShortTextValue],[LongTextValue],[DecimalValue],[IntegerValue],[BooleanValue],[DateTimeValue],[PropertyId],[DictionaryItemId],[PropertyName])
                         SELECT OV.[Id],OV.[CreatedDate],OV.[ModifiedDate],OV.[CreatedBy],OV.[ModifiedBy],OV.[ObjectType],OV.[ObjectId],[Locale],OV.[ValueType],[ShortTextValue],[LongTextValue],[DecimalValue],[IntegerValue],[BooleanValue],[DateTimeValue],[PropertyId],[DictionaryItemId], PDP.[Name]
                         FROM [PlatformDynamicPropertyObjectValue] OV
 						INNER JOIN [PlatformDynamicProperty] PDP ON PDP.Id = OV.PropertyId
@@ -240,7 +240,7 @@ namespace VirtoCommerce.CartModule.Data.Migrations
                 name: "CartShipmentDynamicPropertyObjectValue");
 
             migrationBuilder.DropTable(
-                name: "CartShoppingCartDynamicPropertyObjectValue");
+                name: "CartDynamicPropertyObjectValue");
         }
     }
 }
