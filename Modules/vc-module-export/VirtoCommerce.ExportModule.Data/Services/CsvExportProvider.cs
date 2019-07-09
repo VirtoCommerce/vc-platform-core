@@ -19,7 +19,6 @@ namespace VirtoCommerce.ExportModule.Data.Services
         public string ExportedFileExtension => "csv";
         public bool IsTabular => true;
         public IExportProviderConfiguration Configuration { get; }
-        public ExportedTypeMetadata Metadata { get; set; }
 
         private CsvWriter _csvWriter;
 
@@ -46,11 +45,6 @@ namespace VirtoCommerce.ExportModule.Data.Services
 
         private void EnsureWriterCreated(TextWriter textWriter)
         {
-            if (Metadata == null)
-            {
-                throw new ArgumentNullException(nameof(Metadata));
-            }
-
             if (_csvWriter == null)
             {
                 var csvConfiguration = (Configuration as CsvProviderConfiguration)?.Configuration ?? new Configuration();
@@ -66,8 +60,9 @@ namespace VirtoCommerce.ExportModule.Data.Services
 
             if (mapForType == null)
             {
-                var constructor = typeof(MetadataFilteredMap<>).MakeGenericType(objectType).GetConstructor(new[] { typeof(ExportedTypeMetadata) });
-                var classMap = (ClassMap)constructor.Invoke(new[] { Metadata });
+                var constructor = typeof(MetadataFilteredMap<>).MakeGenericType(objectType).GetConstructor(new[] { typeof(ExportedTypeColumnInfo[]) });
+                var includedColumns = (Configuration as CsvProviderConfiguration)?.IncludedColumns;
+                var classMap = (ClassMap)constructor.Invoke(includedColumns != null ? new[] { includedColumns } : null);
 
                 csvConfiguration.RegisterClassMap(classMap);
             }
@@ -75,18 +70,17 @@ namespace VirtoCommerce.ExportModule.Data.Services
     }
 
     /// <summary>
-    /// Custom ClassMap implementation which includes only type members that are presented in <see cref="ExportedTypeMetadata"/>. Supports nested properties.
+    /// Custom ClassMap implementation which includes type properties. Supports nested properties.
     /// Does not map <see cref="IEnumerable<Entity>"/> as these are not representable in CSV structure in suitable manner.
     /// </summary>
     /// <typeparam name="T">Mapped type.</typeparam>
     public class MetadataFilteredMap<T> : ClassMap<T>
     {
-        public MetadataFilteredMap(ExportedTypeMetadata exportedTypeMetadata)
+        public MetadataFilteredMap(ExportedTypeColumnInfo[] includedColumns)
         {
             var exportedType = typeof(T);
-
-            var includedPropertiesInfo = exportedTypeMetadata.PropertyInfos;
-            int columnIndex = 0;
+            var includedPropertiesInfo = includedColumns ?? ExportedTypeMetadata.GetFromType<T>(true).PropertyInfos;
+            var columnIndex = 0;
 
             foreach (var includedPropertyInfo in includedPropertiesInfo)
             {
@@ -122,6 +116,7 @@ namespace VirtoCommerce.ExportModule.Data.Services
                     else
                     {
                         var referenceMap = currentClassMap.ReferenceMaps.Find(propertyInfo);
+
                         currentType = propertyInfo.PropertyType;
 
                         if (referenceMap == null)

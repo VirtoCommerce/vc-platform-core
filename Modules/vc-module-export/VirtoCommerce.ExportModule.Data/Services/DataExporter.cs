@@ -1,9 +1,9 @@
 using System;
 using System.IO;
-using System.Linq;
 using System.Text;
 using VirtoCommerce.ExportModule.Core.Model;
 using VirtoCommerce.ExportModule.Core.Services;
+using VirtoCommerce.ExportModule.Data.Extensions;
 using VirtoCommerce.Platform.Core.Common;
 
 namespace VirtoCommerce.ExportModule.Data.Services
@@ -51,14 +51,12 @@ namespace VirtoCommerce.ExportModule.Data.Services
                 using (var writer = new StreamWriter(stream, Encoding.UTF8, 1024, true) { AutoFlush = true })
                 using (var exportProvider = _exportProviderFactory.CreateProvider(request.ProviderName, request.ProviderConfig))
                 {
-                    var filteredMetadata = (ExportedTypeMetadata)exportedTypeDefinition.MetaData.Clone();
+                    var needTabularData = exportProvider.IsTabular;
 
-                    var includedColumnNames = request.DataQuery.IncludedColumns.Select(x => x.Name).ToArray();
-                    filteredMetadata.PropertyInfos = exportedTypeDefinition.MetaData.PropertyInfos
-                        .Where(x => request.DataQuery.IncludedColumns.IsNullOrEmpty() || includedColumnNames.Contains(x.Name))
-                        .ToArray();
-
-                    exportProvider.Metadata = filteredMetadata;
+                    if (needTabularData && !exportedTypeDefinition.IsTabularExportSupported)
+                    {
+                        throw new NotSupportedException($"Provider \"{exportProvider.TypeName}\" does not support tabular export.");
+                    }
 
                     exportProgress.Description = "Fetching…";
                     progressCallback(exportProgress);
@@ -78,7 +76,16 @@ namespace VirtoCommerce.ExportModule.Data.Services
                         {
                             try
                             {
-                                exportProvider.WriteRecord(writer, obj);
+                                var preparedObject = obj;
+
+                                request.DataQuery.FilterProperties(preparedObject);
+
+                                if (needTabularData)
+                                {
+                                    preparedObject = exportedTypeDefinition.TabularDataConverter.ToTabular(preparedObject);
+                                }
+
+                                exportProvider.WriteRecord(writer, preparedObject);
                             }
                             catch (Exception e)
                             {

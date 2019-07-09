@@ -459,15 +459,13 @@ namespace VirtoCommerce.ExportModule.Tests
 
         private string SerializeAndRead(ExportedTypeMetadata metadata, IEnumerable items, Configuration configuration = null)
         {
-            var csvConfiguration = new CsvProviderConfiguration() { Configuration = configuration ?? new Configuration() };
+            var csvConfiguration = new CsvProviderConfiguration() { Configuration = configuration ?? new Configuration(), IncludedColumns = metadata.PropertyInfos };
 
             using (var stream = new MemoryStream())
             using (var writer = new StreamWriter(stream, Encoding.UTF8) { AutoFlush = true })
             {
                 using (var csvExportProvider = new CsvExportProvider(csvConfiguration))
                 {
-                    csvExportProvider.Metadata = metadata;
-
                     foreach (var item in items)
                     {
                         csvExportProvider.WriteRecord(writer, item);

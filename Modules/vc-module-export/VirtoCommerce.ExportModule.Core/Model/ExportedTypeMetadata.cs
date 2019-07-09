@@ -60,15 +60,6 @@ namespace VirtoCommerce.ExportModule.Core.Model
             return result;
         }
 
-        public override object Clone()
-        {
-            var result = (ExportedTypeMetadata)base.Clone();
-
-            result.PropertyInfos = PropertyInfos?.Select(x => (ExportedTypeColumnInfo)x.Clone()).ToArray();
-
-            return result;
-        }
-
 
         private ExportTypePropertyInfoEx[] GetFromType(Type type, string groupName, string baseMemberName, List<MemberInfo> passedNodes, bool extractNestedProperties)
         {

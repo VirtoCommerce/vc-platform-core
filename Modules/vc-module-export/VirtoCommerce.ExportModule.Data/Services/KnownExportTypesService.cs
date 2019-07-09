@@ -22,12 +22,14 @@ namespace VirtoCommerce.ExportModule.Data.Services
 
             if (!_knownExportTypes.TryGetValue(type, out var result))
             {
-                _knownExportTypes.TryAdd(type, new ExportedTypeDefinition()
-                {
-                    TypeName = type.FullName,
-                    Group = group,
-                    MetaData = ExportedTypeMetadata.GetFromType<T>(true),
-                });
+                _knownExportTypes.TryAdd(type,
+                    new ExportedTypeDefinition()
+                    {
+                        TypeName = type.FullName,
+                        Group = group,
+                    }
+                    .WithMetadata(ExportedTypeMetadata.GetFromType<T>(true))
+                );
             }
             return _knownExportTypes[type];
         }

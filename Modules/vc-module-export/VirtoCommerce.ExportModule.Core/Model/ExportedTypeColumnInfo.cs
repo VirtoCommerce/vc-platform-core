@@ -1,8 +1,6 @@
-using System;
-
 namespace VirtoCommerce.ExportModule.Core.Model
 {
-    public class ExportedTypeColumnInfo : ICloneable
+    public class ExportedTypeColumnInfo
     {
         public string Name { get; set; }
 
@@ -13,10 +11,5 @@ namespace VirtoCommerce.ExportModule.Core.Model
         public bool IsRequired { get; set; }
 
         public string DefaultValue { get; set; }
-
-        public object Clone()
-        {
-            return MemberwiseClone();
-        }
     }
 }
