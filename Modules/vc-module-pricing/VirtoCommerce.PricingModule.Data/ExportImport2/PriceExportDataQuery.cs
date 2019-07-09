@@ -10,7 +10,7 @@ namespace VirtoCommerce.PricingModule.Data.ExportImport
     {
         public PriceExportDataQuery()
         {
-            IncludedColumns = new[] { "Id", "PricelistId", "Currency", "ProductId", "Sale", "List", "MinQuantity", "StartDate", "EndDate", "EffectiveValue" }
+            IncludedColumns = new[] { "Id", "PricelistId", "Currency", "ProductId", "Sale", "List", "MinQuantity", "StartDate", "EndDate", }
                 .Select(x => new ExportedTypeColumnInfo()
                 {
                     Name = x,

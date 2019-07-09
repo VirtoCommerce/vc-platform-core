@@ -1,6 +1,6 @@
 using System;
 
-namespace VirtoCommerce.PricingModule.Data.ExportImport2
+namespace VirtoCommerce.PricingModule.Data.ExportImport
 {
     public class TabularPrice
     {

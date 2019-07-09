@@ -1,27 +1,28 @@
 using System;
 using VirtoCommerce.ExportModule.Core.Services;
+using VirtoCommerce.Platform.Core.Common;
 using VirtoCommerce.PricingModule.Core.Model;
 
-namespace VirtoCommerce.PricingModule.Data.ExportImport2
+namespace VirtoCommerce.PricingModule.Data.ExportImport
 {
     public class TabularPriceDataConverter : ITabularDataConverter
     {
         public object ToTabular(object obj)
         {
-            var price = obj as Price ?? throw new ArgumentException(nameof(obj));
-            var tabularPrice = new TabularPrice();
+            var source = obj as Price ?? throw new ArgumentException(nameof(obj));
+            var result = AbstractTypeFactory<TabularPrice>.TryCreateInstance();
 
-            tabularPrice.Currency = price.Currency;
-            tabularPrice.EndDate = price.EndDate;
-            tabularPrice.Id = price.Id;
-            tabularPrice.List = price.List;
-            tabularPrice.MinQuantity = price.MinQuantity;
-            tabularPrice.PricelistId = price.PricelistId;
-            tabularPrice.ProductId = price.ProductId;
-            tabularPrice.Sale = price.Sale;
-            tabularPrice.StartDate = price.StartDate;
+            result.Currency = source.Currency;
+            result.EndDate = source.EndDate;
+            result.Id = source.Id;
+            result.List = source.List;
+            result.MinQuantity = source.MinQuantity;
+            result.PricelistId = source.PricelistId;
+            result.ProductId = source.ProductId;
+            result.Sale = source.Sale;
+            result.StartDate = source.StartDate;
 
-            return tabularPrice;
+            return result;
         }
     }
 }
