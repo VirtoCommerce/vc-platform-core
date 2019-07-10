@@ -52,7 +52,6 @@ namespace VirtoCommerce.OrdersModule.Web.Controllers.Api
 
         private readonly INotificationTemplateRenderer _notificationTemplateRenderer;
         private readonly IChangeLogSearchService _changeLogSearchService;
-        private static readonly object _lockObject = new object();
 
         public OrderModuleController(
               ICustomerOrderService customerOrderService
@@ -424,7 +423,7 @@ namespace VirtoCommerce.OrdersModule.Web.Controllers.Api
             var paymentMethodCode = parameters.Get("code");
 
             //Need to use concrete  payment method if it code passed otherwise use all order payment methods
-            foreach (var inPayment in order.InPayments.Where(x => x.PaymentMethod != null && (string.IsNullOrEmpty(paymentMethodCode) ? true : x.GatewayCode.EqualsInvariant(paymentMethodCode))))
+            foreach (var inPayment in order.InPayments.Where(x => x.PaymentMethod != null && (string.IsNullOrEmpty(paymentMethodCode) || x.GatewayCode.EqualsInvariant(paymentMethodCode))))
             {
                 //Each payment method must check that these parameters are addressed to it
                 var result = inPayment.PaymentMethod.ValidatePostProcessRequest(parameters);
@@ -456,7 +455,6 @@ namespace VirtoCommerce.OrdersModule.Web.Controllers.Api
             }
             return Ok(new PostProcessPaymentRequestResult { ErrorMessage = "Payment method not found" });
         }
-
 
         [HttpGet]
         [Route("invoice/{orderNumber}")]
@@ -505,7 +503,6 @@ namespace VirtoCommerce.OrdersModule.Web.Controllers.Api
                 {
                     return Unauthorized();
                 }
-
 
                 //Load general change log for order
                 var allHasHangesObjects = order.GetFlatObjectsListWithInterface<IHasChangesHistory>()
