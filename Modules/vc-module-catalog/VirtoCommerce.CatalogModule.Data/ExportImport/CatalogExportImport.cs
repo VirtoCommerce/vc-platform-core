@@ -18,6 +18,7 @@ namespace VirtoCommerce.CatalogModule.Data.ExportImport
     public class CatalogExportImport
     {
         private readonly ICatalogService _catalogService;
+        private readonly ICatalogSearchService _catalogSearchService;
         private readonly IProductSearchService _productSearchService;
         private readonly ICategorySearchService _categorySearchService;
         private readonly ICategoryService _categoryService;
@@ -32,7 +33,7 @@ namespace VirtoCommerce.CatalogModule.Data.ExportImport
 
         private int _batchSize = 50;
 
-        public CatalogExportImport(ICatalogService catalogService, IProductSearchService productSearchService, ICategorySearchService categorySearchService, ICategoryService categoryService,
+        public CatalogExportImport(ICatalogService catalogService, ICatalogSearchService catalogSearchService, IProductSearchService productSearchService, ICategorySearchService categorySearchService, ICategoryService categoryService,
                                   IItemService itemService, IPropertyService propertyService, IPropertySearchService propertySearchService, IProperyDictionaryItemSearchService propertyDictionarySearchService,
                                   IProperyDictionaryItemService propertyDictionaryService, JsonSerializer jsonSerializer, IBlobStorageProvider blobStorageProvider, IAssociationService associationService)
         {
@@ -48,6 +49,7 @@ namespace VirtoCommerce.CatalogModule.Data.ExportImport
             _jsonSerializer = jsonSerializer;
             _blobStorageProvider = blobStorageProvider;
             _associationService = associationService;
+            _catalogSearchService = catalogSearchService;
         }
 
         public async Task DoExportAsync(Stream outStream, ExportImportOptions options, Action<ExportImportProgressInfo> progressCallback, ICancellationToken cancellationToken)
@@ -67,13 +69,8 @@ namespace VirtoCommerce.CatalogModule.Data.ExportImport
 
                 await writer.WritePropertyNameAsync("Catalogs");
                 await writer.SerializeJsonArrayWithPagingAsync(_jsonSerializer, _batchSize, async (skip, take) =>
-                {
-                    var result = AbstractTypeFactory<CatalogSearchResult>.TryCreateInstance();
-                    var searchResult = (await _catalogService.GetCatalogsListAsync()).ToArray();
-                    result.Results = searchResult;
-                    result.TotalCount = searchResult.Length;
-                    return (GenericSearchResult<Catalog>)result;
-                }, (processedCount, totalCount) =>
+                    (GenericSearchResult<Catalog>)await _catalogSearchService.SearchCatalogsAsync(new CatalogSearchCriteria { Skip = skip, Take = take })             
+                , (processedCount, totalCount) =>
                 {
                     progressInfo.Description = $"{ processedCount } of { totalCount } catalogs have been exported";
                     progressCallback(progressInfo);

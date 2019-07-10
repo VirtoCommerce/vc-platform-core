@@ -5,8 +5,10 @@ using System.Security.Claims;
 using System.Threading.Tasks;
 using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Identity;
+using Microsoft.AspNetCore.Mvc;
 using Microsoft.Extensions.Caching.Memory;
 using Microsoft.Extensions.Logging;
+using Microsoft.Extensions.Options;
 using VirtoCommerce.Platform.Core;
 using VirtoCommerce.Platform.Core.Caching;
 using VirtoCommerce.Platform.Core.Common;
@@ -19,12 +21,22 @@ namespace VirtoCommerce.Platform.Security.Services
     {
         private readonly IPermissionsRegistrar _knownPermissions;
         private readonly IPlatformMemoryCache _memoryCache;
-        public CustomRoleManager(IPermissionsRegistrar knownPermissions, IPlatformMemoryCache memoryCache, IRoleStore<Role> store, IEnumerable<IRoleValidator<Role>> roleValidators,
-                                 ILookupNormalizer keyNormalizer, IdentityErrorDescriber errors, ILogger<RoleManager<Role>> logger, IHttpContextAccessor contextAccessor)
+        private readonly MvcJsonOptions _jsonOptions;
+        public CustomRoleManager(
+            IPermissionsRegistrar knownPermissions
+            , IPlatformMemoryCache memoryCache
+            , IRoleStore<Role> store
+            , IEnumerable<IRoleValidator<Role>> roleValidators
+            , ILookupNormalizer keyNormalizer
+            , IdentityErrorDescriber errors
+            , ILogger<RoleManager<Role>> logger
+            , IHttpContextAccessor contextAccessor
+            , IOptions<MvcJsonOptions> jsonOptions)
             : base(store, roleValidators, keyNormalizer, errors, logger, contextAccessor)
         {
             _knownPermissions = knownPermissions;
             _memoryCache = memoryCache;
+            _jsonOptions = jsonOptions.Value;
         }
 
         public override async Task<Role> FindByNameAsync(string roleName)
@@ -91,7 +103,7 @@ namespace VirtoCommerce.Platform.Security.Services
             var result = await base.UpdateAsync(existRole);
             if (result.Succeeded && updateRole.Permissions != null)
             {
-                var sourcePermissionClaims = updateRole.Permissions.Select(x => new Claim(PlatformConstants.Security.Claims.PermissionClaimType, x.Name)).ToList();
+                var sourcePermissionClaims = updateRole.Permissions.Select(x => x.ToClaim(_jsonOptions.SerializerSettings)).ToList();
                 var targetPermissionClaims = (await GetClaimsAsync(existRole)).Where(x => x.Type == PlatformConstants.Security.Claims.PermissionClaimType).ToList();
                 var comparer = AnonymousComparer.Create((Claim x) => x.Value);
                 //Add
@@ -129,9 +141,20 @@ namespace VirtoCommerce.Platform.Security.Services
 
             if (SupportsRoleClaims)
             {
+                role.Permissions = new List<Permission>();
                 //Load role claims and convert it to the permissions and assign to role
-                var rolePermissionClaims = (await GetClaimsAsync(role)).Where(x => x.Type == PlatformConstants.Security.Claims.PermissionClaimType);
-                role.Permissions = _knownPermissions.GetAllPermissions().Join(rolePermissionClaims, p => p.Name, c => c.Value, (p, c) => p).ToList();
+                var storedPermissions = (await GetClaimsAsync(role)).Select(x=>Permission.TryCreateFromClaim(x, _jsonOptions.SerializerSettings)).OfType<Permission>().ToList();
+                var knownPermissionsDict = _knownPermissions.GetAllPermissions().Select(x=>x.Clone() as Permission).ToDictionary(x=>x.Name, x=>x).WithDefaultValue(null);
+                foreach (var storedPermission in storedPermissions)
+                {
+                    //Copy all meta information from registered to stored (for particular role) permission
+                    var knownPermission = knownPermissionsDict[storedPermission.Name];
+                    if(knownPermission != null)
+                    {
+                        knownPermission.Patch(storedPermission);
+                        role.Permissions.Add(storedPermission);
+                    }
+                }
             }
         }
     }

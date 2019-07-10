@@ -29,7 +29,7 @@ namespace VirtoCommerce.CatalogModule.Web.Controllers.Api
         /// <returns></returns>
         [HttpPost]
         [Route("search")]
-        [Authorize(ModuleConstants.Security.Permissions.CatalogRead)]
+        [Authorize(ModuleConstants.Security.Permissions.Read)]
         public async Task<ActionResult<PropertyDictionaryItem[]>> SearchPropertyDictionaryItems([FromBody]PropertyDictionaryItemSearchCriteria criteria)
         {
             var result = await _propertyDictionarySearchService.SearchAsync(criteria);
@@ -41,7 +41,7 @@ namespace VirtoCommerce.CatalogModule.Web.Controllers.Api
         /// </summary>
         [HttpPost]
         [Route("")]
-        [Authorize(ModuleConstants.Security.Permissions.CatalogCreate)]
+        [Authorize(ModuleConstants.Security.Permissions.Create)]
         public async Task<ActionResult> SaveChanges([FromBody]PropertyDictionaryItem[] propertyDictItems)
         {
             await _propertyDictionaryService.SaveChangesAsync(propertyDictItems);
@@ -54,7 +54,7 @@ namespace VirtoCommerce.CatalogModule.Web.Controllers.Api
         /// <param name="ids">The identifiers of objects that needed to be deleted</param>
         [HttpDelete]
         [Route("")]
-        [Authorize(ModuleConstants.Security.Permissions.CatalogDelete)]
+        [Authorize(ModuleConstants.Security.Permissions.Delete)]
         public async Task<ActionResult> DeletePropertyDictionaryItems([FromQuery] string[] ids)
         {
             await _propertyDictionaryService.DeleteAsync(ids);

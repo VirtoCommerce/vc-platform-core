@@ -1,4 +1,4 @@
-﻿using System.Collections.Generic;
+using System.Collections.Generic;
 using VirtoCommerce.Platform.Core.Security;
 
 namespace VirtoCommerce.Platform.Security

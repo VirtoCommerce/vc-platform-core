@@ -2,6 +2,7 @@ using System;
 using System.IO;
 using System.Linq;
 using System.Threading.Tasks;
+using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Builder;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.EntityFrameworkCore;
@@ -27,6 +28,7 @@ using VirtoCommerce.StoreModule.Data.ExportImport;
 using VirtoCommerce.StoreModule.Data.Handlers;
 using VirtoCommerce.StoreModule.Data.Repositories;
 using VirtoCommerce.StoreModule.Data.Services;
+using VirtoCommerce.StoreModule.Web.Authorization;
 using VirtoCommerce.StoreModule.Web.JsonConverters;
 
 namespace VirtoCommerce.StoreModule.Web
@@ -48,6 +50,8 @@ namespace VirtoCommerce.StoreModule.Web
             serviceCollection.AddSingleton<StoreExportImport>();
             serviceCollection.AddSingleton<StoreChangedEventHandler>();
             serviceCollection.AddSingleton<ISeoBySlugResolver, SeoBySlugResolver>();
+
+            serviceCollection.AddSingleton<IAuthorizationHandler, StoreAuthorizationHandler>();
         }
 
         public void PostInitialize(IApplicationBuilder appBuilder)
@@ -62,7 +66,7 @@ namespace VirtoCommerce.StoreModule.Web
             //Register settings for type Store
             settingsRegistrar.RegisterSettingsForType(ModuleConstants.Settings.AllSettings, typeof(Store).Name);
 
-            var permissionsProvider = appBuilder.ApplicationServices.GetRequiredService<IPermissionsRegistrar>();
+            var permissionsProvider = appBuilder.ApplicationServices.GetRequiredService<IPermissionsRegistrar>();            
             permissionsProvider.RegisterPermissions(ModuleConstants.Security.Permissions.AllPermissions.Select(x =>
                 new Permission()
                 {
@@ -70,6 +74,15 @@ namespace VirtoCommerce.StoreModule.Web
                     ModuleId = ModuleInfo.Id,
                     Name = x
                 }).ToArray());
+
+            //Register Permission scopes
+            AbstractTypeFactory<PermissionScope>.RegisterType<StoreSelectedScope>();
+            permissionsProvider.WithAvailabeScopesForPermissions(new[] {
+                                                                        ModuleConstants.Security.Permissions.Read,
+                                                                        ModuleConstants.Security.Permissions.Update,
+                                                                        ModuleConstants.Security.Permissions.Delete,
+                                                                        ModuleConstants.Security.Permissions.LoginOnBehalf }, new StoreSelectedScope());
+
 
             using (var serviceScope = appBuilder.ApplicationServices.CreateScope())
             {

@@ -6,6 +6,7 @@ using FluentValidation;
 using Microsoft.Extensions.Caching.Memory;
 using VirtoCommerce.CatalogModule.Core.Events;
 using VirtoCommerce.CatalogModule.Core.Model;
+using VirtoCommerce.CatalogModule.Core.Search;
 using VirtoCommerce.CatalogModule.Core.Services;
 using VirtoCommerce.CatalogModule.Data.Caching;
 using VirtoCommerce.CatalogModule.Data.Model;
@@ -26,21 +27,26 @@ namespace VirtoCommerce.CatalogModule.Data.Services
         private readonly Func<ICatalogRepository> _repositoryFactory;
         private readonly IEventPublisher _eventPublisher;
         private readonly AbstractValidator<IHasProperties> _hasPropertyValidator;
-        private readonly ICatalogService _catalogService;
+        private readonly ICatalogSearchService _catalogSearchService;
         private readonly IOutlineService _outlineService;
         private readonly IBlobUrlResolver _blobUrlResolver;
 
-        public CategoryService(Func<ICatalogRepository> catalogRepositoryFactory, IEventPublisher eventPublisher, IPlatformMemoryCache platformMemoryCache,
-                               AbstractValidator<IHasProperties> hasPropertyValidator, ICatalogService catalogService, IOutlineService outlineService,
-                               IBlobUrlResolver blobUrlResolver)
+        public CategoryService(
+            Func<ICatalogRepository> catalogRepositoryFactory
+            , IEventPublisher eventPublisher
+            , IPlatformMemoryCache platformMemoryCache
+            , AbstractValidator<IHasProperties> hasPropertyValidator
+            , ICatalogSearchService catalogSearchService
+            , IOutlineService outlineService
+            , IBlobUrlResolver blobUrlResolver)
         {
             _repositoryFactory = catalogRepositoryFactory;
             _eventPublisher = eventPublisher;
             _platformMemoryCache = platformMemoryCache;
             _hasPropertyValidator = hasPropertyValidator;
-            _catalogService = catalogService;
             _outlineService = outlineService;
             _blobUrlResolver = blobUrlResolver;
+            _catalogSearchService = catalogSearchService;
         }
 
         #region ICategoryService Members
@@ -153,7 +159,8 @@ namespace VirtoCommerce.CatalogModule.Data.Services
 
         protected virtual async Task LoadDependenciesAsync(IEnumerable<Category> categories, IDictionary<string, Category> preloadedCategoriesMap)
         {
-            var catalogsByIdDict = (await _catalogService.GetCatalogsListAsync()).ToDictionary(x => x.Id, StringComparer.OrdinalIgnoreCase).WithDefaultValue(null);
+            var catalogsByIdDict = ((await _catalogSearchService.SearchCatalogsAsync(new Core.Model.Search.CatalogSearchCriteria { Take = int.MaxValue })).Results).ToDictionary(x => x.Id, StringComparer.OrdinalIgnoreCase)
+                                                                             .WithDefaultValue(null);
 
             foreach (var category in categories)
             {

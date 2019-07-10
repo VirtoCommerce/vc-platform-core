@@ -55,6 +55,7 @@ namespace VirtoCommerce.CatalogModule.Web
             serviceCollection.AddSingleton<ICategorySearchService, CategorySearchService>();
 
             serviceCollection.AddSingleton<ICatalogService, CatalogService>();
+            serviceCollection.AddSingleton<ICatalogSearchService, CatalogSearchService>();
             serviceCollection.AddSingleton<IListEntrySearchService, ListEntrySearchService>();
 
             serviceCollection.AddSingleton<ICategoryService, CategoryService>();
