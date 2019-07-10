@@ -7,23 +7,24 @@ angular.module('virtoCommerce.exportModule')
         function initializeBlade() {
             exportApi.getProviders(function (result) {
                 if (result && result.length) {
-                    $scope.providers = _.map(result, function (item) { return { id: item.typeName, name: item.typeName } });
-                    $scope.selectedProvider = $scope.providers[0];
+                    blade.providers = _.map(result, function (item) { return { id: item.typeName, name: item.typeName } });
+                    blade.selectedProvider = blade.providers[0];
                 }
             });
             blade.isLoading = false;
         }
 
         $scope.startExport = function () {
-            blade.exportDataRequest.providerName = $scope.selectedProvider.name;
-                    var progressBlade = {
-                        id: 'exportProgress',
-                        title: 'Exporting...',
-                        controller: 'virtoCommerce.exportModule.exportProcessController',
-                        template: 'Modules/$(VirtoCommerce.Export)/Scripts/blades/exportProgress.tpl.html',
-                        exportDataRequest: blade.exportDataRequest,
-                        isClosingDisabled: false
-                    };
+            blade.exportDataRequest.providerName = blade.selectedProvider.name;
+            var progressBlade = {
+                id: 'exportProgress',
+                title: 'Exporting...',
+                controller: 'virtoCommerce.exportModule.exportProcessController',
+                template: 'Modules/$(VirtoCommerce.Export)/Scripts/blades/exportProgress.tpl.html',
+                exportDataRequest: blade.exportDataRequest,
+                isClosingDisabled: false
+            };
+
             bladeNavigationService.showBlade(progressBlade);
         };
 

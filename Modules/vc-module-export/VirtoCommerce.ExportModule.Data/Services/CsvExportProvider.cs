@@ -60,8 +60,10 @@ namespace VirtoCommerce.ExportModule.Data.Services
 
             if (mapForType == null)
             {
-                var constructor = typeof(MetadataFilteredMap<>).MakeGenericType(objectType).GetConstructor(new[] { typeof(ExportedTypeColumnInfo[]) });
                 var includedColumns = (Configuration as CsvProviderConfiguration)?.IncludedColumns;
+                var constructor = typeof(MetadataFilteredMap<>).MakeGenericType(objectType).GetConstructor(includedColumns != null
+                    ? new[] { typeof(ExportedTypeColumnInfo[]) }
+                    : Array.Empty<Type>());
                 var classMap = (ClassMap)constructor.Invoke(includedColumns != null ? new[] { includedColumns } : null);
 
                 csvConfiguration.RegisterClassMap(classMap);
@@ -76,6 +78,9 @@ namespace VirtoCommerce.ExportModule.Data.Services
     /// <typeparam name="T">Mapped type.</typeparam>
     public class MetadataFilteredMap<T> : ClassMap<T>
     {
+        public MetadataFilteredMap() : this(null)
+        { }
+
         public MetadataFilteredMap(ExportedTypeColumnInfo[] includedColumns)
         {
             var exportedType = typeof(T);
