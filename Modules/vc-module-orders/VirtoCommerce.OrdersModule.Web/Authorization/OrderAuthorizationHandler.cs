@@ -47,13 +47,8 @@ namespace VirtoCommerce.OrdersModule.Web.Authorization
                         {
                             criteria.EmployeeId = context.User.Identity.Name;
                         }
-                        //Do allow to  return all stores if user don't have corresponding permission
-                        if (!allowedStoreIds.IsNullOrEmpty() || onlyResponsibleScope != null)
-                        {
-                            context.Succeed(requirement);
-                        }
+                        context.Succeed(requirement);                        
                     }
-
                     if (context.Resource is CustomerOrder order)
                     {
                         if (allowedStoreIds.Contains(order.StoreId) || (onlyResponsibleScope != null && order.EmployeeId.EqualsInvariant(context.User.Identity.Name)))

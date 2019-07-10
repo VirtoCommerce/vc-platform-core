@@ -40,11 +40,7 @@ namespace VirtoCommerce.StoreModule.Web.Authorization
                     if (context.Resource is StoreSearchCriteria criteria)
                     {
                         criteria.StoreIds = allowedStoreIds;
-                        //Do allow to  return all stores if user don't have corresponding permission
-                        if (!allowedStoreIds.IsNullOrEmpty())
-                        {
-                            context.Succeed(requirement);
-                        }
+                        context.Succeed(requirement);                        
                     }
                     if (context.Resource is Store store)
                     {

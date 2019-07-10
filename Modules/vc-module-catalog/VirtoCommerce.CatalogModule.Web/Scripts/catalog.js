@@ -192,7 +192,7 @@ angular.module(catalogsModuleName, ['ui.grid.validate', 'ui.grid.infiniteScroll'
             //Register permission scopes templates used for scope bounded definition in role management ui
 
             var catalogSelectScope = {
-                type: 'CatalogSelectedScope',
+                type: 'SelectedCatalogScope',
                 title: 'catalog.permissions.catalog-scope.title',
                 selectFn: function (blade, callback) {
                     var newBlade = {

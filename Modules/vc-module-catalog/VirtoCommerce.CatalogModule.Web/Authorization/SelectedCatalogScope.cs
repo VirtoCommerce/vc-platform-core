@@ -7,6 +7,6 @@ namespace VirtoCommerce.CatalogModule.Web.Authorization
     /// </summary>
     public sealed class SelectedCatalogScope : PermissionScope
     {
-        public string CategoryId => Scope;
+        public string CatalogId => Scope;
     }
 }

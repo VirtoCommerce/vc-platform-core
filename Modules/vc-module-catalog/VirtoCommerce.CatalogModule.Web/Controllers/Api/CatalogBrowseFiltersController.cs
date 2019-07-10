@@ -31,23 +31,19 @@ namespace VirtoCommerce.CatalogModule.Web.Controllers.Api
         private readonly IPropertySearchService _propertySearchService;
         private readonly IBrowseFilterService _browseFilterService;
         private readonly IProperyDictionaryItemSearchService _propDictItemsSearchService;
-        private readonly IAuthorizationService _authorizationService;
-
 
         public CatalogBrowseFiltersController(
             IStoreService storeService
             , IPropertyService propertyService
             , IBrowseFilterService browseFilterService
             , IProperyDictionaryItemSearchService propDictItemsSearchService
-            , IPropertySearchService propertySearchService
-            , IAuthorizationService authorizationService)
+            , IPropertySearchService propertySearchService)
         {
             _storeService = storeService;
             _propertyService = propertyService;
             _browseFilterService = browseFilterService;
             _propDictItemsSearchService = propDictItemsSearchService;
             _propertySearchService = propertySearchService;
-            _authorizationService = authorizationService;
         }
 
         /// <summary>
@@ -120,12 +116,7 @@ namespace VirtoCommerce.CatalogModule.Web.Controllers.Api
                 var catalogPropertiesSearchResult = await _propertySearchService.SearchPropertiesAsync(new PropertySearchCriteria { PropertyNames = new[] { propertyName }, CatalogId = store.Catalog, Take = 1 });
                 var property = catalogPropertiesSearchResult.Results.FirstOrDefault(p => p.Name.EqualsInvariant(propertyName) && p.Dictionary);
                 if (property != null)
-                {
-                    var authorizationResult = await _authorizationService.AuthorizeAsync(User, property, new CatalogAuthorizationRequirement(ModuleConstants.Security.Permissions.Read));
-                    if (!authorizationResult.Succeeded)
-                    {
-                        return Unauthorized();
-                    }
+                {                  
                     var searchResult = await _propDictItemsSearchService.SearchAsync(new PropertyDictionaryItemSearchCriteria { PropertyIds = new[] { property.Id }, Take = int.MaxValue });
                     result = searchResult.Results.Select(x => x.Alias).Distinct().ToArray();
                 }

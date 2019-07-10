@@ -111,9 +111,6 @@ namespace VirtoCommerce.CatalogModule.Web.Controllers.Api
                     }
                 }
             };
-
-            //retVal.SecurityScopes = GetObjectPermissionScopeStrings(retVal);
-
             return Ok(retVal);
         }
 
@@ -138,7 +135,6 @@ namespace VirtoCommerce.CatalogModule.Web.Controllers.Api
                     }
                 }
             };
-            //retVal.SecurityScopes = GetObjectPermissionScopeStrings(retVal);
             return Ok(retVal);
         }
 
@@ -154,8 +150,6 @@ namespace VirtoCommerce.CatalogModule.Web.Controllers.Api
         public async Task<ActionResult<Catalog>> CreateCatalog([FromBody]Catalog catalog)
         {
             await _catalogService.SaveChangesAsync(new[] { catalog });
-            //Need for UI permission checks
-            //retVal.SecurityScopes = GetObjectPermissionScopeStrings(newCatalog);
             return Ok(catalog);
         }
 
@@ -169,8 +163,13 @@ namespace VirtoCommerce.CatalogModule.Web.Controllers.Api
         [Authorize(ModuleConstants.Security.Permissions.Update)]
         public async Task<ActionResult> UpdateCatalog([FromBody]Catalog catalog)
         {
+            var authorizationResult = await _authorizationService.AuthorizeAsync(User, catalog, new CatalogAuthorizationRequirement(ModuleConstants.Security.Permissions.Update));
+            if (!authorizationResult.Succeeded)
+            {
+                return Unauthorized();
+            }
             await _catalogService.SaveChangesAsync(new[] { catalog });
-            return NoContent();
+            return Ok(catalog);
         }
 
         /// <summary>
@@ -184,9 +183,12 @@ namespace VirtoCommerce.CatalogModule.Web.Controllers.Api
         [Authorize(ModuleConstants.Security.Permissions.Delete)]
         public async Task<ActionResult> DeleteCatalog(string id)
         {
-            //TODO
-            //var catalog = (await _catalogService.GetByIdsAsync(new [] { id})).FirstOrDefault();
-            //CheckCurrentUserHasPermissionForObjects(CatalogPredefinedPermissions.Delete, catalog);
+            var catalog = (await _catalogService.GetByIdsAsync(new [] { id})).FirstOrDefault();
+            var authorizationResult = await _authorizationService.AuthorizeAsync(User, catalog, new CatalogAuthorizationRequirement(ModuleConstants.Security.Permissions.Delete));
+            if (!authorizationResult.Succeeded)
+            {
+                return Unauthorized();
+            }
 
             await _catalogService.DeleteAsync(new[] { id });
             return NoContent();

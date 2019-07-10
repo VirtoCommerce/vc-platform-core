@@ -12,7 +12,9 @@ namespace VirtoCommerce.CatalogModule.Web.Controllers.Api
         private readonly IProductIndexedSearchService _productIndexedSearchService;
         private readonly ICategoryIndexedSearchService _categoryIndexedSearchService;
 
-        public CatalogModuleIndexedSearchController(IProductIndexedSearchService productIndexedSearchService, ICategoryIndexedSearchService categoryIndexedSearchService)
+        public CatalogModuleIndexedSearchController(
+            IProductIndexedSearchService productIndexedSearchService
+            , ICategoryIndexedSearchService categoryIndexedSearchService)
         {
             _productIndexedSearchService = productIndexedSearchService;
             _categoryIndexedSearchService = categoryIndexedSearchService;
