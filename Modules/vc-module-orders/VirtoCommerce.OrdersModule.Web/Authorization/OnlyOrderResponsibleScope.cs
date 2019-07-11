@@ -10,6 +10,7 @@ namespace VirtoCommerce.OrdersModule.Web.Authorization
         public OnlyOrderResponsibleScope()
         {
             Scope = "{{userId}}";
+            Label = "none";
         }
     }
 }
