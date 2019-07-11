@@ -1,5 +1,4 @@
 using System;
-using System.Collections;
 using System.IO;
 using System.Linq;
 using Newtonsoft.Json;
@@ -15,8 +14,8 @@ namespace VirtoCommerce.ExportModule.Data.Services
     {
         public string TypeName => nameof(JsonExportProvider);
         public string ExportedFileExtension => "json";
+        public bool IsTabular => false;
         public IExportProviderConfiguration Configuration { get; }
-        public ExportedTypeMetadata Metadata { get; set; }
 
         private readonly JsonSerializer _serializer;
         private JsonTextWriter _jsonTextWriter;
@@ -49,7 +48,6 @@ namespace VirtoCommerce.ExportModule.Data.Services
             }
 
             EnsureWriterCreated(writer);
-            FilterProperties(objectToRecord);
 
             _serializer.Serialize(_jsonTextWriter, objectToRecord);
         }
@@ -69,51 +67,6 @@ namespace VirtoCommerce.ExportModule.Data.Services
                 _jsonTextWriter = new JsonTextWriter(writer);
                 _jsonTextWriter.CloseOutput = false;
                 _jsonTextWriter.WriteStartArray();
-            }
-        }
-
-        private void FilterProperties(object obj, string baseMemberName = null)
-        {
-            var type = obj.GetType();
-
-            foreach (var property in type.GetProperties().Where(x => x.CanRead && x.CanWrite))
-            {
-                var propertyName = ExportedTypeMetadata.GetDerivedName(baseMemberName, property);
-                var nestedType = ExportedTypeMetadata.GetNestedType(property.PropertyType);
-
-                if (nestedType.IsSubclassOf(typeof(Entity)))
-                {
-                    if (!Metadata.PropertiesInfo.Any(x => x.Name.StartsWith($"{propertyName}.", StringComparison.InvariantCultureIgnoreCase)))
-                    {
-                        property.SetValue(obj, null);
-                    }
-                    else
-                    {
-                        if (typeof(IEnumerable).IsAssignableFrom(property.PropertyType))
-                        {
-                            var objectValues = property.GetValue(obj, null) as IEnumerable;
-                            if (objectValues != null)
-                            {
-                                foreach (var value in objectValues)
-                                {
-                                    FilterProperties(value, propertyName);
-                                }
-                            }
-                        }
-                        else
-                        {
-                            var objectValue = property.GetValue(obj, null);
-                            if (objectValue != null)
-                            {
-                                FilterProperties(objectValue, propertyName);
-                            }
-                        }
-                    }
-                }
-                else if (!Metadata.PropertiesInfo.Any(x => x.Name.Equals(propertyName, StringComparison.InvariantCultureIgnoreCase)))
-                {
-                    property.SetValue(obj, null);
-                }
             }
         }
     }

@@ -12,7 +12,7 @@
                         <label class="form-label">{{ 'export.blades.export-settings.labels.template' | translate }}</label>
                         <div class="form-input">
                             <ui-select ng-model="blade.template" required>
-                                <ui-select-match placeholder="{{ 'stores.blades.store-detail.placeholders.state' | translate }}">{{$select.selected.name}}</ui-select-match>
+                                <ui-select-match placeholder="{{ 'export.blades.export-settings.placeholders.template' | translate }}">{{$select.selected.name}}</ui-select-match>
                                 <ui-select-choices repeat="x in (blade.templates | filter: {name: $select.search})">
                                     <span ng-bind-html="x.name | highlight: $select.search"></span>
                                 </ui-select-choices>
@@ -21,9 +21,9 @@
 
                         <label class="form-label">{{ 'export.blades.export-settings.labels.provider' | translate }}</label>
                         <div class="form-input">
-                            <ui-select ng-model="selectedProvider" required>
-                                <ui-select-match placeholder="{{ 'stores.blades.store-detail.placeholders.state' | translate }}">{{$select.selected.name}}</ui-select-match>
-                                <ui-select-choices repeat="x in (providers | filter: {name: $select.search})">
+                            <ui-select ng-model="blade.selectedProvider" required>
+                                <ui-select-match placeholder="{{ 'export.blades.export-settings.placeholders.provider' | translate }}">{{$select.selected.name}}</ui-select-match>
+                                <ui-select-choices repeat="x in (blade.providers | filter: {name: $select.search})">
                                     <span ng-bind-html="x.name | highlight: $select.search"></span>
                                 </ui-select-choices>
                             </ui-select>

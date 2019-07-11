@@ -5,6 +5,6 @@ namespace VirtoCommerce.ExportModule.Core.Services
     public interface IKnownExportTypesRegistrar
     {
         ExportedTypeDefinition[] GetRegisteredTypes();
-        ExportedTypeDefinition RegisterType<T>(string group);
+        ExportedTypeDefinition RegisterType(string exportedTypeName, string group, string exportQueryType);
     }
 }

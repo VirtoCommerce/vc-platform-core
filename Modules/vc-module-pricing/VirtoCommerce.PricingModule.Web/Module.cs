@@ -139,21 +139,30 @@ namespace VirtoCommerce.PricingModule.Web
 
             var pricingSearchServiceFactory = appBuilder.ApplicationServices.GetService<Func<IPricingSearchService>>();
             var pricingService = appBuilder.ApplicationServices.GetService<IPricingService>();
-            registrar.RegisterType<Price>("Pricing")
+
+            registrar.RegisterType(typeof(Price).Name, "Pricing", typeof(PriceExportDataQuery).Name)
                 .WithDataSourceFactory(dataQuery => new PriceExportPagedDataSource(pricingSearchServiceFactory(), pricingService) { DataQuery = dataQuery })
-                .WithMetadata(ExportedTypeMetadata.GetFromType<Price>());
+                .WithMetadata(ExportedTypeMetadata.GetFromType<Price>(true))
+                .WithTabularDataConverter(new TabularPriceDataConverter());
 
-            registrar.RegisterType<Pricelist>("Pricing")
+            registrar.RegisterType(typeof(Pricelist).Name, "Pricing", typeof(PricelistExportDataQuery).Name)
                 .WithDataSourceFactory(dataQuery => new PricelistExportPagedDataSource(pricingSearchServiceFactory(), pricingService) { DataQuery = dataQuery })
-                .WithMetadata(ExportedTypeMetadata.GetFromType<Pricelist>());
+                .WithMetadata(ExportedTypeMetadata.GetFromType<Pricelist>(false))
+                .WithTabularDataConverter(new TabularPricelistDataConverter());
 
-            registrar.RegisterType<PricelistAssignment>("Pricing")
+            registrar.RegisterType(typeof(PricelistAssignment).Name, "Pricing", typeof(PricelistAssignmentExportDataQuery).Name)
                 .WithDataSourceFactory(dataQuery => new PricelistAssignmentExportPagedDataSource(pricingSearchServiceFactory(), pricingService) { DataQuery = dataQuery })
-                .WithMetadata(ExportedTypeMetadata.GetFromType<PricelistAssignment>());
+                .WithMetadata(ExportedTypeMetadata.GetFromType<PricelistAssignment>(true))
+                .WithTabularDataConverter(new TabularPricelistAssignmentDataConverter());
+
+            registrar.RegisterType("Pricelist full data", "Pricing", typeof(PricelistFullExportDataQuery).Name)
+                .WithDataSourceFactory(dataQuery => new PricelistExportPagedDataSource(pricingSearchServiceFactory(), pricingService) { DataQuery = dataQuery })
+                .WithMetadata(ExportedTypeMetadata.GetFromType<Pricelist>(true));
 
             AbstractTypeFactory<ExportDataQuery>.RegisterType<PriceExportDataQuery>();
             AbstractTypeFactory<ExportDataQuery>.RegisterType<PricelistAssignmentExportDataQuery>();
             AbstractTypeFactory<ExportDataQuery>.RegisterType<PricelistExportDataQuery>();
+            AbstractTypeFactory<ExportDataQuery>.RegisterType<PricelistFullExportDataQuery>();
         }
 
         public void Uninstall()
