@@ -13,43 +13,46 @@ namespace VirtoCommerce.ExportModule.Data.Extensions
             var type = obj.GetType();
             var includedColumns = dataQuery.IncludedColumns;
 
-            foreach (var property in type.GetProperties().Where(x => x.CanRead && x.CanWrite))
+            if (!includedColumns.IsNullOrEmpty())
             {
-                var propertyName = ExportedTypeMetadata.GetDerivedName(baseMemberName, property);
-                var nestedType = ExportedTypeMetadata.GetNestedType(property.PropertyType);
-
-                if (nestedType.IsSubclassOf(typeof(Entity)))
+                foreach (var property in type.GetProperties().Where(x => x.CanRead && x.CanWrite))
                 {
-                    if (!includedColumns.Any(x => x.Name.StartsWith($"{propertyName}.", StringComparison.InvariantCultureIgnoreCase)))
+                    var propertyName = ExportedTypeMetadata.GetDerivedName(baseMemberName, property);
+                    var nestedType = ExportedTypeMetadata.GetNestedType(property.PropertyType);
+
+                    if (nestedType.IsSubclassOf(typeof(Entity)))
                     {
-                        property.SetValue(obj, null);
-                    }
-                    else
-                    {
-                        if (typeof(IEnumerable).IsAssignableFrom(property.PropertyType))
+                        if (!includedColumns.Any(x => x.Name.StartsWith($"{propertyName}.", StringComparison.InvariantCultureIgnoreCase)))
                         {
-                            var objectValues = property.GetValue(obj, null) as IEnumerable;
-                            if (objectValues != null)
-                            {
-                                foreach (var value in objectValues)
-                                {
-                                    FilterProperties(dataQuery, value, propertyName);
-                                }
-                            }
+                            property.SetValue(obj, null);
                         }
                         else
                         {
-                            var objectValue = property.GetValue(obj, null);
-                            if (objectValue != null)
+                            if (typeof(IEnumerable).IsAssignableFrom(property.PropertyType))
                             {
-                                FilterProperties(dataQuery, objectValue, propertyName);
+                                var objectValues = property.GetValue(obj, null) as IEnumerable;
+                                if (objectValues != null)
+                                {
+                                    foreach (var value in objectValues)
+                                    {
+                                        FilterProperties(dataQuery, value, propertyName);
+                                    }
+                                }
+                            }
+                            else
+                            {
+                                var objectValue = property.GetValue(obj, null);
+                                if (objectValue != null)
+                                {
+                                    FilterProperties(dataQuery, objectValue, propertyName);
+                                }
                             }
                         }
                     }
-                }
-                else if (!includedColumns.Any(x => x.Name.Equals(propertyName, StringComparison.InvariantCultureIgnoreCase)))
-                {
-                    property.SetValue(obj, null);
+                    else if (!includedColumns.Any(x => x.Name.Equals(propertyName, StringComparison.InvariantCultureIgnoreCase)))
+                    {
+                        property.SetValue(obj, null);
+                    }
                 }
             }
         }

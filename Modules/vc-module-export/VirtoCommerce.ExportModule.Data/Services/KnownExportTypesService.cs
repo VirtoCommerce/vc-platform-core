@@ -1,4 +1,3 @@
-using System;
 using System.Collections.Concurrent;
 using System.Linq;
 using VirtoCommerce.ExportModule.Core.Model;
@@ -9,29 +8,27 @@ namespace VirtoCommerce.ExportModule.Data.Services
 {
     public class KnownExportTypesService : IKnownExportTypesRegistrar, IKnownExportTypesResolver
     {
-        private readonly ConcurrentDictionary<Type, ExportedTypeDefinition> _knownExportTypes = new ConcurrentDictionary<Type, ExportedTypeDefinition>();
+        private readonly ConcurrentDictionary<string, ExportedTypeDefinition> _knownExportTypes = new ConcurrentDictionary<string, ExportedTypeDefinition>();
 
         public ExportedTypeDefinition[] GetRegisteredTypes()
         {
             return _knownExportTypes.Values.ToArray();
         }
 
-        public ExportedTypeDefinition RegisterType<T>(string group)
+        public ExportedTypeDefinition RegisterType(string exportedTypeName, string group, string exportQueryType)
         {
-            var type = typeof(T);
-
-            if (!_knownExportTypes.TryGetValue(type, out var result))
+            if (!_knownExportTypes.TryGetValue(exportedTypeName, out var result))
             {
-                _knownExportTypes.TryAdd(type,
+                _knownExportTypes.TryAdd(exportedTypeName,
                     new ExportedTypeDefinition()
                     {
-                        TypeName = type.FullName,
+                        TypeName = exportedTypeName,
                         Group = group,
+                        ExportDataQueryType = exportQueryType,
                     }
-                    .WithMetadata(ExportedTypeMetadata.GetFromType<T>(true))
                 );
             }
-            return _knownExportTypes[type];
+            return _knownExportTypes[exportedTypeName];
         }
 
         public ExportedTypeDefinition ResolveExportedTypeDefinition(string typeName)

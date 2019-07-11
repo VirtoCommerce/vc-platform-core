@@ -75,7 +75,7 @@ angular.module('virtoCommerce.exportModule')
                     var exportDataRequest = {
                         exportTypeName: selectedTypes[0].typeName,
                         dataQuery: {
-                            exportTypeName: selectedTypes[0].name + 'ExportDataQuery',
+                            exportTypeName: selectedTypes[0].exportDataQueryType,
                             take: 10000
                         }
                     };
