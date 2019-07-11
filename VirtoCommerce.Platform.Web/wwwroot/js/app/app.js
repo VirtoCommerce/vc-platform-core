@@ -6,20 +6,6 @@ angular.module('platformWebApp', AppDependencies).controller('platformWebApp.app
         $scope.closeError = function () {
             $scope.platformError = undefined;
         };
-        modules.query().$promise.then(function (results) {
-            var modulesWithErrors = _.filter(results, function (x) { return _.any(x.validationErrors); });
-            if (_.any(modulesWithErrors)) {
-                $scope.platformError = {
-                    title: modulesWithErrors.length + " modules are loaded with errors and require your attention.",
-                    detail: ''
-                };
-                _.each(modulesWithErrors, function (x) {
-                    var moduleErrors = "<br/><br/><b>" + x.id + "</b> " + x.version + "<br/>" + x.validationErrors.join("<br/>");
-                    $scope.platformError.detail += moduleErrors;
-                });
-                $state.go('workspace.modularity');
-            }
-        });
 
         $scope.$on('httpError', function (event, error) {
             if (!event.defaultPrevented) {
@@ -43,7 +29,23 @@ angular.module('platformWebApp', AppDependencies).controller('platformWebApp.app
         $scope.$on('loginStatusChanged', function (event, authContext) {
             //reset menu to default state
             angular.forEach(mainMenuService.menuItems, function (menuItem) { mainMenuService.resetMenuItemDefaults(menuItem); });
+
             if (authContext.isAuthenticated) {
+                modules.query().$promise.then(function (results) {
+                    var modulesWithErrors = _.filter(results, function (x) { return _.any(x.validationErrors); });
+                    if (_.any(modulesWithErrors)) {
+                        $scope.platformError = {
+                            title: modulesWithErrors.length + " modules are loaded with errors and require your attention.",
+                            detail: ''
+                        };
+                        _.each(modulesWithErrors, function (x) {
+                            var moduleErrors = "<br/><br/><b>" + x.id + "</b> " + x.version + "<br/>" + x.validationErrors.join("<br/>");
+                            $scope.platformError.detail += moduleErrors;
+                        });
+                        $state.go('workspace.modularity');
+                    }
+                });
+
                 userProfile.load().then(function () {
                     i18n.changeLanguage(userProfile.language);
                     i18n.changeRegionalFormat(userProfile.regionalFormat);
