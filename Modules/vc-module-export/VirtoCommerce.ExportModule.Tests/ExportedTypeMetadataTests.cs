@@ -10,8 +10,8 @@ namespace VirtoCommerce.ExportModule.Tests
         [Fact]
         public Task GetFromType_Pricelist_NameBuiltCorrectly()
         {
-            var metadata = ExportedTypeMetadata.GetFromType<Pricelist>();
-            var props = metadata.PropertiesInfo.Select(x => x.Name);
+            var metadata = ExportedTypeMetadata.GetFromType<Pricelist>(true);
+            var props = metadata.PropertyInfos.Select(x => x.Name);
 
             // Check if all own property detected
             Assert.Contains("Name", props);
@@ -21,7 +21,6 @@ namespace VirtoCommerce.ExportModule.Tests
             Assert.Contains("ModifiedDate", props);
             Assert.Contains("CreatedBy", props);
             Assert.Contains("ModifiedBy", props);
-            Assert.Contains("ShouldSerializeAuditableProperties", props);
             Assert.Contains("Id", props);
 
             // Reference properties
@@ -42,8 +41,8 @@ namespace VirtoCommerce.ExportModule.Tests
         [Fact]
         public Task GetFromType_Pricelist_ExportNameBuiltCorrectly()
         {
-            var metadata = ExportedTypeMetadata.GetFromType<Pricelist>();
-            var props = metadata.PropertiesInfo.Select(x => x.ExportName);
+            var metadata = ExportedTypeMetadata.GetFromType<Pricelist>(true);
+            var props = metadata.PropertyInfos.Select(x => x.ExportName);
 
             // Check if all own property detected
             Assert.Contains("Name", props);
@@ -53,7 +52,6 @@ namespace VirtoCommerce.ExportModule.Tests
             Assert.Contains("ModifiedDate", props);
             Assert.Contains("CreatedBy", props);
             Assert.Contains("ModifiedBy", props);
-            Assert.Contains("ShouldSerializeAuditableProperties", props);
             Assert.Contains("Id", props);
 
             // Reference properties
@@ -73,14 +71,27 @@ namespace VirtoCommerce.ExportModule.Tests
 
 
         [Fact]
-        public Task GetFromType_Pricelist_MemberTypeBuiltCorrectly()
+        public Task GetFromType_Pricelist_WithoutReferences_BuiltCorrectly()
         {
-            var metadata = ExportedTypeMetadata.GetFromType<Pricelist>();
-            var props = metadata.PropertiesInfo;
+            var metadata = ExportedTypeMetadata.GetFromType<Pricelist>(false);
+            var props = metadata.PropertyInfos.Select(x => x.Name);
 
-            Assert.Equal(1, props.Count(x => x.MemberInfo == typeof(Pricelist).GetProperty("Name")));
-            Assert.Equal(1, props.Count(x => x.MemberInfo == typeof(Price).GetProperty("Id")));
-            Assert.Equal(1, props.Count(x => x.MemberInfo == typeof(PricelistAssignment).GetProperty("Id")));
+            // Check if all own property detected
+            Assert.Contains("Name", props);
+            Assert.Contains("Description", props);
+            Assert.Contains("Currency", props);
+            Assert.Contains("CreatedDate", props);
+            Assert.Contains("ModifiedDate", props);
+            Assert.Contains("CreatedBy", props);
+            Assert.Contains("ModifiedBy", props);
+            Assert.Contains("Id", props);
+
+            // And does not contain nested properties
+            Assert.DoesNotContain("Prices", props);
+            Assert.DoesNotContain("Prices.Id", props);
+            Assert.DoesNotContain("Prices.PricelistId", props);
+            Assert.DoesNotContain("Assignments.Id", props);
+            Assert.DoesNotContain("Assignments.PricelistId", props);
 
             return Task.CompletedTask;
         }

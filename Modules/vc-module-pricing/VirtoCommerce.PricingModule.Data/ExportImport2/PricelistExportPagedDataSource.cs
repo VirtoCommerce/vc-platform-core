@@ -9,7 +9,7 @@ namespace VirtoCommerce.PricingModule.Data.ExportImport
 {
     public class PricelistExportPagedDataSource : BaseExportPagedDataSource
     {
-        readonly IPricingSearchService _searchService;
+        private readonly IPricingSearchService _searchService;
         private readonly IPricingService _pricingService;
 
         public PricelistExportPagedDataSource(IPricingSearchService searchService, IPricingService pricingService)
@@ -35,7 +35,7 @@ namespace VirtoCommerce.PricingModule.Data.ExportImport
                 totalCount = pricelistSearchResult.TotalCount;
             }
 
-            if (!result.IsNullOrEmpty() && searchCriteria.Take > 0)
+            if (!result.IsNullOrEmpty())
             {
                 var pricelistIds = result.Select(x => x.Id).ToArray();
                 var prices = _searchService.SearchPricesAsync(new PricesSearchCriteria() { PriceListIds = pricelistIds, Take = int.MaxValue }).Result;

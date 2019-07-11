@@ -11,6 +11,10 @@
                     "total": "Total count",
                     "processed": "Processed count",
                     "errors-count": "Error count"
+                },
+                "placeholders": {
+                    "provider": "Select provider for export",
+                    "template": "Select export template"
                 }
             },
             "exporter": {

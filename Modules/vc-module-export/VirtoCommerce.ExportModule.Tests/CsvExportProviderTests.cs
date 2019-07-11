@@ -42,36 +42,31 @@ namespace VirtoCommerce.ExportModule.Tests
 
             var metadata = new ExportedTypeMetadata()
             {
-                PropertiesInfo = new[]
+                PropertyInfos = new[]
                 {
-                    new ExportTypePropertyInfo()
+                    new ExportedTypeColumnInfo()
                     {
                         Name = nameof(Price.Id),
-                        MemberInfo = typeof(Price).GetProperty(nameof(Price.Id)),
                         ExportName = nameof(Price.Id),
                     },
-                    new ExportTypePropertyInfo()
+                    new ExportedTypeColumnInfo()
                     {
                         Name = nameof(Price.PricelistId),
-                        MemberInfo = typeof(Price).GetProperty(nameof(Price.PricelistId)),
                         ExportName = nameof(Price.PricelistId),
                     },
-                    new ExportTypePropertyInfo()
+                    new ExportedTypeColumnInfo()
                     {
                         Name = nameof(Price.List),
-                        MemberInfo = typeof(Price).GetProperty(nameof(Price.List)),
                         ExportName = nameof(Price.List),
                     },
-                    new ExportTypePropertyInfo()
+                    new ExportedTypeColumnInfo()
                     {
                         Name = nameof(Price.CreatedDate),
-                        MemberInfo = typeof(Price).GetProperty(nameof(Price.CreatedDate)),
                         ExportName = nameof(Price.CreatedDate),
                     },
-                    new ExportTypePropertyInfo()
+                    new ExportedTypeColumnInfo()
                     {
                         Name = nameof(Price.EndDate),
-                        MemberInfo = typeof(Price).GetProperty(nameof(Price.EndDate)),
                         ExportName = nameof(Price.EndDate),
                     },
                 }
@@ -113,18 +108,16 @@ namespace VirtoCommerce.ExportModule.Tests
 
             var metadata = new ExportedTypeMetadata()
             {
-                PropertiesInfo = new[]
+                PropertyInfos = new[]
                 {
-                    new ExportTypePropertyInfo()
+                    new ExportedTypeColumnInfo()
                     {
                         Name = nameof(Price.Id),
-                        MemberInfo = typeof(Price).GetProperty(nameof(Price.Id)),
                         ExportName = $"{nameof(Price)}.{nameof(Price.Id)}",
                     },
-                    new ExportTypePropertyInfo()
+                    new ExportedTypeColumnInfo()
                     {
                         Name = nameof(Price.PricelistId),
-                        MemberInfo = typeof(Price).GetProperty(nameof(Price.PricelistId)),
                         ExportName = $"{nameof(Price)}.{nameof(Price.PricelistId)}",
                     },
                 }
@@ -165,36 +158,31 @@ namespace VirtoCommerce.ExportModule.Tests
 
             var metadata = new ExportedTypeMetadata()
             {
-                PropertiesInfo = new[]
+                PropertyInfos = new[]
                 {
-                    new ExportTypePropertyInfo()
+                    new ExportedTypeColumnInfo()
                     {
                         Name = nameof(PricelistAssignment.Id),
-                        MemberInfo = typeof(PricelistAssignment).GetProperty(nameof(PricelistAssignment.Id)),
                         ExportName = nameof(PricelistAssignment.Id),
                     },
-                    new ExportTypePropertyInfo()
+                    new ExportedTypeColumnInfo()
                     {
                         Name = nameof(PricelistAssignment.Description),
-                        MemberInfo = typeof(PricelistAssignment).GetProperty(nameof(PricelistAssignment.Description)),
                         ExportName = nameof(PricelistAssignment.Description),
                     },
-                    new ExportTypePropertyInfo()
+                    new ExportedTypeColumnInfo()
                     {
                         Name = nameof(PricelistAssignment.EndDate),
-                        MemberInfo = typeof(PricelistAssignment).GetProperty(nameof(PricelistAssignment.EndDate)),
                         ExportName = nameof(PricelistAssignment.EndDate),
                     },
-                    new ExportTypePropertyInfo()
+                    new ExportedTypeColumnInfo()
                     {
                         Name = nameof(PricelistAssignment.Priority),
-                        MemberInfo = typeof(PricelistAssignment).GetProperty(nameof(PricelistAssignment.Priority)),
                         ExportName = nameof(PricelistAssignment.Priority),
                     },
-                    new ExportTypePropertyInfo()
+                    new ExportedTypeColumnInfo()
                     {
                         Name = nameof(PricelistAssignment.ConditionExpression),
-                        MemberInfo = typeof(PricelistAssignment).GetProperty(nameof(PricelistAssignment.ConditionExpression)),
                         ExportName = nameof(PricelistAssignment.ConditionExpression),
                     },
                 }
@@ -216,24 +204,21 @@ namespace VirtoCommerce.ExportModule.Tests
 
             var metadata = new ExportedTypeMetadata()
             {
-                PropertiesInfo = new[]
+                PropertyInfos = new[]
                 {
-                    new ExportTypePropertyInfo()
+                    new ExportedTypeColumnInfo()
                     {
                         Name = nameof(Pricelist.Id),
-                        MemberInfo = typeof(Pricelist).GetProperty(nameof(Pricelist.Id)),
                         ExportName = nameof(Pricelist.Id),
                     },
-                    new ExportTypePropertyInfo()
+                    new ExportedTypeColumnInfo()
                     {
                         Name = nameof(Pricelist.Name),
-                        MemberInfo = typeof(Pricelist).GetProperty(nameof(Pricelist.Name)),
                         ExportName = nameof(Pricelist.Name),
                     },
-                    new ExportTypePropertyInfo()
+                    new ExportedTypeColumnInfo()
                     {
                         Name = nameof(Pricelist.Currency),
-                        MemberInfo = typeof(Pricelist).GetProperty(nameof(Pricelist.Currency)),
                         ExportName = nameof(Pricelist.Currency),
                     },
                 }
@@ -255,42 +240,36 @@ namespace VirtoCommerce.ExportModule.Tests
 
             var metadata = new ExportedTypeMetadata()
             {
-                PropertiesInfo = new[]
+                PropertyInfos = new[]
                 {
-                    new ExportTypePropertyInfo()
+                    new ExportedTypeColumnInfo()
                     {
                         Name = nameof(Pricelist.Id),
-                        MemberInfo = typeof(Pricelist).GetProperty(nameof(Pricelist.Id)),
                         ExportName = nameof(Pricelist.Id),
                     },
-                    new ExportTypePropertyInfo()
+                    new ExportedTypeColumnInfo()
                     {
                         Name = nameof(Pricelist.Name),
-                        MemberInfo = typeof(Pricelist).GetProperty(nameof(Pricelist.Name)),
                         ExportName = nameof(Pricelist.Name),
                     },
-                    new ExportTypePropertyInfo()
+                    new ExportedTypeColumnInfo()
                     {
                         Name = nameof(Pricelist.Currency),
-                        MemberInfo = typeof(Pricelist).GetProperty(nameof(Pricelist.Currency)),
                         ExportName = nameof(Pricelist.Currency),
                     },
-                    new ExportTypePropertyInfo()
+                    new ExportedTypeColumnInfo()
                     {
                         Name = $"{nameof(Pricelist.ActiveAssignment)}.{nameof(PricelistAssignment.Id)}",
-                        MemberInfo = typeof(PricelistAssignment).GetProperty(nameof(PricelistAssignment.Id)),
                         ExportName = $"{nameof(Pricelist.ActiveAssignment)}.{nameof(PricelistAssignment.Id)}",
                     },
-                    new ExportTypePropertyInfo()
+                    new ExportedTypeColumnInfo()
                     {
                         Name = $"{nameof(Pricelist.ActiveAssignment)}.{nameof(PricelistAssignment.Name)}",
-                        MemberInfo = typeof(PricelistAssignment).GetProperty(nameof(PricelistAssignment.Name)),
                         ExportName = $"{nameof(Pricelist.ActiveAssignment)}.{nameof(PricelistAssignment.Name)}",
                     },
-                    new ExportTypePropertyInfo()
+                    new ExportedTypeColumnInfo()
                     {
                         Name = $"{nameof(Pricelist.ActiveAssignment)}.{nameof(PricelistAssignment.Priority)}",
-                        MemberInfo = typeof(PricelistAssignment).GetProperty(nameof(PricelistAssignment.Priority)),
                         ExportName = $"{nameof(Pricelist.ActiveAssignment)}.{nameof(PricelistAssignment.Priority)}",
                     },
                 }
@@ -312,36 +291,31 @@ namespace VirtoCommerce.ExportModule.Tests
 
             var metadata = new ExportedTypeMetadata()
             {
-                PropertiesInfo = new[]
+                PropertyInfos = new[]
                 {
-                    new ExportTypePropertyInfo()
+                    new ExportedTypeColumnInfo()
                     {
                         Name = nameof(Pricelist.Id),
-                        MemberInfo = typeof(Pricelist).GetProperty(nameof(Pricelist.Id)),
                         ExportName = nameof(Pricelist.Id),
                     },
-                    new ExportTypePropertyInfo()
+                    new ExportedTypeColumnInfo()
                     {
                         Name = nameof(Pricelist.Name),
-                        MemberInfo = typeof(Pricelist).GetProperty(nameof(Pricelist.Name)),
                         ExportName = nameof(Pricelist.Name),
                     },
-                    new ExportTypePropertyInfo()
+                    new ExportedTypeColumnInfo()
                     {
                         Name = nameof(Pricelist.Currency),
-                        MemberInfo = typeof(Pricelist).GetProperty(nameof(Pricelist.Currency)),
                         ExportName = nameof(Pricelist.Currency),
                     },
-                    new ExportTypePropertyInfo()
+                    new ExportedTypeColumnInfo()
                     {
                         Name = $"{nameof(Pricelist.Prices)}.{nameof(Price.Id)}",
-                        MemberInfo = typeof(Price).GetProperty(nameof(Price.Id)),
                         ExportName = $"{nameof(Pricelist.Prices)}.{nameof(Price.Id)}",
                     },
-                    new ExportTypePropertyInfo()
+                    new ExportedTypeColumnInfo()
                     {
                         Name = $"{nameof(Pricelist.Prices)}.{nameof(Price.List)}",
-                        MemberInfo = typeof(Price).GetProperty(nameof(Price.List)),
                         ExportName = $"{nameof(Pricelist.Prices)}.{nameof(Price.List)}",
                     },
                 }
@@ -364,54 +338,46 @@ namespace VirtoCommerce.ExportModule.Tests
 
             var metadata = new ExportedTypeMetadata()
             {
-                PropertiesInfo = new[]
+                PropertyInfos = new[]
                 {
-                    new ExportTypePropertyInfo()
+                    new ExportedTypeColumnInfo()
                     {
                         Name = nameof(Pricelist.Id),
-                        MemberInfo = typeof(Pricelist).GetProperty(nameof(Pricelist.Id)),
                         ExportName = nameof(Pricelist.Id),
                     },
-                    new ExportTypePropertyInfo()
+                    new ExportedTypeColumnInfo()
                     {
                         Name = nameof(Pricelist.Name),
-                        MemberInfo = typeof(Pricelist).GetProperty(nameof(Pricelist.Name)),
                         ExportName = nameof(Pricelist.Name),
                     },
-                    new ExportTypePropertyInfo()
+                    new ExportedTypeColumnInfo()
                     {
                         Name = nameof(Pricelist.Currency),
-                        MemberInfo = typeof(Pricelist).GetProperty(nameof(Pricelist.Currency)),
                         ExportName = nameof(Pricelist.Name),
                     },
-                    new ExportTypePropertyInfo()
+                    new ExportedTypeColumnInfo()
                     {
                         Name = $"{nameof(Pricelist.ActiveAssignment)}.{nameof(PricelistAssignment.Id)}",
-                        MemberInfo = typeof(PricelistAssignment).GetProperty(nameof(PricelistAssignment.Id)),
                         ExportName = $"{nameof(Pricelist.ActiveAssignment)}.{nameof(PricelistAssignment.Id)}",
                     },
-                    new ExportTypePropertyInfo()
+                    new ExportedTypeColumnInfo()
                     {
                         Name = $"{nameof(Pricelist.ActiveAssignment)}.{nameof(PricelistAssignment.Name)}",
-                        MemberInfo = typeof(PricelistAssignment).GetProperty(nameof(PricelistAssignment.Name)),
                         ExportName = $"{nameof(Pricelist.ActiveAssignment)}.{nameof(PricelistAssignment.Name)}",
                     },
-                    new ExportTypePropertyInfo()
+                    new ExportedTypeColumnInfo()
                     {
                         Name = $"{nameof(Pricelist.ActiveAssignment)}.{nameof(PricelistAssignment.Priority)}",
-                        MemberInfo = typeof(PricelistAssignment).GetProperty(nameof(PricelistAssignment.Priority)),
                         ExportName = $"{nameof(Pricelist.ActiveAssignment)}.{nameof(PricelistAssignment.Priority)}",
                     },
-                    new ExportTypePropertyInfo()
+                    new ExportedTypeColumnInfo()
                     {
                         Name = $"{nameof(Pricelist.Prices)}.{nameof(Price.Id)}",
-                        MemberInfo = typeof(Price).GetProperty(nameof(Price.Id)),
                         ExportName = $"{nameof(Pricelist.Prices)}.{nameof(Price.Id)}",
                     },
-                    new ExportTypePropertyInfo()
+                    new ExportedTypeColumnInfo()
                     {
                         Name = $"{nameof(Pricelist.Prices)}.{nameof(Price.List)}",
-                        MemberInfo = typeof(Price).GetProperty(nameof(Price.List)),
                         ExportName = $"{nameof(Pricelist.Prices)}.{nameof(Price.List)}",
                     },
                 }
@@ -436,54 +402,46 @@ namespace VirtoCommerce.ExportModule.Tests
 
             var metadata = new ExportedTypeMetadata()
             {
-                PropertiesInfo = new[]
+                PropertyInfos = new[]
                 {
-                    new ExportTypePropertyInfo()
+                    new ExportedTypeColumnInfo()
                     {
                         Name = nameof(Pricelist.Id),
-                        MemberInfo = typeof(Pricelist).GetProperty(nameof(Pricelist.Id)),
                         ExportName = nameof(Pricelist.Id),
                     },
-                    new ExportTypePropertyInfo()
+                    new ExportedTypeColumnInfo()
                     {
                         Name = nameof(Pricelist.Name),
-                        MemberInfo = typeof(Pricelist).GetProperty(nameof(Pricelist.Name)),
                         ExportName = nameof(Pricelist.Name),
                     },
-                    new ExportTypePropertyInfo()
+                    new ExportedTypeColumnInfo()
                     {
                         Name = $"{nameof(Pricelist.ActiveAssignment)}.{nameof(PricelistAssignment.Id)}",
-                        MemberInfo = typeof(PricelistAssignment).GetProperty(nameof(PricelistAssignment.Id)),
                         ExportName = $"{nameof(Pricelist.ActiveAssignment)}.{nameof(PricelistAssignment.Id)}",
                     },
-                    new ExportTypePropertyInfo()
+                    new ExportedTypeColumnInfo()
                     {
                         Name = $"{nameof(Pricelist.ActiveAssignment)}.{nameof(PricelistAssignment.Name)}",
-                        MemberInfo = typeof(PricelistAssignment).GetProperty(nameof(PricelistAssignment.Name)),
                         ExportName = $"{nameof(Pricelist.ActiveAssignment)}.{nameof(PricelistAssignment.Name)}",
                     },
-                    new ExportTypePropertyInfo()
+                    new ExportedTypeColumnInfo()
                     {
                         Name = $"{nameof(Pricelist.ActiveAssignment)}.{nameof(PricelistAssignment.Priority)}",
-                        MemberInfo = typeof(PricelistAssignment).GetProperty(nameof(PricelistAssignment.Priority)),
                         ExportName = $"{nameof(Pricelist.ActiveAssignment)}.{nameof(PricelistAssignment.Priority)}",
                     },
-                    new ExportTypePropertyInfo()
+                    new ExportedTypeColumnInfo()
                     {
                         Name = $"{nameof(Pricelist.InactiveAssignment)}.{nameof(PricelistAssignment.Id)}",
-                        MemberInfo = typeof(PricelistAssignment).GetProperty(nameof(PricelistAssignment.Id)),
                         ExportName = $"{nameof(Pricelist.InactiveAssignment)}.{nameof(PricelistAssignment.Id)}",
                     },
-                    new ExportTypePropertyInfo()
+                    new ExportedTypeColumnInfo()
                     {
                         Name = $"{nameof(Pricelist.InactiveAssignment)}.{nameof(PricelistAssignment.Name)}",
-                        MemberInfo = typeof(PricelistAssignment).GetProperty(nameof(PricelistAssignment.Name)),
                         ExportName = $"{nameof(Pricelist.InactiveAssignment)}.{nameof(PricelistAssignment.Name)}",
                     },
-                    new ExportTypePropertyInfo()
+                    new ExportedTypeColumnInfo()
                     {
                         Name = $"{nameof(Pricelist.InactiveAssignment)}.{nameof(PricelistAssignment.Priority)}",
-                        MemberInfo = typeof(PricelistAssignment).GetProperty(nameof(PricelistAssignment.Priority)),
                         ExportName = $"{nameof(Pricelist.InactiveAssignment)}.{nameof(PricelistAssignment.Priority)}",
                     },
                 }
@@ -501,15 +459,13 @@ namespace VirtoCommerce.ExportModule.Tests
 
         private string SerializeAndRead(ExportedTypeMetadata metadata, IEnumerable items, Configuration configuration = null)
         {
-            var csvConfiguration = new CsvProviderConfiguration() { Configuration = configuration ?? new Configuration() };
+            var csvConfiguration = new CsvProviderConfiguration() { Configuration = configuration ?? new Configuration(), IncludedColumns = metadata.PropertyInfos };
 
             using (var stream = new MemoryStream())
             using (var writer = new StreamWriter(stream, Encoding.UTF8) { AutoFlush = true })
             {
                 using (var csvExportProvider = new CsvExportProvider(csvConfiguration))
                 {
-                    csvExportProvider.Metadata = metadata;
-
                     foreach (var item in items)
                     {
                         csvExportProvider.WriteRecord(writer, item);
