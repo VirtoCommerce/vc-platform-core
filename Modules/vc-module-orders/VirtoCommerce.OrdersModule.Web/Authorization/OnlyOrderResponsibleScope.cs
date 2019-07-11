@@ -7,5 +7,9 @@ namespace VirtoCommerce.OrdersModule.Web.Authorization
     /// </summary>
     public sealed class OnlyOrderResponsibleScope : PermissionScope
     {
+        public OnlyOrderResponsibleScope()
+        {
+            Scope = "{{userId}}";
+        }
     }
 }

@@ -1,5 +1,4 @@
-angular.module('platformWebApp')
-.controller('platformWebApp.roleDetailController', ['$q', '$scope', 'platformWebApp.bladeNavigationService', 'platformWebApp.roles', 'platformWebApp.dialogService', function ($q, $scope, bladeNavigationService, roles, dialogService) {
+angular.module('platformWebApp').controller('platformWebApp.roleDetailController', ['$q', '$scope', 'platformWebApp.bladeNavigationService', 'platformWebApp.roles', 'platformWebApp.dialogService', function ($q, $scope, bladeNavigationService, roles, dialogService) {
     var blade = $scope.blade;
     blade.updatePermission = 'platform:security:update';
     var promise = roles.queryPermissions().$promise;
@@ -120,7 +119,7 @@ angular.module('platformWebApp')
                     name: "platform.commands.save",
                     icon: 'fa fa-save',
                     executeMethod: $scope.saveChanges,
-                    canExecuteMethod: canSave,                    
+                    canExecuteMethod: canSave,
                     permission: blade.updatePermission
                 },
                 {
@@ -164,8 +163,6 @@ angular.module('platformWebApp')
             ];
         }
     }
-
-
 
     // actions on load
     initializeToolbar();

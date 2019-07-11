@@ -16,6 +16,5 @@ namespace VirtoCommerce.Platform.Security
         {
             _permissions.AddRange(permissions);
         }
-
     }
 }
