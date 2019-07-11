@@ -47,9 +47,9 @@ namespace VirtoCommerce.CatalogModule.Web.Authorization
                         catalogSearchCriteria.CatalogIds = allowedCatalogIds;
                         context.Succeed(requirement);
                     }
-                    else if (context.Resource is CatalogListEntrySearchCriteria listEntrySearchcriteria)
+                    else if (context.Resource is CatalogListEntrySearchCriteria listEntrySearchCriteria)
                     {
-                        listEntrySearchcriteria.CatalogIds = allowedCatalogIds;
+                        listEntrySearchCriteria.CatalogIds = allowedCatalogIds;
                         context.Succeed(requirement);
                     }
                     else if (context.Resource is Catalog catalog && !catalog.IsTransient())

@@ -86,7 +86,6 @@ namespace VirtoCommerce.CatalogModule.Web
 
             serviceCollection.AddSingleton<ISeoBySlugResolver, SeoBySlugResolver>();
 
-
             PropertyValueValidator PropertyValueValidatorFactory(PropertyValidationRule rule) => new PropertyValueValidator(rule);
             serviceCollection.AddSingleton((Func<PropertyValidationRule, PropertyValueValidator>)PropertyValueValidatorFactory);
             serviceCollection.AddSingleton<AbstractValidator<IHasProperties>, HasPropertiesValidator>();
@@ -105,7 +104,6 @@ namespace VirtoCommerce.CatalogModule.Web
                     return new IdOutlinePartResolver();
                 }
             });
-
 
             serviceCollection.AddSingleton<ProductDocumentChangesProvider>();
             serviceCollection.AddSingleton<ProductDocumentBuilder>();
@@ -134,7 +132,6 @@ namespace VirtoCommerce.CatalogModule.Web
                 },
             });
 
-
             serviceCollection.AddSingleton<IAuthorizationHandler, CatalogAuthorizationHandler>();
         }
 
@@ -157,8 +154,6 @@ namespace VirtoCommerce.CatalogModule.Web
                                                                         ModuleConstants.Security.Permissions.Update,
                                                                         ModuleConstants.Security.Permissions.Delete,
                                                                          }, new SelectedCatalogScope());
-
-
 
             var mvcJsonOptions = appBuilder.ApplicationServices.GetService<IOptions<MvcJsonOptions>>();
             mvcJsonOptions.Value.SerializerSettings.Converters.Add(new SearchCriteriaJsonConverter());
