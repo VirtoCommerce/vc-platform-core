@@ -43,7 +43,6 @@ namespace VirtoCommerce.MarketingModule.Data.Search
                     var sortInfos = GetSortInfos(criteria);
                     var query = GetQuery(repository, criteria, sortInfos);
 
-
                     var totalCount = await query.CountAsync();
                     var searchResult = new GenericSearchResult<PromotionUsage> { TotalCount = totalCount };
 
