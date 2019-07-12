@@ -161,8 +161,8 @@ namespace VirtoCommerce.Platform.Web
                 options.ClaimsIdentity.UserIdClaimType = OpenIdConnectConstants.Claims.Name;
                 options.ClaimsIdentity.RoleClaimType = OpenIdConnectConstants.Claims.Role;
             });
-            var azureAdSection = Configuration.GetSection("AzureAd");
 
+            var azureAdSection = Configuration.GetSection("AzureAd");
 
             if (azureAdSection.GetChildren().Any())
             {
@@ -184,6 +184,7 @@ namespace VirtoCommerce.Platform.Web
                         });
                 }
             }
+
             services.Configure<Core.Security.AuthorizationOptions>(Configuration.GetSection("Authorization"));
             var authorizationOptions = Configuration.GetSection("Authorization").Get<Core.Security.AuthorizationOptions>();
             // Register the OpenIddict services.
@@ -322,7 +323,6 @@ namespace VirtoCommerce.Platform.Web
         // This method gets called by the runtime. Use this method to configure the HTTP request pipeline.
         public void Configure(IApplicationBuilder app, IHostingEnvironment env)
         {
-
             if (env.IsDevelopment())
             {
                 app.UseDeveloperExceptionPage();
@@ -349,6 +349,7 @@ namespace VirtoCommerce.Platform.Web
                 FileProvider = new PhysicalFileProvider(env.MapPath("~/js")),
                 RequestPath = new PathString($"/$(Platform)/Scripts")
             });
+
             var localModules = app.ApplicationServices.GetRequiredService<ILocalModuleCatalog>().Modules;
             foreach (var module in localModules.OfType<ManifestModuleInfo>())
             {
@@ -365,7 +366,6 @@ namespace VirtoCommerce.Platform.Web
 
             app.UseMvc(routes =>
             {
-
                 routes.MapRoute(
                     name: "default",
                     template: "{controller=Home}/{action=Index}/{id?}");
@@ -382,7 +382,6 @@ namespace VirtoCommerce.Platform.Web
                 securityDbContext.Database.MigrateIfNotApplied(MigrationName.GetUpdateV2MigrationName("Security"));
                 securityDbContext.Database.Migrate();
             }
-
 
             // Enable middleware to serve generated Swagger as a JSON endpoint.
             app.UseSwagger();
@@ -410,8 +409,6 @@ namespace VirtoCommerce.Platform.Web
 
             //Seed default users
             app.UseDefaultUsersAsync().GetAwaiter().GetResult();
-
-
         }
     }
 }
