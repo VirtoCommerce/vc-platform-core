@@ -78,6 +78,11 @@ namespace VirtoCommerce.OrdersModule.Data.Services
                 query = query.Where(x => !x.IsPrototype);
             }
 
+            if (!criteria.Ids.IsNullOrEmpty())
+            {
+                query = query.Where(x => criteria.Ids.Contains(x.Id));
+            }
+
             if (criteria.OnlyRecurring)
             {
                 query = query.Where(x => x.SubscriptionId != null);

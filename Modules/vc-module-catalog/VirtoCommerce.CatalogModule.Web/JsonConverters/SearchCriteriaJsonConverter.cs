@@ -10,7 +10,7 @@ namespace VirtoCommerce.CatalogModule.Web.JsonConverters
 {
     public class SearchCriteriaJsonConverter : JsonConverter
     {
-        private readonly Type[] _knowTypes = new[] { typeof(CatalogProduct), typeof(ProductIndexedSearchCriteria), typeof(CategoryIndexedSearchCriteria) };
+        private readonly Type[] _knowTypes = new[] { typeof(CatalogProduct), typeof(ProductIndexedSearchCriteria), typeof(CategoryIndexedSearchCriteria), typeof(CatalogSearchCriteria), typeof(CategorySearchCriteria), typeof(ProductSearchCriteria) };
 
         public override bool CanWrite => false;
         public override bool CanRead => true;

@@ -19,6 +19,7 @@
     <ItemGroup>
         <ProjectReference Include="..\..\..\VirtoCommerce.Platform.Core\VirtoCommerce.Platform.Core.csproj" />
         <ProjectReference Include="..\..\..\VirtoCommerce.Platform.Data\VirtoCommerce.Platform.Data.csproj" />
+        <ProjectReference Include="..\..\..\VirtoCommerce.Platform.Security\VirtoCommerce.Platform.Security.csproj" />
         <ProjectReference Include="..\VirtoCommerce.StoreModule.Core\VirtoCommerce.StoreModule.Core.csproj" />
     </ItemGroup>
 

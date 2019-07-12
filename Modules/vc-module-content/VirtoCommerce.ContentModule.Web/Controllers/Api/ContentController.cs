@@ -32,7 +32,9 @@ namespace VirtoCommerce.ContentModule.Web.Controllers.Api
         private readonly IPlatformMemoryCache _platformMemoryCache;
         private static readonly FormOptions _defaultFormOptions = new FormOptions();
 
-        public ContentController(IBlobContentStorageProviderFactory blobContentStorageProviderFactory, IPlatformMemoryCache platformMemoryCache)
+        public ContentController(
+            IBlobContentStorageProviderFactory blobContentStorageProviderFactory
+            , IPlatformMemoryCache platformMemoryCache)
         {
             _blobContentStorageProviderFactory = blobContentStorageProviderFactory;
             _platformMemoryCache = platformMemoryCache;

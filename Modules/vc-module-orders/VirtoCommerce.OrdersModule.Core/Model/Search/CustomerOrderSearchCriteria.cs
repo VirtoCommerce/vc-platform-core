@@ -5,6 +5,7 @@ namespace VirtoCommerce.OrdersModule.Core.Model.Search
 {
     public class CustomerOrderSearchCriteria : SearchCriteriaBase
     {
+        public string[] Ids { get; set; }
         /// <summary>
         /// Search by numbers
         /// </summary>
