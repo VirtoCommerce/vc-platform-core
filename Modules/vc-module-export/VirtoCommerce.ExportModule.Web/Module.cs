@@ -26,7 +26,7 @@ namespace VirtoCommerce.ExportModule.Web
             serviceCollection.AddTransient<Func<IExportProviderConfiguration, IExportProvider>>(serviceProvider => config => new CsvExportProvider(config));
             serviceCollection.AddTransient<IExportProviderFactory, ExportProviderFactory>();
 
-            serviceCollection.AddScoped<IDataExporter, DataExporter>();
+            serviceCollection.AddTransient<IDataExporter, DataExporter>();
         }
 
         public void PostInitialize(IApplicationBuilder appBuilder)
