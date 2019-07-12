@@ -87,8 +87,8 @@ namespace VirtoCommerce.OrdersModule.Data.Model
 
         public virtual ObservableCollection<DiscountEntity> Discounts { get; set; } = new NullCollection<DiscountEntity>();
 
-        public virtual ObservableCollection<CustomerOrderDynamicPropertyObjectValueEntity> DynamicPropertyObjectValues { get; set; }
-            = new NullCollection<CustomerOrderDynamicPropertyObjectValueEntity>();
+        public virtual ObservableCollection<OrderDynamicPropertyObjectValueEntity> DynamicPropertyObjectValues { get; set; }
+            = new NullCollection<OrderDynamicPropertyObjectValueEntity>();
 
 
         public override OrderOperation ToModel(OrderOperation operation)
@@ -221,8 +221,8 @@ namespace VirtoCommerce.OrdersModule.Data.Model
 
             if (order.DynamicProperties != null)
             {
-                DynamicPropertyObjectValues = new ObservableCollection<CustomerOrderDynamicPropertyObjectValueEntity>(order.DynamicProperties.SelectMany(p => p.Values
-                    .Select(v => AbstractTypeFactory<CustomerOrderDynamicPropertyObjectValueEntity>.TryCreateInstance().FromModel(v, order, p))).OfType<CustomerOrderDynamicPropertyObjectValueEntity>());
+                DynamicPropertyObjectValues = new ObservableCollection<OrderDynamicPropertyObjectValueEntity>(order.DynamicProperties.SelectMany(p => p.Values
+                    .Select(v => AbstractTypeFactory<OrderDynamicPropertyObjectValueEntity>.TryCreateInstance().FromModel(v, order, p))).OfType<OrderDynamicPropertyObjectValueEntity>());
             }
 
             Sum = order.Total;
