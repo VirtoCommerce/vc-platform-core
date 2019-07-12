@@ -3,14 +3,14 @@ using System.Linq;
 using System.Security.Claims;
 using System.Threading.Tasks;
 using Microsoft.AspNetCore.Authorization;
-using Microsoft.AspNetCore.Identity;
 using VirtoCommerce.Platform.Core;
+using VirtoCommerce.Platform.Core.Security;
 
 namespace VirtoCommerce.Platform.Security.Authorization
 {
-    public class PermissionAuthorizationHandler : AuthorizationHandler<PermissionAuthorizationRequirement>
+    public abstract class PermissionAuthorizationHandlerBase<TRequirement> : AuthorizationHandler<TRequirement> where TRequirement : PermissionAuthorizationRequirement
     {
-        protected override Task HandleRequirementAsync(AuthorizationHandlerContext context, PermissionAuthorizationRequirement requirement)
+        protected override Task HandleRequirementAsync(AuthorizationHandlerContext context, TRequirement requirement)
         {
             var limitedPermissionsClaim = context.User.FindFirstValue(PlatformConstants.Security.Claims.LimitedPermissionsClaimType);
 
@@ -24,42 +24,21 @@ namespace VirtoCommerce.Platform.Security.Authorization
             {
                 var limitedPermissions = limitedPermissionsClaim.Split(PlatformConstants.Security.Claims.PermissionClaimTypeDelimiter, StringSplitOptions.RemoveEmptyEntries) ?? new string[0];
 
-                if (limitedPermissions.Contains(requirement.Permission.Name))
+                if (limitedPermissions.Contains(requirement.Permission))
                 {
                     context.Succeed(requirement);
                 }
             }
             else
             {
-                //TODO: Check cases with locked user
-                if (context.User.IsInRole(PlatformConstants.Security.SystemRoles.Administrator))
-                {
-                    context.Succeed(requirement);
-                }
-
-                if (context.User.IsInRole(PlatformConstants.Security.SystemRoles.Customer))
-                {
-                    return Task.CompletedTask;
-                }
-
-                if (context.User.HasClaim(PlatformConstants.Security.Claims.PermissionClaimType, requirement.Permission.Name)
-                    && context.User.HasClaim(PlatformConstants.Security.Claims.PermissionClaimType, PlatformConstants.Security.Permissions.SecurityCallApi))
+                if(context.User.HasGlobalPermission(requirement.Permission))
                 {
                     context.Succeed(requirement);
                 }
             }
 
             return Task.CompletedTask;
-
-            //TODO: Check scoped permissions
-            //if (result)
-            //{
-            //    var fqUserPermissions = user.Roles.SelectMany(x => x.Permissions).SelectMany(x => x.GetPermissionWithScopeCombinationNames()).Distinct();
-            //    var fqCheckPermissions = permissionIds.Concat(permissionIds.LeftJoin(scopes, ":"));
-            //    result = fqUserPermissions.Intersect(fqCheckPermissions, StringComparer.OrdinalIgnoreCase).Any();
-            //}
         }
-
 
     }
 }

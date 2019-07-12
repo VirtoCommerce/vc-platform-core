@@ -266,7 +266,7 @@ namespace VirtoCommerce.Platform.Web
             // register the AuthorizationPolicyProvider which dynamically registers authorization policies for each permission defined in module manifest
             services.AddSingleton<IAuthorizationPolicyProvider, PermissionAuthorizationPolicyProvider>();
             //Platform authorization handler for policies based on permissions 
-            services.AddSingleton<IAuthorizationHandler, PermissionAuthorizationHandler>();
+            services.AddSingleton<IAuthorizationHandler, DefaultPermissionAuthorizationHandler>();
             // Default password validation service implementation
             services.AddScoped<IPasswordCheckService, PasswordCheckService>();
 
