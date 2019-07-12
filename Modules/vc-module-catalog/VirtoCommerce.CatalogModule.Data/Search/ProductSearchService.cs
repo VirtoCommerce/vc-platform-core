@@ -1,10 +1,12 @@
 using System;
+using System.Collections.Generic;
 using System.Linq;
 using System.Threading.Tasks;
 using Microsoft.EntityFrameworkCore;
 using VirtoCommerce.CatalogModule.Core.Model.Search;
 using VirtoCommerce.CatalogModule.Core.Search;
 using VirtoCommerce.CatalogModule.Core.Services;
+using VirtoCommerce.CatalogModule.Data.Model;
 using VirtoCommerce.CatalogModule.Data.Repositories;
 using VirtoCommerce.Platform.Core.Common;
 using VirtoCommerce.Platform.Data.Infrastructure;
@@ -29,33 +31,19 @@ namespace VirtoCommerce.CatalogModule.Data.Search
             {
                 //Optimize performance and CPU usage
                 repository.DisableChangesTracking();
-                var query = repository.Items;
-                if (!string.IsNullOrEmpty(criteria.Keyword))
-                {
-                    query = query.Where(x => x.Name.Contains(criteria.Keyword));
-                }
-                if (!string.IsNullOrEmpty(criteria.CatalogId))
-                {
-                    query = query.Where(x => x.CatalogId == criteria.CatalogId);
-                }
-                if (!string.IsNullOrEmpty(criteria.CategoryId))
-                {
-                    query = query.Where(x => x.CategoryId == criteria.CategoryId);
-                }
-                if (!criteria.Skus.IsNullOrEmpty())
-                {
-                    query = query.Where(x => criteria.Skus.Contains(x.Code));
-                }
-                if (!criteria.SearchInVariations)
-                {
-                    query = query.Where(x => x.ParentId == null);
-                }
+
                 var sortInfos = criteria.SortInfos;
                 if (sortInfos.IsNullOrEmpty())
                 {
-                    sortInfos = new[] { new SortInfo { SortColumn = "Name" } };
+                    sortInfos = new[]
+                    {
+                            new SortInfo
+                            {
+                                SortColumn = "Name"
+                            }
+                        };
                 }
-                query = query.OrderBySortInfos(sortInfos).ThenBy(x => x.Id);
+                var query = BuildSearchQuery(repository, criteria, sortInfos);
                 result.TotalCount = await query.CountAsync();
                 if (criteria.Take > 0)
                 {
@@ -65,6 +53,34 @@ namespace VirtoCommerce.CatalogModule.Data.Search
                 }
             }
             return result;
+        }
+
+        protected virtual IQueryable<ItemEntity> BuildSearchQuery(ICatalogRepository repository, ProductSearchCriteria criteria, IEnumerable<SortInfo> sortInfos)
+        {
+            var query = repository.Items;
+            if (!string.IsNullOrEmpty(criteria.Keyword))
+            {
+                query = query.Where(x => x.Name.Contains(criteria.Keyword));
+            }
+            if (!string.IsNullOrEmpty(criteria.CatalogId))
+            {
+                query = query.Where(x => x.CatalogId == criteria.CatalogId);
+            }
+            if (!string.IsNullOrEmpty(criteria.CategoryId))
+            {
+                query = query.Where(x => x.CategoryId == criteria.CategoryId);
+            }
+            if (!criteria.Skus.IsNullOrEmpty())
+            {
+                query = query.Where(x => criteria.Skus.Contains(x.Code));
+            }
+            if (!criteria.SearchInVariations)
+            {
+                query = query.Where(x => x.ParentId == null);
+            }
+
+            query = query.OrderBySortInfos(sortInfos).ThenBy(x => x.Id);
+            return query;
         }
     }
 }

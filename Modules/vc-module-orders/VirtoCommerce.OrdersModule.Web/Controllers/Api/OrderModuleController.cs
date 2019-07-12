@@ -12,7 +12,6 @@ using VirtoCommerce.CoreModule.Core.Common;
 using VirtoCommerce.NotificationsModule.Core.Extensions;
 using VirtoCommerce.NotificationsModule.Core.Model;
 using VirtoCommerce.NotificationsModule.Core.Services;
-using VirtoCommerce.OrderModule.Web.Security;
 using VirtoCommerce.OrdersModule.Core;
 using VirtoCommerce.OrdersModule.Core.Model;
 using VirtoCommerce.OrdersModule.Core.Model.Search;
@@ -21,6 +20,7 @@ using VirtoCommerce.OrdersModule.Core.Services;
 using VirtoCommerce.OrdersModule.Data.Caching;
 using VirtoCommerce.OrdersModule.Data.Repositories;
 using VirtoCommerce.OrdersModule.Data.Services;
+using VirtoCommerce.OrdersModule.Web.Authorization;
 using VirtoCommerce.OrdersModule.Web.BackgroundJobs;
 using VirtoCommerce.OrdersModule.Web.Model;
 using VirtoCommerce.PaymentModule.Core.Model;
@@ -29,6 +29,7 @@ using VirtoCommerce.Platform.Core.Caching;
 using VirtoCommerce.Platform.Core.ChangeLog;
 using VirtoCommerce.Platform.Core.Common;
 using VirtoCommerce.Platform.Core.Settings;
+using VirtoCommerce.StoreModule.Core.Model;
 using VirtoCommerce.StoreModule.Core.Services;
 using CustomerOrderSearchResult = VirtoCommerce.OrdersModule.Core.Model.Search.CustomerOrderSearchResult;
 
@@ -47,10 +48,10 @@ namespace VirtoCommerce.OrdersModule.Web.Controllers.Api
         private readonly IShoppingCartService _cartService;
         private readonly ICustomerOrderTotalsCalculator _totalsCalculator;
         private readonly INotificationSearchService _notificationSearchService;
+        private readonly IAuthorizationService _authorizationService;
 
         private readonly INotificationTemplateRenderer _notificationTemplateRenderer;
         private readonly IChangeLogSearchService _changeLogSearchService;
-        private static readonly object _lockObject = new object();
 
         public OrderModuleController(
               ICustomerOrderService customerOrderService
@@ -64,7 +65,8 @@ namespace VirtoCommerce.OrdersModule.Web.Controllers.Api
             , IChangeLogSearchService changeLogSearchService
             , INotificationTemplateRenderer notificationTemplateRenderer
             , INotificationSearchService notificationSearchService
-            , ICustomerOrderTotalsCalculator totalsCalculator)
+            , ICustomerOrderTotalsCalculator totalsCalculator
+            , IAuthorizationService authorizationService)
         {
             _customerOrderService = customerOrderService;
             _searchService = searchService;
@@ -72,14 +74,13 @@ namespace VirtoCommerce.OrdersModule.Web.Controllers.Api
             _storeService = storeService;
             _platformMemoryCache = platformMemoryCache;
             _repositoryFactory = repositoryFactory;
-            //_securityService = securityService;
-            //_permissionScopeService = permissionScopeService;
             _customerOrderBuilder = customerOrderBuilder;
             _cartService = cartService;
             _changeLogSearchService = changeLogSearchService;
             _notificationTemplateRenderer = notificationTemplateRenderer;
             _notificationSearchService = notificationSearchService;
             _totalsCalculator = totalsCalculator;
+            _authorizationService = authorizationService;
         }
 
         /// <summary>
@@ -90,9 +91,12 @@ namespace VirtoCommerce.OrdersModule.Web.Controllers.Api
         [Route("search")]
         public async Task<ActionResult<CustomerOrderSearchResult>> SearchCustomerOrder([FromBody]CustomerOrderSearchCriteria criteria)
         {
-            //Scope bound ACL filtration
-            criteria = FilterOrderSearchCriteria(User.Identity.Name, criteria);
-
+            var authorizationResult = await _authorizationService.AuthorizeAsync(User, criteria, new OrderAuthorizationRequirement(ModuleConstants.Security.Permissions.Read));
+            if (!authorizationResult.Succeeded)
+            {
+                return Unauthorized();
+            }
+            
             var result = await _searchService.SearchCustomerOrdersAsync(criteria);
 
             return Ok(result);
@@ -110,24 +114,15 @@ namespace VirtoCommerce.OrdersModule.Web.Controllers.Api
         {
             var searchCriteria = AbstractTypeFactory<CustomerOrderSearchCriteria>.TryCreateInstance();
             searchCriteria.Number = number;
-            //ToDo
-            //searchCriteria.ResponseGroup = OrderReadPricesPermission.ApplyResponseGroupFiltering(_securityService.GetUserPermissions(User.Identity.Name), respGroup); ;
-
+            searchCriteria.ResponseGroup = respGroup;
+            var authorizationResult = await _authorizationService.AuthorizeAsync(User, searchCriteria, new OrderAuthorizationRequirement(ModuleConstants.Security.Permissions.Read));
+            if (!authorizationResult.Succeeded)
+            {
+                return Unauthorized();
+            }
             var result = await _searchService.SearchCustomerOrdersAsync(searchCriteria);
 
-            var retVal = result.Results.FirstOrDefault();
-
-            //TODO Resource based auth
-            //if (retVal != null)
-            //{
-            //    var scopes = _permissionScopeService.GetObjectPermissionScopeStrings(retVal).ToArray();
-            //    if (!_securityService.UserHasAnyPermission(User.Identity.Name, scopes, ModuleConstants.Security.Permissions.Read))
-            //    {
-            //        return Unauthorized();
-            //    }
-            //    //Set scopes for UI scope bounded ACL checking
-            //    retVal.Scopes = scopes;
-            //}
+            var retVal = result.Results.FirstOrDefault();      
             return Ok(retVal);
         }
 
@@ -141,26 +136,17 @@ namespace VirtoCommerce.OrdersModule.Web.Controllers.Api
         [Route("{id}")]
         public async Task<ActionResult<CustomerOrder>> GetById(string id, [FromRoute] string respGroup = null)
         {
-            var retVal = await _customerOrderService.GetByIdAsync(id,
-                /* OrderReadPricesPermission.ApplyResponseGroupFiltering(_securityService.GetUserPermissions(User.Identity.Name),*/ respGroup);
-
-            if (retVal == null)
+            var searchCriteria = AbstractTypeFactory<CustomerOrderSearchCriteria>.TryCreateInstance();
+            searchCriteria.Ids = new[] { id };
+            searchCriteria.ResponseGroup = respGroup;
+            var authorizationResult = await _authorizationService.AuthorizeAsync(User, searchCriteria, new OrderAuthorizationRequirement(ModuleConstants.Security.Permissions.Read));
+            if (!authorizationResult.Succeeded)
             {
-                return NotFound();
+                return Unauthorized();
             }
-
-            //TODO
-            ////Scope bound security check
-            //var scopes = _permissionScopeService.GetObjectPermissionScopeStrings(retVal).ToArray();
-            //if (!_securityService.UserHasAnyPermission(User.Identity.Name, scopes, OrderPredefinedPermissions.Read))
-            //{
-            //    throw new HttpResponseException(HttpStatusCode.Unauthorized);
-            //}
-
-            ////Set scopes for UI scope bounded ACL checking
-            //retVal.Scopes = scopes;
-
-            return Ok(retVal);
+            var result = await _searchService.SearchCustomerOrdersAsync(searchCriteria);
+                   
+            return Ok(result.Results.FirstOrDefault());
         }
 
         /// <summary>
@@ -204,6 +190,12 @@ namespace VirtoCommerce.OrdersModule.Web.Controllers.Api
             if (order == null)
             {
                 throw new InvalidOperationException($"Cannot find order with ID {orderId}");
+            }
+
+            var authorizationResult = await _authorizationService.AuthorizeAsync(User, order, new OrderAuthorizationRequirement(ModuleConstants.Security.Permissions.Update));
+            if (!authorizationResult.Succeeded)
+            {
+                return Unauthorized();
             }
 
             var inPayment = order.InPayments.FirstOrDefault(x => x.Id == paymentId);
@@ -278,14 +270,11 @@ namespace VirtoCommerce.OrdersModule.Web.Controllers.Api
         [Route("")]
         public async Task<ActionResult> UpdateOrder([FromBody]CustomerOrder customerOrder)
         {
-            //Check scope bound permission
-            //var scopes = _permissionScopeService.GetObjectPermissionScopeStrings(customerOrder).ToArray();
-
-            //TODO
-            //if (!_securityService.UserHasAnyPermission(User.Identity.Name, scopes, OrderPredefinedPermissions.Read))
-            //{
-            //    return Unauthorized();
-            //}
+            var authorizationResult = await _authorizationService.AuthorizeAsync(User, customerOrder, new OrderAuthorizationRequirement(ModuleConstants.Security.Permissions.Update));
+            if (!authorizationResult.Succeeded)
+            {
+                return Unauthorized();
+            }
 
             await _customerOrderService.SaveChangesAsync(new[] { customerOrder });
             return NoContent();
@@ -309,7 +298,7 @@ namespace VirtoCommerce.OrdersModule.Web.Controllers.Api
                 retVal.Currency = order.Currency;
                 retVal.Status = "New";
 
-                var store = await _storeService.GetByIdAsync(order.StoreId);
+                var store = await _storeService.GetByIdAsync(order.StoreId, StoreResponseGroup.StoreInfo.ToString());
                 var numberTemplate = store.Settings.GetSettingValue(
                     ModuleConstants.Settings.General.OrderShipmentNewNumberTemplate.Name,
                     ModuleConstants.Settings.General.OrderShipmentNewNumberTemplate.DefaultValue);
@@ -348,7 +337,7 @@ namespace VirtoCommerce.OrdersModule.Web.Controllers.Api
                 retVal.CustomerId = order.CustomerId;
                 retVal.Status = retVal.PaymentStatus.ToString();
 
-                var store = await _storeService.GetByIdAsync(order.StoreId);
+                var store = await _storeService.GetByIdAsync(order.StoreId, StoreResponseGroup.StoreInfo.ToString());
                 var numberTemplate = store.Settings.GetSettingValue(
                     ModuleConstants.Settings.General.OrderPaymentInNewNumberTemplate.Name,
                     ModuleConstants.Settings.General.OrderPaymentInNewNumberTemplate.DefaultValue);
@@ -434,7 +423,7 @@ namespace VirtoCommerce.OrdersModule.Web.Controllers.Api
             var paymentMethodCode = parameters.Get("code");
 
             //Need to use concrete  payment method if it code passed otherwise use all order payment methods
-            foreach (var inPayment in order.InPayments.Where(x => x.PaymentMethod != null && (string.IsNullOrEmpty(paymentMethodCode) ? true : x.GatewayCode.EqualsInvariant(paymentMethodCode))))
+            foreach (var inPayment in order.InPayments.Where(x => x.PaymentMethod != null && (string.IsNullOrEmpty(paymentMethodCode) || x.GatewayCode.EqualsInvariant(paymentMethodCode))))
             {
                 //Each payment method must check that these parameters are addressed to it
                 var result = inPayment.PaymentMethod.ValidatePostProcessRequest(parameters);
@@ -466,7 +455,6 @@ namespace VirtoCommerce.OrdersModule.Web.Controllers.Api
             }
             return Ok(new PostProcessPaymentRequestResult { ErrorMessage = "Payment method not found" });
         }
-
 
         [HttpGet]
         [Route("invoice/{orderNumber}")]
@@ -512,6 +500,12 @@ namespace VirtoCommerce.OrdersModule.Web.Controllers.Api
             var order = await _customerOrderService.GetByIdAsync(id);
             if (order != null)
             {
+                var authorizationResult = await _authorizationService.AuthorizeAsync(User, order, new OrderAuthorizationRequirement(ModuleConstants.Security.Permissions.Read));
+                if (!authorizationResult.Succeeded)
+                {
+                    return Unauthorized();
+                }
+
                 //Load general change log for order
                 var allHasHangesObjects = order.GetFlatObjectsListWithInterface<IHasChangesHistory>()
                                           .Distinct().ToArray();
@@ -527,34 +521,5 @@ namespace VirtoCommerce.OrdersModule.Web.Controllers.Api
             return Ok(result);
         }
 
-        private CustomerOrderSearchCriteria FilterOrderSearchCriteria(string userName, CustomerOrderSearchCriteria criteria)
-        {
-            //TODO
-            //if (!_securityService.UserHasAnyPermission(userName, null, OrderPredefinedPermissions.Read))
-            //{
-            //    //Get defined user 'read' permission scopes
-            //    var readPermissionScopes = _securityService.GetUserPermissions(userName)
-            //        .Where(x => x.Id.StartsWith(OrderPredefinedPermissions.Read))
-            //        .SelectMany(x => x.AssignedScopes)
-            //        .ToList();
-
-            //    //Check user has a scopes
-            //    //Stores
-            //    criteria.StoreIds = readPermissionScopes.OfType<OrderStoreScope>()
-            //        .Select(x => x.Scope)
-            //        .Where(x => !string.IsNullOrEmpty(x))
-            //        .ToArray();
-
-            //    var responsibleScope = readPermissionScopes.OfType<OrderResponsibleScope>().FirstOrDefault();
-            //    //employee id
-            //    if (responsibleScope != null)
-            //    {
-            //        criteria.EmployeeId = userName;
-            //    }
-            //// ResponseGroup
-            // criteria.ResponseGroup = OrderReadPricesPermission.ApplyResponseGroupFiltering(_securityService.GetUserPermissions(User.Identity.Name), criteria.ResponseGroup);
-            //}
-            return criteria;
-        }
     }
 }

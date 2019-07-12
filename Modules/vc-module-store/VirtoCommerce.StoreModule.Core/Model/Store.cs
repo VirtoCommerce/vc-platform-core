@@ -81,7 +81,7 @@ namespace VirtoCommerce.StoreModule.Core.Model
         #endregion
 
         #region IHasDynamicProperties Members
-        public string ObjectType { get; set; }
+        public string ObjectType => GetType().FullName;
         public ICollection<DynamicObjectProperty> DynamicProperties { get; set; }
         #endregion
 

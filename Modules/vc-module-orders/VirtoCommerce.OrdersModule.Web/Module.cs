@@ -2,6 +2,7 @@ using System;
 using System.IO;
 using System.Linq;
 using System.Threading.Tasks;
+using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Builder;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.EntityFrameworkCore;
@@ -18,6 +19,7 @@ using VirtoCommerce.OrdersModule.Data.ExportImport;
 using VirtoCommerce.OrdersModule.Data.Handlers;
 using VirtoCommerce.OrdersModule.Data.Repositories;
 using VirtoCommerce.OrdersModule.Data.Services;
+using VirtoCommerce.OrdersModule.Web.Authorization;
 using VirtoCommerce.OrdersModule.Web.JsonConverters;
 using VirtoCommerce.Platform.Core.Bus;
 using VirtoCommerce.Platform.Core.Common;
@@ -37,13 +39,13 @@ namespace VirtoCommerce.OrdersModule.Web
         public void Initialize(IServiceCollection serviceCollection)
         {
             var configuration = serviceCollection.BuildServiceProvider().GetRequiredService<IConfiguration>();
-            serviceCollection.AddTransient<IOrderRepository, OrderRepositoryImpl>();
+            serviceCollection.AddTransient<IOrderRepository, OrderRepository>();
             var connectionString = configuration.GetConnectionString("VirtoCommerce.Orders") ?? configuration.GetConnectionString("VirtoCommerce");
             serviceCollection.AddDbContext<OrderDbContext>(options => options.UseSqlServer(connectionString));
             serviceCollection.AddSingleton<Func<IOrderRepository>>(provider => () => provider.CreateScope().ServiceProvider.GetRequiredService<IOrderRepository>());
-            serviceCollection.AddSingleton<ICustomerOrderSearchService, CustomerOrderSearchServiceImpl>();
-            serviceCollection.AddSingleton<ICustomerOrderService, CustomerOrderServiceImpl>();
-            serviceCollection.AddSingleton<ICustomerOrderBuilder, CustomerOrderBuilderImpl>();
+            serviceCollection.AddSingleton<ICustomerOrderSearchService, CustomerOrderSearchService>();
+            serviceCollection.AddSingleton<ICustomerOrderService, CustomerOrderService>();
+            serviceCollection.AddSingleton<ICustomerOrderBuilder, CustomerOrderBuilder>();
             serviceCollection.AddSingleton<ICustomerOrderTotalsCalculator, DefaultCustomerOrderTotalsCalculator>();
             serviceCollection.AddSingleton<OrderExportImport>();
             serviceCollection.AddSingleton<OrderChangedEvent>();
@@ -53,6 +55,8 @@ namespace VirtoCommerce.OrdersModule.Web
             //Register as scoped because we use UserManager<> as dependency in this implementation
             serviceCollection.AddScoped<SendNotificationsOrderChangedEventHandler>();
             serviceCollection.AddSingleton<PolymorphicOperationJsonConverter>();
+
+            serviceCollection.AddSingleton<IAuthorizationHandler, OrderAuthorizationHandler>();
         }
 
         public void PostInitialize(IApplicationBuilder appBuilder)
@@ -75,6 +79,16 @@ namespace VirtoCommerce.OrdersModule.Web
                     ModuleId = ModuleInfo.Id,
                     Name = x
                 }).ToArray());
+
+            AbstractTypeFactory<PermissionScope>.RegisterType<OnlyOrderResponsibleScope>();
+            AbstractTypeFactory<PermissionScope>.RegisterType<OrderSelectedStoreScope>();
+
+            permissionsProvider.WithAvailabeScopesForPermissions(new[] {
+                                                                        ModuleConstants.Security.Permissions.Read,
+                                                                        ModuleConstants.Security.Permissions.Update,
+                                                                        ModuleConstants.Security.Permissions.Delete,
+                                                                        }, new OnlyOrderResponsibleScope(), new OrderSelectedStoreScope());
+
 
             var inProcessBus = appBuilder.ApplicationServices.GetService<IHandlerRegistrar>();
             inProcessBus.RegisterHandler<OrderChangedEvent>(async (message, token) => await appBuilder.ApplicationServices.GetService<AdjustInventoryOrderChangedEventHandler>().Handle(message));

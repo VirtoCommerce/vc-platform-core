@@ -1,4 +1,4 @@
-<div class="blade-static __collapsed">
+﻿<div class="blade-static __collapsed">
     <div class="form-group">
         <p class="form-count">{{ 'platform.list.count' | translate }}: <span class="count">{{pageSettings.totalItems | number:0}}</span></p>
     </div>
@@ -13,6 +13,7 @@
                             { name: 'actions', displayName: '', enableColumnResizing: false, enableSorting: false, width: 30, cellTemplate: 'list-actions.cell.html', pinnedLeft:true },
                             { name: 'notificationType', displayName: 'notifications.blades.notifications-journal.labels.notification', cellTemplate: 'notification.cell.html' },
                             { name: 'createdDate', displayName: 'notifications.blades.notifications-journal.labels.created' },
+                            { name: 'sendAttemptCount', displayName: 'notifications.blades.notifications-journal.labels.sendAttemptCount' },
                             { name: 'status', displayName: 'notifications.blades.notifications-journal.labels.status', cellTemplate: 'status.cell.html' }
                 ]})">
             <div class="table-wrapper" ng-if="blade.currentEntities.length">

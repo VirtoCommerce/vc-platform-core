@@ -1,4 +1,4 @@
-﻿using System;
+using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Text;
@@ -82,7 +82,7 @@ namespace VirtoCommerce.Platform.Core.Common
         {
             BaseType retVal;
             //Try find first direct type match from registered types
-            var typeInfo = _typeInfos.FirstOrDefault(x => x.Type.Name.EqualsInvariant(typeName));
+            var typeInfo = _typeInfos.FirstOrDefault(x => x.TypeName.EqualsInvariant(typeName));
             //Then need to find in inheritance chain from registered types
             if (typeInfo == null)
             {                
@@ -116,8 +116,10 @@ namespace VirtoCommerce.Platform.Core.Common
         {
             Services = new List<object>();
             Type = type;
+            TypeName = type.Name;
         }
 
+        public string TypeName { get; private set; }
         public Func<BaseType> Factory { get; private set; }
         public Type Type { get; private set; }
         public Type MappedType { get; set; }
@@ -148,6 +150,13 @@ namespace VirtoCommerce.Platform.Core.Common
             Factory = factory;
             return this;
         }
+        
+        public TypeInfo<BaseType> WithTypeName(string name)
+        {
+            TypeName = name;
+            return this;
+        }
+
 
         public bool IsAssignableTo(string typeName)
         {

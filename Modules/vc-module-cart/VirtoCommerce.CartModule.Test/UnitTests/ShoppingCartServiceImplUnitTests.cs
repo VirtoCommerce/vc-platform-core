@@ -28,7 +28,7 @@ namespace VirtoCommerce.CartModule.Test.UnitTests
         private readonly Mock<IEventPublisher> _eventPublisherMock;
         private readonly Mock<IPlatformMemoryCache> _platformMemoryCacheMock;
         private readonly Mock<ICacheEntry> _сacheEntryMock;
-        private readonly ShoppingCartServiceImpl _shoppingCartServiceImpl;
+        private readonly ShoppingCartService _shoppingCartServiceImpl;
 
         public ShoppingCartServiceImplUnitTests()
         {
@@ -41,8 +41,7 @@ namespace VirtoCommerce.CartModule.Test.UnitTests
             _eventPublisherMock = new Mock<IEventPublisher>();
             _platformMemoryCacheMock = new Mock<IPlatformMemoryCache>();
             _сacheEntryMock = new Mock<ICacheEntry>();
-            _shoppingCartServiceImpl = new ShoppingCartServiceImpl(_repositoryFactory
-                , _dynamicPropertyServiceMock.Object
+            _shoppingCartServiceImpl = new ShoppingCartService(_repositoryFactory
                 , _calculatorMock.Object
                 , _eventPublisherMock.Object
                 , _platformMemoryCacheMock.Object
@@ -62,7 +61,7 @@ namespace VirtoCommerce.CartModule.Test.UnitTests
             _platformMemoryCacheMock.Setup(pmc => pmc.CreateEntry(cacheKey)).Returns(_сacheEntryMock.Object);
 
             //Act
-            var result = await _shoppingCartServiceImpl.GetByIdsAsync(new[] {cartId});
+            var result = await _shoppingCartServiceImpl.GetByIdsAsync(new[] { cartId });
 
             //Assert
             Assert.True(result.Any());

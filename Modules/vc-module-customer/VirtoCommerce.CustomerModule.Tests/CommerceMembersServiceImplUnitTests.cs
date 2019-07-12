@@ -31,7 +31,7 @@ namespace VirtoCommerce.CustomerModule.Tests
         private readonly Mock<IPlatformMemoryCache> _platformMemoryCacheMock;
         private readonly Mock<ICacheEntry> _сacheEntryMock;
         private readonly Mock<IUserSearchService> _userSearchMock;
-        private readonly CommerceMembersServiceImpl _commerceMembersServiceImpl;
+        private readonly CommerceMembersService _commerceMembersServiceImpl;
 
         public CommerceMembersServiceImplUnitTests()
         {
@@ -45,7 +45,7 @@ namespace VirtoCommerce.CustomerModule.Tests
             _сacheEntryMock = new Mock<ICacheEntry>();
             _userSearchMock = new Mock<IUserSearchService>();
             _сacheEntryMock.SetupGet(c => c.ExpirationTokens).Returns(new List<IChangeToken>());
-            _commerceMembersServiceImpl = new CommerceMembersServiceImpl(_repositoryFactory, _eventPublisherMock.Object, _dynamicPropertyServiceMock.Object, _platformMemoryCacheMock.Object, _userSearchMock.Object);
+            _commerceMembersServiceImpl = new CommerceMembersService(_repositoryFactory, _eventPublisherMock.Object, _dynamicPropertyServiceMock.Object, _platformMemoryCacheMock.Object, _userSearchMock.Object);
 
             AbstractTypeFactory<Member>.RegisterType<Organization>().MapToType<OrganizationEntity>();
             AbstractTypeFactory<Member>.RegisterType<Contact>().MapToType<ContactEntity>();

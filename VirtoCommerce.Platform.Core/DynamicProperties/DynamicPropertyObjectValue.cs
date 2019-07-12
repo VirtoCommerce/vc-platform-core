@@ -13,6 +13,9 @@ namespace VirtoCommerce.Platform.Core.DynamicProperties
         public string ValueId { get; set; }
         public DynamicPropertyValueType ValueType { get; set; }
 
+        public string PropertyId { get; set; }
+        public string PropertyName { get; set; }
+
         public override string ToString()
         {
             return string.Format("{0}", Value != null ? Value.ToString().Truncate(50) : "n/a");

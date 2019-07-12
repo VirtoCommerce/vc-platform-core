@@ -11,7 +11,6 @@ namespace VirtoCommerce.ContentModule.Data.Repositories
         {
         }
 
-
         protected override void OnModelCreating(ModelBuilder modelBuilder)
         {
             #region MenuLinkList

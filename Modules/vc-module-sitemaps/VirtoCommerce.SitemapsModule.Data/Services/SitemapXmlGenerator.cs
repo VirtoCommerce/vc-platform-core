@@ -8,13 +8,13 @@ using Microsoft.Extensions.Logging;
 using VirtoCommerce.Platform.Core.Common;
 using VirtoCommerce.Platform.Core.ExportImport;
 using VirtoCommerce.Platform.Core.Settings;
+using VirtoCommerce.SitemapsModule.Core;
 using VirtoCommerce.SitemapsModule.Core.Models;
 using VirtoCommerce.SitemapsModule.Core.Models.Search;
 using VirtoCommerce.SitemapsModule.Core.Services;
 using VirtoCommerce.SitemapsModule.Data.Models.Xml;
 using VirtoCommerce.StoreModule.Core.Model;
 using VirtoCommerce.StoreModule.Core.Services;
-using VirtoCommerce.SitemapsModule.Core;
 
 namespace VirtoCommerce.SitemapsModule.Data.Services
 {
@@ -56,7 +56,7 @@ namespace VirtoCommerce.SitemapsModule.Data.Services
             }
 
             var sitemapUrls = new List<string>();
-            var store = await _storeService.GetByIdAsync(storeId);
+            var store = await _storeService.GetByIdAsync(storeId, StoreResponseGroup.StoreInfo.ToString());
 
             var sitemapSearchCriteria = new SitemapSearchCriteria
             {
@@ -86,7 +86,7 @@ namespace VirtoCommerce.SitemapsModule.Data.Services
             xmlNamespaces.Add("xhtml", "http://www.w3.org/1999/xhtml");
 
             var sitemapLocation = SitemapLocation.Parse(sitemapUrl, filenameSeparator);
-            var store = await _storeService.GetByIdAsync(storeId);
+            var store = await _storeService.GetByIdAsync(storeId, StoreResponseGroup.StoreInfo.ToString());
             if (sitemapLocation.Location.EqualsInvariant("sitemap.xml"))
             {
                 progressCallback?.Invoke(new ExportImportProgressInfo

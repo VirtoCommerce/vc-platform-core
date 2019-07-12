@@ -361,7 +361,7 @@ angular.module(moduleName, [ /*TODO: Uncomment when migration of theses module w
 
         //Register permission scopes templates used for scope bounded definition in role management ui
         var orderStoreScope = {
-            type: 'OrderStoreScope',
+            type: 'OrderSelectedStoreScope',
             title: 'Only for orders in selected stores',
             selectFn: function (blade, callback) {
                 var newBlade = {
@@ -379,7 +379,7 @@ angular.module(moduleName, [ /*TODO: Uncomment when migration of theses module w
         };
         scopeResolver.register(orderStoreScope);
         var responsibleOrderScope = {
-            type: 'OrderResponsibleScope',
+            type: 'OnlyOrderResponsibleScope',
             title: 'Only for order responsible'
         };
         scopeResolver.register(responsibleOrderScope);

@@ -11,6 +11,7 @@ using VirtoCommerce.OrdersModule.Core.Model;
 using VirtoCommerce.Platform.Core.Common;
 using VirtoCommerce.Platform.Core.Events;
 using VirtoCommerce.Platform.Core.Settings;
+using VirtoCommerce.StoreModule.Core.Model;
 using VirtoCommerce.StoreModule.Core.Services;
 
 namespace VirtoCommerce.OrdersModule.Data.Handlers
@@ -247,7 +248,7 @@ namespace VirtoCommerce.OrdersModule.Data.Handlers
             //Use a default fulfillment center defined for store
             if (string.IsNullOrEmpty(result))
             {
-                var store = await _storeService.GetByIdAsync(orderStoreId);
+                var store = await _storeService.GetByIdAsync(orderStoreId, StoreResponseGroup.StoreInfo.ToString());
                 result = store?.MainFulfillmentCenterId;
             }
             return result;

@@ -44,11 +44,10 @@ namespace VirtoCommerce.NotificationsModule.Data.Senders
 
             await _notificationMessageService.SaveNotificationMessagesAsync(new[] { message });
 
-            var policy = Policy.Handle<SentNotificationException>().WaitAndRetryAsync(_maxRetryAttempts, retryAttempt => TimeSpan.FromSeconds(Math.Pow(2, retryAttempt))
+            var policy = Policy.Handle<SentNotificationException>().WaitAndRetryAsync(_maxRetryAttempts, retryAttempt => TimeSpan.FromSeconds(Math.Pow(3, retryAttempt))
                 , (exception, timeSpan, retryCount, context) =>
                 {
                     _logger.LogError(exception, $"Retry {retryCount} of {context.PolicyKey}, due to: {exception}.");
-                    message.LastSendError = exception?.Message;
                 });
 
             var policyResult = await policy.ExecuteAndCaptureAsync(() =>
@@ -66,6 +65,7 @@ namespace VirtoCommerce.NotificationsModule.Data.Senders
             else
             {
                 result.ErrorMessage = policyResult.FinalException?.Message;
+                message.LastSendError = policyResult.FinalException?.ToString();
             }
 
             await _notificationMessageService.SaveNotificationMessagesAsync(new[] { message });

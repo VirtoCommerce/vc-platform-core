@@ -6,6 +6,7 @@ using FluentValidation;
 using Microsoft.Extensions.Caching.Memory;
 using VirtoCommerce.CatalogModule.Core.Events;
 using VirtoCommerce.CatalogModule.Core.Model;
+using VirtoCommerce.CatalogModule.Core.Search;
 using VirtoCommerce.CatalogModule.Core.Services;
 using VirtoCommerce.CatalogModule.Data.Caching;
 using VirtoCommerce.CatalogModule.Data.Model;
@@ -24,25 +25,33 @@ namespace VirtoCommerce.CatalogModule.Data.Services
         private readonly Func<ICatalogRepository> _repositoryFactory;
         private readonly IEventPublisher _eventPublisher;
         private readonly AbstractValidator<IHasProperties> _hasPropertyValidator;
-        private readonly ICatalogService _catalogService;
+        private readonly ICatalogSearchService _catalogSearchService;
         private readonly ICategoryService _categoryService;
         private readonly IOutlineService _outlineService;
         private readonly IPlatformMemoryCache _platformMemoryCache;
         private readonly IBlobUrlResolver _blobUrlResolver;
         private readonly ISkuGenerator _skuGenerator;
 
-        public ItemService(Func<ICatalogRepository> catalogRepositoryFactory, IEventPublisher eventPublisher, AbstractValidator<IHasProperties> hasPropertyValidator,
-                           ICatalogService catalogService, ICategoryService categoryService, IOutlineService outlineService, IPlatformMemoryCache platformMemoryCache, IBlobUrlResolver blobUrlResolver, ISkuGenerator skuGenerator)
+        public ItemService(
+            Func<ICatalogRepository> catalogRepositoryFactory
+            , IEventPublisher eventPublisher
+            , AbstractValidator<IHasProperties> hasPropertyValidator
+            , ICatalogSearchService catalogSearchService
+            , ICategoryService categoryService
+            , IOutlineService outlineService
+            , IPlatformMemoryCache platformMemoryCache
+            , IBlobUrlResolver blobUrlResolver
+            , ISkuGenerator skuGenerator)
         {
             _repositoryFactory = catalogRepositoryFactory;
             _eventPublisher = eventPublisher;
             _hasPropertyValidator = hasPropertyValidator;
-            _catalogService = catalogService;
             _categoryService = categoryService;
             _outlineService = outlineService;
             _platformMemoryCache = platformMemoryCache;
             _blobUrlResolver = blobUrlResolver;
             _skuGenerator = skuGenerator;
+            _catalogSearchService = catalogSearchService;
         }
 
         #region IItemService Members
@@ -61,7 +70,7 @@ namespace VirtoCommerce.CatalogModule.Data.Services
                     //Optimize performance and CPU usage
                     repository.DisableChangesTracking();
 
-                    result = (await repository.GetItemByIdsAsync(itemIds, itemResponseGroup))
+                    result = (await repository.GetItemByIdsAsync(itemIds, responseGroup))
                                        .Select(x => x.ToModel(AbstractTypeFactory<CatalogProduct>.TryCreateInstance()))
                                        .ToArray();
                 }
@@ -78,7 +87,6 @@ namespace VirtoCommerce.CatalogModule.Data.Services
                 {
                     _outlineService.FillOutlinesForObjects(productsWithVariationsList, catalogId);
                 }
-
 
                 //Reduce details according to response group
                 foreach (var product in productsWithVariationsList)
@@ -170,7 +178,6 @@ namespace VirtoCommerce.CatalogModule.Data.Services
             }
         }
 
-
         public virtual async Task LoadDependenciesAsync(IEnumerable<CatalogProduct> products)
         {
             await InnerLoadDependenciesAsync(products);
@@ -178,7 +185,7 @@ namespace VirtoCommerce.CatalogModule.Data.Services
 
         protected virtual async Task InnerLoadDependenciesAsync(IEnumerable<CatalogProduct> products, bool processVariations = true)
         {
-            var catalogsByIdDict = (await _catalogService.GetCatalogsListAsync()).ToDictionary(x => x.Id, StringComparer.OrdinalIgnoreCase)
+            var catalogsByIdDict = ((await _catalogSearchService.SearchCatalogsAsync(new Core.Model.Search.CatalogSearchCriteria { Take = int.MaxValue })).Results).ToDictionary(x => x.Id, StringComparer.OrdinalIgnoreCase)
                                                                             .WithDefaultValue(null);
             var productsCategoryIds = products.Select(x => x.CategoryId)
                                            .Where(x => x != null).Distinct()
@@ -226,7 +233,6 @@ namespace VirtoCommerce.CatalogModule.Data.Services
             }
         }
 
-
         protected virtual void ApplyInheritanceRules(IEnumerable<CatalogProduct> products)
         {
             foreach (var product in products)
@@ -238,7 +244,6 @@ namespace VirtoCommerce.CatalogModule.Data.Services
                 }
             }
         }
-
 
         protected virtual async Task ValidateProductsAsync(CatalogProduct[] products)
         {
@@ -260,10 +265,10 @@ namespace VirtoCommerce.CatalogModule.Data.Services
             var targets = products.OfType<IHasProperties>();
             foreach (var item in targets)
             {
-                var validatioResult = await _hasPropertyValidator.ValidateAsync(item);
-                if (!validatioResult.IsValid)
+                var validationResult = await _hasPropertyValidator.ValidateAsync(item);
+                if (!validationResult.IsValid)
                 {
-                    throw new ValidationException($"Product properties has validation error: {string.Join(Environment.NewLine, validatioResult.Errors.Select(x => x.ToString()))}");
+                    throw new ValidationException($"Product properties has validation error: {string.Join(Environment.NewLine, validationResult.Errors.Select(x => x.ToString()))}");
                 }
             }
         }

@@ -4,7 +4,6 @@ using System.Linq;
 using System.Threading.Tasks;
 using FluentValidation;
 using Microsoft.Extensions.Caching.Memory;
-
 using VirtoCommerce.Platform.Core.Caching;
 using VirtoCommerce.Platform.Core.Common;
 using VirtoCommerce.Platform.Core.DynamicProperties;
@@ -26,17 +25,13 @@ namespace VirtoCommerce.StoreModule.Data.Services
     {
         private readonly Func<IStoreRepository> _repositoryFactory;
         private readonly ISettingsManager _settingManager;
-        private readonly IDynamicPropertyService _dynamicPropertyService;
-
         private readonly IEventPublisher _eventPublisher;
         private readonly IPlatformMemoryCache _platformMemoryCache;
 
-        public StoreService(Func<IStoreRepository> repositoryFactory, ISettingsManager settingManager, IDynamicPropertyService dynamicPropertyService,
-                            IEventPublisher eventPublisher, IPlatformMemoryCache platformMemoryCache)
+        public StoreService(Func<IStoreRepository> repositoryFactory, ISettingsManager settingManager, IEventPublisher eventPublisher, IPlatformMemoryCache platformMemoryCache)
         {
             _repositoryFactory = repositoryFactory;
             _settingManager = settingManager;
-            _dynamicPropertyService = dynamicPropertyService;
 
             _eventPublisher = eventPublisher;
             _platformMemoryCache = platformMemoryCache;
@@ -44,9 +39,9 @@ namespace VirtoCommerce.StoreModule.Data.Services
 
         #region IStoreService Members
 
-        public virtual async Task<Store[]> GetByIdsAsync(string[] ids)
+        public virtual async Task<Store[]> GetByIdsAsync(string[] ids, string responseGroup = null)
         {
-            var cacheKey = CacheKey.With(GetType(), "GetByIdsAsync", string.Join("-", ids));
+            var cacheKey = CacheKey.With(GetType(), "GetByIdsAsync", string.Join("-", ids), responseGroup);
             return await _platformMemoryCache.GetOrCreateExclusiveAsync(cacheKey, async (cacheEntry) =>
             {
                 var stores = new List<Store>();
@@ -57,28 +52,25 @@ namespace VirtoCommerce.StoreModule.Data.Services
                 {
                     repository.DisableChangesTracking();
 
-                    var dbStores = await repository.GetStoresByIdsAsync(ids);
+                    var dbStores = await repository.GetStoresByIdsAsync(ids, responseGroup);
+
                     foreach (var dbStore in dbStores)
                     {
                         var store = AbstractTypeFactory<Store>.TryCreateInstance();
                         dbStore.ToModel(store);
-
 
                         await _settingManager.DeepLoadSettingsAsync(store);
                         stores.Add(store);
                     }
                 }
 
-                var result = stores.ToArray();
-                await _dynamicPropertyService.LoadDynamicPropertyValuesAsync(result);
-
-                return result;
+                return stores.ToArray();
             });
         }
 
-        public virtual async Task<Store> GetByIdAsync(string id)
+        public virtual async Task<Store> GetByIdAsync(string id, string responseGroup = null)
         {
-            var stores = await GetByIdsAsync(new[] { id });
+            var stores = await GetByIdsAsync(new[] { id }, responseGroup);
             return stores.FirstOrDefault();
         }
 
@@ -123,7 +115,7 @@ namespace VirtoCommerce.StoreModule.Data.Services
             using (var repository = _repositoryFactory())
             {
                 var changedEntries = new List<GenericChangedEntry<Store>>();
-                var stores = await GetByIdsAsync(ids);
+                var stores = await GetByIdsAsync(ids, StoreResponseGroup.StoreInfo.ToString());
                 var dbStores = await repository.GetStoresByIdsAsync(ids);
 
                 foreach (var store in stores)
@@ -158,7 +150,7 @@ namespace VirtoCommerce.StoreModule.Data.Services
 
             if (user.StoreId != null)
             {
-                var stores = await GetByIdsAsync(new[] { user.StoreId });
+                var stores = await GetByIdsAsync(new[] { user.StoreId }, StoreResponseGroup.StoreInfo.ToString());
                 foreach (var store in stores)
                 {
                     retVal.Add(store.Id);

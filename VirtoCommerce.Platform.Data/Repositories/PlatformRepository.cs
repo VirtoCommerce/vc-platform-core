@@ -1,10 +1,8 @@
 using System;
-using System.Collections.Generic;
 using System.Linq;
 using System.Threading.Tasks;
 using Microsoft.EntityFrameworkCore;
 using VirtoCommerce.Platform.Core.Common;
-using VirtoCommerce.Platform.Data.Assets;
 using VirtoCommerce.Platform.Data.Infrastructure;
 using VirtoCommerce.Platform.Data.Model;
 
@@ -21,7 +19,7 @@ namespace VirtoCommerce.Platform.Data.Repositories
         public virtual IQueryable<SettingEntity> Settings { get { return DbContext.Set<SettingEntity>(); } }
 
         public virtual IQueryable<DynamicPropertyEntity> DynamicProperties { get { return DbContext.Set<DynamicPropertyEntity>(); } }
-        public virtual IQueryable<DynamicPropertyObjectValueEntity> DynamicPropertyObjectValues { get { return DbContext.Set<DynamicPropertyObjectValueEntity>(); } }
+
         public virtual IQueryable<DynamicPropertyDictionaryItemEntity> DynamicPropertyDictionaryItems { get { return DbContext.Set<DynamicPropertyDictionaryItemEntity>(); } }
 
 
@@ -29,17 +27,11 @@ namespace VirtoCommerce.Platform.Data.Repositories
 
 
 
-        public virtual async Task<DynamicPropertyEntity[]> GetObjectDynamicPropertiesAsync(string[] objectTypeNames, string[] objectIds)
+        public virtual async Task<DynamicPropertyEntity[]> GetObjectDynamicPropertiesAsync(string[] objectTypeNames)
         {
             var properties = await DynamicProperties.Include(x => x.DisplayNames)
                                               .OrderBy(x => x.Name)
                                               .Where(x => objectTypeNames.Contains(x.ObjectType)).ToArrayAsync();
-
-            var propertyIds = properties.Select(x => x.Id).ToArray();
-            var proprValues = await DynamicPropertyObjectValues.Include(x => x.DictionaryItem.DisplayNames)
-                                                         .Where(x => propertyIds.Contains(x.PropertyId) && objectIds.Contains(x.ObjectId))
-                                                         .ToArrayAsync();
-
             return properties;
         }
 

@@ -138,7 +138,7 @@ namespace VirtoCommerce.OrderModule.Test
             var settingsManagerMock = new Mock<ISettingsManager>();
 
             var storeServiceMock = new Mock<IStoreService>();
-            storeServiceMock.Setup(x => x.GetByIdAsync(TestStoreId))
+            storeServiceMock.Setup(x => x.GetByIdAsync(TestStoreId, null))
                 .ReturnsAsync(new Store { MainFulfillmentCenterId = TestFulfillmentCenterId });
 
             var targetHandler = new AdjustInventoryOrderChangedEventHandler(inventoryServiceMock.Object,

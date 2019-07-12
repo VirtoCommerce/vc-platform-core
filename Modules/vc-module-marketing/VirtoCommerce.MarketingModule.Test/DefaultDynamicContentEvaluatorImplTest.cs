@@ -20,17 +20,19 @@ namespace VirtoCommerce.MarketingModule.Test
     public class DefaultDynamicContentEvaluatorImplTest
     {
         private readonly Mock<IMarketingRepository> _repositoryMock;
+        private readonly Mock<IDynamicContentSearchService> _dynamicContentSearchServiceMock;
         private readonly Mock<IDynamicContentService> _dynamicContentServiceMock;
-        private readonly Mock<ILogger<DefaultDynamicContentEvaluatorImpl>> _loggerMock;
+        private readonly Mock<ILogger<DefaultDynamicContentEvaluator>> _loggerMock;
         private readonly Mock<IUnitOfWork> _mockUnitOfWork;
 
         public DefaultDynamicContentEvaluatorImplTest()
         {
             _repositoryMock = new Mock<IMarketingRepository>();
 
+            _dynamicContentSearchServiceMock = new Mock<IDynamicContentSearchService>();
             _dynamicContentServiceMock = new Mock<IDynamicContentService>();
             //_expressionSerializerMock = new Mock<IExpressionSerializer>();
-            _loggerMock = new Mock<ILogger<DefaultDynamicContentEvaluatorImpl>>();
+            _loggerMock = new Mock<ILogger<DefaultDynamicContentEvaluator>>();
             _mockUnitOfWork = new Mock<IUnitOfWork>();
             _repositoryMock.Setup(ss => ss.UnitOfWork).Returns(_mockUnitOfWork.Object);
 
@@ -70,12 +72,12 @@ namespace VirtoCommerce.MarketingModule.Test
                     DynamicExpression = new DynamicContentConditionTree()
                 }
             };
-            _dynamicContentServiceMock.Setup(dcs => dcs.GetContentPublicationsByStoreIdAndPlaceNameAsync(It.IsAny<string>(), It.IsAny<DateTime>(), It.IsAny<string>()))
-                .ReturnsAsync(groups.ToArray());
+            _dynamicContentSearchServiceMock.Setup(dcs => dcs.SearchContentPublicationsAsync(It.IsAny<DynamicContentPublicationSearchCriteria>()))
+                .ReturnsAsync(new Core.Model.DynamicContent.Search.DynamicContentPublicationSearchResult { Results = groups.ToArray() });
             _dynamicContentServiceMock.Setup(dcs => dcs.GetContentItemsByIdsAsync(new[] { dynamicContentItem.Id }))
                 .ReturnsAsync(expectedArray);
 
-            var evaluator = new DefaultDynamicContentEvaluatorImpl(_dynamicContentServiceMock.Object, _loggerMock.Object);
+            var evaluator = new DefaultDynamicContentEvaluator(_dynamicContentSearchServiceMock.Object, _dynamicContentServiceMock.Object, _loggerMock.Object);
 
             //Act
             var results = evaluator.EvaluateItemsAsync(evalContext).GetAwaiter().GetResult();

@@ -31,7 +31,7 @@ namespace VirtoCommerce.CustomerModule.Data.Migrations
                             ALTER TABLE [Member] ADD [Salutation] nvarchar(256) NULL
                             ALTER TABLE [Member] ADD [Type] nvarchar(64) NULL
                             ALTER TABLE [Member] ADD [IsActive] [bit] NULL
-                            ALTER TABLE [Member] ADD [Description] nvarchar(256) NULL
+                            ALTER TABLE [Member] ADD [Description] nvarchar(max) NULL
                             ALTER TABLE [Member] ADD [BusinessCategory] nvarchar(64) NULL
                             ALTER TABLE [Member] ADD [OwnerId] nvarchar(128) NULL
                             ALTER TABLE [Member] ADD [SiteUrl] nvarchar(2048) NULL
@@ -63,6 +63,13 @@ namespace VirtoCommerce.CustomerModule.Data.Migrations
                             UPDATE [PlatformDynamicProperty] SET ObjectType = 'VirtoCommerce.CustomerModule.Core.Model.Organization' WHERE ObjectType = 'VirtoCommerce.Domain.Customer.Model.Organization'
                             UPDATE [PlatformDynamicProperty] SET ObjectType = 'VirtoCommerce.CustomerModule.Core.Model.Employee' WHERE ObjectType = 'VirtoCommerce.Domain.Customer.Model.Employee'
                             UPDATE [PlatformDynamicProperty] SET ObjectType = 'VirtoCommerce.CustomerModule.Core.Model.Vendor' WHERE ObjectType = 'VirtoCommerce.Domain.Customer.Model.Vendor'
+                        END
+
+                        BEGIN
+                            UPDATE [PlatformDynamicPropertyObjectValue] SET ObjectType = 'VirtoCommerce.CustomerModule.Core.Model.Contact' WHERE ObjectType = 'VirtoCommerce.Domain.Customer.Model.Contact'
+                            UPDATE [PlatformDynamicPropertyObjectValue] SET ObjectType = 'VirtoCommerce.CustomerModule.Core.Model.Organization' WHERE ObjectType = 'VirtoCommerce.Domain.Customer.Model.Organization'
+                            UPDATE [PlatformDynamicPropertyObjectValue] SET ObjectType = 'VirtoCommerce.CustomerModule.Core.Model.Employee' WHERE ObjectType = 'VirtoCommerce.Domain.Customer.Model.Employee'
+                            UPDATE [PlatformDynamicPropertyObjectValue] SET ObjectType = 'VirtoCommerce.CustomerModule.Core.Model.Vendor' WHERE ObjectType = 'VirtoCommerce.Domain.Customer.Model.Vendor'
                         END
             END");
 
@@ -104,7 +111,8 @@ namespace VirtoCommerce.CustomerModule.Data.Migrations
                     BEGIN
                         INSERT INTO [MemberSeoInfo] ([Id], [CreatedDate], [ModifiedDate], [CreatedBy], [ModifiedBy], [Keyword], [StoreId], [IsActive], [Language], [Title], [MetaDescription], [MetaKeywords], [ImageAltDescription], [MemberId])
                               SELECT [Id], [CreatedDate], [ModifiedDate], [CreatedBy], [ModifiedBy], [Keyword], [StoreId], [IsActive], [Language], [Title], [MetaDescription], [MetaKeywords], [ImageAltDescription], [ObjectId] as [MemberId]  FROM [SeoUrlKeyword] WHERE ObjectType = 'Vendor'
-				    END");
+				    END");      
+
         }
 
         protected override void Down(MigrationBuilder migrationBuilder)

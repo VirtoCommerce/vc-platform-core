@@ -3,7 +3,6 @@ using System;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.Infrastructure;
 using Microsoft.EntityFrameworkCore.Metadata;
-using Microsoft.EntityFrameworkCore.Storage.ValueConversion;
 using VirtoCommerce.StoreModule.Data.Repositories;
 
 namespace VirtoCommerce.StoreModule.Data.Migrations
@@ -52,9 +51,6 @@ namespace VirtoCommerce.StoreModule.Data.Migrations
                         .HasMaxLength(64);
 
                     b.Property<DateTime?>("ModifiedDate");
-
-                    b.Property<string>("OuterId")
-                        .HasMaxLength(128);
 
                     b.Property<string>("StoreId")
                         .HasMaxLength(128);
