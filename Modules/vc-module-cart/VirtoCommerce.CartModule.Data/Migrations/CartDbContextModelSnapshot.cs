@@ -352,68 +352,6 @@ namespace VirtoCommerce.CartModule.Data.Migrations
                     b.ToTable("CartLineItem");
                 });
 
-            modelBuilder.Entity("VirtoCommerce.CartModule.Data.Model.PaymentDynamicPropertyObjectValueEntity", b =>
-                {
-                    b.Property<string>("Id")
-                        .ValueGeneratedOnAdd()
-                        .HasMaxLength(128);
-
-                    b.Property<bool?>("BooleanValue");
-
-                    b.Property<string>("CreatedBy")
-                        .HasMaxLength(64);
-
-                    b.Property<DateTime>("CreatedDate");
-
-                    b.Property<DateTime?>("DateTimeValue");
-
-                    b.Property<decimal?>("DecimalValue")
-                        .HasColumnType("decimal(18,5)");
-
-                    b.Property<string>("DictionaryItemId")
-                        .HasMaxLength(128);
-
-                    b.Property<int?>("IntegerValue");
-
-                    b.Property<string>("Locale")
-                        .HasMaxLength(64);
-
-                    b.Property<string>("LongTextValue");
-
-                    b.Property<string>("ModifiedBy")
-                        .HasMaxLength(64);
-
-                    b.Property<DateTime?>("ModifiedDate");
-
-                    b.Property<string>("ObjectId")
-                        .HasMaxLength(128);
-
-                    b.Property<string>("ObjectType")
-                        .HasMaxLength(256);
-
-                    b.Property<string>("PropertyId")
-                        .HasMaxLength(128);
-
-                    b.Property<string>("PropertyName")
-                        .HasMaxLength(256);
-
-                    b.Property<string>("ShortTextValue")
-                        .HasMaxLength(512);
-
-                    b.Property<string>("ValueType")
-                        .IsRequired()
-                        .HasMaxLength(64);
-
-                    b.HasKey("Id");
-
-                    b.HasIndex("ObjectId");
-
-                    b.HasIndex("ObjectType", "ObjectId")
-                        .HasName("IX_ObjectType_ObjectId");
-
-                    b.ToTable("CartPaymentDynamicPropertyObjectValue");
-                });
-
             modelBuilder.Entity("VirtoCommerce.CartModule.Data.Model.PaymentEntity", b =>
                 {
                     b.Property<string>("Id")
@@ -478,68 +416,6 @@ namespace VirtoCommerce.CartModule.Data.Migrations
                     b.HasIndex("ShoppingCartId");
 
                     b.ToTable("CartPayment");
-                });
-
-            modelBuilder.Entity("VirtoCommerce.CartModule.Data.Model.ShipmentDynamicPropertyObjectValueEntity", b =>
-                {
-                    b.Property<string>("Id")
-                        .ValueGeneratedOnAdd()
-                        .HasMaxLength(128);
-
-                    b.Property<bool?>("BooleanValue");
-
-                    b.Property<string>("CreatedBy")
-                        .HasMaxLength(64);
-
-                    b.Property<DateTime>("CreatedDate");
-
-                    b.Property<DateTime?>("DateTimeValue");
-
-                    b.Property<decimal?>("DecimalValue")
-                        .HasColumnType("decimal(18,5)");
-
-                    b.Property<string>("DictionaryItemId")
-                        .HasMaxLength(128);
-
-                    b.Property<int?>("IntegerValue");
-
-                    b.Property<string>("Locale")
-                        .HasMaxLength(64);
-
-                    b.Property<string>("LongTextValue");
-
-                    b.Property<string>("ModifiedBy")
-                        .HasMaxLength(64);
-
-                    b.Property<DateTime?>("ModifiedDate");
-
-                    b.Property<string>("ObjectId")
-                        .HasMaxLength(128);
-
-                    b.Property<string>("ObjectType")
-                        .HasMaxLength(256);
-
-                    b.Property<string>("PropertyId")
-                        .HasMaxLength(128);
-
-                    b.Property<string>("PropertyName")
-                        .HasMaxLength(256);
-
-                    b.Property<string>("ShortTextValue")
-                        .HasMaxLength(512);
-
-                    b.Property<string>("ValueType")
-                        .IsRequired()
-                        .HasMaxLength(64);
-
-                    b.HasKey("Id");
-
-                    b.HasIndex("ObjectId");
-
-                    b.HasIndex("ObjectType", "ObjectId")
-                        .HasName("IX_ObjectType_ObjectId");
-
-                    b.ToTable("CartShipmentDynamicPropertyObjectValue");
                 });
 
             modelBuilder.Entity("VirtoCommerce.CartModule.Data.Model.ShipmentEntity", b =>
@@ -707,11 +583,17 @@ namespace VirtoCommerce.CartModule.Data.Migrations
                     b.Property<string>("ObjectType")
                         .HasMaxLength(256);
 
+                    b.Property<string>("PaymentId");
+
                     b.Property<string>("PropertyId")
                         .HasMaxLength(128);
 
                     b.Property<string>("PropertyName")
                         .HasMaxLength(256);
+
+                    b.Property<string>("ShipmentId");
+
+                    b.Property<string>("ShoppingCartId");
 
                     b.Property<string>("ShortTextValue")
                         .HasMaxLength(512);
@@ -722,12 +604,16 @@ namespace VirtoCommerce.CartModule.Data.Migrations
 
                     b.HasKey("Id");
 
-                    b.HasIndex("ObjectId");
+                    b.HasIndex("PaymentId");
+
+                    b.HasIndex("ShipmentId");
+
+                    b.HasIndex("ShoppingCartId");
 
                     b.HasIndex("ObjectType", "ObjectId")
                         .HasName("IX_ObjectType_ObjectId");
 
-                    b.ToTable("CartShoppingCartDynamicPropertyObjectValue");
+                    b.ToTable("CartDynamicPropertyObjectValue");
                 });
 
             modelBuilder.Entity("VirtoCommerce.CartModule.Data.Model.ShoppingCartEntity", b =>
@@ -944,27 +830,11 @@ namespace VirtoCommerce.CartModule.Data.Migrations
                         .OnDelete(DeleteBehavior.Cascade);
                 });
 
-            modelBuilder.Entity("VirtoCommerce.CartModule.Data.Model.PaymentDynamicPropertyObjectValueEntity", b =>
-                {
-                    b.HasOne("VirtoCommerce.CartModule.Data.Model.PaymentEntity", "Payment")
-                        .WithMany("DynamicPropertyObjectValues")
-                        .HasForeignKey("ObjectId")
-                        .OnDelete(DeleteBehavior.Cascade);
-                });
-
             modelBuilder.Entity("VirtoCommerce.CartModule.Data.Model.PaymentEntity", b =>
                 {
                     b.HasOne("VirtoCommerce.CartModule.Data.Model.ShoppingCartEntity", "ShoppingCart")
                         .WithMany("Payments")
                         .HasForeignKey("ShoppingCartId")
-                        .OnDelete(DeleteBehavior.Cascade);
-                });
-
-            modelBuilder.Entity("VirtoCommerce.CartModule.Data.Model.ShipmentDynamicPropertyObjectValueEntity", b =>
-                {
-                    b.HasOne("VirtoCommerce.CartModule.Data.Model.ShipmentEntity", "Shipment")
-                        .WithMany("DynamicPropertyObjectValues")
-                        .HasForeignKey("ObjectId")
                         .OnDelete(DeleteBehavior.Cascade);
                 });
 
@@ -991,10 +861,20 @@ namespace VirtoCommerce.CartModule.Data.Migrations
 
             modelBuilder.Entity("VirtoCommerce.CartModule.Data.Model.ShoppingCartDynamicPropertyObjectValueEntity", b =>
                 {
+                    b.HasOne("VirtoCommerce.CartModule.Data.Model.PaymentEntity", "Payment")
+                        .WithMany("DynamicPropertyObjectValues")
+                        .HasForeignKey("PaymentId")
+                        .OnDelete(DeleteBehavior.Restrict);
+
+                    b.HasOne("VirtoCommerce.CartModule.Data.Model.ShipmentEntity", "Shipment")
+                        .WithMany("DynamicPropertyObjectValues")
+                        .HasForeignKey("ShipmentId")
+                        .OnDelete(DeleteBehavior.Restrict);
+
                     b.HasOne("VirtoCommerce.CartModule.Data.Model.ShoppingCartEntity", "ShoppingCart")
                         .WithMany("DynamicPropertyObjectValues")
-                        .HasForeignKey("ObjectId")
-                        .OnDelete(DeleteBehavior.Cascade);
+                        .HasForeignKey("ShoppingCartId")
+                        .OnDelete(DeleteBehavior.Restrict);
                 });
 
             modelBuilder.Entity("VirtoCommerce.CartModule.Data.Model.TaxDetailEntity", b =>

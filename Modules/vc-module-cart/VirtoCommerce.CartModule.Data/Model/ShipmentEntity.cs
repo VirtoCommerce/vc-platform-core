@@ -87,8 +87,8 @@ namespace VirtoCommerce.CartModule.Data.Model
         public virtual ObservableCollection<AddressEntity> Addresses { get; set; } = new NullCollection<AddressEntity>();
         public virtual ObservableCollection<TaxDetailEntity> TaxDetails { get; set; } = new NullCollection<TaxDetailEntity>();
 
-        public virtual ObservableCollection<ShipmentDynamicPropertyObjectValueEntity> DynamicPropertyObjectValues { get; set; }
-            = new NullCollection<ShipmentDynamicPropertyObjectValueEntity>();
+        public virtual ObservableCollection<ShoppingCartDynamicPropertyObjectValueEntity> DynamicPropertyObjectValues { get; set; }
+            = new NullCollection<ShoppingCartDynamicPropertyObjectValueEntity>();
 
         #endregion
 
@@ -222,8 +222,8 @@ namespace VirtoCommerce.CartModule.Data.Model
 
             if (shipment.DynamicProperties != null)
             {
-                DynamicPropertyObjectValues = new ObservableCollection<ShipmentDynamicPropertyObjectValueEntity>(shipment.DynamicProperties.SelectMany(p => p.Values
-                    .Select(v => AbstractTypeFactory<ShipmentDynamicPropertyObjectValueEntity>.TryCreateInstance().FromModel(v, shipment, p))).OfType<ShipmentDynamicPropertyObjectValueEntity>());
+                DynamicPropertyObjectValues = new ObservableCollection<ShoppingCartDynamicPropertyObjectValueEntity>(shipment.DynamicProperties.SelectMany(p => p.Values
+                    .Select(v => AbstractTypeFactory<ShoppingCartDynamicPropertyObjectValueEntity>.TryCreateInstance().FromModel(v, shipment, p))).OfType<ShoppingCartDynamicPropertyObjectValueEntity>());
             }
 
             return this;

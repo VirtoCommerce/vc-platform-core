@@ -122,45 +122,27 @@ namespace VirtoCommerce.CartModule.Data.Repositories
 
             #endregion
 
-            #region Payment
-
-            modelBuilder.Entity<PaymentDynamicPropertyObjectValueEntity>().ToTable("CartPaymentDynamicPropertyObjectValue").HasKey(x => x.Id);
-            modelBuilder.Entity<PaymentDynamicPropertyObjectValueEntity>().Property(x => x.Id).HasMaxLength(128);
-            modelBuilder.Entity<PaymentDynamicPropertyObjectValueEntity>().Property(x => x.DecimalValue).HasColumnType("decimal(18,5)");
-            modelBuilder.Entity<PaymentDynamicPropertyObjectValueEntity>().HasOne(p => p.Payment)
-                .WithMany(s => s.DynamicPropertyObjectValues).HasForeignKey(k => k.ObjectId)
-                .OnDelete(DeleteBehavior.Cascade);
-            modelBuilder.Entity<PaymentDynamicPropertyObjectValueEntity>().HasIndex(x => new { x.ObjectType, x.ObjectId })
-                .IsUnique(false)
-                .HasName("IX_ObjectType_ObjectId");
-
-            #endregion
-
-            #region Shipment
-
-            modelBuilder.Entity<ShipmentDynamicPropertyObjectValueEntity>().ToTable("CartShipmentDynamicPropertyObjectValue").HasKey(x => x.Id);
-            modelBuilder.Entity<ShipmentDynamicPropertyObjectValueEntity>().Property(x => x.Id).HasMaxLength(128);
-            modelBuilder.Entity<ShipmentDynamicPropertyObjectValueEntity>().Property(x => x.DecimalValue).HasColumnType("decimal(18,5)");
-            modelBuilder.Entity<ShipmentDynamicPropertyObjectValueEntity>().HasOne(p => p.Shipment)
-                .WithMany(s => s.DynamicPropertyObjectValues).HasForeignKey(k => k.ObjectId)
-                .OnDelete(DeleteBehavior.Cascade);
-            modelBuilder.Entity<ShipmentDynamicPropertyObjectValueEntity>().HasIndex(x => new { x.ObjectType, x.ObjectId })
-                .IsUnique(false)
-                .HasName("IX_ObjectType_ObjectId");
-
-            #endregion
-
             #region ShoppingCart
 
             modelBuilder.Entity<ShoppingCartDynamicPropertyObjectValueEntity>().ToTable("CartDynamicPropertyObjectValue").HasKey(x => x.Id);
             modelBuilder.Entity<ShoppingCartDynamicPropertyObjectValueEntity>().Property(x => x.Id).HasMaxLength(128);
             modelBuilder.Entity<ShoppingCartDynamicPropertyObjectValueEntity>().Property(x => x.DecimalValue).HasColumnType("decimal(18,5)");
-            modelBuilder.Entity<ShoppingCartDynamicPropertyObjectValueEntity>().HasOne(p => p.ShoppingCart)
-                .WithMany(s => s.DynamicPropertyObjectValues).HasForeignKey(k => k.ObjectId)
-                .OnDelete(DeleteBehavior.Cascade);
+
             modelBuilder.Entity<ShoppingCartDynamicPropertyObjectValueEntity>().HasIndex(x => new { x.ObjectType, x.ObjectId })
                 .IsUnique(false)
                 .HasName("IX_ObjectType_ObjectId");
+
+            modelBuilder.Entity<ShoppingCartDynamicPropertyObjectValueEntity>().HasOne(p => p.ShoppingCart)
+                .WithMany(s => s.DynamicPropertyObjectValues).HasForeignKey(k => k.ShoppingCartId)
+                .OnDelete(DeleteBehavior.Cascade);
+
+            modelBuilder.Entity<ShoppingCartDynamicPropertyObjectValueEntity>().HasOne(p => p.Shipment)
+                .WithMany(s => s.DynamicPropertyObjectValues).HasForeignKey(k => k.ShipmentId)
+                .OnDelete(DeleteBehavior.Cascade);
+
+            modelBuilder.Entity<ShoppingCartDynamicPropertyObjectValueEntity>().HasOne(p => p.Payment)
+                .WithMany(s => s.DynamicPropertyObjectValues).HasForeignKey(k => k.PaymentId)
+                .OnDelete(DeleteBehavior.Cascade);
 
             #endregion
 
