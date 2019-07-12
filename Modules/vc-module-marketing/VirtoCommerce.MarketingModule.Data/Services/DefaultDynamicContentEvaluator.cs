@@ -8,6 +8,7 @@ using VirtoCommerce.CoreModule.Core.Common;
 using VirtoCommerce.CoreModule.Core.Conditions;
 using VirtoCommerce.MarketingModule.Core.Model;
 using VirtoCommerce.MarketingModule.Core.Model.DynamicContent;
+using VirtoCommerce.MarketingModule.Core.Search;
 using VirtoCommerce.MarketingModule.Core.Services;
 using VirtoCommerce.Platform.Core.Common;
 
@@ -15,13 +16,13 @@ namespace VirtoCommerce.MarketingModule.Data.Services
 {
     public class DefaultDynamicContentEvaluator : IMarketingDynamicContentEvaluator
     {
-        private readonly IDynamicContentSearchService _dynamicContentSearchService;
+        private readonly IContentPublicationsSearchService _contentPublicationsSearchService;
         private readonly IDynamicContentService _dynamicContentService;
         private readonly ILogger _logger;
 
-        public DefaultDynamicContentEvaluator(IDynamicContentSearchService dynamicContentSearchService, IDynamicContentService dynamicContentService, ILogger<DefaultDynamicContentEvaluator> logger)
+        public DefaultDynamicContentEvaluator(IContentPublicationsSearchService contentPublicationsSearchService, IDynamicContentService dynamicContentService, ILogger<DefaultDynamicContentEvaluator> logger)
         {
-            _dynamicContentSearchService = dynamicContentSearchService;
+            _contentPublicationsSearchService = contentPublicationsSearchService;
             _dynamicContentService = dynamicContentService;
             _logger = logger;
         }
@@ -42,7 +43,7 @@ namespace VirtoCommerce.MarketingModule.Data.Services
             var criteria = AbstractTypeFactory<DynamicContentPublicationSearchCriteria>.TryCreateInstance();
             criteria = criteria.FromEvalContext(dynamicContext);
 
-            var publishings = await _dynamicContentSearchService.SearchContentPublicationsAsync(criteria);
+            var publishings = await _contentPublicationsSearchService.SearchContentPublicationsAsync(criteria);
 
             foreach (var publishing in publishings.Results)
             {

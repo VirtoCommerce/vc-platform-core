@@ -46,7 +46,6 @@ namespace VirtoCommerce.CatalogModule.Data.Search.Indexing
             return result;
         }
 
-
         public static JsonSerializer ObjectSerializer { get; } = new JsonSerializer
         {
             DefaultValueHandling = DefaultValueHandling.Include,

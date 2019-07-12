@@ -8,6 +8,7 @@ using VirtoCommerce.MarketingModule.Core.Model;
 using VirtoCommerce.MarketingModule.Core.Model.DynamicContent.Search;
 using VirtoCommerce.MarketingModule.Core.Model.Promotions;
 using VirtoCommerce.MarketingModule.Core.Model.Promotions.Search;
+using VirtoCommerce.MarketingModule.Core.Search;
 using VirtoCommerce.MarketingModule.Core.Services;
 using VirtoCommerce.Platform.Core.Common;
 using VirtoCommerce.Platform.Core.ExportImport;
@@ -20,21 +21,36 @@ namespace VirtoCommerce.MarketingModule.Data.ExportImport
         private readonly JsonSerializer _jsonSerializer;
         private const int _batchSize = 50;
         private readonly IPromotionSearchService _promotionSearchService;
-        private readonly IDynamicContentSearchService _dynamicContentSearchService;
+        private readonly IContentPublicationsSearchService _contentPublicationsSearchService;
         private readonly IPromotionService _promotionService;
         private readonly IDynamicContentService _dynamicContentService;
         private readonly ICouponService _couponService;
         private readonly IPromotionUsageService _promotionUsageService;
+        private readonly IContentItemsSearchService _contentItemsSearchService;
+        private readonly ICouponSearchService _couponSearchService;
+        private readonly IContentPlacesSearchService _contentPlacesSearchService;
+        private readonly IPromotionUsageSearchService _promotionUsageSearchService;
+        private readonly IFolderSearchService _folderSearchService;
 
-        public MarketingExportImport(JsonSerializer jsonSerializer, IPromotionSearchService promotionSearchService, IDynamicContentSearchService dynamicContentSearchService, IPromotionService promotionService, IDynamicContentService dynamicContentService, ICouponService couponService, IPromotionUsageService promotionUsageService)
+        public MarketingExportImport(JsonSerializer jsonSerializer, IPromotionSearchService promotionSearchService,
+            IContentPublicationsSearchService contentPublicationsSearchService, IPromotionService promotionService,
+            IDynamicContentService dynamicContentService, ICouponService couponService,
+            IPromotionUsageService promotionUsageService, IContentItemsSearchService contentItemsSearchService,
+            ICouponSearchService couponSearchService, IContentPlacesSearchService contentPlacesSearchService,
+            IPromotionUsageSearchService promotionUsageSearchService, IFolderSearchService folderSearchService)
         {
             _jsonSerializer = jsonSerializer;
             _promotionSearchService = promotionSearchService;
-            _dynamicContentSearchService = dynamicContentSearchService;
+            _contentPublicationsSearchService = contentPublicationsSearchService;
             _promotionService = promotionService;
             _dynamicContentService = dynamicContentService;
             _couponService = couponService;
             _promotionUsageService = promotionUsageService;
+            _contentItemsSearchService = contentItemsSearchService;
+            _couponSearchService = couponSearchService;
+            _contentPlacesSearchService = contentPlacesSearchService;
+            _promotionUsageSearchService = promotionUsageSearchService;
+            _folderSearchService = folderSearchService;
         }
 
         public async Task DoExportAsync(Stream outStream, Action<ExportImportProgressInfo> progressCallback,
@@ -84,7 +100,7 @@ namespace VirtoCommerce.MarketingModule.Data.ExportImport
 
                 await writer.WritePropertyNameAsync("DynamicContentItems");
                 await writer.SerializeJsonArrayWithPagingAsync(_jsonSerializer, _batchSize, async (skip, take) =>
-                    (GenericSearchResult<DynamicContentItem>)await _dynamicContentSearchService.SearchContentItemsAsync(new DynamicContentItemSearchCriteria { Skip = skip, Take = take })
+                    (GenericSearchResult<DynamicContentItem>)await _contentItemsSearchService.SearchContentItemsAsync(new DynamicContentItemSearchCriteria { Skip = skip, Take = take })
                 , (processedCount, totalCount) =>
                 {
                     progressInfo.Description = $"{ processedCount } of { totalCount } dynamic content items have been exported";
@@ -96,7 +112,7 @@ namespace VirtoCommerce.MarketingModule.Data.ExportImport
 
                 await writer.WritePropertyNameAsync("DynamicContentPlaces");
                 await writer.SerializeJsonArrayWithPagingAsync(_jsonSerializer, _batchSize, async (skip, take) =>
-                    (GenericSearchResult<DynamicContentPlace>)await _dynamicContentSearchService.SearchContentPlacesAsync(new DynamicContentPlaceSearchCriteria { Skip = skip, Take = take })
+                    (GenericSearchResult<DynamicContentPlace>)await _contentPlacesSearchService.SearchContentPlacesAsync(new DynamicContentPlaceSearchCriteria { Skip = skip, Take = take })
                 , (processedCount, totalCount) =>
                 {
                     progressInfo.Description = $"{ processedCount } of { totalCount } dynamic content places have been exported";
@@ -109,7 +125,7 @@ namespace VirtoCommerce.MarketingModule.Data.ExportImport
                 await writer.WritePropertyNameAsync("DynamicContentPublications");
                 await writer.SerializeJsonArrayWithPagingAsync(_jsonSerializer, _batchSize, async (skip, take) =>
                 {
-                    var searchResult = await _dynamicContentSearchService.SearchContentPublicationsAsync(new DynamicContentPublicationSearchCriteria { Skip = skip, Take = take });
+                    var searchResult = await _contentPublicationsSearchService.SearchContentPublicationsAsync(new DynamicContentPublicationSearchCriteria { Skip = skip, Take = take });
                     return (GenericSearchResult<DynamicContentPublication>)searchResult;
                 }, (processedCount, totalCount) =>
                 {
@@ -121,7 +137,7 @@ namespace VirtoCommerce.MarketingModule.Data.ExportImport
                 progressCallback(progressInfo);
 
                 await writer.WritePropertyNameAsync("Coupons");
-                await writer.SerializeJsonArrayWithPagingAsync(_jsonSerializer, _batchSize, (skip, take) => _couponService.SearchCouponsAsync(new CouponSearchCriteria { Skip = skip, Take = take }), (processedCount, totalCount) =>
+                await writer.SerializeJsonArrayWithPagingAsync(_jsonSerializer, _batchSize, (skip, take) => _couponSearchService.SearchCouponsAsync(new CouponSearchCriteria { Skip = skip, Take = take }), (processedCount, totalCount) =>
                 {
                     progressInfo.Description = $"{ processedCount } of { totalCount } coupons have been exported";
                     progressCallback(progressInfo);
@@ -131,7 +147,7 @@ namespace VirtoCommerce.MarketingModule.Data.ExportImport
                 progressCallback(progressInfo);
 
                 await writer.WritePropertyNameAsync("Usages");
-                await writer.SerializeJsonArrayWithPagingAsync(_jsonSerializer, _batchSize, (skip, take) => _promotionUsageService.SearchUsagesAsync(new PromotionUsageSearchCriteria { Skip = skip, Take = take }), (processedCount, totalCount) =>
+                await writer.SerializeJsonArrayWithPagingAsync(_jsonSerializer, _batchSize, (skip, take) => _promotionUsageSearchService.SearchUsagesAsync(new PromotionUsageSearchCriteria { Skip = skip, Take = take }), (processedCount, totalCount) =>
                 {
                     progressInfo.Description = $"{ processedCount } of { totalCount } usages have been exported";
                     progressCallback(progressInfo);
@@ -222,7 +238,7 @@ namespace VirtoCommerce.MarketingModule.Data.ExportImport
         {
             var result = new List<DynamicContentFolder>();
 
-            var childrenFolders = (await _dynamicContentSearchService.SearchFoldersAsync(new DynamicContentFolderSearchCriteria { FolderId = folder?.Id, Take = int.MaxValue })).Results.ToList();
+            var childrenFolders = (await _folderSearchService.SearchFoldersAsync(new DynamicContentFolderSearchCriteria { FolderId = folder?.Id, Take = int.MaxValue })).Results.ToList();
             foreach (var childFolder in childrenFolders)
             {
                 result.Add(childFolder);

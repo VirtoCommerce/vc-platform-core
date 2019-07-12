@@ -11,6 +11,7 @@ using VirtoCommerce.MarketingModule.Core.Model;
 using VirtoCommerce.MarketingModule.Core.Model.Promotions;
 using VirtoCommerce.MarketingModule.Core.Model.Promotions.Search;
 using VirtoCommerce.MarketingModule.Core.Model.PushNotifications;
+using VirtoCommerce.MarketingModule.Core.Search;
 using VirtoCommerce.MarketingModule.Core.Services;
 using VirtoCommerce.MarketingModule.Data.Promotions;
 using VirtoCommerce.MarketingModule.Data.Repositories;
@@ -36,6 +37,7 @@ namespace VirtoCommerce.MarketingModule.Web.Controllers.Api
         private readonly CsvCouponImporter _csvCouponImporter;
         private readonly Func<IMarketingRepository> _repositoryFactory;
         private readonly IMarketingExtensionManager _marketingExtensionManager;
+        private readonly ICouponSearchService _couponSearchService;
 
         public MarketingModulePromotionController(
             IPromotionService promotionService,
@@ -46,7 +48,9 @@ namespace VirtoCommerce.MarketingModule.Web.Controllers.Api
             IPushNotificationManager notifier,
             IBlobStorageProvider blobStorageProvider,
             CsvCouponImporter csvCouponImporter,
-            Func<IMarketingRepository> repositoryFactory, IMarketingExtensionManager marketingExtensionManager)
+            Func<IMarketingRepository> repositoryFactory,
+            IMarketingExtensionManager marketingExtensionManager,
+            ICouponSearchService couponSearchService)
         {
             _promotionService = promotionService;
             _couponService = couponService;
@@ -58,6 +62,7 @@ namespace VirtoCommerce.MarketingModule.Web.Controllers.Api
             _csvCouponImporter = csvCouponImporter;
             _repositoryFactory = repositoryFactory;
             _marketingExtensionManager = marketingExtensionManager;
+            _couponSearchService = couponSearchService;
         }
 
         /// <summary>
@@ -154,7 +159,6 @@ namespace VirtoCommerce.MarketingModule.Web.Controllers.Api
             return await GetPromotionById(promotion.Id);
         }
 
-
         /// <summary>
         /// Update a existing dynamic promotion object in marketing system
         /// </summary>
@@ -191,7 +195,7 @@ namespace VirtoCommerce.MarketingModule.Web.Controllers.Api
         [Route("coupons/search")]
         public async Task<ActionResult<GenericSearchResult<Coupon>>> SearchCoupons([FromBody]CouponSearchCriteria criteria)
         {
-            var searchResult = await _couponService.SearchCouponsAsync(criteria);
+            var searchResult = await _couponSearchService.SearchCouponsAsync(criteria);
             // actualize coupon totalUsage field 
             using (var repository = _repositoryFactory())
             {
@@ -282,7 +286,6 @@ namespace VirtoCommerce.MarketingModule.Web.Controllers.Api
                 }
             }
         }
-
 
         private PromotionSearchCriteria FilterPromotionSearchCriteria(string userName, PromotionSearchCriteria criteria)
         {

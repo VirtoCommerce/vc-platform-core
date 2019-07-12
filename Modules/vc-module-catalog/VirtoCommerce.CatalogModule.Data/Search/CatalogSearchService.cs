@@ -37,14 +37,11 @@ namespace VirtoCommerce.CatalogModule.Data.Search
                 {
                     sortInfos = new[]
                     {
-                            new SortInfo
-                            {
-                                SortColumn = "Name"
-                            }
-                        };
+                        new SortInfo { SortColumn = "Name" }
+                    };
                 }
 
-                var query = BuildSearchQuery(repository, criteria, sortInfos);
+                var query = GetQuery(repository, criteria, sortInfos);
 
                 result.TotalCount = await query.CountAsync();
                 if (criteria.Take > 0)
@@ -57,7 +54,7 @@ namespace VirtoCommerce.CatalogModule.Data.Search
             return result;
         }
 
-        protected virtual IQueryable<CatalogEntity> BuildSearchQuery(ICatalogRepository repository, CatalogSearchCriteria criteria, IEnumerable<SortInfo> sortInfos)
+        protected virtual IQueryable<CatalogEntity> GetQuery(ICatalogRepository repository, CatalogSearchCriteria criteria, IEnumerable<SortInfo> sortInfos)
         {
             var query = repository.Catalogs;
             if (!string.IsNullOrEmpty(criteria.Keyword))
@@ -68,6 +65,7 @@ namespace VirtoCommerce.CatalogModule.Data.Search
             {
                 query = query.Where(x => criteria.CatalogIds.Contains(x.Id));
             }
+
             query = query.OrderBySortInfos(sortInfos).ThenBy(x => x.Id);
             return query;
         }

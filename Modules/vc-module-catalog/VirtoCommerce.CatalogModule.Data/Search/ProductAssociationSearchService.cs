@@ -5,7 +5,6 @@ using Microsoft.Extensions.Caching.Memory;
 using VirtoCommerce.CatalogModule.Core.Model;
 using VirtoCommerce.CatalogModule.Core.Model.Search;
 using VirtoCommerce.CatalogModule.Core.Search;
-using VirtoCommerce.CatalogModule.Core.Services;
 using VirtoCommerce.CatalogModule.Data.Caching;
 using VirtoCommerce.CatalogModule.Data.Repositories;
 using VirtoCommerce.Platform.Core.Caching;
@@ -17,12 +16,10 @@ namespace VirtoCommerce.CatalogModule.Data.Search
     public class ProductAssociationSearchService : IProductAssociationSearchService
     {
         private readonly Func<ICatalogRepository> _catalogRepositoryFactory;
-        private readonly IItemService _itemService;
         private readonly IPlatformMemoryCache _platformMemoryCache;
-        public ProductAssociationSearchService(Func<ICatalogRepository> catalogRepositoryFactory, IItemService itemService, IPlatformMemoryCache platformMemoryCache)
+        public ProductAssociationSearchService(Func<ICatalogRepository> catalogRepositoryFactory, IPlatformMemoryCache platformMemoryCache)
         {
             _catalogRepositoryFactory = catalogRepositoryFactory;
-            _itemService = itemService;
             _platformMemoryCache = platformMemoryCache;
         }
 
@@ -44,13 +41,11 @@ namespace VirtoCommerce.CatalogModule.Data.Search
                     {
                         //Optimize performance and CPU usage
                         repository.DisableChangesTracking();
-
                         var dbResult = await repository.SearchAssociations(criteria);
 
                         result.TotalCount = dbResult.TotalCount;
                         result.Results = dbResult.Results
                             .Select(x => x.ToModel(AbstractTypeFactory<ProductAssociation>.TryCreateInstance())).ToList();
-
                     }
                 }
                 return result;

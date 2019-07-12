@@ -18,11 +18,13 @@ using VirtoCommerce.MarketingModule.Core.Model;
 using VirtoCommerce.MarketingModule.Core.Model.DynamicContent;
 using VirtoCommerce.MarketingModule.Core.Model.Promotions;
 using VirtoCommerce.MarketingModule.Core.Model.Promotions.Conditions;
+using VirtoCommerce.MarketingModule.Core.Search;
 using VirtoCommerce.MarketingModule.Core.Services;
 using VirtoCommerce.MarketingModule.Data.ExportImport;
 using VirtoCommerce.MarketingModule.Data.Handlers;
 using VirtoCommerce.MarketingModule.Data.Promotions;
 using VirtoCommerce.MarketingModule.Data.Repositories;
+using VirtoCommerce.MarketingModule.Data.Search;
 using VirtoCommerce.MarketingModule.Data.Services;
 using VirtoCommerce.MarketingModule.Web.ExportImport;
 using VirtoCommerce.MarketingModule.Web.JsonConverters;
@@ -53,6 +55,9 @@ namespace VirtoCommerce.MarketingModule.Web
 
             var promotionExtensionManager = new DefaultMarketingExtensionManager();
 
+
+            #region Services
+
             serviceCollection.AddSingleton<IMarketingExtensionManager>(promotionExtensionManager);
             serviceCollection.AddSingleton<IPromotionService, PromotionService>();
             serviceCollection.AddSingleton<ICouponService, CouponService>();
@@ -60,11 +65,21 @@ namespace VirtoCommerce.MarketingModule.Web
             serviceCollection.AddSingleton<IMarketingDynamicContentEvaluator, DefaultDynamicContentEvaluator>();
             serviceCollection.AddSingleton<IDynamicContentService, DynamicContentService>();
 
-            serviceCollection.AddSingleton<IPromotionSearchService, MarketingSearchService>();
-            serviceCollection.AddSingleton<ICouponService, CouponService>();
-            serviceCollection.AddSingleton<IDynamicContentSearchService, MarketingSearchService>();
-            serviceCollection.AddSingleton<CsvCouponImporter>();
+            #endregion
 
+            #region Search
+
+            serviceCollection.AddSingleton<IContentItemsSearchService, ContentItemsSearchService>();
+            serviceCollection.AddSingleton<IContentPlacesSearchService, ContentPlacesSearchService>();
+            serviceCollection.AddSingleton<IContentPublicationsSearchService, ContentPublicationsSearchService>();
+            serviceCollection.AddSingleton<ICouponSearchService, CouponSearchService>();
+            serviceCollection.AddSingleton<IFolderSearchService, FolderSearchService>();
+            serviceCollection.AddSingleton<IPromotionSearchService, PromotionSearchService>();
+            serviceCollection.AddSingleton<IPromotionUsageSearchService, PromotionUsageSearchService>();
+
+            #endregion
+
+            serviceCollection.AddSingleton<CsvCouponImporter>();
 
             serviceCollection.AddSingleton<IMarketingPromoEvaluator>(provider =>
             {
@@ -75,17 +90,14 @@ namespace VirtoCommerce.MarketingModule.Web
                 {
                     return new CombineStackablePromotionPolicy(promotionService);
                 }
-                else
-                {
-                    return new BestRewardPromotionPolicy(promotionService);
-                }
+                return new BestRewardPromotionPolicy(promotionService);
             });
 
             AbstractTypeFactory<DynamicPromotion>.RegisterType<DynamicPromotion>().WithFactory(() =>
             {
-                var couponService = serviceCollection.BuildServiceProvider().GetService<ICouponService>();
-                var promotionUsageService = serviceCollection.BuildServiceProvider().GetService<IPromotionUsageService>();
-                return new DynamicPromotion(couponService, promotionUsageService);
+                var couponSearchService = serviceCollection.BuildServiceProvider().GetService<ICouponSearchService>();
+                var promotionUsagesSearchService = serviceCollection.BuildServiceProvider().GetService<IPromotionUsageSearchService>();
+                return new DynamicPromotion(couponSearchService, promotionUsagesSearchService);
             });
 
             serviceCollection.AddSingleton<DynamicContentItemEventHandlers>();
@@ -221,7 +233,6 @@ namespace VirtoCommerce.MarketingModule.Web
         {
             await _appBuilder.ApplicationServices.GetRequiredService<MarketingExportImport>().DoImportAsync(inputStream, progressCallback, cancellationToken);
         }
-
 
         private List<IConditionTree> GetConditionsAndRewards()
         {

@@ -7,6 +7,7 @@ using Microsoft.AspNetCore.Mvc;
 using Newtonsoft.Json;
 using VirtoCommerce.CoreModule.Core.Conditions;
 using VirtoCommerce.MarketingModule.Core;
+using VirtoCommerce.MarketingModule.Core.Search;
 using VirtoCommerce.MarketingModule.Core.Services;
 using VirtoCommerce.Platform.Core.Common;
 using coreModel = VirtoCommerce.MarketingModule.Core.Model;
@@ -18,17 +19,28 @@ namespace VirtoCommerce.MarketingModule.Web.Controllers.Api
     {
         private readonly IDynamicContentService _dynamicContentService;
         private readonly IMarketingDynamicContentEvaluator _dynamicContentEvaluator;
-        private readonly IDynamicContentSearchService _dynamicConentSearchService;
+        private readonly IContentPublicationsSearchService _contentPublicationsSearchService;
         private readonly IMarketingExtensionManager _marketingExtensionManager;
+        private readonly IFolderSearchService _folderSearchService;
+        private readonly IContentPlacesSearchService _contentPlacesSearchService;
+        private readonly IContentItemsSearchService _contentItemsSearchService;
 
-        public MarketingModuleDynamicContentController(IDynamicContentService dynamicContentService,
-            IMarketingDynamicContentEvaluator dynamicContentEvaluator, IDynamicContentSearchService dynamicConentSearchService
-            , IMarketingExtensionManager marketingExtensionManager)
+        public MarketingModuleDynamicContentController(
+            IDynamicContentService dynamicContentService,
+            IMarketingDynamicContentEvaluator dynamicContentEvaluator,
+            IContentPublicationsSearchService contentPublicationsSearchService,
+            IMarketingExtensionManager marketingExtensionManager,
+            IFolderSearchService folderSearchService,
+            IContentPlacesSearchService contentPlacesSearchService,
+            IContentItemsSearchService contentItemsSearchService)
         {
             _dynamicContentService = dynamicContentService;
             _dynamicContentEvaluator = dynamicContentEvaluator;
-            _dynamicConentSearchService = dynamicConentSearchService;
+            _contentPublicationsSearchService = contentPublicationsSearchService;
             _marketingExtensionManager = marketingExtensionManager;
+            _folderSearchService = folderSearchService;
+            _contentPlacesSearchService = contentPlacesSearchService;
+            _contentItemsSearchService = contentItemsSearchService;
         }
 
         /// <summary>
@@ -45,16 +57,25 @@ namespace VirtoCommerce.MarketingModule.Web.Controllers.Api
                 Results = new List<coreModel.DynamicContentListEntry>()
             };
 
-            var foldersSearchResult = await _dynamicConentSearchService.SearchFoldersAsync(new coreModel.DynamicContentFolderSearchCriteria { FolderId = criteria.FolderId, Keyword = criteria.Keyword, Take = criteria.Take, Skip = criteria.Skip, Sort = criteria.Sort });
+            var folderSearchCriteria = new coreModel.DynamicContentFolderSearchCriteria
+            {
+                FolderId = criteria.FolderId,
+                Keyword = criteria.Keyword,
+                Take = criteria.Take,
+                Skip = criteria.Skip,
+                Sort = criteria.Sort
+            };
+
+            var foldersSearchResult = await _folderSearchService.SearchFoldersAsync(folderSearchCriteria);
             var folderSkip = Math.Min(foldersSearchResult.TotalCount, criteria.Skip);
             var folderTake = Math.Min(criteria.Take, Math.Max(0, foldersSearchResult.TotalCount - criteria.Skip));
             retVal.TotalCount += foldersSearchResult.TotalCount;
             retVal.Results.AddRange(foldersSearchResult.Results.Skip(folderSkip).Take(folderTake));
 
-            criteria.Skip = criteria.Skip - folderSkip;
-            criteria.Take = criteria.Take - folderTake;
+            criteria.Skip -= folderSkip;
+            criteria.Take -= folderTake;
 
-            var placesSearchResult = await _dynamicConentSearchService.SearchContentPlacesAsync(criteria);
+            var placesSearchResult = await _contentPlacesSearchService.SearchContentPlacesAsync(criteria);
             retVal.TotalCount += placesSearchResult.TotalCount;
             retVal.Results.AddRange(placesSearchResult.Results);
 
@@ -69,7 +90,7 @@ namespace VirtoCommerce.MarketingModule.Web.Controllers.Api
         [Route("contentplaces/search")]
         public async Task<ActionResult<GenericSearchResult<coreModel.DynamicContentPlace>>> DynamicContentPlacesSearch([FromBody]coreModel.DynamicContentPlaceSearchCriteria criteria)
         {
-            var placesSearchResult = await _dynamicConentSearchService.SearchContentPlacesAsync(criteria);
+            var placesSearchResult = await _contentPlacesSearchService.SearchContentPlacesAsync(criteria);
             return Ok(placesSearchResult);
         }
 
@@ -86,16 +107,16 @@ namespace VirtoCommerce.MarketingModule.Web.Controllers.Api
                 Results = new List<coreModel.DynamicContentListEntry>()
             };
 
-            var foldersSearchResult = await _dynamicConentSearchService.SearchFoldersAsync(new coreModel.DynamicContentFolderSearchCriteria { FolderId = criteria.FolderId, Keyword = criteria.Keyword, Take = criteria.Take, Skip = criteria.Skip, Sort = criteria.Sort });
+            var foldersSearchResult = await _folderSearchService.SearchFoldersAsync(new coreModel.DynamicContentFolderSearchCriteria { FolderId = criteria.FolderId, Keyword = criteria.Keyword, Take = criteria.Take, Skip = criteria.Skip, Sort = criteria.Sort });
             var folderSkip = Math.Min(foldersSearchResult.TotalCount, criteria.Skip);
             var folderTake = Math.Min(criteria.Take, Math.Max(0, foldersSearchResult.TotalCount - criteria.Skip));
             retVal.TotalCount += foldersSearchResult.TotalCount;
             retVal.Results.AddRange(foldersSearchResult.Results.Skip(folderSkip).Take(folderTake));
 
-            criteria.Skip = criteria.Skip - folderSkip;
-            criteria.Take = criteria.Take - folderTake;
+            criteria.Skip -= folderSkip;
+            criteria.Take -= folderTake;
 
-            var itemsSearchResult = await _dynamicConentSearchService.SearchContentItemsAsync(criteria);
+            var itemsSearchResult = await _contentItemsSearchService.SearchContentItemsAsync(criteria);
             retVal.TotalCount += itemsSearchResult.TotalCount;
             retVal.Results.AddRange(itemsSearchResult.Results);
 
@@ -110,7 +131,7 @@ namespace VirtoCommerce.MarketingModule.Web.Controllers.Api
         [Route("contentitems/search")]
         public async Task<ActionResult<GenericSearchResult<coreModel.DynamicContentItem>>> DynamicContentItemsSearch([FromBody]coreModel.DynamicContentItemSearchCriteria criteria)
         {
-            var itemsSearchResult = await _dynamicConentSearchService.SearchContentItemsAsync(criteria);
+            var itemsSearchResult = await _contentItemsSearchService.SearchContentItemsAsync(criteria);
             return Ok(itemsSearchResult);
         }
 
@@ -122,10 +143,9 @@ namespace VirtoCommerce.MarketingModule.Web.Controllers.Api
         [Route("contentpublications/search")]
         public async Task<ActionResult<GenericSearchResult<coreModel.DynamicContentPublication>>> DynamicContentPublicationsSearch([FromBody]coreModel.DynamicContentPublicationSearchCriteria criteria)
         {
-            var publicationSearchResult = await _dynamicConentSearchService.SearchContentPublicationsAsync(criteria);
+            var publicationSearchResult = await _contentPublicationsSearchService.SearchContentPublicationsAsync(criteria);
             return Ok(publicationSearchResult);
         }
-
 
         /// <summary>
         /// Get dynamic content for given placeholders
@@ -157,7 +177,6 @@ namespace VirtoCommerce.MarketingModule.Web.Controllers.Api
             return NotFound();
         }
 
-
         /// <summary>
         /// Add new dynamic content item object to marketing system
         /// </summary>
@@ -170,7 +189,6 @@ namespace VirtoCommerce.MarketingModule.Web.Controllers.Api
             await _dynamicContentService.SaveContentItemsAsync(new[] { contentItem });
             return await GetDynamicContentById(contentItem.Id);
         }
-
 
         /// <summary>
         ///  Update a existing dynamic content item object
@@ -198,7 +216,6 @@ namespace VirtoCommerce.MarketingModule.Web.Controllers.Api
             return NoContent();
         }
 
-
         /// <summary>
         /// Find dynamic content place object by id
         /// </summary>
@@ -217,7 +234,6 @@ namespace VirtoCommerce.MarketingModule.Web.Controllers.Api
             return NotFound();
         }
 
-
         /// <summary>
         /// Add new dynamic content place object to marketing system
         /// </summary>
@@ -230,7 +246,6 @@ namespace VirtoCommerce.MarketingModule.Web.Controllers.Api
             await _dynamicContentService.SavePlacesAsync(new[] { contentPlace });
             return await GetDynamicContentPlaceById(contentPlace.Id);
         }
-
 
         /// <summary>
         ///  Update a existing dynamic content place object
@@ -296,7 +311,6 @@ namespace VirtoCommerce.MarketingModule.Web.Controllers.Api
             return NotFound();
         }
 
-
         /// <summary>
         /// Add new dynamic content publication object to marketing system
         /// </summary>
@@ -309,7 +323,6 @@ namespace VirtoCommerce.MarketingModule.Web.Controllers.Api
             await _dynamicContentService.SavePublicationsAsync(new[] { publication });
             return await GetDynamicContentPublicationById(publication.Id);
         }
-
 
         /// <summary>
         ///  Update a existing dynamic content publication object
@@ -354,7 +367,6 @@ namespace VirtoCommerce.MarketingModule.Web.Controllers.Api
             }
             return NotFound();
         }
-
 
         /// <summary>
         /// Add new dynamic content folder

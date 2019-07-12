@@ -35,7 +35,6 @@ namespace VirtoCommerce.CustomerModule.Data.Search
             return result;
         }
 
-
         protected virtual ISearchRequestBuilder GetRequestBuilder(MembersSearchCriteria criteria)
         {
             var requestBuilder = _searchRequestBuilders?.FirstOrDefault(b => b.DocumentType.Equals(criteria.ObjectType)) ??
