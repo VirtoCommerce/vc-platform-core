@@ -78,7 +78,7 @@ namespace VirtoCommerce.OrdersModule.Data.Model
         public virtual ObservableCollection<AddressEntity> Addresses { get; set; } = new NullCollection<AddressEntity>();
         public virtual ObservableCollection<DiscountEntity> Discounts { get; set; } = new NullCollection<DiscountEntity>();
         public virtual ObservableCollection<TaxDetailEntity> TaxDetails { get; set; } = new NullCollection<TaxDetailEntity>();
-        public virtual ObservableCollection<ShipmentDynamicPropertyObjectValueEntity> DynamicPropertyObjectValues { get; set; } = new NullCollection<ShipmentDynamicPropertyObjectValueEntity>();
+        public virtual ObservableCollection<OrderDynamicPropertyObjectValueEntity> DynamicPropertyObjectValues { get; set; } = new NullCollection<OrderDynamicPropertyObjectValueEntity>();
 
         #endregion
 
@@ -228,8 +228,8 @@ namespace VirtoCommerce.OrdersModule.Data.Model
 
             if (shipment.DynamicProperties != null)
             {
-                DynamicPropertyObjectValues = new ObservableCollection<ShipmentDynamicPropertyObjectValueEntity>(shipment.DynamicProperties.SelectMany(p => p.Values
-                    .Select(v => AbstractTypeFactory<ShipmentDynamicPropertyObjectValueEntity>.TryCreateInstance().FromModel(v, shipment, p))).OfType<ShipmentDynamicPropertyObjectValueEntity>());
+                DynamicPropertyObjectValues = new ObservableCollection<OrderDynamicPropertyObjectValueEntity>(shipment.DynamicProperties.SelectMany(p => p.Values
+                    .Select(v => AbstractTypeFactory<OrderDynamicPropertyObjectValueEntity>.TryCreateInstance().FromModel(v, shipment, p))).OfType<OrderDynamicPropertyObjectValueEntity>());
             }
 
             Sum = shipment.TotalWithTax;

@@ -69,7 +69,7 @@ namespace VirtoCommerce.OrdersModule.Data.Model
 
         public virtual ObservableCollection<DiscountEntity> Discounts { get; set; } = new NullCollection<DiscountEntity>();
         public virtual ObservableCollection<TaxDetailEntity> TaxDetails { get; set; } = new NullCollection<TaxDetailEntity>();
-        public virtual ObservableCollection<PaymentInDynamicPropertyObjectValueEntity> DynamicPropertyObjectValues { get; set; } = new NullCollection<PaymentInDynamicPropertyObjectValueEntity>();
+        public virtual ObservableCollection<OrderDynamicPropertyObjectValueEntity> DynamicPropertyObjectValues { get; set; } = new NullCollection<OrderDynamicPropertyObjectValueEntity>();
 
         public override OrderOperation ToModel(OrderOperation operation)
         {
@@ -194,8 +194,8 @@ namespace VirtoCommerce.OrdersModule.Data.Model
 
             if (payment.DynamicProperties != null)
             {
-                DynamicPropertyObjectValues = new ObservableCollection<PaymentInDynamicPropertyObjectValueEntity>(payment.DynamicProperties.SelectMany(p => p.Values
-                    .Select(v => AbstractTypeFactory<PaymentInDynamicPropertyObjectValueEntity>.TryCreateInstance().FromModel(v, payment, p))).OfType<PaymentInDynamicPropertyObjectValueEntity>());
+                DynamicPropertyObjectValues = new ObservableCollection<OrderDynamicPropertyObjectValueEntity>(payment.DynamicProperties.SelectMany(p => p.Values
+                    .Select(v => AbstractTypeFactory<OrderDynamicPropertyObjectValueEntity>.TryCreateInstance().FromModel(v, payment, p))).OfType<OrderDynamicPropertyObjectValueEntity>());
             }
 
             return this;

@@ -25,8 +25,6 @@ namespace VirtoCommerce.CartModule.Data.Repositories
         protected IQueryable<TaxDetailEntity> TaxDetails => DbContext.Set<TaxDetailEntity>();
         protected IQueryable<CouponEntity> Coupons => DbContext.Set<CouponEntity>();
         protected IQueryable<LineItemDynamicPropertyObjectValueEntity> LineItemDynamicPropertyObjectValues => DbContext.Set<LineItemDynamicPropertyObjectValueEntity>();
-        protected IQueryable<PaymentDynamicPropertyObjectValueEntity> PaymentDynamicPropertyObjectValues => DbContext.Set<PaymentDynamicPropertyObjectValueEntity>();
-        protected IQueryable<ShipmentDynamicPropertyObjectValueEntity> ShipmentDynamicPropertyObjectValues => DbContext.Set<ShipmentDynamicPropertyObjectValueEntity>();
         protected IQueryable<ShoppingCartDynamicPropertyObjectValueEntity> DynamicPropertyObjectValues => DbContext.Set<ShoppingCartDynamicPropertyObjectValueEntity>();
 
         public virtual async Task<ShoppingCartEntity[]> GetShoppingCartsByIdsAsync(string[] ids, string responseGroup = null)
@@ -47,7 +45,7 @@ namespace VirtoCommerce.CartModule.Data.Repositories
 
                 var paymentTaxDetails = TaxDetails.Where(x => paymentIds.Contains(x.PaymentId)).ToArrayAsync();
                 var paymentDiscounts = Discounts.Where(x => paymentIds.Contains(x.PaymentId)).ToArrayAsync();
-                var paymentDynamicPropertyObjectValues = PaymentDynamicPropertyObjectValues.Where(x => ids.Contains(x.ObjectId)).ToArrayAsync();
+                var paymentDynamicPropertyObjectValues = DynamicPropertyObjectValues.Where(x => x.ObjectType.EqualsInvariant(typeof(Payment).FullName) && paymentIds.Contains(x.PaymentId)).ToArrayAsync();
                 await Task.WhenAll(paymentTaxDetails, paymentDiscounts, paymentDynamicPropertyObjectValues);
             }
 
@@ -68,13 +66,13 @@ namespace VirtoCommerce.CartModule.Data.Repositories
                 var shipmentTaxDetails = TaxDetails.Where(x => shipmentIds.Contains(x.ShipmentId)).ToArrayAsync();
                 var shipmentDiscounts = Discounts.Where(x => shipmentIds.Contains(x.ShipmentId)).ToArrayAsync();
                 var shipmentAddresses = Addresses.Where(x => shipmentIds.Contains(x.ShipmentId)).ToArrayAsync();
-                var shipmentDynamicPropertyObjectValues = ShipmentDynamicPropertyObjectValues.Where(x => ids.Contains(x.ObjectId)).ToArrayAsync();
+                var shipmentDynamicPropertyObjectValues = DynamicPropertyObjectValues.Where(x => x.ObjectType.EqualsInvariant(typeof(Shipment).FullName) && shipmentIds.Contains(x.ShipmentId)).ToArrayAsync();
                 await Task.WhenAll(shipmentTaxDetails, shipmentDiscounts, shipmentAddresses, shipmentDynamicPropertyObjectValues);
             }
 
             if (cartResponseGroup.HasFlag(CartResponseGroup.WithDynamicProperties))
             {
-                var dynamicPropertyObjectValues = await DynamicPropertyObjectValues.Where(x => ids.Contains(x.ObjectId)).ToArrayAsync();
+                var dynamicPropertyObjectValues = await DynamicPropertyObjectValues.Where(x => x.ObjectType.EqualsInvariant(typeof(ShoppingCart).FullName) && ids.Contains(x.ShoppingCartId)).ToArrayAsync();
             }
 
             return carts;
