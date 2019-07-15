@@ -116,18 +116,22 @@ namespace VirtoCommerce.CartModule.Data.Repositories
                 .IsUnique(false)
                 .HasName("IX_ObjectType_ObjectId");
 
+            //need to set DeleteBehavior.Cascade manually
             modelBuilder.Entity<CartDynamicPropertyObjectValueEntity>().HasOne(p => p.ShoppingCart)
                 .WithMany(s => s.DynamicPropertyObjectValues).HasForeignKey(k => k.ShoppingCartId)
                 .OnDelete(DeleteBehavior.Cascade);
 
+            //need to set DeleteBehavior.Cascade manually
             modelBuilder.Entity<CartDynamicPropertyObjectValueEntity>().HasOne(p => p.Shipment)
                 .WithMany(s => s.DynamicPropertyObjectValues).HasForeignKey(k => k.ShipmentId)
                 .OnDelete(DeleteBehavior.Cascade);
 
+            //need to set DeleteBehavior.Cascade manually
             modelBuilder.Entity<CartDynamicPropertyObjectValueEntity>().HasOne(p => p.Payment)
                 .WithMany(s => s.DynamicPropertyObjectValues).HasForeignKey(k => k.PaymentId)
                 .OnDelete(DeleteBehavior.Cascade);
 
+            //need to set DeleteBehavior.Cascade manually
             modelBuilder.Entity<CartDynamicPropertyObjectValueEntity>().HasOne(p => p.LineItem)
                 .WithMany(s => s.DynamicPropertyObjectValues).HasForeignKey(k => k.LineItemId)
                 .OnDelete(DeleteBehavior.Cascade);
