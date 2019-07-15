@@ -1,4 +1,4 @@
-using System;
+﻿using System;
 using Microsoft.EntityFrameworkCore.Migrations;
 
 namespace VirtoCommerce.OrdersModule.Data.Migrations
@@ -44,6 +44,12 @@ namespace VirtoCommerce.OrdersModule.Data.Migrations
                         principalColumn: "Id",
                         onDelete: ReferentialAction.Restrict);
                     table.ForeignKey(
+                        name: "FK_OrderDynamicPropertyObjectValue_OrderLineItem_LineItemId",
+                        column: x => x.LineItemId,
+                        principalTable: "OrderLineItem",
+                        principalColumn: "Id",
+                        onDelete: ReferentialAction.Restrict);
+                    table.ForeignKey(
                         name: "FK_OrderDynamicPropertyObjectValue_OrderPaymentIn_PaymentInId",
                         column: x => x.PaymentInId,
                         principalTable: "OrderPaymentIn",
@@ -55,18 +61,17 @@ namespace VirtoCommerce.OrdersModule.Data.Migrations
                         principalTable: "OrderShipment",
                         principalColumn: "Id",
                         onDelete: ReferentialAction.Restrict);
-                    table.ForeignKey(
-                        name: "FK_OrderDynamicPropertyObjectValue_OrderLineItem_LineItemId",
-                        column: x => x.LineItemId,
-                        principalTable: "OrderLineItem",
-                        principalColumn: "Id",
-                        onDelete: ReferentialAction.Restrict);
                 });
 
             migrationBuilder.CreateIndex(
                 name: "IX_OrderDynamicPropertyObjectValue_CustomerOrderId",
                 table: "OrderDynamicPropertyObjectValue",
                 column: "CustomerOrderId");
+
+            migrationBuilder.CreateIndex(
+                name: "IX_OrderDynamicPropertyObjectValue_LineItemId",
+                table: "OrderDynamicPropertyObjectValue",
+                column: "LineItemId");
 
             migrationBuilder.CreateIndex(
                 name: "IX_OrderDynamicPropertyObjectValue_PaymentInId",
@@ -79,19 +84,19 @@ namespace VirtoCommerce.OrdersModule.Data.Migrations
                 column: "ShipmentId");
 
             migrationBuilder.CreateIndex(
-                name: "IX_OrderDynamicPropertyObjectValue_LineItemId",
+                name: "IX_ObjectType_CustomerOrderId",
                 table: "OrderDynamicPropertyObjectValue",
-                column: "LineItemId");
+                columns: new[] { "ObjectType", "CustomerOrderId" });
+
+            migrationBuilder.CreateIndex(
+                name: "IX_ObjectType_LineItemId",
+                table: "OrderDynamicPropertyObjectValue",
+                columns: new[] { "ObjectType", "LineItemId" });
 
             migrationBuilder.CreateIndex(
                 name: "IX_ObjectType_ObjectId",
                 table: "OrderDynamicPropertyObjectValue",
                 columns: new[] { "ObjectType", "ObjectId" });
-
-            migrationBuilder.CreateIndex(
-                name: "IX_ObjectType_CustomerOrderId",
-                table: "OrderDynamicPropertyObjectValue",
-                columns: new[] { "ObjectType", "CustomerOrderId" });
 
             migrationBuilder.CreateIndex(
                 name: "IX_ObjectType_PaymentInId",
@@ -102,11 +107,6 @@ namespace VirtoCommerce.OrdersModule.Data.Migrations
                 name: "IX_ObjectType_ShipmentId",
                 table: "OrderDynamicPropertyObjectValue",
                 columns: new[] { "ObjectType", "ShipmentId" });
-
-            migrationBuilder.CreateIndex(
-                name: "IX_ObjectType_LineItemId",
-                table: "OrderDynamicPropertyObjectValue",
-                columns: new[] { "ObjectType", "LineItemId" });
         }
 
         protected override void Down(MigrationBuilder migrationBuilder)

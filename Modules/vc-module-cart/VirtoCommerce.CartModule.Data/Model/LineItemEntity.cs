@@ -134,8 +134,8 @@ namespace VirtoCommerce.CartModule.Data.Model
         public virtual ObservableCollection<DiscountEntity> Discounts { get; set; }
             = new NullCollection<DiscountEntity>();
 
-        public virtual ObservableCollection<LineItemDynamicPropertyObjectValueEntity> DynamicPropertyObjectValues { get; set; }
-            = new NullCollection<LineItemDynamicPropertyObjectValueEntity>();
+        public virtual ObservableCollection<CartDynamicPropertyObjectValueEntity> DynamicPropertyObjectValues { get; set; }
+            = new NullCollection<CartDynamicPropertyObjectValueEntity>();
 
         #endregion
 
@@ -275,8 +275,8 @@ namespace VirtoCommerce.CartModule.Data.Model
 
             if (lineItem.DynamicProperties != null)
             {
-                DynamicPropertyObjectValues = new ObservableCollection<LineItemDynamicPropertyObjectValueEntity>(lineItem.DynamicProperties.SelectMany(p => p.Values
-                    .Select(v => AbstractTypeFactory<LineItemDynamicPropertyObjectValueEntity>.TryCreateInstance().FromModel(v, lineItem, p))).OfType<LineItemDynamicPropertyObjectValueEntity>());
+                DynamicPropertyObjectValues = new ObservableCollection<CartDynamicPropertyObjectValueEntity>(lineItem.DynamicProperties.SelectMany(p => p.Values
+                    .Select(v => AbstractTypeFactory<CartDynamicPropertyObjectValueEntity>.TryCreateInstance().FromModel(v, lineItem, p))).OfType<CartDynamicPropertyObjectValueEntity>());
             }
 
             return this;

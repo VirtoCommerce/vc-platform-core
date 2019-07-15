@@ -114,8 +114,8 @@ namespace VirtoCommerce.CartModule.Data.Model
         public virtual ObservableCollection<TaxDetailEntity> TaxDetails { get; set; } = new NullCollection<TaxDetailEntity>();
         public virtual ObservableCollection<CouponEntity> Coupons { get; set; } = new NullCollection<CouponEntity>();
 
-        public virtual ObservableCollection<ShoppingCartDynamicPropertyObjectValueEntity> DynamicPropertyObjectValues { get; set; }
-            = new NullCollection<ShoppingCartDynamicPropertyObjectValueEntity>();
+        public virtual ObservableCollection<CartDynamicPropertyObjectValueEntity> DynamicPropertyObjectValues { get; set; }
+            = new NullCollection<CartDynamicPropertyObjectValueEntity>();
 
 
         public virtual ShoppingCart ToModel(ShoppingCart cart)
@@ -273,8 +273,8 @@ namespace VirtoCommerce.CartModule.Data.Model
 
             if (cart.DynamicProperties != null)
             {
-                DynamicPropertyObjectValues = new ObservableCollection<ShoppingCartDynamicPropertyObjectValueEntity>(cart.DynamicProperties.SelectMany(p => p.Values
-                    .Select(v => AbstractTypeFactory<ShoppingCartDynamicPropertyObjectValueEntity>.TryCreateInstance().FromModel(v, cart, p))).OfType<ShoppingCartDynamicPropertyObjectValueEntity>());
+                DynamicPropertyObjectValues = new ObservableCollection<CartDynamicPropertyObjectValueEntity>(cart.DynamicProperties.SelectMany(p => p.Values
+                    .Select(v => AbstractTypeFactory<CartDynamicPropertyObjectValueEntity>.TryCreateInstance().FromModel(v, cart, p))).OfType<CartDynamicPropertyObjectValueEntity>());
             }
 
             return this;
