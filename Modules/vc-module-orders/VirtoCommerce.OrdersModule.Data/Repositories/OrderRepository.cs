@@ -26,7 +26,6 @@ namespace VirtoCommerce.OrdersModule.Data.Repositories
         public IQueryable<LineItemEntity> LineItems => DbContext.Set<LineItemEntity>();
         public IQueryable<PaymentGatewayTransactionEntity> Transactions => DbContext.Set<PaymentGatewayTransactionEntity>();
         public IQueryable<OrderDynamicPropertyObjectValueEntity> OrderDynamicPropertyObjectValues => DbContext.Set<OrderDynamicPropertyObjectValueEntity>();
-        public IQueryable<LineItemDynamicPropertyObjectValueEntity> LineItemDynamicPropertyObjectValues => DbContext.Set<LineItemDynamicPropertyObjectValueEntity>();
 
         public virtual async Task<CustomerOrderEntity[]> GetCustomerOrdersByIdsAsync(string[] ids, string responseGroup = null)
         {
@@ -61,7 +60,7 @@ namespace VirtoCommerce.OrdersModule.Data.Repositories
                 var lineItemIds = lineItems.Select(x => x.Id).ToArray();
                 var lineItemDiscounts = Discounts.Where(x => lineItemIds.Contains(x.LineItemId)).ToArrayAsync();
                 var lineItemTaxDetails = TaxDetails.Where(x => lineItemIds.Contains(x.LineItemId)).ToArrayAsync();
-                var lineItemDynamicPropertyValues = LineItemDynamicPropertyObjectValues.Where(x => lineItemIds.Contains(x.ObjectId)).ToArrayAsync();
+                var lineItemDynamicPropertyValues = OrderDynamicPropertyObjectValues.Where(x => x.ObjectType.EqualsInvariant(typeof(LineItem).FullName) && lineItemIds.Contains(x.ObjectId)).ToArrayAsync();
                 await Task.WhenAll(lineItemDiscounts, lineItemTaxDetails, lineItemDynamicPropertyValues);
             }
 

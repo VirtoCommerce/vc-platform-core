@@ -91,8 +91,8 @@ namespace VirtoCommerce.OrdersModule.Data.Model
 
         public virtual ObservableCollection<TaxDetailEntity> TaxDetails { get; set; } = new NullCollection<TaxDetailEntity>();
 
-        public virtual ObservableCollection<LineItemDynamicPropertyObjectValueEntity> DynamicPropertyObjectValues { get; set; }
-            = new NullCollection<LineItemDynamicPropertyObjectValueEntity>();
+        public virtual ObservableCollection<OrderDynamicPropertyObjectValueEntity> DynamicPropertyObjectValues { get; set; }
+            = new NullCollection<OrderDynamicPropertyObjectValueEntity>();
 
         #endregion
 
@@ -219,8 +219,8 @@ namespace VirtoCommerce.OrdersModule.Data.Model
 
             if (lineItem.DynamicProperties != null)
             {
-                DynamicPropertyObjectValues = new ObservableCollection<LineItemDynamicPropertyObjectValueEntity>(lineItem.DynamicProperties.SelectMany(p => p.Values
-                    .Select(v => AbstractTypeFactory<LineItemDynamicPropertyObjectValueEntity>.TryCreateInstance().FromModel(v, lineItem, p))).OfType<LineItemDynamicPropertyObjectValueEntity>());
+                DynamicPropertyObjectValues = new ObservableCollection<OrderDynamicPropertyObjectValueEntity>(lineItem.DynamicProperties.SelectMany(p => p.Values
+                    .Select(v => AbstractTypeFactory<OrderDynamicPropertyObjectValueEntity>.TryCreateInstance().FromModel(v, lineItem, p))).OfType<OrderDynamicPropertyObjectValueEntity>());
             }
 
             return this;

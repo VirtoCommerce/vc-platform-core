@@ -164,23 +164,7 @@ namespace VirtoCommerce.OrdersModule.Data.Repositories
             modelBuilder.Entity<PaymentGatewayTransactionEntity>().ToTable("OrderPaymentGatewayTransaction");
             #endregion
 
-            #region DynamicProperty
-
-            #region LineItem
-
-            modelBuilder.Entity<LineItemDynamicPropertyObjectValueEntity>().ToTable("OrderLineItemDynamicPropertyObjectValue").HasKey(x => x.Id);
-            modelBuilder.Entity<LineItemDynamicPropertyObjectValueEntity>().Property(x => x.Id).HasMaxLength(128);
-            modelBuilder.Entity<LineItemDynamicPropertyObjectValueEntity>().Property(x => x.DecimalValue).HasColumnType("decimal(18,5)");
-            modelBuilder.Entity<LineItemDynamicPropertyObjectValueEntity>().HasOne(p => p.LineItem)
-                .WithMany(s => s.DynamicPropertyObjectValues).HasForeignKey(k => k.ObjectId)
-                .OnDelete(DeleteBehavior.Cascade);
-            modelBuilder.Entity<LineItemDynamicPropertyObjectValueEntity>().HasIndex(x => new { x.ObjectType, x.ObjectId })
-                .IsUnique(false)
-                .HasName("IX_ObjectType_ObjectId");
-
-            #endregion
-
-            #region Order
+            #region DynamicPropertyValues
 
             modelBuilder.Entity<OrderDynamicPropertyObjectValueEntity>().ToTable("OrderDynamicPropertyObjectValue").HasKey(x => x.Id);
             modelBuilder.Entity<OrderDynamicPropertyObjectValueEntity>().Property(x => x.Id).HasMaxLength(128);
@@ -201,11 +185,30 @@ namespace VirtoCommerce.OrdersModule.Data.Repositories
                 .WithMany(s => s.DynamicPropertyObjectValues).HasForeignKey(k => k.ShipmentId)
                 .OnDelete(DeleteBehavior.Cascade);
 
+            //need to set DeleteBehavior.Cascade manually
+            modelBuilder.Entity<OrderDynamicPropertyObjectValueEntity>().HasOne(p => p.LineItem)
+                .WithMany(s => s.DynamicPropertyObjectValues).HasForeignKey(k => k.LineItemId)
+                .OnDelete(DeleteBehavior.Cascade);
+
+            modelBuilder.Entity<OrderDynamicPropertyObjectValueEntity>().HasIndex(x => new { x.ObjectType, x.CustomerOrderId })
+                .IsUnique(false)
+                .HasName("IX_ObjectType_CustomerOrderId");
+
+            modelBuilder.Entity<OrderDynamicPropertyObjectValueEntity>().HasIndex(x => new { x.ObjectType, x.PaymentInId })
+                .IsUnique(false)
+                .HasName("IX_ObjectType_PaymentInId");
+
+            modelBuilder.Entity<OrderDynamicPropertyObjectValueEntity>().HasIndex(x => new { x.ObjectType, x.ShipmentId })
+                .IsUnique(false)
+                .HasName("IX_ObjectType_ShipmentId");
+
+            modelBuilder.Entity<OrderDynamicPropertyObjectValueEntity>().HasIndex(x => new { x.ObjectType, x.LineItemId })
+                .IsUnique(false)
+                .HasName("IX_ObjectType_LineItemId");
+
             modelBuilder.Entity<OrderDynamicPropertyObjectValueEntity>().HasIndex(x => new { x.ObjectType, x.ObjectId })
                 .IsUnique(false)
                 .HasName("IX_ObjectType_ObjectId");
-
-            #endregion
 
             #endregion
 
