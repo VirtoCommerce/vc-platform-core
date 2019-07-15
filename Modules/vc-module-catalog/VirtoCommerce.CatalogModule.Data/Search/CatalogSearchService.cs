@@ -37,11 +37,8 @@ namespace VirtoCommerce.CatalogModule.Data.Search
                 {
                     sortInfos = new[]
                     {
-                            new SortInfo
-                            {
-                                SortColumn = "Name"
-                            }
-                        };
+                        new SortInfo { SortColumn = "Name" }
+                    };
                 }
 
                 var query = BuildSearchQuery(repository, criteria, sortInfos);
@@ -68,6 +65,7 @@ namespace VirtoCommerce.CatalogModule.Data.Search
             {
                 query = query.Where(x => criteria.CatalogIds.Contains(x.Id));
             }
+
             query = query.OrderBySortInfos(sortInfos).ThenBy(x => x.Id);
             return query;
         }

@@ -6,6 +6,22 @@ namespace VirtoCommerce.MarketingModule.Core.Model.Promotions.Search
     {
         public bool OnlyActive { get; set; }
         public string Store { get; set; }
-        public string[] StoreIds { get; set; }
+
+        private string[] _storeIds;
+        public string[] StoreIds
+        {
+            get
+            {
+                if (_storeIds == null && !string.IsNullOrEmpty(Store))
+                {
+                    _storeIds = new[] { Store };
+                }
+                return _storeIds;
+            }
+            set
+            {
+                _storeIds = value;
+            }
+        }
     }
 }

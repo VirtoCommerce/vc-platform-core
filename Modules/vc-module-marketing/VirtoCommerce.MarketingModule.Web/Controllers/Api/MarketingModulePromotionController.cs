@@ -11,9 +11,11 @@ using VirtoCommerce.MarketingModule.Core.Model;
 using VirtoCommerce.MarketingModule.Core.Model.Promotions;
 using VirtoCommerce.MarketingModule.Core.Model.Promotions.Search;
 using VirtoCommerce.MarketingModule.Core.Model.PushNotifications;
+using VirtoCommerce.MarketingModule.Core.Search;
 using VirtoCommerce.MarketingModule.Core.Services;
 using VirtoCommerce.MarketingModule.Data.Promotions;
 using VirtoCommerce.MarketingModule.Data.Repositories;
+using VirtoCommerce.MarketingModule.Web.Authorization;
 using VirtoCommerce.MarketingModule.Web.ExportImport;
 using VirtoCommerce.Platform.Core.Assets;
 using VirtoCommerce.Platform.Core.Common;
@@ -36,7 +38,8 @@ namespace VirtoCommerce.MarketingModule.Web.Controllers.Api
         private readonly CsvCouponImporter _csvCouponImporter;
         private readonly Func<IMarketingRepository> _repositoryFactory;
         private readonly IMarketingExtensionManager _marketingExtensionManager;
-
+        private readonly ICouponSearchService _couponSearchService;
+        private readonly IAuthorizationService _authorizationService;
         public MarketingModulePromotionController(
             IPromotionService promotionService,
             ICouponService couponService,
@@ -46,7 +49,10 @@ namespace VirtoCommerce.MarketingModule.Web.Controllers.Api
             IPushNotificationManager notifier,
             IBlobStorageProvider blobStorageProvider,
             CsvCouponImporter csvCouponImporter,
-            Func<IMarketingRepository> repositoryFactory, IMarketingExtensionManager marketingExtensionManager)
+            Func<IMarketingRepository> repositoryFactory,
+            IMarketingExtensionManager marketingExtensionManager,
+            ICouponSearchService couponSearchService,
+            IAuthorizationService authorizationService)
         {
             _promotionService = promotionService;
             _couponService = couponService;
@@ -58,6 +64,8 @@ namespace VirtoCommerce.MarketingModule.Web.Controllers.Api
             _csvCouponImporter = csvCouponImporter;
             _repositoryFactory = repositoryFactory;
             _marketingExtensionManager = marketingExtensionManager;
+            _couponSearchService = couponSearchService;
+            _authorizationService = authorizationService;
         }
 
         /// <summary>
@@ -66,21 +74,17 @@ namespace VirtoCommerce.MarketingModule.Web.Controllers.Api
         /// <param name="criteria">criteria</param>
         [HttpPost]
         [Route("search")]
-        public async Task<ActionResult<GenericSearchResult<DynamicPromotion>>> PromotionsSearch([FromBody]PromotionSearchCriteria criteria)
+        public async Task<ActionResult<PromotionSearchResult>> PromotionsSearch([FromBody] PromotionSearchCriteria criteria)
         {
-            var retVal = new GenericSearchResult<Promotion>();
             //Scope bound ACL filtration
-            criteria = FilterPromotionSearchCriteria(User.Identity.Name, criteria);
-
-            var promoSearchResult = await _promoSearchService.SearchPromotionsAsync(criteria);
-            //foreach (var promotion in promoSearchResult.Results.OfType<DynamicPromotion>())
-            //{
-            //    promotion.PredicateVisualTreeSerialized = null;
-            //}
-
-            retVal.TotalCount = promoSearchResult.TotalCount;
-            retVal.Results = promoSearchResult.Results.ToList();
-            return Ok(retVal);
+            var authorizationResult = await _authorizationService.AuthorizeAsync(User, criteria, new MarketingAuthorizationRequirement(ModuleConstants.Security.Permissions.Read));
+            if (!authorizationResult.Succeeded)
+            {
+                return Unauthorized();
+            }
+            var result = await _promoSearchService.SearchPromotionsAsync(criteria);
+        
+            return Ok(result);
         }
 
         /// <summary>
@@ -109,12 +113,11 @@ namespace VirtoCommerce.MarketingModule.Web.Controllers.Api
             if (result != null)
             {
                 FillConditions(result);
-                //TODO
-                //var scopes = _permissionScopeService.GetObjectPermissionScopeStrings(retVal).ToArray();
-                //if (!_securityService.UserHasAnyPermission(User.Identity.Name, scopes, MarketingPredefinedPermissions.Read))
-                //{
-                //    throw new HttpResponseException(HttpStatusCode.Unauthorized);
-                //}
+                var authorizationResult = await _authorizationService.AuthorizeAsync(User, result, new MarketingAuthorizationRequirement(ModuleConstants.Security.Permissions.Read));
+                if (!authorizationResult.Succeeded)
+                {
+                    return Unauthorized();
+                }
 
                 return Ok(result);
             }
@@ -143,17 +146,10 @@ namespace VirtoCommerce.MarketingModule.Web.Controllers.Api
         [Route("")]
         [Authorize(ModuleConstants.Security.Permissions.Create)]
         public async Task<ActionResult<Promotion>> CreatePromotion([FromBody]Promotion promotion)
-        {
-            //TODO
-            //var scopes = _permissionScopeService.GetObjectPermissionScopeStrings(promotion).ToArray();
-            //if (!_securityService.UserHasAnyPermission(User.Identity.Name, scopes, MarketingPredefinedPermissions.Create))
-            //{
-            //    throw new HttpResponseException(HttpStatusCode.Unauthorized);
-            //}
+        {          
             await _promotionService.SavePromotionsAsync(new[] { promotion });
             return await GetPromotionById(promotion.Id);
         }
-
 
         /// <summary>
         /// Update a existing dynamic promotion object in marketing system
@@ -163,13 +159,7 @@ namespace VirtoCommerce.MarketingModule.Web.Controllers.Api
         [Route("")]
         [Authorize(ModuleConstants.Security.Permissions.Update)]
         public async Task<ActionResult> UpdatePromotions([FromBody]Promotion promotion)
-        {
-            //TODO
-            //var scopes = _permissionScopeService.GetObjectPermissionScopeStrings(promotion).ToArray();
-            //if (!_securityService.UserHasAnyPermission(User.Identity.Name, scopes, MarketingPredefinedPermissions.Update))
-            //{
-            //    throw new HttpResponseException(HttpStatusCode.Unauthorized);
-            //}
+        {           
             await _promotionService.SavePromotionsAsync(new[] { promotion });
             return NoContent();
         }
@@ -189,9 +179,9 @@ namespace VirtoCommerce.MarketingModule.Web.Controllers.Api
 
         [HttpPost]
         [Route("coupons/search")]
-        public async Task<ActionResult<GenericSearchResult<Coupon>>> SearchCoupons([FromBody]CouponSearchCriteria criteria)
+        public async Task<ActionResult<CouponSearchResult>> SearchCoupons([FromBody]CouponSearchCriteria criteria)
         {
-            var searchResult = await _couponService.SearchCouponsAsync(criteria);
+            var searchResult = await _couponSearchService.SearchCouponsAsync(criteria);
             // actualize coupon totalUsage field 
             using (var repository = _repositoryFactory())
             {
@@ -217,6 +207,7 @@ namespace VirtoCommerce.MarketingModule.Web.Controllers.Api
 
         [HttpPost]
         [Route("coupons/add")]
+        [Authorize(ModuleConstants.Security.Permissions.Update)]
         public async Task<ActionResult> AddCoupons([FromBody]Coupon[] coupons)
         {
             await _couponService.SaveCouponsAsync(coupons);
@@ -226,6 +217,7 @@ namespace VirtoCommerce.MarketingModule.Web.Controllers.Api
 
         [HttpDelete]
         [Route("coupons/delete")]
+        [Authorize(ModuleConstants.Security.Permissions.Delete)]
         public async Task<ActionResult> DeleteCoupons([FromQuery] string[] ids)
         {
             await _couponService.DeleteCouponsAsync(ids);
@@ -235,6 +227,7 @@ namespace VirtoCommerce.MarketingModule.Web.Controllers.Api
 
         [HttpPost]
         [Route("coupons/import")]
+        [Authorize(ModuleConstants.Security.Permissions.Update)]
         public async Task<ActionResult<ImportNotification>> ImportCouponsAsync([FromBody]ImportRequest request)
         {
             var notification = new ImportNotification(_userNameResolver.GetCurrentUserName())
@@ -281,29 +274,7 @@ namespace VirtoCommerce.MarketingModule.Web.Controllers.Api
                     await _notifier.SendAsync(notification);
                 }
             }
-        }
-
-
-        private PromotionSearchCriteria FilterPromotionSearchCriteria(string userName, PromotionSearchCriteria criteria)
-        {
-            //TODO
-            //if (!_securityService.UserHasAnyPermission(userName, null, MarketingPredefinedPermissions.Read))
-            //{
-            //    //Get defined user 'read' permission scopes
-            //    var readPermissionScopes = _securityService.GetUserPermissions(userName)
-            //                                          .Where(x => x.Id.StartsWith(MarketingPredefinedPermissions.Read))
-            //                                          .SelectMany(x => x.AssignedScopes)
-            //                                          .ToList();
-
-            //    //Check user has a scopes
-            //    //Store
-            //    criteria.Store = readPermissionScopes.OfType<MarketingSelectedStoreScope>()
-            //                                             .Select(x => x.Scope)
-            //                                             .Where(x => !String.IsNullOrEmpty(x))
-            //                                             .FirstOrDefault();
-            //}
-            return criteria;
-        }
+        }   
 
         private void FillConditions(Promotion promotion)
         {

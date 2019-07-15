@@ -8,6 +8,7 @@ using VirtoCommerce.CoreModule.Core.Conditions.Browse;
 using VirtoCommerce.CoreModule.Core.Conditions.GeoConditions;
 using VirtoCommerce.MarketingModule.Core.Model;
 using VirtoCommerce.MarketingModule.Core.Model.DynamicContent;
+using VirtoCommerce.MarketingModule.Core.Search;
 using VirtoCommerce.MarketingModule.Core.Services;
 using VirtoCommerce.MarketingModule.Data.Repositories;
 using VirtoCommerce.MarketingModule.Data.Services;
@@ -20,7 +21,7 @@ namespace VirtoCommerce.MarketingModule.Test
     public class DefaultDynamicContentEvaluatorImplTest
     {
         private readonly Mock<IMarketingRepository> _repositoryMock;
-        private readonly Mock<IDynamicContentSearchService> _dynamicContentSearchServiceMock;
+        private readonly Mock<IContentPublicationsSearchService> _dynamicContentSearchServiceMock;
         private readonly Mock<IDynamicContentService> _dynamicContentServiceMock;
         private readonly Mock<ILogger<DefaultDynamicContentEvaluator>> _loggerMock;
         private readonly Mock<IUnitOfWork> _mockUnitOfWork;
@@ -29,7 +30,7 @@ namespace VirtoCommerce.MarketingModule.Test
         {
             _repositoryMock = new Mock<IMarketingRepository>();
 
-            _dynamicContentSearchServiceMock = new Mock<IDynamicContentSearchService>();
+            _dynamicContentSearchServiceMock = new Mock<IContentPublicationsSearchService>();
             _dynamicContentServiceMock = new Mock<IDynamicContentService>();
             //_expressionSerializerMock = new Mock<IExpressionSerializer>();
             _loggerMock = new Mock<ILogger<DefaultDynamicContentEvaluator>>();

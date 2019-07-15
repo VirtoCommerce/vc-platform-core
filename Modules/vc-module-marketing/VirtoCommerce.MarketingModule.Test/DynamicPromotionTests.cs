@@ -5,7 +5,7 @@ using System.Threading.Tasks;
 using Moq;
 using VirtoCommerce.MarketingModule.Core.Model.Promotions;
 using VirtoCommerce.MarketingModule.Core.Model.Promotions.Search;
-using VirtoCommerce.MarketingModule.Core.Services;
+using VirtoCommerce.MarketingModule.Core.Search;
 using VirtoCommerce.MarketingModule.Data.Promotions;
 using VirtoCommerce.Platform.Core.Common;
 using Xunit;
@@ -74,26 +74,25 @@ namespace VirtoCommerce.MarketingModule.Test
             Assert.Equal(expectedCouponsCount, validCoupons.Count());
         }
 
-
         private DynamicPromotionMoq CreateDynamicPromotion(int totalUses, Coupon testCoupon)
         {
             var coupons = new List<Coupon>() { testCoupon };
 
-            var promotionUsageServiceMoq = new Mock<IPromotionUsageService>();
+            var promotionUsageServiceMoq = new Mock<IPromotionUsageSearchService>();
             promotionUsageServiceMoq.Setup(x => x.SearchUsagesAsync(It.IsAny<PromotionUsageSearchCriteria>()))
-                .ReturnsAsync(new GenericSearchResult<PromotionUsage>() { TotalCount = totalUses });
+                .ReturnsAsync(new PromotionUsageSearchResult() { TotalCount = totalUses });
 
-            var couponServiceMoq = new Mock<ICouponService>();
+            var couponServiceMoq = new Mock<ICouponSearchService>();
             couponServiceMoq.Setup(x => x.SearchCouponsAsync(It.IsAny<CouponSearchCriteria>()))
-                .ReturnsAsync(new GenericSearchResult<Coupon>() { Results = coupons });
+                .ReturnsAsync(new CouponSearchResult() { Results = coupons });
 
             return new DynamicPromotionMoq(couponServiceMoq.Object, promotionUsageServiceMoq.Object);
         }
 
         private class DynamicPromotionMoq : DynamicPromotion
         {
-            public DynamicPromotionMoq(ICouponService couponService,
-                IPromotionUsageService usageService) : base(couponService, usageService)
+            public DynamicPromotionMoq(ICouponSearchService couponSearchService,
+                IPromotionUsageSearchService promotionUsageSearchService) : base(couponSearchService, promotionUsageSearchService)
             {
             }
 

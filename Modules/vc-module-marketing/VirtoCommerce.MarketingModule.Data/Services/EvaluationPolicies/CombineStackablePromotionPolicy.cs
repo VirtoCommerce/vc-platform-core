@@ -5,6 +5,7 @@ using System.Threading.Tasks;
 using VirtoCommerce.CoreModule.Core.Common;
 using VirtoCommerce.MarketingModule.Core.Model.Promotions;
 using VirtoCommerce.MarketingModule.Core.Model.Promotions.Search;
+using VirtoCommerce.MarketingModule.Core.Search;
 using VirtoCommerce.MarketingModule.Core.Services;
 using VirtoCommerce.Platform.Core.Common;
 
@@ -25,8 +26,7 @@ namespace VirtoCommerce.MarketingModule.Data.Services
                 throw new ArgumentNullException(nameof(context));
             }
 
-            var promoContext = context as PromotionEvaluationContext;
-            if (promoContext == null)
+            if (!(context is PromotionEvaluationContext promoContext))
             {
                 throw new ArgumentException($"{nameof(context)} type {context.GetType()} must be derived from PromotionEvaluationContext");
             }

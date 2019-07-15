@@ -12,7 +12,6 @@ using VirtoCommerce.MarketingModule.Data.Model;
 using VirtoCommerce.MarketingModule.Data.Repositories;
 using VirtoCommerce.Platform.Core.Caching;
 using VirtoCommerce.Platform.Core.Common;
-using VirtoCommerce.Platform.Core.DynamicProperties;
 using VirtoCommerce.Platform.Core.Events;
 
 namespace VirtoCommerce.MarketingModule.Data.Services
@@ -22,19 +21,18 @@ namespace VirtoCommerce.MarketingModule.Data.Services
         private readonly Func<IMarketingRepository> _repositoryFactory;
         private readonly IEventPublisher _eventPublisher;
         private readonly IPlatformMemoryCache _platformMemoryCache;
-        private readonly IMarketingExtensionManager _marketingExtensionManager;
 
-        public DynamicContentService(Func<IMarketingRepository> repositoryFactory, IEventPublisher eventPublisher, IPlatformMemoryCache platformMemoryCache, IMarketingExtensionManager marketingExtensionManager)
+        public DynamicContentService(Func<IMarketingRepository> repositoryFactory, IEventPublisher eventPublisher, IPlatformMemoryCache platformMemoryCache)
         {
             _repositoryFactory = repositoryFactory;
             _eventPublisher = eventPublisher;
             _platformMemoryCache = platformMemoryCache;
-            _marketingExtensionManager = marketingExtensionManager;
         }
 
         #region IDynamicContentService Members
 
         #region DynamicContentItem methods
+
         public async Task<DynamicContentItem[]> GetContentItemsByIdsAsync(string[] ids)
         {
             var cacheKey = CacheKey.With(GetType(), "GetContentItemsByIdsAsync", string.Join("-", ids));
@@ -48,7 +46,6 @@ namespace VirtoCommerce.MarketingModule.Data.Services
                 }
                 return retVal;
             });
-
         }
 
         public async Task SaveContentItemsAsync(DynamicContentItem[] items)
@@ -99,9 +96,11 @@ namespace VirtoCommerce.MarketingModule.Data.Services
 
             DynamicContentItemCacheRegion.ExpireRegion();
         }
+
         #endregion
 
         #region DynamicContentPlace methods
+
         public async Task<DynamicContentPlace[]> GetPlacesByIdsAsync(string[] ids)
         {
             var cacheKey = CacheKey.With(GetType(), "GetPlacesByIdsAsync", string.Join("-", ids));
@@ -162,9 +161,11 @@ namespace VirtoCommerce.MarketingModule.Data.Services
 
             DynamicContentPlaceCacheRegion.ExpireRegion();
         }
+
         #endregion
 
         #region DynamicContentPublication methods
+
         public async Task<DynamicContentPublication[]> GetPublicationsByIdsAsync(string[] ids)
         {
             var cacheKey = CacheKey.With(GetType(), "GetPublicationsByIdsAsync", string.Join("-", ids));
@@ -241,10 +242,11 @@ namespace VirtoCommerce.MarketingModule.Data.Services
                 publication.PredicateVisualTreeSerialized = JsonConvert.SerializeObject(publication.DynamicExpression);
             }
         }
+
         #endregion
 
-
         #region DynamicContentFolder methods
+
         public async Task<DynamicContentFolder[]> GetFoldersByIdsAsync(string[] ids)
         {
             var cacheKey = CacheKey.With(GetType(), "GetFoldersByIdsAsync", string.Join("-", ids));
@@ -303,8 +305,8 @@ namespace VirtoCommerce.MarketingModule.Data.Services
 
             DynamicContentFolderCacheRegion.ExpireRegion();
         }
-        #endregion
 
+        #endregion
 
         #endregion
     }
