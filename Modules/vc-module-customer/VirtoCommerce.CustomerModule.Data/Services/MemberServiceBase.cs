@@ -67,15 +67,13 @@ namespace VirtoCommerce.CustomerModule.Data.Services
                         if (member != null)
                         {
                             dataMember.ToModel(member);
+                            member.ReduceDetails(responseGroup);
+
                             retVal.Add(member);
                             cacheEntry.AddExpirationToken(CustomerCacheRegion.CreateChangeToken(member));
                         }
                     }
                 }
-
-                //TODO remove
-                //await _dynamicPropertyMetaInfoService.ResolveMetaInfoAsync(retVal.ToArray<IHasDynamicProperties>());
-
                 return retVal.ToArray();
             });
         }

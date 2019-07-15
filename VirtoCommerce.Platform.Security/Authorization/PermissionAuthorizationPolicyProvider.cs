@@ -1,7 +1,6 @@
 using System.Collections.Generic;
 using System.Threading.Tasks;
 using Microsoft.AspNetCore.Authorization;
-using Microsoft.Extensions.Caching.Memory;
 using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.Options;
 using VirtoCommerce.Platform.Core.Caching;
@@ -47,7 +46,7 @@ namespace VirtoCommerce.Platform.Security.Authorization
                 var resultLookup = new Dictionary<string, AuthorizationPolicy>();
                 foreach (var permission in _permissionsProvider.GetAllPermissions())
                 {
-                    resultLookup[permission.Name] = new AuthorizationPolicyBuilder().AddRequirements(new PermissionAuthorizationRequirement { Permission = permission }).Build();
+                    resultLookup[permission.Name] = new AuthorizationPolicyBuilder().AddRequirements(new PermissionAuthorizationRequirement(permission.Name)).Build();
                 }
                 return resultLookup;
             });

@@ -36,20 +36,25 @@ namespace VirtoCommerce.CatalogModule.Data.Services
 
         #region ICatalogService Members
 
-        public virtual async Task<Catalog[]> GetByIdsAsync(string[] catalogIds)
+        public virtual async Task<Catalog[]> GetByIdsAsync(string[] catalogIds, string responseGroup = null)
         {
-            return (await PreloadCatalogs()).Values.Where(x => catalogIds.Contains(x.Id))
-                                            .Select(x => x.Clone())
-                                            .OfType<Catalog>()
-                                            .ToArray();
-        }
+            var catalogResponseGroup = EnumUtility.SafeParseFlags(responseGroup, CatalogResponseGroup.Full);
 
-        public async Task<IEnumerable<Catalog>> GetCatalogsListAsync()
-        {
-            //Clone required because client code may change resulting objects
-            var catalogs = await PreloadCatalogs();
-            return catalogs.Values.Select(c => c.Clone()).OfType<Catalog>().OrderBy(x => x.Name);
-        }
+            var result = new List<Catalog>();
+            var preloadedCatalogsByIdDict = await PreloadCatalogsAsync();
+            foreach (var catalogId in catalogIds.Where(x => x != null))
+            {
+                var catalog = preloadedCatalogsByIdDict[catalogId];
+                if (catalog != null)
+                {
+                    catalog = catalog.Clone() as Catalog;
+                    //Reduce details according to response group
+                    catalog.ReduceDetails(catalogResponseGroup.ToString());
+                    result.Add(catalog);
+                }
+            }
+            return result.ToArray();        
+        }     
 
         public virtual async Task SaveChangesAsync(Catalog[] catalogs)
         {
@@ -108,7 +113,7 @@ namespace VirtoCommerce.CatalogModule.Data.Services
 
         #endregion
 
-        protected virtual Task<IDictionary<string, Catalog>> PreloadCatalogs()
+        protected virtual Task<IDictionary<string, Catalog>> PreloadCatalogsAsync()
         {
             var cacheKey = CacheKey.With(GetType(), "AllCatalogs");
             return _platformMemoryCache.GetOrCreateExclusive(cacheKey, async (cacheEntry) =>
@@ -158,7 +163,7 @@ namespace VirtoCommerce.CatalogModule.Data.Services
 
         private async Task ValidateCatalogPropertiesAsync(Catalog[] catalogs)
         {
-            LoadDependencies(catalogs, await PreloadCatalogs());
+            LoadDependencies(catalogs, await PreloadCatalogsAsync());
             foreach (var catalog in catalogs)
             {
                 var validatioResult = await _hasPropertyValidator.ValidateAsync(catalog);

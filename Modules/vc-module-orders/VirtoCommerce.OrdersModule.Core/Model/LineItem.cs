@@ -120,5 +120,24 @@ namespace VirtoCommerce.OrdersModule.Core.Model
         #region IHaveTaxDetalization Members
         public ICollection<TaxDetail> TaxDetails { get; set; }
         #endregion
+
+        public virtual void ReduceDetails(string responseGroup)
+        {
+            var orderResponseGroup = EnumUtility.SafeParseFlags(responseGroup, CustomerOrderResponseGroup.Full);
+
+            if (!orderResponseGroup.HasFlag(CustomerOrderResponseGroup.WithDiscounts))
+            {
+                Discounts = null;
+            }
+            if (!orderResponseGroup.HasFlag(CustomerOrderResponseGroup.WithPrices))
+            {
+                Price = 0m;
+                PriceWithTax = 0m;
+                DiscountAmount = 0m;
+                DiscountAmountWithTax = 0m;
+                TaxTotal = 0m;
+                TaxPercentRate = 0m;
+            }
+        }
     }
 }

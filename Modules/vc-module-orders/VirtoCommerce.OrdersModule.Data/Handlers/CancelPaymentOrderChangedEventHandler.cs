@@ -71,24 +71,24 @@ namespace VirtoCommerce.OrdersModule.Data.Handlers
                     }
                 }
             }
-            TryToCancelOrderPayments(toCancelPayments);
+            TryToCancelOrderPayments(toCancelPayments, changedEntry.NewEntry);
             if (!toCancelPayments.IsNullOrEmpty())
             {
                 await _orderService.SaveChangesAsync(new[] { changedEntry.NewEntry });
             }
         }
 
-        protected virtual void TryToCancelOrderPayments(IEnumerable<PaymentIn> toCancelPayments)
+        protected virtual void TryToCancelOrderPayments(IEnumerable<PaymentIn> toCancelPayments, CustomerOrder order)
         {
             foreach (var payment in toCancelPayments ?? Enumerable.Empty<PaymentIn>())
             {
                 if (payment.PaymentStatus == PaymentStatus.Authorized)
                 {
-                    payment.PaymentMethod?.VoidProcessPayment(new VoidPaymentRequest { PaymentId = payment.Id });
+                    payment.PaymentMethod?.VoidProcessPayment(new VoidPaymentRequest { PaymentId = payment.Id, OrderId = order.Id });
                 }
                 else if (payment.PaymentStatus == PaymentStatus.Paid)
                 {
-                    payment.PaymentMethod?.RefundProcessPayment(new RefundPaymentRequest { PaymentId = payment.Id });
+                    payment.PaymentMethod?.RefundProcessPayment(new RefundPaymentRequest { PaymentId = payment.Id, OrderId = order.Id });
                 }
                 else
                 {

@@ -1,4 +1,5 @@
 using System;
+using System.Collections.Generic;
 using System.Collections.ObjectModel;
 using System.ComponentModel.DataAnnotations;
 using System.ComponentModel.DataAnnotations.Schema;
@@ -99,6 +100,8 @@ namespace VirtoCommerce.OrdersModule.Data.Model
         public virtual CustomerOrderEntity CustomerOrder { get; set; }
         public string CustomerOrderId { get; set; }
 
+        public virtual ObservableCollection<ShipmentItemEntity> ShipmentItems { get; set; } = new NullCollection<ShipmentItemEntity>();
+
         public virtual LineItem ToModel(LineItem lineItem)
         {
             if (lineItem == null)
@@ -160,7 +163,9 @@ namespace VirtoCommerce.OrdersModule.Data.Model
         public virtual LineItemEntity FromModel(LineItem lineItem, PrimaryKeyResolvingMap pkMap)
         {
             if (lineItem == null)
+            {
                 throw new ArgumentNullException(nameof(lineItem));
+            }
 
             ModelLineItem = lineItem;
             pkMap.AddPair(lineItem, this);
@@ -229,16 +234,11 @@ namespace VirtoCommerce.OrdersModule.Data.Model
         public virtual void Patch(LineItemEntity target)
         {
             if (target == null)
+            {
                 throw new ArgumentNullException(nameof(target));
+            }
 
-
-            target.Price = Price;
-            target.PriceWithTax = PriceWithTax;
-            target.DiscountAmount = DiscountAmount;
-            target.DiscountAmountWithTax = DiscountAmountWithTax;
             target.Quantity = Quantity;
-            target.TaxTotal = TaxTotal;
-            target.TaxPercentRate = TaxPercentRate;
             target.Weight = Weight;
             target.Height = Height;
             target.Width = Width;
@@ -250,6 +250,16 @@ namespace VirtoCommerce.OrdersModule.Data.Model
             target.CancelledDate = CancelledDate;
             target.CancelReason = CancelReason;
             target.Comment = Comment;
+
+            if (!(GetNonCalculatablePrices().All(x => x == 0m) && target.GetNonCalculatablePrices().Any(x => x != 0m)))
+            {
+                target.TaxPercentRate = TaxPercentRate;
+                target.Price = Price;
+                target.DiscountAmount = DiscountAmount;
+                target.PriceWithTax = PriceWithTax;
+                target.DiscountAmountWithTax = DiscountAmountWithTax;
+                target.TaxTotal = TaxTotal;
+            }
 
             if (!Discounts.IsNullCollection())
             {
@@ -267,6 +277,22 @@ namespace VirtoCommerce.OrdersModule.Data.Model
             {
                 DynamicPropertyObjectValues.Patch(target.DynamicPropertyObjectValues, (sourceDynamicPropertyObjectValues, targetDynamicPropertyObjectValues) => sourceDynamicPropertyObjectValues.Patch(targetDynamicPropertyObjectValues));
             }
+        }
+        public virtual void ResetPrices()
+        {
+            Price = 0m;
+            PriceWithTax = 0m;
+            DiscountAmount = 0m;
+            DiscountAmountWithTax = 0m;
+            TaxTotal = 0m;
+            TaxPercentRate = 0m;
+        }
+
+        public virtual IEnumerable<decimal> GetNonCalculatablePrices()
+        {
+            yield return TaxPercentRate;
+            yield return Price;
+            yield return DiscountAmount;
         }
     }
 }

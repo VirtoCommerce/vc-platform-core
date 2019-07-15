@@ -5,6 +5,7 @@ using Xunit;
 
 namespace VirtoCommerce.OrdersModule.Tests
 {
+    [Trait("Category", "CI")]
     public class OrderTotalsCalculationTest
     {
         [Fact]

@@ -69,7 +69,7 @@ namespace VirtoCommerce.CartModule.Data.Repositories
                 await Task.WhenAll(shipmentTaxDetails, shipmentDiscounts, shipmentAddresses, shipmentDynamicPropertyObjectValues);
             }
 
-            if (cartResponseGroup.HasFlag(CartResponseGroup.WithDynamicPropertyValues))
+            if (cartResponseGroup.HasFlag(CartResponseGroup.WithDynamicProperties))
             {
                 var dynamicPropertyObjectValues = await DynamicPropertyObjectValues.Where(x => x.ObjectType.EqualsInvariant(typeof(ShoppingCart).FullName) && ids.Contains(x.ShoppingCartId)).ToArrayAsync();
             }

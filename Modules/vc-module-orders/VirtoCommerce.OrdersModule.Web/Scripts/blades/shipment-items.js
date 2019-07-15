@@ -1,7 +1,8 @@
-﻿angular.module('virtoCommerce.orderModule')
-.controller('virtoCommerce.orderModule.shipmentItemsController', ['$scope', 'platformWebApp.bladeNavigationService', 'platformWebApp.dialogService', function ($scope, bladeNavigationService, dialogService) {
+angular.module('virtoCommerce.orderModule')
+    .controller('virtoCommerce.orderModule.shipmentItemsController', ['$scope', 'platformWebApp.bladeNavigationService', 'platformWebApp.dialogService', 'platformWebApp.authService', function ($scope, bladeNavigationService, dialogService, authService) {
     var blade = $scope.blade;
     blade.updatePermission = 'order:update';
+    blade.isVisiblePrices = authService.checkPermission('order:read_prices');
 
 	//pagination settings
 	$scope.pageSettings = {};
@@ -23,25 +24,25 @@
 	blade.toolbarCommands = [
         {
             name: "orders.commands.add-item", icon: 'fa fa-plus',
-        	executeMethod: function () {
-        		openAddEntityWizard();
-        	},
-        	canExecuteMethod: function () {
-        		return false;
-        	},
-        	permission: blade.updatePermission
+            executeMethod: function () {
+                openAddEntityWizard();
+            },
+            canExecuteMethod: function () {
+                return false;
+            },
+            permission: blade.updatePermission
         },
         {
             name: "platform.commands.remove", icon: 'fa fa-trash-o',
-        	executeMethod: function () {
-        		var items = blade.currentEntity.items;
-        		blade.currentEntity.items = _.difference(items, _.filter(items, function (x) { return x.selected }));
+            executeMethod: function () {
+                var items = blade.currentEntity.items;
+                blade.currentEntity.items = _.difference(items, _.filter(items, function (x) { return x.selected }));
 
-        	},
-        	canExecuteMethod: function () {
-        		return _.any(blade.currentEntity.items, function (x) { return x.selected; });;
-        	},
-        	permission: blade.updatePermission
+            },
+            canExecuteMethod: function () {
+                return _.any(blade.currentEntity.items, function (x) { return x.selected; });
+            },
+            permission: blade.updatePermission
         }
 	];
 

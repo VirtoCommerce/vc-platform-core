@@ -77,9 +77,17 @@ namespace VirtoCommerce.OrdersModule.Data.Repositories
                 await Task.WhenAll(shipmentDiscounts, shipmentTaxDetails, addresses, shipmentItems, packages, shipmentDynamicPropertyValues);
             }
 
-            if (customerOrderResponseGroup.HasFlag(CustomerOrderResponseGroup.WithDynamicPropertyValues))
+            if (customerOrderResponseGroup.HasFlag(CustomerOrderResponseGroup.WithDynamicProperties))
             {
                 var dynamicPropertyObjectValues = await OrderDynamicPropertyObjectValues.Where(x => x.ObjectType.EqualsInvariant(typeof(CustomerOrder).FullName) && ids.Contains(x.CustomerOrderId)).ToArrayAsync();
+            }
+
+            if (!customerOrderResponseGroup.HasFlag(CustomerOrderResponseGroup.WithPrices))
+            {
+                foreach (var customerOrder in result)
+                {
+                    customerOrder.ResetPrices();
+                }
             }
 
             return result;

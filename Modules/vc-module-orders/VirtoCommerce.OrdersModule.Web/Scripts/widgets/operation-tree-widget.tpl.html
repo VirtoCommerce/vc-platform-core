@@ -1,4 +1,4 @@
-﻿<div class="tree-view">
+<div class="tree-view">
     <div class="tree-scroll">
         <ul class="tree">
             <li class="tree-item first" ng-include="node.treeTemplateUrl ? node.treeTemplateUrl : 'orderOperationDefault.tpl.html'"></li>
@@ -17,7 +17,7 @@
                 <i class="tree-ico fa fa-calendar"></i>
                 {{node.operation.createdDate | amParse | date}}
             </div>
-            <div class="tree-el __price">
+            <div class="tree-el __price" va-permission="order:read_prices">
                 <i class="tree-ico fa fa-money"></i>
                 {{node.operation.sum  | currency:node.operation.currency}}
             </div>

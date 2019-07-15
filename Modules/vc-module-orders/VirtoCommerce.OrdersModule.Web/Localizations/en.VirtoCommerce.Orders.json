@@ -279,7 +279,8 @@
         "order:create": "Create order related data",
         "order:update": "Update order related data",
         "order:delete": "Delete order related data",
-        "order:access": "Access order related data"
+        "order:access": "Access order related data",
+        "order:read_prices": "View order prices"
     },
     "settings": {
         "Order.Status": {
