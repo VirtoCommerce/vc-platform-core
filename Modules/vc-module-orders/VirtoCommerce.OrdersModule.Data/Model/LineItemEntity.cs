@@ -8,6 +8,7 @@ using VirtoCommerce.CoreModule.Core.Common;
 using VirtoCommerce.CoreModule.Core.Tax;
 using VirtoCommerce.OrdersModule.Core.Model;
 using VirtoCommerce.Platform.Core.Common;
+using VirtoCommerce.Platform.Core.DynamicProperties;
 
 namespace VirtoCommerce.OrdersModule.Data.Model
 {
@@ -85,8 +86,16 @@ namespace VirtoCommerce.OrdersModule.Data.Model
         [StringLength(128)]
         public string OuterId { get; set; }
 
+        #region NavigationProperties
+
         public virtual ObservableCollection<DiscountEntity> Discounts { get; set; } = new NullCollection<DiscountEntity>();
+
         public virtual ObservableCollection<TaxDetailEntity> TaxDetails { get; set; } = new NullCollection<TaxDetailEntity>();
+
+        public virtual ObservableCollection<OrderDynamicPropertyObjectValueEntity> DynamicPropertyObjectValues { get; set; }
+            = new NullCollection<OrderDynamicPropertyObjectValueEntity>();
+
+        #endregion
 
         public virtual CustomerOrderEntity CustomerOrder { get; set; }
         public string CustomerOrderId { get; set; }
@@ -138,6 +147,15 @@ namespace VirtoCommerce.OrdersModule.Data.Model
             lineItem.IsGift = IsGift;
             lineItem.Discounts = Discounts.Select(x => x.ToModel(AbstractTypeFactory<Discount>.TryCreateInstance())).ToList();
             lineItem.TaxDetails = TaxDetails.Select(x => x.ToModel(AbstractTypeFactory<TaxDetail>.TryCreateInstance())).ToList();
+
+            lineItem.DynamicProperties = DynamicPropertyObjectValues.GroupBy(g => g.PropertyId).Select(x =>
+            {
+                var property = AbstractTypeFactory<DynamicObjectProperty>.TryCreateInstance();
+                property.Id = x.Key;
+                property.Name = x.FirstOrDefault()?.PropertyName;
+                property.Values = x.Select(v => v.ToModel(AbstractTypeFactory<DynamicPropertyObjectValue>.TryCreateInstance())).ToArray();
+                return property;
+            }).ToArray();
 
             return lineItem;
         }
@@ -204,6 +222,12 @@ namespace VirtoCommerce.OrdersModule.Data.Model
                 TaxDetails.AddRange(lineItem.TaxDetails.Select(x => AbstractTypeFactory<TaxDetailEntity>.TryCreateInstance().FromModel(x)));
             }
 
+            if (lineItem.DynamicProperties != null)
+            {
+                DynamicPropertyObjectValues = new ObservableCollection<OrderDynamicPropertyObjectValueEntity>(lineItem.DynamicProperties.SelectMany(p => p.Values
+                    .Select(v => AbstractTypeFactory<OrderDynamicPropertyObjectValueEntity>.TryCreateInstance().FromModel(v, lineItem, p))).OfType<OrderDynamicPropertyObjectValueEntity>());
+            }
+
             return this;
         }
 
@@ -247,6 +271,11 @@ namespace VirtoCommerce.OrdersModule.Data.Model
             {
                 var taxDetailComparer = AnonymousComparer.Create((TaxDetailEntity x) => x.Name);
                 TaxDetails.Patch(target.TaxDetails, taxDetailComparer, (sourceTaxDetail, targetTaxDetail) => sourceTaxDetail.Patch(targetTaxDetail));
+            }
+
+            if (!DynamicPropertyObjectValues.IsNullCollection())
+            {
+                DynamicPropertyObjectValues.Patch(target.DynamicPropertyObjectValues, (sourceDynamicPropertyObjectValues, targetDynamicPropertyObjectValues) => sourceDynamicPropertyObjectValues.Patch(targetDynamicPropertyObjectValues));
             }
         }
         public virtual void ResetPrices()

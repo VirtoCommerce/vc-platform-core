@@ -38,6 +38,10 @@ namespace VirtoCommerce.OrdersModule.Data.Model
         [StringLength(128)]
         public string OuterId { get; set; }
 
+        #region NavigationProperties
+
+        #endregion
+
         public virtual OrderOperation ToModel(OrderOperation operation)
         {
             if (operation == null)
@@ -62,6 +66,7 @@ namespace VirtoCommerce.OrdersModule.Data.Model
             operation.IsApproved = IsApproved;
             operation.Sum = Sum;
             operation.ChildrenOperations = GetAllChildOperations(operation);
+
             return operation;
         }
 
@@ -94,25 +99,25 @@ namespace VirtoCommerce.OrdersModule.Data.Model
             return this;
         }
 
-        public virtual void Patch(OperationEntity operation)
+        public virtual void Patch(OperationEntity target)
         {
-            if (operation == null)
+            if (target == null)
             {
-                throw new ArgumentNullException(nameof(operation));
+                throw new ArgumentNullException(nameof(target));
             }
 
-            operation.Comment = Comment;
-            operation.Currency = Currency;
-            operation.Number = Number;
-            operation.Status = Status;
-            operation.IsCancelled = IsCancelled;
-            operation.CancelledDate = CancelledDate;
-            operation.CancelReason = CancelReason;
-            operation.IsApproved = IsApproved;
+            target.Comment = Comment;
+            target.Currency = Currency;
+            target.Number = Number;
+            target.Status = Status;
+            target.IsCancelled = IsCancelled;
+            target.CancelledDate = CancelledDate;
+            target.CancelReason = CancelReason;
+            target.IsApproved = IsApproved;
 
             if (NeedPatchSum)
             {
-                operation.Sum = Sum;
+                target.Sum = Sum;
             }
         }
 

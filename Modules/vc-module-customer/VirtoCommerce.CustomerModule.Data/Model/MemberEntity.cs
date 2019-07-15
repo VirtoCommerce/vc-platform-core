@@ -11,18 +11,6 @@ namespace VirtoCommerce.CustomerModule.Data.Model
 {
     public abstract class MemberEntity : AuditableEntity, IHasOuterId
     {
-        public MemberEntity()
-        {
-            Notes = new NullCollection<NoteEntity>();
-            Addresses = new NullCollection<AddressEntity>();
-            MemberRelations = new NullCollection<MemberRelationEntity>();
-            Phones = new NullCollection<PhoneEntity>();
-            Emails = new NullCollection<EmailEntity>();
-            Groups = new NullCollection<MemberGroupEntity>();
-            SeoInfos = new NullCollection<SeoInfoEntity>();
-            DynamicPropertyObjectValues = new NullCollection<MemberDynamicPropertyObjectValueEntity>();
-        }
-
         [StringLength(64)]
         public string MemberType { get; set; }
 
@@ -34,21 +22,22 @@ namespace VirtoCommerce.CustomerModule.Data.Model
 
         #region NavigationProperties
 
-        public ObservableCollection<NoteEntity> Notes { get; set; }
+        public virtual ObservableCollection<NoteEntity> Notes { get; set; } = new NullCollection<NoteEntity>();
 
-        public ObservableCollection<AddressEntity> Addresses { get; set; }
+        public virtual ObservableCollection<AddressEntity> Addresses { get; set; } = new NullCollection<AddressEntity>();
 
-        public ObservableCollection<MemberRelationEntity> MemberRelations { get; set; }
+        public virtual ObservableCollection<MemberRelationEntity> MemberRelations { get; set; } = new NullCollection<MemberRelationEntity>();
 
-        public ObservableCollection<PhoneEntity> Phones { get; set; }
+        public virtual ObservableCollection<PhoneEntity> Phones { get; set; } = new NullCollection<PhoneEntity>();
 
-        public ObservableCollection<EmailEntity> Emails { get; set; }
+        public virtual ObservableCollection<EmailEntity> Emails { get; set; } = new NullCollection<EmailEntity>();
 
-        public ObservableCollection<MemberGroupEntity> Groups { get; set; }
+        public virtual ObservableCollection<MemberGroupEntity> Groups { get; set; } = new NullCollection<MemberGroupEntity>();
 
-        public ObservableCollection<SeoInfoEntity> SeoInfos { get; set; }
+        public virtual ObservableCollection<SeoInfoEntity> SeoInfos { get; set; } = new NullCollection<SeoInfoEntity>();
 
-        public ObservableCollection<MemberDynamicPropertyObjectValueEntity> DynamicPropertyObjectValues { get; set; }
+        public virtual ObservableCollection<MemberDynamicPropertyObjectValueEntity> DynamicPropertyObjectValues { get; set; }
+            = new NullCollection<MemberDynamicPropertyObjectValueEntity>();
 
         #endregion
 
@@ -84,11 +73,10 @@ namespace VirtoCommerce.CustomerModule.Data.Model
             return member;
         }
 
-
         public virtual MemberEntity FromModel(Member member, PrimaryKeyResolvingMap pkMap)
         {
             if (member == null)
-                throw new ArgumentNullException("member");
+                throw new ArgumentNullException(nameof(member));
 
             pkMap.AddPair(member, this);
 
@@ -168,7 +156,6 @@ namespace VirtoCommerce.CustomerModule.Data.Model
 
             return this;
         }
-
 
         public virtual void Patch(MemberEntity target)
         {

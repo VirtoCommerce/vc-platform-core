@@ -1,5 +1,7 @@
 using System;
+using System.Collections.ObjectModel;
 using System.ComponentModel.DataAnnotations;
+using System.Linq;
 using VirtoCommerce.MarketingModule.Core.Model;
 using VirtoCommerce.Platform.Core.Common;
 using VirtoCommerce.Platform.Core.DynamicProperties;
@@ -31,6 +33,9 @@ namespace VirtoCommerce.MarketingModule.Data.Model
 
         public virtual DynamicContentFolderEntity Folder { get; set; }
 
+        public ObservableCollection<DynamicContentItemDynamicPropertyObjectValueEntity> DynamicPropertyObjectValues { get; set; }
+            = new NullCollection<DynamicContentItemDynamicPropertyObjectValueEntity>();
+
         #endregion
 
         public virtual DynamicContentItem ToModel(DynamicContentItem item)
@@ -54,6 +59,16 @@ namespace VirtoCommerce.MarketingModule.Data.Model
             {
                 item.Folder = Folder.ToModel(AbstractTypeFactory<DynamicContentFolder>.TryCreateInstance());
             }
+
+            item.DynamicProperties = DynamicPropertyObjectValues.GroupBy(g => g.PropertyId).Select(x =>
+            {
+                var property = AbstractTypeFactory<DynamicObjectProperty>.TryCreateInstance();
+                property.Id = x.Key;
+                property.Name = x.FirstOrDefault()?.PropertyName;
+                property.Values = x.Select(v => v.ToModel(AbstractTypeFactory<DynamicPropertyObjectValue>.TryCreateInstance())).ToArray();
+                return property;
+            }).ToArray();
+
             return item;
         }
 
@@ -79,6 +94,8 @@ namespace VirtoCommerce.MarketingModule.Data.Model
             if (item.DynamicProperties != null)
             {
                 ContentTypeId = item.GetDynamicPropertyValue<string>("Content type", null);
+                DynamicPropertyObjectValues = new ObservableCollection<DynamicContentItemDynamicPropertyObjectValueEntity>(item.DynamicProperties.SelectMany(p => p.Values
+                    .Select(v => AbstractTypeFactory<DynamicContentItemDynamicPropertyObjectValueEntity>.TryCreateInstance().FromModel(v, item, p))).OfType<DynamicContentItemDynamicPropertyObjectValueEntity>());
             }
 
             return this;
@@ -94,6 +111,11 @@ namespace VirtoCommerce.MarketingModule.Data.Model
             target.FolderId = FolderId;
             target.ContentTypeId = ContentTypeId;
             target.ImageUrl = ImageUrl;
+
+            if (!DynamicPropertyObjectValues.IsNullCollection())
+            {
+                DynamicPropertyObjectValues.Patch(target.DynamicPropertyObjectValues, (sourceDynamicPropertyObjectValues, targetDynamicPropertyObjectValues) => sourceDynamicPropertyObjectValues.Patch(targetDynamicPropertyObjectValues));
+            }
         }
     }
 }

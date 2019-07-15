@@ -50,13 +50,13 @@ namespace VirtoCommerce.OrdersModule.Core.Model
         public virtual decimal Fee { get; set; }
 
         public virtual decimal FeeWithTax { get; set; }
+
         #region ITaxable Members
 
         /// <summary>
         /// Tax category or type
         /// </summary>
         public string TaxType { get; set; }
-
 
         public decimal TaxTotal { get; set; }
 
@@ -90,7 +90,6 @@ namespace VirtoCommerce.OrdersModule.Core.Model
 
         public string OuterId { get; set; }
 
-
         #region IHaveDimension Members
         public string WeightUnit { get; set; }
         public decimal? Weight { get; set; }
@@ -110,10 +109,9 @@ namespace VirtoCommerce.OrdersModule.Core.Model
         #endregion
 
         #region IHasDynamicProperties Members
-        public string ObjectType { get; set; }
+        public string ObjectType => GetType().FullName;
         public ICollection<DynamicObjectProperty> DynamicProperties { get; set; }
         #endregion
-
 
         #region IHasDiscounts
         public ICollection<Discount> Discounts { get; set; }

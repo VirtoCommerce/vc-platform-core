@@ -39,6 +39,8 @@ namespace VirtoCommerce.MarketingModule.Data.Repositories
 
         public IQueryable<PromotionStoreEntity> PromotionStores => DbContext.Set<PromotionStoreEntity>();
 
+        public IQueryable<DynamicContentItemDynamicPropertyObjectValueEntity> DynamicContentItemDynamicPropertyObjectValues => DbContext.Set<DynamicContentItemDynamicPropertyObjectValueEntity>();
+
         public virtual async Task<PromotionEntity[]> GetPromotionsByIdsAsync(string[] ids)
         {
             var propmotions = await Promotions.Where(x => ids.Contains(x.Id)).ToArrayAsync();
@@ -79,6 +81,8 @@ namespace VirtoCommerce.MarketingModule.Data.Repositories
                 {
                     item.Folder = allFolders.FirstOrDefault(x => x.Id == item.FolderId);
                 }
+
+                var dynamicContentItemDynamicPropertyObjectValues = await DynamicContentItemDynamicPropertyObjectValues.Where(x => ids.Contains(x.Id)).ToArrayAsync();
             }
             return retVal;
         }

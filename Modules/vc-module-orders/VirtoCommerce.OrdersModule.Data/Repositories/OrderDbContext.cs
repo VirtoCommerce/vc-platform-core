@@ -19,8 +19,8 @@ namespace VirtoCommerce.OrdersModule.Data.Repositories
 
         protected override void OnModelCreating(ModelBuilder modelBuilder)
         {
-
             #region CustomerOrder
+
             modelBuilder.Entity<CustomerOrderEntity>().ToTable("CustomerOrder").HasKey(x => x.Id);
             modelBuilder.Entity<CustomerOrderEntity>().Property(x => x.Id).HasMaxLength(128);
             modelBuilder.Entity<CustomerOrderEntity>().ToTable("CustomerOrder");
@@ -72,13 +72,13 @@ namespace VirtoCommerce.OrdersModule.Data.Repositories
             #region Shipment
 
             modelBuilder.Entity<ShipmentEntity>().HasKey(x => x.Id);
-            modelBuilder.Entity<ShipmentEntity>().Property(x => x.Id).HasMaxLength(128); ;
+            modelBuilder.Entity<ShipmentEntity>().Property(x => x.Id).HasMaxLength(128);
 
             modelBuilder.Entity<ShipmentEntity>().Property(x => x.TaxPercentRate).HasColumnType("decimal(18,4)");
             modelBuilder.Entity<ShipmentEntity>().HasOne(x => x.CustomerOrder).WithMany(x => x.Shipments)
                         .HasForeignKey(x => x.CustomerOrderId).OnDelete(DeleteBehavior.Cascade).IsRequired();
-
             modelBuilder.Entity<ShipmentEntity>().ToTable("OrderShipment");
+
             #endregion
 
             #region Address
@@ -111,6 +111,7 @@ namespace VirtoCommerce.OrdersModule.Data.Repositories
                         .HasForeignKey(x => x.ShipmentId).OnDelete(DeleteBehavior.Restrict);
 
             modelBuilder.Entity<PaymentInEntity>().ToTable("OrderPaymentIn");
+
             #endregion
 
             #region Discount
@@ -161,6 +162,54 @@ namespace VirtoCommerce.OrdersModule.Data.Repositories
             modelBuilder.Entity<PaymentGatewayTransactionEntity>().HasOne(x => x.PaymentIn).WithMany(x => x.Transactions)
                         .HasForeignKey(x => x.PaymentInId).OnDelete(DeleteBehavior.Cascade).IsRequired();
             modelBuilder.Entity<PaymentGatewayTransactionEntity>().ToTable("OrderPaymentGatewayTransaction");
+            #endregion
+
+            #region DynamicPropertyValues
+
+            modelBuilder.Entity<OrderDynamicPropertyObjectValueEntity>().ToTable("OrderDynamicPropertyObjectValue").HasKey(x => x.Id);
+            modelBuilder.Entity<OrderDynamicPropertyObjectValueEntity>().Property(x => x.Id).HasMaxLength(128);
+            modelBuilder.Entity<OrderDynamicPropertyObjectValueEntity>().Property(x => x.DecimalValue).HasColumnType("decimal(18,5)");
+
+            //need to set DeleteBehavior.Cascade manually
+            modelBuilder.Entity<OrderDynamicPropertyObjectValueEntity>().HasOne(p => p.CustomerOrder)
+                .WithMany(s => s.DynamicPropertyObjectValues).HasForeignKey(k => k.CustomerOrderId)
+                .OnDelete(DeleteBehavior.Cascade);
+
+            //need to set DeleteBehavior.Cascade manually
+            modelBuilder.Entity<OrderDynamicPropertyObjectValueEntity>().HasOne(p => p.PaymentIn)
+                .WithMany(s => s.DynamicPropertyObjectValues).HasForeignKey(k => k.PaymentInId)
+                .OnDelete(DeleteBehavior.Cascade);
+
+            //need to set DeleteBehavior.Cascade manually
+            modelBuilder.Entity<OrderDynamicPropertyObjectValueEntity>().HasOne(p => p.Shipment)
+                .WithMany(s => s.DynamicPropertyObjectValues).HasForeignKey(k => k.ShipmentId)
+                .OnDelete(DeleteBehavior.Cascade);
+
+            //need to set DeleteBehavior.Cascade manually
+            modelBuilder.Entity<OrderDynamicPropertyObjectValueEntity>().HasOne(p => p.LineItem)
+                .WithMany(s => s.DynamicPropertyObjectValues).HasForeignKey(k => k.LineItemId)
+                .OnDelete(DeleteBehavior.Cascade);
+
+            modelBuilder.Entity<OrderDynamicPropertyObjectValueEntity>().HasIndex(x => new { x.ObjectType, x.CustomerOrderId })
+                .IsUnique(false)
+                .HasName("IX_ObjectType_CustomerOrderId");
+
+            modelBuilder.Entity<OrderDynamicPropertyObjectValueEntity>().HasIndex(x => new { x.ObjectType, x.PaymentInId })
+                .IsUnique(false)
+                .HasName("IX_ObjectType_PaymentInId");
+
+            modelBuilder.Entity<OrderDynamicPropertyObjectValueEntity>().HasIndex(x => new { x.ObjectType, x.ShipmentId })
+                .IsUnique(false)
+                .HasName("IX_ObjectType_ShipmentId");
+
+            modelBuilder.Entity<OrderDynamicPropertyObjectValueEntity>().HasIndex(x => new { x.ObjectType, x.LineItemId })
+                .IsUnique(false)
+                .HasName("IX_ObjectType_LineItemId");
+
+            modelBuilder.Entity<OrderDynamicPropertyObjectValueEntity>().HasIndex(x => new { x.ObjectType, x.ObjectId })
+                .IsUnique(false)
+                .HasName("IX_ObjectType_ObjectId");
+
             #endregion
 
             base.OnModelCreating(modelBuilder);

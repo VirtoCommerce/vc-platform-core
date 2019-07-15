@@ -56,6 +56,8 @@ namespace VirtoCommerce.CartModule.Data.Services
                         {
                             _totalsCalculator.CalculateTotals(cart);
                         }
+                        cart.ReduceDetails(responseGroup);
+
                         retVal.Add(cart);
                         cacheEntry.AddExpirationToken(CartCacheRegion.CreateChangeToken(cart));
                     }

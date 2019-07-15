@@ -53,6 +53,7 @@ namespace VirtoCommerce.Platform.Data.Model
             if (!string.IsNullOrEmpty(DictionaryItemId))
             {
                 propValue.ValueId = DictionaryItemId;
+                propValue.Value = ShortTextValue;
             }
             else
             {
@@ -90,6 +91,7 @@ namespace VirtoCommerce.Platform.Data.Model
             {
                 DictionaryItemId = dictItem.Id;
                 PropertyId = dictItem.PropertyId;
+                ShortTextValue = dictItem.Name;
             }
             else
             {

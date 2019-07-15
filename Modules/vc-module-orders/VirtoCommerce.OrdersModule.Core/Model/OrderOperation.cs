@@ -25,6 +25,7 @@ namespace VirtoCommerce.OrdersModule.Core.Model
         public string OuterId { get; set; }
 
         public IEnumerable<IOperation> ChildrenOperations { get; set; }
+
         #region ISupportCancelation Members
 
         public bool IsCancelled { get; set; }
@@ -33,10 +34,11 @@ namespace VirtoCommerce.OrdersModule.Core.Model
 
         #endregion
 
-
         #region IHasDynamicProperties Members
-        public string ObjectType { get; set; }
+
+        public string ObjectType => GetType().FullName;
         public ICollection<DynamicObjectProperty> DynamicProperties { get; set; }
+
         #endregion
 
         #region IHasChangesHistory

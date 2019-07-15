@@ -2,12 +2,16 @@ using System.Collections.Generic;
 using VirtoCommerce.Platform.Core.Common;
 using VirtoCommerce.Platform.Core.DynamicProperties;
 
-namespace VirtoCommerce.ContentModule.Web
+namespace VirtoCommerce.ContentModule.Core.Model
 {
     public class FrontMatterHeaders : Entity, IHasDynamicProperties
     {
+        #region IHasDynamicProperties Members
+
         public string ObjectType => GetType().FullName;
         public ICollection<DynamicObjectProperty> DynamicProperties { get; set; }
+
+        #endregion
 
         #region DynamicProperty
 
