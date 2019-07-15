@@ -39,8 +39,8 @@ namespace VirtoCommerce.MarketingModule.Data.Search
                 var retVal = AbstractTypeFactory<DynamicContentFolderSearchResult>.TryCreateInstance();
                 using (var repository = _repositoryFactory())
                 {
-                    var sortInfos = GetSortInfos(criteria);
-                    var query = GetQuery(criteria, repository, sortInfos);
+                    var sortInfos = BuildSortInfos(criteria);
+                    var query = BuildSearchQuery(criteria, repository, sortInfos);
 
                     retVal.TotalCount = await query.CountAsync();
 
@@ -56,7 +56,7 @@ namespace VirtoCommerce.MarketingModule.Data.Search
             });
         }
 
-        protected virtual IList<SortInfo> GetSortInfos(DynamicContentFolderSearchCriteria criteria)
+        protected virtual IList<SortInfo> BuildSortInfos(DynamicContentFolderSearchCriteria criteria)
         {
             var sortInfos = criteria.SortInfos;
             if (sortInfos.IsNullOrEmpty())
@@ -65,7 +65,7 @@ namespace VirtoCommerce.MarketingModule.Data.Search
                 {
                     new SortInfo
                     {
-                        SortColumn = ReflectionUtility.GetPropertyName<DynamicContentFolder>(x => x.Name),
+                        SortColumn = nameof(DynamicContentFolder.Name),
                         SortDirection = SortDirection.Ascending
                     }
                 };
@@ -74,8 +74,7 @@ namespace VirtoCommerce.MarketingModule.Data.Search
             return sortInfos;
         }
 
-        protected virtual IQueryable<DynamicContentFolderEntity> GetQuery(DynamicContentFolderSearchCriteria criteria,
-            IMarketingRepository repository, IList<SortInfo> sortInfos)
+        protected virtual IQueryable<DynamicContentFolderEntity> BuildSearchQuery(DynamicContentFolderSearchCriteria criteria, IMarketingRepository repository, IList<SortInfo> sortInfos)
         {
             var query = repository.Folders.Where(x => x.ParentFolderId == criteria.FolderId);
             if (!string.IsNullOrEmpty(criteria.Keyword))

@@ -38,8 +38,8 @@ namespace VirtoCommerce.MarketingModule.Data.Search
                 var retVal = AbstractTypeFactory<PromotionSearchResult>.TryCreateInstance();
                 using (var repository = _repositoryFactory())
                 {
-                    var sortInfos = GetSortInfos(criteria);
-                    var query = GetQuery(repository, criteria, sortInfos);
+                    var sortInfos = BuildSortInfos(criteria);
+                    var query = BuildSearchQuery(repository, criteria, sortInfos);
 
                     retVal.TotalCount = await query.CountAsync();
 
@@ -57,7 +57,7 @@ namespace VirtoCommerce.MarketingModule.Data.Search
             });
         }
 
-        protected virtual IList<SortInfo> GetSortInfos(PromotionSearchCriteria criteria)
+        protected virtual IList<SortInfo> BuildSortInfos(PromotionSearchCriteria criteria)
         {
             var sortInfos = criteria.SortInfos;
             if (sortInfos.IsNullOrEmpty())
@@ -66,7 +66,7 @@ namespace VirtoCommerce.MarketingModule.Data.Search
                 {
                     new SortInfo
                     {
-                        SortColumn = ReflectionUtility.GetPropertyName<Promotion>(x => x.Priority),
+                        SortColumn = nameof(Promotion.Priority),
                         SortDirection = SortDirection.Descending
                     }
                 };
@@ -75,7 +75,7 @@ namespace VirtoCommerce.MarketingModule.Data.Search
             return sortInfos;
         }
 
-        protected virtual IQueryable<PromotionEntity> GetQuery(IMarketingRepository repository, PromotionSearchCriteria criteria, IList<SortInfo> sortInfos)
+        protected virtual IQueryable<PromotionEntity> BuildSearchQuery(IMarketingRepository repository, PromotionSearchCriteria criteria, IList<SortInfo> sortInfos)
         {
             var query = repository.Promotions;
 

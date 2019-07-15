@@ -43,8 +43,8 @@ namespace VirtoCommerce.MarketingModule.Data.Search
 
                 using (var repository = _repositoryFactory())
                 {
-                    var sortInfos = GetSortInfos(criteria);
-                    var query = GetQuery(criteria, repository, sortInfos);
+                    var sortInfos = BuildSortInfos(criteria);
+                    var query = BuildSearchQuery(criteria, repository, sortInfos);
 
                     var totalCount = await query.CountAsync();
                     var searchResult = new GenericSearchResult<Coupon> { TotalCount = totalCount };
@@ -60,7 +60,7 @@ namespace VirtoCommerce.MarketingModule.Data.Search
             });
         }
 
-        protected virtual IQueryable<CouponEntity> GetQuery(CouponSearchCriteria criteria, IMarketingRepository repository, IList<SortInfo> sortInfos)
+        protected virtual IQueryable<CouponEntity> BuildSearchQuery(CouponSearchCriteria criteria, IMarketingRepository repository, IList<SortInfo> sortInfos)
         {
             var query = repository.Coupons;
 
@@ -84,7 +84,7 @@ namespace VirtoCommerce.MarketingModule.Data.Search
             return query;
         }
 
-        protected virtual IList<SortInfo> GetSortInfos(CouponSearchCriteria criteria)
+        protected virtual IList<SortInfo> BuildSortInfos(CouponSearchCriteria criteria)
         {
             var sortInfos = criteria.SortInfos;
             //TODO: Sort by TotalUsesCount 
@@ -105,7 +105,7 @@ namespace VirtoCommerce.MarketingModule.Data.Search
             {
                 sortInfos.Add(new SortInfo
                 {
-                    SortColumn = ReflectionUtility.GetPropertyName<Coupon>(x => x.Id),
+                    SortColumn = nameof(Coupon.Id),
                     SortDirection = SortDirection.Ascending
                 });
             }

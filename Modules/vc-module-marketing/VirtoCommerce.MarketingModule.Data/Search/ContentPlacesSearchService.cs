@@ -38,8 +38,8 @@ namespace VirtoCommerce.MarketingModule.Data.Search
                 var retVal = AbstractTypeFactory<DynamicContentPlaceSearchResult>.TryCreateInstance();
                 using (var repository = _repositoryFactory())
                 {
-                    var sortInfos = GetSortInfos(criteria);
-                    var query = GetQuery(criteria, repository, sortInfos);
+                    var sortInfos = BuildSortInfos(criteria);
+                    var query = BuildSearchQuery(criteria, repository, sortInfos);
 
                     retVal.TotalCount = await query.CountAsync();
 
@@ -54,7 +54,7 @@ namespace VirtoCommerce.MarketingModule.Data.Search
             });
         }
 
-        protected virtual IList<SortInfo> GetSortInfos(DynamicContentPlaceSearchCriteria criteria)
+        protected virtual IList<SortInfo> BuildSortInfos(DynamicContentPlaceSearchCriteria criteria)
         {
             var sortInfos = criteria.SortInfos;
             if (sortInfos.IsNullOrEmpty())
@@ -63,7 +63,7 @@ namespace VirtoCommerce.MarketingModule.Data.Search
                 {
                     new SortInfo
                     {
-                        SortColumn = ReflectionUtility.GetPropertyName<DynamicContentPlace>(x => x.Name),
+                        SortColumn = nameof(DynamicContentPlace.Name),
                         SortDirection = SortDirection.Ascending
                     }
                 };
@@ -72,7 +72,7 @@ namespace VirtoCommerce.MarketingModule.Data.Search
             return sortInfos;
         }
 
-        protected virtual IQueryable<DynamicContentPlaceEntity> GetQuery(DynamicContentPlaceSearchCriteria criteria,
+        protected virtual IQueryable<DynamicContentPlaceEntity> BuildSearchQuery(DynamicContentPlaceSearchCriteria criteria,
             IMarketingRepository repository, IList<SortInfo> sortInfos)
         {
             var query = repository.Places;

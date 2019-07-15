@@ -39,8 +39,8 @@ namespace VirtoCommerce.MarketingModule.Data.Search
                 var retVal = AbstractTypeFactory<DynamicContentItemSearchResult>.TryCreateInstance();
                 using (var repository = _repositoryFactory())
                 {
-                    var sortInfos = GetContentItemsSortInfos(criteria);
-                    var query = GetContentItemsQuery(criteria, repository, sortInfos);
+                    var sortInfos = BuildSortInfos(criteria);
+                    var query = BuildSearchQuery(criteria, repository, sortInfos);
 
                     retVal.TotalCount = await query.CountAsync();
 
@@ -55,7 +55,7 @@ namespace VirtoCommerce.MarketingModule.Data.Search
             });
         }
 
-        protected virtual IList<SortInfo> GetContentItemsSortInfos(DynamicContentItemSearchCriteria criteria)
+        protected virtual IList<SortInfo> BuildSortInfos(DynamicContentItemSearchCriteria criteria)
         {
             var sortInfos = criteria.SortInfos;
             if (sortInfos.IsNullOrEmpty())
@@ -64,7 +64,7 @@ namespace VirtoCommerce.MarketingModule.Data.Search
                 {
                     new SortInfo
                     {
-                        SortColumn = ReflectionUtility.GetPropertyName<DynamicContentItem>(x => x.Name),
+                        SortColumn = nameof(DynamicContentItem.Name),
                         SortDirection = SortDirection.Ascending
                     }
                 };
@@ -73,8 +73,7 @@ namespace VirtoCommerce.MarketingModule.Data.Search
             return sortInfos;
         }
 
-        protected virtual IQueryable<DynamicContentItemEntity> GetContentItemsQuery(DynamicContentItemSearchCriteria criteria,
-            IMarketingRepository repository, IList<SortInfo> sortInfos)
+        protected virtual IQueryable<DynamicContentItemEntity> BuildSearchQuery(DynamicContentItemSearchCriteria criteria,  IMarketingRepository repository, IList<SortInfo> sortInfos)
         {
             var query = repository.Items;
             if (!string.IsNullOrEmpty(criteria.FolderId))

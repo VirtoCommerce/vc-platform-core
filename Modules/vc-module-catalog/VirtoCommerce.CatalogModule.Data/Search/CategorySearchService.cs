@@ -41,7 +41,7 @@ namespace VirtoCommerce.CatalogModule.Data.Search
                     };
                 }
 
-                var query = GetQuery(repository, criteria, sortInfos);
+                var query = BuildSearchQuery(repository, criteria, sortInfos);
               
                 result.TotalCount = await query.CountAsync();
                 if (criteria.Take > 0)
@@ -55,7 +55,7 @@ namespace VirtoCommerce.CatalogModule.Data.Search
             return result;
         }
 
-        protected virtual IQueryable<CategoryEntity> GetQuery(ICatalogRepository repository, CategorySearchCriteria criteria, IEnumerable<SortInfo> sortInfos)
+        protected virtual IQueryable<CategoryEntity> BuildSearchQuery(ICatalogRepository repository, CategorySearchCriteria criteria, IEnumerable<SortInfo> sortInfos)
         {
             var query = repository.Categories;
             if (!string.IsNullOrEmpty(criteria.Keyword))
