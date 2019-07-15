@@ -1,6 +1,6 @@
 using System;
 
-namespace VirtoCommerce.CustomerModule.Data.Model
+namespace VirtoCommerce.CustomerModule.Core.Model
 {
     [Flags]
     public enum MemberResponseGroup

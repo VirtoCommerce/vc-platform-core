@@ -80,7 +80,7 @@ namespace VirtoCommerce.OrdersModule.Data.Repositories
                 await Task.WhenAll(shipmentDiscounts, shipmentTaxDetails, addresses, shipmentItems, packages, shipmentDynamicPropertyValues);
             }
 
-            if (customerOrderResponseGroup.HasFlag(CustomerOrderResponseGroup.WithDynamicPropertyValues))
+            if (customerOrderResponseGroup.HasFlag(CustomerOrderResponseGroup.WithDynamicProperties))
             {
                 var dynamicPropertyObjectValues = await OrderDynamicPropertyObjectValues.Where(x => ids.Contains(x.ObjectId)).ToArrayAsync();
             }

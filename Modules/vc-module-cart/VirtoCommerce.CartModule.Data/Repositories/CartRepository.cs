@@ -1,6 +1,7 @@
 using System.Linq;
 using System.Threading.Tasks;
 using Microsoft.EntityFrameworkCore;
+using VirtoCommerce.CartModule.Core.Model;
 using VirtoCommerce.CartModule.Data.Model;
 using VirtoCommerce.Platform.Core.Common;
 using VirtoCommerce.Platform.Data.Infrastructure;
@@ -71,7 +72,7 @@ namespace VirtoCommerce.CartModule.Data.Repositories
                 await Task.WhenAll(shipmentTaxDetails, shipmentDiscounts, shipmentAddresses, shipmentDynamicPropertyObjectValues);
             }
 
-            if (cartResponseGroup.HasFlag(CartResponseGroup.WithDynamicPropertyValues))
+            if (cartResponseGroup.HasFlag(CartResponseGroup.WithDynamicProperties))
             {
                 var dynamicPropertyObjectValues = await DynamicPropertyObjectValues.Where(x => ids.Contains(x.ObjectId)).ToArrayAsync();
             }

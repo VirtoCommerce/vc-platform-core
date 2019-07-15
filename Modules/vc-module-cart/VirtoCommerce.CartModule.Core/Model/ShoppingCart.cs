@@ -144,5 +144,29 @@ namespace VirtoCommerce.CartModule.Core.Model
         public ICollection<DynamicObjectProperty> DynamicProperties { get; set; }
 
         #endregion
+
+        public virtual void ReduceDetails(string responseGroup)
+        {
+            //Reduce details according to response group
+            var cartResponseGroup = EnumUtility.SafeParseFlags(responseGroup, CartResponseGroup.Full);
+
+            if (!cartResponseGroup.HasFlag(CartResponseGroup.WithLineItems))
+            {
+                Items = null;
+            }
+            if (!cartResponseGroup.HasFlag(CartResponseGroup.WithPayments))
+            {
+                Payments = null;
+            }
+            if (!cartResponseGroup.HasFlag(CartResponseGroup.WithShipments))
+            {
+                Shipments = null;
+            }
+            if (!cartResponseGroup.HasFlag(CartResponseGroup.WithDynamicProperties))
+            {
+                DynamicProperties = null;
+            }
+        
+        }
     }
 }
