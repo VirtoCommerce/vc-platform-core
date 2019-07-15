@@ -4,7 +4,6 @@ angular.module('virtoCommerce.inventoryModule')
             $scope.uiGridConstants = uiGridConstants;
             var blade = $scope.blade;
 
-
             // actions on load
             blade.title = 'core.blades.fulfillment-center-list.title';
             blade.subtitle = 'core.blades.fulfillment-center-list.subtitle';
@@ -13,19 +12,19 @@ angular.module('virtoCommerce.inventoryModule')
                 blade.isLoading = true;
 
                 fulfillments.search({
-                        searchPhrase: filter.keyword ? filter.keyword : undefined,
-                        sort: uiGridHelper.getSortExpression($scope),
-                        skip: ($scope.pageSettings.currentPage - 1) * $scope.pageSettings.itemsPerPageCount,
-                        take: $scope.pageSettings.itemsPerPageCount
-                    }, function (response) {
-                        blade.isLoading = false;
-                        $scope.pageSettings.totalItems = response.totalCount;
-                        blade.currentEntities = response.results;
-                        if (parentRefresh === true) {
-                            blade.parentBlade.refresh();
-                        }
-                        return response.results;
-                    });
+                    searchPhrase: filter.keyword ? filter.keyword : undefined,
+                    sort: uiGridHelper.getSortExpression($scope),
+                    skip: ($scope.pageSettings.currentPage - 1) * $scope.pageSettings.itemsPerPageCount,
+                    take: $scope.pageSettings.itemsPerPageCount
+                }, function (response) {
+                    blade.isLoading = false;
+                    $scope.pageSettings.totalItems = response.totalCount;
+                    blade.currentEntities = response.results;
+                    if (parentRefresh === true) {
+                        blade.parentBlade.refresh(true);
+                    }
+                    return response.results;
+                });
             };
 
             function showDetailBlade(node, title) {
@@ -67,8 +66,6 @@ angular.module('virtoCommerce.inventoryModule')
                     permission: 'inventory:fulfillment:edit'
                 }
             ];
-
-        
 
             $scope.delete = function (item) {
                 var dialog = {
