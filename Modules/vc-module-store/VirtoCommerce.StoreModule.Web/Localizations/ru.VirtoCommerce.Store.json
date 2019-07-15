@@ -14,8 +14,6 @@
         "subtitle": "",
         "labels": {
           "description": "Описание",
-          "store-url": "URL-адрес магазина",
-          "secure-url": "Защищенный URL",
           "store-country": "Страна",
           "store-region": "Регион",
           "store-email": "Электронный адрес магазина",
@@ -28,8 +26,6 @@
         },
         "placeholders": {
           "description": "Введите описание",
-          "store-url": "Введите URL",
-          "secure-url": "Введите защищенный URL",
           "store-country": "Выбрать ...",
           "store-region": "Введите регион",
           "store-email": "Введите значение",

@@ -14,8 +14,6 @@
         "subtitle": {},
         "labels": {
           "description": "Beschreibung",
-          "store-url": "Store-URL",
-          "secure-url": "Sichere URL",
           "store-country": "Shop Land",
           "store-region": "Shop region",
           "store-email": "E-Mail speichern",
@@ -26,8 +24,6 @@
         },
         "placeholders": {
           "description": "Beschreibung eingeben",
-          "store-url": "URL eingeben",
-          "secure-url": "Geben Sie den sicheren URL ein",
           "store-country": "Wählen Sie aus...",
           "store-region": "Region eingeben",
           "store-email": "Wert eingeben",
