@@ -1,4 +1,4 @@
-﻿<div class="blade-static" ng-if="blade.isExpanded">
+<div class="blade-static" ng-if="blade.isExpanded">
     <div class="form-group">
         <div class="form-input __search">
             <input placeholder="{{'platform.placeholders.search-keyword' | translate}}" ng-model="filter.keyword" ng-keyup="$event.which === 13 && filter.criteriaChanged()" style="width: 190px">
@@ -29,7 +29,7 @@
                             { name: 'number', displayName: 'orders.blades.customerOrder-list.labels.number', width: '***', displayAlways: true },
                             { name: 'customerName', displayName: 'orders.blades.customerOrder-list.labels.customer', width: '***' },
                             { name: 'storeId', displayName: 'orders.blades.customerOrder-list.labels.store', width: '**' },
-                            { name: 'total', displayName: 'orders.blades.customerOrder-list.labels.total', cellFilter: 'currency', width: '**' },
+                            { name: 'total', displayName: 'orders.blades.customerOrder-list.labels.total', cellFilter: 'currency | showPrice:' + blade.isVisiblePrices, width: '**' },
                             { name: 'currency', displayName: 'orders.blades.customerOrder-list.labels.currency', width: '*' },
                             { name: 'isApproved', displayName: 'orders.blades.customerOrder-list.labels.confirmed', width: '*', cellClass: '__blue' },
                             { name: 'status', displayName: 'orders.blades.customerOrder-list.labels.status', cellFilter: 'statusTranslate:row.entity', width: '*' },

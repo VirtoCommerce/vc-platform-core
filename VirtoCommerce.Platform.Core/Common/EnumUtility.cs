@@ -1,4 +1,6 @@
 using System;
+using System.Globalization;
+using System.Linq;
 
 namespace VirtoCommerce.Platform.Core.Common
 {
@@ -47,6 +49,32 @@ namespace VirtoCommerce.Platform.Core.Common
             }
 
             return wasAssigned ? (T)Enum.ToObject(typeof(T), result) : defaultValue;
+        }
+
+        public static string SafeRemoveFlagFromEnumString<T>(string value, T flag, char separator = ',')
+            where T : struct, IConvertible
+        {
+            if (!typeof(T).IsDefined(typeof(FlagsAttribute), false))
+            {
+                throw new ArgumentException($"{typeof(T).FullName} type should have [Flags] attribute.");
+            }
+
+            var result = value;
+
+            if (!string.IsNullOrEmpty(value))
+            {
+                if (int.TryParse(value, out var intValue))
+                {
+                    intValue &= ~flag.ToInt32(CultureInfo.InvariantCulture);
+                    result = intValue.ToString();
+                }
+                else
+                {
+                    var parts = value.Split(separator, StringSplitOptions.RemoveEmptyEntries);
+                    result = string.Join(separator, parts.Where(x => !x.EqualsInvariant(flag.ToString())));
+                }
+            }
+            return result;
         }
     }
 }

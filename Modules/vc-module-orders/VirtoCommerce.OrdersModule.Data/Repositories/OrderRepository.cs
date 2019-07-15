@@ -73,6 +73,14 @@ namespace VirtoCommerce.OrdersModule.Data.Repositories
                 await Task.WhenAll(shipmentDiscounts, shipmentTaxDetails, addresses, shipmentItems, packages);
             }
 
+            if (!customerOrderResponseGroup.HasFlag(CustomerOrderResponseGroup.WithPrices))
+            {
+                foreach (var customerOrder in result)
+                {
+                    customerOrder.ResetPrices();
+                }
+            }
+
             return result;
         }
 

@@ -464,6 +464,8 @@ namespace VirtoCommerce.OrdersModule.Web.Controllers.Api
             var searchCriteria = AbstractTypeFactory<CustomerOrderSearchCriteria>.TryCreateInstance();
             searchCriteria.Number = orderNumber;
             searchCriteria.Take = 1;
+            //ToDo
+            //searchCriteria.ResponseGroup = OrderReadPricesPermission.ApplyResponseGroupFiltering(_securityService.GetUserPermissions(User.Identity.Name), null);
 
             var orders = await _searchService.SearchCustomerOrdersAsync(searchCriteria);
             var order = orders.Results.FirstOrDefault();

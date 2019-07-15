@@ -4,7 +4,6 @@ using System.Linq;
 using System.Threading.Tasks;
 using Microsoft.Extensions.Caching.Memory;
 using VirtoCommerce.CoreModule.Core.Common;
-
 using VirtoCommerce.OrdersModule.Core.Events;
 using VirtoCommerce.OrdersModule.Core.Model;
 using VirtoCommerce.OrdersModule.Core.Services;
@@ -86,6 +85,9 @@ namespace VirtoCommerce.OrdersModule.Data.Services
                                 _totalsCalculator.CalculateTotals(customerOrder);
                             }
                             await LoadOrderDependenciesAsync(customerOrder);
+
+                            customerOrder.ReduceDetails(responseGroup);
+
                             retVal.Add(customerOrder);
                             cacheEntry.AddExpirationToken(OrderCacheRegion.CreateChangeToken(customerOrder));
                         }
@@ -138,13 +140,6 @@ namespace VirtoCommerce.OrdersModule.Data.Services
                 pkMap.ResolvePrimaryKeys();
             }
 
-            //TODO
-            ////Save dynamic properties
-            //foreach (var order in orders)
-            //{
-            //    await _dynamicPropertyService.SaveDynamicPropertyValuesAsync(order);
-            //}
-            //Raise domain events
             await _eventPublisher.Publish(new OrderChangedEvent(changedEntries));
             ClearCache(orders);
         }
@@ -159,12 +154,6 @@ namespace VirtoCommerce.OrdersModule.Data.Services
                 await _eventPublisher.Publish(new OrderChangeEvent(changedEntries));
 
                 await repository.RemoveOrdersByIdsAsync(ids);
-
-                //TODO
-                //foreach (var order in orders)
-                //{
-                //    await _dynamicPropertyService.DeleteDynamicPropertyValuesAsync(order);
-                //}
 
                 await repository.UnitOfWork.CommitAsync();
                 //Raise domain events after deletion

@@ -4,6 +4,7 @@ using VirtoCommerce.CoreModule.Core.Common;
 using VirtoCommerce.CoreModule.Core.Tax;
 using VirtoCommerce.PaymentModule.Core.Model;
 using VirtoCommerce.PaymentModule.Model.Requests;
+using VirtoCommerce.Platform.Core.Common;
 
 namespace VirtoCommerce.OrdersModule.Core.Model
 {
@@ -71,5 +72,33 @@ namespace VirtoCommerce.OrdersModule.Core.Model
         #endregion
 
         public ICollection<PaymentGatewayTransaction> Transactions { get; set; }
+
+        public virtual void ReduceDetails(string responseGroup)
+        {
+            //Reduce details according to response group
+            var orderResponseGroup = EnumUtility.SafeParseFlags(responseGroup, CustomerOrderResponseGroup.Full);
+            if (!orderResponseGroup.HasFlag(CustomerOrderResponseGroup.WithAddresses))
+            {
+                BillingAddress = null;
+            }
+            if (!orderResponseGroup.HasFlag(CustomerOrderResponseGroup.WithDiscounts))
+            {
+                Discounts = null;
+            }
+            if (!orderResponseGroup.HasFlag(CustomerOrderResponseGroup.WithPrices))
+            {
+
+                Price = 0m;
+                PriceWithTax = 0m;
+                DiscountAmount = 0m;
+                DiscountAmountWithTax = 0m;
+                Total = 0m;
+                TotalWithTax = 0m;
+                TaxTotal = 0m;
+                TaxPercentRate = 0m;
+                Sum = 0m;
+            }
+
+        }
     }
 }

@@ -1,7 +1,9 @@
-﻿angular.module('virtoCommerce.orderModule')
-    .controller('virtoCommerce.orderModule.customerOrderDetailController', ['$scope', '$window', 'platformWebApp.bladeNavigationService', 'platformWebApp.dialogService', 'virtoCommerce.orderModule.order_res_stores', 'platformWebApp.settings', 'virtoCommerce.customerModule.members', 'virtoCommerce.customerModule.memberTypesResolverService', 'virtoCommerce.orderModule.statusTranslationService', 'virtoCommerce.orderModule.securityAccounts',
-    function ($scope, $window, bladeNavigationService, dialogService, order_res_stores, settings, members, memberTypesResolverService, statusTranslationService, securityAccounts) {
+angular.module('virtoCommerce.orderModule')
+    .controller('virtoCommerce.orderModule.customerOrderDetailController', ['$scope', '$window', 'platformWebApp.bladeNavigationService', 'platformWebApp.dialogService', 'virtoCommerce.orderModule.order_res_stores', 'platformWebApp.settings', 'virtoCommerce.customerModule.members', 'virtoCommerce.customerModule.memberTypesResolverService', 'virtoCommerce.orderModule.statusTranslationService', 'virtoCommerce.orderModule.securityAccounts', 'platformWebApp.authService',
+        function ($scope, $window, bladeNavigationService, dialogService, order_res_stores, settings, members, memberTypesResolverService, statusTranslationService, securityAccounts, authService) {
         var blade = $scope.blade;
+
+        blade.isVisiblePrices = authService.checkPermission('order:read_prices');
 
         angular.extend(blade, {
             title: 'orders.blades.customerOrder-detail.title',
@@ -80,7 +82,7 @@
            });
 
         blade.customInitialize = function () {
-            blade.isLocked = blade.currentEntity.status == 'Completed' || blade.currentEntity.isCancelled;
+            blade.isLocked = blade.currentEntity.status === 'Completed' || blade.currentEntity.isCancelled;
 
             //var orderLineItemsBlade = {
             //    id: 'customerOrderItems',

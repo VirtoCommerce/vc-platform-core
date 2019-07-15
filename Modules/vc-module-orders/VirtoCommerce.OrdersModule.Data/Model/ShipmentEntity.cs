@@ -1,4 +1,5 @@
 using System;
+using System.Collections.Generic;
 using System.Collections.ObjectModel;
 using System.ComponentModel.DataAnnotations;
 using System.ComponentModel.DataAnnotations.Schema;
@@ -11,7 +12,7 @@ using Address = VirtoCommerce.OrdersModule.Core.Model.Address;
 
 namespace VirtoCommerce.OrdersModule.Data.Model
 {
-    public class ShipmentEntity : OperationEntity
+    public class ShipmentEntity : OperationEntity, ISupportPartialPriceUpdate
     {
         [StringLength(64)]
         public string OrganizationId { get; set; }
@@ -81,7 +82,9 @@ namespace VirtoCommerce.OrdersModule.Data.Model
         {
             var shipment = operation as Shipment;
             if (shipment == null)
+            {
                 throw new ArgumentException(@"operation argument must be of type Shipment", nameof(operation));
+            }
 
             if (!Addresses.IsNullOrEmpty())
             {
@@ -138,7 +141,9 @@ namespace VirtoCommerce.OrdersModule.Data.Model
         {
             var shipment = operation as Shipment;
             if (shipment == null)
+            {
                 throw new ArgumentException(@"operation argument must be of type Shipment", nameof(operation));
+            }
 
             base.FromModel(shipment, pkMap);
 
@@ -219,16 +224,17 @@ namespace VirtoCommerce.OrdersModule.Data.Model
 
         public override void Patch(OperationEntity operation)
         {
-            base.Patch(operation);
-
             var target = operation as ShipmentEntity;
             if (target == null)
+            {
                 throw new ArgumentException(@"operation argument must be of type ShipmentEntity", nameof(operation));
+            }
 
-            target.Price = Price;
-            target.PriceWithTax = PriceWithTax;
-            target.DiscountAmount = DiscountAmount;
-            target.DiscountAmountWithTax = DiscountAmountWithTax;
+            var isNeedPatch = !(GetNonCalculatablePrices().Any(x => x == 0m) && target.GetNonCalculatablePrices().Any(x => x != 0m));
+
+            base.NeedPatchSum = isNeedPatch;
+            base.Patch(operation);
+
             target.FulfillmentCenterId = FulfillmentCenterId;
             target.FulfillmentCenterName = FulfillmentCenterName;
             target.OrganizationId = OrganizationId;
@@ -246,10 +252,18 @@ namespace VirtoCommerce.OrdersModule.Data.Model
             target.WeightUnit = WeightUnit;
             target.Length = Length;
             target.TaxType = TaxType;
-            target.TaxPercentRate = TaxPercentRate;
-            target.TaxTotal = TaxTotal;
-            target.Total = Total;
-            target.TotalWithTax = TotalWithTax;
+
+            if (isNeedPatch)
+            {
+                target.Price = Price;
+                target.PriceWithTax = PriceWithTax;
+                target.DiscountAmount = DiscountAmount;
+                target.DiscountAmountWithTax = DiscountAmountWithTax;
+                target.TaxPercentRate = TaxPercentRate;
+                target.TaxTotal = TaxTotal;
+                target.Total = Total;
+                target.TotalWithTax = TotalWithTax;
+            }
 
             if (!InPayments.IsNullCollection())
             {
@@ -282,6 +296,25 @@ namespace VirtoCommerce.OrdersModule.Data.Model
                 var taxDetailComparer = AnonymousComparer.Create((TaxDetailEntity x) => x.Name);
                 TaxDetails.Patch(target.TaxDetails, taxDetailComparer, (sourceTaxDetail, targetTaxDetail) => sourceTaxDetail.Patch(targetTaxDetail));
             }
+        }
+        public virtual void ResetPrices()
+        {
+            Price = 0m;
+            PriceWithTax = 0m;
+            DiscountAmount = 0m;
+            DiscountAmountWithTax = 0m;
+            Total = 0m;
+            TotalWithTax = 0m;
+            TaxTotal = 0m;
+            TaxPercentRate = 0m;
+            Sum = 0m;
+        }
+
+        public virtual IEnumerable<decimal> GetNonCalculatablePrices()
+        {
+            yield return TaxPercentRate;
+            yield return Price;
+            yield return DiscountAmount;
         }
     }
 }
