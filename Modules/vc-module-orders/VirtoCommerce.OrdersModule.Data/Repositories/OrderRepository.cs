@@ -83,6 +83,14 @@ namespace VirtoCommerce.OrdersModule.Data.Repositories
                 var dynamicPropertyObjectValues = await OrderDynamicPropertyObjectValues.Where(x => x.ObjectType.EqualsInvariant(typeof(CustomerOrder).FullName) && ids.Contains(x.CustomerOrderId)).ToArrayAsync();
             }
 
+            if (!customerOrderResponseGroup.HasFlag(CustomerOrderResponseGroup.WithPrices))
+            {
+                foreach (var customerOrder in result)
+                {
+                    customerOrder.ResetPrices();
+                }
+            }
+
             return result;
         }
 
