@@ -1,0 +1,66 @@
+<div class="blade-static __bottom">
+    <button class="btn" ng-click="startExport()" ng-disabled="!validateExportParameters()">
+        <span>{{ 'platform.blades.export-main.labels.start-export' | translate }}</span>
+    </button>
+</div>
+<div class="blade-content">
+    <div class="blade-inner">
+        <div class="inner-block">
+            <form class="form" name="exportForm" ng-if="!blade.notification">
+                <div class="form-group">
+                <!--                         
+                    <label class="form-label">{{ 'export.blades.export-settings.labels.template' | translate }}</label>
+                    <div class="form-input">
+                        <ui-select ng-model="blade.template" required>
+                            <ui-select-match placeholder="{{ 'export.blades.export-settings.placeholders.template' | translate }}">{{$select.selected.name}}</ui-select-match>
+                            <ui-select-choices repeat="x in (blade.templates | filter: {name: $select.search})">
+                                <span ng-bind-html="x.name | highlight: $select.search"></span>
+                            </ui-select-choices>
+                        </ui-select>
+                    </div> 
+                -->
+
+                    <div class="list __info form-group">
+                        <div>
+                            <label class="form-label">{{ 'export.blades.export-settings.labels.exportedType' | translate }}</label>
+                            <a class="form-label" ng-click="selectExportedType()">{{ 'export.blades.export-settings.labels.select' | translate }}</a>
+                        </div>
+                        <div>
+                            <label class="form-label">{{ blade.exportDataRequest.exportTypeName || ('export.blades.export-settings.labels.none' | translate) }}</label>
+                        </div>
+                    </div>
+
+                    <div class="list __info form-group">
+                        <div>
+                            <label class="form-label">{{ 'export.blades.export-settings.labels.exportedData' | translate }}</label>
+                            <a class="form-label" ng-class="{'__disabled': !blade.isExportedTypeSelected}" ng-click="selectExportedData()">{{ 'export.blades.export-settings.labels.select' | translate }}</a>
+                        </div>
+                        <div>
+                            <label class="form-label">{{ blade.selectedData || ('export.blades.export-settings.labels.all' | translate) }}</label>
+                        </div>
+                    </div>
+
+                    <div class="list __info form-group">
+                        <div>
+                            <label class="form-label">{{ 'export.blades.export-settings.labels.exportedColumns' | translate }}</label>
+                            <a class="form-label" ng-class="{'__disabled': !blade.isExportedTypeSelected}" ng-click="selectExportedColumns()">{{ 'export.blades.export-settings.labels.select' | translate }}</a>
+                        </div>
+                        <div>
+                            <label class="form-label">{{ blade.selectedColumns || ('export.blades.export-settings.labels.all' | translate) }}</label>
+                        </div>
+                    </div>
+
+                    <div class="list __info form-group">
+                        <label class="form-label">{{ 'export.blades.export-settings.labels.provider' | translate }}</label>
+                        <ui-select ng-model="blade.selectedProvider" required ng-disabled="!blade.isExportedTypeSelected">
+                            <ui-select-match placeholder="{{ 'export.blades.export-settings.placeholders.provider' | translate }}">{{$select.selected.name}}</ui-select-match>
+                            <ui-select-choices repeat="x in (blade.providers | filter: {name: $select.search})">
+                                <span ng-bind-html="x.name | highlight: $select.search"></span>
+                            </ui-select-choices>
+                        </ui-select>
+                    </div>
+                </div>
+            </form>
+        </div>
+    </div>
+</div>

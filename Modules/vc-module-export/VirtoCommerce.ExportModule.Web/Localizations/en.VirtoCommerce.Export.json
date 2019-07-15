@@ -10,7 +10,16 @@
                     "row-selected": "Select records for export",
                     "total": "Total count",
                     "processed": "Processed count",
-                    "errors-count": "Error count"
+                    "errors-count": "Error count",
+                    "edit": "Edit",
+                    "delete": "Delete",
+                    "save": "Save",
+                    "exportedType": "Select object type for export",
+                    "select": "Select",
+                    "none": "None",
+                    "exportedData": "Select data for export",
+                    "exportedColumns": "Select columns for export",
+                    "all": "All"
                 },
                 "placeholders": {
                     "provider": "Select provider for export",

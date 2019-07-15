@@ -11,13 +11,16 @@ angular.module(moduleName, ['ui.grid.cellNav', 'ui.grid.edit', 'ui.grid.validate
             url: '/exportNew',
             templateUrl: '$(Platform)/Scripts/common/templates/home.tpl.html',
             controller: ['$scope', 'platformWebApp.bladeNavigationService', function ($scope, bladeNavigationService) {
-                var blade = {
-                    id: 'exportNew',
-                    controller: 'virtoCommerce.exportModule.exportGroupsController',
-                    template: 'Modules/$(VirtoCommerce.Export)/Scripts/blades/exportGroups.tpl.html',
-                    isClosingDisabled: true
+                var newBlade = {
+                    id: 'exportSettings',
+                    title: 'export.blades.exporter.title',
+                    subtitle: 'export.blades.exporter.subtitle',
+                    controller: 'virtoCommerce.exportModule.exportSettingsController',
+                    template: 'Modules/$(VirtoCommerce.Export)/Scripts/blades/exportSettings.tpl.html',
+                    exportDataRequest: {},
+                    isClosingDisabled: false
                 };
-                bladeNavigationService.showBlade(blade);
+                bladeNavigationService.showBlade(newBlade);
             }]
         });
     }])

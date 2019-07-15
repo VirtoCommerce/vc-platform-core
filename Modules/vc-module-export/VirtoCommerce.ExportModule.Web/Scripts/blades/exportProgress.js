@@ -1,5 +1,5 @@
 angular.module('virtoCommerce.exportModule')
-    .controller('virtoCommerce.exportModule.exportProcessController', ['$scope', 'platformWebApp.bladeNavigationService', 'virtoCommerce.exportModule.exportModuleApi', function ($scope, bladeNavigationService, exportApi) {
+    .controller('virtoCommerce.exportModule.exportProgressController', ['$scope', 'platformWebApp.bladeNavigationService', 'virtoCommerce.exportModule.exportModuleApi', function ($scope, bladeNavigationService, exportApi) {
         var blade = $scope.blade;
         blade.isLoading = true;
         $scope.blade.headIcon = 'fa-upload';
