@@ -21,8 +21,8 @@ namespace VirtoCommerce.SearchModule.Web
 
         public void Initialize(IServiceCollection serviceCollection)
         {
-            serviceCollection.AddSingleton<ISearchPhraseParser, SearchPhraseParser>();
-            serviceCollection.AddSingleton<IIndexingWorker>(context =>
+            serviceCollection.AddTransient<ISearchPhraseParser, SearchPhraseParser>();
+            serviceCollection.AddTransient<IIndexingWorker>(context =>
             {
                 var settingsManager = context.GetService<ISettingsManager>();
                 if (settingsManager.GetValue(ModuleConstants.Settings.IndexingJobs.ScaleOut.Name, false))
@@ -38,8 +38,8 @@ namespace VirtoCommerce.SearchModule.Web
                 }
             });
 
-            serviceCollection.AddSingleton<IIndexingManager, IndexingManager>();
-            serviceCollection.AddSingleton<IndexProgressHandler>();
+            serviceCollection.AddTransient<IIndexingManager, IndexingManager>();
+            serviceCollection.AddTransient<IndexProgressHandler>();
 
             var configuration = serviceCollection.BuildServiceProvider().GetService<IConfiguration>();
             serviceCollection.AddOptions<SearchOptions>().Bind(configuration.GetSection("Search")).ValidateDataAnnotations();
