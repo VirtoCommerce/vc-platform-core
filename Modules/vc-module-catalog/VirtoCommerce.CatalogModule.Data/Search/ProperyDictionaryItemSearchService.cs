@@ -1,11 +1,12 @@
 using System;
+using System.Collections.Generic;
 using System.Linq;
 using System.Threading.Tasks;
 using Microsoft.EntityFrameworkCore;
-using VirtoCommerce.CatalogModule.Core.Model;
 using VirtoCommerce.CatalogModule.Core.Model.Search;
 using VirtoCommerce.CatalogModule.Core.Search;
 using VirtoCommerce.CatalogModule.Core.Services;
+using VirtoCommerce.CatalogModule.Data.Model;
 using VirtoCommerce.CatalogModule.Data.Repositories;
 using VirtoCommerce.Platform.Core.Common;
 using VirtoCommerce.Platform.Data.Infrastructure;
@@ -37,16 +38,7 @@ namespace VirtoCommerce.CatalogModule.Data.Search
 
                 var result = AbstractTypeFactory<PropertyDictionaryItemSearchResult>.TryCreateInstance();
 
-                var query = repository.PropertyDictionaryItems;
-                if (!criteria.PropertyIds.IsNullOrEmpty())
-                {
-                    query = query.Where(x => criteria.PropertyIds.Contains(x.PropertyId));
-                }
-                if (!string.IsNullOrEmpty(criteria.Keyword))
-                {
-                    query = query.Where(x => x.Alias.Contains(criteria.Keyword));
-                }
-
+               
                 var sortInfos = criteria.SortInfos;
                 if (sortInfos.IsNullOrEmpty())
                 {
@@ -55,19 +47,36 @@ namespace VirtoCommerce.CatalogModule.Data.Search
                         new SortInfo { SortColumn = "Alias", SortDirection = SortDirection.Ascending }
                     };
                 }
-
-                query = query.OrderBySortInfos(sortInfos).ThenBy(x => x.Id);
+                
+                var query = BuildSearchQuery(repository, criteria, sortInfos);
 
                 result.TotalCount = await query.CountAsync();
 
                 if (criteria.Take > 0)
                 {
-                    var ids = await query.Skip(criteria.Skip).Take(criteria.Take).Select(x => x.Id).ToArrayAsync();
-                    result.Results = (await _properyDictionaryItemService.GetByIdsAsync(ids)).AsQueryable().OrderBySortInfos(sortInfos).ToList();
+                    var ids = await query.Skip(criteria.Skip).Take(criteria.Take).Select(x => x.Id).ToListAsync();
+                    var dictItems = await  _properyDictionaryItemService.GetByIdsAsync(ids.ToArray());
+                    result.Results = dictItems.OrderBy(x => ids.IndexOf(x.Id)).ToList();
                 }
 
                 return result;
             }
+        }
+
+        protected virtual IQueryable<PropertyDictionaryItemEntity> BuildSearchQuery(ICatalogRepository repository, PropertyDictionaryItemSearchCriteria criteria, IEnumerable<SortInfo> sortInfos)
+        {
+            var query = repository.PropertyDictionaryItems;
+            if (!criteria.PropertyIds.IsNullOrEmpty())
+            {
+                query = query.Where(x => criteria.PropertyIds.Contains(x.PropertyId));
+            }
+            if (!string.IsNullOrEmpty(criteria.Keyword))
+            {
+                query = query.Where(x => x.Alias.Contains(criteria.Keyword));
+            }
+
+            query = query.OrderBySortInfos(sortInfos).ThenBy(x => x.Id);
+            return query;
         }
     }
 }

@@ -11,17 +11,17 @@ namespace VirtoCommerce.CatalogModule.Core
         {
             public static class Permissions
             {
-                public const string CatalogAccess = "catalog:access",
-                  CatalogCreate = "catalog:create",
-                  CatalogRead = "catalog:read",
-                  CatalogUpdate = "catalog:update",
-                  CatalogDelete = "catalog:delete",
-                  CatalogExport = "catalog:export",
-                  CatalogImport = "catalog:import",
+                public const string Access = "catalog:access",
+                  Create = "catalog:create",
+                  Read = "catalog:read",
+                  Update = "catalog:update",
+                  Delete = "catalog:delete",
+                  Export = "catalog:export",
+                  Import = "catalog:import",
                   CatalogBrowseFiltersRead = "catalog:BrowseFilters:Read",
                   CatalogBrowseFiltersUpdate = "atalog:BrowseFilters:Update";
 
-                public static string[] AllPermissions = new[] { CatalogAccess, CatalogCreate, CatalogRead, CatalogUpdate, CatalogDelete, CatalogExport, CatalogImport, CatalogBrowseFiltersRead, CatalogBrowseFiltersUpdate };
+                public static string[] AllPermissions = new[] { Access, Create, Read, Update, Delete, Export, Import, CatalogBrowseFiltersRead, CatalogBrowseFiltersUpdate };
             }
         }
 

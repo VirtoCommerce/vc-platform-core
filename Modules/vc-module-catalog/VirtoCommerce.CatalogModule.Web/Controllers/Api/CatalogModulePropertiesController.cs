@@ -2,11 +2,14 @@ using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Threading.Tasks;
+using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
+using VirtoCommerce.CatalogModule.Core;
 using VirtoCommerce.CatalogModule.Core.Model;
 using VirtoCommerce.CatalogModule.Core.Model.Search;
 using VirtoCommerce.CatalogModule.Core.Search;
 using VirtoCommerce.CatalogModule.Core.Services;
+using VirtoCommerce.CatalogModule.Web.Authorization;
 
 namespace VirtoCommerce.CatalogModule.Web.Controllers.Api
 {
@@ -17,14 +20,20 @@ namespace VirtoCommerce.CatalogModule.Web.Controllers.Api
         private readonly ICategoryService _categoryService;
         private readonly ICatalogService _catalogService;
         private readonly IProperyDictionaryItemSearchService _propertyDictionarySearchService;
+        private readonly IAuthorizationService _authorizationService;
         //Workaround: Bad design to use repository in the controller layer, need to extend in the future IPropertyService.Delete with new parameter DeleteAllValues
-        public CatalogModulePropertiesController(IPropertyService propertyService, ICategoryService categoryService, ICatalogService catalogService,
-                                                 IProperyDictionaryItemSearchService propertyDictionarySearchService)
+        public CatalogModulePropertiesController(
+            IPropertyService propertyService
+            , ICategoryService categoryService
+            , ICatalogService catalogService
+            , IProperyDictionaryItemSearchService propertyDictionarySearchService
+            , IAuthorizationService authorizationService)
         {
             _propertyService = propertyService;
             _categoryService = categoryService;
             _catalogService = catalogService;
             _propertyDictionarySearchService = propertyDictionarySearchService;
+            _authorizationService = authorizationService;
         }
 
 
@@ -58,7 +67,11 @@ namespace VirtoCommerce.CatalogModule.Web.Controllers.Api
             {
                 return NotFound();
             }
-            //CheckCurrentUserHasPermissionForObjects(CatalogPredefinedPermissions.Read, property);
+            var authorizationResult = await _authorizationService.AuthorizeAsync(User, property, new CatalogAuthorizationRequirement(ModuleConstants.Security.Permissions.Read));
+            if (!authorizationResult.Succeeded)
+            {
+                return Unauthorized();
+            }
 
             return Ok(property);
         }
@@ -84,8 +97,6 @@ namespace VirtoCommerce.CatalogModule.Web.Controllers.Api
                 Attributes = new List<PropertyAttribute>(),
                 DisplayNames = catalog?.Languages.Select(x => new PropertyDisplayName { LanguageCode = x.LanguageCode }).ToList()
             };
-
-            //CheckCurrentUserHasPermissionForObjects(CatalogPredefinedPermissions.Create, retVal.ToCoreModel());
 
             return Ok(retVal);
         }
@@ -113,8 +124,6 @@ namespace VirtoCommerce.CatalogModule.Web.Controllers.Api
                 DisplayNames = category?.Catalog.Languages.Select(x => new PropertyDisplayName { LanguageCode = x.LanguageCode }).ToList()
             };
 
-            //CheckCurrentUserHasPermissionForObjects(CatalogPredefinedPermissions.Create, retVal.ToCoreModel());
-
             return Ok(retVal);
         }
 
@@ -128,6 +137,12 @@ namespace VirtoCommerce.CatalogModule.Web.Controllers.Api
         [Route("")]
         public async Task<ActionResult> SaveProperty([FromBody]Property property)
         {
+            var authorizationResult = await _authorizationService.AuthorizeAsync(User, property, new CatalogAuthorizationRequirement(ModuleConstants.Security.Permissions.Update));
+            if (!authorizationResult.Succeeded)
+            {
+                return Unauthorized();
+            }
+
             await _propertyService.SaveChangesAsync(new[] { property });
 
             return NoContent();
@@ -144,9 +159,13 @@ namespace VirtoCommerce.CatalogModule.Web.Controllers.Api
         [Route("")]
         public async Task<ActionResult> DeleteProperty(string id, bool doDeleteValues = false)
         {
-            //var property = _propertyService.GetById(id);
+            var property = await _propertyService.GetByIdsAsync(new[] { id });
 
-            //CheckCurrentUserHasPermissionForObjects(CatalogPredefinedPermissions.Delete, property);
+            var authorizationResult = await _authorizationService.AuthorizeAsync(User, property, new CatalogAuthorizationRequirement(ModuleConstants.Security.Permissions.Delete));
+            if (!authorizationResult.Succeeded)
+            {
+                return Unauthorized();
+            }
             await _propertyService.DeleteAsync(new[] { id }, doDeleteValues);
             return NoContent();
         }

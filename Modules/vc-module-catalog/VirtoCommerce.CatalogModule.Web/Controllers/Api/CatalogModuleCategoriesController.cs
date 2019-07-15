@@ -2,9 +2,12 @@ using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Threading.Tasks;
+using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
+using VirtoCommerce.CatalogModule.Core;
 using VirtoCommerce.CatalogModule.Core.Model;
 using VirtoCommerce.CatalogModule.Core.Services;
+using VirtoCommerce.CatalogModule.Web.Authorization;
 using VirtoCommerce.CoreModule.Core.Seo;
 using VirtoCommerce.Platform.Core.Common;
 
@@ -15,11 +18,17 @@ namespace VirtoCommerce.CatalogModule.Web.Controllers.Api
     {
         private readonly ICategoryService _categoryService;
         private readonly ICatalogService _catalogService;
+        private readonly IAuthorizationService _authorizationService;
 
-        public CatalogModuleCategoriesController(ICategoryService categoryService, ICatalogService catalogService)
+
+        public CatalogModuleCategoriesController(
+            ICategoryService categoryService
+            , ICatalogService catalogService
+            , IAuthorizationService authorizationService)
         {
             _categoryService = categoryService;
             _catalogService = catalogService;
+            _authorizationService = authorizationService;
         }
 
 
@@ -38,6 +47,12 @@ namespace VirtoCommerce.CatalogModule.Web.Controllers.Api
                 return NotFound();
             }
 
+            var authorizationResult = await _authorizationService.AuthorizeAsync(User, category, new CatalogAuthorizationRequirement(ModuleConstants.Security.Permissions.Read));
+            if (!authorizationResult.Succeeded)
+            {
+                return Unauthorized();
+            }
+
             return Ok(category);
         }
 
@@ -52,13 +67,11 @@ namespace VirtoCommerce.CatalogModule.Web.Controllers.Api
         {
             var categories = await _categoryService.GetByIdsAsync(ids, respGroup);
 
-            //TODO
-            //CheckCurrentUserHasPermissionForObjects(CatalogPredefinedPermissions.Read, categories);
-
-            //foreach (var category in retVal)
-            //{
-            //    category.SecurityScopes = GetObjectPermissionScopeStrings(category);
-            //}
+            var authorizationResult = await _authorizationService.AuthorizeAsync(User, categories, new CatalogAuthorizationRequirement(ModuleConstants.Security.Permissions.Read));
+            if (!authorizationResult.Succeeded)
+            {
+                return Unauthorized();
+            }
 
             return Ok(categories);
         }
@@ -94,10 +107,6 @@ namespace VirtoCommerce.CatalogModule.Web.Controllers.Api
                 IsActive = true
             };
 
-            //TODO
-            //CheckCurrentUserHasPermissionForObjects(CatalogPredefinedPermissions.Create, retVal.ToModuleModel());
-            //retVal.SecurityScopes = GetObjectPermissionScopeStrings(retVal.ToModuleModel());
-
             return Ok(retVal);
         }
 
@@ -110,9 +119,10 @@ namespace VirtoCommerce.CatalogModule.Web.Controllers.Api
         [HttpPost]
         [Route("")]
         public async Task<ActionResult> CreateOrUpdateCategory([FromBody]Category category)
-        {
+        {           
             if (category.Id == null)
             {
+                //Ensure that new category has SeoInfo
                 if (category.SeoInfos == null || !category.SeoInfos.Any())
                 {
                     var slugUrl = category.Name.GenerateSlug();
@@ -123,20 +133,17 @@ namespace VirtoCommerce.CatalogModule.Web.Controllers.Api
                         category.SeoInfos = new[] { new SeoInfo { LanguageCode = defaultLanguage, SemanticUrl = slugUrl } };
                     }
                 }
+            }                     
 
-                //TODO
-                //CheckCurrentUserHasPermissionForObjects(CatalogPredefinedPermissions.Create, coreCategory);
-
-                await _categoryService.SaveChangesAsync(new[] { category });
-                return Ok(category);
-            }
-            else
+            var authorizationResult = await _authorizationService.AuthorizeAsync(User, category, new CatalogAuthorizationRequirement(ModuleConstants.Security.Permissions.Update));
+            if (!authorizationResult.Succeeded)
             {
-                //CheckCurrentUserHasPermissionForObjects(CatalogPredefinedPermissions.Update, coreCategory);
-
-                await _categoryService.SaveChangesAsync(new[] { category });
-                return NoContent();
+                return Unauthorized();
             }
+
+            await _categoryService.SaveChangesAsync(new[] { category });
+            return Ok(category);
+
         }
 
 
@@ -148,9 +155,12 @@ namespace VirtoCommerce.CatalogModule.Web.Controllers.Api
         [Route("")]
         public async Task<ActionResult> DeleteCategory([FromQuery]string[] ids)
         {
-            //TODO
-            //var categories = _categoryService.GetByIds(ids, Domain.Catalog.Model.CategoryResponseGroup.WithParents);
-            //CheckCurrentUserHasPermissionForObjects(CatalogPredefinedPermissions.Delete, categories);
+            var categories = await _categoryService.GetByIdsAsync(ids, CategoryResponseGroup.Info.ToString());
+            var authorizationResult = await _authorizationService.AuthorizeAsync(User, categories, new CatalogAuthorizationRequirement(ModuleConstants.Security.Permissions.Delete));
+            if (!authorizationResult.Succeeded)
+            {
+                return Unauthorized();
+            }
 
             await _categoryService.DeleteAsync(ids);
             return NoContent();

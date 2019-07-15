@@ -3,6 +3,7 @@ using System.IO;
 using System.Linq;
 using System.Threading.Tasks;
 using FluentValidation;
+using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Builder;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.EntityFrameworkCore;
@@ -23,6 +24,7 @@ using VirtoCommerce.CatalogModule.Data.Search.BrowseFilters;
 using VirtoCommerce.CatalogModule.Data.Search.Indexing;
 using VirtoCommerce.CatalogModule.Data.Services;
 using VirtoCommerce.CatalogModule.Data.Validation;
+using VirtoCommerce.CatalogModule.Web.Authorization;
 using VirtoCommerce.CatalogModule.Web.JsonConverters;
 using VirtoCommerce.CoreModule.Core.Seo;
 using VirtoCommerce.Platform.Core.Bus;
@@ -55,6 +57,7 @@ namespace VirtoCommerce.CatalogModule.Web
             serviceCollection.AddSingleton<ICategorySearchService, CategorySearchService>();
 
             serviceCollection.AddSingleton<ICatalogService, CatalogService>();
+            serviceCollection.AddSingleton<ICatalogSearchService, CatalogSearchService>();
             serviceCollection.AddSingleton<IListEntrySearchService, ListEntrySearchService>();
 
             serviceCollection.AddSingleton<ICategoryService, CategoryService>();
@@ -83,7 +86,6 @@ namespace VirtoCommerce.CatalogModule.Web
 
             serviceCollection.AddSingleton<ISeoBySlugResolver, SeoBySlugResolver>();
 
-
             PropertyValueValidator PropertyValueValidatorFactory(PropertyValidationRule rule) => new PropertyValueValidator(rule);
             serviceCollection.AddSingleton((Func<PropertyValidationRule, PropertyValueValidator>)PropertyValueValidatorFactory);
             serviceCollection.AddSingleton<AbstractValidator<IHasProperties>, HasPropertiesValidator>();
@@ -102,7 +104,6 @@ namespace VirtoCommerce.CatalogModule.Web
                     return new IdOutlinePartResolver();
                 }
             });
-
 
             serviceCollection.AddSingleton<ProductDocumentChangesProvider>();
             serviceCollection.AddSingleton<ProductDocumentBuilder>();
@@ -130,6 +131,8 @@ namespace VirtoCommerce.CatalogModule.Web
                     DocumentBuilder = provider.GetService<CategoryDocumentBuilder>(),
                 },
             });
+
+            serviceCollection.AddSingleton<IAuthorizationHandler, CatalogAuthorizationHandler>();
         }
 
         public void PostInitialize(IApplicationBuilder appBuilder)
@@ -142,6 +145,15 @@ namespace VirtoCommerce.CatalogModule.Web
             //Register module permissions
             var permissionsProvider = appBuilder.ApplicationServices.GetRequiredService<IPermissionsRegistrar>();
             permissionsProvider.RegisterPermissions(ModuleConstants.Security.Permissions.AllPermissions.Select(x => new Permission() { GroupName = "Catalog", Name = x }).ToArray());
+
+
+            //Register Permission scopes
+            AbstractTypeFactory<PermissionScope>.RegisterType<SelectedCatalogScope>();
+            permissionsProvider.WithAvailabeScopesForPermissions(new[] {
+                                                                        ModuleConstants.Security.Permissions.Read,
+                                                                        ModuleConstants.Security.Permissions.Update,
+                                                                        ModuleConstants.Security.Permissions.Delete,
+                                                                         }, new SelectedCatalogScope());
 
             var mvcJsonOptions = appBuilder.ApplicationServices.GetService<IOptions<MvcJsonOptions>>();
             mvcJsonOptions.Value.SerializerSettings.Converters.Add(new SearchCriteriaJsonConverter());

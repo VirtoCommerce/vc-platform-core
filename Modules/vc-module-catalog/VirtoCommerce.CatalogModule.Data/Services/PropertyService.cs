@@ -7,6 +7,7 @@ using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.Caching.Memory;
 using VirtoCommerce.CatalogModule.Core.Events;
 using VirtoCommerce.CatalogModule.Core.Model;
+using VirtoCommerce.CatalogModule.Core.Search;
 using VirtoCommerce.CatalogModule.Core.Services;
 using VirtoCommerce.CatalogModule.Data.Caching;
 using VirtoCommerce.CatalogModule.Data.Model;
@@ -25,14 +26,18 @@ namespace VirtoCommerce.CatalogModule.Data.Services
         private readonly Func<ICatalogRepository> _repositoryFactory;
         private readonly IEventPublisher _eventPublisher;
         private readonly IPlatformMemoryCache _platformMemoryCache;
-        private readonly ICatalogService _catalogService;
+        private readonly ICatalogSearchService _catalogSearchService;
 
-        public PropertyService(Func<ICatalogRepository> repositoryFactory, IEventPublisher eventPublisher, IPlatformMemoryCache platformMemoryCache, ICatalogService catalogService)
+        public PropertyService(
+            Func<ICatalogRepository> repositoryFactory
+            , IEventPublisher eventPublisher
+            , IPlatformMemoryCache platformMemoryCache
+            , ICatalogSearchService catalogSearchService)
         {
             _repositoryFactory = repositoryFactory;
             _eventPublisher = eventPublisher;
             _platformMemoryCache = platformMemoryCache;
-            _catalogService = catalogService;
+            _catalogSearchService = catalogSearchService;
         }
 
         #region IPropertyService members
@@ -173,10 +178,11 @@ namespace VirtoCommerce.CatalogModule.Data.Services
 
         protected virtual async Task LoadDependenciesAsync(Property[] properties)
         {
-            var catalogsMap = (await _catalogService.GetCatalogsListAsync()).ToDictionary(x => x.Id, StringComparer.OrdinalIgnoreCase);
+            var catalogsByIdDict = ((await _catalogSearchService.SearchCatalogsAsync(new Core.Model.Search.CatalogSearchCriteria { Take = int.MaxValue })).Results).ToDictionary(x => x.Id, StringComparer.OrdinalIgnoreCase)
+                                                                           .WithDefaultValue(null);
             foreach (var property in properties)
             {
-                property.Catalog = catalogsMap.GetValueOrThrow(property.CatalogId, $"property catalog with key {property.CatalogId} not exist");
+                property.Catalog = catalogsByIdDict[property.CatalogId];
             }
         }
 
