@@ -3,6 +3,7 @@ using System.Collections.Generic;
 using System.IO;
 using System.Linq;
 using System.Threading.Tasks;
+using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Builder;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.EntityFrameworkCore;
@@ -26,6 +27,7 @@ using VirtoCommerce.MarketingModule.Data.Promotions;
 using VirtoCommerce.MarketingModule.Data.Repositories;
 using VirtoCommerce.MarketingModule.Data.Search;
 using VirtoCommerce.MarketingModule.Data.Services;
+using VirtoCommerce.MarketingModule.Web.Authorization;
 using VirtoCommerce.MarketingModule.Web.ExportImport;
 using VirtoCommerce.MarketingModule.Web.JsonConverters;
 using VirtoCommerce.Platform.Core.Bus;
@@ -64,6 +66,7 @@ namespace VirtoCommerce.MarketingModule.Web
             serviceCollection.AddSingleton<IPromotionUsageService, PromotionUsageService>();
             serviceCollection.AddSingleton<IMarketingDynamicContentEvaluator, DefaultDynamicContentEvaluator>();
             serviceCollection.AddSingleton<IDynamicContentService, DynamicContentService>();
+            serviceCollection.AddSingleton<ICouponService, CouponService>();
 
             #endregion
 
@@ -102,6 +105,8 @@ namespace VirtoCommerce.MarketingModule.Web
 
             serviceCollection.AddSingleton<DynamicContentItemEventHandlers>();
             serviceCollection.AddSingleton<MarketingExportImport>();
+
+            serviceCollection.AddTransient<IAuthorizationHandler, MarketingAuthorizationHandler>();
         }
 
         public void PostInitialize(IApplicationBuilder appBuilder)
@@ -111,14 +116,19 @@ namespace VirtoCommerce.MarketingModule.Web
             var settingsRegistrar = appBuilder.ApplicationServices.GetRequiredService<ISettingsRegistrar>();
             settingsRegistrar.RegisterSettings(ModuleConstants.Settings.General.AllSettings, ModuleInfo.Id);
 
-            var permissionsProvider = appBuilder.ApplicationServices.GetRequiredService<IPermissionsRegistrar>();
-            permissionsProvider.RegisterPermissions(ModuleConstants.Security.Permissions.AllPermissions.Select(x =>
+            var permissionsRegistrar = appBuilder.ApplicationServices.GetRequiredService<IPermissionsRegistrar>();
+            permissionsRegistrar.RegisterPermissions(ModuleConstants.Security.Permissions.AllPermissions.Select(x =>
                 new Permission()
                 {
                     GroupName = "Marketing",
                     ModuleId = ModuleInfo.Id,
                     Name = x
                 }).ToArray());
+
+            //Register Permission scopes
+            AbstractTypeFactory<PermissionScope>.RegisterType<MarketingStoreSelectedScope>();
+            permissionsRegistrar.WithAvailabeScopesForPermissions(new[] { ModuleConstants.Security.Permissions.Read }, new MarketingStoreSelectedScope());
+
 
             var eventHandlerRegistrar = appBuilder.ApplicationServices.GetService<IHandlerRegistrar>();
             //Create order observer. record order coupon usage

@@ -137,7 +137,8 @@ namespace VirtoCommerce.MarketingModule.Data.ExportImport
                 progressCallback(progressInfo);
 
                 await writer.WritePropertyNameAsync("Coupons");
-                await writer.SerializeJsonArrayWithPagingAsync(_jsonSerializer, _batchSize, (skip, take) => _couponSearchService.SearchCouponsAsync(new CouponSearchCriteria { Skip = skip, Take = take }), (processedCount, totalCount) =>
+                await writer.SerializeJsonArrayWithPagingAsync(_jsonSerializer, _batchSize, async (skip, take) =>
+                  (GenericSearchResult<Coupon>)await _couponSearchService.SearchCouponsAsync(new CouponSearchCriteria { Skip = skip, Take = take }), (processedCount, totalCount) =>
                 {
                     progressInfo.Description = $"{ processedCount } of { totalCount } coupons have been exported";
                     progressCallback(progressInfo);
@@ -147,7 +148,9 @@ namespace VirtoCommerce.MarketingModule.Data.ExportImport
                 progressCallback(progressInfo);
 
                 await writer.WritePropertyNameAsync("Usages");
-                await writer.SerializeJsonArrayWithPagingAsync(_jsonSerializer, _batchSize, (skip, take) => _promotionUsageSearchService.SearchUsagesAsync(new PromotionUsageSearchCriteria { Skip = skip, Take = take }), (processedCount, totalCount) =>
+                await writer.SerializeJsonArrayWithPagingAsync(_jsonSerializer, _batchSize, async (skip, take) =>
+                (GenericSearchResult<PromotionUsage>)await _promotionUsageSearchService.SearchUsagesAsync(new PromotionUsageSearchCriteria { Skip = skip, Take = take })
+                , (processedCount, totalCount) =>
                 {
                     progressInfo.Description = $"{ processedCount } of { totalCount } usages have been exported";
                     progressCallback(progressInfo);

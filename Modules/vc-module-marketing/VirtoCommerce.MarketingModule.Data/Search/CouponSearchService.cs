@@ -7,6 +7,7 @@ using Microsoft.Extensions.Caching.Memory;
 using VirtoCommerce.MarketingModule.Core.Model.Promotions;
 using VirtoCommerce.MarketingModule.Core.Model.Promotions.Search;
 using VirtoCommerce.MarketingModule.Core.Search;
+using VirtoCommerce.MarketingModule.Core.Services;
 using VirtoCommerce.MarketingModule.Data.Caching;
 using VirtoCommerce.MarketingModule.Data.Model;
 using VirtoCommerce.MarketingModule.Data.Repositories;
@@ -20,16 +21,16 @@ namespace VirtoCommerce.MarketingModule.Data.Search
     {
         private readonly Func<IMarketingRepository> _repositoryFactory;
         private readonly IPlatformMemoryCache _platformMemoryCache;
-        private readonly CouponService _couponService;
+        private readonly ICouponService _couponService;
 
-        public CouponSearchService(Func<IMarketingRepository> repositoryFactory, IPlatformMemoryCache platformMemoryCache, CouponService couponService)
+        public CouponSearchService(Func<IMarketingRepository> repositoryFactory, IPlatformMemoryCache platformMemoryCache, ICouponService couponService)
         {
             _repositoryFactory = repositoryFactory;
             _platformMemoryCache = platformMemoryCache;
             _couponService = couponService;
         }
 
-        public async Task<GenericSearchResult<Coupon>> SearchCouponsAsync(CouponSearchCriteria criteria)
+        public async Task<CouponSearchResult> SearchCouponsAsync(CouponSearchCriteria criteria)
         {
             if (criteria == null)
             {
@@ -47,7 +48,8 @@ namespace VirtoCommerce.MarketingModule.Data.Search
                     var query = BuildSearchQuery(criteria, repository, sortInfos);
 
                     var totalCount = await query.CountAsync();
-                    var searchResult = new GenericSearchResult<Coupon> { TotalCount = totalCount };
+                    var searchResult = AbstractTypeFactory<CouponSearchResult>.TryCreateInstance();
+                    searchResult.TotalCount = totalCount;
 
                     if (criteria.Take > 0)
                     {
@@ -88,17 +90,16 @@ namespace VirtoCommerce.MarketingModule.Data.Search
         {
             var sortInfos = criteria.SortInfos;
             //TODO: Sort by TotalUsesCount 
-            if (sortInfos.IsNullOrEmpty()
-                || sortInfos.Any(x => x.SortColumn.EqualsInvariant(ReflectionUtility.GetPropertyName<Coupon>(p => p.TotalUsesCount))))
+            if (sortInfos.IsNullOrEmpty() || sortInfos.Any(x => x.SortColumn.EqualsInvariant(nameof(Coupon.TotalUsesCount))))
             {
                 sortInfos = new[]
                 {
                     new SortInfo
                     {
-                        SortColumn = ReflectionUtility.GetPropertyName<Coupon>(x => x.Code),
+                        SortColumn = nameof(Coupon.Code),
                         SortDirection = SortDirection.Descending
                     }
-                };
+                }.ToList();
             }
 
             if (sortInfos.Count < 2)

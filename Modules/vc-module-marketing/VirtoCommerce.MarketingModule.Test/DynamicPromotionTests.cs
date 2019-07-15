@@ -80,11 +80,11 @@ namespace VirtoCommerce.MarketingModule.Test
 
             var promotionUsageServiceMoq = new Mock<IPromotionUsageSearchService>();
             promotionUsageServiceMoq.Setup(x => x.SearchUsagesAsync(It.IsAny<PromotionUsageSearchCriteria>()))
-                .ReturnsAsync(new GenericSearchResult<PromotionUsage>() { TotalCount = totalUses });
+                .ReturnsAsync(new PromotionUsageSearchResult() { TotalCount = totalUses });
 
             var couponServiceMoq = new Mock<ICouponSearchService>();
             couponServiceMoq.Setup(x => x.SearchCouponsAsync(It.IsAny<CouponSearchCriteria>()))
-                .ReturnsAsync(new GenericSearchResult<Coupon>() { Results = coupons });
+                .ReturnsAsync(new CouponSearchResult() { Results = coupons });
 
             return new DynamicPromotionMoq(couponServiceMoq.Object, promotionUsageServiceMoq.Object);
         }

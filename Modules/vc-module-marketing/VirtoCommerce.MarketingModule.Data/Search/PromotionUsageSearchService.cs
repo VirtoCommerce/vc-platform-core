@@ -26,7 +26,7 @@ namespace VirtoCommerce.MarketingModule.Data.Search
             _repositoryFactory = repositoryFactory;
         }
 
-        public virtual async Task<GenericSearchResult<PromotionUsage>> SearchUsagesAsync(PromotionUsageSearchCriteria criteria)
+        public virtual async Task<PromotionUsageSearchResult> SearchUsagesAsync(PromotionUsageSearchCriteria criteria)
         {
             if (criteria == null)
             {
@@ -36,6 +36,7 @@ namespace VirtoCommerce.MarketingModule.Data.Search
             var cacheKey = CacheKey.With(GetType(), "SearchUsagesAsync", criteria.GetCacheKey());
             return await _platformMemoryCache.GetOrCreateExclusiveAsync(cacheKey, async (cacheEntry) =>
             {
+                var result = AbstractTypeFactory<PromotionUsageSearchResult>.TryCreateInstance();
                 cacheEntry.AddExpirationToken(PromotionUsageCacheRegion.CreateChangeToken());
 
                 using (var repository = _repositoryFactory())
@@ -43,16 +44,15 @@ namespace VirtoCommerce.MarketingModule.Data.Search
                     var sortInfos = BuildSortInfos(criteria);
                     var query = BuildSearchQuery(repository, criteria, sortInfos);
 
-                    var totalCount = await query.CountAsync();
-                    var searchResult = new GenericSearchResult<PromotionUsage> { TotalCount = totalCount };
+                    result.TotalCount = await query.CountAsync();
 
                     if (criteria.Take > 0)
                     {
                         var coupons = await query.Skip(criteria.Skip).Take(criteria.Take).ToArrayAsync();
-                        searchResult.Results = coupons.Select(x => x.ToModel(AbstractTypeFactory<PromotionUsage>.TryCreateInstance())).ToList();
+                        result.Results = coupons.Select(x => x.ToModel(AbstractTypeFactory<PromotionUsage>.TryCreateInstance())).ToList();
                     }
 
-                    return searchResult;
+                    return result;
                 }
             });
         }

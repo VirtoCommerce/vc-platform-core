@@ -7,6 +7,7 @@ using Microsoft.AspNetCore.Mvc;
 using Newtonsoft.Json;
 using VirtoCommerce.CoreModule.Core.Conditions;
 using VirtoCommerce.MarketingModule.Core;
+using VirtoCommerce.MarketingModule.Core.Model.DynamicContent.Search;
 using VirtoCommerce.MarketingModule.Core.Search;
 using VirtoCommerce.MarketingModule.Core.Services;
 using VirtoCommerce.Platform.Core.Common;
@@ -50,12 +51,9 @@ namespace VirtoCommerce.MarketingModule.Web.Controllers.Api
         [Authorize(ModuleConstants.Security.Permissions.Read)]
         [HttpPost]
         [Route("contentplaces/listentries/search")]
-        public async Task<ActionResult<GenericSearchResult<coreModel.DynamicContentFolder>>> DynamicContentPlaceListEntriesSearch([FromBody]coreModel.DynamicContentPlaceSearchCriteria criteria)
+        public async Task<ActionResult<DynamicContentListEntrySearchResult>> DynamicContentPlaceListEntriesSearch([FromBody]coreModel.DynamicContentPlaceSearchCriteria criteria)
         {
-            var retVal = new GenericSearchResult<coreModel.DynamicContentListEntry>
-            {
-                Results = new List<coreModel.DynamicContentListEntry>()
-            };
+            var result = AbstractTypeFactory<DynamicContentListEntrySearchResult>.TryCreateInstance();
 
             var folderSearchCriteria = new coreModel.DynamicContentFolderSearchCriteria
             {
@@ -69,17 +67,17 @@ namespace VirtoCommerce.MarketingModule.Web.Controllers.Api
             var foldersSearchResult = await _folderSearchService.SearchFoldersAsync(folderSearchCriteria);
             var folderSkip = Math.Min(foldersSearchResult.TotalCount, criteria.Skip);
             var folderTake = Math.Min(criteria.Take, Math.Max(0, foldersSearchResult.TotalCount - criteria.Skip));
-            retVal.TotalCount += foldersSearchResult.TotalCount;
-            retVal.Results.AddRange(foldersSearchResult.Results.Skip(folderSkip).Take(folderTake));
+            result.TotalCount += foldersSearchResult.TotalCount;
+            result.Results.AddRange(foldersSearchResult.Results.Skip(folderSkip).Take(folderTake));
 
             criteria.Skip -= folderSkip;
             criteria.Take -= folderTake;
 
             var placesSearchResult = await _contentPlacesSearchService.SearchContentPlacesAsync(criteria);
-            retVal.TotalCount += placesSearchResult.TotalCount;
-            retVal.Results.AddRange(placesSearchResult.Results);
+            result.TotalCount += placesSearchResult.TotalCount;
+            result.Results.AddRange(placesSearchResult.Results);
 
-            return Ok(retVal);
+            return Ok(result);
         }
 
         /// <summary>
@@ -87,8 +85,9 @@ namespace VirtoCommerce.MarketingModule.Web.Controllers.Api
         /// </summary>
         /// <param name="criteria">criteria</param>
         [HttpPost]
+        [Authorize(ModuleConstants.Security.Permissions.Read)]
         [Route("contentplaces/search")]
-        public async Task<ActionResult<GenericSearchResult<coreModel.DynamicContentPlace>>> DynamicContentPlacesSearch([FromBody]coreModel.DynamicContentPlaceSearchCriteria criteria)
+        public async Task<ActionResult<DynamicContentPlaceSearchResult>> DynamicContentPlacesSearch([FromBody]coreModel.DynamicContentPlaceSearchCriteria criteria)
         {
             var placesSearchResult = await _contentPlacesSearchService.SearchContentPlacesAsync(criteria);
             return Ok(placesSearchResult);
@@ -99,28 +98,26 @@ namespace VirtoCommerce.MarketingModule.Web.Controllers.Api
         /// </summary>
         /// <param name="criteria">criteria</param>
         [HttpPost]
+        [Authorize(ModuleConstants.Security.Permissions.Read)]
         [Route("contentitems/listentries/search")]
-        public async Task<ActionResult<GenericSearchResult<coreModel.DynamicContentListEntry>>> DynamicContentItemsEntriesSearch([FromBody]coreModel.DynamicContentItemSearchCriteria criteria)
+        public async Task<ActionResult<DynamicContentListEntrySearchResult>> DynamicContentItemsEntriesSearch([FromBody]coreModel.DynamicContentItemSearchCriteria criteria)
         {
-            var retVal = new GenericSearchResult<coreModel.DynamicContentListEntry>
-            {
-                Results = new List<coreModel.DynamicContentListEntry>()
-            };
+            var result = AbstractTypeFactory<DynamicContentListEntrySearchResult>.TryCreateInstance();
 
             var foldersSearchResult = await _folderSearchService.SearchFoldersAsync(new coreModel.DynamicContentFolderSearchCriteria { FolderId = criteria.FolderId, Keyword = criteria.Keyword, Take = criteria.Take, Skip = criteria.Skip, Sort = criteria.Sort });
             var folderSkip = Math.Min(foldersSearchResult.TotalCount, criteria.Skip);
             var folderTake = Math.Min(criteria.Take, Math.Max(0, foldersSearchResult.TotalCount - criteria.Skip));
-            retVal.TotalCount += foldersSearchResult.TotalCount;
-            retVal.Results.AddRange(foldersSearchResult.Results.Skip(folderSkip).Take(folderTake));
+            result.TotalCount += foldersSearchResult.TotalCount;
+            result.Results.AddRange(foldersSearchResult.Results.Skip(folderSkip).Take(folderTake));
 
             criteria.Skip -= folderSkip;
             criteria.Take -= folderTake;
 
             var itemsSearchResult = await _contentItemsSearchService.SearchContentItemsAsync(criteria);
-            retVal.TotalCount += itemsSearchResult.TotalCount;
-            retVal.Results.AddRange(itemsSearchResult.Results);
+            result.TotalCount += itemsSearchResult.TotalCount;
+            result.Results.AddRange(itemsSearchResult.Results);
 
-            return Ok(retVal);
+            return Ok(result);
         }
 
         /// <summary>
@@ -128,8 +125,9 @@ namespace VirtoCommerce.MarketingModule.Web.Controllers.Api
         /// </summary>
         /// <param name="criteria">criteria</param>
         [HttpPost]
+        [Authorize(ModuleConstants.Security.Permissions.Read)]
         [Route("contentitems/search")]
-        public async Task<ActionResult<GenericSearchResult<coreModel.DynamicContentItem>>> DynamicContentItemsSearch([FromBody]coreModel.DynamicContentItemSearchCriteria criteria)
+        public async Task<ActionResult<DynamicContentItemSearchResult>> DynamicContentItemsSearch([FromBody]coreModel.DynamicContentItemSearchCriteria criteria)
         {
             var itemsSearchResult = await _contentItemsSearchService.SearchContentItemsAsync(criteria);
             return Ok(itemsSearchResult);
@@ -140,8 +138,9 @@ namespace VirtoCommerce.MarketingModule.Web.Controllers.Api
         /// </summary>
         /// <param name="criteria">criteria</param>
         [HttpPost]
+        [Authorize(ModuleConstants.Security.Permissions.Read)]
         [Route("contentpublications/search")]
-        public async Task<ActionResult<GenericSearchResult<coreModel.DynamicContentPublication>>> DynamicContentPublicationsSearch([FromBody]coreModel.DynamicContentPublicationSearchCriteria criteria)
+        public async Task<ActionResult<DynamicContentPublicationSearchResult>> DynamicContentPublicationsSearch([FromBody]coreModel.DynamicContentPublicationSearchCriteria criteria)
         {
             var publicationSearchResult = await _contentPublicationsSearchService.SearchContentPublicationsAsync(criteria);
             return Ok(publicationSearchResult);
@@ -151,6 +150,7 @@ namespace VirtoCommerce.MarketingModule.Web.Controllers.Api
         /// Get dynamic content for given placeholders
         /// </summary>
         [HttpPost]
+        [Authorize(ModuleConstants.Security.Permissions.Read)]
         [Route("contentitems/evaluate")]
         public async Task<ActionResult<coreModel.DynamicContentItem[]>> EvaluateDynamicContent([FromBody]coreModel.DynamicContentEvaluationContext evalContext)
         {
@@ -164,8 +164,8 @@ namespace VirtoCommerce.MarketingModule.Web.Controllers.Api
         /// <remarks>Return a single dynamic content item object </remarks>
         /// <param name="id"> content item id</param>
         [HttpGet]
-        [Route("contentitems/{id}")]
         [Authorize(ModuleConstants.Security.Permissions.Read)]
+        [Route("contentitems/{id}")]
         public async Task<ActionResult<coreModel.DynamicContentItem>> GetDynamicContentById(string id)
         {
             var items = await _dynamicContentService.GetContentItemsByIdsAsync(new[] { id });
@@ -223,6 +223,7 @@ namespace VirtoCommerce.MarketingModule.Web.Controllers.Api
         /// <param name="id">place id</param>
         [HttpGet]
         [Route("contentplaces/{id}")]
+        [Authorize(ModuleConstants.Security.Permissions.Read)]
         public async Task<ActionResult<coreModel.DynamicContentPlace>> GetDynamicContentPlaceById(string id)
         {
             var places = await _dynamicContentService.GetPlacesByIdsAsync(new[] { id });
@@ -299,6 +300,7 @@ namespace VirtoCommerce.MarketingModule.Web.Controllers.Api
         /// <param name="id">publication id</param>
         [HttpGet]
         [Route("contentpublications/{id}")]
+        [Authorize(ModuleConstants.Security.Permissions.Read)]
         public async Task<ActionResult<coreModel.DynamicContentPublication>> GetDynamicContentPublicationById(string id)
         {
             var publications = await _dynamicContentService.GetPublicationsByIdsAsync(new[] { id });
