@@ -31,7 +31,7 @@ namespace VirtoCommerce.OrdersModule.Web.Authorization
         protected override async Task HandleRequirementAsync(AuthorizationHandlerContext context, OrderAuthorizationRequirement requirement)
         {
             await base.HandleRequirementAsync(context, requirement);
-
+            
             if (!context.HasSucceeded)
             {
                 var userPermission = context.User.FindPermission(requirement.Permission, _jsonOptions.SerializerSettings);
@@ -47,26 +47,40 @@ namespace VirtoCommerce.OrdersModule.Web.Authorization
                         if (onlyResponsibleScope != null)
                         {
                             criteria.EmployeeId = context.User.Identity.Name;
-                        }
-                        if(!context.User.HasGlobalPermission(ModuleConstants.Security.Permissions.ReadPrices))
-                        {
-                            criteria.ResponseGroup = EnumUtility.SafeRemoveFlagFromEnumString(criteria.ResponseGroup, CustomerOrderResponseGroup.WithPrices);
-                        }
+                        }                      
                         context.Succeed(requirement);                        
                     }
-
                     if (context.Resource is CustomerOrder order)
-                    {
-                        if (!context.User.HasGlobalPermission(ModuleConstants.Security.Permissions.ReadPrices))
-                        {
-                            order.ReduceDetails((CustomerOrderResponseGroup.Full & ~CustomerOrderResponseGroup.WithPrices).ToString());
-                        }
+                    {                     
                         if (allowedStoreIds.Contains(order.StoreId) || (onlyResponsibleScope != null && order.EmployeeId.EqualsInvariant(context.User.Identity.Name)))
                         {
                             context.Succeed(requirement);
                         }
                     }
                 }
+            }
+
+            //Apply ReadPrices authorization rules for all checks
+            if (!context.User.HasGlobalPermission(ModuleConstants.Security.Permissions.ReadPrices))
+            {
+                if (context.Resource is CustomerOrderSearchCriteria criteria)
+                {
+                    if (string.IsNullOrEmpty(criteria.ResponseGroup))
+                    {
+                        criteria.ResponseGroup = CustomerOrderResponseGroup.Full.ToString();
+                    }
+                    criteria.ResponseGroup = EnumUtility.SafeRemoveFlagFromEnumString(criteria.ResponseGroup, CustomerOrderResponseGroup.WithPrices);
+                    //Do not allow pass empty response group into services because that can leads to use default response group CustomerOrderResponseGroup.Full
+                    if (string.IsNullOrEmpty(criteria.ResponseGroup))
+                    {
+                        criteria.ResponseGroup = CustomerOrderResponseGroup.Default.ToString();
+                    }
+                    context.Succeed(requirement);
+                }
+                if (context.Resource is CustomerOrder order)
+                {
+                    order.ReduceDetails((CustomerOrderResponseGroup.Full & ~CustomerOrderResponseGroup.WithPrices).ToString());
+                }           
             }
         }
     }
