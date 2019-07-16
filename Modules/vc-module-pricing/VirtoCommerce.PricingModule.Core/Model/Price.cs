@@ -1,5 +1,4 @@
 using System;
-using Newtonsoft.Json.Linq;
 using VirtoCommerce.Platform.Core.Common;
 
 namespace VirtoCommerce.PricingModule.Core.Model
@@ -38,10 +37,9 @@ namespace VirtoCommerce.PricingModule.Core.Model
 
         #region ICloneable Members
 
-        public object Clone()
+        public virtual object Clone()
         {
-            var jObject = JObject.FromObject(this);
-            var result = jObject.ToObject(GetType());
+            var result = MemberwiseClone() as Price;
             return result;
         }
 
