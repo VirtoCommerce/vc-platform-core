@@ -10,7 +10,7 @@
     blade.refresh = function () {
         blade.data = blade.currentEntity;
 
-        dynamicPropertiesApi.search({objectType: blade.currentEntity.objectType, take: blade.currentEntity.dynamicPropertyCount}, 
+        dynamicPropertiesApi.search({objectType: blade.currentEntity.objectType, take: blade.dynamicPropertyCount}, 
             function (response) {
                 var rawProperties = response.results;
                 _.each(response.results, function(prop) {
