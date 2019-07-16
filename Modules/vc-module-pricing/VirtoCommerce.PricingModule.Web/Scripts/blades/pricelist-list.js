@@ -131,8 +131,8 @@ function ($scope, pricelists, dialogService, uiGridHelper, bladeUtils) {
                     id: 'pricelistExport',
                     title: 'pricing.blades.exporter.priceListTitle',
                     subtitle: 'pricing.blades.exporter.pricelistSubtitle',
-                    controller: 'virtoCommerce.exportModule.exporterController',
-                    template: 'Modules/$(VirtoCommerce.Export)/Scripts/blades/exportSetting.tpl.html',
+                    controller: 'virtoCommerce.exportModule.exportSettingsController',
+                    template: 'Modules/$(VirtoCommerce.Export)/Scripts/blades/exportSettings.tpl.html',
                     exportDataRequest: exportDataRequest
                 };
                 bladeNavigationService.showBlade(newBlade, blade);

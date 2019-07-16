@@ -1,5 +1,5 @@
 angular.module('virtoCommerce.exportModule')
-    .controller('virtoCommerce.exportModule.exportGroupsController', ['$scope', 'platformWebApp.bladeNavigationService', 'virtoCommerce.exportModule.exportModuleApi', function ($scope, bladeNavigationService, exportApi) {
+    .controller('virtoCommerce.exportModule.exportTypeSelectorController', ['$scope', 'platformWebApp.bladeNavigationService', 'virtoCommerce.exportModule.exportModuleApi', function ($scope, bladeNavigationService, exportApi) {
         var typeTree;
         var blade = $scope.blade;
         blade.title = 'Exported types';
@@ -13,6 +13,7 @@ angular.module('virtoCommerce.exportModule')
                         item.groupName = item.group + '|' + item.typeName;
                         var lastIndex = item.typeName.lastIndexOf('.');
                         item.name = item.typeName.substring(lastIndex + 1);
+                        item.isTabularExportSupported = item.isTabularExportSupported;
                     });
                 blade.allGroups = results;
                 typeTree = {};
@@ -72,24 +73,19 @@ angular.module('virtoCommerce.exportModule')
                     setBreadcrumbs(node);
                 } else {
                     var selectedTypes = _.filter(blade.allGroups, function (x) { return x.groupName === node.groupName || (node.groupName === 'General' && !x.groupName); });
+                    var selectedType = selectedTypes[0];
                     var exportDataRequest = {
-                        exportTypeName: selectedTypes[0].typeName,
+                        exportTypeName: selectedType.typeName,
+                        isTabularExportSupported: selectedType.isTabularExportSupported,
                         dataQuery: {
-                            exportTypeName: selectedTypes[0].exportDataQueryType,
+                            exportTypeName: selectedType.exportDataQueryType,
                             take: 10000
                         }
                     };
-                    var newBlade = {
-                        id: 'exportSettings',
-                        title: 'export.blades.exporter.title',
-                        subtitle: 'export.blades.exporter.subtitle',
-                        controller: 'virtoCommerce.exportModule.exporterController',
-                        template: 'Modules/$(VirtoCommerce.Export)/Scripts/blades/exportSetting.tpl.html',
-                        exportDataRequest: exportDataRequest,
-                        isClosingDisabled: false
-                    };
-                    bladeNavigationService.showBlade(newBlade, blade);
-
+                    if (blade.onSelected) {
+                        blade.onSelected(exportDataRequest);
+                        bladeNavigationService.closeBlade(blade);
+                    }
                 }
             });
         };

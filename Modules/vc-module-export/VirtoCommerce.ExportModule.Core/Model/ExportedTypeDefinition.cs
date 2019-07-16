@@ -14,7 +14,6 @@ namespace VirtoCommerce.ExportModule.Core.Model
 
         public string ExportDataQueryType { get; set; }
 
-        [JsonIgnore]
         public bool IsTabularExportSupported { get => TabularDataConverter != null; }
 
         [JsonIgnore]
