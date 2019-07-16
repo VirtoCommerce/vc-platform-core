@@ -19,6 +19,7 @@ namespace VirtoCommerce.CustomerModule.Data.Repositories
         protected override void OnModelCreating(ModelBuilder modelBuilder)
         {
             #region Member
+
             modelBuilder.Entity<MemberEntity>().HasKey(x => x.Id);
             modelBuilder.Entity<MemberEntity>().ToTable("Member");
             modelBuilder.Entity<MemberEntity>().Property(x => x.Id).HasMaxLength(128);
@@ -116,7 +117,6 @@ namespace VirtoCommerce.CustomerModule.Data.Repositories
             modelBuilder.Entity<VendorEntity>().Property(p => p.Description).HasColumnName("Description");
 
             #endregion
-
 
             #region SeoInfo
             modelBuilder.Entity<SeoInfoEntity>().ToTable("MemberSeoInfo").HasKey(x => x.Id);

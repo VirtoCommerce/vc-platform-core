@@ -11,7 +11,6 @@ using VirtoCommerce.CustomerModule.Data.Model;
 using VirtoCommerce.CustomerModule.Data.Repositories;
 using VirtoCommerce.Platform.Core.Caching;
 using VirtoCommerce.Platform.Core.Common;
-using VirtoCommerce.Platform.Core.DynamicProperties;
 using VirtoCommerce.Platform.Core.Events;
 using VirtoCommerce.Platform.Data.Infrastructure;
 
@@ -24,14 +23,12 @@ namespace VirtoCommerce.CustomerModule.Data.Services
     {
         private readonly Func<IMemberRepository> _repositoryFactory;
         private readonly IEventPublisher _eventPublisher;
-        private readonly IDynamicPropertyService _dynamicPropertyService;
         private readonly IPlatformMemoryCache _platformMemoryCache;
 
-        protected MemberServiceBase(Func<IMemberRepository> repositoryFactory, IEventPublisher eventPublisher, IDynamicPropertyService dynamicPropertyService, IPlatformMemoryCache platformMemoryCache)
+        protected MemberServiceBase(Func<IMemberRepository> repositoryFactory, IEventPublisher eventPublisher, IPlatformMemoryCache platformMemoryCache)
         {
             _repositoryFactory = repositoryFactory;
             _eventPublisher = eventPublisher;
-            _dynamicPropertyService = dynamicPropertyService;
             _platformMemoryCache = platformMemoryCache;
         }
 
@@ -70,15 +67,13 @@ namespace VirtoCommerce.CustomerModule.Data.Services
                         if (member != null)
                         {
                             dataMember.ToModel(member);
+                            member.ReduceDetails(responseGroup);
+
                             retVal.Add(member);
                             cacheEntry.AddExpirationToken(CustomerCacheRegion.CreateChangeToken(member));
                         }
                     }
                 }
-
-                //TODO remove
-                //await _dynamicPropertyMetaInfoService.ResolveMetaInfoAsync(retVal.ToArray<IHasDynamicProperties>());
-
                 return retVal.ToArray();
             });
         }
@@ -149,10 +144,6 @@ namespace VirtoCommerce.CustomerModule.Data.Services
 
                     await repository.RemoveMembersByIdsAsync(members.Select(m => m.Id).ToArray());
                     await repository.UnitOfWork.CommitAsync();
-                    foreach (var member in members)
-                    {
-                        await _dynamicPropertyService.DeleteDynamicPropertyValuesAsync(member);
-                    }
                     await _eventPublisher.Publish(new MemberChangedEvent(changedEntries));
                 }
 

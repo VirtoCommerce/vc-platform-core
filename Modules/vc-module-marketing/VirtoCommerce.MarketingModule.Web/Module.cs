@@ -3,6 +3,7 @@ using System.Collections.Generic;
 using System.IO;
 using System.Linq;
 using System.Threading.Tasks;
+using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Builder;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.EntityFrameworkCore;
@@ -18,12 +19,15 @@ using VirtoCommerce.MarketingModule.Core.Model;
 using VirtoCommerce.MarketingModule.Core.Model.DynamicContent;
 using VirtoCommerce.MarketingModule.Core.Model.Promotions;
 using VirtoCommerce.MarketingModule.Core.Model.Promotions.Conditions;
+using VirtoCommerce.MarketingModule.Core.Search;
 using VirtoCommerce.MarketingModule.Core.Services;
 using VirtoCommerce.MarketingModule.Data.ExportImport;
 using VirtoCommerce.MarketingModule.Data.Handlers;
 using VirtoCommerce.MarketingModule.Data.Promotions;
 using VirtoCommerce.MarketingModule.Data.Repositories;
+using VirtoCommerce.MarketingModule.Data.Search;
 using VirtoCommerce.MarketingModule.Data.Services;
+using VirtoCommerce.MarketingModule.Web.Authorization;
 using VirtoCommerce.MarketingModule.Web.ExportImport;
 using VirtoCommerce.MarketingModule.Web.JsonConverters;
 using VirtoCommerce.Platform.Core.Bus;
@@ -53,18 +57,32 @@ namespace VirtoCommerce.MarketingModule.Web
 
             var promotionExtensionManager = new DefaultMarketingExtensionManager();
 
+
+            #region Services
+
             serviceCollection.AddSingleton<IMarketingExtensionManager>(promotionExtensionManager);
             serviceCollection.AddSingleton<IPromotionService, PromotionService>();
             serviceCollection.AddSingleton<ICouponService, CouponService>();
             serviceCollection.AddSingleton<IPromotionUsageService, PromotionUsageService>();
             serviceCollection.AddSingleton<IMarketingDynamicContentEvaluator, DefaultDynamicContentEvaluator>();
             serviceCollection.AddSingleton<IDynamicContentService, DynamicContentService>();
-
-            serviceCollection.AddSingleton<IPromotionSearchService, MarketingSearchService>();
             serviceCollection.AddSingleton<ICouponService, CouponService>();
-            serviceCollection.AddSingleton<IDynamicContentSearchService, MarketingSearchService>();
-            serviceCollection.AddSingleton<CsvCouponImporter>();
 
+            #endregion
+
+            #region Search
+
+            serviceCollection.AddSingleton<IContentItemsSearchService, ContentItemsSearchService>();
+            serviceCollection.AddSingleton<IContentPlacesSearchService, ContentPlacesSearchService>();
+            serviceCollection.AddSingleton<IContentPublicationsSearchService, ContentPublicationsSearchService>();
+            serviceCollection.AddSingleton<ICouponSearchService, CouponSearchService>();
+            serviceCollection.AddSingleton<IFolderSearchService, FolderSearchService>();
+            serviceCollection.AddSingleton<IPromotionSearchService, PromotionSearchService>();
+            serviceCollection.AddSingleton<IPromotionUsageSearchService, PromotionUsageSearchService>();
+
+            #endregion
+
+            serviceCollection.AddSingleton<CsvCouponImporter>();
 
             serviceCollection.AddSingleton<IMarketingPromoEvaluator>(provider =>
             {
@@ -75,21 +93,20 @@ namespace VirtoCommerce.MarketingModule.Web
                 {
                     return new CombineStackablePromotionPolicy(promotionService);
                 }
-                else
-                {
-                    return new BestRewardPromotionPolicy(promotionService);
-                }
+                return new BestRewardPromotionPolicy(promotionService);
             });
 
             AbstractTypeFactory<DynamicPromotion>.RegisterType<DynamicPromotion>().WithFactory(() =>
             {
-                var couponService = serviceCollection.BuildServiceProvider().GetService<ICouponService>();
-                var promotionUsageService = serviceCollection.BuildServiceProvider().GetService<IPromotionUsageService>();
-                return new DynamicPromotion(couponService, promotionUsageService);
+                var couponSearchService = serviceCollection.BuildServiceProvider().GetService<ICouponSearchService>();
+                var promotionUsagesSearchService = serviceCollection.BuildServiceProvider().GetService<IPromotionUsageSearchService>();
+                return new DynamicPromotion(couponSearchService, promotionUsagesSearchService);
             });
 
             serviceCollection.AddSingleton<DynamicContentItemEventHandlers>();
             serviceCollection.AddSingleton<MarketingExportImport>();
+
+            serviceCollection.AddTransient<IAuthorizationHandler, MarketingAuthorizationHandler>();
         }
 
         public void PostInitialize(IApplicationBuilder appBuilder)
@@ -99,14 +116,19 @@ namespace VirtoCommerce.MarketingModule.Web
             var settingsRegistrar = appBuilder.ApplicationServices.GetRequiredService<ISettingsRegistrar>();
             settingsRegistrar.RegisterSettings(ModuleConstants.Settings.General.AllSettings, ModuleInfo.Id);
 
-            var permissionsProvider = appBuilder.ApplicationServices.GetRequiredService<IPermissionsRegistrar>();
-            permissionsProvider.RegisterPermissions(ModuleConstants.Security.Permissions.AllPermissions.Select(x =>
+            var permissionsRegistrar = appBuilder.ApplicationServices.GetRequiredService<IPermissionsRegistrar>();
+            permissionsRegistrar.RegisterPermissions(ModuleConstants.Security.Permissions.AllPermissions.Select(x =>
                 new Permission()
                 {
                     GroupName = "Marketing",
                     ModuleId = ModuleInfo.Id,
                     Name = x
                 }).ToArray());
+
+            //Register Permission scopes
+            AbstractTypeFactory<PermissionScope>.RegisterType<MarketingStoreSelectedScope>();
+            permissionsRegistrar.WithAvailabeScopesForPermissions(new[] { ModuleConstants.Security.Permissions.Read }, new MarketingStoreSelectedScope());
+
 
             var eventHandlerRegistrar = appBuilder.ApplicationServices.GetService<IHandlerRegistrar>();
             //Create order observer. record order coupon usage
@@ -119,6 +141,9 @@ namespace VirtoCommerce.MarketingModule.Web
                 dbContext.Database.EnsureCreated();
                 dbContext.Database.Migrate();
             }
+
+            var dynamicPropertyRegistrar = appBuilder.ApplicationServices.GetRequiredService<IDynamicPropertyRegistrar>();
+            dynamicPropertyRegistrar.RegisterType<DynamicContentItem>();
 
             var dynamicContentService = appBuilder.ApplicationServices.GetService<IDynamicContentService>();
             foreach (var id in new[] { ModuleConstants.MarketingConstants.ContentPlacesRootFolderId, ModuleConstants.MarketingConstants.CotentItemRootFolderId })
@@ -221,7 +246,6 @@ namespace VirtoCommerce.MarketingModule.Web
         {
             await _appBuilder.ApplicationServices.GetRequiredService<MarketingExportImport>().DoImportAsync(inputStream, progressCallback, cancellationToken);
         }
-
 
         private List<IConditionTree> GetConditionsAndRewards()
         {

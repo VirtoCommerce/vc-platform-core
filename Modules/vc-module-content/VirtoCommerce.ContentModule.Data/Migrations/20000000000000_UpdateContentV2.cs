@@ -11,6 +11,14 @@ namespace VirtoCommerce.ContentModule.Data.Migrations
                  WHERE TABLE_NAME = '__MigrationHistory'))
                     BEGIN
 	                    INSERT INTO [dbo].[__EFMigrationsHistory] ([MigrationId],[ProductVersion]) VALUES ('20180629125447_InitialContent', '2.2.3-servicing-35854')
+
+                        BEGIN
+                            UPDATE [PlatformDynamicProperty] SET ObjectType = 'VirtoCommerce.ContentModule.Core.Model.FrontMatterHeaders' WHERE ObjectType = 'VirtoCommerce.ContentModule.Web.FrontMatterHeaders'
+                        END
+
+                        BEGIN
+                            UPDATE [PlatformDynamicPropertyObjectValue] SET ObjectType = 'VirtoCommerce.ContentModule.Core.Model.FrontMatterHeaders' WHERE ObjectType = 'VirtoCommerce.ContentModule.Web.FrontMatterHeaders'
+                        END
                     END");
         }
 

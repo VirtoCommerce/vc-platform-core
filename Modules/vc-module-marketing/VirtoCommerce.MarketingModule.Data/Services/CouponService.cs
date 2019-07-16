@@ -32,57 +32,6 @@ namespace VirtoCommerce.MarketingModule.Data.Services
 
         #region ICouponService members
 
-        public async Task<GenericSearchResult<Coupon>> SearchCouponsAsync(CouponSearchCriteria criteria)
-        {
-            if (criteria == null)
-            {
-                throw new ArgumentNullException("criteria");
-            }
-
-            var cacheKey = CacheKey.With(GetType(), "SearchCouponsAsync", criteria.GetCacheKey());
-            return await _platformMemoryCache.GetOrCreateExclusiveAsync(cacheKey, async (cacheEntry) =>
-            {
-                cacheEntry.AddExpirationToken(CouponCacheRegion.CreateChangeToken());
-
-                using (var repository = _repositoryFactory())
-                {
-                    var query = repository.Coupons;
-
-                    if (!string.IsNullOrEmpty(criteria.PromotionId))
-                    {
-                        query = query.Where(c => c.PromotionId == criteria.PromotionId);
-                    }
-                    if (!string.IsNullOrEmpty(criteria.Code))
-                    {
-                        query = query.Where(c => c.Code == criteria.Code);
-                    }
-                    if (!criteria.Codes.IsNullOrEmpty())
-                    {
-                        query = query.Where(c => criteria.Codes.Contains(c.Code));
-                    }
-
-                    var sortInfos = criteria.SortInfos;
-                    //TODO: Sort by TotalUsesCount 
-                    if (sortInfos.IsNullOrEmpty() || sortInfos.Any(x => x.SortColumn.EqualsInvariant(ReflectionUtility.GetPropertyName<Coupon>(p => p.TotalUsesCount))))
-                    {
-                        sortInfos = new[] { new SortInfo { SortColumn = ReflectionUtility.GetPropertyName<Coupon>(x => x.Code), SortDirection = SortDirection.Descending } };
-                    }
-                    query = query.OrderBySortInfos(sortInfos);
-
-                    var totalCount = await query.CountAsync();
-                    var searchResult = new GenericSearchResult<Coupon> { TotalCount = totalCount };
-
-                    if (criteria.Take > 0)
-                    {
-                        var ids = await query.Select(x => x.Id).Skip(criteria.Skip).Take(criteria.Take).ToArrayAsync();
-                        searchResult.Results = await GetByIdsAsync(ids);
-                    }
-
-                    return searchResult;
-                }
-            });
-        }
-
         public async Task<Coupon[]> GetByIdsAsync(string[] ids)
         {
             var cacheKey = CacheKey.With(GetType(), "GetByIdsAsync", string.Join("-", ids));
@@ -143,6 +92,5 @@ namespace VirtoCommerce.MarketingModule.Data.Services
         }
 
         #endregion
-
     }
 }

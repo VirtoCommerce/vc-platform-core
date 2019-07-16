@@ -6,7 +6,6 @@ using VirtoCommerce.CustomerModule.Data.Model;
 using VirtoCommerce.CustomerModule.Data.Repositories;
 using VirtoCommerce.Platform.Core.Caching;
 using VirtoCommerce.Platform.Core.Common;
-using VirtoCommerce.Platform.Core.DynamicProperties;
 using VirtoCommerce.Platform.Core.Events;
 using VirtoCommerce.Platform.Core.Security;
 using VirtoCommerce.Platform.Core.Security.Search;
@@ -21,8 +20,8 @@ namespace VirtoCommerce.CustomerModule.Data.Services
         private readonly IUserSearchService _userSearchService;
 
         public CommerceMembersService(Func<ICustomerRepository> repositoryFactory, IEventPublisher eventPublisher
-            , IDynamicPropertyService dynamicPropertyService, IPlatformMemoryCache platformMemoryCache, IUserSearchService userSearchService)
-            : base(repositoryFactory, eventPublisher, dynamicPropertyService, platformMemoryCache)
+            , IPlatformMemoryCache platformMemoryCache, IUserSearchService userSearchService)
+            : base(repositoryFactory, eventPublisher, platformMemoryCache)
         {
             _userSearchService = userSearchService;
         }

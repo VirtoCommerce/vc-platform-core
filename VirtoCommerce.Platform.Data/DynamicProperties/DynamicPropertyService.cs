@@ -116,20 +116,6 @@ namespace VirtoCommerce.Platform.Data.DynamicProperties
             }
         }
 
-
-
-        //TODO remove
-        public virtual Task SaveDynamicPropertyValuesAsync(IHasDynamicProperties owner)
-        {
-            return Task.CompletedTask;
-        }
-
-        //TODO remove
-        public virtual Task DeleteDynamicPropertyValuesAsync(IHasDynamicProperties owner)
-        {
-            return Task.CompletedTask;
-        }
-
         #endregion
 
     }

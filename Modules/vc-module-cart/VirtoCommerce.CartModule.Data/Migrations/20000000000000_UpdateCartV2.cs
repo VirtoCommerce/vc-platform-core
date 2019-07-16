@@ -17,6 +17,16 @@ namespace VirtoCommerce.CartModule.Data.Migrations
                         ALTER TABLE [CartPayment] ADD [ModifiedBy] nvarchar(64) NULL
                         EXEC sp_RENAME 'CartShipment.FulfilmentCenterId' , 'FulfillmentCenterId', 'COLUMN'
                         EXEC sp_RENAME 'CartLineItem.FulfilmentLocationCode' , 'FulfillmentLocationCode', 'COLUMN'
+
+                        UPDATE [PlatformDynamicProperty] SET ObjectType = 'VirtoCommerce.CartModule.Core.Model.LineItem'     WHERE ObjectType = 'VirtoCommerce.Domain.Cart.Model.LineItem'
+                        UPDATE [PlatformDynamicProperty] SET ObjectType = 'VirtoCommerce.CartModule.Core.Model.Payment'      WHERE ObjectType = 'VirtoCommerce.Domain.Cart.Model.Payment'
+                        UPDATE [PlatformDynamicProperty] SET ObjectType = 'VirtoCommerce.CartModule.Core.Model.Shipment'     WHERE ObjectType = 'VirtoCommerce.Domain.Cart.Model.Shipment'
+                        UPDATE [PlatformDynamicProperty] SET ObjectType = 'VirtoCommerce.CartModule.Core.Model.ShoppingCart' WHERE ObjectType = 'VirtoCommerce.Domain.Cart.Model.ShoppingCart'
+
+                        UPDATE [PlatformDynamicPropertyObjectValue] SET ObjectType = 'VirtoCommerce.CartModule.Core.Model.LineItem'     WHERE ObjectType = 'VirtoCommerce.Domain.Cart.Model.LineItem'
+                        UPDATE [PlatformDynamicPropertyObjectValue] SET ObjectType = 'VirtoCommerce.CartModule.Core.Model.Payment'      WHERE ObjectType = 'VirtoCommerce.Domain.Cart.Model.Payment'
+                        UPDATE [PlatformDynamicPropertyObjectValue] SET ObjectType = 'VirtoCommerce.CartModule.Core.Model.Shipment'     WHERE ObjectType = 'VirtoCommerce.Domain.Cart.Model.Shipment'
+                        UPDATE [PlatformDynamicPropertyObjectValue] SET ObjectType = 'VirtoCommerce.CartModule.Core.Model.ShoppingCart' WHERE ObjectType = 'VirtoCommerce.Domain.Cart.Model.ShoppingCart'
                     END");
         }
 

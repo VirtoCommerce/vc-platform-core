@@ -28,10 +28,8 @@ namespace VirtoCommerce.CatalogModule.Data.Search
             _itemService = itemService;
             _categoryService = categoryService;
 
-
             _productSortingAliases["sku"] = ReflectionUtility.GetPropertyName<CatalogProduct>(x => x.Code);
             _categorySortingAliases["sku"] = ReflectionUtility.GetPropertyName<Category>(x => x.Code);
-
         }
 
         public async Task<ListEntrySearchResult> SearchAsync(CatalogListEntrySearchCriteria criteria)
@@ -40,10 +38,9 @@ namespace VirtoCommerce.CatalogModule.Data.Search
             {
                 throw new ArgumentNullException(nameof(criteria));
             }
+
             criteria.Normalize();
-
             var result = AbstractTypeFactory<ListEntrySearchResult>.TryCreateInstance();
-
 
             //Need search in children categories if user specify keyword
             if (!string.IsNullOrEmpty(criteria.Keyword))
@@ -80,10 +77,9 @@ namespace VirtoCommerce.CatalogModule.Data.Search
                 result.TotalCount += productsSearchResult.TotalCount;
                 result.ListEntries.AddRange(productListEntries);
             }
+
             return result;
-
         }
-
 
         protected virtual async Task<GenericSearchResult<Category>> SearchCategoriesAsync(CatalogListEntrySearchCriteria criteria)
         {
@@ -171,6 +167,7 @@ namespace VirtoCommerce.CatalogModule.Data.Search
                     result.Results = (await _categoryService.GetByIdsAsync(categoryIds.ToArray(), criteria.ResponseGroup, criteria.CatalogId)).OrderBy(x => categoryIds.IndexOf(x.Id)).ToList();
                 }
             }
+
             return result;
         }
 
@@ -183,9 +180,9 @@ namespace VirtoCommerce.CatalogModule.Data.Search
             {
                 sortInfos = new[] { new SortInfo { SortColumn = "Priority", SortDirection = SortDirection.Descending }, new SortInfo { SortColumn = "Name", SortDirection = SortDirection.Ascending } };
             }
+
             //Try to replace sorting columns names
             TryTransformSortingInfoColumnNames(_productSortingAliases, sortInfos.ToArray());
-
 
             using (var repository = _catalogRepositoryFactory())
             {
@@ -230,8 +227,8 @@ namespace VirtoCommerce.CatalogModule.Data.Search
                     result.Results = (await _itemService.GetByIdsAsync(itemIds.ToArray(), criteria.ResponseGroup, criteria.CatalogId)).OrderBy(x => itemIds.IndexOf(x.Id)).ToList();
                 }
             }
-            return result;
 
+            return result;
         }
 
         protected virtual IQueryable<CategoryEntity> BuildCategorySearchQuery(IQueryable<CategoryEntity> query, CatalogListEntrySearchCriteria criteria)
@@ -271,7 +268,6 @@ namespace VirtoCommerce.CatalogModule.Data.Search
             {
                 query = query.Where(x => criteria.VendorIds.Contains(x.Vendor));
             }
-
 
             if (!criteria.ProductTypes.IsNullOrEmpty())
             {

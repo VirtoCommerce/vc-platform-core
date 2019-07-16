@@ -6,6 +6,7 @@ using VirtoCommerce.CoreModule.Core.Conditions;
 using VirtoCommerce.MarketingModule.Core.Model.Promotions;
 using VirtoCommerce.MarketingModule.Core.Model.Promotions.Conditions;
 using VirtoCommerce.MarketingModule.Core.Model.Promotions.Search;
+using VirtoCommerce.MarketingModule.Core.Search;
 using VirtoCommerce.MarketingModule.Core.Services;
 using VirtoCommerce.MarketingModule.Data.Promotions;
 using VirtoCommerce.MarketingModule.Data.Services;
@@ -42,7 +43,7 @@ namespace VirtoCommerce.MarketingModule.Test
         }
 
         [Fact]
-        public void EvaluateRewards_OnlySingleExlusivePromotion()
+        public void EvaluateRewards_OnlySingleExclusivePromotion()
         {
             //Arrange            
             var evalPolicy = GetPromotionEvaluationPolicy(TestPromotions);
@@ -127,10 +128,10 @@ namespace VirtoCommerce.MarketingModule.Test
         public void EvaluateRewards_DynamicPromotions()
         {
             //Arrange 
-            var couponServiceMock = new Mock<ICouponService>();
-            var promotionUsageMock = new Mock<IPromotionUsageService>();
+            var couponSearchMockServiceMock = new Mock<ICouponSearchService>();
+            var promotionUsageSearchMock = new Mock<IPromotionUsageSearchService>();
 
-            var evalPolicy = GetPromotionEvaluationPolicy(new List<Promotion> { new DynamicPromotion(couponServiceMock.Object, promotionUsageMock.Object)
+            var evalPolicy = GetPromotionEvaluationPolicy(new List<Promotion> { new DynamicPromotion(couponSearchMockServiceMock.Object, promotionUsageSearchMock.Object)
             {
                 PredicateVisualTreeSerialized = "{\"AvailableChildren\":null,\"Children\":[{\"All\":false,\"Not\":false,\"AvailableChildren\":null,\"Children\":[{\"AvailableChildren\":null,\"Children\":[],\"Id\":\"ConditionIsRegisteredUser\"}],\"Id\":\"BlockCustomerCondition\"},{\"All\":false,\"Not\":false,\"AvailableChildren\":null,\"Children\":[],\"Id\":\"BlockCatalogCondition\"},{\"All\":false,\"Not\":false,\"AvailableChildren\":null,\"Children\":[{\"NumItem\":10,\"NumItemSecond\":13,\"ProductId\":null,\"ProductName\":null,\"CompareCondition\":\"Between\",\"AvailableChildren\":null,\"Children\":[],\"Id\":\"ConditionAtNumItemsInCart\"},{\"SubTotal\":0.0,\"SubTotalSecond\":100.0,\"ExcludingCategoryIds\":[],\"ExcludingProductIds\":[],\"CompareCondition\":\"AtLeast\",\"AvailableChildren\":null,\"Children\":[],\"Id\":\"ConditionCartSubtotalLeast\"}],\"Id\":\"BlockCartCondition\"},{\"AvailableChildren\":null,\"Children\":[{\"Amount\":15.0,\"AvailableChildren\":null,\"Children\":[],\"Id\":\"RewardCartGetOfAbsSubtotal\"}],\"Id\":\"BlockReward\"}],\"Id\":\"PromotionConditionAndRewardTree\"}"
             } });
@@ -163,7 +164,6 @@ namespace VirtoCommerce.MarketingModule.Test
 
             return new CombineStackablePromotionPolicy(promoSearchServiceMock.Object);
         }
-
 
         private static IEnumerable<Promotion> TestPromotions
         {
@@ -268,7 +268,6 @@ namespace VirtoCommerce.MarketingModule.Test
             return TestPromotions.Where(x => ids.Contains(x.Id));
         }
 
-
         private static void RegisterConditionRewards()
         {
             AbstractTypeFactory<IConditionTree>.RegisterType<PromotionConditionAndRewardTree>();
@@ -316,7 +315,6 @@ namespace VirtoCommerce.MarketingModule.Test
             AbstractTypeFactory<PromotionReward>.RegisterType<ShipmentReward>();
             AbstractTypeFactory<PromotionReward>.RegisterType<SpecialOfferReward>();
         }
-
     }
 
     internal class MockPromotion : Promotion

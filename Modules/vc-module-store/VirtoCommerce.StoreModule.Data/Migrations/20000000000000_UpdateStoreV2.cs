@@ -11,7 +11,7 @@ namespace VirtoCommerce.StoreModule.Data.Migrations
                  WHERE TABLE_NAME = '__MigrationHistory'))
                  BEGIN
                     INSERT INTO [dbo].[__EFMigrationsHistory] ([MigrationId],[ProductVersion]) VALUES ('20190522054351_InitialStore', '2.2.3-servicing-35854')
-                    UPDATE [PlatformDynamicProperty] SET ObjectType = 'VirtoCommerce.StoreModule.Core.Model.Store' WHERE ObjectType = 'VirtoCommerce.Domain.Store.Model.Store'
+                    UPDATE [PlatformDynamicProperty]            SET ObjectType = 'VirtoCommerce.StoreModule.Core.Model.Store' WHERE ObjectType = 'VirtoCommerce.Domain.Store.Model.Store'
                     UPDATE [PlatformDynamicPropertyObjectValue] SET ObjectType = 'VirtoCommerce.StoreModule.Core.Model.Store' WHERE ObjectType = 'VirtoCommerce.Domain.Store.Model.Store'
                 END");
 
@@ -54,13 +54,10 @@ namespace VirtoCommerce.StoreModule.Data.Migrations
                         INSERT INTO [StoreSeoInfo] ([Id], [CreatedDate], [ModifiedDate], [CreatedBy], [ModifiedBy], [Keyword], [StoreId], [IsActive], [Language], [Title], [MetaDescription], [MetaKeywords], [ImageAltDescription])
                           SELECT [Id], [CreatedDate], [ModifiedDate], [CreatedBy], [ModifiedBy], [Keyword], [ObjectId] as [StoreId], [IsActive], [Language], [Title], [MetaDescription], [MetaKeywords], [ImageAltDescription]  FROM [SeoUrlKeyword] WHERE ObjectType = 'Store'              
                     END");
-
-
         }
 
         protected override void Down(MigrationBuilder migrationBuilder)
         {
-
         }
     }
 }
