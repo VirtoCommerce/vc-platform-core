@@ -14,12 +14,16 @@
                     "edit": "Edit",
                     "delete": "Delete",
                     "save": "Save",
-                    "exportedType": "Select object type for export",
+                    "exported-type": "Select object type for export",
                     "select": "Select",
                     "none": "None",
-                    "exportedData": "Select data for export",
-                    "exportedColumns": "Select columns for export",
-                    "all": "All"
+                    "exported-data": "Select data for export",
+                    "exported-columns": "Select columns for export",
+                    "all": "All",
+                    "provider-description": "Tabular providers (e.g. Csv provider) are unavailable for exported types which do not support tabular export.",
+                    "exported-columns-description": "Please select columns to export.",
+                    "exported-data-description": "Please select data range to export.",
+                    "exported-type-description": "Please select data type to export."
                 },
                 "placeholders": {
                     "provider": "Select provider for export",

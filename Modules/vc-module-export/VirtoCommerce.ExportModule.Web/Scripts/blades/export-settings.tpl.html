@@ -21,33 +21,36 @@
                 -->
 
                     <div class="list __info form-group">
-                        <div>
-                            <label class="form-label">{{ 'export.blades.export-settings.labels.exportedType' | translate }}</label>
+                        <div class="selection-group">
+                            <label class="form-label">{{ 'export.blades.export-settings.labels.exported-type' | translate }}</label>
                             <a class="form-label" ng-click="selectExportedType()">{{ 'export.blades.export-settings.labels.select' | translate }}</a>
                         </div>
-                        <div>
+                        <div class="result-group">
                             <label class="form-label">{{ blade.exportDataRequest.exportTypeName || ('export.blades.export-settings.labels.none' | translate) }}</label>
                         </div>
+                        <div class="list-descr">{{ 'export.blades.export-settings.labels.exported-type-description' | translate }}</div>
                     </div>
 
                     <div class="list __info form-group">
-                        <div>
-                            <label class="form-label">{{ 'export.blades.export-settings.labels.exportedData' | translate }}</label>
+                        <div class="selection-group">
+                            <label class="form-label">{{ 'export.blades.export-settings.labels.exported-data' | translate }}</label>
                             <a class="form-label" ng-class="{'__disabled': !blade.isExportedTypeSelected}" ng-click="selectExportedData()">{{ 'export.blades.export-settings.labels.select' | translate }}</a>
                         </div>
-                        <div>
+                        <div class="result-group">
                             <label class="form-label">{{ blade.selectedData || ('export.blades.export-settings.labels.all' | translate) }}</label>
                         </div>
+                        <div class="list-descr">{{ 'export.blades.export-settings.labels.exported-data-description' | translate }}</div>
                     </div>
 
                     <div class="list __info form-group">
-                        <div>
-                            <label class="form-label">{{ 'export.blades.export-settings.labels.exportedColumns' | translate }}</label>
+                        <div class="selection-group">
+                            <label class="form-label">{{ 'export.blades.export-settings.labels.exported-columns' | translate }}</label>
                             <a class="form-label" ng-class="{'__disabled': !blade.isExportedTypeSelected}" ng-click="selectExportedColumns()">{{ 'export.blades.export-settings.labels.select' | translate }}</a>
                         </div>
-                        <div>
+                        <div class="result-group">
                             <label class="form-label">{{ blade.selectedColumns || ('export.blades.export-settings.labels.all' | translate) }}</label>
                         </div>
+                        <div class="list-descr">{{ 'export.blades.export-settings.labels.exported-columns-description' | translate }}</div>
                     </div>
 
                     <div class="list __info form-group">
@@ -58,6 +61,7 @@
                                 <span ng-bind-html="x.name | highlight: $select.search"></span>
                             </ui-select-choices>
                         </ui-select>
+                        <div class="list-descr">{{ 'export.blades.export-settings.labels.provider-description' | translate }}</div>
                     </div>
                 </div>
             </form>
