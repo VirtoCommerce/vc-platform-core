@@ -40,7 +40,7 @@ angular.module('virtoCommerce.exportModule')
                 id: 'exportProgress',
                 title: 'Exporting...',
                 controller: 'virtoCommerce.exportModule.exportProgressController',
-                template: 'Modules/$(VirtoCommerce.Export)/Scripts/blades/exportProgress.tpl.html',
+                template: 'Modules/$(VirtoCommerce.Export)/Scripts/blades/export-progress.tpl.html',
                 exportDataRequest: blade.exportDataRequest,
                 isClosingDisabled: false
             };
@@ -52,7 +52,7 @@ angular.module('virtoCommerce.exportModule')
             var exportedTypeblade = {
                 id: 'exportedTypeSelector',
                 controller: 'virtoCommerce.exportModule.exportTypeSelectorController',
-                template: 'Modules/$(VirtoCommerce.Export)/Scripts/blades/exportTypeSelector.tpl.html',
+                template: 'Modules/$(VirtoCommerce.Export)/Scripts/blades/export-type-selector.tpl.html',
                 isClosingDisabled: false,
                 exportDataRequest: blade.exportDataRequest,
                 onSelected: function(exportDataRequest) {
