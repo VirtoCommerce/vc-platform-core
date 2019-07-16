@@ -39,7 +39,7 @@ namespace VirtoCommerce.PricingModule.Core.Model
         //           This property causes NSwag to include lots of types including MethodImplAttributes, which leads to the invalid Swagger JSON.
         private Condition[] _conditions;
         [JsonIgnore]
-        public Condition[] Conditions => _conditions ?? (_conditions = ((PriceConditionTree)DynamicExpression).GetConditions());
+        public Condition[] Conditions => _conditions ?? (DynamicExpression != null ? _conditions = ((PriceConditionTree)DynamicExpression).GetConditions() : null);
 
         /// <summary>
         /// List of conditions and rules to define Prices Assignment is valid
