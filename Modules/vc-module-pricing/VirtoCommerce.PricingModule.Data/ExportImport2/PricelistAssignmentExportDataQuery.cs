@@ -11,7 +11,7 @@ namespace VirtoCommerce.PricingModule.Data.ExportImport
 
         public PricelistAssignmentExportDataQuery()
         {
-            IncludedColumns = new[] { "Id", "CatalogId", "PricelistId", "Name", "Priority", "ConditionExpression", "PredicateVisualTreeSerialized" }
+            IncludedColumns = new[] { "Id", "CatalogId", "PricelistId", "Name", "Priority" }
                 .Select(x => new ExportedTypeColumnInfo()
                 {
                     Name = x,

@@ -12,7 +12,5 @@ namespace VirtoCommerce.PricingModule.Data.ExportImport
         public int Priority { get; set; }
         public DateTime? StartDate { get; set; }
         public DateTime? EndDate { get; set; }
-        public string ConditionExpression { get; set; }
-        public string PredicateVisualTreeSerialized { get; set; }
     }
 }

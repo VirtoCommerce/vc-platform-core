@@ -13,12 +13,10 @@ namespace VirtoCommerce.PricingModule.Data.ExportImport
             var result = AbstractTypeFactory<TabularPricelistAssignment>.TryCreateInstance();
 
             result.CatalogId = source.CatalogId;
-            result.ConditionExpression = source.ConditionExpression;
             result.Description = source.Description;
             result.EndDate = source.EndDate;
             result.Id = source.Id;
             result.Name = source.Name;
-            result.PredicateVisualTreeSerialized = source.PredicateVisualTreeSerialized;
             result.PricelistId = source.PricelistId;
             result.Priority = source.Priority;
             result.StartDate = source.StartDate;
