@@ -32,13 +32,13 @@ namespace VirtoCommerce.CartModule.Web
             serviceCollection.AddTransient<ICartRepository, CartRepository>();
             var connectionString = configuration.GetConnectionString("VirtoCommerce.Cart") ?? configuration.GetConnectionString("VirtoCommerce");
             serviceCollection.AddDbContext<CartDbContext>(options => options.UseSqlServer(connectionString));
-            serviceCollection.AddSingleton<Func<ICartRepository>>(provider => () => provider.CreateScope().ServiceProvider.GetRequiredService<ICartRepository>());
-            serviceCollection.AddSingleton<IShoppingCartService, ShoppingCartService>();
-            serviceCollection.AddSingleton<IShoppingCartSearchService, ShoppingCartSearchService>();
-            serviceCollection.AddSingleton<IShoppingCartTotalsCalculator, DefaultShoppingCartTotalsCalculator>();
-            serviceCollection.AddSingleton<IShoppingCartBuilder, ShoppingCartBuilder>();
+            serviceCollection.AddTransient<Func<ICartRepository>>(provider => () => provider.CreateScope().ServiceProvider.GetRequiredService<ICartRepository>());
+            serviceCollection.AddTransient<IShoppingCartService, ShoppingCartService>();
+            serviceCollection.AddTransient<IShoppingCartSearchService, ShoppingCartSearchService>();
+            serviceCollection.AddTransient<IShoppingCartTotalsCalculator, DefaultShoppingCartTotalsCalculator>();
+            serviceCollection.AddTransient<IShoppingCartBuilder, ShoppingCartBuilder>();
 
-            serviceCollection.AddSingleton<CartChangedEventHandler>();
+            serviceCollection.AddTransient<CartChangedEventHandler>();
             var providerSnapshot = serviceCollection.BuildServiceProvider();
             var inProcessBus = providerSnapshot.GetService<IHandlerRegistrar>();
             inProcessBus.RegisterHandler<CartChangedEvent>(async (message, token) => await providerSnapshot.GetService<CartChangedEventHandler>().Handle(message));
