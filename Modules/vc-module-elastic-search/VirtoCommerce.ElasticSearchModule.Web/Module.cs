@@ -21,7 +21,7 @@ namespace VirtoCommerce.ElasticSearchModule.Web
             if (provider.EqualsInvariant("ElasticSearch"))
             {
                 serviceCollection.Configure<ElasticSearchOptions>(configuration.GetSection("Search:ElasticSearch"));
-                serviceCollection.AddTransient<ISearchProvider, ElasticSearchProvider>();
+                serviceCollection.AddSingleton<ISearchProvider, ElasticSearchProvider>();
             }
         }
 

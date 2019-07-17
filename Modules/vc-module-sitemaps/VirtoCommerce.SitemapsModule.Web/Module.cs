@@ -45,7 +45,7 @@ namespace VirtoCommerce.SitemapsModule.Web
                                    configuration.GetConnectionString("VirtoCommerce");
             serviceCollection.AddDbContext<SitemapDbContext>(options => options.UseSqlServer(connectionString));
             serviceCollection.AddTransient<ISitemapRepository, SitemapRepository>();
-            serviceCollection.AddSingleton<Func<ISitemapRepository>>(provider =>
+            serviceCollection.AddTransient<Func<ISitemapRepository>>(provider =>
                 () => provider.CreateScope().ServiceProvider.GetRequiredService<ISitemapRepository>());
 
             serviceCollection.AddTransient<ISitemapService, SitemapService>();
@@ -59,7 +59,7 @@ namespace VirtoCommerce.SitemapsModule.Web
             serviceCollection.AddTransient<ISitemapItemRecordProvider, VendorSitemapItemRecordProvider>();
             serviceCollection.AddTransient<ISitemapItemRecordProvider, StaticContentSitemapItemRecordProvider>();
             serviceCollection.AddTransient<ISitemapXmlGenerator, SitemapXmlGenerator>();
-            serviceCollection.AddSingleton<SitemapExportImport>();
+            serviceCollection.AddTransient<SitemapExportImport>();
         }
 
         /// <summary>

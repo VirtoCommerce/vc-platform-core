@@ -34,12 +34,12 @@ namespace VirtoCommerce.ShippingModule.Web
             var connectionString = configuration.GetConnectionString("VirtoCommerce.Shipping") ?? configuration.GetConnectionString("VirtoCommerce");
             serviceCollection.AddDbContext<ShippingDbContext>(options => options.UseSqlServer(connectionString));
             serviceCollection.AddTransient<IShippingRepository, ShippingRepository>();
-            serviceCollection.AddSingleton<Func<IShippingRepository>>(provider => () => provider.CreateScope().ServiceProvider.GetService<IShippingRepository>());
+            serviceCollection.AddTransient<Func<IShippingRepository>>(provider => () => provider.CreateScope().ServiceProvider.GetService<IShippingRepository>());
 
-            serviceCollection.AddSingleton<IShippingMethodsService, ShippingMethodsService>();
-            serviceCollection.AddSingleton<IShippingMethodsRegistrar, ShippingMethodsService>();
-            serviceCollection.AddSingleton<IShippingMethodsSearchService, ShippingMethodsSearchService>();
-            serviceCollection.AddSingleton<ShippingExportImport>();
+            serviceCollection.AddTransient<IShippingMethodsService, ShippingMethodsService>();
+            serviceCollection.AddTransient<IShippingMethodsRegistrar, ShippingMethodsService>();
+            serviceCollection.AddTransient<IShippingMethodsSearchService, ShippingMethodsSearchService>();
+            serviceCollection.AddTransient<ShippingExportImport>();
         }
 
         public void PostInitialize(IApplicationBuilder applicationBuilder)
