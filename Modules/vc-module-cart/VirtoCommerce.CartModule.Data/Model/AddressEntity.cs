@@ -5,7 +5,7 @@ using VirtoCommerce.Platform.Core.Common;
 
 namespace VirtoCommerce.CartModule.Data.Model
 {
-    public class AddressEntity : Entity
+    public class AddressEntity : Entity, ICloneable
     {
         [StringLength(2048)]
         public string Name { get; set; }
@@ -56,7 +56,6 @@ namespace VirtoCommerce.CartModule.Data.Model
         [StringLength(254)]
         public string Email { get; set; }
 
-
         public string ShoppingCartId { get; set; }
         public virtual ShoppingCartEntity ShoppingCart { get; set; }
 
@@ -65,7 +64,6 @@ namespace VirtoCommerce.CartModule.Data.Model
 
         public string PaymentId { get; set; }
         public virtual PaymentEntity Payment { get; set; }
-
 
         public virtual Address ToModel(Address address)
         {
@@ -165,5 +163,31 @@ namespace VirtoCommerce.CartModule.Data.Model
             }
             return base.GetHashCode();
         }
+
+        #region ICloneable members
+
+        public virtual object Clone()
+        {
+            var result = MemberwiseClone() as AddressEntity;
+
+            if (ShoppingCart != null)
+            {
+                result.ShoppingCart = result.ShoppingCart.Clone() as ShoppingCartEntity;
+            }
+
+            if (Shipment != null)
+            {
+                result.Shipment = Shipment.Clone() as ShipmentEntity;
+            }
+
+            if (Payment != null)
+            {
+                result.Payment = Payment.Clone() as PaymentEntity;
+            }
+
+            return result;
+        }
+
+        #endregion
     }
 }

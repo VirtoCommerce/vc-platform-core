@@ -6,7 +6,7 @@ using VirtoCommerce.Platform.Core.Common;
 
 namespace VirtoCommerce.CartModule.Data.Model
 {
-    public class ShipmentItemEntity : AuditableEntity
+    public class ShipmentItemEntity : AuditableEntity, ICloneable
     {
         [StringLength(128)]
         public string BarCode { get; set; }
@@ -21,7 +21,6 @@ namespace VirtoCommerce.CartModule.Data.Model
 
         public string ShipmentId { get; set; }
         public virtual ShipmentEntity Shipment { get; set; }
-
 
         public virtual ShipmentItem ToModel(ShipmentItem shipmentItem)
         {
@@ -77,5 +76,26 @@ namespace VirtoCommerce.CartModule.Data.Model
             target.BarCode = BarCode;
             target.Quantity = Quantity;
         }
+
+        #region ICloneable members
+
+        public virtual object Clone()
+        {
+            var result = MemberwiseClone() as ShipmentItemEntity;
+
+            if (LineItem != null)
+            {
+                result.LineItem = LineItem.Clone() as LineItemEntity;
+            }
+
+            if (Shipment != null)
+            {
+                result.Shipment = Shipment.Clone() as ShipmentEntity;
+            }
+
+            return result;
+        }
+
+        #endregion
     }
 }

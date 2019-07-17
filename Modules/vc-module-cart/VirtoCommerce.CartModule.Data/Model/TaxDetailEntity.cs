@@ -6,7 +6,7 @@ using VirtoCommerce.Platform.Core.Common;
 
 namespace VirtoCommerce.CartModule.Data.Model
 {
-    public class TaxDetailEntity : Entity
+    public class TaxDetailEntity : Entity, ICloneable
     {
         [StringLength(1024)]
         public string Name { get; set; }
@@ -15,7 +15,6 @@ namespace VirtoCommerce.CartModule.Data.Model
 
         [Column(TypeName = "Money")]
         public decimal Amount { get; set; }
-
 
         public string ShoppingCartId { get; set; }
         public virtual ShoppingCartEntity ShoppingCart { get; set; }
@@ -28,7 +27,6 @@ namespace VirtoCommerce.CartModule.Data.Model
 
         public string PaymentId { get; set; }
         public virtual PaymentEntity Payment { get; set; }
-
 
         public virtual TaxDetail ToModel(TaxDetail taxDetail)
         {
@@ -62,5 +60,36 @@ namespace VirtoCommerce.CartModule.Data.Model
             target.Rate = Rate;
             target.Amount = Amount;
         }
+
+        #region ICloneable members
+
+        public virtual object Clone()
+        {
+            var result = MemberwiseClone() as TaxDetailEntity;
+
+            if (ShoppingCart != null)
+            {
+                result.ShoppingCart = ShoppingCart.Clone() as ShoppingCartEntity;
+            }
+
+            if (Shipment != null)
+            {
+                result.Shipment = Shipment.Clone() as ShipmentEntity;
+            }
+
+            if (LineItem != null)
+            {
+                result.LineItem = LineItem.Clone() as LineItemEntity;
+            }
+
+            if (Payment != null)
+            {
+                result.Payment = Payment.Clone() as PaymentEntity;
+            }
+
+            return result;
+        }
+
+        #endregion
     }
 }

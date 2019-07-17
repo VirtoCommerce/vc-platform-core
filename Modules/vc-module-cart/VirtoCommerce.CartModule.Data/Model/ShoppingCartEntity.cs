@@ -12,7 +12,7 @@ using Address = VirtoCommerce.CartModule.Core.Model.Address;
 
 namespace VirtoCommerce.CartModule.Data.Model
 {
-    public class ShoppingCartEntity : AuditableEntity
+    public class ShoppingCartEntity : AuditableEntity, ICloneable
     {
         [StringLength(64)]
         public string Name { get; set; }
@@ -106,6 +106,8 @@ namespace VirtoCommerce.CartModule.Data.Model
         [StringLength(64)]
         public string Type { get; set; }
 
+        #region NavigationProperties
+
         public virtual ObservableCollection<DiscountEntity> Discounts { get; set; } = new NullCollection<DiscountEntity>();
         public virtual ObservableCollection<AddressEntity> Addresses { get; set; } = new NullCollection<AddressEntity>();
         public virtual ObservableCollection<LineItemEntity> Items { get; set; } = new NullCollection<LineItemEntity>();
@@ -113,10 +115,10 @@ namespace VirtoCommerce.CartModule.Data.Model
         public virtual ObservableCollection<ShipmentEntity> Shipments { get; set; } = new NullCollection<ShipmentEntity>();
         public virtual ObservableCollection<TaxDetailEntity> TaxDetails { get; set; } = new NullCollection<TaxDetailEntity>();
         public virtual ObservableCollection<CouponEntity> Coupons { get; set; } = new NullCollection<CouponEntity>();
-
         public virtual ObservableCollection<CartDynamicPropertyObjectValueEntity> DynamicPropertyObjectValues { get; set; }
             = new NullCollection<CartDynamicPropertyObjectValueEntity>();
 
+        #endregion
 
         public virtual ShoppingCart ToModel(ShoppingCart cart)
         {
@@ -381,5 +383,57 @@ namespace VirtoCommerce.CartModule.Data.Model
                 DynamicPropertyObjectValues.Patch(target.DynamicPropertyObjectValues, (sourceDynamicPropertyObjectValues, targetDynamicPropertyObjectValues) => sourceDynamicPropertyObjectValues.Patch(targetDynamicPropertyObjectValues));
             }
         }
+
+        #region ICloneable members
+
+        public virtual object Clone()
+        {
+            var result = MemberwiseClone() as ShoppingCartEntity;
+
+            if (Discounts != null)
+            {
+                result.Discounts = new ObservableCollection<DiscountEntity>(Discounts.Select(x => x.Clone() as DiscountEntity));
+            }
+
+            if (Addresses != null)
+            {
+                result.Addresses = new ObservableCollection<AddressEntity>(Addresses.Select(x => x.Clone() as AddressEntity));
+            }
+
+            if (Items != null)
+            {
+                result.Items = new ObservableCollection<LineItemEntity>(Items.Select(x => x.Clone() as LineItemEntity));
+            }
+
+            if (Payments != null)
+            {
+                result.Payments = new ObservableCollection<PaymentEntity>(Payments.Select(x => x.Clone() as PaymentEntity));
+            }
+
+            if (Shipments != null)
+            {
+                result.Shipments = new ObservableCollection<ShipmentEntity>(Shipments.Select(x => x.Clone() as ShipmentEntity));
+            }
+
+            if (TaxDetails != null)
+            {
+                result.TaxDetails = new ObservableCollection<TaxDetailEntity>(TaxDetails.Select(x => x.Clone() as TaxDetailEntity));
+            }
+
+            if (Coupons != null)
+            {
+                result.Coupons = new ObservableCollection<CouponEntity>(Coupons.Select(x => x.Clone() as CouponEntity));
+            }
+
+            if (DynamicPropertyObjectValues != null)
+            {
+                result.DynamicPropertyObjectValues = new ObservableCollection<CartDynamicPropertyObjectValueEntity>(
+                    DynamicPropertyObjectValues.Select(x => x.Clone() as CartDynamicPropertyObjectValueEntity));
+            }
+
+            return result;
+        }
+
+        #endregion
     }
 }
