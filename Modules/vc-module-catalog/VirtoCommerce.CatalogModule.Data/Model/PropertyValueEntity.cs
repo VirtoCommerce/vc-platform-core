@@ -9,13 +9,10 @@ using VirtoCommerce.Platform.Core.Common;
 
 namespace VirtoCommerce.CatalogModule.Data.Model
 {
-
-    public class PropertyValueEntity : AuditableEntity, IHasOuterId
+    public class PropertyValueEntity : AuditableEntity, IHasOuterId, ICloneable
     {
-
         [NotMapped]
         public string Alias { get; set; }
-
 
         [StringLength(64)]
         public string Name { get; set; }
@@ -42,8 +39,8 @@ namespace VirtoCommerce.CatalogModule.Data.Model
         [StringLength(128)]
         public string OuterId { get; set; }
 
-
         #region Navigation Properties
+
         public string ItemId { get; set; }
         public virtual ItemEntity CatalogItem { get; set; }
 
@@ -121,8 +118,8 @@ namespace VirtoCommerce.CatalogModule.Data.Model
                     result.Add(group.FirstOrDefault());
                 }
             }
-            return result;
 
+            return result;
         }
 
         public virtual PropertyValueEntity FromModel(PropertyValue propValue, PrimaryKeyResolvingMap pkMap)
@@ -164,7 +161,6 @@ namespace VirtoCommerce.CatalogModule.Data.Model
             target.ShortTextValue = ShortTextValue;
             target.ValueType = ValueType;
         }
-
 
         protected virtual object GetValue(PropertyValueType valueType)
         {
@@ -214,5 +210,36 @@ namespace VirtoCommerce.CatalogModule.Data.Model
                     throw new NotSupportedException();
             }
         }
+
+        #region ICloneable members
+
+        public virtual object Clone()
+        {
+            var result = MemberwiseClone() as PropertyValueEntity;
+
+            if (CatalogItem != null)
+            {
+                result.CatalogItem = CatalogItem.Clone() as ItemEntity;
+            }
+
+            if (Catalog != null)
+            {
+                result.Catalog = Catalog.Clone() as CatalogEntity;
+            }
+
+            if (Category != null)
+            {
+                result.Category = Category.Clone() as CategoryEntity;
+            }
+
+            if (DictionaryItem != null)
+            {
+                result.DictionaryItem = DictionaryItem.Clone() as PropertyDictionaryItemEntity;
+            }
+
+            return result;
+        }
+
+        #endregion
     }
 }

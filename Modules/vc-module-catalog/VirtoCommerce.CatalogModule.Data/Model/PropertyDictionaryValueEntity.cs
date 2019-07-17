@@ -5,7 +5,7 @@ using VirtoCommerce.Platform.Core.Common;
 
 namespace VirtoCommerce.CatalogModule.Data.Model
 {
-    public class PropertyDictionaryValueEntity : Entity
+    public class PropertyDictionaryValueEntity : Entity, ICloneable
     {
         [StringLength(512)]
         public string Value { get; set; }
@@ -14,8 +14,10 @@ namespace VirtoCommerce.CatalogModule.Data.Model
         public string Locale { get; set; }
 
         #region Navigation Properties
+
         public string DictionaryItemId { get; set; }
         public virtual PropertyDictionaryItemEntity DictionaryItem { get; set; }
+
         #endregion
 
         public virtual PropertyDictionaryItemLocalizedValue ToModel(PropertyDictionaryItemLocalizedValue localizedValue)
@@ -45,5 +47,21 @@ namespace VirtoCommerce.CatalogModule.Data.Model
             target.Locale = Locale;
             target.Value = Value;
         }
+
+        #region ICloneable members
+
+        public virtual object Clone()
+        {
+            var result = MemberwiseClone() as PropertyDictionaryValueEntity;
+
+            if (DictionaryItem != null)
+            {
+                result.DictionaryItem = DictionaryItem.Clone() as PropertyDictionaryItemEntity;
+            }
+
+            return result;
+        }
+
+        #endregion
     }
 }

@@ -158,14 +158,14 @@ namespace VirtoCommerce.CatalogModule.Data.Repositories
             modelBuilder.Entity<CategoryRelationEntity>().ToTable("CategoryRelation").HasKey(x => x.Id);
             modelBuilder.Entity<CategoryRelationEntity>().Property(x => x.Id).HasMaxLength(128);
 
-            modelBuilder.Entity<CategoryRelationEntity>().HasOne(x => x.TargetCategory).WithMany(x => x.IncommingLinks)
+            modelBuilder.Entity<CategoryRelationEntity>().HasOne(x => x.TargetCategory).WithMany(x => x.IncomingLinks)
                 .HasForeignKey(x => x.TargetCategoryId).OnDelete(DeleteBehavior.Restrict);
 
             modelBuilder.Entity<CategoryRelationEntity>().HasOne(x => x.SourceCategory).WithMany(x => x.OutgoingLinks)
                 .HasForeignKey(x => x.SourceCategoryId).IsRequired().OnDelete(DeleteBehavior.Cascade);
 
             modelBuilder.Entity<CategoryRelationEntity>().HasOne(x => x.TargetCatalog)
-                .WithMany(x => x.IncommingLinks)
+                .WithMany(x => x.IncomingLinks)
                 .HasForeignKey(x => x.TargetCatalogId).OnDelete(DeleteBehavior.Restrict);
             #endregion
 

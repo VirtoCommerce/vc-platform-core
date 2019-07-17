@@ -7,13 +7,8 @@ using VirtoCommerce.Platform.Core.Common;
 
 namespace VirtoCommerce.CatalogModule.Data.Model
 {
-    public class PropertyDictionaryItemEntity : Entity
+    public class PropertyDictionaryItemEntity : Entity, ICloneable
     {
-        public PropertyDictionaryItemEntity()
-        {
-            DictionaryItemValues = new NullCollection<PropertyDictionaryValueEntity>();
-        }
-
         [StringLength(512)]
         [Required]
         public string Alias { get; set; }
@@ -21,11 +16,14 @@ namespace VirtoCommerce.CatalogModule.Data.Model
         public int SortOrder { get; set; }
 
         #region Navigation Properties
+
         public string PropertyId { get; set; }
         public virtual PropertyEntity Property { get; set; }
-        #endregion
 
         public ObservableCollection<PropertyDictionaryValueEntity> DictionaryItemValues { get; set; }
+            = new NullCollection<PropertyDictionaryValueEntity>();
+
+        #endregion
 
         public virtual PropertyDictionaryItem ToModel(PropertyDictionaryItem propDictItem)
         {
@@ -58,6 +56,7 @@ namespace VirtoCommerce.CatalogModule.Data.Model
             {
                 DictionaryItemValues = new ObservableCollection<PropertyDictionaryValueEntity>(propDictItem.LocalizedValues.Select(x => AbstractTypeFactory<PropertyDictionaryValueEntity>.TryCreateInstance().FromModel(x, pkMap)));
             }
+
             return this;
         }
 
@@ -72,5 +71,26 @@ namespace VirtoCommerce.CatalogModule.Data.Model
             }
         }
 
+        #region ICloneable members
+
+        public virtual object Clone()
+        {
+            var result = MemberwiseClone() as PropertyDictionaryItemEntity;
+
+            if (Property != null)
+            {
+                result.Property = Property.Clone() as PropertyEntity;
+            }
+
+            if (DictionaryItemValues != null)
+            {
+                result.DictionaryItemValues = new ObservableCollection<PropertyDictionaryValueEntity>(
+                    DictionaryItemValues.Select(x => x.Clone() as PropertyDictionaryValueEntity));
+            }
+
+            return result;
+        }
+
+        #endregion
     }
 }

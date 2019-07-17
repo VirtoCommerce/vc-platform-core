@@ -10,18 +10,8 @@ using VirtoCommerce.Platform.Core.Common;
 
 namespace VirtoCommerce.CatalogModule.Data.Model
 {
-    public class CategoryEntity : AuditableEntity, IHasOuterId
+    public class CategoryEntity : AuditableEntity, IHasOuterId, ICloneable
     {
-        public CategoryEntity()
-        {
-            Images = new NullCollection<ImageEntity>();
-            CategoryPropertyValues = new NullCollection<PropertyValueEntity>();
-            OutgoingLinks = new NullCollection<CategoryRelationEntity>();
-            IncommingLinks = new NullCollection<CategoryRelationEntity>();
-            Properties = new NullCollection<PropertyEntity>();
-            SeoInfos = new NullCollection<SeoInfoEntity>();
-        }
-
         [Required]
         [StringLength(64)]
         public string Code { get; set; }
@@ -59,6 +49,7 @@ namespace VirtoCommerce.CatalogModule.Data.Model
         }
 
         #region Navigation Properties
+
         [StringLength(128)]
         [ForeignKey("Catalog")]
         [Required]
@@ -73,16 +64,27 @@ namespace VirtoCommerce.CatalogModule.Data.Model
         public virtual CategoryEntity ParentCategory { get; set; }
 
         public virtual ObservableCollection<ImageEntity> Images { get; set; }
+            = new NullCollection<ImageEntity>();
 
         public virtual ObservableCollection<PropertyValueEntity> CategoryPropertyValues { get; set; }
-        //It new navigation property for link replace to stupid CategoryLink (will be removed later)
+            = new NullCollection<PropertyValueEntity>();
+
+        /// <summary>
+        /// It new navigation property for link replace to stupid CategoryLink (will be removed later) 
+        /// </summary>
         public virtual ObservableCollection<CategoryRelationEntity> OutgoingLinks { get; set; }
-        public virtual ObservableCollection<CategoryRelationEntity> IncommingLinks { get; set; }
+            = new NullCollection<CategoryRelationEntity>();
+
+        public virtual ObservableCollection<CategoryRelationEntity> IncomingLinks { get; set; }
+            = new NullCollection<CategoryRelationEntity>();
+
         public virtual ObservableCollection<PropertyEntity> Properties { get; set; }
+            = new NullCollection<PropertyEntity>();
+
         public virtual ObservableCollection<SeoInfoEntity> SeoInfos { get; set; }
+            = new NullCollection<SeoInfoEntity>();
 
         #endregion
-
 
         public virtual Category ToModel(Category category)
         {
@@ -207,7 +209,6 @@ namespace VirtoCommerce.CatalogModule.Data.Model
                 }
             }
 
-
             if (category.Links != null)
             {
                 OutgoingLinks = new ObservableCollection<CategoryRelationEntity>(category.Links.Select(x => AbstractTypeFactory<CategoryRelationEntity>.TryCreateInstance().FromModel(x)));
@@ -259,8 +260,63 @@ namespace VirtoCommerce.CatalogModule.Data.Model
             {
                 SeoInfos.Patch(target.SeoInfos, (sourceSeoInfo, targetSeoInfo) => sourceSeoInfo.Patch(targetSeoInfo));
             }
-
         }
 
+        #region ICloneable members
+
+        public virtual object Clone()
+        {
+            var result = MemberwiseClone() as CategoryEntity;
+
+            if (Catalog != null)
+            {
+                result.Catalog = Catalog.Clone() as CatalogEntity;
+            }
+
+            if (ParentCategory != null)
+            {
+                result.ParentCategory = ParentCategory.Clone() as CategoryEntity;
+            }
+
+            if (Images != null)
+            {
+                result.Images = new ObservableCollection<ImageEntity>(
+                    Images.Select(x => x.Clone() as ImageEntity));
+            }
+
+            if (CategoryPropertyValues != null)
+            {
+                result.CategoryPropertyValues = new ObservableCollection<PropertyValueEntity>(
+                    CategoryPropertyValues.Select(x => x.Clone() as PropertyValueEntity));
+            }
+
+            if (OutgoingLinks != null)
+            {
+                result.OutgoingLinks = new ObservableCollection<CategoryRelationEntity>(
+                    OutgoingLinks.Select(x => x.Clone() as CategoryRelationEntity));
+            }
+
+            if (IncomingLinks != null)
+            {
+                result.IncomingLinks = new ObservableCollection<CategoryRelationEntity>(
+                    IncomingLinks.Select(x => x.Clone() as CategoryRelationEntity));
+            }
+
+            if (Properties != null)
+            {
+                result.Properties = new ObservableCollection<PropertyEntity>(
+                    Properties.Select(x => x.Clone() as PropertyEntity));
+            }
+
+            if (SeoInfos != null)
+            {
+                result.SeoInfos = new ObservableCollection<SeoInfoEntity>(
+                    SeoInfos.Select(x => x.Clone() as SeoInfoEntity));
+            }
+
+            return result;
+        }
+
+        #endregion
     }
 }

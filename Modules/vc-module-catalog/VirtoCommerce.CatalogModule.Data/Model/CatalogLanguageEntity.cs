@@ -5,15 +5,16 @@ using VirtoCommerce.Platform.Core.Common;
 
 namespace VirtoCommerce.CatalogModule.Data.Model
 {
-    public class CatalogLanguageEntity : Entity
+    public class CatalogLanguageEntity : Entity, ICloneable
     {
-
         [StringLength(64)]
         public string Language { get; set; }
 
         #region Navigation Properties
+
         public string CatalogId { get; set; }
         public virtual CatalogEntity Catalog { get; set; }
+
         #endregion
 
         public virtual CatalogLanguage ToModel(CatalogLanguage lang)
@@ -26,7 +27,6 @@ namespace VirtoCommerce.CatalogModule.Data.Model
             lang.LanguageCode = Language;
 
             return lang;
-
         }
 
         public virtual CatalogLanguageEntity FromModel(CatalogLanguage lang, PrimaryKeyResolvingMap pkMap)
@@ -40,7 +40,6 @@ namespace VirtoCommerce.CatalogModule.Data.Model
             CatalogId = lang.Id;
             Language = lang.LanguageCode;
 
-
             return this;
         }
 
@@ -48,5 +47,21 @@ namespace VirtoCommerce.CatalogModule.Data.Model
         {
             target.Language = Language;
         }
+
+        #region ICloneable members
+
+        public virtual object Clone()
+        {
+            var result = MemberwiseClone() as CatalogLanguageEntity;
+
+            if (Catalog != null)
+            {
+                result.Catalog = Catalog.Clone() as CatalogEntity;
+            }
+
+            return result;
+        }
+
+        #endregion
     }
 }

@@ -7,16 +7,8 @@ using VirtoCommerce.Platform.Core.Common;
 
 namespace VirtoCommerce.CatalogModule.Data.Model
 {
-    public class PropertyEntity : AuditableEntity, IHasOuterId
+    public class PropertyEntity : AuditableEntity, IHasOuterId, ICloneable
     {
-        public PropertyEntity()
-        {
-            DictionaryItems = new NullCollection<PropertyDictionaryItemEntity>();
-            PropertyAttributes = new NullCollection<PropertyAttributeEntity>();
-            DisplayNames = new NullCollection<PropertyDisplayNameEntity>();
-            ValidationRules = new NullCollection<PropertyValidationRuleEntity>();
-        }
-
         [Required]
         [StringLength(128)]
         public string Name { get; set; }
@@ -37,6 +29,7 @@ namespace VirtoCommerce.CatalogModule.Data.Model
         public bool IsMultiValue { get; set; }
 
         public bool IsHidden { get; set; }
+
         /// <summary>
         /// Gets or sets a value indicating whether this instance is locale dependant. If true, the locale must be specified for the values.
         /// </summary>
@@ -62,9 +55,16 @@ namespace VirtoCommerce.CatalogModule.Data.Model
         public virtual CategoryEntity Category { get; set; }
 
         public virtual ObservableCollection<PropertyDictionaryItemEntity> DictionaryItems { get; set; }
+            = new NullCollection<PropertyDictionaryItemEntity>();
+
         public virtual ObservableCollection<PropertyAttributeEntity> PropertyAttributes { get; set; }
+            = new NullCollection<PropertyAttributeEntity>();
+
         public virtual ObservableCollection<PropertyDisplayNameEntity> DisplayNames { get; set; }
+            = new NullCollection<PropertyDisplayNameEntity>();
+
         public virtual ObservableCollection<PropertyValidationRuleEntity> ValidationRules { get; set; }
+            = new NullCollection<PropertyValidationRuleEntity>();
 
         #endregion
 
@@ -93,7 +93,6 @@ namespace VirtoCommerce.CatalogModule.Data.Model
             property.Hidden = IsHidden;
             property.ValueType = (PropertyValueType)PropertyValueType;
             property.Type = EnumUtility.SafeParse(TargetType, PropertyType.Catalog);
-
 
             property.Attributes = PropertyAttributes.Select(x => x.ToModel(AbstractTypeFactory<PropertyAttribute>.TryCreateInstance())).ToList();
             property.DisplayNames = DisplayNames.Select(x => x.ToModel(AbstractTypeFactory<PropertyDisplayName>.TryCreateInstance())).ToList();
@@ -149,6 +148,7 @@ namespace VirtoCommerce.CatalogModule.Data.Model
             {
                 ValidationRules = new ObservableCollection<PropertyValidationRuleEntity>(property.ValidationRules.Select(x => AbstractTypeFactory<PropertyValidationRuleEntity>.TryCreateInstance().FromModel(x)));
             }
+
             return this;
         }
 
@@ -187,5 +187,50 @@ namespace VirtoCommerce.CatalogModule.Data.Model
                 ValidationRules.Patch(target.ValidationRules, (sourceRule, targetRule) => sourceRule.Patch(targetRule));
             }
         }
+
+        #region ICloneable members
+
+        public virtual object Clone()
+        {
+            var result = MemberwiseClone() as PropertyEntity;
+
+            if (Catalog != null)
+            {
+                result.Catalog = Catalog.Clone() as CatalogEntity;
+            }
+
+            if (Category != null)
+            {
+                result.Category = Category.Clone() as CategoryEntity;
+            }
+
+            if (DictionaryItems != null)
+            {
+                result.DictionaryItems = new ObservableCollection<PropertyDictionaryItemEntity>(
+                    DictionaryItems.Select(x => x.Clone() as PropertyDictionaryItemEntity));
+            }
+
+            if (PropertyAttributes != null)
+            {
+                result.PropertyAttributes = new ObservableCollection<PropertyAttributeEntity>(
+                    PropertyAttributes.Select(x => x.Clone() as PropertyAttributeEntity));
+            }
+
+            if (DisplayNames != null)
+            {
+                result.DisplayNames = new ObservableCollection<PropertyDisplayNameEntity>(
+                    DisplayNames.Select(x => x.Clone() as PropertyDisplayNameEntity));
+            }
+
+            if (ValidationRules != null)
+            {
+                result.ValidationRules = new ObservableCollection<PropertyValidationRuleEntity>(
+                    ValidationRules.Select(x => x.Clone() as PropertyValidationRuleEntity));
+            }
+
+            return result;
+        }
+
+        #endregion
     }
 }

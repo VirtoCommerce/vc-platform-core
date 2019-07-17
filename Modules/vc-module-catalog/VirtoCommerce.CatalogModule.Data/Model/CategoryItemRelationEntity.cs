@@ -1,15 +1,15 @@
 using System;
-using System.Collections.Generic;
 using VirtoCommerce.CatalogModule.Core.Model;
 using VirtoCommerce.Platform.Core.Common;
 
 namespace VirtoCommerce.CatalogModule.Data.Model
 {
-    public class CategoryItemRelationEntity : Entity
+    public class CategoryItemRelationEntity : Entity, ICloneable
     {
         public int Priority { get; set; }
 
         #region Navigation Properties
+
         public string ItemId { get; set; }
         public virtual ItemEntity CatalogItem { get; set; }
 
@@ -50,5 +50,30 @@ namespace VirtoCommerce.CatalogModule.Data.Model
             target.Priority = Priority;
         }
 
+        #region ICloneable members
+
+        public virtual object Clone()
+        {
+            var result = MemberwiseClone() as CategoryItemRelationEntity;
+
+            if (CatalogItem != null)
+            {
+                result.CatalogItem = CatalogItem.Clone() as ItemEntity;
+            }
+
+            if (Category != null)
+            {
+                result.Category = Category.Clone() as CategoryEntity;
+            }
+
+            if (Catalog != null)
+            {
+                result.Catalog = Catalog.Clone() as CatalogEntity;
+            }
+
+            return result;
+        }
+
+        #endregion
     }
 }

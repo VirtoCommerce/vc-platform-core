@@ -77,10 +77,10 @@ namespace VirtoCommerce.CartModule.Data.Model
         [StringLength(64)]
         public string TaxType { get; set; }
 
+        #region NavigationProperties
+
         public string ShoppingCartId { get; set; }
         public virtual ShoppingCartEntity ShoppingCart { get; set; }
-
-        #region NavigationProperties
 
         public virtual ObservableCollection<ShipmentItemEntity> Items { get; set; } = new NullCollection<ShipmentItemEntity>();
         public virtual ObservableCollection<DiscountEntity> Discounts { get; set; } = new NullCollection<DiscountEntity>();
@@ -297,22 +297,26 @@ namespace VirtoCommerce.CartModule.Data.Model
 
             if (Items != null)
             {
-                result.Items = new ObservableCollection<ShipmentItemEntity>(Items.Select(x => x.Clone() as ShipmentItemEntity));
+                result.Items = new ObservableCollection<ShipmentItemEntity>(
+                    Items.Select(x => x.Clone() as ShipmentItemEntity));
             }
 
             if (Discounts != null)
             {
-                result.Discounts = new ObservableCollection<DiscountEntity>(Discounts.Select(x => x.Clone() as DiscountEntity));
+                result.Discounts = new ObservableCollection<DiscountEntity>(
+                    Discounts.Select(x => x.Clone() as DiscountEntity));
             }
 
             if (Addresses != null)
             {
-                result.Addresses = new ObservableCollection<AddressEntity>(Addresses.Select(x => x.Clone() as AddressEntity));
+                result.Addresses = new ObservableCollection<AddressEntity>(
+                    Addresses.Select(x => x.Clone() as AddressEntity));
             }
 
             if (TaxDetails != null)
             {
-                result.TaxDetails = new ObservableCollection<TaxDetailEntity>(TaxDetails.Select(x => x.Clone() as TaxDetailEntity));
+                result.TaxDetails = new ObservableCollection<TaxDetailEntity>(
+                    TaxDetails.Select(x => x.Clone() as TaxDetailEntity));
             }
 
             if (DynamicPropertyObjectValues != null)

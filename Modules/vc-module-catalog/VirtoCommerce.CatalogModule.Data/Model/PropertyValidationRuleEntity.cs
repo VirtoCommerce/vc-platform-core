@@ -5,7 +5,7 @@ using VirtoCommerce.Platform.Core.Common;
 
 namespace VirtoCommerce.CatalogModule.Data.Model
 {
-    public class PropertyValidationRuleEntity : Entity
+    public class PropertyValidationRuleEntity : Entity, ICloneable
     {
         public bool IsUnique { get; set; }
 
@@ -19,11 +19,9 @@ namespace VirtoCommerce.CatalogModule.Data.Model
         #region Navigation properties
 
         public string PropertyId { get; set; }
-
         public PropertyEntity Property { get; set; }
 
         #endregion
-
 
         public virtual PropertyValidationRule ToModel(PropertyValidationRule rule)
         {
@@ -62,5 +60,21 @@ namespace VirtoCommerce.CatalogModule.Data.Model
             target.IsUnique = IsUnique;
             target.RegExp = RegExp;
         }
+
+        #region ICloneable members
+
+        public virtual object Clone()
+        {
+            var result = MemberwiseClone() as PropertyValidationRuleEntity;
+
+            if (Property != null)
+            {
+                result.Property = Property.Clone() as PropertyEntity;
+            }
+
+            return result;
+        }
+
+        #endregion
     }
 }

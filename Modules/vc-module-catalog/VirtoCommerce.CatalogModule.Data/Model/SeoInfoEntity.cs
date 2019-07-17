@@ -1,10 +1,11 @@
+using System;
 using System.ComponentModel.DataAnnotations;
 using VirtoCommerce.CoreModule.Core.Seo;
 using VirtoCommerce.Platform.Core.Common;
 
 namespace VirtoCommerce.CatalogModule.Data.Model
 {
-    public class SeoInfoEntity : AuditableEntity
+    public class SeoInfoEntity : AuditableEntity, ICloneable
     {
         [StringLength(255)]
         [Required]
@@ -32,11 +33,13 @@ namespace VirtoCommerce.CatalogModule.Data.Model
         public string ImageAltDescription { get; set; }
 
         #region Navigation Properties
+
         public string ItemId { get; set; }
         public virtual ItemEntity Item { get; set; }
 
         public string CategoryId { get; set; }
         public virtual CategoryEntity Category { get; set; }
+
         #endregion
 
         public virtual SeoInfo ToModel(SeoInfo seoInfo)
@@ -94,5 +97,26 @@ namespace VirtoCommerce.CatalogModule.Data.Model
             target.MetaKeywords = MetaKeywords;
             target.StoreId = StoreId;
         }
+
+        #region ICloneable members
+
+        public virtual object Clone()
+        {
+            var result = MemberwiseClone() as SeoInfoEntity;
+
+            if (Item != null)
+            {
+                result.Item = Item.Clone() as ItemEntity;
+            }
+
+            if (Category != null)
+            {
+                result.Category = Category.Clone() as CategoryEntity;
+            }
+
+            return result;
+        }
+
+        #endregion
     }
 }

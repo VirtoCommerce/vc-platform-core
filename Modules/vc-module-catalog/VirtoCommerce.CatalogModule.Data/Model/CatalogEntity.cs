@@ -8,17 +8,8 @@ using VirtoCommerce.Platform.Core.Common;
 
 namespace VirtoCommerce.CatalogModule.Data.Model
 {
-    public class CatalogEntity : AuditableEntity, IHasOuterId
+    public class CatalogEntity : AuditableEntity, IHasOuterId, ICloneable
     {
-        public CatalogEntity()
-        {
-
-            CatalogLanguages = new NullCollection<CatalogLanguageEntity>();
-            CatalogPropertyValues = new NullCollection<PropertyValueEntity>();
-            IncommingLinks = new NullCollection<CategoryRelationEntity>();
-            Properties = new NullCollection<PropertyEntity>();
-        }
-
         public bool Virtual { get; set; }
         [Required]
         [StringLength(128)]
@@ -35,13 +26,20 @@ namespace VirtoCommerce.CatalogModule.Data.Model
         public string OuterId { get; set; }
 
         #region Navigation Properties
-        public virtual ObservableCollection<CategoryRelationEntity> IncommingLinks { get; set; }
+
+        public virtual ObservableCollection<CategoryRelationEntity> IncomingLinks { get; set; }
+            = new NullCollection<CategoryRelationEntity>();
 
         public virtual ObservableCollection<CatalogLanguageEntity> CatalogLanguages { get; set; }
-        public virtual ObservableCollection<PropertyValueEntity> CatalogPropertyValues { get; set; }
-        public virtual ObservableCollection<PropertyEntity> Properties { get; set; }
-        #endregion
+            = new NullCollection<CatalogLanguageEntity>();
 
+        public virtual ObservableCollection<PropertyValueEntity> CatalogPropertyValues { get; set; }
+            = new NullCollection<PropertyValueEntity>();
+
+        public virtual ObservableCollection<PropertyEntity> Properties { get; set; }
+            = new NullCollection<PropertyEntity>();
+
+        #endregion
 
         public virtual Catalog ToModel(Catalog catalog)
         {
@@ -121,7 +119,6 @@ namespace VirtoCommerce.CatalogModule.Data.Model
                 }
             }
 
-
             if (catalog.Languages != null)
             {
                 CatalogLanguages = new ObservableCollection<CatalogLanguageEntity>(catalog.Languages.Select(x => AbstractTypeFactory<CatalogLanguageEntity>.TryCreateInstance().FromModel(x, pkMap)));
@@ -132,7 +129,6 @@ namespace VirtoCommerce.CatalogModule.Data.Model
 
         public virtual void Patch(CatalogEntity target)
         {
-
             target.Name = Name;
             target.DefaultLanguage = DefaultLanguage;
 
@@ -149,8 +145,41 @@ namespace VirtoCommerce.CatalogModule.Data.Model
             {
                 CatalogPropertyValues.Patch(target.CatalogPropertyValues, (sourcePropValue, targetPropValue) => sourcePropValue.Patch(targetPropValue));
             }
-
         }
 
+        #region ICloneable members
+
+        public virtual object Clone()
+        {
+            var result = MemberwiseClone() as CatalogEntity;
+
+            if (IncomingLinks != null)
+            {
+                result.IncomingLinks = new ObservableCollection<CategoryRelationEntity>(
+                    IncomingLinks.Select(x => x.Clone() as CategoryRelationEntity));
+            }
+
+            if (CatalogLanguages != null)
+            {
+                result.CatalogLanguages = new ObservableCollection<CatalogLanguageEntity>(
+                    CatalogLanguages.Select(x => x.Clone() as CatalogLanguageEntity));
+            }
+
+            if (CatalogPropertyValues != null)
+            {
+                result.CatalogPropertyValues = new ObservableCollection<PropertyValueEntity>(
+                    CatalogPropertyValues.Select(x => x.Clone() as PropertyValueEntity));
+            }
+
+            if (Properties != null)
+            {
+                result.Properties = new ObservableCollection<PropertyEntity>(
+                    Properties.Select(x => x.Clone() as PropertyEntity));
+            }
+
+            return result;
+        }
+
+        #endregion
     }
 }
