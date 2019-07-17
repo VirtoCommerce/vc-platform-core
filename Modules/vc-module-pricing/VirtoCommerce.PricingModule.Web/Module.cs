@@ -66,7 +66,6 @@ namespace VirtoCommerce.PricingModule.Web
             serviceCollection.AddTransient<ProductPriceDocumentBuilder>();
             serviceCollection.AddSingleton<LogChangesChangedEventHandler>();
 
-
             serviceCollection.AddScoped<PriceExportPagedDataSource>(); // Adding as scoped, because of used services (UserManager, PrincipalFactory) scoped too
             serviceCollection.AddSingleton<Func<ExportDataQuery, PriceExportPagedDataSource>>(provider => (exportDataQuery) => CreateExportPagedDataSource<PriceExportPagedDataSource>(provider, exportDataQuery));
 
@@ -212,6 +211,13 @@ namespace VirtoCommerce.PricingModule.Web
             return rootBlock;
         }
 
+        /// <summary>
+        /// Helps to create ExportDataSource factory method
+        /// </summary>
+        /// <typeparam name="T"></typeparam>
+        /// <param name="provider"></param>
+        /// <param name="exportDataQuery"></param>
+        /// <returns></returns>
         private static T CreateExportPagedDataSource<T>(IServiceProvider provider, ExportDataQuery exportDataQuery) where T : BaseExportPagedDataSource
         {
             var result = provider.CreateScope().ServiceProvider.GetRequiredService<T>();

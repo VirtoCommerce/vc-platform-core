@@ -35,7 +35,7 @@ namespace VirtoCommerce.ExportModule.Core.Model
         private readonly IAuthorizationPolicyProvider _authorizationPolicyProvider;
         private readonly UserManager<ApplicationUser> _userManager;
 
-        public BaseExportPagedDataSource(IAuthorizationPolicyProvider authorizationPolicyProvider, IAuthorizationService authorizationService, IUserClaimsPrincipalFactory<ApplicationUser> userClaimsPrincipalFactory, UserManager<ApplicationUser> userManager)
+        protected BaseExportPagedDataSource(IAuthorizationPolicyProvider authorizationPolicyProvider, IAuthorizationService authorizationService, IUserClaimsPrincipalFactory<ApplicationUser> userClaimsPrincipalFactory, UserManager<ApplicationUser> userManager)
         {
             _authorizationService = authorizationService;
             _userClaimsPrincipalFactory = userClaimsPrincipalFactory;
@@ -45,6 +45,11 @@ namespace VirtoCommerce.ExportModule.Core.Model
 
         protected abstract FetchResult FetchData(SearchCriteriaBase searchCriteria);
 
+        /// <summary>
+        /// Checks user passed in <see cref="DataQuery"/> for permissions before fetching data.
+        /// Permissions should be attached to *ExportPagedDataSource class using <see cref="AuthorizeAttribute"/>
+        /// </summary>
+        /// <returns></returns>
         public virtual async Task Authorize()
         {
             var user = await _userManager.FindByNameAsync(DataQuery.UserName);
@@ -53,7 +58,7 @@ namespace VirtoCommerce.ExportModule.Core.Model
             foreach (var policyString in policies)
             {
                 var policy = await _authorizationPolicyProvider.GetPolicyAsync(policyString);
-                var allow = await _authorizationService.AuthorizeAsync(claimsPrincipal, policy);
+                var allow = await _authorizationService.AuthorizeAsync(claimsPrincipal, null, policy.Requirements);
                 if (!allow.Succeeded)
                 {
                     throw new UnauthorizedAccessException(allow.Failure.FailedRequirements.FirstOrDefault().ToString());

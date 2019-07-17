@@ -4,12 +4,16 @@ using Microsoft.AspNetCore.Identity;
 using VirtoCommerce.ExportModule.Core.Model;
 using VirtoCommerce.Platform.Core.Common;
 using VirtoCommerce.Platform.Core.Security;
+using VirtoCommerce.PricingModule.Core;
 using VirtoCommerce.PricingModule.Core.Model;
 using VirtoCommerce.PricingModule.Core.Model.Search;
 using VirtoCommerce.PricingModule.Core.Services;
 
 namespace VirtoCommerce.PricingModule.Data.ExportImport
 {
+    // These permissions required to fetch data
+    [Authorize(ModuleConstants.Security.Permissions.Export)]
+    [Authorize(ModuleConstants.Security.Permissions.Read)]
     public class PricelistAssignmentExportPagedDataSource : BaseExportPagedDataSource
     {
         readonly IPricingSearchService _searchService;
