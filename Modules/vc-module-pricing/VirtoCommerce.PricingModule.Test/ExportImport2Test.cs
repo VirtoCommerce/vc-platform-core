@@ -6,6 +6,7 @@ using System.Linq;
 using System.Text;
 using System.Threading;
 using System.Threading.Tasks;
+using Microsoft.AspNetCore.Authorization;
 using Moq;
 using Newtonsoft.Json;
 using VirtoCommerce.CoreModule.Core.Conditions;
@@ -40,7 +41,7 @@ namespace VirtoCommerce.PricingModule.Test
             var resolver = (IKnownExportTypesResolver)registrar;
 
             resolver.ResolveExportedTypeDefinition(typeof(Price).Name)
-                .WithDataSourceFactory(dataQuery => new PriceExportPagedDataSource(searchServiceMock.Object, priceServiceMock.Object) { DataQuery = dataQuery })
+                .WithDataSourceFactory(dataQuery => new PriceExportPagedDataSource(searchServiceMock.Object, priceServiceMock.Object, null, null, null, null) { DataQuery = dataQuery })
                 .WithMetadata(metadata);
 
             var exportProviderFactories = new[] {
@@ -95,6 +96,9 @@ namespace VirtoCommerce.PricingModule.Test
             IKnownExportTypesRegistrar registrar = new KnownExportTypesService();
             registrar.RegisterType(typeof(Pricelist).Name, "Pricing", typeof(PricelistExportDataQuery).Name);
 
+            var authorizationServiceMock = new Mock<IAuthorizationService>();
+            var authorizationPolicyProviderMock = new Mock<IAuthorizationPolicyProvider>();
+
             var searchServiceMock = new Mock<IPricingSearchService>();
             searchServiceMock.Setup(x => x.SearchPricelistsAsync(It.IsAny<PricelistSearchCriteria>())).ReturnsAsync(GetTestPricelistResult());
             searchServiceMock.Setup(x => x.SearchPricesAsync(It.IsAny<PricesSearchCriteria>())).ReturnsAsync(new PriceSearchResult()
@@ -108,7 +112,7 @@ namespace VirtoCommerce.PricingModule.Test
             var metadata = ExportedTypeMetadata.GetFromType<Pricelist>(true);
             var resolver = (IKnownExportTypesResolver)registrar;
             resolver.ResolveExportedTypeDefinition(typeof(Pricelist).Name)
-                .WithDataSourceFactory(dataQuery => new PricelistExportPagedDataSource(searchServiceMock.Object, priceServiceMock.Object) { DataQuery = dataQuery })
+                .WithDataSourceFactory(dataQuery => new PricelistExportPagedDataSource(searchServiceMock.Object, priceServiceMock.Object, authorizationPolicyProviderMock.Object, authorizationServiceMock.Object, null, null) { DataQuery = dataQuery })
                 .WithMetadata(metadata);
 
             var exportProviderFactories = new[] {
@@ -173,7 +177,7 @@ namespace VirtoCommerce.PricingModule.Test
             var metadata = ExportedTypeMetadata.GetFromType<PricelistAssignment>(true);
             var resolver = (IKnownExportTypesResolver)registrar;
             resolver.ResolveExportedTypeDefinition(typeof(PricelistAssignment).Name)
-                .WithDataSourceFactory(dataQuery => new PricelistAssignmentExportPagedDataSource(searchServiceMock.Object, priceServiceMock.Object) { DataQuery = dataQuery })
+                .WithDataSourceFactory(dataQuery => new PricelistAssignmentExportPagedDataSource(searchServiceMock.Object, priceServiceMock.Object, null, null, null, null) { DataQuery = dataQuery })
                 .WithMetadata(metadata);
 
             var exportProviderFactories = new[] {
@@ -242,7 +246,7 @@ namespace VirtoCommerce.PricingModule.Test
 
             var metadata = ExportedTypeMetadata.GetFromType<Price>(true);
             resolver.ResolveExportedTypeDefinition(typeof(Price).Name)
-                .WithDataSourceFactory(dataQuery => new PriceExportPagedDataSource(searchServiceMock.Object, priceServiceMock.Object) { DataQuery = dataQuery })
+                .WithDataSourceFactory(dataQuery => new PriceExportPagedDataSource(searchServiceMock.Object, priceServiceMock.Object, null, null, null, null) { DataQuery = dataQuery })
                 .WithMetadata(metadata);
 
             var exportProviderFactories = new[]
