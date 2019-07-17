@@ -43,7 +43,7 @@ namespace VirtoCommerce.CoreModule.Web
             serviceCollection.AddTransient<ICoreRepository, CoreRepositoryImpl>();
             var connectionString = configuration.GetConnectionString("VirtoCommerce.Core") ?? configuration.GetConnectionString("VirtoCommerce");
             serviceCollection.AddDbContext<CoreDbContext>(options => options.UseSqlServer(connectionString));
-            serviceCollection.AddSingleton<Func<ICoreRepository>>(provider => () => provider.CreateScope().ServiceProvider.GetRequiredService<ICoreRepository>());
+            serviceCollection.AddTransient<Func<ICoreRepository>>(provider => () => provider.CreateScope().ServiceProvider.GetRequiredService<ICoreRepository>());
             serviceCollection.AddTransient<ICurrencyService, CurrencyService>();
             serviceCollection.AddTransient<IPackageTypesService, PackageTypesService>();
             //Can be overrided
