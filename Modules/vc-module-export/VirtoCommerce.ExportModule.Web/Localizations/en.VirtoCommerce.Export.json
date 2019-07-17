@@ -3,6 +3,8 @@
         "main-menu-title": "Export New",
         "blades": {
             "export-settings": {
+                "title": "Export settings",
+                "subtitle": "Specify export settings",
                 "labels": {
                     "provider": "Select provider for export",
                     "template": "Select export template",
@@ -30,9 +32,26 @@
                     "template": "Select export template"
                 }
             },
-            "exporter": {
-                "title": "Export settings",
-                "subtitle": "Select columns and data for export"
+            "export-progress": {
+                "title": "Export progress"
+            },
+            "export-type-selector": {
+                "title": "Select exported type",
+                "subtitle": "Select data type you want to export"
+            },
+            "export-generic-viewer": {
+                "title": "Select data to export",
+                "subtitle": "Select data you want to export",
+                "labels": {
+                    "picture": "Pic",
+                    "type": "Object type",
+                    "name": "Name",
+                    "code": "Code",
+                    "new-filter": "Add new filter"
+                },
+                "placeholders": {
+                    "select-filter": "Select keyword…"
+                }
             }
         }
     }

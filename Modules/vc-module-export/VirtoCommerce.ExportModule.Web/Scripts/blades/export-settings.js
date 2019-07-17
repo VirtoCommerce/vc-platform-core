@@ -38,7 +38,7 @@ angular.module('virtoCommerce.exportModule')
             blade.exportDataRequest.providerName = blade.selectedProvider.id;
             var progressBlade = {
                 id: 'exportProgress',
-                title: 'Exporting...',
+                title: 'export.blades.export-progress.title',
                 controller: 'virtoCommerce.exportModule.exportProgressController',
                 template: 'Modules/$(VirtoCommerce.Export)/Scripts/blades/export-progress.tpl.html',
                 exportDataRequest: blade.exportDataRequest,
@@ -51,6 +51,8 @@ angular.module('virtoCommerce.exportModule')
         $scope.selectExportedType = function () {
             var exportedTypeblade = {
                 id: 'exportedTypeSelector',
+                title: 'export.blades.export-type-selector.title',
+                subtitle: 'export.blades.export-type-selector.subtitle',
                 controller: 'virtoCommerce.exportModule.exportTypeSelectorController',
                 template: 'Modules/$(VirtoCommerce.Export)/Scripts/blades/export-type-selector.tpl.html',
                 isClosingDisabled: false,
@@ -71,7 +73,19 @@ angular.module('virtoCommerce.exportModule')
         };
 
         $scope.selectExportedData = function() {
-            alert("Select exported data");
+            var exportedDatablade = {
+                id: 'exportedDataSelector',
+                title: 'export.blades.export-generic-viewer.title',
+                subtitle: 'export.blades.export-generic-viewer.subtitle',
+                controller: 'virtoCommerce.exportModule.exportGenericViewerController',
+                template: 'Modules/$(VirtoCommerce.Export)/Scripts/blades/export-generic-viewer.tpl.html',
+                isClosingDisabled: false,
+                dataQuery: blade.exportDataRequest.dataQuery,
+                onCompleted: function(dataQuery) {
+                }
+            };
+
+            bladeNavigationService.showBlade(exportedDatablade, blade);
         };
 
         $scope.validateExportParameters = function () {
