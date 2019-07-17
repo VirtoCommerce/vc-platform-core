@@ -11,6 +11,7 @@ using VirtoCommerce.PricingModule.Core.Services;
 
 namespace VirtoCommerce.PricingModule.Data.ExportImport
 {
+    // These permissions required to fetch data
     [Authorize(ModuleConstants.Security.Permissions.Export)]
     [Authorize(ModuleConstants.Security.Permissions.Read)]
     public class PricelistExportPagedDataSource : BaseExportPagedDataSource
