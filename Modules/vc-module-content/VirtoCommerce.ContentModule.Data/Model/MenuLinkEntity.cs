@@ -1,10 +1,11 @@
+using System;
 using System.ComponentModel.DataAnnotations;
 using VirtoCommerce.ContentModule.Core.Model;
 using VirtoCommerce.Platform.Core.Common;
 
 namespace VirtoCommerce.ContentModule.Data.Model
 {
-    public class MenuLinkEntity : AuditableEntity, IHasOuterId
+    public class MenuLinkEntity : AuditableEntity, IHasOuterId, ICloneable
     {
         [Required]
         [StringLength(1024)]
@@ -20,11 +21,16 @@ namespace VirtoCommerce.ContentModule.Data.Model
         public string AssociatedObjectName { get; set; }
         [StringLength(128)]
         public string AssociatedObjectId { get; set; }
-        public virtual MenuLinkListEntity MenuLinkList { get; set; }
+
+        #region Navigation Properties
+
         public string MenuLinkListId { get; set; }
+        public virtual MenuLinkListEntity MenuLinkList { get; set; }
+
+        #endregion
+
         [StringLength(128)]
         public string OuterId { get; set; }
-
 
         public void Patch(MenuLinkEntity target)
         {
@@ -53,7 +59,6 @@ namespace VirtoCommerce.ContentModule.Data.Model
             return link;
         }
 
-
         public MenuLinkEntity FromModel(MenuLink link)
         {
             Id = link.Id;
@@ -70,5 +75,20 @@ namespace VirtoCommerce.ContentModule.Data.Model
             return this;
         }
 
+        #region ICloneable members
+
+        public virtual object Clone()
+        {
+            var result = MemberwiseClone() as MenuLinkEntity;
+
+            if (MenuLinkList != null)
+            {
+                result.MenuLinkList = MenuLinkList.Clone() as MenuLinkListEntity;
+            }
+
+            return result;
+        }
+
+        #endregion
     }
 }

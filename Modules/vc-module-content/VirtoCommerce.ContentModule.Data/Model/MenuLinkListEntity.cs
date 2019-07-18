@@ -7,7 +7,7 @@ using VirtoCommerce.Platform.Core.Common;
 
 namespace VirtoCommerce.ContentModule.Data.Model
 {
-    public class MenuLinkListEntity : AuditableEntity, IHasOuterId
+    public class MenuLinkListEntity : AuditableEntity, IHasOuterId, ICloneable
     {
         [Required]
         public string Name { get; set; }
@@ -18,7 +18,11 @@ namespace VirtoCommerce.ContentModule.Data.Model
         [StringLength(128)]
         public string OuterId { get; set; }
 
+        #region Navigation Properties
+
         public virtual ObservableCollection<MenuLinkEntity> MenuLinks { get; set; } = new ObservableCollection<MenuLinkEntity>();
+
+        #endregion
 
         public void Patch(MenuLinkListEntity target)
         {
@@ -43,7 +47,9 @@ namespace VirtoCommerce.ContentModule.Data.Model
 
             if (MenuLinks.Any())
             {
-                menuLinkList.MenuLinks = MenuLinks.OrderByDescending(l => l.Priority).Select(s => s.ToModel(AbstractTypeFactory<MenuLink>.TryCreateInstance())).ToArray();
+                menuLinkList.MenuLinks = MenuLinks.OrderByDescending(l => l.Priority)
+                    .Select(s => s.ToModel(AbstractTypeFactory<MenuLink>.TryCreateInstance()))
+                    .ToArray();
             }
 
             return menuLinkList;
@@ -72,5 +78,22 @@ namespace VirtoCommerce.ContentModule.Data.Model
 
             return this;
         }
+
+        #region ICloneable members
+
+        public virtual object Clone()
+        {
+            var result = MemberwiseClone() as MenuLinkListEntity;
+
+            if (MenuLinks != null)
+            {
+                result.MenuLinks = new ObservableCollection<MenuLinkEntity>(
+                    MenuLinks.Select(x => x.Clone() as MenuLinkEntity));
+            }
+
+            return result;
+        }
+
+        #endregion
     }
 }
