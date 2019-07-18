@@ -75,7 +75,7 @@ namespace VirtoCommerce.ExportModule.Web.Controllers
         [Route("run")]
         public ActionResult<PlatformExportPushNotification> RunExport([FromBody]ExportDataRequest request)
         {
-            string currentUserName = _userNameResolver.GetCurrentUserName();
+            var currentUserName = _userNameResolver.GetCurrentUserName();
             request.DataQuery.UserName = currentUserName;
             var notification = new ExportPushNotification(currentUserName)
             {

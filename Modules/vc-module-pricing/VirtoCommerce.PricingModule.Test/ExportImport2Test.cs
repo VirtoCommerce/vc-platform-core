@@ -35,15 +35,7 @@ namespace VirtoCommerce.PricingModule.Test
             IKnownExportTypesRegistrar registrar = new KnownExportTypesService();
             registrar.RegisterType(typeof(Price).Name, "Pricing", typeof(PriceExportDataQuery).Name);
 
-            var authorizationServiceMock = new Mock<IAuthorizationService>();
-            authorizationServiceMock.Setup(x => x.AuthorizeAsync(It.IsAny<ClaimsPrincipal>(), It.IsAny<object>(), It.IsAny<IEnumerable<IAuthorizationRequirement>>())).ReturnsAsync(AuthorizationResult.Success());
-
-            var authorizationPolicyProviderMock = new Mock<IAuthorizationPolicyProvider>();
-            authorizationPolicyProviderMock.Setup(x => x.GetPolicyAsync(It.IsAny<string>())).ReturnsAsync(new AuthorizationPolicy(new IAuthorizationRequirement[] { new Mock<IAuthorizationRequirement>().Object }, new string[] { }));
-
-            var userClaimsPrincipalFactoryMock = new Mock<IUserClaimsPrincipalFactory<ApplicationUser>>();
-
-            var userManagerMock = new Mock<UserManager<ApplicationUser>>(new Mock<IUserStore<ApplicationUser>>().Object, null, null, null, null, null, null, null, null);
+            AuthServicesMock(true, out var authorizationServiceMock, out var authorizationPolicyProviderMock, out var userClaimsPrincipalFactoryMock, out var userManagerMock);
 
             var searchServiceMock = new Mock<IPricingSearchService>();
             searchServiceMock.Setup(x => x.SearchPricesAsync(It.IsAny<PricesSearchCriteria>())).ReturnsAsync(GetTestPriceResult());
@@ -109,15 +101,7 @@ namespace VirtoCommerce.PricingModule.Test
             IKnownExportTypesRegistrar registrar = new KnownExportTypesService();
             registrar.RegisterType(typeof(Pricelist).Name, "Pricing", typeof(PricelistExportDataQuery).Name);
 
-            var authorizationServiceMock = new Mock<IAuthorizationService>();
-            authorizationServiceMock.Setup(x => x.AuthorizeAsync(It.IsAny<ClaimsPrincipal>(), It.IsAny<object>(), It.IsAny<IEnumerable<IAuthorizationRequirement>>())).ReturnsAsync(AuthorizationResult.Success());
-
-            var authorizationPolicyProviderMock = new Mock<IAuthorizationPolicyProvider>();
-            authorizationPolicyProviderMock.Setup(x => x.GetPolicyAsync(It.IsAny<string>())).ReturnsAsync(new AuthorizationPolicy(new IAuthorizationRequirement[] { new Mock<IAuthorizationRequirement>().Object }, new string[] { }));
-
-            var userClaimsPrincipalFactoryMock = new Mock<IUserClaimsPrincipalFactory<ApplicationUser>>();
-
-            var userManagerMock = new Mock<UserManager<ApplicationUser>>(new Mock<IUserStore<ApplicationUser>>().Object, null, null, null, null, null, null, null, null);
+            AuthServicesMock(true, out var authorizationServiceMock, out var authorizationPolicyProviderMock, out var userClaimsPrincipalFactoryMock, out var userManagerMock);
 
             var searchServiceMock = new Mock<IPricingSearchService>();
             searchServiceMock.Setup(x => x.SearchPricelistsAsync(It.IsAny<PricelistSearchCriteria>())).ReturnsAsync(GetTestPricelistResult());
@@ -184,20 +168,73 @@ namespace VirtoCommerce.PricingModule.Test
 
         [Fact]
         [SuppressMessage("Sonar", "S3966:Objects should not be disposed more than once")]
+        public Task PricelistJsonExportFailsUnauthorized()
+        {
+            //Arrange
+            IKnownExportTypesRegistrar registrar = new KnownExportTypesService();
+            registrar.RegisterType(typeof(Pricelist).Name, "Pricing", typeof(PricelistExportDataQuery).Name);
+
+            AuthServicesMock(false, out var authorizationServiceMock, out var authorizationPolicyProviderMock, out var userClaimsPrincipalFactoryMock, out var userManagerMock);
+
+            var searchServiceMock = new Mock<IPricingSearchService>();
+            searchServiceMock.Setup(x => x.SearchPricelistsAsync(It.IsAny<PricelistSearchCriteria>())).ReturnsAsync(GetTestPricelistResult());
+            searchServiceMock.Setup(x => x.SearchPricesAsync(It.IsAny<PricesSearchCriteria>())).ReturnsAsync(new PriceSearchResult()
+            {
+                TotalCount = 0,
+                Results = new List<Price>(),
+            });
+
+            var priceServiceMock = new Mock<IPricingService>();
+
+            var metadata = ExportedTypeMetadata.GetFromType<Pricelist>(true);
+            var resolver = (IKnownExportTypesResolver)registrar;
+            resolver.ResolveExportedTypeDefinition(typeof(Pricelist).Name)
+                .WithDataSourceFactory(dataQuery => new PricelistExportPagedDataSource(searchServiceMock.Object, priceServiceMock.Object, authorizationPolicyProviderMock.Object, authorizationServiceMock.Object, userClaimsPrincipalFactoryMock.Object, userManagerMock.Object) { DataQuery = dataQuery })
+                .WithMetadata(metadata);
+
+            var exportProviderFactories = new[] {
+                new Func<IExportProviderConfiguration, IExportProvider>(config => new JsonExportProvider(config))
+            };
+
+            var dataExporter = new DataExporter(resolver, new ExportProviderFactory(exportProviderFactories));
+            var includedColumnNames = new string[] { "Currency", "Id", "Name" };
+
+            //Act
+            Action act = () =>
+            {
+                using (var stream = new MemoryStream())
+                using (var writer = new StreamWriter(stream, Encoding.UTF8) { AutoFlush = true })
+                {
+                    dataExporter.Export(
+                        stream,
+                        new ExportDataRequest()
+                        {
+                            DataQuery = new PricelistExportDataQuery()
+                            {
+                                IncludedColumns = metadata.PropertyInfos.Where(x => includedColumnNames.Contains(x.Name, StringComparer.OrdinalIgnoreCase)).ToArray(),
+                            },
+                            ExportTypeName = typeof(Pricelist).Name,
+                            ProviderName = nameof(JsonExportProvider)
+                        },
+                        new Action<ExportProgressInfo>(x => Console.WriteLine(x.Description)),
+                        new CancellationTokenWrapper(CancellationToken.None));
+                }
+            };
+
+            //Assert
+            Assert.Throws<UnauthorizedAccessException>(act);
+
+            return Task.CompletedTask;
+        }
+
+        [Fact]
+        [SuppressMessage("Sonar", "S3966:Objects should not be disposed more than once")]
         public Task PricelistAssignmentJsonExport()
         {
             IKnownExportTypesRegistrar registrar = new KnownExportTypesService();
             registrar.RegisterType(typeof(PricelistAssignment).Name, "Pricing", typeof(PricelistAssignmentExportDataQuery).Name);
 
-            var authorizationServiceMock = new Mock<IAuthorizationService>();
-            authorizationServiceMock.Setup(x => x.AuthorizeAsync(It.IsAny<ClaimsPrincipal>(), It.IsAny<object>(), It.IsAny<IEnumerable<IAuthorizationRequirement>>())).ReturnsAsync(AuthorizationResult.Success());
-
-            var authorizationPolicyProviderMock = new Mock<IAuthorizationPolicyProvider>();
-            authorizationPolicyProviderMock.Setup(x => x.GetPolicyAsync(It.IsAny<string>())).ReturnsAsync(new AuthorizationPolicy(new IAuthorizationRequirement[] { new Mock<IAuthorizationRequirement>().Object }, new string[] { }));
-
-            var userClaimsPrincipalFactoryMock = new Mock<IUserClaimsPrincipalFactory<ApplicationUser>>();
-
-            var userManagerMock = new Mock<UserManager<ApplicationUser>>(new Mock<IUserStore<ApplicationUser>>().Object, null, null, null, null, null, null, null, null);
+            AuthServicesMock(true, out var authorizationServiceMock, out var authorizationPolicyProviderMock, out var userClaimsPrincipalFactoryMock, out var userManagerMock);
 
             var searchServiceMock = new Mock<IPricingSearchService>();
             searchServiceMock.Setup(x => x.SearchPricelistAssignmentsAsync(It.IsAny<PricelistAssignmentsSearchCriteria>())).ReturnsAsync(GetPricelistAssignmentSearchResult());
@@ -267,15 +304,7 @@ namespace VirtoCommerce.PricingModule.Test
             IKnownExportTypesRegistrar registrar = new KnownExportTypesService();
             registrar.RegisterType(typeof(Price).Name, "Pricing", typeof(PriceExportDataQuery).Name);
 
-            var authorizationServiceMock = new Mock<IAuthorizationService>();
-            authorizationServiceMock.Setup(x => x.AuthorizeAsync(It.IsAny<ClaimsPrincipal>(), It.IsAny<object>(), It.IsAny<IEnumerable<IAuthorizationRequirement>>())).ReturnsAsync(AuthorizationResult.Success());
-
-            var authorizationPolicyProviderMock = new Mock<IAuthorizationPolicyProvider>();
-            authorizationPolicyProviderMock.Setup(x => x.GetPolicyAsync(It.IsAny<string>())).ReturnsAsync(new AuthorizationPolicy(new IAuthorizationRequirement[] { new Mock<IAuthorizationRequirement>().Object }, new string[] { }));
-
-            var userClaimsPrincipalFactoryMock = new Mock<IUserClaimsPrincipalFactory<ApplicationUser>>();
-
-            var userManagerMock = new Mock<UserManager<ApplicationUser>>(new Mock<IUserStore<ApplicationUser>>().Object, null, null, null, null, null, null, null, null);
+            AuthServicesMock(true, out var authorizationServiceMock, out var authorizationPolicyProviderMock, out var userClaimsPrincipalFactoryMock, out var userManagerMock);
 
             var resolver = (IKnownExportTypesResolver)registrar;
 
@@ -503,6 +532,18 @@ namespace VirtoCommerce.PricingModule.Test
  ";
             #endregion
             return JsonConvert.DeserializeObject<PricelistAssignmentSearchResult>(resultInJSON, new ConditionJsonConverter());
+        }
+
+        private static void AuthServicesMock(bool authorizationResult, out Mock<IAuthorizationService> authorizationServiceMock, out Mock<IAuthorizationPolicyProvider> authorizationPolicyProviderMock, out Mock<IUserClaimsPrincipalFactory<ApplicationUser>> userClaimsPrincipalFactoryMock, out Mock<UserManager<ApplicationUser>> userManagerMock)
+        {
+            authorizationServiceMock = new Mock<IAuthorizationService>();
+            authorizationServiceMock.Setup(x => x.AuthorizeAsync(It.IsAny<ClaimsPrincipal>(), It.IsAny<object>(), It.IsAny<IEnumerable<IAuthorizationRequirement>>())).ReturnsAsync(authorizationResult ? AuthorizationResult.Success() : AuthorizationResult.Failed(AuthorizationFailure.Failed(new IAuthorizationRequirement[] { new Mock<IAuthorizationRequirement>().Object })));
+
+            authorizationPolicyProviderMock = new Mock<IAuthorizationPolicyProvider>();
+            authorizationPolicyProviderMock.Setup(x => x.GetPolicyAsync(It.IsAny<string>())).ReturnsAsync(new AuthorizationPolicy(new IAuthorizationRequirement[] { new Mock<IAuthorizationRequirement>().Object }, new string[] { }));
+
+            userClaimsPrincipalFactoryMock = new Mock<IUserClaimsPrincipalFactory<ApplicationUser>>();
+            userManagerMock = new Mock<UserManager<ApplicationUser>>(new Mock<IUserStore<ApplicationUser>>().Object, null, null, null, null, null, null, null, null);
         }
     }
 }

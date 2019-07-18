@@ -58,10 +58,10 @@ namespace VirtoCommerce.ExportModule.Core.Model
             foreach (var policyString in policies)
             {
                 var policy = await _authorizationPolicyProvider.GetPolicyAsync(policyString);
-                var allow = await _authorizationService.AuthorizeAsync(claimsPrincipal, null, policy.Requirements);
-                if (!allow.Succeeded)
+                var authorizationResult = await _authorizationService.AuthorizeAsync(claimsPrincipal, null, policy.Requirements);
+                if (!authorizationResult.Succeeded)
                 {
-                    throw new UnauthorizedAccessException(allow.Failure.FailedRequirements.FirstOrDefault().ToString());
+                    throw new UnauthorizedAccessException(authorizationResult.Failure.FailedRequirements.FirstOrDefault().ToString());
                 }
             }
         }
