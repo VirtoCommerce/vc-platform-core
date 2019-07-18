@@ -3,9 +3,11 @@ using System.Collections.Generic;
 using System.IO;
 using System.Linq;
 using Hangfire;
+using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.AspNetCore.StaticFiles;
 using Microsoft.Extensions.Options;
+using VirtoCommerce.ExportModule.Core;
 using VirtoCommerce.ExportModule.Core.Model;
 using VirtoCommerce.ExportModule.Core.Services;
 using VirtoCommerce.ExportModule.Data.Model;
@@ -19,6 +21,7 @@ using VirtoCommerce.Platform.Core.Security;
 namespace VirtoCommerce.ExportModule.Web.Controllers
 {
     [Route("api/export")]
+    [Authorize(ModuleConstants.Security.Permissions.Access)]
     public class ExportController : Controller
     {
         private readonly IEnumerable<Func<IExportProviderConfiguration, IExportProvider>> _exportProviderFactories;
@@ -72,7 +75,9 @@ namespace VirtoCommerce.ExportModule.Web.Controllers
         [Route("run")]
         public ActionResult<PlatformExportPushNotification> RunExport([FromBody]ExportDataRequest request)
         {
-            var notification = new ExportPushNotification(_userNameResolver.GetCurrentUserName())
+            var currentUserName = _userNameResolver.GetCurrentUserName();
+            request.DataQuery.UserName = currentUserName;
+            var notification = new ExportPushNotification(currentUserName)
             {
                 Title = $"{request.ExportTypeName} export task",
                 Description = "starting export...."
@@ -105,6 +110,7 @@ namespace VirtoCommerce.ExportModule.Web.Controllers
         /// <returns></returns>
         [HttpGet]
         [Route("download/{fileName}")]
+        [Authorize(ModuleConstants.Security.Permissions.Download)]
         public ActionResult DownloadExportFile([FromRoute] string fileName)
         {
             var localTmpFolder = Path.GetFullPath(Path.Combine(_platformOptions.DefaultExportFolder));
