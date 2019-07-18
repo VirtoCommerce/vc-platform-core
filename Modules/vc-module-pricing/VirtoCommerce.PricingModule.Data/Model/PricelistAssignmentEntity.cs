@@ -5,7 +5,7 @@ using VirtoCommerce.PricingModule.Core.Model;
 
 namespace VirtoCommerce.PricingModule.Data.Model
 {
-    public class PricelistAssignmentEntity : AuditableEntity, IHasOuterId
+    public class PricelistAssignmentEntity : AuditableEntity, IHasOuterId, ICloneable
     {
         [StringLength(128)]
         [Required]
@@ -31,10 +31,9 @@ namespace VirtoCommerce.PricingModule.Data.Model
         [StringLength(128)]
         public string OuterId { get; set; }
 
-
         #region Navigation Properties
-        public string PricelistId { get; set; }
 
+        public string PricelistId { get; set; }
         public virtual PricelistEntity Pricelist { get; set; }
 
         #endregion
@@ -42,7 +41,7 @@ namespace VirtoCommerce.PricingModule.Data.Model
         public virtual PricelistAssignment ToModel(PricelistAssignment assignment)
         {
             if (assignment == null)
-                throw new ArgumentNullException("assignment");
+                throw new ArgumentNullException(nameof(assignment));
 
             assignment.Id = Id;
             assignment.CreatedBy = CreatedBy;
@@ -77,7 +76,7 @@ namespace VirtoCommerce.PricingModule.Data.Model
         public virtual PricelistAssignmentEntity FromModel(PricelistAssignment assignment, PrimaryKeyResolvingMap pkMap)
         {
             if (assignment == null)
-                throw new ArgumentNullException("assignment");
+                throw new ArgumentNullException(nameof(assignment));
 
             pkMap.AddPair(assignment, this);
 
@@ -103,7 +102,7 @@ namespace VirtoCommerce.PricingModule.Data.Model
         public virtual void Patch(PricelistAssignmentEntity target)
         {
             if (target == null)
-                throw new ArgumentNullException("target");
+                throw new ArgumentNullException(nameof(target));
 
             target.Name = Name;
             target.Description = Description;
@@ -115,5 +114,20 @@ namespace VirtoCommerce.PricingModule.Data.Model
             target.PredicateVisualTreeSerialized = PredicateVisualTreeSerialized;
         }
 
+        #region ICloneable members
+
+        public virtual object Clone()
+        {
+            var result = MemberwiseClone() as PricelistAssignmentEntity;
+
+            if (Pricelist != null)
+            {
+                result.Pricelist = Pricelist.Clone() as PricelistEntity;
+            }
+
+            return result;
+        }
+
+        #endregion
     }
 }

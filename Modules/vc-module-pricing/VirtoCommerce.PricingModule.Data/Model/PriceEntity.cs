@@ -6,7 +6,7 @@ using VirtoCommerce.PricingModule.Core.Model;
 
 namespace VirtoCommerce.PricingModule.Data.Model
 {
-    public class PriceEntity : AuditableEntity, IHasOuterId
+    public class PriceEntity : AuditableEntity, IHasOuterId, ICloneable
     {
         [Column(TypeName = "Money")]
         public decimal? Sale { get; set; }
@@ -29,11 +29,9 @@ namespace VirtoCommerce.PricingModule.Data.Model
         #region Navigation Properties
 
         public string PricelistId { get; set; }
-
         public virtual PricelistEntity Pricelist { get; set; }
 
         #endregion
-
 
         public virtual Price ToModel(Price price)
         {
@@ -94,5 +92,21 @@ namespace VirtoCommerce.PricingModule.Data.Model
             target.Sale = Sale;
             target.MinQuantity = MinQuantity;
         }
+
+        #region ICloneable members
+
+        public virtual object Clone()
+        {
+            var result = MemberwiseClone() as PriceEntity;
+
+            if (Pricelist != null)
+            {
+                result.Pricelist = Pricelist.Clone() as PricelistEntity;
+            }
+
+            return result;
+        }
+
+        #endregion
     }
 }

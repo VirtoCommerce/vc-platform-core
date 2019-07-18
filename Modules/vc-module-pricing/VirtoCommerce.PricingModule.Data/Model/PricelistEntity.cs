@@ -2,19 +2,14 @@ using System;
 using System.Collections.Generic;
 using System.Collections.ObjectModel;
 using System.ComponentModel.DataAnnotations;
+using System.Linq;
 using VirtoCommerce.Platform.Core.Common;
 using VirtoCommerce.PricingModule.Core.Model;
 
 namespace VirtoCommerce.PricingModule.Data.Model
 {
-    public class PricelistEntity : AuditableEntity
+    public class PricelistEntity : AuditableEntity, ICloneable
     {
-        public PricelistEntity()
-        {
-            Prices = new NullCollection<PriceEntity>();
-            Assignments = new NullCollection<PricelistAssignmentEntity>();
-        }
-
         [Required]
         [StringLength(128)]
         public string Name { get; set; }
@@ -29,19 +24,20 @@ namespace VirtoCommerce.PricingModule.Data.Model
         [StringLength(128)]
         public string OuterId { get; set; }
 
-
         #region Navigation Properties
 
         public virtual ObservableCollection<PriceEntity> Prices { get; set; }
+            = new NullCollection<PriceEntity>();
+
         public virtual ObservableCollection<PricelistAssignmentEntity> Assignments { get; set; }
+            = new NullCollection<PricelistAssignmentEntity>();
 
         #endregion
-
 
         public virtual Pricelist ToModel(Pricelist pricelist)
         {
             if (pricelist == null)
-                throw new ArgumentNullException("pricelist");
+                throw new ArgumentNullException(nameof(pricelist));
 
             pricelist.Id = Id;
             pricelist.CreatedBy = CreatedBy;
@@ -56,15 +52,15 @@ namespace VirtoCommerce.PricingModule.Data.Model
 
             pricelist.Assignments = new List<PricelistAssignment>();
             //Create lightweight assignment for represent assignment info in pricelist
-            foreach (var assignemntEntity in Assignments)
+            foreach (var assignmentEntity in Assignments)
             {
                 var assignment = AbstractTypeFactory<PricelistAssignment>.TryCreateInstance();
-                assignment.Id = assignemntEntity.Id;
-                assignment.CatalogId = assignemntEntity.CatalogId;
-                assignment.Description = assignemntEntity.Description;
-                assignment.Name = assignemntEntity.Name;
-                assignment.Priority = assignemntEntity.Priority;
-                assignment.StartDate = assignemntEntity.StartDate;
+                assignment.Id = assignmentEntity.Id;
+                assignment.CatalogId = assignmentEntity.CatalogId;
+                assignment.Description = assignmentEntity.Description;
+                assignment.Name = assignmentEntity.Name;
+                assignment.Priority = assignmentEntity.Priority;
+                assignment.StartDate = assignmentEntity.StartDate;
 
                 pricelist.Assignments.Add(assignment);
             }
@@ -74,7 +70,7 @@ namespace VirtoCommerce.PricingModule.Data.Model
         public virtual PricelistEntity FromModel(Pricelist pricelist, PrimaryKeyResolvingMap pkMap)
         {
             if (pricelist == null)
-                throw new ArgumentNullException("pricelist");
+                throw new ArgumentNullException(nameof(pricelist));
 
             pkMap.AddPair(pricelist, this);
 
@@ -95,11 +91,34 @@ namespace VirtoCommerce.PricingModule.Data.Model
         public virtual void Patch(PricelistEntity target)
         {
             if (target == null)
-                throw new ArgumentNullException("target");
+                throw new ArgumentNullException(nameof(target));
 
             target.Name = Name;
             target.Currency = Currency;
             target.Description = Description;
         }
+
+        #region ICloneable members
+
+        public virtual object Clone()
+        {
+            var result = MemberwiseClone() as PricelistEntity;
+
+            if (Prices != null)
+            {
+                result.Prices = new ObservableCollection<PriceEntity>(
+                    Prices.Select(x => x.Clone() as PriceEntity));
+            }
+
+            if (Assignments != null)
+            {
+                result.Assignments = new ObservableCollection<PricelistAssignmentEntity>(
+                    Assignments.Select(x => x.Clone() as PricelistAssignmentEntity));
+            }
+
+            return result;
+        }
+
+        #endregion
     }
 }
