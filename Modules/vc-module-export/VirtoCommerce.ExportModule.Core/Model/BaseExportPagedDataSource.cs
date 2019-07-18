@@ -61,7 +61,7 @@ namespace VirtoCommerce.ExportModule.Core.Model
                 var authorizationResult = await _authorizationService.AuthorizeAsync(claimsPrincipal, null, policy.Requirements);
                 if (!authorizationResult.Succeeded)
                 {
-                    throw new UnauthorizedAccessException(authorizationResult.Failure.FailedRequirements.FirstOrDefault().ToString());
+                    throw new UnauthorizedAccessException();
                 }
             }
         }
