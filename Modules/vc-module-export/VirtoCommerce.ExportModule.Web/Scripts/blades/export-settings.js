@@ -82,6 +82,7 @@ angular.module('virtoCommerce.exportModule')
                 isClosingDisabled: false,
                 dataQuery: blade.exportDataRequest.dataQuery,
                 onCompleted: function(dataQuery) {
+                    console.log(dataQuery);
                 }
             };
 

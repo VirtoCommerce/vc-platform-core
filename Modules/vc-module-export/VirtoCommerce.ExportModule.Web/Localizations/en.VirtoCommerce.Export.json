@@ -1,6 +1,9 @@
 {
     "export": {
         "main-menu-title": "Export New",
+        "commands": {
+            "pick-all": "Pick all",
+        },
         "blades": {
             "export-settings": {
                 "title": "Export settings",
@@ -50,7 +53,7 @@
                     "new-filter": "Add new filter"
                 },
                 "placeholders": {
-                    "select-filter": "Select keyword…"
+                    "select-filter": "Select filter…"
                 }
             }
         }

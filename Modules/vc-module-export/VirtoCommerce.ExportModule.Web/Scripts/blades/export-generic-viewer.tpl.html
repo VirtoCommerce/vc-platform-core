@@ -1,9 +1,8 @@
 <div class="blade-static __expanded">
-    <va-breadcrumb ng-model="blade.breadcrumbs" blade-id="blade.id"></va-breadcrumb>
     <div class="form-group">
         <vc-item-search blade="blade"></vc-item-search>
         <ui-select ng-model="filter.current" ng-change="filter.change()" style="left: 220px;position: absolute;width: 190px;top: 0px;">
-                <ui-select-match allow-clear="true" placeholder="{{'export.blades.export-type-selector.placeholders.select-filter' | translate}}">{{$select.selected.name | translate}}</ui-select-match>
+                <ui-select-match allow-clear="true" placeholder="{{'export.blades.export-generic-viewer.placeholders.select-filter' | translate}}">{{$select.selected.name | translate}}</ui-select-match>
                 <ui-select-choices repeat="x in $localStorage.exportSearchFilters | filter: $select.search">
                     <span ng-bind-html="x.name | translate | highlight: $select.search"></span>
                 </ui-select-choices>
@@ -11,7 +10,7 @@
         <p class="form-count">{{'platform.list.count' | translate}}: <span class="count">{{pageSettings.totalItems | number:0}}</span></p>
     </div>
 </div>
-<div class="blade-content __medium-wide">
+<div class="blade-content" ng-class="{'__large-wide': blade.isExpanded, '__normal': !blade.isExpanded}">
     <div class="blade-inner">
         <div class="inner-block" ng-init="setGridOptions({
                 useExternalSorting: true,
@@ -23,12 +22,12 @@
                 columnDefs: [
                         { name: 'actions', displayName: '', enableColumnResizing: false, enableSorting: false, width: 30, cellTemplate: 'item-list-actions.cell.html', pinnedLeft:true },
                         {
-                            name: 'imageUrl', displayName: 'export.blades.export-type-selector.labels.picture',
+                            name: 'imageUrl', displayName: 'export.blades.export-generic-viewer.labels.picture',
                             enableColumnResizing: false, enableSorting: false, width: 60,
                             cellTemplate: 'item-list-icon.cell.html'
                         },
-                        { name: 'name', displayName: 'export.blades.export-type-selector.name', cellTemplate: 'item-list-name.cell.html' },
-                        { name: 'code', displayName: 'export.blades.export-type-selector.labels.code', width: 170, cellTemplate: 'item-list-code.cell.html' },
+                        { name: 'name', displayName: 'export.blades.export-generic-viewer.name', cellTemplate: 'item-list-name.cell.html' },
+                        { name: 'code', displayName: 'export.blades.export-generic-viewer.labels.code', width: 170, cellTemplate: 'item-list-code.cell.html' },
                         { name: '$path', displayName: 'Parent', enableSorting: false, visible: false, cellTooltip: true }
                     ]})">
             <div class="table-wrapper" ng-if="items.length > 0">

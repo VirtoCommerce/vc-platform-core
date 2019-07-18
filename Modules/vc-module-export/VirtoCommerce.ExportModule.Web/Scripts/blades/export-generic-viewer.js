@@ -1,8 +1,24 @@
 angular.module('virtoCommerce.exportModule')
-    .controller('virtoCommerce.exportModule.exportGenericViewerController', ['$scope', 'platformWebApp.bladeNavigationService', function ($scope, bladeNavigationService) {
+    .controller('virtoCommerce.exportModule.exportGenericViewerController', 
+    ['$sessionStorage', '$localStorage', '$timeout', '$scope', 'platformWebApp.bladeUtils', 'platformWebApp.dialogService', 'platformWebApp.authService', 'platformWebApp.uiGridHelper', 'platformWebApp.bladeNavigationService', 
+    function ($sessionStorage, $localStorage, $timeout, $scope, bladeUtils, dialogService, authService, uiGridHelper, bladeNavigationService) {
         $scope.uiGridConstants = uiGridHelper.uiGridConstants;
         $scope.hasMore = true;
-        $scope.items = [];
+        $scope.items = [{
+            type: 'price',
+            id: 'id1',
+            imageUrl: null,
+            name: 'Price1',
+            code: null,
+            $path: 'pl1\\'
+        }, {
+            type: 'product',
+            id: 'id2',
+            imageUrl: 'http://localhost:10645/assets/catalog/ASZF216GBSL/1431971520000_1134360_64x64.jpg',
+            name: 'Phone',
+            code: 'PH_Code',
+            $path: 'pl1\\'
+        }];
         
         var blade = $scope.blade;
         blade.isLoading = true;
@@ -13,48 +29,45 @@ angular.module('virtoCommerce.exportModule')
         }
 
         blade.refresh = function () {
-  
-            blade.isLoading = true;
-
-            if ($scope.pageSettings.currentPage !== 1)
-                $scope.pageSettings.currentPage = 1;
-
-            // var searchCriteria = getSearchCriteria();
-
-            // listEntries.listitemssearch(
-            //     searchCriteria,
-            //     function (data) {
-            //         transformByFilters(data.listEntries);
-            //         blade.isLoading = false;
-            //         $scope.pageSettings.totalItems = data.totalCount;
-            //         $scope.items = data.listEntries;
-            //         $scope.hasMore = data.listEntries.length === $scope.pageSettings.itemsPerPageCount;
-
-            //         //Set navigation breadcrumbs
-            //         setBreadcrumbs();
-            //     });
+            loadData();
 
             //reset state grid
             resetStateGrid();
-        }
+        };
 
         function showMore() {
             if ($scope.hasMore) {
 
                 ++$scope.pageSettings.currentPage;
                 $scope.gridApi.infiniteScroll.saveScrollPercentage();
-                blade.isLoading = true;
 
-                // var searchCriteria = getSearchCriteria();
+                loadData(function() {
+                    $scope.gridApi.infiniteScroll.dataLoaded();
+
+                    $timeout(function () {
+                        // wait for grid to ingest data changes
+                        if ($scope.gridApi.selection.getSelectAllState()) {
+                            $scope.gridApi.selection.selectAllRows();
+                        }
+                    });
+                });
+            }
+        }
+
+        function loadData(additionalHandling) {
+            // blade.isLoading = true;
+            // var searchCriteria = getDataQuery();
 
                 // listEntries.listitemssearch(
                 //     searchCriteria,
                 //     function (data) {
-                //         transformByFilters(data.listEntries);
                 //         blade.isLoading = false;
                 //         $scope.pageSettings.totalItems = data.totalCount;
                 //         $scope.items = $scope.items.concat(data.listEntries);
                 //         $scope.hasMore = data.listEntries.length === $scope.pageSettings.itemsPerPageCount;
+                            // if (additionalHandling) {
+                            //     additionalHandling(data);
+                            // }
                 //         $scope.gridApi.infiniteScroll.dataLoaded();
 
                 //         $timeout(function () {
@@ -65,22 +78,17 @@ angular.module('virtoCommerce.exportModule')
                 //         });
 
                 //     });
-            }
         }
 
-        function getSearchCriteria()
+        function getDataQuery()
         {
-            var searchCriteria = {
-                catalogId: blade.catalogId,
-                categoryId: blade.categoryId,
+            var dataQuery = {
                 keyword: filter.keyword ? filter.keyword : undefined,
-                searchInVariations: filter.searchInVariations ? filter.searchInVariations : false,
-                responseGroup: 'withCategories, withProducts',
                 sort: uiGridHelper.getSortExpression($scope),
                 skip: ($scope.pageSettings.currentPage - 1) * $scope.pageSettings.itemsPerPageCount,
                 take: $scope.pageSettings.itemsPerPageCount
             };
-            return searchCriteria;
+            return dataQuery;
         }
 
         function resetStateGrid() {
@@ -191,22 +199,27 @@ angular.module('virtoCommerce.exportModule')
             name: 'platform.commands.pick-selected',
             icon: 'fa fa-save',
             canExecuteMethod: function () {
-                return blade.notification && !blade.notification.finished;
+                return $scope.gridApi && $scope.gridApi.selection.getSelectedRows() && $scope.gridApi.selection.getSelectedRows().length;
             },
             executeMethod: function () {
+                var dataQuery = getDataQuery();
+                dataQuery.objectIds = _.map($scope.gridApi.selection.getSelectedRows(), function(item) { return item.id; });
+
                 if (blade.onCompleted) {
-                    blade.onCompleted();
+                    blade.onCompleted(dataQuery);
                 }
             }
         }, {
-            name: 'platform.commands.select-all',
-            icon: 'fa fa-check-square-o',
+            name: 'export.commands.pick-all',
+            icon: 'fa fa-save',
             canExecuteMethod: function () {
-                return blade.notification && !blade.notification.finished;
+                return true;
             },
             executeMethod: function () {
+                var dataQuery = getDataQuery();
+
                 if (blade.onCompleted) {
-                    blade.onCompleted();
+                    blade.onCompleted(dataQuery);
                 }
             }
         }, {
@@ -220,11 +233,10 @@ angular.module('virtoCommerce.exportModule')
             name: 'platform.commands.cancel',
             icon: 'fa fa-times',
             canExecuteMethod: function () {
-                return blade.notification && !blade.notification.finished;
+                return true;
             },
             executeMethod: function () {
-                exportApi.cancel({ jobId: blade.notification.jobId }, function (data) {
-                });
+                bladeNavigationService.closeBlade(blade);
             }
         }];
 
