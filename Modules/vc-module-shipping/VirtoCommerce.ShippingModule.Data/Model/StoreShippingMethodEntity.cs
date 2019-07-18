@@ -5,7 +5,7 @@ using VirtoCommerce.ShippingModule.Core.Model;
 
 namespace VirtoCommerce.ShippingModule.Data.Model
 {
-    public class StoreShippingMethodEntity : Entity
+    public class StoreShippingMethodEntity : Entity, ICloneable
     {
         [Required]
         [StringLength(128)]
@@ -23,11 +23,7 @@ namespace VirtoCommerce.ShippingModule.Data.Model
 
         public string TypeName { get; set; }
 
-        #region Navigation Properties
-
         public string StoreId { get; set; }
-
-        #endregion
 
         public virtual ShippingMethod ToModel(ShippingMethod shippingMethod)
         {
@@ -76,5 +72,15 @@ namespace VirtoCommerce.ShippingModule.Data.Model
             target.Priority = Priority;
             target.StoreId = StoreId;
         }
+
+        #region ICloneable members
+
+        public virtual object Clone()
+        {
+            var result = MemberwiseClone() as StoreShippingMethodEntity;
+            return result;
+        }
+
+        #endregion
     }
 }

@@ -5,7 +5,7 @@ using VirtoCommerce.SitemapsModule.Core.Models;
 
 namespace VirtoCommerce.SitemapsModule.Data.Models
 {
-    public class SitemapItemEntity : AuditableEntity
+    public class SitemapItemEntity : AuditableEntity, ICloneable
     {
         [Required]
         [StringLength(256)]
@@ -21,12 +21,15 @@ namespace VirtoCommerce.SitemapsModule.Data.Models
         [StringLength(128)]
         public string ObjectType { get; set; }
 
-        public string SitemapId { get; set; }
-
         [StringLength(256)]
         public string UrlTemplate { get; set; }
 
+        #region Navigation Properties
+
+        public string SitemapId { get; set; }
         public virtual SitemapEntity Sitemap { get; set; }
+
+        #endregion
 
         public virtual SitemapItem ToModel(SitemapItem sitemapItem)
         {
@@ -94,5 +97,21 @@ namespace VirtoCommerce.SitemapsModule.Data.Models
             sitemapItemEntity.Title = Title;
             sitemapItemEntity.UrlTemplate = UrlTemplate;
         }
+
+        #region ICloneable members
+
+        public virtual object Clone()
+        {
+            var result = MemberwiseClone() as SitemapItemEntity;
+
+            if (Sitemap != null)
+            {
+                result.Sitemap = Sitemap.Clone() as SitemapEntity;
+            }
+
+            return result;
+        }
+
+        #endregion
     }
 }
