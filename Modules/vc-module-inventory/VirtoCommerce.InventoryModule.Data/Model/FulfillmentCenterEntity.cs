@@ -1,10 +1,11 @@
+using System;
 using System.ComponentModel.DataAnnotations;
 using VirtoCommerce.InventoryModule.Core.Model;
 using VirtoCommerce.Platform.Core.Common;
 
 namespace VirtoCommerce.InventoryModule.Data.Model
 {
-    public class FulfillmentCenterEntity : AuditableEntity, IHasOuterId
+    public class FulfillmentCenterEntity : AuditableEntity, IHasOuterId, ICloneable
     {
         [Required]
         [StringLength(128)]
@@ -113,7 +114,6 @@ namespace VirtoCommerce.InventoryModule.Data.Model
             GeoLocation = center.GeoLocation;
 
             return this;
-
         }
 
         public virtual void Patch(FulfillmentCenterEntity target)
@@ -132,5 +132,15 @@ namespace VirtoCommerce.InventoryModule.Data.Model
             target.Name = Name;
             target.GeoLocation = GeoLocation;
         }
+
+        #region ICloneable members
+
+        public virtual object Clone()
+        {
+            var result = MemberwiseClone() as FulfillmentCenterEntity;
+            return result;
+        }
+
+        #endregion
     }
 }

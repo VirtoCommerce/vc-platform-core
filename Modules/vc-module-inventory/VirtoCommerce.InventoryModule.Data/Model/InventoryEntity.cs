@@ -5,7 +5,7 @@ using VirtoCommerce.Platform.Core.Common;
 
 namespace VirtoCommerce.InventoryModule.Data.Model
 {
-    public class InventoryEntity : AuditableEntity, IHasOuterId
+    public class InventoryEntity : AuditableEntity, IHasOuterId, ICloneable
     {
         [Required]
         public decimal InStockQuantity { get; set; }
@@ -23,7 +23,6 @@ namespace VirtoCommerce.InventoryModule.Data.Model
         public bool AllowBackorder { get; set; }
 
         public bool AllowPreorder { get; set; }
-
 
         [Required]
         public int Status { get; set; }
@@ -47,12 +46,12 @@ namespace VirtoCommerce.InventoryModule.Data.Model
         [StringLength(128)]
         public string OuterId { get; set; }
 
-
         #region Navigation properties
+
         public string FulfillmentCenterId { get; set; }
         public FulfillmentCenterEntity FulfillmentCenter { get; set; }
-        #endregion
 
+        #endregion
 
         public virtual InventoryInfo ToModel(InventoryInfo inventory)
         {
@@ -124,5 +123,21 @@ namespace VirtoCommerce.InventoryModule.Data.Model
             target.ReservedQuantity = ReservedQuantity;
             target.Status = Status;
         }
+
+        #region ICloneable members
+
+        public virtual object Clone()
+        {
+            var result = MemberwiseClone() as InventoryEntity;
+
+            if (FulfillmentCenter != null)
+            {
+                result.FulfillmentCenter = FulfillmentCenter.Clone() as FulfillmentCenterEntity;
+            }
+
+            return result;
+        }
+
+        #endregion
     }
 }
