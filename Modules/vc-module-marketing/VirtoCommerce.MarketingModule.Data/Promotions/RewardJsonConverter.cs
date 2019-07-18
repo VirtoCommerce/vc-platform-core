@@ -1,7 +1,6 @@
 using System;
 using Newtonsoft.Json;
 using Newtonsoft.Json.Linq;
-using VirtoCommerce.CoreModule.Core.Conditions;
 using VirtoCommerce.MarketingModule.Core.Model.Promotions;
 using VirtoCommerce.Platform.Core.Common;
 

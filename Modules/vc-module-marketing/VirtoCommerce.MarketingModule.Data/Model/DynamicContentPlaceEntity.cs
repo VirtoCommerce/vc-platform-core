@@ -5,7 +5,7 @@ using VirtoCommerce.Platform.Core.Common;
 
 namespace VirtoCommerce.MarketingModule.Data.Model
 {
-    public class DynamicContentPlaceEntity : AuditableEntity
+    public class DynamicContentPlaceEntity : AuditableEntity, ICloneable
     {
         [Required]
         [StringLength(128)]
@@ -18,9 +18,10 @@ namespace VirtoCommerce.MarketingModule.Data.Model
         public string ImageUrl { get; set; }
 
         #region Navigation Properties
-        public string FolderId { get; set; }
 
+        public string FolderId { get; set; }
         public virtual DynamicContentFolderEntity Folder { get; set; }
+
         #endregion
 
         public virtual DynamicContentPlace ToModel(DynamicContentPlace place)
@@ -43,6 +44,7 @@ namespace VirtoCommerce.MarketingModule.Data.Model
             {
                 place.Folder = Folder.ToModel(AbstractTypeFactory<DynamicContentFolder>.TryCreateInstance());
             }
+
             return place;
         }
 
@@ -77,5 +79,21 @@ namespace VirtoCommerce.MarketingModule.Data.Model
             target.FolderId = FolderId;
             target.ImageUrl = ImageUrl;
         }
+
+        #region ICloneable members
+
+        public virtual object Clone()
+        {
+            var result = MemberwiseClone() as DynamicContentPlaceEntity;
+
+            if (Folder != null)
+            {
+                result.Folder = Folder.Clone() as DynamicContentFolderEntity;
+            }
+
+            return result;
+        }
+
+        #endregion
     }
 }

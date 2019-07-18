@@ -6,12 +6,8 @@ using VirtoCommerce.Platform.Core.Common;
 
 namespace VirtoCommerce.MarketingModule.Data.Model
 {
-    public class CouponEntity : AuditableEntity, IHasOuterId
+    public class CouponEntity : AuditableEntity, IHasOuterId, ICloneable
     {
-        public CouponEntity()
-        {
-        }
-
         [StringLength(64)]
         public string Code { get; set; }
 
@@ -28,6 +24,7 @@ namespace VirtoCommerce.MarketingModule.Data.Model
         public string OuterId { get; set; }
 
         #region Navigation Properties
+
         public string PromotionId { get; set; }
         public virtual PromotionEntity Promotion { get; set; }
 
@@ -90,5 +87,21 @@ namespace VirtoCommerce.MarketingModule.Data.Model
             target.MaxUsesNumber = MaxUsesNumber;
             target.MaxUsesPerUser = MaxUsesPerUser;
         }
+
+        #region ICloneable members
+
+        public virtual object Clone()
+        {
+            var result = MemberwiseClone() as CouponEntity;
+
+            if (Promotion != null)
+            {
+                result.Promotion = Promotion.Clone() as PromotionEntity;
+            }
+
+            return result;
+        }
+
+        #endregion
     }
 }

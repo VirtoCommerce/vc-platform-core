@@ -1,19 +1,14 @@
 using System;
 using System.Collections.ObjectModel;
 using System.ComponentModel.DataAnnotations;
+using System.Linq;
 using VirtoCommerce.MarketingModule.Core.Model;
 using VirtoCommerce.Platform.Core.Common;
 
 namespace VirtoCommerce.MarketingModule.Data.Model
 {
-    public class DynamicContentFolderEntity : AuditableEntity
+    public class DynamicContentFolderEntity : AuditableEntity, ICloneable
     {
-        public DynamicContentFolderEntity()
-        {
-            ContentItems = new NullCollection<DynamicContentItemEntity>();
-            ContentPlaces = new NullCollection<DynamicContentPlaceEntity>();
-        }
-
         [Required]
         [StringLength(128)]
         public string Name { get; set; }
@@ -25,11 +20,16 @@ namespace VirtoCommerce.MarketingModule.Data.Model
         public string ImageUrl { get; set; }
 
         #region Navigation Properties
+
         public string ParentFolderId { get; set; }
         public virtual DynamicContentFolderEntity ParentFolder { get; set; }
 
         public virtual ObservableCollection<DynamicContentItemEntity> ContentItems { get; set; }
+            = new NullCollection<DynamicContentItemEntity>();
+
         public virtual ObservableCollection<DynamicContentPlaceEntity> ContentPlaces { get; set; }
+            = new NullCollection<DynamicContentPlaceEntity>();
+
         #endregion
 
         public virtual DynamicContentFolder ToModel(DynamicContentFolder folder)
@@ -83,5 +83,32 @@ namespace VirtoCommerce.MarketingModule.Data.Model
             target.Description = Description;
         }
 
+        #region ICloneable members
+
+        public virtual object Clone()
+        {
+            var result = MemberwiseClone() as DynamicContentFolderEntity;
+
+            if (ParentFolder != null)
+            {
+                result.ParentFolder = ParentFolder.Clone() as DynamicContentFolderEntity;
+            }
+
+            if (ContentItems != null)
+            {
+                result.ContentItems = new ObservableCollection<DynamicContentItemEntity>(
+                    ContentItems.Select(x => x.Clone() as DynamicContentItemEntity));
+            }
+
+            if (ContentPlaces != null)
+            {
+                result.ContentPlaces = new ObservableCollection<DynamicContentPlaceEntity>(
+                    ContentPlaces.Select(x => x.Clone() as DynamicContentPlaceEntity));
+            }
+
+            return result;
+        }
+
+        #endregion
     }
 }

@@ -7,14 +7,8 @@ using VirtoCommerce.Platform.Core.Common;
 
 namespace VirtoCommerce.MarketingModule.Data.Model
 {
-    public class DynamicContentPublishingGroupEntity : AuditableEntity, IHasOuterId
+    public class DynamicContentPublishingGroupEntity : AuditableEntity, IHasOuterId, ICloneable
     {
-        public DynamicContentPublishingGroupEntity()
-        {
-            ContentItems = new NullCollection<PublishingGroupContentItemEntity>();
-            ContentPlaces = new NullCollection<PublishingGroupContentPlaceEntity>();
-        }
-
         [Required]
         [StringLength(128)]
         public string Name { get; set; }
@@ -41,11 +35,14 @@ namespace VirtoCommerce.MarketingModule.Data.Model
         public string OuterId { get; set; }
 
         #region Navigation Properties
+
         public virtual ObservableCollection<PublishingGroupContentItemEntity> ContentItems { get; set; }
+            = new NullCollection<PublishingGroupContentItemEntity>();
 
         public virtual ObservableCollection<PublishingGroupContentPlaceEntity> ContentPlaces { get; set; }
-        #endregion
+            = new NullCollection<PublishingGroupContentPlaceEntity>();
 
+        #endregion
 
         public virtual DynamicContentPublication ToModel(DynamicContentPublication publication)
         {
@@ -143,5 +140,28 @@ namespace VirtoCommerce.MarketingModule.Data.Model
                 ContentPlaces.Patch(target.ContentPlaces, itemComparer, (sourceProperty, targetProperty) => { });
             }
         }
+
+        #region ICloneable members
+
+        public virtual object Clone()
+        {
+            var result = MemberwiseClone() as DynamicContentPublishingGroupEntity;
+
+            if (ContentItems != null)
+            {
+                result.ContentItems = new ObservableCollection<PublishingGroupContentItemEntity>(
+                    ContentItems.Select(x => x.Clone() as PublishingGroupContentItemEntity));
+            }
+
+            if (ContentPlaces != null)
+            {
+                result.ContentPlaces = new ObservableCollection<PublishingGroupContentPlaceEntity>(
+                    ContentPlaces.Select(x => x.Clone() as PublishingGroupContentPlaceEntity));
+            }
+
+            return result;
+        }
+
+        #endregion
     }
 }

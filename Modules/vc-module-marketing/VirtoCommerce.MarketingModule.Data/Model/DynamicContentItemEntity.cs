@@ -8,7 +8,7 @@ using VirtoCommerce.Platform.Core.DynamicProperties;
 
 namespace VirtoCommerce.MarketingModule.Data.Model
 {
-    public class DynamicContentItemEntity : AuditableEntity
+    public class DynamicContentItemEntity : AuditableEntity, ICloneable
     {
         [Required]
         [StringLength(128)]
@@ -29,8 +29,8 @@ namespace VirtoCommerce.MarketingModule.Data.Model
         public string ImageUrl { get; set; }
 
         #region Navigation Properties
-        public string FolderId { get; set; }
 
+        public string FolderId { get; set; }
         public virtual DynamicContentFolderEntity Folder { get; set; }
 
         public ObservableCollection<DynamicContentItemDynamicPropertyObjectValueEntity> DynamicPropertyObjectValues { get; set; }
@@ -117,5 +117,27 @@ namespace VirtoCommerce.MarketingModule.Data.Model
                 DynamicPropertyObjectValues.Patch(target.DynamicPropertyObjectValues, (sourceDynamicPropertyObjectValues, targetDynamicPropertyObjectValues) => sourceDynamicPropertyObjectValues.Patch(targetDynamicPropertyObjectValues));
             }
         }
+
+        #region ICloneable members
+
+        public virtual object Clone()
+        {
+            var result = MemberwiseClone() as DynamicContentItemEntity;
+
+            if (Folder != null)
+            {
+                result.Folder = Folder.Clone() as DynamicContentFolderEntity;
+            }
+
+            if (DynamicPropertyObjectValues != null)
+            {
+                result.DynamicPropertyObjectValues = new ObservableCollection<DynamicContentItemDynamicPropertyObjectValueEntity>(
+                    DynamicPropertyObjectValues.Select(x => x.Clone() as DynamicContentItemDynamicPropertyObjectValueEntity));
+            }
+
+            return result;
+        }
+
+        #endregion
     }
 }

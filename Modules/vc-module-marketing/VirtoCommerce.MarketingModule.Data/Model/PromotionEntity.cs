@@ -9,7 +9,7 @@ using VirtoCommerce.Platform.Core.Common;
 
 namespace VirtoCommerce.MarketingModule.Data.Model
 {
-    public class PromotionEntity : AuditableEntity, IHasOuterId
+    public class PromotionEntity : AuditableEntity, IHasOuterId, ICloneable
     {
         [StringLength(128)]
         public string StoreId { get; set; }
@@ -34,6 +34,7 @@ namespace VirtoCommerce.MarketingModule.Data.Model
         public int Priority { get; set; }
 
         public bool IsExclusive { get; set; }
+
         public bool IsAllowCombiningWithSelf { get; set; }
 
         [NotMapped]
@@ -52,7 +53,11 @@ namespace VirtoCommerce.MarketingModule.Data.Model
         [StringLength(128)]
         public string OuterId { get; set; }
 
+        #region Navigation Properties
+
         public virtual ObservableCollection<PromotionStoreEntity> Stores { get; set; } = new NullCollection<PromotionStoreEntity>();
+
+        #endregion
 
         public virtual Promotion ToModel(DynamicPromotion promotion)
         {
@@ -81,7 +86,6 @@ namespace VirtoCommerce.MarketingModule.Data.Model
             promotion.MaxUsageCount = TotalLimit;
             promotion.MaxPersonalUsageCount = PerCustomerLimit;
             promotion.HasCoupons = HasCoupons;
-
 
             if (!string.IsNullOrEmpty(promotion.PredicateVisualTreeSerialized))
             {
@@ -159,5 +163,22 @@ namespace VirtoCommerce.MarketingModule.Data.Model
                 Stores.Patch(target.Stores, comparer, (sourceEntity, targetEntity) => targetEntity.StoreId = sourceEntity.StoreId);
             }
         }
+
+        #region ICloneable members
+
+        public virtual object Clone()
+        {
+            var result = MemberwiseClone() as PromotionEntity;
+
+            if (Stores != null)
+            {
+                result.Stores = new ObservableCollection<PromotionStoreEntity>(
+                    Stores.Select(x => x.Clone() as PromotionStoreEntity));
+            }
+
+            return result;
+        }
+
+        #endregion
     }
 }
