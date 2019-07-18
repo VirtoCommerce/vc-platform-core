@@ -1,3 +1,4 @@
+using System;
 using System.Collections.ObjectModel;
 using System.ComponentModel.DataAnnotations;
 using System.Linq;
@@ -6,7 +7,7 @@ using VirtoCommerce.Platform.Core.Common;
 
 namespace VirtoCommerce.NotificationsModule.Data.Model
 {
-    public class EmailNotificationEntity : NotificationEntity
+    public class EmailNotificationEntity : NotificationEntity, ICloneable
     {
         /// <summary>
         /// Sender info (e-mail, phone number and etc.) of notification
@@ -20,9 +21,15 @@ namespace VirtoCommerce.NotificationsModule.Data.Model
         [StringLength(128)]
         public string To { get; set; }
 
-        public virtual ObservableCollection<NotificationEmailRecipientEntity> Recipients { get; set; } = new NullCollection<NotificationEmailRecipientEntity>();
-        public virtual ObservableCollection<EmailAttachmentEntity> Attachments { get; set; } = new NullCollection<EmailAttachmentEntity>();
+        #region Navigation Properties
 
+        public virtual ObservableCollection<NotificationEmailRecipientEntity> Recipients { get; set; }
+            = new NullCollection<NotificationEmailRecipientEntity>();
+
+        public virtual ObservableCollection<EmailAttachmentEntity> Attachments { get; set; }
+            = new NullCollection<EmailAttachmentEntity>();
+
+        #endregion
 
         public override Notification ToModel(Notification notification)
         {
@@ -103,6 +110,29 @@ namespace VirtoCommerce.NotificationsModule.Data.Model
 
             base.Patch(notification);
         }
+
+        #region ICloneable members
+
+        public virtual object Clone()
+        {
+            var result = MemberwiseClone() as EmailNotificationEntity;
+
+            if (Recipients != null)
+            {
+                result.Recipients = new ObservableCollection<NotificationEmailRecipientEntity>(
+                    Recipients.Select(x => x.Clone() as NotificationEmailRecipientEntity));
+            }
+
+            if (Attachments != null)
+            {
+                result.Attachments = new ObservableCollection<EmailAttachmentEntity>(
+                    Attachments.Select(x => x.Clone() as EmailAttachmentEntity));
+            }
+
+            return result;
+        }
+
+        #endregion
     }
 
     /// <summary>

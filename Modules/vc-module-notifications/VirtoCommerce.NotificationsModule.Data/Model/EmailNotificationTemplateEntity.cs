@@ -21,7 +21,6 @@ namespace VirtoCommerce.NotificationsModule.Data.Model
         /// </summary>
         public string Body { get; set; }
 
-
         public override NotificationTemplate ToModel(NotificationTemplate template)
         {
             if (template is EmailNotificationTemplate emailNotificationTemplate)

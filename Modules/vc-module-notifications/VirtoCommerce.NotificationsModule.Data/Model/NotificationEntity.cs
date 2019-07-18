@@ -10,7 +10,7 @@ namespace VirtoCommerce.NotificationsModule.Data.Model
     /// <summary>
     /// Entity is Notification
     /// </summary>
-    public abstract class NotificationEntity : AuditableEntity
+    public abstract class NotificationEntity : AuditableEntity, ICloneable
     {
         /// <summary>
         /// Tenant id that initiate sending
@@ -41,7 +41,12 @@ namespace VirtoCommerce.NotificationsModule.Data.Model
         [StringLength(128)]
         public string Kind { get; set; }
 
-        public virtual ObservableCollection<NotificationTemplateEntity> Templates { get; set; } = new NullCollection<NotificationTemplateEntity>();
+        #region Navigation Properties
+
+        public virtual ObservableCollection<NotificationTemplateEntity> Templates { get; set; }
+            = new NullCollection<NotificationTemplateEntity>();
+
+        #endregion
 
         public virtual Notification ToModel(Notification notification)
         {
@@ -98,5 +103,22 @@ namespace VirtoCommerce.NotificationsModule.Data.Model
                 Templates.Patch(notification.Templates, (sourceTemplate, templateEntity) => sourceTemplate.Patch(templateEntity));
             }
         }
+
+        #region ICloneable members
+
+        public virtual object Clone()
+        {
+            var result = MemberwiseClone() as NotificationEntity;
+
+            if (Templates != null)
+            {
+                result.Templates = new ObservableCollection<NotificationTemplateEntity>(
+                    Templates.Select(x => x.Clone() as NotificationTemplateEntity));
+            }
+
+            return result;
+        }
+
+        #endregion
     }
 }

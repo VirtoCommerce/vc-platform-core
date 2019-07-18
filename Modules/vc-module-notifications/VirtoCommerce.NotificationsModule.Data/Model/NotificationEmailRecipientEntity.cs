@@ -1,3 +1,4 @@
+using System;
 using System.ComponentModel.DataAnnotations;
 using VirtoCommerce.Platform.Core.Common;
 
@@ -6,7 +7,7 @@ namespace VirtoCommerce.NotificationsModule.Data.Model
     /// <summary>
     /// Entity is recipient of notification
     /// </summary>
-    public class NotificationEmailRecipientEntity : Entity
+    public class NotificationEmailRecipientEntity : Entity, ICloneable
     {
         /// <summary>
         /// Recipient info (e-mail and etc.) of notification
@@ -19,11 +20,15 @@ namespace VirtoCommerce.NotificationsModule.Data.Model
         /// </summary>
         public NotificationRecipientType RecipientType { get; set; }
 
+        #region Navigation Properties
+
         /// <summary>
         /// Id of notification
         /// </summary>
         public string NotificationId { get; set; }
         public EmailNotificationEntity Notification { get; set; }
+
+        #endregion
 
         public virtual NotificationEmailRecipientEntity FromModel(string emailAddress, NotificationRecipientType recipientType)
         {
@@ -37,5 +42,21 @@ namespace VirtoCommerce.NotificationsModule.Data.Model
         {
             emailAddress.EmailAddress = EmailAddress;
         }
+
+        #region ICloneable members
+
+        public virtual object Clone()
+        {
+            var result = MemberwiseClone() as NotificationEmailRecipientEntity;
+
+            if (Notification != null)
+            {
+                result.Notification = Notification.Clone() as EmailNotificationEntity;
+            }
+
+            return result;
+        }
+
+        #endregion
     }
 }

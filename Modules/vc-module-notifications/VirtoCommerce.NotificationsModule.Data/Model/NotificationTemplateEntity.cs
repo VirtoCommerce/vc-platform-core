@@ -8,7 +8,7 @@ namespace VirtoCommerce.NotificationsModule.Data.Model
     /// <summary>
     /// Entity is template of Notification
     /// </summary>
-    public abstract class NotificationTemplateEntity : AuditableEntity
+    public abstract class NotificationTemplateEntity : AuditableEntity, ICloneable
     {
         public abstract string Kind { get; }
         /// <summary>
@@ -17,14 +17,16 @@ namespace VirtoCommerce.NotificationsModule.Data.Model
         [StringLength(10)]
         public string LanguageCode { get; set; }
 
+        #region Navigation Properties
 
         /// <summary>
         /// Id of notification
         /// </summary>
         [StringLength(128)]
         public string NotificationId { get; set; }
-
         public NotificationEntity Notification { get; set; }
+
+        #endregion
 
         public virtual NotificationTemplate ToModel(NotificationTemplate template)
         {
@@ -46,7 +48,6 @@ namespace VirtoCommerce.NotificationsModule.Data.Model
 
             pkMap.AddPair(template, this);
 
-
             Id = template.Id;
             LanguageCode = template.LanguageCode;
             CreatedBy = template.CreatedBy;
@@ -61,5 +62,21 @@ namespace VirtoCommerce.NotificationsModule.Data.Model
         {
             template.LanguageCode = LanguageCode;
         }
+
+        #region ICloneable members
+
+        public virtual object Clone()
+        {
+            var result = MemberwiseClone() as NotificationTemplateEntity;
+
+            if (Notification != null)
+            {
+                result.Notification = Notification.Clone() as NotificationEntity;
+            }
+
+            return result;
+        }
+
+        #endregion
     }
 }
