@@ -34,12 +34,12 @@ namespace VirtoCommerce.TaxModule.Web
             var connectionString = configuration.GetConnectionString("VirtoCommerce.Tax") ?? configuration.GetConnectionString("VirtoCommerce");
             serviceCollection.AddDbContext<TaxDbContext>(options => options.UseSqlServer(connectionString));
             serviceCollection.AddTransient<ITaxRepository, TaxRepository>();
-            serviceCollection.AddSingleton<Func<ITaxRepository>>(provider => () => provider.CreateScope().ServiceProvider.GetService<ITaxRepository>());
+            serviceCollection.AddTransient<Func<ITaxRepository>>(provider => () => provider.CreateScope().ServiceProvider.GetService<ITaxRepository>());
 
-            serviceCollection.AddSingleton<ITaxProviderService, TaxProviderService>();
-            serviceCollection.AddSingleton<ITaxProviderRegistrar, TaxProviderService>();
-            serviceCollection.AddSingleton<ITaxProviderSearchService, TaxProviderSearchService>();
-            serviceCollection.AddSingleton<TaxExportImport>();
+            serviceCollection.AddTransient<ITaxProviderService, TaxProviderService>();
+            serviceCollection.AddTransient<ITaxProviderRegistrar, TaxProviderService>();
+            serviceCollection.AddTransient<ITaxProviderSearchService, TaxProviderSearchService>();
+            serviceCollection.AddTransient<TaxExportImport>();
         }
 
         public void PostInitialize(IApplicationBuilder applicationBuilder)
