@@ -19,7 +19,6 @@ namespace VirtoCommerce.CoreModule.Data.Model
         public virtual object Clone()
         {
             var result = MemberwiseClone() as SequenceEntity;
-
             return result;
         }
 

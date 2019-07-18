@@ -9,7 +9,7 @@ using VirtoCommerce.Platform.Core.DynamicProperties;
 
 namespace VirtoCommerce.CustomerModule.Data.Model
 {
-    public abstract class MemberEntity : AuditableEntity, IHasOuterId
+    public abstract class MemberEntity : AuditableEntity, IHasOuterId, ICloneable
     {
         [StringLength(64)]
         public string MemberType { get; set; }
@@ -207,5 +207,64 @@ namespace VirtoCommerce.CustomerModule.Data.Model
                 DynamicPropertyObjectValues.Patch(target.DynamicPropertyObjectValues, (sourceDynamicPropertyObjectValues, targetDynamicPropertyObjectValues) => sourceDynamicPropertyObjectValues.Patch(targetDynamicPropertyObjectValues));
             }
         }
+
+        #region ICloneable members
+
+        public virtual object Clone()
+        {
+            var result = MemberwiseClone() as MemberEntity;
+
+            if (Notes != null)
+            {
+                result.Notes = new ObservableCollection<NoteEntity>(
+                    Notes.Select(x => x.Clone() as NoteEntity));
+            }
+
+            if (Addresses != null)
+            {
+                result.Addresses = new ObservableCollection<AddressEntity>(
+                    Addresses.Select(x => x.Clone() as AddressEntity));
+            }
+
+            if (MemberRelations != null)
+            {
+                result.MemberRelations = new ObservableCollection<MemberRelationEntity>(
+                    MemberRelations.Select(x => x.Clone() as MemberRelationEntity));
+            }
+
+            if (Phones != null)
+            {
+                result.Phones = new ObservableCollection<PhoneEntity>(
+                    Phones.Select(x => x.Clone() as PhoneEntity));
+            }
+
+            if (Emails != null)
+            {
+                result.Emails = new ObservableCollection<EmailEntity>(
+                    Emails.Select(x => x.Clone() as EmailEntity));
+            }
+
+            if (Groups != null)
+            {
+                result.Groups = new ObservableCollection<MemberGroupEntity>(
+                    Groups.Select(x => x.Clone() as MemberGroupEntity));
+            }
+
+            if (SeoInfos != null)
+            {
+                result.SeoInfos = new ObservableCollection<SeoInfoEntity>(
+                    SeoInfos.Select(x => x.Clone() as SeoInfoEntity));
+            }
+
+            if (DynamicPropertyObjectValues != null)
+            {
+                result.DynamicPropertyObjectValues = new ObservableCollection<MemberDynamicPropertyObjectValueEntity>(
+                    DynamicPropertyObjectValues.Select(x => x.Clone() as MemberDynamicPropertyObjectValueEntity));
+            }
+
+            return result;
+        }
+
+        #endregion
     }
 }
