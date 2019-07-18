@@ -79,6 +79,8 @@ namespace VirtoCommerce.OrdersModule.Data.Model
         [StringLength(128)]
         public string ShoppingCartId { get; set; }
 
+        #region Navigation Properties
+
         public virtual ObservableCollection<TaxDetailEntity> TaxDetails { get; set; } = new NullCollection<TaxDetailEntity>();
 
         public virtual ObservableCollection<AddressEntity> Addresses { get; set; } = new NullCollection<AddressEntity>();
@@ -94,6 +96,7 @@ namespace VirtoCommerce.OrdersModule.Data.Model
         public virtual ObservableCollection<OrderDynamicPropertyObjectValueEntity> DynamicPropertyObjectValues { get; set; }
             = new NullCollection<OrderDynamicPropertyObjectValueEntity>();
 
+        #endregion
 
         public override OrderOperation ToModel(OrderOperation operation)
         {
@@ -407,5 +410,58 @@ namespace VirtoCommerce.OrdersModule.Data.Model
             yield return PaymentTotalWithTax;
             yield return DiscountAmount;
         }
+
+        #region ICloneable members
+
+        public override object Clone()
+        {
+            var result = base.Clone() as CustomerOrderEntity;
+
+            if (TaxDetails != null)
+            {
+                result.TaxDetails = new ObservableCollection<TaxDetailEntity>(
+                    TaxDetails.Select(x => x.Clone() as TaxDetailEntity));
+            }
+
+            if (Addresses != null)
+            {
+                result.Addresses = new ObservableCollection<AddressEntity>(
+                    Addresses.Select(x => x.Clone() as AddressEntity));
+            }
+
+            if (InPayments != null)
+            {
+                result.InPayments = new ObservableCollection<PaymentInEntity>(
+                    InPayments.Select(x => x.Clone() as PaymentInEntity));
+            }
+
+            if (Items != null)
+            {
+                result.Items = new ObservableCollection<LineItemEntity>(
+                    Items.Select(x => x.Clone() as LineItemEntity));
+            }
+
+            if (Shipments != null)
+            {
+                result.Shipments = new ObservableCollection<ShipmentEntity>(
+                    Shipments.Select(x => x.Clone() as ShipmentEntity));
+            }
+
+            if (Discounts != null)
+            {
+                result.Discounts = new ObservableCollection<DiscountEntity>(
+                    Discounts.Select(x => x.Clone() as DiscountEntity));
+            }
+
+            if (DynamicPropertyObjectValues != null)
+            {
+                result.DynamicPropertyObjectValues = new ObservableCollection<OrderDynamicPropertyObjectValueEntity>(
+                    DynamicPropertyObjectValues.Select(x => x.Clone() as OrderDynamicPropertyObjectValueEntity));
+            }
+
+            return result;
+        }
+
+        #endregion
     }
 }

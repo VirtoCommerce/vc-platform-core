@@ -6,17 +6,21 @@ using VirtoCommerce.Platform.Core.Common;
 
 namespace VirtoCommerce.OrdersModule.Data.Model
 {
-    public class PaymentGatewayTransactionEntity : AuditableEntity
+    public class PaymentGatewayTransactionEntity : AuditableEntity, ICloneable
     {
         [Column(TypeName = "Money")]
         public decimal Amount { get; set; }
+
         [StringLength(3)]
         public string Currency { get; set; }
 
         public bool IsProcessed { get; set; }
+
         public DateTime? ProcessedDate { get; set; }
+
         [StringLength(2048)]
         public string ProcessError { get; set; }
+
         public int ProcessAttemptCount { get; set; }
 
         public string RequestData { get; set; }
@@ -41,9 +45,12 @@ namespace VirtoCommerce.OrdersModule.Data.Model
         [StringLength(2048)]
         public string Note { get; set; }
 
-        public virtual PaymentInEntity PaymentIn { get; set; }
-        public string PaymentInId { get; set; }
+        #region Navigation Properties
 
+        public string PaymentInId { get; set; }
+        public virtual PaymentInEntity PaymentIn { get; set; }
+
+        #endregion
 
         public virtual PaymentGatewayTransaction ToModel(PaymentGatewayTransaction transaction)
         {
@@ -124,5 +131,21 @@ namespace VirtoCommerce.OrdersModule.Data.Model
             target.Status = Status;
             target.Type = Type;
         }
+
+        #region ICloneable members
+
+        public virtual object Clone()
+        {
+            var result = MemberwiseClone() as PaymentGatewayTransactionEntity;
+
+            if (PaymentIn != null)
+            {
+                result.PaymentIn = PaymentIn.Clone() as PaymentInEntity;
+            }
+
+            return result;
+        }
+
+        #endregion
     }
 }

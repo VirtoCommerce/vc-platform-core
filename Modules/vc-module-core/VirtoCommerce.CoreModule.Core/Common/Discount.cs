@@ -1,8 +1,9 @@
+using System;
 using VirtoCommerce.Platform.Core.Common;
 
 namespace VirtoCommerce.CoreModule.Core.Common
 {
-    public class Discount : Entity
+    public class Discount : Entity, ICloneable
     {
         public string PromotionId { get; set; }
         public string Currency { get; set; }
@@ -10,5 +11,15 @@ namespace VirtoCommerce.CoreModule.Core.Common
         public virtual decimal DiscountAmountWithTax { get; set; }
         public string Coupon { get; set; }
         public string Description { get; set; }
+
+        #region ICloneable members
+
+        public virtual object Clone()
+        {
+            var result = MemberwiseClone() as Discount;
+            return result;
+        }
+
+        #endregion
     }
 }

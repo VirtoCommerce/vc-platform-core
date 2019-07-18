@@ -12,7 +12,7 @@ using VirtoCommerce.Platform.Core.DynamicProperties;
 
 namespace VirtoCommerce.OrdersModule.Data.Model
 {
-    public class LineItemEntity : AuditableEntity, IHasOuterId
+    public class LineItemEntity : AuditableEntity, IHasOuterId, ICloneable
     {
         [StringLength(128)]
         public string PriceId { get; set; }
@@ -88,6 +88,9 @@ namespace VirtoCommerce.OrdersModule.Data.Model
 
         #region NavigationProperties
 
+        public string CustomerOrderId { get; set; }
+        public virtual CustomerOrderEntity CustomerOrder { get; set; }
+
         public virtual ObservableCollection<DiscountEntity> Discounts { get; set; } = new NullCollection<DiscountEntity>();
 
         public virtual ObservableCollection<TaxDetailEntity> TaxDetails { get; set; } = new NullCollection<TaxDetailEntity>();
@@ -95,12 +98,9 @@ namespace VirtoCommerce.OrdersModule.Data.Model
         public virtual ObservableCollection<OrderDynamicPropertyObjectValueEntity> DynamicPropertyObjectValues { get; set; }
             = new NullCollection<OrderDynamicPropertyObjectValueEntity>();
 
-        #endregion
-
-        public virtual CustomerOrderEntity CustomerOrder { get; set; }
-        public string CustomerOrderId { get; set; }
-
         public virtual ObservableCollection<ShipmentItemEntity> ShipmentItems { get; set; } = new NullCollection<ShipmentItemEntity>();
+
+        #endregion
 
         public virtual LineItem ToModel(LineItem lineItem)
         {
@@ -278,6 +278,7 @@ namespace VirtoCommerce.OrdersModule.Data.Model
                 DynamicPropertyObjectValues.Patch(target.DynamicPropertyObjectValues, (sourceDynamicPropertyObjectValues, targetDynamicPropertyObjectValues) => sourceDynamicPropertyObjectValues.Patch(targetDynamicPropertyObjectValues));
             }
         }
+
         public virtual void ResetPrices()
         {
             Price = 0m;
@@ -294,5 +295,43 @@ namespace VirtoCommerce.OrdersModule.Data.Model
             yield return Price;
             yield return DiscountAmount;
         }
+
+        #region ICloneable members
+
+        public virtual object Clone()
+        {
+            var result = MemberwiseClone() as LineItemEntity;
+
+            if (CustomerOrder != null)
+            {
+                result.CustomerOrder = CustomerOrder.Clone() as CustomerOrderEntity;
+            }
+
+            if (Discounts != null)
+            {
+                result.Discounts = new ObservableCollection<DiscountEntity>(
+                    Discounts.Select(x => x.Clone() as DiscountEntity));
+            }
+
+            if (TaxDetails != null)
+            {
+                result.TaxDetails = new ObservableCollection<TaxDetailEntity>(
+                    TaxDetails.Select(x => x.Clone() as TaxDetailEntity));
+            }
+
+            if (DynamicPropertyObjectValues != null)
+            {
+                result.DynamicPropertyObjectValues = new ObservableCollection<OrderDynamicPropertyObjectValueEntity>(
+                    DynamicPropertyObjectValues.Select(x => x.Clone() as OrderDynamicPropertyObjectValueEntity));
+            }
+
+            if (ShipmentItems != null)
+            {
+                result.ShipmentItems = new ObservableCollection<ShipmentItemEntity>(
+                    ShipmentItems.Select(x => x.Clone() as ShipmentItemEntity));
+            }
+        }
+
+        #endregion
     }
 }

@@ -7,7 +7,7 @@ using VirtoCommerce.Platform.Core.Common;
 
 namespace VirtoCommerce.OrdersModule.Data.Model
 {
-    public class ShipmentPackageEntity : AuditableEntity
+    public class ShipmentPackageEntity : AuditableEntity, ICloneable
     {
         [StringLength(128)]
         public string BarCode { get; set; }
@@ -23,11 +23,14 @@ namespace VirtoCommerce.OrdersModule.Data.Model
         public decimal? Length { get; set; }
         public decimal? Width { get; set; }
 
-        public virtual ShipmentEntity Shipment { get; set; }
+        #region Navigation Properties
+
         public string ShipmentId { get; set; }
+        public virtual ShipmentEntity Shipment { get; set; }
 
         public virtual ObservableCollection<ShipmentItemEntity> Items { get; set; } = new NullCollection<ShipmentItemEntity>();
 
+        #endregion
 
         public virtual ShipmentPackage ToModel(ShipmentPackage package)
         {
@@ -105,5 +108,27 @@ namespace VirtoCommerce.OrdersModule.Data.Model
                 Items.Patch(target.Items, (sourceItem, targetItem) => sourceItem.Patch(targetItem));
             }
         }
+
+        #region ICloneable members
+
+        public virtual object Clone()
+        {
+            var result = MemberwiseClone() as ShipmentPackageEntity;
+
+            if (Shipment != null)
+            {
+                result.Shipment = Shipment.Clone() as ShipmentEntity;
+            }
+
+            if (Items != null)
+            {
+                result.Items = new ObservableCollection<ShipmentItemEntity>(
+                    Items.Select(x => x.Clone() as ShipmentItemEntity));
+            }
+
+            return result;
+        }
+
+        #endregion
     }
 }

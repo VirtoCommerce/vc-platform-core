@@ -59,8 +59,7 @@ namespace VirtoCommerce.OrdersModule.Data.Model
         public decimal TaxTotal { get; set; }
         public decimal TaxPercentRate { get; set; }
 
-        public virtual ObservableCollection<AddressEntity> Addresses { get; set; } = new NullCollection<AddressEntity>();
-        public virtual ObservableCollection<PaymentGatewayTransactionEntity> Transactions { get; set; } = new NullCollection<PaymentGatewayTransactionEntity>();
+        #region Navigation Properties
 
         public string CustomerOrderId { get; set; }
         public virtual CustomerOrderEntity CustomerOrder { get; set; }
@@ -68,9 +67,19 @@ namespace VirtoCommerce.OrdersModule.Data.Model
         public string ShipmentId { get; set; }
         public virtual ShipmentEntity Shipment { get; set; }
 
+        public virtual ObservableCollection<AddressEntity> Addresses { get; set; } = new NullCollection<AddressEntity>();
+
+        public virtual ObservableCollection<PaymentGatewayTransactionEntity> Transactions { get; set; }
+            = new NullCollection<PaymentGatewayTransactionEntity>();
+
         public virtual ObservableCollection<DiscountEntity> Discounts { get; set; } = new NullCollection<DiscountEntity>();
+
         public virtual ObservableCollection<TaxDetailEntity> TaxDetails { get; set; } = new NullCollection<TaxDetailEntity>();
-        public virtual ObservableCollection<OrderDynamicPropertyObjectValueEntity> DynamicPropertyObjectValues { get; set; } = new NullCollection<OrderDynamicPropertyObjectValueEntity>();
+
+        public virtual ObservableCollection<OrderDynamicPropertyObjectValueEntity> DynamicPropertyObjectValues { get; set; }
+            = new NullCollection<OrderDynamicPropertyObjectValueEntity>();
+
+        #endregion
 
         public override OrderOperation ToModel(OrderOperation operation)
         {
@@ -273,6 +282,7 @@ namespace VirtoCommerce.OrdersModule.Data.Model
                 DynamicPropertyObjectValues.Patch(target.DynamicPropertyObjectValues, (sourceDynamicPropertyObjectValues, targetDynamicPropertyObjectValues) => sourceDynamicPropertyObjectValues.Patch(targetDynamicPropertyObjectValues));
             }
         }
+
         public virtual void ResetPrices()
         {
             Price = 0m;
@@ -293,5 +303,56 @@ namespace VirtoCommerce.OrdersModule.Data.Model
             yield return DiscountAmount;
             yield return Sum;
         }
+
+        #region ICloneable members
+
+        public override object Clone()
+        {
+            var result = base.Clone() as PaymentInEntity;
+
+            if (CustomerOrder != null)
+            {
+                result.CustomerOrder = CustomerOrder.Clone() as CustomerOrderEntity;
+            }
+
+            if (Shipment != null)
+            {
+                result.Shipment = Shipment.Clone() as ShipmentEntity;
+            }
+
+            if (Addresses != null)
+            {
+                result.Addresses = new ObservableCollection<AddressEntity>(
+                    Addresses.Select(x => x.Clone() as AddressEntity));
+            }
+
+            if (Transactions != null)
+            {
+                result.Transactions = new ObservableCollection<PaymentGatewayTransactionEntity>(
+                    Transactions.Select(x => x.Clone() as PaymentGatewayTransactionEntity));
+            }
+
+            if (Discounts != null)
+            {
+                result.Discounts = new ObservableCollection<DiscountEntity>(
+                    Discounts.Select(x => x.Clone() as DiscountEntity));
+            }
+
+            if (TaxDetails != null)
+            {
+                result.TaxDetails = new ObservableCollection<TaxDetailEntity>(
+                    TaxDetails.Select(x => x.Clone() as TaxDetailEntity));
+            }
+
+            if (DynamicPropertyObjectValues != null)
+            {
+                result.DynamicPropertyObjectValues = new ObservableCollection<OrderDynamicPropertyObjectValueEntity>(
+                    DynamicPropertyObjectValues.Select(x => x.Clone() as OrderDynamicPropertyObjectValueEntity));
+            }
+
+            return result;
+        }
+
+        #endregion
     }
 }

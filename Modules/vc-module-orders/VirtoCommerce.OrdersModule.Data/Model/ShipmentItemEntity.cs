@@ -6,12 +6,17 @@ using VirtoCommerce.Platform.Core.Common;
 
 namespace VirtoCommerce.OrdersModule.Data.Model
 {
-    public class ShipmentItemEntity : AuditableEntity
+    public class ShipmentItemEntity : AuditableEntity, ICloneable
     {
         [StringLength(128)]
         public string BarCode { get; set; }
 
         public int Quantity { get; set; }
+
+        #region Navigation Properties
+
+        [NotMapped]
+        public LineItem ModelLineItem { get; set; }
 
         public virtual LineItemEntity LineItem { get; set; }
         public string LineItemId { get; set; }
@@ -22,8 +27,7 @@ namespace VirtoCommerce.OrdersModule.Data.Model
         public virtual ShipmentPackageEntity ShipmentPackage { get; set; }
         public string ShipmentPackageId { get; set; }
 
-        [NotMapped]
-        public LineItem ModelLineItem { get; set; }
+        #endregion
 
         [StringLength(128)]
         public string OuterId { get; set; }
@@ -85,5 +89,34 @@ namespace VirtoCommerce.OrdersModule.Data.Model
             target.ShipmentPackageId = ShipmentPackageId;
             target.Quantity = Quantity;
         }
+
+        #region ICloneable members
+
+        public virtual object Clone()
+        {
+            var result = MemberwiseClone() as ShipmentItemEntity;
+
+            if (ModelLineItem != null)
+            {
+                result.ModelLineItem = ModelLineItem.Clone() as LineItem;
+            }
+
+            if (LineItem != null)
+            {
+                result.LineItem = LineItem.Clone() as LineItemEntity;
+            }
+
+            if (Shipment != null)
+            {
+                result.Shipment = Shipment.Clone() as ShipmentEntity;
+            }
+
+            if (ShipmentPackage != null)
+            {
+                result.ShipmentPackage = ShipmentPackage.Clone() as ShipmentPackageEntity;
+            }
+        }
+
+        #endregion
     }
 }

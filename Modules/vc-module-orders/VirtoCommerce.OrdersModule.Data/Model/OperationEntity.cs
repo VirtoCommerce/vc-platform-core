@@ -11,7 +11,7 @@ using VirtoCommerce.Platform.Core.Common;
 
 namespace VirtoCommerce.OrdersModule.Data.Model
 {
-    public abstract class OperationEntity : AuditableEntity, IHasOuterId
+    public abstract class OperationEntity : AuditableEntity, IHasOuterId, ICloneable
     {
         [Required]
         [StringLength(64)]
@@ -37,10 +37,6 @@ namespace VirtoCommerce.OrdersModule.Data.Model
 
         [StringLength(128)]
         public string OuterId { get; set; }
-
-        #region NavigationProperties
-
-        #endregion
 
         public virtual OrderOperation ToModel(OrderOperation operation)
         {
@@ -152,5 +148,15 @@ namespace VirtoCommerce.OrdersModule.Data.Model
 
             return retVal;
         }
+
+        #region ICloneable members
+
+        public virtual object Clone()
+        {
+            var result = MemberwiseClone() as OperationEntity;
+            return result;
+        }
+
+        #endregion
     }
 }

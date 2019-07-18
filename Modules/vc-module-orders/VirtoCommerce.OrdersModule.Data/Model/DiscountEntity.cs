@@ -6,7 +6,7 @@ using VirtoCommerce.Platform.Core.Common;
 
 namespace VirtoCommerce.OrdersModule.Data.Model
 {
-    public class DiscountEntity : Entity
+    public class DiscountEntity : Entity, ICloneable
     {
         [StringLength(64)]
         public string PromotionId { get; set; }
@@ -24,6 +24,8 @@ namespace VirtoCommerce.OrdersModule.Data.Model
         [StringLength(1024)]
         public string CouponInvalidDescription { get; set; }
 
+        #region Navigation Properties
+
         public virtual CustomerOrderEntity CustomerOrder { get; set; }
         public string CustomerOrderId { get; set; }
 
@@ -36,6 +38,7 @@ namespace VirtoCommerce.OrdersModule.Data.Model
         public virtual PaymentInEntity PaymentIn { get; set; }
         public string PaymentInId { get; set; }
 
+        #endregion
 
         public virtual Discount ToModel(Discount discount)
         {
@@ -78,5 +81,36 @@ namespace VirtoCommerce.OrdersModule.Data.Model
             target.PromotionDescription = PromotionDescription;
             target.PromotionId = PromotionId;
         }
+
+        #region ICloneable members
+
+        public virtual object Clone()
+        {
+            var result = MemberwiseClone() as DiscountEntity;
+
+            if (CustomerOrder != null)
+            {
+                result.CustomerOrder = CustomerOrder.Clone() as CustomerOrderEntity;
+            }
+
+            if (Shipment != null)
+            {
+                result.Shipment = Shipment.Clone() as ShipmentEntity;
+            }
+
+            if (LineItem != null)
+            {
+                result.LineItem = LineItem.Clone() as LineItemEntity;
+            }
+
+            if (PaymentIn != null)
+            {
+                result.PaymentIn = PaymentIn.Clone() as PaymentInEntity;
+            }
+
+            return result;
+        }
+
+        #endregion
     }
 }
