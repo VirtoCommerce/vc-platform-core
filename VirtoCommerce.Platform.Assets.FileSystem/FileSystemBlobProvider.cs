@@ -265,10 +265,6 @@ namespace VirtoCommerce.Platform.Assets.FileSystem
                 throw new ArgumentNullException(nameof(relativeUrl));
             }
 
-            if (relativeUrl == null)
-            {
-                throw new ArgumentNullException("relativeUrl");
-            }
             var retVal = relativeUrl;
             if (!relativeUrl.IsAbsoluteUrl())
             {
