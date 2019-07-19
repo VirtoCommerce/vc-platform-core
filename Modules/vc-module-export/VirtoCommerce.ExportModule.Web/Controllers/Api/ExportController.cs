@@ -21,7 +21,6 @@ using VirtoCommerce.Platform.Core.Security;
 namespace VirtoCommerce.ExportModule.Web.Controllers
 {
     [Route("api/export")]
-    [Authorize(ModuleConstants.Security.Permissions.Access)]
     public class ExportController : Controller
     {
         private readonly IEnumerable<Func<IExportProviderConfiguration, IExportProvider>> _exportProviderFactories;
@@ -50,6 +49,7 @@ namespace VirtoCommerce.ExportModule.Web.Controllers
         /// <returns>The list of exported known types</returns>
         [HttpGet]
         [Route("knowntypes")]
+        [Authorize(ModuleConstants.Security.Permissions.Access)]
         public ActionResult<ExportedTypeDefinition[]> GetExportedKnownTypes()
         {
             return Ok(_knownExportTypesRegistrar.GetRegisteredTypes());
@@ -61,6 +61,7 @@ namespace VirtoCommerce.ExportModule.Web.Controllers
         /// <returns>The list of export providers</returns>
         [HttpGet]
         [Route("providers")]
+        [Authorize(ModuleConstants.Security.Permissions.Access)]
         public ActionResult<IExportProvider[]> GetExportProviders()
         {
             return Ok(_exportProviderFactories.Select(x => x(new EmptyProviderConfiguration())).ToArray());
@@ -73,6 +74,7 @@ namespace VirtoCommerce.ExportModule.Web.Controllers
         /// <returns>Export task id</returns>
         [HttpPost]
         [Route("run")]
+        [Authorize(ModuleConstants.Security.Permissions.Access)]
         public ActionResult<PlatformExportPushNotification> RunExport([FromBody]ExportDataRequest request)
         {
             var currentUserName = _userNameResolver.GetCurrentUserName();
@@ -97,6 +99,7 @@ namespace VirtoCommerce.ExportModule.Web.Controllers
         /// <returns></returns>
         [HttpPost]
         [Route("task/cancel")]
+        [Authorize(ModuleConstants.Security.Permissions.Access)]
         public ActionResult CancelExport([FromBody]ExportCancellationRequest cancellationRequest)
         {
             BackgroundJob.Delete(cancellationRequest.JobId);
