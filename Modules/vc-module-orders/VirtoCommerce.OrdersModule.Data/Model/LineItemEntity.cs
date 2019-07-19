@@ -330,6 +330,8 @@ namespace VirtoCommerce.OrdersModule.Data.Model
                 result.ShipmentItems = new ObservableCollection<ShipmentItemEntity>(
                     ShipmentItems.Select(x => x.Clone() as ShipmentItemEntity));
             }
+
+            return result;
         }
 
         #endregion

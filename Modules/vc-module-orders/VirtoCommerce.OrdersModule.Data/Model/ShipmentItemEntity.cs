@@ -115,6 +115,8 @@ namespace VirtoCommerce.OrdersModule.Data.Model
             {
                 result.ShipmentPackage = ShipmentPackage.Clone() as ShipmentPackageEntity;
             }
+
+            return result;
         }
 
         #endregion

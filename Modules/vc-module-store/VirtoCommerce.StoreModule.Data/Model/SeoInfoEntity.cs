@@ -1,17 +1,15 @@
+using System;
 using System.ComponentModel.DataAnnotations;
 using VirtoCommerce.CoreModule.Core.Seo;
 using VirtoCommerce.Platform.Core.Common;
 
 namespace VirtoCommerce.StoreModule.Data.Model
 {
-    public class SeoInfoEntity : AuditableEntity
+    public class SeoInfoEntity : AuditableEntity, ICloneable
     {
         [StringLength(255)]
         [Required]
         public string Keyword { get; set; }
-
-        [StringLength(128)]
-        public string StoreId { get; set; }
 
         [Required]
         public bool IsActive { get; set; }
@@ -32,7 +30,11 @@ namespace VirtoCommerce.StoreModule.Data.Model
         public string ImageAltDescription { get; set; }
 
         #region Navigation Properties
+
+        [StringLength(128)]
+        public string StoreId { get; set; }
         public virtual StoreEntity Store { get; set; }
+
         #endregion
 
         public virtual SeoInfo ToModel(SeoInfo seoInfo)
@@ -90,5 +92,21 @@ namespace VirtoCommerce.StoreModule.Data.Model
             target.MetaKeywords = MetaKeywords;
             target.StoreId = StoreId;
         }
+
+        #region ICloneable members
+
+        public virtual object Clone()
+        {
+            var result = MemberwiseClone() as SeoInfoEntity;
+
+            if (Store != null)
+            {
+                result.Store = Store.Clone() as StoreEntity;
+            }
+
+            return result;
+        }
+
+        #endregion
     }
 }

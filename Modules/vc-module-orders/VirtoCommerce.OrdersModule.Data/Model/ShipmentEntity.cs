@@ -395,6 +395,8 @@ namespace VirtoCommerce.OrdersModule.Data.Model
                 result.DynamicPropertyObjectValues = new ObservableCollection<OrderDynamicPropertyObjectValueEntity>(
                     DynamicPropertyObjectValues.Select(x => x.Clone() as OrderDynamicPropertyObjectValueEntity));
             }
+
+            return result;
         }
 
         #endregion

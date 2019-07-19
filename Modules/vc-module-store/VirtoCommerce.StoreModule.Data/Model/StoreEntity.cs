@@ -9,19 +9,8 @@ using VirtoCommerce.StoreModule.Core.Model;
 
 namespace VirtoCommerce.StoreModule.Data.Model
 {
-    public class StoreEntity : AuditableEntity, IHasOuterId
+    public class StoreEntity : AuditableEntity, IHasOuterId, ICloneable
     {
-        public StoreEntity()
-        {
-            Languages = new NullCollection<StoreLanguageEntity>();
-            Currencies = new NullCollection<StoreCurrencyEntity>();
-
-            TrustedGroups = new NullCollection<StoreTrustedGroupEntity>();
-            FulfillmentCenters = new NullCollection<StoreFulfillmentCenterEntity>();
-            SeoInfos = new NullCollection<SeoInfoEntity>();
-            DynamicPropertyObjectValues = new NullCollection<StoreDynamicPropertyObjectValueEntity>();
-        }
-
         [Required]
         [StringLength(128)]
         public string Name { get; set; }
@@ -77,14 +66,22 @@ namespace VirtoCommerce.StoreModule.Data.Model
         #region Navigation Properties
 
         public virtual ObservableCollection<StoreLanguageEntity> Languages { get; set; }
+            = new NullCollection<StoreLanguageEntity>();
 
         public virtual ObservableCollection<StoreCurrencyEntity> Currencies { get; set; }
-        public virtual ObservableCollection<StoreTrustedGroupEntity> TrustedGroups { get; set; }
+            = new NullCollection<StoreCurrencyEntity>();
 
+        public virtual ObservableCollection<StoreTrustedGroupEntity> TrustedGroups { get; set; }
+            = new NullCollection<StoreTrustedGroupEntity>();
 
         public virtual ObservableCollection<StoreFulfillmentCenterEntity> FulfillmentCenters { get; set; }
+            = new NullCollection<StoreFulfillmentCenterEntity>();
+
         public virtual ObservableCollection<SeoInfoEntity> SeoInfos { get; set; }
+            = new NullCollection<SeoInfoEntity>();
+
         public virtual ObservableCollection<StoreDynamicPropertyObjectValueEntity> DynamicPropertyObjectValues { get; set; }
+            = new NullCollection<StoreDynamicPropertyObjectValueEntity>();
 
         #endregion
 
@@ -304,5 +301,52 @@ namespace VirtoCommerce.StoreModule.Data.Model
                 DynamicPropertyObjectValues.Patch(target.DynamicPropertyObjectValues, (sourceDynamicPropertyObjectValues, targetDynamicPropertyObjectValues) => sourceDynamicPropertyObjectValues.Patch(targetDynamicPropertyObjectValues));
             }
         }
+
+        #region ICloneable members
+
+        public virtual object Clone()
+        {
+            var result = MemberwiseClone() as StoreEntity;
+
+            if (Languages != null)
+            {
+                result.Languages = new ObservableCollection<StoreLanguageEntity>(
+                    Languages.Select(x => x.Clone() as StoreLanguageEntity));
+            }
+
+            if (Currencies != null)
+            {
+                result.Currencies = new ObservableCollection<StoreCurrencyEntity>(
+                    Currencies.Select(x => x.Clone() as StoreCurrencyEntity));
+            }
+
+            if (TrustedGroups != null)
+            {
+                result.TrustedGroups = new ObservableCollection<StoreTrustedGroupEntity>(
+                    TrustedGroups.Select(x => x.Clone() as StoreTrustedGroupEntity));
+            }
+
+            if (FulfillmentCenters != null)
+            {
+                result.FulfillmentCenters = new ObservableCollection<StoreFulfillmentCenterEntity>(
+                    FulfillmentCenters.Select(x => x.Clone() as StoreFulfillmentCenterEntity));
+            }
+
+            if (SeoInfos != null)
+            {
+                result.SeoInfos = new ObservableCollection<SeoInfoEntity>(
+                    SeoInfos.Select(x => x.Clone() as SeoInfoEntity));
+            }
+
+            if (DynamicPropertyObjectValues != null)
+            {
+                result.DynamicPropertyObjectValues = new ObservableCollection<StoreDynamicPropertyObjectValueEntity>(
+                    DynamicPropertyObjectValues.Select(x => x.Clone() as StoreDynamicPropertyObjectValueEntity));
+            }
+
+            return result;
+        }
+
+        #endregion
     }
 }

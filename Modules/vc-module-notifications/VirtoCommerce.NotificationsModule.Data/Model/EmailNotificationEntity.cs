@@ -113,9 +113,9 @@ namespace VirtoCommerce.NotificationsModule.Data.Model
 
         #region ICloneable members
 
-        public virtual object Clone()
+        public override object Clone()
         {
-            var result = MemberwiseClone() as EmailNotificationEntity;
+            var result = base.Clone() as EmailNotificationEntity;
 
             if (Recipients != null)
             {
