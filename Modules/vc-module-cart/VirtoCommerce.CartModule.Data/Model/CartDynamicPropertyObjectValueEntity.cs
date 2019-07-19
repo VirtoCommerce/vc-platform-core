@@ -1,9 +1,8 @@
-using System;
 using VirtoCommerce.Platform.Data.Model;
 
 namespace VirtoCommerce.CartModule.Data.Model
 {
-    public class CartDynamicPropertyObjectValueEntity : DynamicPropertyObjectValueEntity, ICloneable
+    public class CartDynamicPropertyObjectValueEntity : DynamicPropertyObjectValueEntity
     {
         public string ShoppingCartId { get; set; }
         public virtual ShoppingCartEntity ShoppingCart { get; set; }
@@ -19,9 +18,9 @@ namespace VirtoCommerce.CartModule.Data.Model
 
         #region ICloneable members
 
-        public virtual object Clone()
+        public override object Clone()
         {
-            var result = MemberwiseClone() as CartDynamicPropertyObjectValueEntity;
+            var result = base.Clone() as CartDynamicPropertyObjectValueEntity;
 
             if (ShoppingCart != null)
             {

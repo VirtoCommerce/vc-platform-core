@@ -1,17 +1,16 @@
-using System;
 using VirtoCommerce.Platform.Data.Model;
 
 namespace VirtoCommerce.MarketingModule.Data.Model
 {
-    public class DynamicContentItemDynamicPropertyObjectValueEntity : DynamicPropertyObjectValueEntity, ICloneable
+    public class DynamicContentItemDynamicPropertyObjectValueEntity : DynamicPropertyObjectValueEntity
     {
         public virtual DynamicContentItemEntity DynamicContentItem { get; set; }
 
         #region ICloneable members
 
-        public virtual object Clone()
+        public override object Clone()
         {
-            var result = MemberwiseClone() as DynamicContentItemDynamicPropertyObjectValueEntity;
+            var result = base.Clone() as DynamicContentItemDynamicPropertyObjectValueEntity;
 
             if (DynamicContentItem != null)
             {

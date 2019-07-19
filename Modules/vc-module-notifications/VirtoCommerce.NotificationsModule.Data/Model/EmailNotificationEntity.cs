@@ -7,7 +7,7 @@ using VirtoCommerce.Platform.Core.Common;
 
 namespace VirtoCommerce.NotificationsModule.Data.Model
 {
-    public class EmailNotificationEntity : NotificationEntity, ICloneable
+    public class EmailNotificationEntity : NotificationEntity
     {
         /// <summary>
         /// Sender info (e-mail, phone number and etc.) of notification

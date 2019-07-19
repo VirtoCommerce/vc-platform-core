@@ -1,10 +1,9 @@
-using System;
 using VirtoCommerce.Platform.Data.Model;
 
 namespace VirtoCommerce.OrdersModule.Data.Model
 {
     // because we do not have Operation table, we need to store FK for each derived class
-    public class OrderDynamicPropertyObjectValueEntity : DynamicPropertyObjectValueEntity, ICloneable
+    public class OrderDynamicPropertyObjectValueEntity : DynamicPropertyObjectValueEntity
     {
         #region Navigation Properties
 
@@ -24,9 +23,9 @@ namespace VirtoCommerce.OrdersModule.Data.Model
 
         #region ICloneable members
 
-        public virtual object Clone()
+        public override object Clone()
         {
-            var result = MemberwiseClone() as OrderDynamicPropertyObjectValueEntity;
+            var result = base.Clone() as OrderDynamicPropertyObjectValueEntity;
 
             if (CustomerOrder != null)
             {

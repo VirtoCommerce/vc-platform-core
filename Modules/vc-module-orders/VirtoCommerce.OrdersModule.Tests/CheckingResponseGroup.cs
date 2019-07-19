@@ -4,7 +4,6 @@ using Xunit;
 namespace VirtoCommerce.OrdersModule.Tests
 {
     [Trait("Category", "CI")]
-    [CLSCompliant(false)]
     public class CheckingResponseGroup
     {
         //ToDo
