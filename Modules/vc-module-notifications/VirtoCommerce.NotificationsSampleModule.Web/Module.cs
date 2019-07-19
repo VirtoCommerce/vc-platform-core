@@ -25,7 +25,7 @@ namespace VirtoCommerce.NotificationsSampleModule.Web
             var configuration = snapshot.GetService<IConfiguration>();
             serviceCollection.AddDbContext<TwitterNotificationDbContext>(options => options.UseSqlServer(configuration.GetConnectionString("VirtoCommerce")));
             serviceCollection.AddTransient<INotificationRepository, TwitterNotificationRepository>();
-            serviceCollection.AddSingleton<Func<INotificationRepository>>(provider => () => provider.CreateScope().ServiceProvider.GetService<INotificationRepository>());
+            serviceCollection.AddTransient<Func<INotificationRepository>>(provider => () => provider.CreateScope().ServiceProvider.GetService<INotificationRepository>());
         }
 
         public void PostInitialize(IApplicationBuilder appBuilder)

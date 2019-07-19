@@ -30,7 +30,7 @@ namespace VirtoCommerce.Platform.Data.Extensions
         {
             services.AddDbContext<PlatformDbContext>(options => options.UseSqlServer(configuration.GetConnectionString("VirtoCommerce")));
             services.AddTransient<IPlatformRepository, PlatformRepository>();
-            services.AddSingleton<Func<IPlatformRepository>>(provider => () => provider.CreateScope().ServiceProvider.GetService<IPlatformRepository>());
+            services.AddTransient<Func<IPlatformRepository>>(provider => () => provider.CreateScope().ServiceProvider.GetService<IPlatformRepository>());
 
             services.AddSettings();
 
@@ -41,8 +41,8 @@ namespace VirtoCommerce.Platform.Data.Extensions
             var inProcessBus = new InProcessBus();
             services.AddSingleton<IHandlerRegistrar>(inProcessBus);
             services.AddSingleton<IEventPublisher>(inProcessBus);
-            services.AddSingleton<IChangeLogService, ChangeLogService>();
-            services.AddSingleton<IChangeLogSearchService, ChangeLogSearchService>();
+            services.AddTransient<IChangeLogService, ChangeLogService>();
+            services.AddTransient<IChangeLogSearchService, ChangeLogSearchService>();
             //Use MemoryCache decorator to use global platform cache settings
             services.AddSingleton<IPlatformMemoryCache, PlatformMemoryCache>();
             services.AddScoped<IPlatformExportImportManager, PlatformExportImportManager>();

@@ -36,21 +36,21 @@ namespace VirtoCommerce.ImageToolsModule.Web
             serviceCollection.AddDbContext<ThumbnailDbContext>(options => options.UseSqlServer(configuration.GetConnectionString("VirtoCommerce")));
 
             serviceCollection.AddTransient<IThumbnailRepository, ThumbnailRepository>();
-            serviceCollection.AddSingleton<Func<IThumbnailRepository>>(provider => () => provider.CreateScope().ServiceProvider.GetService<IThumbnailRepository>());
+            serviceCollection.AddTransient<Func<IThumbnailRepository>>(provider => () => provider.CreateScope().ServiceProvider.GetService<IThumbnailRepository>());
 
 
-            serviceCollection.AddSingleton<IThumbnailOptionService, ThumbnailOptionService>();
-            serviceCollection.AddSingleton<IThumbnailOptionSearchService, ThumbnailOptionSearchService>();
+            serviceCollection.AddTransient<IThumbnailOptionService, ThumbnailOptionService>();
+            serviceCollection.AddTransient<IThumbnailOptionSearchService, ThumbnailOptionSearchService>();
 
-            serviceCollection.AddSingleton<IThumbnailTaskSearchService, ThumbnailTaskSearchService>();
-            serviceCollection.AddSingleton<IThumbnailTaskService, ThumbnailTaskService>();
+            serviceCollection.AddTransient<IThumbnailTaskSearchService, ThumbnailTaskSearchService>();
+            serviceCollection.AddTransient<IThumbnailTaskService, ThumbnailTaskService>();
 
-            serviceCollection.AddSingleton<IImageResizer, ImageResizer>();
-            serviceCollection.AddSingleton<IImageService, ImageService>();
-            serviceCollection.AddSingleton<IThumbnailGenerator, DefaultThumbnailGenerator>();
-            serviceCollection.AddSingleton<IThumbnailGenerationProcessor, ThumbnailGenerationProcessor>();
-            serviceCollection.AddSingleton<IImagesChangesProvider, BlobImagesChangesProvider>();
-            serviceCollection.AddSingleton<ThumbnailsExportImport>();
+            serviceCollection.AddTransient<IImageResizer, ImageResizer>();
+            serviceCollection.AddTransient<IImageService, ImageService>();
+            serviceCollection.AddTransient<IThumbnailGenerator, DefaultThumbnailGenerator>();
+            serviceCollection.AddTransient<IThumbnailGenerationProcessor, ThumbnailGenerationProcessor>();
+            serviceCollection.AddTransient<IImagesChangesProvider, BlobImagesChangesProvider>();
+            serviceCollection.AddTransient<ThumbnailsExportImport>();
 
         }
 

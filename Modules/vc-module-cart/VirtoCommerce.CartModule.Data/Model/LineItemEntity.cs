@@ -253,7 +253,7 @@ namespace VirtoCommerce.CartModule.Data.Model
             ShipmentMethodCode = lineItem.ShipmentMethodCode;
             RequiredShipping = lineItem.RequiredShipping;
             ProductType = lineItem.ProductType;
-            FulfillmentLocationCode = FulfillmentLocationCode;
+            FulfillmentLocationCode = lineItem.FulfillmentLocationCode;
             Comment = lineItem.Note;
             CatalogId = lineItem.CatalogId;
             CategoryId = lineItem.CategoryId;

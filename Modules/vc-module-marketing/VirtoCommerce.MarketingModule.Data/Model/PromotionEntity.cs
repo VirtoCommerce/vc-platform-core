@@ -87,11 +87,6 @@ namespace VirtoCommerce.MarketingModule.Data.Model
             promotion.MaxPersonalUsageCount = PerCustomerLimit;
             promotion.HasCoupons = HasCoupons;
 
-            if (!string.IsNullOrEmpty(promotion.PredicateVisualTreeSerialized))
-            {
-                promotion.PredicateVisualTreeSerialized = promotion.PredicateVisualTreeSerialized;
-            }
-
             if (Stores != null)
             {
                 promotion.StoreIds = Stores.Select(x => x.StoreId).ToList();

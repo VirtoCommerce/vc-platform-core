@@ -20,8 +20,8 @@ namespace Module1.Web
         {
             var configuration = serviceCollection.BuildServiceProvider().GetRequiredService<IConfiguration>();
             //var mode = FluentValidation.CascadeMode.Continue;
-            serviceCollection.AddSingleton<IMyService, MyServiceImpl>();
-            serviceCollection.AddSingleton<IThirdPartyService, ThirdPartyServiceImpl>();
+            serviceCollection.AddTransient<IMyService, MyServiceImpl>();
+            serviceCollection.AddTransient<IThirdPartyService, ThirdPartyServiceImpl>();
             serviceCollection.AddDbContext<PlatformDbContext2>(builder =>
             {
                 builder.UseSqlServer(configuration.GetConnectionString("VirtoCommerce"));

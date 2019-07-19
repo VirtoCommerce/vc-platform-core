@@ -42,11 +42,11 @@ namespace VirtoCommerce.ContentModule.Web
 
             serviceCollection.AddDbContext<MenuDbContext>(options => options.UseSqlServer(configuration.GetConnectionString("VirtoCommerce")));
             serviceCollection.AddTransient<IMenuRepository, MenuRepository>();
-            serviceCollection.AddSingleton<Func<IMenuRepository>>(provider => () => provider.CreateScope().ServiceProvider.GetService<IMenuRepository>());
+            serviceCollection.AddTransient<Func<IMenuRepository>>(provider => () => provider.CreateScope().ServiceProvider.GetService<IMenuRepository>());
 
-            serviceCollection.AddSingleton<IMenuService, MenuService>();
+            serviceCollection.AddTransient<IMenuService, MenuService>();
 
-            serviceCollection.AddSingleton<ContentExportImport>();
+            serviceCollection.AddTransient<ContentExportImport>();
 
             var contentProvider = configuration.GetSection("Content:Provider").Value;
             if (contentProvider.EqualsInvariant(AzureBlobProvider.ProviderName))

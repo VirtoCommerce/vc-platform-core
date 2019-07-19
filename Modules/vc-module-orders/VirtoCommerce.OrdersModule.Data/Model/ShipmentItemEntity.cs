@@ -63,7 +63,7 @@ namespace VirtoCommerce.OrdersModule.Data.Model
             OuterId = shipmentItem.OuterId;
 
             BarCode = shipmentItem.BarCode;
-            shipmentItem.Quantity = shipmentItem.Quantity;
+            Quantity = shipmentItem.Quantity;
 
             pkMap.AddPair(shipmentItem, this);
             if (shipmentItem.LineItem != null)

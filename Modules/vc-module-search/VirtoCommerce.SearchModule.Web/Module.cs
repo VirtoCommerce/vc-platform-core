@@ -21,7 +21,7 @@ namespace VirtoCommerce.SearchModule.Web
 
         public void Initialize(IServiceCollection serviceCollection)
         {
-            serviceCollection.AddSingleton<ISearchPhraseParser, SearchPhraseParser>();
+            serviceCollection.AddTransient<ISearchPhraseParser, SearchPhraseParser>();
             serviceCollection.AddSingleton<IIndexingWorker>(context =>
             {
                 var settingsManager = context.GetService<ISettingsManager>();
