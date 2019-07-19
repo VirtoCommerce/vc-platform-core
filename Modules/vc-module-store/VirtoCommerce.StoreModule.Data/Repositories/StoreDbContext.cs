@@ -6,9 +6,14 @@ namespace VirtoCommerce.StoreModule.Data.Repositories
 {
     public class StoreDbContext : DbContextWithTriggers
     {
-        public StoreDbContext(DbContextOptions<StoreDbContext> options) : base(options)
+        public StoreDbContext(DbContextOptions<StoreDbContext> options)
+            : base(options)
         {
+        }
 
+        protected StoreDbContext(DbContextOptions options)
+            : base(options)
+        {
         }
 
         protected override void OnModelCreating(ModelBuilder modelBuilder)
