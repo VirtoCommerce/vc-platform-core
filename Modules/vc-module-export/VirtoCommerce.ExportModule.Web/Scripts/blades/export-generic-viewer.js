@@ -4,24 +4,31 @@ angular.module('virtoCommerce.exportModule')
     function ($sessionStorage, $localStorage, $timeout, $scope, bladeUtils, dialogService, authService, uiGridHelper, bladeNavigationService) {
         $scope.uiGridConstants = uiGridHelper.uiGridConstants;
         $scope.hasMore = true;
-        $scope.items = [{
-            type: 'price',
-            id: 'id1',
-            imageUrl: null,
-            name: 'Price1',
-            code: null,
-            $path: 'pl1\\'
-        }, {
-            type: 'product',
-            id: 'id2',
-            imageUrl: 'http://localhost:10645/assets/catalog/ASZF216GBSL/1431971520000_1134360_64x64.jpg',
-            name: 'Phone',
-            code: 'PH_Code',
-            $path: 'pl1\\'
-        }];
+        $scope.items = [];
+        
+        for (var i=0;i<20;i++)
+        {
+            $scope.items.push(
+            {
+                type: 'price',
+                id: 'id1',
+                imageUrl: null,
+                name: 'Price1',
+                code: null,
+                $path: 'pl1\\'
+            }, {
+                type: 'product',
+                id: 'id2',
+                imageUrl: 'http://localhost:10645/assets/catalog/ASZF216GBSL/1431971520000_1134360_64x64.jpg',
+                name: 'Phone',
+                code: 'PH_Code',
+                $path: 'pl1\\'
+            });
+        };
         
         var blade = $scope.blade;
         blade.isLoading = true;
+        blade.isExpanded = true;
         $scope.blade.headIcon = 'fa-upload';
 
         function initializeBlade() {
@@ -208,6 +215,8 @@ angular.module('virtoCommerce.exportModule')
                 if (blade.onCompleted) {
                     blade.onCompleted(dataQuery);
                 }
+
+                bladeNavigationService.closeBlade(blade);
             }
         }, {
             name: 'export.commands.pick-all',
@@ -221,6 +230,8 @@ angular.module('virtoCommerce.exportModule')
                 if (blade.onCompleted) {
                     blade.onCompleted(dataQuery);
                 }
+                
+                bladeNavigationService.closeBlade(blade);
             }
         }, {
             name: "platform.commands.refresh",

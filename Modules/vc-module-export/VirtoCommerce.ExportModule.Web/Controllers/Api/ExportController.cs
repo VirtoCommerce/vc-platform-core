@@ -28,19 +28,22 @@ namespace VirtoCommerce.ExportModule.Web.Controllers
         private readonly IUserNameResolver _userNameResolver;
         private readonly IPushNotificationManager _pushNotificationManager;
         private readonly PlatformOptions _platformOptions;
+        private readonly IKnownExportTypesResolver _knownExportTypesResolver;
 
         public ExportController(
             IEnumerable<Func<IExportProviderConfiguration, IExportProvider>> exportProviderFactories,
             IKnownExportTypesRegistrar knownExportTypesRegistrar,
             IUserNameResolver userNameResolver,
             IPushNotificationManager pushNotificationManager,
-            IOptions<PlatformOptions> platformOptions)
+            IOptions<PlatformOptions> platformOptions,
+            IKnownExportTypesResolver knownExportTypesResolver)
         {
             _exportProviderFactories = exportProviderFactories;
             _knownExportTypesRegistrar = knownExportTypesRegistrar;
             _userNameResolver = userNameResolver;
             _pushNotificationManager = pushNotificationManager;
             _platformOptions = platformOptions.Value;
+            _knownExportTypesResolver = knownExportTypesResolver;
         }
 
         /// <summary>
@@ -65,6 +68,25 @@ namespace VirtoCommerce.ExportModule.Web.Controllers
         public ActionResult<IExportProvider[]> GetExportProviders()
         {
             return Ok(_exportProviderFactories.Select(x => x(new EmptyProviderConfiguration())).ToArray());
+        }
+
+        /// <summary>
+        /// Starts export task
+        /// </summary>
+        /// <param name="request">Export task description</param>
+        /// <returns>Export task id</returns>
+        [HttpPost]
+        [Route("data")]
+        [Authorize(ModuleConstants.Security.Permissions.Access)]
+        public ActionResult<IEnumerable<ViewableEntity>> GetData([FromBody]ExportDataRequest request)
+        {
+            var currentUserName = _userNameResolver.GetCurrentUserName();
+            request.DataQuery.UserName = currentUserName;
+
+            var exportedTypeDefinition = _knownExportTypesResolver.ResolveExportedTypeDefinition(request.ExportTypeName);
+            var pagedDataSource = exportedTypeDefinition.ExportedDataSourceFactory(request.DataQuery);
+
+            return Ok(pagedDataSource.GetData());
         }
 
         /// <summary>

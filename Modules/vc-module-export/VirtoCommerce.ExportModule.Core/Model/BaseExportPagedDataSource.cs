@@ -1,5 +1,6 @@
 using System;
 using System.Collections;
+using System.Collections.Generic;
 using System.Linq;
 using System.Threading.Tasks;
 using Microsoft.AspNetCore.Authorization;
@@ -45,6 +46,8 @@ namespace VirtoCommerce.ExportModule.Core.Model
 
         protected abstract FetchResult FetchData(SearchCriteriaBase searchCriteria);
 
+        protected abstract ViewableEntity ToViewableEntity(object obj);
+
         /// <summary>
         /// Checks user passed in <see cref="DataQuery"/> for permissions before fetching data.
         /// Permissions should be attached to *ExportPagedDataSource class using <see cref="AuthorizeAttribute"/>
@@ -81,6 +84,22 @@ namespace VirtoCommerce.ExportModule.Core.Model
             _totalCount = result.TotalCount;
             CurrentPageNumber++;
             return result.Results;
+        }
+
+        public virtual IEnumerable<ViewableEntity> GetData()
+        {
+            Authorize().GetAwaiter().GetResult();
+
+            var searchCriteria = DataQuery.ToSearchCriteria();
+            var queryResults = FetchData(searchCriteria).Results;
+            var result = new List<ViewableEntity>();
+
+            foreach (var obj in queryResults)
+            {
+                result.Add(ToViewableEntity(obj));
+            }
+
+            return result;
         }
 
         public virtual int GetTotalCount()

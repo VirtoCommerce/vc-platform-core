@@ -55,5 +55,10 @@ namespace VirtoCommerce.PricingModule.Data.ExportImport
 
             return new FetchResult(result, totalCount);
         }
+
+        protected override ViewableEntity ToViewableEntity(object obj)
+        {
+            throw new System.NotImplementedException();
+        }
     }
 }

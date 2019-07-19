@@ -1,4 +1,5 @@
 using System.Collections;
+using System.Collections.Generic;
 
 namespace VirtoCommerce.ExportModule.Core.Model
 {
@@ -8,5 +9,6 @@ namespace VirtoCommerce.ExportModule.Core.Model
         int CurrentPageNumber { get; }
         int GetTotalCount();
         IEnumerable FetchNextPage();
+        IEnumerable<ViewableEntity> GetData();
     }
 }

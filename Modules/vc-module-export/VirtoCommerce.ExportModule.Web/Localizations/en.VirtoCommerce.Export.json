@@ -2,7 +2,7 @@
     "export": {
         "main-menu-title": "Export New",
         "commands": {
-            "pick-all": "Pick all",
+            "pick-all": "Pick all"
         },
         "blades": {
             "export-settings": {
