@@ -106,7 +106,7 @@ namespace VirtoCommerce.ExportModule.Core.Model
                 //Continue searching for nested members
                 result.AddRange(GetFromType(
                     nestedMemberInfo.NestedType,
-                    groupName,
+                    string.Format($@"{groupName}.{nestedMemberInfo.MemberInfo.Name}"),
                     GetDerivedName(baseMemberName, (PropertyInfo)nestedMemberInfo.MemberInfo),
                     passedNodes,
                     extractNestedProperties));

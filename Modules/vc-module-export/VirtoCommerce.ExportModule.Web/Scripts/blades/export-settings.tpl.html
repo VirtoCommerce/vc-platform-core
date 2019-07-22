@@ -48,7 +48,7 @@
                             <a class="form-label" ng-class="{'__disabled': !blade.isExportedTypeSelected}" ng-click="selectExportedColumns()">{{ 'export.blades.export-settings.labels.select' | translate }}</a>
                         </div>
                         <div class="result-group">
-                            <label class="form-label">{{ blade.selectedColumns || ('export.blades.export-settings.labels.all' | translate) }}</label>
+                            <label class="form-label">{{ blade.includedColumnsDescription || ('export.blades.export-settings.labels.all' | translate) }}</label>
                         </div>
                         <div class="list-descr">{{ 'export.blades.export-settings.labels.exported-columns-description' | translate }}</div>
                     </div>
