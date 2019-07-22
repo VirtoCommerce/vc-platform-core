@@ -1,5 +1,5 @@
 angular.module('virtoCommerce.exportModule')
-    .controller('virtoCommerce.exportModule.exportSettingsController', ['$scope', 'platformWebApp.bladeNavigationService', 'virtoCommerce.exportModule.exportModuleApi', function ($scope, bladeNavigationService, exportApi) {
+    .controller('virtoCommerce.exportModule.exportSettingsController', ['$scope', '$translate', 'platformWebApp.bladeNavigationService', 'virtoCommerce.exportModule.exportModuleApi', function ($scope, $translate, bladeNavigationService, exportApi) {
         var blade = $scope.blade;
         blade.canStartProcess = false;
         blade.isLoading = true;
@@ -58,7 +58,8 @@ angular.module('virtoCommerce.exportModule')
                 onSelected: function(exportDataRequest) {
                     blade.exportDataRequest = angular.extend(blade.exportDataRequest, exportDataRequest);
                     blade.exportDataRequest.dataQuery = angular.copy(exportDataRequest.dataQuery);
-                    blade.isExportedTypeSelected = typeof(blade.exportDataRequest.exportTypeName)  !== 'undefined';
+                    blade.isExportedTypeSelected = typeof (blade.exportDataRequest.exportTypeName) !== 'undefined';
+                    blade.includedColumnsDescription = null;
                     fillProviders();
                 }
             };
@@ -67,7 +68,30 @@ angular.module('virtoCommerce.exportModule')
         };
 
         $scope.selectExportedColumns = function() {
-            alert("Select exported columns");
+            var exportedColumnsblade = {
+                id: 'exportedColumnsSelector',
+                controller: 'virtoCommerce.exportModule.exportColumnsSelectorController',
+                template: 'Modules/$(VirtoCommerce.Export)/Scripts/blades/export-columns-selector.tpl.html',
+                isClosingDisabled: false,
+                exportDataRequest: blade.exportDataRequest,
+                onSelected: function (includedColumns) {
+                    blade.exportDataRequest.dataQuery.includedColumns = includedColumns;
+                    if (blade.exportDataRequest.dataQuery.includedColumns.length != blade.exportDataRequest.metaData.propertyInfos.length) {
+                        var includedColumnsNames = _.pluck(blade.exportDataRequest.dataQuery.includedColumns, 'name');
+                        if (includedColumnsNames.length > 10) {
+                            blade.includedColumnsDescription = includedColumnsNames.slice(0, 10).join(', ') + ', ... (+' + (includedColumnsNames.length - 10) + ' ' + $translate.instant('export.blades.export-settings.labels.columns-more') + ')';
+                        }
+                        else {
+                            blade.includedColumnsDescription = includedColumnsNames.join(', ');
+                        }
+                    }
+                    else {
+                        blade.includedColumnsDescription = null;
+                    }
+                }
+            };
+
+            bladeNavigationService.showBlade(exportedColumnsblade, blade);
         };
 
         $scope.selectExportedData = function() {

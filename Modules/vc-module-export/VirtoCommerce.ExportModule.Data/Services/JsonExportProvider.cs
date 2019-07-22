@@ -6,7 +6,6 @@ using Newtonsoft.Json.Linq;
 using VirtoCommerce.ExportModule.Core.Model;
 using VirtoCommerce.ExportModule.Core.Services;
 using VirtoCommerce.ExportModule.Data.Model;
-using VirtoCommerce.Platform.Core.Common;
 
 namespace VirtoCommerce.ExportModule.Data.Services
 {
@@ -24,20 +23,24 @@ namespace VirtoCommerce.ExportModule.Data.Services
         {
             Configuration = exportProviderConfiguration;
 
+            var jsonSettings = new JsonSerializerSettings();
+
             if (exportProviderConfiguration is JsonProviderConfiguration jsonProviderConfiguration)
             {
-                _serializer = JsonSerializer.Create(jsonProviderConfiguration.Settings);
+                jsonSettings = jsonProviderConfiguration.Settings;
             }
             else
             {
+                jsonSettings.NullValueHandling = NullValueHandling.Ignore;
+                jsonSettings.DefaultValueHandling = DefaultValueHandling.Ignore;
 #if DEBUG
-                _serializer = JsonSerializer.Create(new JsonSerializerSettings() { Formatting = Formatting.Indented });
-#else
-                _serializer = JsonSerializer.CreateDefault();
+                jsonSettings.Formatting = Formatting.Indented;
 #endif
             }
 
-            _serializer.Converters.Add(new ObjectDiscriminatorJsonConverter(typeof(Entity)));
+            _serializer = JsonSerializer.Create(jsonSettings);
+
+            //_serializer.Converters.Add(new ObjectDiscriminatorJsonConverter(typeof(Entity)));
         }
 
         public void WriteRecord(TextWriter writer, object objectToRecord)

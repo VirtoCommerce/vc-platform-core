@@ -7,6 +7,7 @@
                     "provider": "Select provider for export",
                     "template": "Select export template",
                     "column-selected": "Select column for export",
+                    "columns-more": "columns more",
                     "row-selected": "Select records for export",
                     "total": "Total count",
                     "processed": "Processed count",
