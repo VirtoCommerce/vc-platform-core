@@ -1,30 +1,10 @@
 angular.module('virtoCommerce.exportModule')
     .controller('virtoCommerce.exportModule.exportGenericViewerController', 
-    ['$sessionStorage', '$localStorage', '$timeout', '$scope', 'platformWebApp.bladeUtils', 'platformWebApp.dialogService', 'platformWebApp.authService', 'platformWebApp.uiGridHelper', 'platformWebApp.bladeNavigationService', 
-    function ($sessionStorage, $localStorage, $timeout, $scope, bladeUtils, dialogService, authService, uiGridHelper, bladeNavigationService) {
+    ['$localStorage', '$timeout', '$scope', 'platformWebApp.bladeUtils', 'platformWebApp.uiGridHelper', 'platformWebApp.bladeNavigationService', 'virtoCommerce.exportModule.exportModuleApi',
+    function ($localStorage, $timeout, $scope, bladeUtils, uiGridHelper, bladeNavigationService, exportModuleApi) {
         $scope.uiGridConstants = uiGridHelper.uiGridConstants;
         $scope.hasMore = true;
         $scope.items = [];
-        
-        for (var i=0;i<20;i++)
-        {
-            $scope.items.push(
-            {
-                type: 'price',
-                id: 'id1',
-                imageUrl: null,
-                name: 'Price1',
-                code: null,
-                $path: 'pl1\\'
-            }, {
-                type: 'product',
-                id: 'id2',
-                imageUrl: 'http://localhost:10645/assets/catalog/ASZF216GBSL/1431971520000_1134360_64x64.jpg',
-                name: 'Phone',
-                code: 'PH_Code',
-                $path: 'pl1\\'
-            });
-        };
         
         var blade = $scope.blade;
         blade.isLoading = true;
@@ -32,65 +12,49 @@ angular.module('virtoCommerce.exportModule')
         $scope.blade.headIcon = 'fa-upload';
 
         function initializeBlade() {
-            blade.isLoading = false;
         }
 
         blade.refresh = function () {
             loadData();
 
-            //reset state grid
             resetStateGrid();
         };
 
-        function showMore() {
-            if ($scope.hasMore) {
+        function loadData() {
+            blade.isLoading = true;
+            angular.extend(blade.exportDataRequest.dataQuery, buildDataQuery());
 
-                ++$scope.pageSettings.currentPage;
-                $scope.gridApi.infiniteScroll.saveScrollPercentage();
-
-                loadData(function() {
-                    $scope.gridApi.infiniteScroll.dataLoaded();
-
-                    $timeout(function () {
-                        // wait for grid to ingest data changes
-                        if ($scope.gridApi.selection.getSelectAllState()) {
-                            $scope.gridApi.selection.selectAllRows();
-                        }
-                    });
+            exportModuleApi.getData(
+                blade.exportDataRequest,
+                function (data) {
+                    blade.isLoading = false;
+                    $scope.pageSettings.totalItems = data.totalCount;
+                    $scope.items = data.results;
                 });
-            }
         }
 
-        function loadData(additionalHandling) {
-            // blade.isLoading = true;
-            // var searchCriteria = getDataQuery();
+        blade.resetFiltering = function() {
+            filter.keyword = undefined;
+            resetFilterConditions();
+            blade.exportDataRequest.dataQuery = getEmptyDataQuery();
+        };
 
-                // listEntries.listitemssearch(
-                //     searchCriteria,
-                //     function (data) {
-                //         blade.isLoading = false;
-                //         $scope.pageSettings.totalItems = data.totalCount;
-                //         $scope.items = $scope.items.concat(data.listEntries);
-                //         $scope.hasMore = data.listEntries.length === $scope.pageSettings.itemsPerPageCount;
-                            // if (additionalHandling) {
-                            //     additionalHandling(data);
-                            // }
-                //         $scope.gridApi.infiniteScroll.dataLoaded();
-
-                //         $timeout(function () {
-                //             // wait for grid to ingest data changes
-                //             if ($scope.gridApi.selection.getSelectAllState()) {
-                //                 $scope.gridApi.selection.selectAllRows();
-                //             }
-                //         });
-
-                //     });
-        }
-
-        function getDataQuery()
+        function buildDataQuery()
         {
+            var dataQuery = getEmptyDataQuery();
+            
+            if (filter.keyword) {
+                angular.extend(dataQuery, {keyword: filter.keyword});
+            }
+
+            angular.extend(dataQuery, getFilterConditions());
+
+            return dataQuery;
+        }
+
+        function getEmptyDataQuery() {
+
             var dataQuery = {
-                keyword: filter.keyword ? filter.keyword : undefined,
                 sort: uiGridHelper.getSortExpression($scope),
                 skip: ($scope.pageSettings.currentPage - 1) * $scope.pageSettings.itemsPerPageCount,
                 take: $scope.pageSettings.itemsPerPageCount
@@ -98,12 +62,17 @@ angular.module('virtoCommerce.exportModule')
             return dataQuery;
         }
 
+        function getFilterConditions() {
+            return {};
+        }
+
+        function resetFilterConditions() {
+        }
+
         function resetStateGrid() {
             if ($scope.gridApi) {
                 $scope.items = [];
                 $scope.gridApi.selection.clearSelectedRows();
-                $scope.gridApi.infiniteScroll.resetScroll(true, true);
-                $scope.gridApi.infiniteScroll.dataLoaded();
             }
         }
 
@@ -209,8 +178,9 @@ angular.module('virtoCommerce.exportModule')
                 return $scope.gridApi && $scope.gridApi.selection.getSelectedRows() && $scope.gridApi.selection.getSelectedRows().length;
             },
             executeMethod: function () {
-                var dataQuery = getDataQuery();
+                var dataQuery = buildDataQuery();
                 dataQuery.objectIds = _.map($scope.gridApi.selection.getSelectedRows(), function(item) { return item.id; });
+                dataQuery.isAllSelected = false;
 
                 if (blade.onCompleted) {
                     blade.onCompleted(dataQuery);
@@ -225,7 +195,8 @@ angular.module('virtoCommerce.exportModule')
                 return true;
             },
             executeMethod: function () {
-                var dataQuery = getDataQuery();
+                var dataQuery = buildDataQuery();
+                dataQuery.isAllSelected = true;
 
                 if (blade.onCompleted) {
                     blade.onCompleted(dataQuery);
@@ -234,9 +205,16 @@ angular.module('virtoCommerce.exportModule')
                 bladeNavigationService.closeBlade(blade);
             }
         }, {
-            name: "platform.commands.refresh",
-            icon: 'fa fa-refresh',
-            executeMethod: blade.refresh,
+            name: "platform.commands.reset",
+            icon: 'fa fa-undo',
+            executeMethod: function() {
+                if ($scope.pageSettings.currentPage > 1) {
+                    $scope.pageSettings.currentPage = 1;
+                }
+
+                blade.resetFiltering();
+                blade.refresh();
+            },
             canExecuteMethod: function () {
                 return true;
             }
@@ -263,8 +241,9 @@ angular.module('virtoCommerce.exportModule')
                 $scope.gridApi = gridApi;
 
                 uiGridHelper.bindRefreshOnSortChanged($scope);
-                $scope.gridApi.infiniteScroll.on.needLoadMoreData($scope, showMore);
             });
+
+            bladeUtils.initializePagination($scope);
         };
 
         initializeBlade();

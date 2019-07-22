@@ -16,6 +16,7 @@
         <p class="form-count">{{'platform.list.count' | translate}}: <span class="count">{{pageSettings.totalItems | number:0}}</span></p>
     </div>
 </div>
+<div class="blade-static __bottom" ng-if="pageSettings.itemsPerPageCount < pageSettings.totalItems" ng-include="'pagerTemplate.html'"></div>
 <div class="blade-content" ng-class="{'__large-wide': blade.isExpanded, '__normal': !blade.isExpanded}">
     <div class="blade-inner">
         <div class="inner-block" ng-init="setGridOptions({
@@ -33,8 +34,7 @@
                             cellTemplate: 'item-list-icon.cell.html'
                         },
                         { name: 'name', displayName: 'export.blades.export-generic-viewer.labels.name', cellTemplate: 'item-list-name.cell.html' },
-                        { name: 'code', displayName: 'export.blades.export-generic-viewer.labels.code', width: 170, cellTemplate: 'item-list-code.cell.html' },
-                        { name: '$path', displayName: 'Parent', enableSorting: false, visible: false, cellTooltip: true }
+                        { name: 'code', displayName: 'export.blades.export-generic-viewer.labels.code', width: 170, cellTemplate: 'item-list-code.cell.html' }
                     ]})">
             <div class="table-wrapper" ng-if="items.length > 0">
                 <div ui-grid="gridOptions" ui-grid-auto-resize ui-grid-save-state ui-grid-selection ui-grid-resize-columns ui-grid-move-columns ui-grid-pinning ui-grid-height ui-grid-infinite-scroll></div>

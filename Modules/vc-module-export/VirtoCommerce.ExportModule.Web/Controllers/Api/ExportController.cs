@@ -78,7 +78,7 @@ namespace VirtoCommerce.ExportModule.Web.Controllers
         [HttpPost]
         [Route("data")]
         [Authorize(ModuleConstants.Security.Permissions.Access)]
-        public ActionResult<IEnumerable<ViewableEntity>> GetData([FromBody]ExportDataRequest request)
+        public ActionResult<ViewableSearchResult> GetData([FromBody]ExportDataRequest request)
         {
             var currentUserName = _userNameResolver.GetCurrentUserName();
             request.DataQuery.UserName = currentUserName;

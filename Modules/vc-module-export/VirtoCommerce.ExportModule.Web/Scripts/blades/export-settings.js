@@ -80,9 +80,10 @@ angular.module('virtoCommerce.exportModule')
                 controller: 'virtoCommerce.exportModule.exportGenericViewerController',
                 template: 'Modules/$(VirtoCommerce.Export)/Scripts/blades/export-generic-viewer.tpl.html',
                 isClosingDisabled: false,
-                dataQuery: blade.exportDataRequest.dataQuery,
+                exportDataRequest: angular.copy(blade.exportDataRequest),
                 onCompleted: function(dataQuery) {
                     console.log(dataQuery);
+                    blade.exportDataRequest.dataQuery = dataQuery;
                 }
             };
 
