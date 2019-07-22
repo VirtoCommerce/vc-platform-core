@@ -6,6 +6,7 @@ using Newtonsoft.Json.Linq;
 using VirtoCommerce.ExportModule.Core.Model;
 using VirtoCommerce.ExportModule.Core.Services;
 using VirtoCommerce.ExportModule.Data.Model;
+using VirtoCommerce.Platform.Core.Common;
 
 namespace VirtoCommerce.ExportModule.Data.Services
 {
@@ -40,7 +41,7 @@ namespace VirtoCommerce.ExportModule.Data.Services
 
             _serializer = JsonSerializer.Create(jsonSettings);
 
-            //_serializer.Converters.Add(new ObjectDiscriminatorJsonConverter(typeof(Entity)));
+            _serializer.Converters.Add(new ObjectDiscriminatorJsonConverter(jsonSettings, typeof(Entity)));
         }
 
         public void WriteRecord(TextWriter writer, object objectToRecord)
@@ -77,13 +78,15 @@ namespace VirtoCommerce.ExportModule.Data.Services
     public class ObjectDiscriminatorJsonConverter : JsonConverter
     {
         private readonly Type[] _types;
+        private readonly JsonSerializer _jsonSerializer;
 
         public override bool CanRead => false;
         public override bool CanWrite => true;
 
-        public ObjectDiscriminatorJsonConverter(params Type[] types)
+        public ObjectDiscriminatorJsonConverter(JsonSerializerSettings jsonSerializerSettings, params Type[] types)
         {
             _types = types;
+            _jsonSerializer = JsonSerializer.Create(jsonSerializerSettings);
         }
 
         public override bool CanConvert(Type objectType)
@@ -98,7 +101,8 @@ namespace VirtoCommerce.ExportModule.Data.Services
 
         public override void WriteJson(JsonWriter writer, object value, JsonSerializer serializer)
         {
-            var jToken = JToken.FromObject(value);
+            // Here we use another serializer with the same settings to avoid infinity cycle
+            var jToken = JToken.FromObject(value, _jsonSerializer);
 
             if (jToken.Type == JTokenType.Object)
             {
