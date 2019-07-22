@@ -1,5 +1,5 @@
 angular.module('virtoCommerce.exportModule')
-    .controller('virtoCommerce.exportModule.exportColumnsSelectorController', ['$scope', 'platformWebApp.bladeNavigationService', 'virtoCommerce.exportModule.exportModuleApi', function ($scope, bladeNavigationService, exportApi) {
+    .controller('virtoCommerce.exportModule.exportColumnsSelectorController', ['$scope', 'platformWebApp.bladeNavigationService', function ($scope, bladeNavigationService) {
         var blade = $scope.blade;
 
         var allColumns;
