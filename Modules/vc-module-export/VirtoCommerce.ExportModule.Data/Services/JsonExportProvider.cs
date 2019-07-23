@@ -24,20 +24,24 @@ namespace VirtoCommerce.ExportModule.Data.Services
         {
             Configuration = exportProviderConfiguration;
 
+            var jsonSettings = new JsonSerializerSettings();
+
             if (exportProviderConfiguration is JsonProviderConfiguration jsonProviderConfiguration)
             {
-                _serializer = JsonSerializer.Create(jsonProviderConfiguration.Settings);
+                jsonSettings = jsonProviderConfiguration.Settings;
             }
             else
             {
+                jsonSettings.NullValueHandling = NullValueHandling.Ignore;
+                jsonSettings.DefaultValueHandling = DefaultValueHandling.Ignore;
 #if DEBUG
-                _serializer = JsonSerializer.Create(new JsonSerializerSettings() { Formatting = Formatting.Indented });
-#else
-                _serializer = JsonSerializer.CreateDefault();
+                jsonSettings.Formatting = Formatting.Indented;
 #endif
             }
 
-            _serializer.Converters.Add(new ObjectDiscriminatorJsonConverter(typeof(Entity)));
+            _serializer = JsonSerializer.Create(jsonSettings);
+
+            _serializer.Converters.Add(new ObjectDiscriminatorJsonConverter(jsonSettings, typeof(Entity)));
         }
 
         public void WriteRecord(TextWriter writer, object objectToRecord)
@@ -74,13 +78,15 @@ namespace VirtoCommerce.ExportModule.Data.Services
     public class ObjectDiscriminatorJsonConverter : JsonConverter
     {
         private readonly Type[] _types;
+        private readonly JsonSerializer _jsonSerializer;
 
         public override bool CanRead => false;
         public override bool CanWrite => true;
 
-        public ObjectDiscriminatorJsonConverter(params Type[] types)
+        public ObjectDiscriminatorJsonConverter(JsonSerializerSettings jsonSerializerSettings, params Type[] types)
         {
             _types = types;
+            _jsonSerializer = JsonSerializer.Create(jsonSerializerSettings);
         }
 
         public override bool CanConvert(Type objectType)
@@ -95,7 +101,8 @@ namespace VirtoCommerce.ExportModule.Data.Services
 
         public override void WriteJson(JsonWriter writer, object value, JsonSerializer serializer)
         {
-            var jToken = JToken.FromObject(value);
+            // Here we use another serializer with the same settings to avoid infinity cycle
+            var jToken = JToken.FromObject(value, _jsonSerializer);
 
             if (jToken.Type == JTokenType.Object)
             {

@@ -2,7 +2,7 @@ angular.module('virtoCommerce.exportModule')
     .controller('virtoCommerce.exportModule.exportTypeSelectorController', ['$scope', 'platformWebApp.bladeNavigationService', 'virtoCommerce.exportModule.exportModuleApi', function ($scope, bladeNavigationService, exportApi) {
         var typeTree;
         var blade = $scope.blade;
-        blade.title = 'Exported types';
+        blade.title = 'export.blades.export-settings.labels.exported-type';
         blade.headIcon = 'fa-folder';
 
         blade.refresh = function (disableOpenAnimation) {
@@ -76,10 +76,12 @@ angular.module('virtoCommerce.exportModule')
                     var selectedType = selectedTypes[0];
                     var exportDataRequest = {
                         exportTypeName: selectedType.typeName,
+                        metaData: selectedType.metaData,
                         isTabularExportSupported: selectedType.isTabularExportSupported,
                         dataQuery: {
                             exportTypeName: selectedType.exportDataQueryType,
                             isAllSelected: true,
+                            includedColumns: selectedType.metaData.propertyInfos,
                             take: 10000
                         }
                     };
