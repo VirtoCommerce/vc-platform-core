@@ -72,11 +72,11 @@ namespace VirtoCommerce.ExportModule.Data.Services
                             break;
                         }
 
-                        foreach (object obj in objectBatch)
+                        foreach (var obj in objectBatch)
                         {
                             try
                             {
-                                var preparedObject = obj;
+                                var preparedObject = obj.Clone();
 
                                 request.DataQuery.FilterProperties(preparedObject);
 
