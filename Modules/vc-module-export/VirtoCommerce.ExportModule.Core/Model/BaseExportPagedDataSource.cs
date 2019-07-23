@@ -1,5 +1,6 @@
 using System;
 using System.Collections;
+using System.Collections.Generic;
 using System.Linq;
 using System.Threading.Tasks;
 using Microsoft.AspNetCore.Authorization;
@@ -14,10 +15,10 @@ namespace VirtoCommerce.ExportModule.Core.Model
     {
         protected class FetchResult
         {
-            public IEnumerable Results { get; set; }
+            public IEnumerable<ICloneable> Results { get; set; }
             public int TotalCount { get; set; }
 
-            public FetchResult(IEnumerable results, int totalCount)
+            public FetchResult(IEnumerable<ICloneable> results, int totalCount)
             {
                 Results = results;
                 TotalCount = totalCount;
@@ -66,7 +67,7 @@ namespace VirtoCommerce.ExportModule.Core.Model
             }
         }
 
-        public virtual IEnumerable FetchNextPage()
+        public virtual IEnumerable<ICloneable> FetchNextPage()
         {
             if (_searchCriteria == null)
             {
