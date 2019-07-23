@@ -2,6 +2,7 @@ using System.Linq;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Identity;
 using VirtoCommerce.ExportModule.Core.Model;
+using VirtoCommerce.ExportModule.Core.Services;
 using VirtoCommerce.Platform.Core.Common;
 using VirtoCommerce.Platform.Core.Security;
 using VirtoCommerce.PricingModule.Core;
@@ -18,6 +19,7 @@ namespace VirtoCommerce.PricingModule.Data.ExportImport
     {
         private readonly IPricingSearchService _searchService;
         private readonly IPricingService _pricingService;
+        private ViewableEntityConverter<Pricelist> _viewableEntityConverter;
 
         public PricelistExportPagedDataSource(IPricingSearchService searchService, IPricingService pricingService, IAuthorizationPolicyProvider authorizationPolicyProvider, IAuthorizationService authorizationService, IUserClaimsPrincipalFactory<ApplicationUser> userClaimsPrincipalFactory, UserManager<ApplicationUser> userManager)
             : base(authorizationPolicyProvider, authorizationService, userClaimsPrincipalFactory, userManager)
@@ -54,6 +56,26 @@ namespace VirtoCommerce.PricingModule.Data.ExportImport
             }
 
             return new FetchResult(result, totalCount);
+        }
+
+        protected override ViewableEntity ToViewableEntity(object obj)
+        {
+            if (!(obj is Pricelist pricelist))
+            {
+                throw new System.InvalidCastException(nameof(Pricelist));
+            }
+
+            EnsureViewableConverterCreated();
+
+            return _viewableEntityConverter.ToViewableEntity(pricelist);
+        }
+
+        protected virtual void EnsureViewableConverterCreated()
+        {
+            if (_viewableEntityConverter == null)
+            {
+                _viewableEntityConverter = new ViewableEntityConverter<Pricelist>(x => $"{x.Name}", x => x.Id, x => null);
+            }
         }
     }
 }

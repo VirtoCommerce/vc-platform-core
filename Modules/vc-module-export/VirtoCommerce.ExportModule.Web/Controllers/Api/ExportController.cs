@@ -21,7 +21,6 @@ using VirtoCommerce.Platform.Core.Security;
 namespace VirtoCommerce.ExportModule.Web.Controllers
 {
     [Route("api/export")]
-    [Authorize(ModuleConstants.Security.Permissions.Access)]
     public class ExportController : Controller
     {
         private readonly IEnumerable<Func<IExportProviderConfiguration, IExportProvider>> _exportProviderFactories;
@@ -29,19 +28,22 @@ namespace VirtoCommerce.ExportModule.Web.Controllers
         private readonly IUserNameResolver _userNameResolver;
         private readonly IPushNotificationManager _pushNotificationManager;
         private readonly PlatformOptions _platformOptions;
+        private readonly IKnownExportTypesResolver _knownExportTypesResolver;
 
         public ExportController(
             IEnumerable<Func<IExportProviderConfiguration, IExportProvider>> exportProviderFactories,
             IKnownExportTypesRegistrar knownExportTypesRegistrar,
             IUserNameResolver userNameResolver,
             IPushNotificationManager pushNotificationManager,
-            IOptions<PlatformOptions> platformOptions)
+            IOptions<PlatformOptions> platformOptions,
+            IKnownExportTypesResolver knownExportTypesResolver)
         {
             _exportProviderFactories = exportProviderFactories;
             _knownExportTypesRegistrar = knownExportTypesRegistrar;
             _userNameResolver = userNameResolver;
             _pushNotificationManager = pushNotificationManager;
             _platformOptions = platformOptions.Value;
+            _knownExportTypesResolver = knownExportTypesResolver;
         }
 
         /// <summary>
@@ -50,6 +52,7 @@ namespace VirtoCommerce.ExportModule.Web.Controllers
         /// <returns>The list of exported known types</returns>
         [HttpGet]
         [Route("knowntypes")]
+        [Authorize(ModuleConstants.Security.Permissions.Access)]
         public ActionResult<ExportedTypeDefinition[]> GetExportedKnownTypes()
         {
             return Ok(_knownExportTypesRegistrar.GetRegisteredTypes());
@@ -61,9 +64,29 @@ namespace VirtoCommerce.ExportModule.Web.Controllers
         /// <returns>The list of export providers</returns>
         [HttpGet]
         [Route("providers")]
+        [Authorize(ModuleConstants.Security.Permissions.Access)]
         public ActionResult<IExportProvider[]> GetExportProviders()
         {
             return Ok(_exportProviderFactories.Select(x => x(new EmptyProviderConfiguration())).ToArray());
+        }
+
+        /// <summary>
+        /// Provides generic viewable entities collection based on the request
+        /// </summary>
+        /// <param name="request">Data request</param>
+        /// <returns>Viewable entities search result</returns>
+        [HttpPost]
+        [Route("data")]
+        [Authorize(ModuleConstants.Security.Permissions.Access)]
+        public ActionResult<ViewableSearchResult> GetData([FromBody]ExportDataRequest request)
+        {
+            var currentUserName = _userNameResolver.GetCurrentUserName();
+            request.DataQuery.UserName = currentUserName;
+
+            var exportedTypeDefinition = _knownExportTypesResolver.ResolveExportedTypeDefinition(request.ExportTypeName);
+            var pagedDataSource = exportedTypeDefinition.ExportedDataSourceFactory(request.DataQuery);
+
+            return Ok(pagedDataSource.GetData());
         }
 
         /// <summary>
@@ -73,6 +96,7 @@ namespace VirtoCommerce.ExportModule.Web.Controllers
         /// <returns>Export task id</returns>
         [HttpPost]
         [Route("run")]
+        [Authorize(ModuleConstants.Security.Permissions.Access)]
         public ActionResult<PlatformExportPushNotification> RunExport([FromBody]ExportDataRequest request)
         {
             var currentUserName = _userNameResolver.GetCurrentUserName();
@@ -97,6 +121,7 @@ namespace VirtoCommerce.ExportModule.Web.Controllers
         /// <returns></returns>
         [HttpPost]
         [Route("task/cancel")]
+        [Authorize(ModuleConstants.Security.Permissions.Access)]
         public ActionResult CancelExport([FromBody]ExportCancellationRequest cancellationRequest)
         {
             BackgroundJob.Delete(cancellationRequest.JobId);
