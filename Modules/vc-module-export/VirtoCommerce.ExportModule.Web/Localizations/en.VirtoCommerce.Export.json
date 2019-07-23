@@ -61,6 +61,19 @@
                 "commands": {
                     "select": "Select"
                 }
+            },
+            "generic-filter": {
+                "new-title": "Unnamed filter",
+                "new-subtitle": "Edit filter",
+                "subtitle": "Edit filter",
+                "labels": {
+                    "criteria": "Filter criteria",
+                    "filter-name": "Filter name",
+                    "unnamed-filter": "Unnamed filter"
+                },
+                "placeholders": {
+                    "filter-name": "How will you call this filter?"
+                }
             }
         }
     }
