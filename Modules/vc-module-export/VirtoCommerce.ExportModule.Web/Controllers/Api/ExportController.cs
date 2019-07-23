@@ -71,10 +71,10 @@ namespace VirtoCommerce.ExportModule.Web.Controllers
         }
 
         /// <summary>
-        /// Starts export task
+        /// Provides generic viewable entities collection based on the request
         /// </summary>
-        /// <param name="request">Export task description</param>
-        /// <returns>Export task id</returns>
+        /// <param name="request">Data request</param>
+        /// <returns>Viewable entities search result</returns>
         [HttpPost]
         [Route("data")]
         [Authorize(ModuleConstants.Security.Permissions.Access)]
