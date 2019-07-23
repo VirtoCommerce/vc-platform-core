@@ -28,7 +28,9 @@
                     "provider-description": "Tabular providers (e.g. Csv provider) are unavailable for exported types which do not support tabular export.",
                     "exported-columns-description": "Please select columns to export.",
                     "exported-data-description": "Please select data range to export.",
-                    "exported-type-description": "Please select data type to export."
+                    "exported-type-description": "Please select data type to export.",
+                    "selected": "Selected: ",
+                    "allFiltered": "All (filter specified)"
                 },
                 "placeholders": {
                     "provider": "Select provider for export",
@@ -54,6 +56,9 @@
                 },
                 "placeholders": {
                     "select-filter": "Select filter…"
+                },
+                "commands": {
+                    "select": "Select"
                 }
             }
         }

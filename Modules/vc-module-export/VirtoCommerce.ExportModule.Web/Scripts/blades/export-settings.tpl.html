@@ -37,7 +37,10 @@
                             <a class="form-label" ng-class="{'__disabled': !blade.isExportedTypeSelected}" ng-click="selectExportedData()">{{ 'export.blades.export-settings.labels.select' | translate }}</a>
                         </div>
                         <div class="result-group">
-                            <label class="form-label">{{ blade.selectedData || ('export.blades.export-settings.labels.all' | translate) }}</label>
+                            <label ng-if="!blade.exportDataRequest.dataQuery" class="form-label">{{ 'export.blades.export-settings.labels.all' | translate }}</label>
+                            <label ng-if="blade.exportDataRequest.dataQuery && blade.exportDataRequest.dataQuery.isAllSelected && !blade.exportDataRequest.dataQuery.isAnyFilterApplied" class="form-label">{{ 'export.blades.export-settings.labels.all' | translate }}</label>
+                            <label ng-if="blade.exportDataRequest.dataQuery && blade.exportDataRequest.dataQuery.isAllSelected && blade.exportDataRequest.dataQuery.isAnyFilterApplied" class="form-label">{{ 'export.blades.export-settings.labels.allFiltered' | translate }}</label>
+                            <label ng-if="blade.exportDataRequest.dataQuery && !blade.exportDataRequest.dataQuery.isAllSelected" class="form-label">{{ ('export.blades.export-settings.labels.selected' | translate) + blade.exportDataRequest.dataQuery.objectIds.length }}</label>
                         </div>
                         <div class="list-descr">{{ 'export.blades.export-settings.labels.exported-data-description' | translate }}</div>
                     </div>

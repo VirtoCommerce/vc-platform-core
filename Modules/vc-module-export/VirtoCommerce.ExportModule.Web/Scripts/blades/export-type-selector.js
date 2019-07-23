@@ -79,6 +79,7 @@ angular.module('virtoCommerce.exportModule')
                         isTabularExportSupported: selectedType.isTabularExportSupported,
                         dataQuery: {
                             exportTypeName: selectedType.exportDataQueryType,
+                            isAllSelected: true,
                             take: 10000
                         }
                     };
