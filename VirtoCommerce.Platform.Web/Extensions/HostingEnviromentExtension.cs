@@ -19,7 +19,7 @@ namespace VirtoCommerce.Platform.Web.Extensions
 
             if (path.StartsWith("~/"))
             {
-                result = Path.Combine(result, path.Replace("~/", string.Empty).Replace("/", "\\"));
+                result = Path.Combine(result, path.Replace("~/", string.Empty).Replace('/', Path.DirectorySeparatorChar));
             }
             else if (Path.IsPathRooted(path))
             {

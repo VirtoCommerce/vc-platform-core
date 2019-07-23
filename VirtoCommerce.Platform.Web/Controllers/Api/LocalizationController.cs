@@ -18,7 +18,7 @@ namespace VirtoCommerce.Platform.Web.Controllers.Api
         private const string LocalizationFilesFormat = ".json";
         private const string LocalizationFilesFolder = "Localizations";
         private const string InternationalizationFilesFormat = ".js";
-        private const string InternationalizationFilesFolder = "js\\i18n\\angular";
+        private static readonly string InternationalizationFilesFolder = $"js{Path.DirectorySeparatorChar}i18n{Path.DirectorySeparatorChar}angular";
 
         private readonly ILocalModuleCatalog _moduleCatalog;
         private readonly IHostingEnvironment _hostingEnv;
