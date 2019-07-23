@@ -88,49 +88,7 @@ angular.module('virtoCommerce.exportModule')
 
         $scope.selectItem = function (e, listItem) {
             blade.setSelectedItem(listItem);
-            // var newBlade;
-            // if (listItem.type === 'category') {
-            //     var openNewBlade = e.ctrlKey || filter.keyword;
-            //     newBlade = {
-            //         id: 'itemsList' + (blade.level + (openNewBlade ? 1 : 0)),
-            //         level: blade.level + (openNewBlade ? 1 : 0),
-            //         mode: blade.mode,
-            //         isBrowsingLinkedCategory: blade.isBrowsingLinkedCategory || $scope.hasLinks(listItem),
-            //         breadcrumbs: blade.breadcrumbs,
-            //         title: 'catalog.blades.categories-items-list.title',
-            //         subtitle: 'catalog.blades.categories-items-list.subtitle',
-            //         subtitleValues: listItem.name !== null ? { name: listItem.name } : '',
-            //         catalogId: blade.catalogId || listItem.catalogId,
-            //         categoryId: listItem.id,
-            //         category: listItem,
-            //         catalog: blade.catalog,
-            //         disableOpenAnimation: true,
-            //         controller: 'virtoCommerce.catalogModule.categoriesItemsListController',
-            //         template: 'Modules/$(VirtoCommerce.Catalog)/Scripts/blades/categories-items-list.tpl.html'
-            //     };
-
-            //     if (openNewBlade) {
-            //         bladeNavigationService.showBlade(newBlade, blade);
-            //     } else {
-            //         bladeNavigationService.closeBlade(blade, function () {
-            //             bladeNavigationService.showBlade(newBlade, blade.parentBlade);
-            //         });
-            //     }
-            // } else {
-            //     newBlade = {
-            //         id: "listItemDetail" + blade.mode,
-            //         itemId: listItem.id,
-            //         productType: listItem.productType,
-            //         title: listItem.name,
-            //         catalog: blade.catalog,
-            //         controller: 'virtoCommerce.catalogModule.itemDetailController',
-            //         template: 'Modules/$(VirtoCommerce.Catalog)/Scripts/blades/item-detail.tpl.html'
-            //     };
-            //     bladeNavigationService.showBlade(newBlade, blade);
-
-            //     // setting current categoryId to be globally available
-            //     bladeNavigationService.catalogsSelectedCategoryId = blade.categoryId;
-            // }
+            // TODO item view on select
         };
 
         var filter = blade.filter = $scope.filter = {};
