@@ -1,4 +1,4 @@
-﻿using System;
+using System;
 using System.Collections.Generic;
 using System.Linq;
 using Microsoft.Extensions.Logging;
@@ -134,6 +134,31 @@ namespace VirtoCommerce.Platform.Modules
                 throw;
             }
             return result;
+        }
+
+
+        protected override void ValidateDependencyGraph()
+        {
+            var modules = Modules.OfType<ManifestModuleInfo>();
+            var manifestModules = modules as ManifestModuleInfo[] ?? modules.ToArray();
+            try
+            {
+                base.ValidateDependencyGraph();
+            }
+            catch (MissedModuleException exception)
+            {
+                foreach (var module in manifestModules)
+                {
+                    if (exception.MissedDependenciesMatrix.Keys.Contains(module.ModuleName))
+                    {
+                        var errorMessage = $"A module declared a dependency on another module which is not declared to be loaded. Missing module(s): {string.Join(", ", exception.MissedDependenciesMatrix[module.ModuleName])}";
+                        if (!module.Errors.Any(x => x.Contains(errorMessage)))
+                        {
+                            module.Errors.Add(errorMessage);
+                        }
+                    }
+                }
+            }
         }
 
     }

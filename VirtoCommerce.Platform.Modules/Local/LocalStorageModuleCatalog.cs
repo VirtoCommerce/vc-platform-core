@@ -101,7 +101,11 @@ namespace VirtoCommerce.Platform.Modules
                 {
                     if (exception.MissedDependenciesMatrix.Keys.Contains(module.ModuleName))
                     {
-                        module.Errors.Add($"A module declared a dependency on another module which is not declared to be loaded. Missing module(s): {string.Join(", ", exception.MissedDependenciesMatrix[module.ModuleName])}");
+                        var errorMessage = $"A module declared a dependency on another module which is not declared to be loaded. Missing module(s): {string.Join(", ", exception.MissedDependenciesMatrix[module.ModuleName])}";
+                        if (!module.Errors.Any(x => x.Contains(errorMessage)))
+                        {
+                            module.Errors.Add(errorMessage);
+                        }
                     }
                 }
             }
