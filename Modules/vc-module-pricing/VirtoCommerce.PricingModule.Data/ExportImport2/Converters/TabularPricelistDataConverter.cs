@@ -3,7 +3,7 @@ using VirtoCommerce.ExportModule.Core.Services;
 using VirtoCommerce.Platform.Core.Common;
 using VirtoCommerce.PricingModule.Core.Model;
 
-namespace VirtoCommerce.PricingModule.Data.ExportImport
+namespace VirtoCommerce.PricingModule.Data.ExportImport.Converters
 {
     public class TabularPricelistDataConverter : ITabularDataConverter
     {

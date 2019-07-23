@@ -13,8 +13,8 @@ angular.module(moduleName, ['ui.grid.cellNav', 'ui.grid.edit', 'ui.grid.validate
             controller: ['$scope', 'platformWebApp.bladeNavigationService', function ($scope, bladeNavigationService) {
                 var newBlade = {
                     id: 'exportSettings',
-                    title: 'export.blades.exporter.title',
-                    subtitle: 'export.blades.exporter.subtitle',
+                    title: 'export.blades.export-settings.title',
+                    subtitle: 'export.blades.export-settings.subtitle',
                     controller: 'virtoCommerce.exportModule.exportSettingsController',
                     template: 'Modules/$(VirtoCommerce.Export)/Scripts/blades/export-settings.tpl.html',
                     exportDataRequest: {},

@@ -46,6 +46,8 @@ namespace VirtoCommerce.ExportModule.Core.Model
 
         protected abstract FetchResult FetchData(SearchCriteriaBase searchCriteria);
 
+        protected abstract ViewableEntity ToViewableEntity(object obj);
+
         /// <summary>
         /// Checks user passed in <see cref="DataQuery"/> for permissions before fetching data.
         /// Permissions should be attached to *ExportPagedDataSource class using <see cref="AuthorizeAttribute"/>
@@ -69,11 +71,7 @@ namespace VirtoCommerce.ExportModule.Core.Model
 
         public virtual IEnumerable<ICloneable> FetchNextPage()
         {
-            if (_searchCriteria == null)
-            {
-                _searchCriteria = DataQuery.ToSearchCriteria();
-                Authorize().GetAwaiter().GetResult();
-            }
+            EnsureSearchCriteriaInitialized();
 
             _searchCriteria.Skip = PageSize * CurrentPageNumber;
             _searchCriteria.Take = PageSize;
@@ -84,15 +82,30 @@ namespace VirtoCommerce.ExportModule.Core.Model
             return result.Results;
         }
 
+        public virtual ViewableSearchResult GetData()
+        {
+            Authorize().GetAwaiter().GetResult();
+
+            var searchCriteria = DataQuery.ToSearchCriteria();
+            var queryResult = FetchData(searchCriteria);
+            var result = new ViewableSearchResult()
+            {
+                TotalCount = queryResult.TotalCount,
+            };
+
+            foreach (var obj in queryResult.Results)
+            {
+                result.Results.Add(ToViewableEntity(obj));
+            }
+
+            return result;
+        }
+
         public virtual int GetTotalCount()
         {
             if (_totalCount < 0)
             {
-                if (_searchCriteria == null)
-                {
-                    _searchCriteria = DataQuery.ToSearchCriteria();
-                    Authorize().GetAwaiter().GetResult();
-                }
+                EnsureSearchCriteriaInitialized();
 
                 _searchCriteria.Skip = 0;
                 _searchCriteria.Take = 0;
@@ -101,6 +114,18 @@ namespace VirtoCommerce.ExportModule.Core.Model
                 _totalCount = result.TotalCount;
             }
             return _totalCount;
+        }
+
+
+        protected virtual void EnsureSearchCriteriaInitialized()
+        {
+            if (_searchCriteria == null)
+            {
+                _searchCriteria = DataQuery.ToSearchCriteria();
+
+                // Checking permission authorization only once
+                Authorize().GetAwaiter().GetResult();
+            }
         }
     }
 }

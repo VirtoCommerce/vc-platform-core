@@ -10,5 +10,6 @@ namespace VirtoCommerce.ExportModule.Core.Model
         int CurrentPageNumber { get; }
         int GetTotalCount();
         IEnumerable<ICloneable> FetchNextPage();
+        ViewableSearchResult GetData();
     }
 }

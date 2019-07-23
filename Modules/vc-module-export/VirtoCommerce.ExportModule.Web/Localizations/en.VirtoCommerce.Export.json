@@ -1,8 +1,13 @@
 {
     "export": {
         "main-menu-title": "Export New",
+        "commands": {
+            "pick-all": "Pick all"
+        },
         "blades": {
             "export-settings": {
+                "title": "Export settings",
+                "subtitle": "Specify export settings",
                 "labels": {
                     "provider": "Select provider for export",
                     "template": "Select export template",
@@ -24,16 +29,38 @@
                     "provider-description": "Tabular providers (e.g. Csv provider) are unavailable for exported types which do not support tabular export.",
                     "exported-columns-description": "Please select columns to export.",
                     "exported-data-description": "Please select data range to export.",
-                    "exported-type-description": "Please select data type to export."
+                    "exported-type-description": "Please select data type to export.",
+                    "selected": "Selected: ",
+                    "allFiltered": "All (filter specified)"
                 },
                 "placeholders": {
                     "provider": "Select provider for export",
                     "template": "Select export template"
                 }
             },
-            "exporter": {
-                "title": "Export settings",
-                "subtitle": "Select columns and data for export"
+            "export-progress": {
+                "title": "Export progress"
+            },
+            "export-type-selector": {
+                "title": "Select exported type",
+                "subtitle": "Select data type you want to export"
+            },
+            "export-generic-viewer": {
+                "title": "Select data to export",
+                "subtitle": "Select data you want to export",
+                "labels": {
+                    "picture": "Pic",
+                    "type": "Object type",
+                    "name": "Name",
+                    "code": "Code",
+                    "new-filter": "Add new filter"
+                },
+                "placeholders": {
+                    "select-filter": "Select filter…"
+                },
+                "commands": {
+                    "select": "Select"
+                }
             }
         }
     }
