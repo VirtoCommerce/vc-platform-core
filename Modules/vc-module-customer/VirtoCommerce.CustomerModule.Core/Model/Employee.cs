@@ -29,6 +29,8 @@ namespace VirtoCommerce.CustomerModule.Core.Model
 
         public string PhotoUrl { get; set; }
 
+        public override string ObjectType => typeof(Employee).FullName;
+
         #region IHasSecurityAccounts Members
 
         /// <summary>

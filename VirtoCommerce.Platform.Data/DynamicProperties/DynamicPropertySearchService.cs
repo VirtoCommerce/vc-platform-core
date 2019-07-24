@@ -42,9 +42,9 @@ namespace VirtoCommerce.Platform.Data.DynamicProperties
 
                     var query = repository.DynamicProperties;
 
-                    if (!string.IsNullOrEmpty(criteria.TypeName))
+                    if (!string.IsNullOrEmpty(criteria.ObjectType))
                     {
-                        query = query.Where(x => x.ObjectType == criteria.TypeName);
+                        query = query.Where(x => x.ObjectType == criteria.ObjectType);
                     }
 
                     if (!string.IsNullOrEmpty(criteria.Keyword))
