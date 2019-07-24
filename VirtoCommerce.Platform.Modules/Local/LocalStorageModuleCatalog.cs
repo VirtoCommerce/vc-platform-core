@@ -49,9 +49,10 @@ namespace VirtoCommerce.Platform.Modules
                 var modulePath = Path.GetDirectoryName(manifestPath);
 
                 CopyAssemblies(modulePath, _options.ProbingPath);
-
-                var moduleInfo = new ManifestModuleInfo(manifest) { FullPhysicalPath = Path.GetDirectoryName(manifestPath) };
-
+                var moduleInfo = AbstractTypeFactory<ManifestModuleInfo>.TryCreateInstance();
+                moduleInfo.LoadFromManifest(manifest);
+                moduleInfo.FullPhysicalPath = Path.GetDirectoryName(manifestPath);
+             
                 // Modules without assembly file don't need initialization
                 if (string.IsNullOrEmpty(manifest.AssemblyFile))
                 {

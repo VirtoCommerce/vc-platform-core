@@ -42,7 +42,7 @@ namespace VirtoCommerce.Platform.Modules
                         if (alreadyInstalledModule != null)
                         {
                             externalModuleInfo.IsInstalled = alreadyInstalledModule.IsInstalled;
-                            externalModuleInfo.Errors = alreadyInstalledModule.Errors;
+                            externalModuleInfo.Errors.AddRange(alreadyInstalledModule.Errors);
                         }
                         externalModuleInfo.InitializationMode = InitializationMode.OnDemand;
                         AddModule(externalModuleInfo);
@@ -120,10 +120,29 @@ namespace VirtoCommerce.Platform.Modules
 
                 using (var stream = _externalClient.OpenRead(manifestUrl))
                 {
-                    var manifests = stream.DeserializeJson<List<ModuleManifest>>();
+                    var manifests = stream.DeserializeJson<List<ExternalModuleManifest>>();
                     if (!manifests.IsNullOrEmpty())
                     {
-                        result.AddRange(manifests.Select(manifest => new ManifestModuleInfo(manifest)));
+                        foreach(var manifest in manifests)
+                        {
+                            if (manifest.Versions != null)
+                            {
+                                //Select from all versions of module the latest compatible by semVer with the current platform version.
+                                var latestPlatformCompatibleVersion = manifest.Versions.OrderByDescending(x => x.SemanticVersion)
+                                                                               .Where(x => x.PlatformSemanticVersion.IsCompatibleWithBySemVer(PlatformVersion.CurrentVersion))
+                                                                               .FirstOrDefault();
+                                if (latestPlatformCompatibleVersion != null)
+                                {
+                                    var moduleInfo = AbstractTypeFactory<ManifestModuleInfo>.TryCreateInstance();
+                                    moduleInfo.LoadFromExternalManifest(manifest, latestPlatformCompatibleVersion);
+                                    result.Add(moduleInfo);
+                                }
+                            }
+                            else
+                            {
+                                _logger.LogError($"module {manifest.Id} has  invalid  format, missed 'versions'");
+                            }
+                        }
                     }
                 }
 
