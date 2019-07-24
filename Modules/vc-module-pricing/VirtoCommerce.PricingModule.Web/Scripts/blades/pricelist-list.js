@@ -7,8 +7,10 @@ function ($scope, pricelists, dialogService, uiGridHelper, bladeUtils) {
     var exportDataRequest = {
         exportTypeName: 'Pricelist',
         isTabularExportSupported: true,
+        defaultProvider: 'JsonExportProvider',
         dataQuery: {
-            exportTypeName: 'PricelistExportDataQuery'
+            exportTypeName: 'PricelistExportDataQuery',
+            isAllSelected: true,
         }
     };
 
@@ -120,7 +122,12 @@ function ($scope, pricelists, dialogService, uiGridHelper, bladeUtils) {
 
                 var selectedRows = $scope.gridApi.selection.getSelectedRows();
                 exportDataRequest.dataQuery.objectIds = [];
+                exportDataRequest.dataQuery.isAllSelected = true;
+                exportDataRequest.dataQuery.isAnyFilterApplied = false;
+
                 if (selectedRows && selectedRows.length) {
+                    exportDataRequest.dataQuery.isAllSelected = false;
+                    exportDataRequest.dataQuery.isAnyFilterApplied = true;
                     exportDataRequest.dataQuery.objectIds = _.map(selectedRows, function (pricelist) {
                         return pricelist.id;
                     });

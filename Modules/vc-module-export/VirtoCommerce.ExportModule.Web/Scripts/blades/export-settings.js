@@ -11,8 +11,13 @@ angular.module('virtoCommerce.exportModule')
                 if (result && result.length) {
                     blade.allProviders = result;
                     fillProviders();
+                    if (typeof (blade.exportDataRequest.defaultProvider) !== 'undefined') {
+                        blade.selectedProvider = _.find(blade.providers,
+                            function (item) { return item.name === blade.exportDataRequest.defaultProvider});
+                    }
                 }
             });
+
             blade.isExportedTypeSelected = typeof (blade.exportDataRequest.exportTypeName) !== 'undefined';
             blade.isLoading = false;
         }
@@ -80,7 +85,7 @@ angular.module('virtoCommerce.exportModule')
                 exportDataRequest: blade.exportDataRequest,
                 onSelected: function (includedColumns) {
                     blade.exportDataRequest.dataQuery.includedColumns = includedColumns;
-                    if (blade.exportDataRequest.dataQuery.includedColumns.length != blade.exportDataRequest.allColumnsOfType.length) {
+                    if (blade.exportDataRequest.dataQuery.includedColumns.length !== blade.exportDataRequest.allColumnsOfType.length) {
                         var includedColumnsNames = _.pluck(blade.exportDataRequest.dataQuery.includedColumns, 'name');
                         if (includedColumnsNames.length > 10) {
                             blade.includedColumnsDescription = includedColumnsNames.slice(0, 10).join(', ') + ', ... (+' + (includedColumnsNames.length - 10) + ' ' + $translate.instant('export.blades.export-settings.labels.columns-more') + ')';

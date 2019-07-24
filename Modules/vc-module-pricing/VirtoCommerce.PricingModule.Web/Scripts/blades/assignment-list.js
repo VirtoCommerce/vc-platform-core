@@ -7,6 +7,8 @@ angular.module('virtoCommerce.pricingModule')
 
             var exportDataRequest = {
                 exportTypeName: 'PricelistAssignment',
+                isTabularExportSupported: true,
+                defaultProvider: 'JsonExportProvider',
                 dataQuery: {
                     exportTypeName: 'PricelistAssignmentExportDataQuery'
                 }
@@ -159,7 +161,12 @@ angular.module('virtoCommerce.pricingModule')
 
                         var selectedRows = $scope.gridApi.selection.getSelectedRows();
                         exportDataRequest.dataQuery.objectIds = [];
+                        exportDataRequest.dataQuery.isAllSelected = true;
+                        exportDataRequest.dataQuery.isAnyFilterApplied = false;
+
                         if (selectedRows && selectedRows.length) {
+                            exportDataRequest.dataQuery.isAllSelected = false;
+                            exportDataRequest.dataQuery.isAnyFilterApplied = true;
                             exportDataRequest.dataQuery.objectIds = _.map(selectedRows, function (priceAssignments) {
                                 return priceAssignments.id;
                             });
