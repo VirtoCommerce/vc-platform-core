@@ -4,8 +4,9 @@ angular.module('virtoCommerce.pricingModule')
     var blade = $scope.blade;
     var exportDataRequest = {
         exportTypeName: 'Price',
+        isTabularExportSupported: true,
         dataQuery: {
-             exportTypeName: 'PriceExportDataQuery'
+            exportTypeName: 'PriceExportDataQuery'
         }
     };
 
@@ -178,7 +179,7 @@ angular.module('virtoCommerce.pricingModule')
                     title: 'pricing.blades.exporter.priceTitle',
                     subtitle: 'pricing.blades.exporter.priceSubtitle',
                     controller: 'virtoCommerce.exportModule.exportSettingsController',
-                    template: 'Modules/$(VirtoCommerce.Export)/Scripts/blades/exportSettings.tpl.html',
+                    template: 'Modules/$(VirtoCommerce.Export)/Scripts/blades/export-settings.tpl.html',
                     exportDataRequest: exportDataRequest
                 };
                 bladeNavigationService.showBlade(newBlade, blade);
