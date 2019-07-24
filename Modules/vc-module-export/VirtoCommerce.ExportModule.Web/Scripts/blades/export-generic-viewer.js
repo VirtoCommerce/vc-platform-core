@@ -106,7 +106,7 @@ angular.module('virtoCommerce.exportModule')
                 filter.current = null;
                 showFilterDetailBlade({ isNew: true });
             } else {
-                bladeNavigationService.closeBlade({ id: 'filterDetail' });
+                bladeNavigationService.closeBlade({ id: 'exportGenericViewerFilter' });
                 filter.criteriaChanged();
             }
         };
@@ -119,9 +119,9 @@ angular.module('virtoCommerce.exportModule')
 
         function showFilterDetailBlade(bladeData) {
             var newBlade = {
-                id: 'filterDetail',
-                controller: 'virtoCommerce.exportModule.filterDetailController',
-                template: 'Modules/$(VirtoCommerce.Export)/Scripts/blades/filter-detail.tpl.html'
+                id: 'exportGenericViewerFilter',
+                controller: 'virtoCommerce.exportModule.exportGenericViewerFilterController',
+                template: 'Modules/$(VirtoCommerce.Export)/Scripts/blades/export-generic-viewer-filter.tpl.html'
             };
             angular.extend(newBlade, bladeData);
             bladeNavigationService.showBlade(newBlade, blade);

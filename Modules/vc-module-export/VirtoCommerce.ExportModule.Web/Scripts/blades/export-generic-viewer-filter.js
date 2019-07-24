@@ -1,5 +1,5 @@
 angular.module('virtoCommerce.exportModule')
-.controller('virtoCommerce.exportModule.genericFilterController', ['$scope', '$localStorage', 'platformWebApp.settings', 'platformWebApp.metaFormsService', '$translate', 
+.controller('virtoCommerce.exportModule.exportGenericViewerFilter', ['$scope', '$localStorage', 'platformWebApp.settings', 'platformWebApp.metaFormsService', '$translate', 
     function ($scope, $localStorage, settings, metaFormsService, $translate) {
         var blade = $scope.blade;
 
