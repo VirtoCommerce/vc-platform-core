@@ -181,7 +181,8 @@ namespace VirtoCommerce.Platform.Web.Controllers.Api
                         using (var manifestStream = entry.Open())
                         {
                             var manifest = ManifestReader.Read(manifestStream);
-                            var module = new ManifestModuleInfo(manifest);
+                            var module = AbstractTypeFactory<ManifestModuleInfo>.TryCreateInstance();
+                            module.LoadFromManifest(manifest);
                             var alreadyExistModule = _externalModuleCatalog.Modules.OfType<ManifestModuleInfo>().FirstOrDefault(x => x.Equals(module));
                             if (alreadyExistModule != null)
                             {

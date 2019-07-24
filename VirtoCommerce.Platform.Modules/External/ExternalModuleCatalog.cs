@@ -1,4 +1,4 @@
-﻿using System;
+using System;
 using System.Collections.Generic;
 using System.Linq;
 using Microsoft.Extensions.Logging;
@@ -42,7 +42,7 @@ namespace VirtoCommerce.Platform.Modules
                         if (alreadyInstalledModule != null)
                         {
                             externalModuleInfo.IsInstalled = alreadyInstalledModule.IsInstalled;
-                            externalModuleInfo.Errors = alreadyInstalledModule.Errors;
+                            externalModuleInfo.Errors.AddRange(alreadyInstalledModule.Errors);
                         }
                         externalModuleInfo.InitializationMode = InitializationMode.OnDemand;
                         AddModule(externalModuleInfo);
@@ -120,10 +120,29 @@ namespace VirtoCommerce.Platform.Modules
 
                 using (var stream = _externalClient.OpenRead(manifestUrl))
                 {
-                    var manifests = stream.DeserializeJson<List<ModuleManifest>>();
+                    var manifests = stream.DeserializeJson<List<ExternalModuleManifest>>();
                     if (!manifests.IsNullOrEmpty())
                     {
-                        result.AddRange(manifests.Select(manifest => new ManifestModuleInfo(manifest)));
+                        foreach(var manifest in manifests)
+                        {
+                            if (manifest.Versions != null)
+                            {
+                                //Select from all versions of module the latest compatible by semVer with the current platform version.
+                                var latestPlatformCompatibleVersion = manifest.Versions.OrderByDescending(x => x.SemanticVersion)
+                                                                               .Where(x => x.PlatformSemanticVersion.IsCompatibleWithBySemVer(PlatformVersion.CurrentVersion))
+                                                                               .FirstOrDefault();
+                                if (latestPlatformCompatibleVersion != null)
+                                {
+                                    var moduleInfo = AbstractTypeFactory<ManifestModuleInfo>.TryCreateInstance();
+                                    moduleInfo.LoadFromExternalManifest(manifest, latestPlatformCompatibleVersion);
+                                    result.Add(moduleInfo);
+                                }
+                            }
+                            else
+                            {
+                                _logger.LogError($"module {manifest.Id} has  invalid  format, missed 'versions'");
+                            }
+                        }
                     }
                 }
 
@@ -134,6 +153,31 @@ namespace VirtoCommerce.Platform.Modules
                 throw;
             }
             return result;
+        }
+
+
+        protected override void ValidateDependencyGraph()
+        {
+            var modules = Modules.OfType<ManifestModuleInfo>();
+            var manifestModules = modules as ManifestModuleInfo[] ?? modules.ToArray();
+            try
+            {
+                base.ValidateDependencyGraph();
+            }
+            catch (MissedModuleException exception)
+            {
+                foreach (var module in manifestModules)
+                {
+                    if (exception.MissedDependenciesMatrix.Keys.Contains(module.ModuleName))
+                    {
+                        var errorMessage = $"A module declared a dependency on another module which is not declared to be loaded. Missing module(s): {string.Join(", ", exception.MissedDependenciesMatrix[module.ModuleName])}";
+                        if (!module.Errors.Any(x => x.Contains(errorMessage)))
+                        {
+                            module.Errors.Add(errorMessage);
+                        }
+                    }
+                }
+            }
         }
 
     }
