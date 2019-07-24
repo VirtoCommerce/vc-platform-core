@@ -19,6 +19,7 @@ using VirtoCommerce.Platform.Core.PushNotifications;
 using VirtoCommerce.Platform.Core.Security;
 using VirtoCommerce.Platform.Core.Settings;
 using VirtoCommerce.Platform.Data.Helpers;
+using VirtoCommerce.Platform.Web.Modularity;
 
 namespace VirtoCommerce.Platform.Web.Controllers.Api
 {

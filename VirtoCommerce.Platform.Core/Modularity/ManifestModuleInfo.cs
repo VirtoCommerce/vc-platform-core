@@ -66,11 +66,11 @@ namespace VirtoCommerce.Platform.Core.Modularity
             Ref = manifest.PackageUrl;
             if (manifest.Dependencies != null)
             {
-                Dependencies.AddRange(manifest.Dependencies.Select(x => new ModuleIdentity(x.Id, x.Version)));
+                Dependencies.AddRange(manifest.Dependencies.Select(x => new ModuleIdentity(x.Id, SemanticVersion.Parse(x.Version))));
             }
             if (manifest.Incompatibilities != null)
             {
-                Incompatibilities.AddRange(manifest.Incompatibilities.Select(x => new ModuleIdentity(x.Id, x.Version)));
+                Incompatibilities.AddRange(manifest.Incompatibilities.Select(x => new ModuleIdentity(x.Id, SemanticVersion.Parse(x.Version))));
             }
 
             Title = manifest.Title;
@@ -116,11 +116,11 @@ namespace VirtoCommerce.Platform.Core.Modularity
 
             if (version.Dependencies != null)
             {
-                Dependencies.AddRange(version.Dependencies.Select(x => new ModuleIdentity(x.Id, x.Version)));
+                Dependencies.AddRange(version.Dependencies.Select(x => new ModuleIdentity(x.Id, SemanticVersion.Parse(x.Version))));
             }
             if (version.Incompatibilities != null)
             {
-                Incompatibilities.AddRange(version.Incompatibilities.Select(x => new ModuleIdentity(x.Id, x.Version)));
+                Incompatibilities.AddRange(version.Incompatibilities.Select(x => new ModuleIdentity(x.Id, SemanticVersion.Parse(x.Version))));
             }
 
             Title = manifest.Title;
