@@ -153,7 +153,7 @@ namespace VirtoCommerce.PricingModule.Web
 
             registrar.RegisterType(typeof(Price).Name, "Pricing", typeof(PriceExportDataQuery).Name)
                 .WithDataSourceFactory(dataQuery => priceExportPagedDataSourceFactory(dataQuery))
-                .WithMetadata(ExportedTypeMetadata.GetFromType<Price>(true))
+                .WithMetadata(ExportedTypeMetadata.GetFromType<Price>(false))
                 .WithTabularDataConverter(new TabularPriceDataConverter())
                 .WithTabularMetadata(ExportedTypeMetadata.GetFromType<TabularPrice>(false));
 
@@ -165,7 +165,7 @@ namespace VirtoCommerce.PricingModule.Web
 
             registrar.RegisterType(typeof(PricelistAssignment).Name, "Pricing", typeof(PricelistAssignmentExportDataQuery).Name)
                 .WithDataSourceFactory(dataQuery => pricelistAssignmentExportPagedDataSourceFactory(dataQuery))
-                .WithMetadata(ExportedTypeMetadata.GetFromType<PricelistAssignment>(true))
+                .WithMetadata(ExportedTypeMetadata.GetFromType<PricelistAssignment>(false))
                 .WithTabularDataConverter(new TabularPricelistAssignmentDataConverter())
                 .WithTabularMetadata(ExportedTypeMetadata.GetFromType<TabularPricelistAssignment>(false));
 
