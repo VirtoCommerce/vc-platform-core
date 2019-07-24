@@ -24,6 +24,23 @@ angular.module(moduleName, ['ui.grid.cellNav', 'ui.grid.edit', 'ui.grid.validate
             }]
         });
     }])
+    // // service to connect exported type to registered metafields id
+    // .factory('virtoCommerce.exportModule.exportTypeFilterMetafields', [function () {
+    //     var map = {};
+
+    //     function registerMetafieldsId(exportType, metafieldsId) {
+    //         map[exportType] = metafieldsId;
+    //     }
+
+    //     function getMetafieldsId(metafieldsId) {
+    //         return map[metafieldsId];
+    //     }
+
+    //     return {
+    //         registerMetafieldsId: registerMetafieldsId,
+    //         getMetafieldsId: getMetafieldsId
+    //     };
+    // }])
     .run(
         ['$http', '$compile', 'platformWebApp.mainMenuService', 'platformWebApp.widgetService', '$state', 'platformWebApp.authService'
             , function ($http, $compile, mainMenuService, widgetService, $state, authService) {

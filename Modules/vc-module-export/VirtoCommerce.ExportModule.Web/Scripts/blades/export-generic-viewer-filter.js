@@ -1,9 +1,9 @@
 angular.module('virtoCommerce.exportModule')
-.controller('virtoCommerce.exportModule.exportGenericViewerFilter', ['$scope', '$localStorage', 'platformWebApp.settings', 'platformWebApp.metaFormsService', '$translate', 
-    function ($scope, $localStorage, settings, metaFormsService, $translate) {
+.controller('virtoCommerce.exportModule.exportGenericViewerFilterController', ['$scope', '$localStorage', 'platformWebApp.metaFormsService', '$translate', 
+    function ($scope, $localStorage, metaFormsService, $translate) {
         var blade = $scope.blade;
 
-        blade.metaFields = metaFormsService.getMetaFields(blade.metafieldsCollectionId);
+        blade.metaFields = metaFormsService.getMetaFields(blade.metafieldsId) || [];
         // [
             // {
             //     name: 'statuses',

@@ -1,4 +1,4 @@
-﻿//Call this to register our module to main application
+//Call this to register our module to main application
 var moduleName = "virtoCommerce.pricingModule";
 
 if (AppDependencies != undefined) {
@@ -31,8 +31,8 @@ angular.module(moduleName, ['ui.grid.cellNav', 'ui.grid.edit', 'ui.grid.validate
   }]
 )
 .run(
-  ['$http', '$compile', 'platformWebApp.mainMenuService', 'platformWebApp.widgetService', '$state', 'platformWebApp.authService'
-  , function ($http, $compile, mainMenuService, widgetService, $state, authService) {
+  ['$http', '$compile', 'platformWebApp.mainMenuService', 'platformWebApp.widgetService', '$state', 'platformWebApp.authService', 'platformWebApp.metaFormsService',
+  function ($http, $compile, mainMenuService, widgetService, $state, authService, metaFormsService) {
       //Register module in main menu
       var menuItem = {
           path: 'browse/pricing',
@@ -68,4 +68,18 @@ angular.module(moduleName, ['ui.grid.cellNav', 'ui.grid.edit', 'ui.grid.validate
             // compile the response, which will put stuff into the cache
             $compile(response.data);
         });
+
+        //
+        metaFormsService.registerMetaFields('Price' + 'ExportFilter', [
+        {
+            name: 'pricelistSelector',
+            title: "pricing.blades.assignment-detail.labels.price-list",
+            templateUrl: 'Modules/$(VirtoCommerce.Pricing)/Scripts/selectors/pricelist-selector.tpl.html',
+        },
+        {
+            name: 'startDate',
+            title: "pricing.blades.assignment-detail.labels.enable-date",
+            valueType: "DateTime"
+        }
+    ]);
   }]);

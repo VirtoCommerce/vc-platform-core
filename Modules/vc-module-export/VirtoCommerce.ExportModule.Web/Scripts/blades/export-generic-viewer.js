@@ -65,9 +65,10 @@ angular.module('virtoCommerce.exportModule')
 
         function getFilterConditions() {
             var result = {};
-            var isAnyFilterApplied = false;
+            var isAnyFilterApplied = !!filter.current;
 
             result.isAnyFilterApplied = isAnyFilterApplied;
+            angular.extend(result, filter.current);
 
             return result;
         }
@@ -102,9 +103,10 @@ angular.module('virtoCommerce.exportModule')
 
         filter.change = function () {
             $localStorage.exportSearchFilterId = filter.current ? filter.current.id : null;
+            var metafieldsId = blade.exportDataRequest.exportTypeName + 'ExportFilter';
             if (filter.current && !filter.current.id) {
                 filter.current = null;
-                showFilterDetailBlade({ isNew: true });
+                showFilterDetailBlade({ isNew: true, metafieldsId: metafieldsId });
             } else {
                 bladeNavigationService.closeBlade({ id: 'exportGenericViewerFilter' });
                 filter.criteriaChanged();
@@ -113,7 +115,8 @@ angular.module('virtoCommerce.exportModule')
 
         filter.edit = function () {
             if (filter.current) {
-                showFilterDetailBlade({ data: filter.current });
+                var metafieldsId = blade.exportDataRequest.exportTypeName  + 'ExportFilter';
+                showFilterDetailBlade({ data: filter.current, metafieldsId: metafieldsId });
             }
         };
 
