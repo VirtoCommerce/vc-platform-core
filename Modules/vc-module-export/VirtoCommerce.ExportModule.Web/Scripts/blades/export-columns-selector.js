@@ -8,7 +8,7 @@ angular.module('virtoCommerce.exportModule')
             blade.title = 'export.blades.export-settings.labels.exported-columns';
             blade.headIcon = 'fa-folder';
 
-            allColumns = _.each(angular.copy(blade.exportDataRequest.metaData.propertyInfos), function (column) {
+            allColumns = _.each(angular.copy(blade.exportDataRequest.allColumnsOfType), function (column) {
                 column.$selected = _.contains(_.pluck(blade.exportDataRequest.dataQuery.includedColumns, 'name'), column.name);
             });
             blade.currentEntities = _.groupBy(allColumns, 'group');

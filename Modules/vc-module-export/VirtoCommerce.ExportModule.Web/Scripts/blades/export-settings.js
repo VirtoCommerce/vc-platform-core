@@ -18,17 +18,18 @@ angular.module('virtoCommerce.exportModule')
 
         function fillProviders() {
             if (blade.allProviders) {
-                var filterNonTabular = blade.exportDataRequest.exportTypeName && !blade.exportDataRequest.isTabularExportSupported;
-                var providers = blade.allProviders; 
-                if (filterNonTabular) {
-                    providers = _.filter(providers, function (item) { return !item.isTabular});
-                }
-                blade.providers = _.map(providers, function (item) { return { id: item.typeName, name: item.typeName } });
+                blade.providers = _.map(blade.allProviders, function (item) { return { id: item.typeName, name: item.typeName, isTabular: item.isTabular} });
                 if (blade.selectedProvider && _.findIndex(blade.providers, function(item) { return item.id === blade.selectedProvider.id; }) === -1) {
                     blade.selectedProvider = undefined;
                 }
             }
         }
+
+        $scope.providerChanged = function () {
+            blade.exportDataRequest = {};
+            blade.isExportedTypeSelected = false;
+            blade.includedColumnsDescription = null;
+        };
 
         $scope.startExport = function () {
             if (!$scope.validateExportParameters()) {
@@ -57,12 +58,12 @@ angular.module('virtoCommerce.exportModule')
                 template: 'Modules/$(VirtoCommerce.Export)/Scripts/blades/export-type-selector.tpl.html',
                 isClosingDisabled: false,
                 exportDataRequest: blade.exportDataRequest,
+                selectedProvider: blade.selectedProvider,
                 onSelected: function(exportDataRequest) {
                     blade.exportDataRequest = angular.extend(blade.exportDataRequest, exportDataRequest);
                     blade.exportDataRequest.dataQuery = angular.copy(exportDataRequest.dataQuery);
                     blade.isExportedTypeSelected = typeof (blade.exportDataRequest.exportTypeName) !== 'undefined';
                     blade.includedColumnsDescription = null;
-                    fillProviders();
                 }
             };
 
@@ -78,7 +79,7 @@ angular.module('virtoCommerce.exportModule')
                 exportDataRequest: blade.exportDataRequest,
                 onSelected: function (includedColumns) {
                     blade.exportDataRequest.dataQuery.includedColumns = includedColumns;
-                    if (blade.exportDataRequest.dataQuery.includedColumns.length != blade.exportDataRequest.metaData.propertyInfos.length) {
+                    if (blade.exportDataRequest.dataQuery.includedColumns.length != blade.exportDataRequest.allColumnsOfType.length) {
                         var includedColumnsNames = _.pluck(blade.exportDataRequest.dataQuery.includedColumns, 'name');
                         if (includedColumnsNames.length > 10) {
                             blade.includedColumnsDescription = includedColumnsNames.slice(0, 10).join(', ') + ', ... (+' + (includedColumnsNames.length - 10) + ' ' + $translate.instant('export.blades.export-settings.labels.columns-more') + ')';

@@ -26,7 +26,7 @@
                     "exported-data": "Select data for export",
                     "exported-columns": "Select columns for export",
                     "all": "All",
-                    "provider-description": "Tabular providers (e.g. Csv provider) are unavailable for exported types which do not support tabular export.",
+                    "provider-description": "Available exported types depend on selected provider. Some types do not support tabular export (CSV provider).",
                     "exported-columns-description": "Please select columns to export.",
                     "exported-data-description": "Please select data range to export.",
                     "exported-type-description": "Please select data type to export.",

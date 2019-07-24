@@ -9,12 +9,14 @@ angular.module('virtoCommerce.exportModule')
             blade.isLoading = true;
 
             exportApi.getKnowntypes(function (results) {
-                    _.each(results, function (item) {
-                        item.groupName = item.group + '|' + item.typeName;
-                        var lastIndex = item.typeName.lastIndexOf('.');
-                        item.name = item.typeName.substring(lastIndex + 1);
-                        item.isTabularExportSupported = item.isTabularExportSupported;
-                    });
+                if (blade.selectedProvider.isTabular) {
+                    results = _.filter(results, function (x) { return x.isTabularExportSupported === true; });
+                }
+                _.each(results, function (item) {
+                    item.groupName = item.group + '|' + item.typeName;
+                    var lastIndex = item.typeName.lastIndexOf('.');
+                    item.name = item.typeName.substring(lastIndex + 1);
+                });
                 blade.allGroups = results;
                 typeTree = {};
                 _.each(results, function (exportedType ) {
@@ -74,14 +76,14 @@ angular.module('virtoCommerce.exportModule')
                 } else {
                     var selectedTypes = _.filter(blade.allGroups, function (x) { return x.groupName === node.groupName || (node.groupName === 'General' && !x.groupName); });
                     var selectedType = selectedTypes[0];
+                    var allColumnsOfType = (blade.selectedProvider.isTabular ? selectedType.tabularMetaData.propertyInfos : selectedType.metaData.propertyInfos);
                     var exportDataRequest = {
                         exportTypeName: selectedType.typeName,
-                        metaData: selectedType.metaData,
-                        isTabularExportSupported: selectedType.isTabularExportSupported,
+                        allColumnsOfType: allColumnsOfType,
                         dataQuery: {
                             exportTypeName: selectedType.exportDataQueryType,
                             isAllSelected: true,
-                            includedColumns: selectedType.metaData.propertyInfos,
+                            includedColumns: allColumnsOfType,
                             take: 10000
                         }
                     };

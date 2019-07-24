@@ -21,6 +21,7 @@ using VirtoCommerce.PricingModule.Core.Model;
 using VirtoCommerce.PricingModule.Core.Model.Search;
 using VirtoCommerce.PricingModule.Core.Services;
 using VirtoCommerce.PricingModule.Data.ExportImport;
+using VirtoCommerce.PricingModule.Data.ExportImport.Converters;
 using Xunit;
 
 namespace VirtoCommerce.PricingModule.Test
@@ -366,7 +367,9 @@ namespace VirtoCommerce.PricingModule.Test
                 {
                     DataQuery = dataQuery
                 })
-                .WithMetadata(metadata);
+                .WithMetadata(metadata)
+                .WithTabularDataConverter(new TabularPriceDataConverter())
+                .WithTabularMetadata(ExportedTypeMetadata.GetFromType<TabularPrice>(false));
 
             var exportProviderFactories = new[]
             {
@@ -374,7 +377,7 @@ namespace VirtoCommerce.PricingModule.Test
                 new Func<IExportProviderConfiguration, IExportProvider>(config => new CsvExportProvider(config)),
             };
 
-            var includedColumnNames = new string[] { "Currency", "ProductId", "Sale", "List", "MinQuantity", "StartDate", "EndDate", "EffectiveValue" };
+            var includedColumnNames = new string[] { "Currency", "ProductId" };
             var dataExporter = new DataExporter(resolver, new ExportProviderFactory(exportProviderFactories));
 
             var result = string.Empty;
@@ -401,7 +404,7 @@ namespace VirtoCommerce.PricingModule.Test
                 result = reader.ReadToEnd();
             }
 
-            Assert.NotNull(result);
+            Assert.Equal("Id;PricelistId;Currency;ProductId;Sale;List;MinQuantity;StartDate;EndDate\r\n;;USD;d029526eab5948b189694f1bddba8e68;;0;0;;\r\n;;EUR;85e7aa089a4e4a97a4394d668e37e3f8;;0;0;;\r\n;;EUR;f427108e75ed4676923ddc47632111e3;;0;0;;\r\n", result);
 
             return Task.CompletedTask;
         }

@@ -154,17 +154,20 @@ namespace VirtoCommerce.PricingModule.Web
             registrar.RegisterType(typeof(Price).Name, "Pricing", typeof(PriceExportDataQuery).Name)
                 .WithDataSourceFactory(dataQuery => priceExportPagedDataSourceFactory(dataQuery))
                 .WithMetadata(ExportedTypeMetadata.GetFromType<Price>(false))
-                .WithTabularDataConverter(new TabularPriceDataConverter());
+                .WithTabularDataConverter(new TabularPriceDataConverter())
+                .WithTabularMetadata(ExportedTypeMetadata.GetFromType<TabularPrice>(false));
 
             registrar.RegisterType(typeof(Pricelist).Name, "Pricing", typeof(PricelistExportDataQuery).Name)
                 .WithDataSourceFactory(dataQuery => pricelistExportPagedDataSourceFactory(dataQuery))
                 .WithMetadata(ExportedTypeMetadata.GetFromType<Pricelist>(false))
-                .WithTabularDataConverter(new TabularPricelistDataConverter());
+                .WithTabularDataConverter(new TabularPricelistDataConverter())
+                .WithTabularMetadata(ExportedTypeMetadata.GetFromType<TabularPricelist>(false));
 
             registrar.RegisterType(typeof(PricelistAssignment).Name, "Pricing", typeof(PricelistAssignmentExportDataQuery).Name)
                 .WithDataSourceFactory(dataQuery => pricelistAssignmentExportPagedDataSourceFactory(dataQuery))
                 .WithMetadata(ExportedTypeMetadata.GetFromType<PricelistAssignment>(false))
-                .WithTabularDataConverter(new TabularPricelistAssignmentDataConverter());
+                .WithTabularDataConverter(new TabularPricelistAssignmentDataConverter())
+                .WithTabularMetadata(ExportedTypeMetadata.GetFromType<TabularPricelistAssignment>(false));
 
             registrar.RegisterType("Pricelist full data", "Pricing", typeof(PricelistFullExportDataQuery).Name)
                 .WithDataSourceFactory(dataQuery => pricelistExportPagedDataSourceFactory(dataQuery))

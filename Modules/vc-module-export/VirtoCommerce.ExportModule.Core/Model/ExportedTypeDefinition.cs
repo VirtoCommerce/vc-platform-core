@@ -12,6 +12,8 @@ namespace VirtoCommerce.ExportModule.Core.Model
 
         public ExportedTypeMetadata MetaData { get; protected set; }
 
+        public ExportedTypeMetadata TabularMetaData { get; protected set; }
+
         public string ExportDataQueryType { get; set; }
 
         public bool IsTabularExportSupported { get => TabularDataConverter != null; }
@@ -31,6 +33,12 @@ namespace VirtoCommerce.ExportModule.Core.Model
         public ExportedTypeDefinition WithMetadata(ExportedTypeMetadata metadata)
         {
             MetaData = metadata;
+            return this;
+        }
+
+        public ExportedTypeDefinition WithTabularMetadata(ExportedTypeMetadata tabularMetadata)
+        {
+            TabularMetaData = tabularMetadata;
             return this;
         }
 
