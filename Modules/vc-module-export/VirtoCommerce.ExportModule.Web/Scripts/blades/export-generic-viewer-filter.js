@@ -2,71 +2,15 @@ angular.module('virtoCommerce.exportModule')
 .controller('virtoCommerce.exportModule.exportGenericViewerFilterController', ['$scope', '$localStorage', 'platformWebApp.metaFormsService', '$translate', 
     function ($scope, $localStorage, metaFormsService, $translate) {
         var blade = $scope.blade;
+        blade.exportTypeName = blade.exportTypeName || "NotSpecified";
 
         blade.metaFields = metaFormsService.getMetaFields(blade.metafieldsId) || [];
-        // [
-            // {
-            //     name: 'statuses',
-            //     title: "orders.blades.customerOrder-detail.labels.status",
-            //     templateUrl: 'statusesSelector.html'
-            // },
-            // {
-            //     name: 'storeIds',
-            //     title: "orders.blades.customerOrder-detail.labels.store",
-            //     templateUrl: 'storeSelector.html'
-            // },
-            // {
-            //     name: 'startDate',
-            //     title: "orders.blades.filter-detail.labels.from",
-            //     valueType: "DateTime"
-            // },
-            // {
-            //     name: 'endDate',
-            //     title: "orders.blades.filter-detail.labels.to",
-            //     valueType: "DateTime"
-            // },
-            // {
-            //     name: 'customerId',
-            //     title: "orders.blades.customerOrder-detail.labels.customer",
-            //     templateUrl: 'customerSelector.html'
-            // },
-            // {
-            //     name: 'employeeId',
-            //     title: "orders.blades.shipment-detail.labels.employee",
-            //     templateUrl: 'filter-employeeSelector.html'
-            // }
-        // ];
-        
-        // function translateBladeStatuses(data) {
-        //     blade.statuses = statusTranslationService.translateStatuses(data, 'customerOrder');
-        // }
-        // settings.getValues({ id: 'Order.Status' }, translateBladeStatuses);
-        // blade.stores = order_res_stores.query();
-        // // load employees
-        // members.search(
-        //    {
-        //        memberType: 'Employee',
-        //        sort: 'fullName:asc',
-        //        take: 1000
-        //    },
-        //    function (data) {
-        //        blade.employees = data.results;
-        //    });
-        // members.search(
-        //    {
-        //        memberType: 'Contact',
-        //        sort: 'fullName:asc',
-        //        take: 1000
-        //    },
-        //    function (data) {
-        //        blade.contacts = data.results;
-        //    });
 
         $scope.saveChanges = function () {
             angular.copy(blade.currentEntity, blade.origEntity);
             if (blade.isNew) {
-                $localStorage.exportSearchFilters.push(blade.origEntity);
-                $localStorage.exportSearchFilterId = blade.origEntity.id;
+                $localStorage.exportSearchFilters[blade.exportTypeName].push(blade.origEntity);
+                $localStorage.exportSearchFilterIds[blade.exportTypeName] = blade.origEntity.id;
                 blade.parentBlade.filter.current = blade.origEntity;
                 blade.isNew = false;
             }
@@ -122,8 +66,8 @@ angular.module('virtoCommerce.exportModule')
 
         function deleteEntry() {
             blade.parentBlade.filter.current = null;
-            $localStorage.exportSearchFilters.splice($localStorage.exportSearchFilters.indexOf(blade.origEntity), 1);
-            delete $localStorage.exportSearchFilterId;
+            $localStorage.exportSearchFilters[blade.exportTypeName].splice($localStorage.exportSearchFilters[blade.exportTypeName].indexOf(blade.origEntity), 1);
+            $localStorage.exportSearchFilterIds[blade.exportTypeName] = undefined;
             blade.parentBlade.refresh();
             $scope.bladeClose();
         }

@@ -71,15 +71,26 @@ angular.module(moduleName, ['ui.grid.cellNav', 'ui.grid.edit', 'ui.grid.validate
 
         //
         metaFormsService.registerMetaFields('Price' + 'ExportFilter', [
-        {
-            name: 'pricelistSelector',
-            title: "pricing.selectors.titles.price-lists",
-            templateUrl: 'Modules/$(VirtoCommerce.Pricing)/Scripts/selectors/pricelist-selector.tpl.html',
-        },
-        {
-            name: 'modifiedSince',
-            title: "pricing.selectors.titles.modified-since",
-            valueType: "DateTime"
-        }
-    ]);
-  }]);
+            {
+                name: 'pricelistSelector',
+                title: "pricing.selectors.titles.price-lists",
+                templateUrl: 'Modules/$(VirtoCommerce.Pricing)/Scripts/selectors/pricelist-selector.tpl.html',
+            },
+            {
+                name: 'productSelector',
+                title: "pricing.selectors.titles.products",
+                templateUrl: 'Modules/$(VirtoCommerce.Pricing)/Scripts/selectors/product-selector.tpl.html',
+            },
+            {
+                name: 'modifiedSince',
+                title: "pricing.selectors.titles.modified-since",
+                valueType: "DateTime"
+            }]);
+  
+        metaFormsService.registerMetaFields('PricelistAssignment' + 'ExportFilter', [
+            {
+                name: 'pricelistAssignmentSelector',
+                title: "pricing.selectors.titles.price-lists",
+                templateUrl: 'Modules/$(VirtoCommerce.Pricing)/Scripts/selectors/pricelist-selector.tpl.html',
+            }]);    
+    }]);

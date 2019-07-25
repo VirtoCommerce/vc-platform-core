@@ -193,7 +193,8 @@
         "selectors" : {
             "titles": {
                 "price-lists": "Price lists",
-                "modified-since": "Modified since"
+                "modified-since": "Modified since",
+                "products": "Products"
             },
             "placeholders": {
                 "price-lists": "Select price lists…"

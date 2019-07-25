@@ -6,13 +6,15 @@ angular.module('virtoCommerce.exportModule')
         $scope.hasMore = true;
         $scope.items = [];
         $scope.blade.headIcon = 'fa-upload';
+        $scope.exportSearchFilters = [];
+        $scope.exportSearchFilterIds = [];
         
         var blade = $scope.blade;
         blade.isLoading = true;
         blade.isExpanded = true;
 
         var filter = blade.filter = $scope.filter = {};
-        blade.exportDataRequest = blade.exportDataRequest || {};
+        blade.exportDataRequest = blade.exportDataRequest || { exportTypeName: "NotSpecified" };
 
         if (blade.exportDataRequest.dataQuery && blade.exportDataRequest.dataQuery.keyword) {
             filter.keyword = blade.exportDataRequest.dataQuery.keyword;
@@ -98,11 +100,25 @@ angular.module('virtoCommerce.exportModule')
             // TODO item view on select
         };
 
+
         if (!$localStorage.exportSearchFilters) {
-            $localStorage.exportSearchFilters = [{ name: 'export.blades.export-generic-viewer.labels.new-filter' }];
+            $localStorage.exportSearchFilters = [];
         }
-        if ($localStorage.exportSearchFilterId) {
-            filter.current = _.findWhere($localStorage.exportSearchFilters, { id: $localStorage.exportSearchFilterId });
+
+        if (!$localStorage.exportSearchFilters[blade.exportDataRequest.exportTypeName]) {
+            $localStorage.exportSearchFilters[blade.exportDataRequest.exportTypeName] = [{ name: 'export.blades.export-generic-viewer.labels.new-filter' }];
+        }
+
+        $scope.exportSearchFilters = $localStorage.exportSearchFilters[blade.exportDataRequest.exportTypeName];
+
+        if (!$localStorage.exportSearchFilterIds) {
+            $localStorage.exportSearchFilterIds = [];
+        }
+
+        $scope.exportSearchFilterId = $localStorage.exportSearchFilterIds[blade.exportDataRequest.exportTypeName];
+
+        if ($scope.exportSearchFilterId) {
+            filter.current = _.findWhere($scope.exportSearchFilters, { id: $scope.exportSearchFilterId });
         }
 
         filter.change = function () {
@@ -110,7 +126,7 @@ angular.module('virtoCommerce.exportModule')
             var metafieldsId = blade.exportDataRequest.exportTypeName + 'ExportFilter';
             if (filter.current && !filter.current.id) {
                 filter.current = null;
-                showFilterDetailBlade({ isNew: true, metafieldsId: metafieldsId });
+                showFilterDetailBlade({ isNew: true, metafieldsId: metafieldsId, exportTypeName: blade.exportDataRequest.exportTypeName });
             } else {
                 bladeNavigationService.closeBlade({ id: 'exportGenericViewerFilter' });
                 filter.criteriaChanged();
@@ -120,7 +136,7 @@ angular.module('virtoCommerce.exportModule')
         filter.edit = function () {
             if (filter.current) {
                 var metafieldsId = blade.exportDataRequest.exportTypeName  + 'ExportFilter';
-                showFilterDetailBlade({ data: filter.current, metafieldsId: metafieldsId });
+                showFilterDetailBlade({ data: filter.current, metafieldsId: metafieldsId, exportTypeName: blade.exportDataRequest.exportTypeName });
             }
         };
 
