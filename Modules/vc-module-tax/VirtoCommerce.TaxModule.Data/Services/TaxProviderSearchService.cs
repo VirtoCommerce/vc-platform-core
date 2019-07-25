@@ -38,20 +38,22 @@ namespace VirtoCommerce.TaxModule.Data.Services
             {
                 cacheEntry.AddExpirationToken(TaxCacheRegion.CreateChangeToken());
                 var result = AbstractTypeFactory<TaxProviderSearchResult>.TryCreateInstance();
-
-                var sortInfos = GetSortInfos(criteria);
-
+                
                 var tmpSkip = 0;
                 var tmpTake = 0;
 
+                var sortInfos = BuildSortExpression(criteria);
                 using (var repository = _repositoryFactory())
                 {
-                    var query = GetQuery(repository, criteria, sortInfos);
+                    var query = BuildQuery(repository, criteria);               
 
                     result.TotalCount = await query.CountAsync();
                     if (criteria.Take > 0)
                     {
-                        var providerIds = await query.Select(x => x.Id).Skip(criteria.Skip).Take(criteria.Take).ToArrayAsync();
+                        var providerIds = await query.OrderBySortInfos(sortInfos).ThenBy(x => x.Id)
+                                                     .Select(x => x.Id).Skip(criteria.Skip)
+                                                     .Take(criteria.Take).ToArrayAsync();
+
                         result.Results = (await _taxProviderService.GetByIdsAsync(providerIds, criteria.ResponseGroup)).AsQueryable().OrderBySortInfos(sortInfos).ToList();
                     }
                 }
@@ -72,20 +74,23 @@ namespace VirtoCommerce.TaxModule.Data.Services
                     transientProvidersQuery = transientProvidersQuery.Where(x => !allPersistentProvidersTypes.Contains(x.GetType()));
 
                     result.TotalCount += transientProvidersQuery.Count();
-                    var transientProviders = transientProvidersQuery.Skip(criteria.Skip).Take(criteria.Take).ToList();
+                    var transientProviders = transientProvidersQuery.Skip(criteria.Skip)
+                                                                    .Take(criteria.Take)
+                                                                    .ToList();
 
                     foreach (var transientProvider in transientProviders)
                     {
                         await _settingManager.DeepLoadSettingsAsync(transientProvider);
                     }
 
-                    result.Results = result.Results.Concat(transientProviders).AsQueryable().OrderBySortInfos(sortInfos).ToList();
+                    result.Results = result.Results.Concat(transientProviders).AsQueryable()
+                                                   .OrderBySortInfos(sortInfos).ThenBy(x => x.Id).ToList();
                 }
                 return result;
             });
         }
 
-        protected virtual IQueryable<StoreTaxProviderEntity> GetQuery(ITaxRepository repository, TaxProviderSearchCriteria criteria, IEnumerable<SortInfo> sortInfos)
+        protected virtual IQueryable<StoreTaxProviderEntity> BuildQuery(ITaxRepository repository, TaxProviderSearchCriteria criteria)
         {
             var query = repository.StoreTaxProviders;
             if (!string.IsNullOrEmpty(criteria.Keyword))
@@ -96,11 +101,10 @@ namespace VirtoCommerce.TaxModule.Data.Services
             {
                 query = query.Where(x => x.StoreId == criteria.StoreId);
             }
-            query = query.OrderBySortInfos(sortInfos);
             return query;
         }
 
-        protected virtual IList<SortInfo> GetSortInfos(TaxProviderSearchCriteria criteria)
+        protected virtual IList<SortInfo> BuildSortExpression(TaxProviderSearchCriteria criteria)
         {
             var sortInfos = criteria.SortInfos;
             if (sortInfos.IsNullOrEmpty())
@@ -109,7 +113,7 @@ namespace VirtoCommerce.TaxModule.Data.Services
                 {
                     new SortInfo
                     {
-                        SortColumn = "Name"
+                        SortColumn = nameof(StoreTaxProviderEntity.Code)
                     }
                 };
             }

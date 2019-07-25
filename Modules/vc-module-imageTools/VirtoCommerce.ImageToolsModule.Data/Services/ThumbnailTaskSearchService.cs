@@ -1,4 +1,5 @@
 using System;
+using System.Collections.Generic;
 using System.Linq;
 using System.Threading.Tasks;
 using Microsoft.EntityFrameworkCore;
@@ -27,32 +28,24 @@ namespace VirtoCommerce.ImageToolsModule.Data.Services
 
             using (var repository = _thumbnailRepositoryFactory())
             {
-                var query = GetTasksQuery(repository, criteria);
+                var sortInfos = BuildSortExpression(criteria);
+                var query = BuildQuery(repository, criteria);
 
-                var sortInfos = criteria.SortInfos;
-                if (sortInfos.IsNullOrEmpty())
-                {
-                    sortInfos = new[]
-                    {
-                        new SortInfo
-                        {
-                            SortColumn = ReflectionUtility.GetPropertyName<ThumbnailTask>(t => t.CreatedDate), SortDirection = SortDirection.Descending
-                        }
-                    };
-                }
-                query = query.OrderBySortInfos(sortInfos);
                 result.TotalCount = await query.CountAsync();
                 if (criteria.Take > 0)
                 {
-                    var ids = await query.Select(x => x.Id).Skip(criteria.Skip).Take(criteria.Take).ToArrayAsync();
-                    result.Results = (await _thumbnailTaskService.GetByIdsAsync(ids)).AsQueryable().OrderBySortInfos(sortInfos).ToArray();
+                    var ids = await query.OrderBySortInfos(sortInfos).ThenBy(x => x.Id)
+                                        .Select(x => x.Id)
+                                        .Skip(criteria.Skip).Take(criteria.Take)
+                                        .ToArrayAsync();
+
+                    result.Results = (await _thumbnailTaskService.GetByIdsAsync(ids)).OrderBy(x => Array.IndexOf(ids, x.Id)).ToList();
                 }
             }
             return result;
         }
 
-        protected virtual IQueryable<ThumbnailTaskEntity> GetTasksQuery(IThumbnailRepository repository,
-            ThumbnailTaskSearchCriteria criteria)
+        protected virtual IQueryable<ThumbnailTaskEntity> BuildQuery(IThumbnailRepository repository, ThumbnailTaskSearchCriteria criteria)
         {
             var query = repository.ThumbnailTasks;
 
@@ -62,6 +55,23 @@ namespace VirtoCommerce.ImageToolsModule.Data.Services
             }
 
             return query;
+        }
+
+        protected virtual IList<SortInfo> BuildSortExpression(ThumbnailTaskSearchCriteria criteria)
+        {
+            var sortInfos = criteria.SortInfos;
+            if (sortInfos.IsNullOrEmpty())
+            {
+                sortInfos = new[]
+                {
+                    new SortInfo {
+                        SortColumn = nameof(ThumbnailOptionEntity.ModifiedDate),
+                        SortDirection = SortDirection.Descending
+                    }
+                };
+            }
+
+            return sortInfos;
         }
     }
 }

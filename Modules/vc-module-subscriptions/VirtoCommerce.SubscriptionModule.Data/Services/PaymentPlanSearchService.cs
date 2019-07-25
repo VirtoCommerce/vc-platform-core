@@ -1,4 +1,5 @@
 using System;
+using System.Collections.Generic;
 using System.Linq;
 using System.Threading.Tasks;
 using Microsoft.EntityFrameworkCore;
@@ -6,10 +7,10 @@ using Microsoft.Extensions.Caching.Memory;
 using VirtoCommerce.Platform.Core.Caching;
 using VirtoCommerce.Platform.Core.Common;
 using VirtoCommerce.Platform.Data.Infrastructure;
-using VirtoCommerce.SubscriptionModule.Core.Model;
 using VirtoCommerce.SubscriptionModule.Core.Model.Search;
 using VirtoCommerce.SubscriptionModule.Core.Services;
 using VirtoCommerce.SubscriptionModule.Data.Caching;
+using VirtoCommerce.SubscriptionModule.Data.Model;
 using VirtoCommerce.SubscriptionModule.Data.Repositories;
 
 namespace VirtoCommerce.SubscriptionModule.Data.Services
@@ -20,7 +21,11 @@ namespace VirtoCommerce.SubscriptionModule.Data.Services
         private readonly IPlatformMemoryCache _platformMemoryCache;
         private readonly IPaymentPlanService _paymentPlanService;
 
-        public PaymentPlanSearchService(Func<ISubscriptionRepository> subscriptionRepositoryFactory, IPlatformMemoryCache platformMemoryCache, IPaymentPlanService paymentPlanService)
+        public PaymentPlanSearchService(
+            Func<ISubscriptionRepository> subscriptionRepositoryFactory
+            , IPlatformMemoryCache platformMemoryCache
+            , IPaymentPlanService paymentPlanService
+            )
         {
             _subscriptionRepositoryFactory = subscriptionRepositoryFactory;
             _platformMemoryCache = platformMemoryCache;
@@ -39,30 +44,49 @@ namespace VirtoCommerce.SubscriptionModule.Data.Services
                 {
                     repository.DisableChangesTracking();
 
-                    var query = repository.PaymentPlans;
-
-                    var sortInfos = criteria.SortInfos;
-                    if (sortInfos.IsNullOrEmpty())
-                    {
-                        sortInfos = new[] { new SortInfo { SortColumn = ReflectionUtility.GetPropertyName<PaymentPlan>(x => x.CreatedDate), SortDirection = SortDirection.Descending } };
-                    }
-                    query = query.OrderBySortInfos(sortInfos);
+                    var query = BuildQuery(repository, criteria);
+                    var sortInfos = BuildSortExpression(criteria);
 
                     retVal.TotalCount = await query.CountAsync();
 
                     if (criteria.Take > 0)
                     {
-                        var paymentPlanEntities = await query.Skip(criteria.Skip).Take(criteria.Take).ToArrayAsync();
-                        var paymentPlanIds = paymentPlanEntities.Select(x => x.Id).ToArray();
+                        var paymentPlanIds = await query.OrderBySortInfos(sortInfos).ThenBy(x => x.Id)
+                                                             .Select(x=> x.Id)
+                                                             .Skip(criteria.Skip).Take(criteria.Take)
+                                                             .ToArrayAsync();
 
-                        //Load subscriptions with preserving sorting order
+                        //Load plans with preserving sorting order
                         var unorderedResults = await _paymentPlanService.GetByIdsAsync(paymentPlanIds, criteria.ResponseGroup);
-                        retVal.Results = unorderedResults.AsQueryable().OrderBySortInfos(sortInfos).ToArray();
+                        retVal.Results = unorderedResults.OrderBy(x => Array.IndexOf(paymentPlanIds, x.Id)).ToArray();
                     }
 
                     return retVal;
                 }
             });
+        }
+
+        protected virtual IQueryable<PaymentPlanEntity> BuildQuery(ISubscriptionRepository repository, PaymentPlanSearchCriteria criteria)
+        {
+            var query = repository.PaymentPlans;
+            return query;
+        }
+
+        protected virtual IList<SortInfo> BuildSortExpression(PaymentPlanSearchCriteria criteria)
+        {
+            var sortInfos = criteria.SortInfos;
+            if (sortInfos.IsNullOrEmpty())
+            {
+                sortInfos = new[]
+                {
+                    new SortInfo
+                    {
+                        SortColumn = nameof(PaymentPlanEntity.CreatedDate),
+                        SortDirection = SortDirection.Descending
+                    }
+                };
+            }
+            return sortInfos;
         }
     }
 }

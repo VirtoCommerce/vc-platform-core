@@ -39,7 +39,7 @@ namespace VirtoCommerce.PaymentModule.Data.Services
 
         public async Task<PaymentMethodsSearchResult> SearchPaymentMethodsAsync(PaymentMethodsSearchCriteria criteria)
         {
-            var cacheKey = CacheKey.With(GetType(), "SearchPaymentMethodsAsync", criteria.GetCacheKey());
+            var cacheKey = CacheKey.With(GetType(), nameof(PaymentMethodsSearchResult), criteria.GetCacheKey());
             return await _memCache.GetOrCreateExclusiveAsync(cacheKey, async (cacheEntry) =>
             {
                 cacheEntry.AddExpirationToken(PaymentCacheRegion.CreateChangeToken());
@@ -48,34 +48,32 @@ namespace VirtoCommerce.PaymentModule.Data.Services
                 var tmpSkip = 0;
                 var tmpTake = 0;
 
-                var sortInfos = GetSortInfos(criteria);
+                var sortInfos = BuildSortExpression(criteria);
 
                 using (var repository = _repositoryFactory())
                 {
                     repository.DisableChangesTracking();
 
 
-                    var query = GetQuery(repository, criteria, sortInfos);
+                    var query = BuildQuery(repository, criteria);
 
                     result.TotalCount = await query.CountAsync();
                     if (criteria.Take > 0)
                     {
-                        var paymentMethodsIds = await query.Select(x => x.Id)
-                                                           .Skip(criteria.Skip)
-                                                           .Take(criteria.Take)
+                        var paymentMethodsIds = await query.OrderBySortInfos(sortInfos)
+                                                           .Select(x => x.Id)
+                                                           .Skip(criteria.Skip).Take(criteria.Take)
                                                            .ToArrayAsync();
 
-                        result.Results = (await _paymentMethodsService.GetByIdsAsync(paymentMethodsIds, criteria.ResponseGroup))
-                                                                      .AsQueryable()
-                                                                      .OrderBySortInfos(sortInfos)
-                                                                      .ToArray();
+                        var unorderedResults = await _paymentMethodsService.GetByIdsAsync(paymentMethodsIds, criteria.ResponseGroup);
+                        result.Results = unorderedResults.OrderBy(x => Array.IndexOf(paymentMethodsIds, x.Id)).ToList();
                     }
                 }
                 //Need to concatenate  persistent methods with registered types and still not persisted
                 tmpSkip = Math.Min(result.TotalCount, criteria.Skip);
                 tmpTake = Math.Min(criteria.Take, Math.Max(0, result.TotalCount - criteria.Skip));
-                criteria.Skip = criteria.Skip - tmpSkip;
-                criteria.Take = criteria.Take - tmpTake;
+                criteria.Skip -= tmpSkip;
+                criteria.Take -= tmpTake;
                 if (criteria.Take > 0 && !criteria.WithoutTransient)
                 {
                     var transientMethodsQuery = AbstractTypeFactory<PaymentMethod>.AllTypeInfos.Select(x => AbstractTypeFactory<PaymentMethod>.TryCreateInstance(x.Type.Name))
@@ -102,10 +100,7 @@ namespace VirtoCommerce.PaymentModule.Data.Services
             });
         }
 
-        protected virtual IQueryable<StorePaymentMethodEntity> GetQuery(
-            IPaymentRepository repository,
-            PaymentMethodsSearchCriteria criteria,
-            IEnumerable<SortInfo> sortInfos)
+        protected virtual IQueryable<StorePaymentMethodEntity> BuildQuery(IPaymentRepository repository, PaymentMethodsSearchCriteria criteria)
         {
             var query = repository.StorePaymentMethods;
 
@@ -129,18 +124,17 @@ namespace VirtoCommerce.PaymentModule.Data.Services
                 query = query.Where(x => x.IsActive == criteria.IsActive.Value);
             }
 
-            query = query.OrderBySortInfos(sortInfos);
             return query;
         }
 
-        protected virtual IList<SortInfo> GetSortInfos(PaymentMethodsSearchCriteria criteria)
+        protected virtual IList<SortInfo> BuildSortExpression(PaymentMethodsSearchCriteria criteria)
         {
             var sortInfos = criteria.SortInfos;
             if (sortInfos.IsNullOrEmpty())
             {
                 sortInfos = new[]
                 {
-                    new SortInfo{ SortColumn = "Name" }
+                    new SortInfo{ SortColumn = nameof(StorePaymentMethodEntity.Code) }
                 };
             }
 
