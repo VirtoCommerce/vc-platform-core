@@ -1,0 +1,18 @@
+<div class="blade-content">
+        <div class="blade-inner">
+            <div class="inner-block clearfix">
+                <form class="form" name="formScope">
+                    <legend>{{ 'export.blades.generic-filter.labels.criteria' | translate }}</legend>
+    
+                    <div class="form-group" ng-init="setForm(formScope)">
+                        <label class="form-label">{{ 'export.blades.generic-filter.labels.filter-name' | translate }}</label>
+                        <div class="form-input">
+                            <input ng-model="blade.currentEntity.name" required placeholder="{{ 'export.blades.generic-filter.placeholders.filter-name' | translate }}" />
+                        </div>
+                    </div>
+    
+                    <va-metaform registered-inputs="blade.metaFields" blade="blade"></va-metaform>
+                </form>
+            </div>
+        </div>
+    </div>
