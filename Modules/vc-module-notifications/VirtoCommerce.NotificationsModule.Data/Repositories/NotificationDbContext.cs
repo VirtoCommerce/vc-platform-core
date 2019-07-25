@@ -25,6 +25,8 @@ namespace VirtoCommerce.NotificationsModule.Data.Repositories
             modelBuilder.Entity<NotificationEntity>().Property(x => x.Id).HasMaxLength(128);
             modelBuilder.Entity<NotificationEntity>().Property(x => x.CreatedBy).HasMaxLength(64);
             modelBuilder.Entity<NotificationEntity>().Property(x => x.ModifiedBy).HasMaxLength(64);
+            modelBuilder.Entity<NotificationEntity>().HasDiscriminator<string>("Discriminator");
+            modelBuilder.Entity<NotificationEntity>().Property("Discriminator").HasMaxLength(128);
 
             modelBuilder.Entity<EmailNotificationEntity>();
             modelBuilder.Entity<SmsNotificationEntity>();
@@ -37,6 +39,8 @@ namespace VirtoCommerce.NotificationsModule.Data.Repositories
             modelBuilder.Entity<NotificationTemplateEntity>().Property(x => x.Id).HasMaxLength(128);
             modelBuilder.Entity<NotificationTemplateEntity>().Property(x => x.CreatedBy).HasMaxLength(64);
             modelBuilder.Entity<NotificationTemplateEntity>().Property(x => x.ModifiedBy).HasMaxLength(64);
+            modelBuilder.Entity<NotificationTemplateEntity>().HasDiscriminator<string>("Discriminator");
+            modelBuilder.Entity<NotificationTemplateEntity>().Property("Discriminator").HasMaxLength(128);
 
             modelBuilder.Entity<NotificationTemplateEntity>().HasOne(x => x.Notification).WithMany(x => x.Templates)
                        .HasForeignKey(x => x.NotificationId).OnDelete(DeleteBehavior.Cascade);
@@ -52,6 +56,8 @@ namespace VirtoCommerce.NotificationsModule.Data.Repositories
             modelBuilder.Entity<NotificationMessageEntity>().Property(x => x.Id).HasMaxLength(128);
             modelBuilder.Entity<NotificationMessageEntity>().Property(x => x.CreatedBy).HasMaxLength(64);
             modelBuilder.Entity<NotificationMessageEntity>().Property(x => x.ModifiedBy).HasMaxLength(64);
+            modelBuilder.Entity<NotificationMessageEntity>().HasDiscriminator<string>("Discriminator");
+            modelBuilder.Entity<NotificationMessageEntity>().Property("Discriminator").HasMaxLength(128);
 
             modelBuilder.Entity<NotificationMessageEntity>().HasOne(x => x.Notification).WithMany()
                   .HasForeignKey(x => x.NotificationId).OnDelete(DeleteBehavior.Restrict);

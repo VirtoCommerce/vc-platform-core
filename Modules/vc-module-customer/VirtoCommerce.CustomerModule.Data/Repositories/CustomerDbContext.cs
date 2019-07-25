@@ -25,6 +25,8 @@ namespace VirtoCommerce.CustomerModule.Data.Repositories
             modelBuilder.Entity<MemberEntity>().Property(x => x.Id).HasMaxLength(128);
             modelBuilder.Entity<MemberEntity>().HasIndex(i => i.MemberType).IsUnique(false).HasName("IX_MemberType");
             modelBuilder.Entity<MemberEntity>().HasIndex(i => i.Name).IsUnique(false).HasName("IX_Member_Name");
+            modelBuilder.Entity<MemberEntity>().HasDiscriminator<string>("Discriminator");
+            modelBuilder.Entity<MemberEntity>().Property("Discriminator").HasMaxLength(128);
 
             #endregion
 
