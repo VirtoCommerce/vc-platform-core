@@ -25,37 +25,30 @@ namespace VirtoCommerce.NotificationsModule.Data.Services
         {
             var result = AbstractTypeFactory<NotificationSearchResult>.TryCreateInstance();
 
-            var sortInfos = criteria.SortInfos;
-            if (sortInfos.IsNullOrEmpty())
-            {
-                sortInfos = new[]
-                {
-                            new SortInfo
-                            {
-                                SortColumn = "Name"
-                            }
-                        };
-            }
-
+            var sortInfos = BuildSortExpression(criteria);
             var tmpSkip = 0;
             var tmpTake = 0;
 
             using (var repository = _repositoryFactory())
             {
-                var query = GetNotificationsQuery(repository, criteria, sortInfos);
+                var query = BuildQuery(repository, criteria, sortInfos);
 
                 result.TotalCount = await query.CountAsync();
                 if (criteria.Take > 0)
                 {
-                    var notificationIds = await query.Select(x => x.Id).Skip(criteria.Skip).Take(criteria.Take).ToArrayAsync();
-                    result.Results = (await _notificationService.GetByIdsAsync(notificationIds, criteria.ResponseGroup)).AsQueryable().OrderBySortInfos(sortInfos).ToList();
+                    var notificationIds = await query.OrderBySortInfos(sortInfos).ThenBy(x=>x.Id)
+                                                     .Select(x => x.Id)
+                                                     .Skip(criteria.Skip).Take(criteria.Take)
+                                                     .ToArrayAsync();
+                    var unorderedResults = await _notificationService.GetByIdsAsync(notificationIds);
+                    result.Results = unorderedResults.OrderBy(x => Array.IndexOf(notificationIds, x.Id)).ToList();
                 }
             }
             tmpSkip = Math.Min(result.TotalCount, criteria.Skip);
             tmpTake = Math.Min(criteria.Take, Math.Max(0, result.TotalCount - criteria.Skip));
 
-            criteria.Skip = criteria.Skip - tmpSkip;
-            criteria.Take = criteria.Take - tmpTake;
+            criteria.Skip -= tmpSkip;
+            criteria.Take -= tmpTake;
 
             if (criteria.Take > 0)
             {
@@ -79,7 +72,7 @@ namespace VirtoCommerce.NotificationsModule.Data.Services
             return result;
         }
 
-        protected virtual IQueryable<NotificationEntity> GetNotificationsQuery(INotificationRepository repository, NotificationSearchCriteria criteria, IEnumerable<SortInfo> sortInfos)
+        protected virtual IQueryable<NotificationEntity> BuildQuery(INotificationRepository repository, NotificationSearchCriteria criteria, IEnumerable<SortInfo> sortInfos)
         {
             var query = repository.Notifications;
 
@@ -100,6 +93,22 @@ namespace VirtoCommerce.NotificationsModule.Data.Services
 
             query = query.OrderBySortInfos(sortInfos);
             return query;
+        }
+
+        protected virtual IList<SortInfo> BuildSortExpression(NotificationSearchCriteria criteria)
+        {
+            var sortInfos = criteria.SortInfos;
+            if (sortInfos.IsNullOrEmpty())
+            {
+                sortInfos = new[]
+                {
+                    new SortInfo
+                    {
+                        SortColumn = nameof(NotificationEntity.Type)
+                    }
+                };
+            }
+            return sortInfos;
         }
     }
 }

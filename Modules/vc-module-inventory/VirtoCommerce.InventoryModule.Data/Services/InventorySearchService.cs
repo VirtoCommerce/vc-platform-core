@@ -40,22 +40,25 @@ namespace VirtoCommerce.InventoryModule.Data.Services
                 {
                     repository.DisableChangesTracking();
 
-                    var sortInfos = GetSortInfos(criteria);
-                    var query = GetQuery(repository, criteria, sortInfos);
+                    var sortInfos = BuildSortExpression(criteria);
+                    var query = BuildQuery(repository, criteria);
 
                     result.TotalCount = await query.CountAsync();
                     if (criteria.Take > 0)
                     {
-                        var inventoryIds = await query.Select(x => x.Id).Skip(criteria.Skip).Take(criteria.Take).ToArrayAsync();
-                        result.Results = (await _inventoryService.GetByIdsAsync(inventoryIds, criteria.ResponseGroup)).AsQueryable().OrderBySortInfos(sortInfos).ToArray();
+                        var ids = await query.OrderBySortInfos(sortInfos).ThenBy(x => x.Id)
+                                            .Select(x => x.Id)
+                                            .Skip(criteria.Skip).Take(criteria.Take)
+                                            .ToArrayAsync();
+
+                        result.Results = (await _inventoryService.GetByIdsAsync(ids)).OrderBy(x => Array.IndexOf(ids, x.Id)).ToList();
                     }
                 }
                 return result;
             });
         }
 
-        protected virtual IQueryable<InventoryEntity> GetQuery(IInventoryRepository repository,
-            InventorySearchCriteria criteria, IEnumerable<SortInfo> sortInfos)
+        protected virtual IQueryable<InventoryEntity> BuildQuery(IInventoryRepository repository, InventorySearchCriteria criteria)
         {
             var query = repository.Inventories;
             if (!criteria.ProductIds.IsNullOrEmpty())
@@ -67,17 +70,20 @@ namespace VirtoCommerce.InventoryModule.Data.Services
                 query = query.Where(x => criteria.FulfillmentCenterIds.Contains(x.FulfillmentCenterId));
             }
 
-            return query.OrderBySortInfos(sortInfos);
+            return query;
         }
 
-        protected virtual IList<SortInfo> GetSortInfos(InventorySearchCriteria criteria)
+        protected virtual IList<SortInfo> BuildSortExpression(InventorySearchCriteria criteria)
         {
             var sortInfos = criteria.SortInfos;
             if (sortInfos.IsNullOrEmpty())
             {
                 sortInfos = new[]
                 {
-                    new SortInfo { SortColumn = "ModifiedDate" }
+                    new SortInfo {
+                        SortColumn = nameof(InventoryEntity.ModifiedDate),
+                        SortDirection = SortDirection.Descending
+                    }
                 };
             }
 
