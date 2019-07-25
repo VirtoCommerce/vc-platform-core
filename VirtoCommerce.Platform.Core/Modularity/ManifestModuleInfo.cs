@@ -30,16 +30,16 @@ namespace VirtoCommerce.Platform.Core.Modularity
         public string ReleaseNotes { get; private set; }
         public string Copyright { get; private set; }
         public string Tags { get; private set; }
-        public ICollection<ModuleIdentity> Dependencies => new List<ModuleIdentity>();
+        public ICollection<ModuleIdentity> Dependencies { get; } = new List<ModuleIdentity>();
         /// <summary>
         /// List of incompatible modules
         /// </summary>
-        public ICollection<ModuleIdentity> Incompatibilities => new List<ModuleIdentity>();
+        public ICollection<ModuleIdentity> Incompatibilities { get; } = new List<ModuleIdentity>();
         public bool IsRemovable { get; set; }
         public bool IsInstalled { get; set; }
-        public ICollection<string> Groups  => new List<string>();
+        public ICollection<string> Groups { get; } = new List<string>();
         public string FullPhysicalPath { get; set; }
-        public ICollection<string> Errors => new List<string>();
+        public ICollection<string> Errors { get; } = new List<string>();
         public bool UseFullTypeNameInSwagger { get; set; }
 
         public virtual ManifestModuleInfo LoadFromManifest(ModuleManifest manifest)
@@ -66,11 +66,11 @@ namespace VirtoCommerce.Platform.Core.Modularity
             Ref = manifest.PackageUrl;
             if (manifest.Dependencies != null)
             {
-                Dependencies.AddRange(manifest.Dependencies.Select(x => new ModuleIdentity(x.Id, x.Version)));
+                Dependencies.AddRange(manifest.Dependencies.Select(x => new ModuleIdentity(x.Id, SemanticVersion.Parse(x.Version))));
             }
             if (manifest.Incompatibilities != null)
             {
-                Incompatibilities.AddRange(manifest.Incompatibilities.Select(x => new ModuleIdentity(x.Id, x.Version)));
+                Incompatibilities.AddRange(manifest.Incompatibilities.Select(x => new ModuleIdentity(x.Id, SemanticVersion.Parse(x.Version))));
             }
 
             Title = manifest.Title;
@@ -116,11 +116,11 @@ namespace VirtoCommerce.Platform.Core.Modularity
 
             if (version.Dependencies != null)
             {
-                Dependencies.AddRange(version.Dependencies.Select(x => new ModuleIdentity(x.Id, x.Version)));
+                Dependencies.AddRange(version.Dependencies.Select(x => new ModuleIdentity(x.Id, SemanticVersion.Parse(x.Version))));
             }
             if (version.Incompatibilities != null)
             {
-                Incompatibilities.AddRange(version.Incompatibilities.Select(x => new ModuleIdentity(x.Id, x.Version)));
+                Incompatibilities.AddRange(version.Incompatibilities.Select(x => new ModuleIdentity(x.Id, SemanticVersion.Parse(x.Version))));
             }
 
             Title = manifest.Title;

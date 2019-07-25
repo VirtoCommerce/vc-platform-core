@@ -2,6 +2,7 @@ using System;
 using System.Linq;
 using Newtonsoft.Json;
 using Newtonsoft.Json.Linq;
+using VirtoCommerce.Platform.Core.Common;
 using VirtoCommerce.Platform.Core.Modularity;
 
 namespace VirtoCommerce.Platform.Modules
@@ -23,10 +24,13 @@ namespace VirtoCommerce.Platform.Modules
             var obj = JObject.Load(reader);
 
             var id = obj.GetValue("id", StringComparison.InvariantCultureIgnoreCase)?.Value<string>();
-            var version = obj.GetValue("version", StringComparison.InvariantCultureIgnoreCase).ToObject<Version>();
-            var result = new ModuleIdentity(id, version);
-
-            return result;
+            var version = obj.GetValue("version", StringComparison.InvariantCultureIgnoreCase)?.ToObject<Version>();
+            if (id != null && version != null)
+            {
+                var result = new ModuleIdentity(id, new SemanticVersion(version));
+                return result;
+            }
+            throw new JsonReaderException("id or version is required");
         }
 
         public override void WriteJson(JsonWriter writer, object value, JsonSerializer serializer)

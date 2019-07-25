@@ -162,6 +162,17 @@ namespace VirtoCommerce.CatalogModule.Web.Controllers.Api
                     return Unauthorized();
                 }
 
+                //create the catalog item links
+                foreach (CatalogProduct catalogProduct in hasLinkEntries)
+                {
+                    catalogProduct.Links.Add(new CategoryLink
+                    {
+                        ListEntryId = catalogProduct.Id,
+                        CategoryId = creationRequest.CategoryId,
+                        CatalogId = creationRequest.CatalogId
+                    });
+                }
+
                 if (haveProducts)
                 {
                     await SaveListCatalogEntitiesAsync(hasLinkEntries.ToArray());
