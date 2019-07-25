@@ -231,9 +231,9 @@ namespace VirtoCommerce.Platform.Web
 
                     options.UseReferenceTokens();
                     options.DisableScopeValidation();
-
+                    
                     // During development, you can disable the HTTPS requirement.
-                    if (HostingEnvironment.IsDevelopment())
+                    if (HostingEnvironment.IsDevelopment() || authorizationOptions.DisableHttps)
                     {
                         options.DisableHttpsRequirement();
                     }
