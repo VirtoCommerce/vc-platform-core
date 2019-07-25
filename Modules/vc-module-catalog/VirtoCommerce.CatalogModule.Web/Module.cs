@@ -142,6 +142,9 @@ namespace VirtoCommerce.CatalogModule.Web
 
             serviceCollection.AddScoped<CatalogExportPagedDataSource>(); // Adding as scoped, because of used services (UserManager, PrincipalFactory) scoped too
             serviceCollection.AddSingleton<Func<ExportDataQuery, CatalogExportPagedDataSource>>(provider => (exportDataQuery) => CreateExportPagedDataSource<CatalogExportPagedDataSource>(provider, exportDataQuery));
+
+            serviceCollection.AddScoped<ProductExportPagedDataSource>();
+            serviceCollection.AddSingleton<Func<ExportDataQuery, ProductExportPagedDataSource>>(provider => (exportDataQuery) => CreateExportPagedDataSource<ProductExportPagedDataSource>(provider, exportDataQuery));
         }
 
         public void PostInitialize(IApplicationBuilder appBuilder)
@@ -174,6 +177,7 @@ namespace VirtoCommerce.CatalogModule.Web
             //Register types allowed to export
             var registrar = appBuilder.ApplicationServices.GetService<IKnownExportTypesRegistrar>();
             var catalogExportPagedDataSourceFactory = appBuilder.ApplicationServices.GetService<Func<ExportDataQuery, CatalogExportPagedDataSource>>();
+            var productExportPagedDataSourceFactory = appBuilder.ApplicationServices.GetService<Func<ExportDataQuery, ProductExportPagedDataSource>>();
 
 
             registrar.RegisterType(typeof(Catalog).Name, "Catalog", typeof(CatalogExportDataQuery).Name)
@@ -183,6 +187,14 @@ namespace VirtoCommerce.CatalogModule.Web
                 .WithTabularMetadata(ExportedTypeMetadata.GetFromType<TabularCatalog>(false));
 
             AbstractTypeFactory<ExportDataQuery>.RegisterType<CatalogExportDataQuery>();
+
+            registrar.RegisterType(typeof(CatalogProduct).Name, "Product", typeof(ProductExportDataQuery).Name)
+                .WithDataSourceFactory(dataQuery => productExportPagedDataSourceFactory(dataQuery))
+                .WithMetadata(ExportedTypeMetadata.GetFromType<CatalogProduct>(true))
+                .WithTabularDataConverter(new TabularProductDataConverter())
+                .WithTabularMetadata(ExportedTypeMetadata.GetFromType<TabularProduct>(false));
+
+            AbstractTypeFactory<ExportDataQuery>.RegisterType<ProductExportDataQuery>();
 
             //Force migrations
             using (var serviceScope = appBuilder.ApplicationServices.CreateScope())

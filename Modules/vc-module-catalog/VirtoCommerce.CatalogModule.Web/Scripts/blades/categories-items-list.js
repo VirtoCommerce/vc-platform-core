@@ -5,6 +5,15 @@ angular.module('virtoCommerce.catalogModule')
             $scope.uiGridConstants = uiGridHelper.uiGridConstants;
             $scope.hasMore = true;
             $scope.items = [];
+            var exportDataRequest = {
+                exportTypeName: 'CatalogProduct',
+                isTabularExportSupported: true,
+                defaultProvider: 'JsonExportProvider',
+                dataQuery: {
+                    exportTypeName: 'ProductExportDataQuery',
+                    isAllSelected: true
+                }
+            };
 
             var blade = $scope.blade;
             var bladeNavigationService = bladeUtils.bladeNavigationService;
@@ -408,24 +417,59 @@ angular.module('virtoCommerce.catalogModule')
                     canExecuteMethod: function () { return blade.catalogId; },
                     permission: 'catalog:import'
                 },
+                //{
+                //    name: "platform.commands.export",
+                //    icon: 'fa fa-upload',
+                //    executeMethod: function () {
+                //        var newBlade = {
+                //            id: 'catalogExport',
+                //            title: 'catalog.blades.exporter-list.title',
+                //            subtitle: 'catalog.blades.exporter-list.subtitle',
+                //            catalog: blade.catalog,
+                //            controller: 'virtoCommerce.catalogModule.exporterListController',
+                //            template: 'Modules/$(VirtoCommerce.Catalog)/Scripts/blades/export/exporter-list.tpl.html',
+                //            selectedProducts: _.filter($scope.gridApi.selection.getSelectedRows(), function (x) { return x.type == 'product' }),
+                //            selectedCategories: _.filter($scope.gridApi.selection.getSelectedRows(), function (x) { return x.type == 'category' })
+                //        };
+                //        bladeNavigationService.showBlade(newBlade, blade);
+                //    },
+                //    canExecuteMethod: function () { return blade.catalogId; },
+                //    permission: 'catalog:export'
+                //},
                 {
                     name: "platform.commands.export",
                     icon: 'fa fa-upload',
+                    canExecuteMethod: function () {
+                        return true;
+                    },
                     executeMethod: function () {
+
+                        var selectedRows = $scope.gridApi.selection.getSelectedRows();
+                        exportDataRequest.dataQuery.objectIds = [];
+                        if (selectedRows && selectedRows.length) {
+                            exportDataRequest.dataQuery.isAllSelected = false;
+                            exportDataRequest.dataQuery.objectIds = _.map(selectedRows, function (pricelist) {
+                                return pricelist.id;
+                            });
+                        }
+
+                        var searchCriteria = getSearchCriteria();
+                        if (searchCriteria.keyword !== '') {
+                            exportDataRequest.dataQuery.isAnyFilterApplied = true;
+                        }
+
+                        exportDataRequest.dataQuery = angular.extend(exportDataRequest.dataQuery, searchCriteria);
+
                         var newBlade = {
-                            id: 'catalogExport',
-                            title: 'catalog.blades.exporter-list.title',
-                            subtitle: 'catalog.blades.exporter-list.subtitle',
-                            catalog: blade.catalog,
-                            controller: 'virtoCommerce.catalogModule.exporterListController',
-                            template: 'Modules/$(VirtoCommerce.Catalog)/Scripts/blades/export/exporter-list.tpl.html',
-                            selectedProducts: _.filter($scope.gridApi.selection.getSelectedRows(), function (x) { return x.type == 'product' }),
-                            selectedCategories: _.filter($scope.gridApi.selection.getSelectedRows(), function (x) { return x.type == 'category' })
+                            id: 'pricelistExport',
+                            title: 'pricing.blades.exporter.priceListTitle',
+                            subtitle: 'pricing.blades.exporter.pricelistSubtitle',
+                            controller: 'virtoCommerce.exportModule.exportSettingsController',
+                            template: 'Modules/$(VirtoCommerce.Export)/Scripts/blades/export-settings.tpl.html',
+                            exportDataRequest: exportDataRequest
                         };
                         bladeNavigationService.showBlade(newBlade, blade);
-                    },
-                    canExecuteMethod: function () { return blade.catalogId; },
-                    permission: 'catalog:export'
+                    }
                 },
                 {
                     name: "platform.commands.cut",
