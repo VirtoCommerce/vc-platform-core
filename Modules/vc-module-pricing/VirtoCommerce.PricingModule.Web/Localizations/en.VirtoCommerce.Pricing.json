@@ -196,6 +196,10 @@
                 "modified-since": "Modified since",
                 "products": "Products"
             },
+            "labels": {
+                "select": "Select",
+                "selected": "Selected: "
+            },
             "placeholders": {
                 "price-lists": "Select price lists…"
             }
