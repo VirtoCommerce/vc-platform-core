@@ -119,21 +119,22 @@ function ($scope, pricelists, dialogService, uiGridHelper, bladeUtils) {
                 return true;
             },
             executeMethod: function () {
-
+                exportDataRequest.dataQuery.isAllSelected = true;
                 var selectedRows = $scope.gridApi.selection.getSelectedRows();
                 exportDataRequest.dataQuery.objectIds = [];
-                exportDataRequest.dataQuery.isAllSelected = true;
-                exportDataRequest.dataQuery.isAnyFilterApplied = false;
-
                 if (selectedRows && selectedRows.length) {
                     exportDataRequest.dataQuery.isAllSelected = false;
-                    exportDataRequest.dataQuery.isAnyFilterApplied = true;
                     exportDataRequest.dataQuery.objectIds = _.map(selectedRows, function (pricelist) {
                         return pricelist.id;
                     });
                 }
 
-                exportDataRequest.dataQuery = angular.extend(exportDataRequest.dataQuery, getSearchCriteria());
+                var searchCriteria = getSearchCriteria();
+                if (searchCriteria.keyword !== '') {
+                    exportDataRequest.dataQuery.isAnyFilterApplied = true;
+                }
+
+                exportDataRequest.dataQuery = angular.extend(exportDataRequest.dataQuery, searchCriteria);
 
                 var newBlade = {
                     id: 'pricelistExport',

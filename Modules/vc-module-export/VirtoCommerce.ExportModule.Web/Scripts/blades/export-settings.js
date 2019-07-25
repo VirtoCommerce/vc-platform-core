@@ -3,8 +3,8 @@ angular.module('virtoCommerce.exportModule')
         var blade = $scope.blade;
         blade.canStartProcess = false;
         blade.isLoading = true;
-        //blade.exportDataRequest = {};
-        blade.isExportedTypeSelected = false;
+        blade.exportDataRequest = blade.exportDataRequest || {};
+        blade.isExportedTypeSelected = typeof (blade.exportDataRequest.exportTypeName) !== 'undefined';
         
         function initializeBlade() {
             exportApi.getProviders(function (result) {
@@ -18,7 +18,6 @@ angular.module('virtoCommerce.exportModule')
                 }
             });
 
-            blade.isExportedTypeSelected = typeof (blade.exportDataRequest.exportTypeName) !== 'undefined';
             blade.isLoading = false;
         }
 
