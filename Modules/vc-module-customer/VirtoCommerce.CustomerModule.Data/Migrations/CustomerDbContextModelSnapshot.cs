@@ -205,7 +205,8 @@ namespace VirtoCommerce.CustomerModule.Data.Migrations
                     b.Property<DateTime>("CreatedDate");
 
                     b.Property<string>("Discriminator")
-                        .IsRequired();
+                        .IsRequired()
+                        .HasMaxLength(128);
 
                     b.Property<string>("MemberType")
                         .HasMaxLength(64);
