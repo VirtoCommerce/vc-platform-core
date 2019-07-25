@@ -30,16 +30,16 @@ namespace VirtoCommerce.Platform.Core.Modularity
         public string ReleaseNotes { get; private set; }
         public string Copyright { get; private set; }
         public string Tags { get; private set; }
-        public ICollection<ModuleIdentity> Dependencies => new List<ModuleIdentity>();
+        public ICollection<ModuleIdentity> Dependencies { get; } = new List<ModuleIdentity>();
         /// <summary>
         /// List of incompatible modules
         /// </summary>
-        public ICollection<ModuleIdentity> Incompatibilities => new List<ModuleIdentity>();
+        public ICollection<ModuleIdentity> Incompatibilities { get; } = new List<ModuleIdentity>();
         public bool IsRemovable { get; set; }
         public bool IsInstalled { get; set; }
-        public ICollection<string> Groups  => new List<string>();
+        public ICollection<string> Groups { get; } = new List<string>();
         public string FullPhysicalPath { get; set; }
-        public ICollection<string> Errors => new List<string>();
+        public ICollection<string> Errors { get; } = new List<string>();
         public bool UseFullTypeNameInSwagger { get; set; }
 
         public virtual ManifestModuleInfo LoadFromManifest(ModuleManifest manifest)
