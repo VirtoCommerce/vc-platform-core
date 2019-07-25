@@ -16,7 +16,6 @@ namespace VirtoCommerce.CatalogModule.Data.ExportImport
     // These permissions required to fetch catalog data
     [Authorize(ModuleConstants.Security.Permissions.Export)]
     [Authorize(ModuleConstants.Security.Permissions.Read)]
-    [Authorize(ModuleConstants.Security.Permissions.Access)]
     public class CatalogExportPagedDataSource : BaseExportPagedDataSource
     {
         private readonly ICatalogSearchService _searchService;
