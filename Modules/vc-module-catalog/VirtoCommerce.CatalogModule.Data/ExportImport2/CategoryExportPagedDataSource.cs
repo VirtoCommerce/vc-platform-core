@@ -13,37 +13,35 @@ using VirtoCommerce.Platform.Core.Security;
 
 namespace VirtoCommerce.CatalogModule.Data.ExportImport
 {
-    // These permissions required to fetch catalog data
     [Authorize(ModuleConstants.Security.Permissions.Export)]
     [Authorize(ModuleConstants.Security.Permissions.Read)]
-    public class CatalogExportPagedDataSource : BaseExportPagedDataSource
+    public class CategoryExportPagedDataSource : BaseExportPagedDataSource
     {
-        private readonly ICatalogSearchService _searchService;
-        private readonly ICatalogService _catalogService;
-        private ViewableEntityConverter<Catalog> _viewableEntityConverter;
+        private readonly ICategorySearchService _searchService;
+        private readonly ICategoryService _categoryService;
+        private ViewableEntityConverter<Category> _viewableEntityConverter;
 
-        public CatalogExportPagedDataSource(ICatalogSearchService searchService, ICatalogService catalogService, IAuthorizationPolicyProvider authorizationPolicyProvider, IAuthorizationService authorizationService, IUserClaimsPrincipalFactory<ApplicationUser> userClaimsPrincipalFactory, UserManager<ApplicationUser> userManager)
+        public CategoryExportPagedDataSource(ICategorySearchService searchService, ICategoryService categoryService, IAuthorizationPolicyProvider authorizationPolicyProvider, IAuthorizationService authorizationService, IUserClaimsPrincipalFactory<ApplicationUser> userClaimsPrincipalFactory, UserManager<ApplicationUser> userManager)
             : base(authorizationPolicyProvider, authorizationService, userClaimsPrincipalFactory, userManager)
         {
             _searchService = searchService;
-            _catalogService = catalogService;
+            _categoryService = categoryService;
         }
-
         protected override FetchResult FetchData(SearchCriteriaBase searchCriteria)
         {
-            Catalog[] result;
+            Category[] result;
             int totalCount;
 
             if (searchCriteria.ObjectIds.Any(x => !string.IsNullOrWhiteSpace(x)))
             {
-                result = _catalogService.GetByIdsAsync(Enumerable.ToArray(searchCriteria.ObjectIds)).Result;
+                result = _categoryService.GetByIdsAsync(Enumerable.ToArray(searchCriteria.ObjectIds), "Full").Result;
                 totalCount = result.Length;
             }
             else
             {
-                var catalogSearchResult = _searchService.SearchCatalogsAsync((CatalogSearchCriteria)searchCriteria).Result;
-                result = catalogSearchResult.Results.ToArray();
-                totalCount = catalogSearchResult.TotalCount;
+                var categorySearchResult = _searchService.SearchCategoriesAsync((CategorySearchCriteria)searchCriteria).Result;
+                result = categorySearchResult.Results.ToArray();
+                totalCount = categorySearchResult.TotalCount;
             }
 
             return new FetchResult(result, totalCount);
@@ -51,21 +49,21 @@ namespace VirtoCommerce.CatalogModule.Data.ExportImport
 
         protected override ViewableEntity ToViewableEntity(object obj)
         {
-            if (!(obj is Catalog catalog))
+            if (!(obj is Category category))
             {
-                throw new System.InvalidCastException(nameof(Catalog));
+                throw new System.InvalidCastException(nameof(Category));
             }
 
             EnsureViewableConverterCreated();
 
-            return _viewableEntityConverter.ToViewableEntity(catalog);
+            return _viewableEntityConverter.ToViewableEntity(category);
         }
 
         protected virtual void EnsureViewableConverterCreated()
         {
             if (_viewableEntityConverter == null)
             {
-                _viewableEntityConverter = new ViewableEntityConverter<Catalog>(x => x.Name, x => x.OuterId, x => null);
+                _viewableEntityConverter = new ViewableEntityConverter<Category>(x => x.Name, x => x.Code, x => x.ImgSrc);
             }
         }
     }
