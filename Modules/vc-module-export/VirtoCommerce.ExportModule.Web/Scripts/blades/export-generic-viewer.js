@@ -5,14 +5,20 @@ angular.module('virtoCommerce.exportModule')
         $scope.uiGridConstants = uiGridHelper.uiGridConstants;
         $scope.hasMore = true;
         $scope.items = [];
+        $scope.blade.headIcon = 'fa-upload';
         
         var blade = $scope.blade;
         blade.isLoading = true;
         blade.isExpanded = true;
-        $scope.blade.headIcon = 'fa-upload';
 
-        function initializeBlade() {
+        var filter = blade.filter = $scope.filter = {};
+        blade.exportDataRequest = blade.exportDataRequest || {};
+
+        if (blade.exportDataRequest.dataQuery && blade.exportDataRequest.dataQuery.keyword) {
+            filter.keyword = blade.exportDataRequest.dataQuery.keyword;
         }
+
+        $scope.$localStorage = $localStorage;
 
         blade.refresh = function () {
             loadData();
@@ -43,10 +49,6 @@ angular.module('virtoCommerce.exportModule')
         {
             var dataQuery = getEmptyDataQuery();
             
-            if (filter.keyword) {
-                angular.extend(dataQuery, {keyword: filter.keyword});
-            }
-
             angular.extend(dataQuery, getFilterConditions());
 
             return dataQuery;
@@ -65,10 +67,14 @@ angular.module('virtoCommerce.exportModule')
 
         function getFilterConditions() {
             var result = {};
-            var isAnyFilterApplied = !!filter.current;
+            var isAnyFilterApplied = !!filter.current || filter.keyword;
 
             result.isAnyFilterApplied = isAnyFilterApplied;
             angular.extend(result, filter.current);
+
+            if (filter.keyword) {
+                angular.extend(result, { keyword: filter.keyword });
+            }
 
             return result;
         }
@@ -92,8 +98,6 @@ angular.module('virtoCommerce.exportModule')
             // TODO item view on select
         };
 
-        var filter = blade.filter = $scope.filter = {};
-        $scope.$localStorage = $localStorage;
         if (!$localStorage.exportSearchFilters) {
             $localStorage.exportSearchFilters = [{ name: 'export.blades.export-generic-viewer.labels.new-filter' }];
         }
@@ -201,6 +205,4 @@ angular.module('virtoCommerce.exportModule')
 
             bladeUtils.initializePagination($scope);
         };
-
-        initializeBlade();
     }]);

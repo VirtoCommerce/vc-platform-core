@@ -73,12 +73,12 @@ angular.module(moduleName, ['ui.grid.cellNav', 'ui.grid.edit', 'ui.grid.validate
         metaFormsService.registerMetaFields('Price' + 'ExportFilter', [
         {
             name: 'pricelistSelector',
-            title: "pricing.blades.assignment-detail.labels.price-list",
+            title: "pricing.selectors.titles.price-lists",
             templateUrl: 'Modules/$(VirtoCommerce.Pricing)/Scripts/selectors/pricelist-selector.tpl.html',
         },
         {
-            name: 'startDate',
-            title: "pricing.blades.assignment-detail.labels.enable-date",
+            name: 'modifiedSince',
+            title: "pricing.selectors.titles.modified-since",
             valueType: "DateTime"
         }
     ]);
