@@ -6,8 +6,11 @@ function ($scope, pricelists, dialogService, uiGridHelper, bladeUtils) {
 
     var exportDataRequest = {
         exportTypeName: 'Pricelist',
+        isTabularExportSupported: true,
+        defaultProvider: 'JsonExportProvider',
         dataQuery: {
-            exportTypeName: 'PricelistExportDataQuery'
+            exportTypeName: 'PricelistExportDataQuery',
+            isAllSelected: true
         }
     };
 
@@ -116,23 +119,29 @@ function ($scope, pricelists, dialogService, uiGridHelper, bladeUtils) {
                 return true;
             },
             executeMethod: function () {
-
+                
                 var selectedRows = $scope.gridApi.selection.getSelectedRows();
                 exportDataRequest.dataQuery.objectIds = [];
                 if (selectedRows && selectedRows.length) {
+                    exportDataRequest.dataQuery.isAllSelected = false;
                     exportDataRequest.dataQuery.objectIds = _.map(selectedRows, function (pricelist) {
                         return pricelist.id;
                     });
                 }
 
-                exportDataRequest.dataQuery = angular.extend(exportDataRequest.dataQuery, getSearchCriteria());
+                var searchCriteria = getSearchCriteria();
+                if (searchCriteria.keyword !== '') {
+                    exportDataRequest.dataQuery.isAnyFilterApplied = true;
+                }
+
+                exportDataRequest.dataQuery = angular.extend(exportDataRequest.dataQuery, searchCriteria);
 
                 var newBlade = {
                     id: 'pricelistExport',
                     title: 'pricing.blades.exporter.priceListTitle',
                     subtitle: 'pricing.blades.exporter.pricelistSubtitle',
                     controller: 'virtoCommerce.exportModule.exportSettingsController',
-                    template: 'Modules/$(VirtoCommerce.Export)/Scripts/blades/exportSettings.tpl.html',
+                    template: 'Modules/$(VirtoCommerce.Export)/Scripts/blades/export-settings.tpl.html',
                     exportDataRequest: exportDataRequest
                 };
                 bladeNavigationService.showBlade(newBlade, blade);

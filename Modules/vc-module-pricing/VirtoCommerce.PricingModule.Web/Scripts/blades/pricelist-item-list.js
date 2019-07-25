@@ -4,8 +4,11 @@ angular.module('virtoCommerce.pricingModule')
     var blade = $scope.blade;
     var exportDataRequest = {
         exportTypeName: 'Price',
+        defaultProvider: 'JsonExportProvider',
+        isTabularExportSupported: true,
         dataQuery: {
-             exportTypeName: 'PriceExportDataQuery'
+            exportTypeName: 'PriceExportDataQuery',
+            isAllSelected: true
         }
     };
 
@@ -166,10 +169,17 @@ angular.module('virtoCommerce.pricingModule')
                 var selectedRows = $scope.gridApi.selection.getSelectedRows();
                 exportDataRequest.dataQuery.productIds = [];
                 if (selectedRows && selectedRows.length) {
+                    exportDataRequest.dataQuery.isAnyFilterApplied = true;
                     exportDataRequest.dataQuery.productIds = _.map(selectedRows, function (product) {
                         return product.productId;
                     });
                 }
+
+                var searchCriteria = getSearchCriteria();
+                if (searchCriteria.keyword !== '') {
+                    exportDataRequest.dataQuery.isAnyFilterApplied = true;
+                }
+
 
                 exportDataRequest.dataQuery = angular.extend(exportDataRequest.dataQuery, getSearchCriteria());
 
@@ -178,7 +188,7 @@ angular.module('virtoCommerce.pricingModule')
                     title: 'pricing.blades.exporter.priceTitle',
                     subtitle: 'pricing.blades.exporter.priceSubtitle',
                     controller: 'virtoCommerce.exportModule.exportSettingsController',
-                    template: 'Modules/$(VirtoCommerce.Export)/Scripts/blades/exportSettings.tpl.html',
+                    template: 'Modules/$(VirtoCommerce.Export)/Scripts/blades/export-settings.tpl.html',
                     exportDataRequest: exportDataRequest
                 };
                 bladeNavigationService.showBlade(newBlade, blade);

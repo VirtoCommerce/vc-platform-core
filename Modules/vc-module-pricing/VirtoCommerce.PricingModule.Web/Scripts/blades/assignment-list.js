@@ -7,6 +7,8 @@ angular.module('virtoCommerce.pricingModule')
 
             var exportDataRequest = {
                 exportTypeName: 'PricelistAssignment',
+                isTabularExportSupported: true,
+                defaultProvider: 'JsonExportProvider',
                 dataQuery: {
                     exportTypeName: 'PricelistAssignmentExportDataQuery'
                 }
@@ -157,22 +159,30 @@ angular.module('virtoCommerce.pricingModule')
                     },
                     executeMethod: function () {
 
+                        exportDataRequest.dataQuery.isAllSelected = true;
                         var selectedRows = $scope.gridApi.selection.getSelectedRows();
+
                         exportDataRequest.dataQuery.objectIds = [];
                         if (selectedRows && selectedRows.length) {
+                            exportDataRequest.dataQuery.isAllSelected = false;
                             exportDataRequest.dataQuery.objectIds = _.map(selectedRows, function (priceAssignments) {
                                 return priceAssignments.id;
                             });
                         }
 
-                        exportDataRequest.dataQuery = angular.extend(exportDataRequest.dataQuery, getSearchCriteria());
+                        var searchCriteria = getSearchCriteria();
+                        if ((searchCriteria.pricelistIds && searchCriteria.pricelistIds.length > 0) || searchCriteria.keyword !== '') {
+                            exportDataRequest.dataQuery.isAnyFilterApplied = true;
+                        }
+
+                        exportDataRequest.dataQuery = angular.extend(exportDataRequest.dataQuery, searchCriteria);
 
                         var newBlade = {
                             id: 'priceAssignmentExport',
                             title: 'pricing.blades.exporter.priceAssignmentTitle',
                             subtitle: 'pricing.blades.exporter.priceAssignmentSubtitle',
                             controller: 'virtoCommerce.exportModule.exportSettingsController',
-                            template: 'Modules/$(VirtoCommerce.Export)/Scripts/blades/exportSettings.tpl.html',
+                            template: 'Modules/$(VirtoCommerce.Export)/Scripts/blades/export-settings.tpl.html',
                             exportDataRequest: exportDataRequest
                         };
                         bladeNavigationService.showBlade(newBlade, blade);
