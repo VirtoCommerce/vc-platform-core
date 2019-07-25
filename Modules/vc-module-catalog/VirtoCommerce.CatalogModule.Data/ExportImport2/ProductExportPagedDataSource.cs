@@ -1,6 +1,7 @@
 using System.Linq;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Identity;
+using VirtoCommerce.CatalogModule.Core;
 using VirtoCommerce.CatalogModule.Core.Model;
 using VirtoCommerce.CatalogModule.Core.Model.Search;
 using VirtoCommerce.CatalogModule.Core.Search;
@@ -12,6 +13,10 @@ using VirtoCommerce.Platform.Core.Security;
 
 namespace VirtoCommerce.CatalogModule.Data.ExportImport
 {
+    // These permissions required to fetch catalog data
+    [Authorize(ModuleConstants.Security.Permissions.Export)]
+    [Authorize(ModuleConstants.Security.Permissions.Read)]
+
     public class ProductExportPagedDataSource : BaseExportPagedDataSource
     {
         private readonly IProductSearchService _productSearchService;
