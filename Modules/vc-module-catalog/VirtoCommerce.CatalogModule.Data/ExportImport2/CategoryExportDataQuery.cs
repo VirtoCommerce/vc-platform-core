@@ -8,7 +8,7 @@ namespace VirtoCommerce.CatalogModule.Data.ExportImport2
     {
         public override SearchCriteriaBase CreateSearchCriteria()
         {
-            return new CatalogSearchCriteria();
+            return new CategorySearchCriteria();
         }
     }
 }

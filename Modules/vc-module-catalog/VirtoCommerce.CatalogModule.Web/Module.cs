@@ -18,6 +18,7 @@ using VirtoCommerce.CatalogModule.Core.Search;
 using VirtoCommerce.CatalogModule.Core.Services;
 using VirtoCommerce.CatalogModule.Data.ExportImport;
 using VirtoCommerce.CatalogModule.Data.ExportImport.Converters;
+using VirtoCommerce.CatalogModule.Data.ExportImport2;
 using VirtoCommerce.CatalogModule.Data.Handlers;
 using VirtoCommerce.CatalogModule.Data.Repositories;
 using VirtoCommerce.CatalogModule.Data.Search;
@@ -142,6 +143,9 @@ namespace VirtoCommerce.CatalogModule.Web
 
             serviceCollection.AddScoped<CatalogExportPagedDataSource>(); // Adding as scoped, because of used services (UserManager, PrincipalFactory) scoped too
             serviceCollection.AddSingleton<Func<ExportDataQuery, CatalogExportPagedDataSource>>(provider => (exportDataQuery) => CreateExportPagedDataSource<CatalogExportPagedDataSource>(provider, exportDataQuery));
+
+            serviceCollection.AddScoped<CategoryExportPagedDataSource>();
+            serviceCollection.AddSingleton<Func<ExportDataQuery, CategoryExportPagedDataSource>>(provider => (exportDataQuery) => CreateExportPagedDataSource<CategoryExportPagedDataSource>(provider, exportDataQuery));
         }
 
         public void PostInitialize(IApplicationBuilder appBuilder)
@@ -174,6 +178,7 @@ namespace VirtoCommerce.CatalogModule.Web
             //Register types allowed to export
             var registrar = appBuilder.ApplicationServices.GetService<IKnownExportTypesRegistrar>();
             var catalogExportPagedDataSourceFactory = appBuilder.ApplicationServices.GetService<Func<ExportDataQuery, CatalogExportPagedDataSource>>();
+            var categoryExportPagedDataSourceFactory = appBuilder.ApplicationServices.GetService<Func<ExportDataQuery, CategoryExportPagedDataSource>>();
 
 
             registrar.RegisterType(typeof(Catalog).Name, "Catalog", typeof(CatalogExportDataQuery).Name)
@@ -182,7 +187,14 @@ namespace VirtoCommerce.CatalogModule.Web
                 .WithTabularDataConverter(new TabularCatalogDataConverter())
                 .WithTabularMetadata(ExportedTypeMetadata.GetFromType<TabularCatalog>(false));
 
+            registrar.RegisterType(typeof(Category).Name, "Catalog", typeof(CategoryExportDataQuery).Name)
+                .WithDataSourceFactory(dataQuery => categoryExportPagedDataSourceFactory(dataQuery))
+                .WithMetadata(ExportedTypeMetadata.GetFromType<Category>(true))
+                .WithTabularDataConverter(new TabularCategoryDataConverter())
+                .WithTabularMetadata(ExportedTypeMetadata.GetFromType<TabularCategory>(false));
+
             AbstractTypeFactory<ExportDataQuery>.RegisterType<CatalogExportDataQuery>();
+            AbstractTypeFactory<ExportDataQuery>.RegisterType<CategoryExportDataQuery>();
 
             //Force migrations
             using (var serviceScope = appBuilder.ApplicationServices.CreateScope())
