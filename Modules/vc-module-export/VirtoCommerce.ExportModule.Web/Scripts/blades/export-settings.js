@@ -18,6 +18,16 @@ angular.module('virtoCommerce.exportModule')
                 }
             });
 
+            if (blade.isExportedTypeSelected) {
+                exportApi.getKnowntypes(function (results) {
+                    if (blade.selectedProvider.isTabular) {
+                        results = _.filter(results, function (x) { return x.isTabularExportSupported === true; });
+                    }
+                    var selectedTypes = _.filter(results,
+                        function (x) { return x.typeName === blade.exportDataRequest.exportTypeName; });
+                    blade.exportDataRequest.allColumnsOfType = selectedTypes[0].metaData.propertyInfos;
+                });
+            }            
             blade.isLoading = false;
         }
 
