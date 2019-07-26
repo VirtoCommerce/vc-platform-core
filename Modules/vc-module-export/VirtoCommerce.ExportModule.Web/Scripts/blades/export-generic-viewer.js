@@ -5,14 +5,22 @@ angular.module('virtoCommerce.exportModule')
         $scope.uiGridConstants = uiGridHelper.uiGridConstants;
         $scope.hasMore = true;
         $scope.items = [];
+        $scope.blade.headIcon = 'fa-upload';
+        $scope.exportSearchFilters = [];
+        $scope.exportSearchFilterIds = [];
         
         var blade = $scope.blade;
         blade.isLoading = true;
         blade.isExpanded = true;
-        $scope.blade.headIcon = 'fa-upload';
 
-        function initializeBlade() {
+        var filter = blade.filter = $scope.filter = {};
+        blade.exportDataRequest = blade.exportDataRequest || { exportTypeName: "NotSpecified" };
+
+        if (blade.exportDataRequest.dataQuery && blade.exportDataRequest.dataQuery.keyword) {
+            filter.keyword = blade.exportDataRequest.dataQuery.keyword;
         }
+
+        $scope.$localStorage = $localStorage;
 
         blade.refresh = function () {
             loadData();
@@ -43,10 +51,6 @@ angular.module('virtoCommerce.exportModule')
         {
             var dataQuery = getEmptyDataQuery();
             
-            if (filter.keyword) {
-                angular.extend(dataQuery, {keyword: filter.keyword});
-            }
-
             angular.extend(dataQuery, getFilterConditions());
 
             return dataQuery;
@@ -66,9 +70,14 @@ angular.module('virtoCommerce.exportModule')
 
         function getFilterConditions() {
             var result = {};
-            var isAnyFilterApplied = false;
+            var isAnyFilterApplied = !!filter.current || filter.keyword;
 
             result.isAnyFilterApplied = isAnyFilterApplied;
+            angular.extend(result, filter.current);
+
+            if (filter.keyword) {
+                angular.extend(result, { keyword: filter.keyword });
+            }
 
             return result;
         }
@@ -92,37 +101,51 @@ angular.module('virtoCommerce.exportModule')
             // TODO item view on select
         };
 
-        var filter = blade.filter = $scope.filter = {};
-        $scope.$localStorage = $localStorage;
+
         if (!$localStorage.exportSearchFilters) {
-            $localStorage.exportSearchFilters = [{ name: 'export.blades.export-generic-viewer.labels.new-filter' }];
+            $localStorage.exportSearchFilters = [];
         }
-        if ($localStorage.exportSearchFilterId) {
-            filter.current = _.findWhere($localStorage.exportSearchFilters, { id: $localStorage.exportSearchFilterId });
+
+        if (!$localStorage.exportSearchFilters[blade.exportDataRequest.exportTypeName]) {
+            $localStorage.exportSearchFilters[blade.exportDataRequest.exportTypeName] = [{ name: 'export.blades.export-generic-viewer.labels.new-filter' }];
+        }
+
+        $scope.exportSearchFilters = $localStorage.exportSearchFilters[blade.exportDataRequest.exportTypeName];
+
+        if (!$localStorage.exportSearchFilterIds) {
+            $localStorage.exportSearchFilterIds = [];
+        }
+
+        $scope.exportSearchFilterId = $localStorage.exportSearchFilterIds[blade.exportDataRequest.exportTypeName];
+
+        if ($scope.exportSearchFilterId) {
+            filter.current = _.findWhere($scope.exportSearchFilters, { id: $scope.exportSearchFilterId });
         }
 
         filter.change = function () {
             $localStorage.exportSearchFilterId = filter.current ? filter.current.id : null;
+            var metafieldsId = blade.exportDataRequest.exportTypeName + 'ExportFilter';
             if (filter.current && !filter.current.id) {
                 filter.current = null;
-                showFilterDetailBlade({ isNew: true });
+                showFilterDetailBlade({ isNew: true, metafieldsId: metafieldsId, exportTypeName: blade.exportDataRequest.exportTypeName });
             } else {
-                bladeNavigationService.closeBlade({ id: 'filterDetail' });
+                bladeNavigationService.closeBlade({ id: 'exportGenericViewerFilter' });
                 filter.criteriaChanged();
             }
         };
 
         filter.edit = function () {
             if (filter.current) {
-                showFilterDetailBlade({ data: filter.current });
+                var metafieldsId = blade.exportDataRequest.exportTypeName  + 'ExportFilter';
+                showFilterDetailBlade({ data: filter.current, metafieldsId: metafieldsId, exportTypeName: blade.exportDataRequest.exportTypeName });
             }
         };
 
         function showFilterDetailBlade(bladeData) {
             var newBlade = {
-                id: 'filterDetail',
-                controller: 'virtoCommerce.exportModule.filterDetailController',
-                template: 'Modules/$(VirtoCommerce.Export)/Scripts/blades/filter-detail.tpl.html'
+                id: 'exportGenericViewerFilter',
+                controller: 'virtoCommerce.exportModule.exportGenericViewerFilterController',
+                template: 'Modules/$(VirtoCommerce.Export)/Scripts/blades/export-generic-viewer-filter.tpl.html'
             };
             angular.extend(newBlade, bladeData);
             bladeNavigationService.showBlade(newBlade, blade);
@@ -199,6 +222,4 @@ angular.module('virtoCommerce.exportModule')
 
             bladeUtils.initializePagination($scope);
         };
-
-        initializeBlade();
     }]);

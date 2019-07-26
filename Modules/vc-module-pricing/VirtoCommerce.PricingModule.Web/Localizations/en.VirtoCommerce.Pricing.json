@@ -189,6 +189,20 @@
         "commands": {
             "add-selected": "Add selected",
             "delete-all-filtered": "Delete all filtered"
+        },
+        "selectors" : {
+            "titles": {
+                "price-lists": "Price lists",
+                "modified-since": "Modified since",
+                "products": "Products"
+            },
+            "labels": {
+                "select": "Select",
+                "selected": "Selected: "
+            },
+            "placeholders": {
+                "price-lists": "Select price lists…"
+            }
         }
     },
     "permissions": {

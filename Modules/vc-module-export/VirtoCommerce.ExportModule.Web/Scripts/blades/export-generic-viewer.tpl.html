@@ -7,7 +7,7 @@
             </button>
             <ui-select ng-model="filter.current" ng-change="filter.change()" style="left: 220px;position: absolute;width: 190px;top: 0px;">
                 <ui-select-match allow-clear="true" placeholder="{{'export.blades.export-generic-viewer.placeholders.select-filter' | translate}}">{{$select.selected.name | translate}}</ui-select-match>
-                <ui-select-choices repeat="x in $localStorage.exportSearchFilters | filter: $select.search">
+                <ui-select-choices repeat="x in exportSearchFilters | filter: $select.search">
                     <span ng-bind-html="x.name | translate | highlight: $select.search"></span>
                 </ui-select-choices>
             </ui-select>
