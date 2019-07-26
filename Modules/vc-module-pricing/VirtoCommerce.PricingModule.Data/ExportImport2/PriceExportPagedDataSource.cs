@@ -64,7 +64,7 @@ namespace VirtoCommerce.PricingModule.Data.ExportImport
         {
             if (_viewableEntityConverter == null)
             {
-                _viewableEntityConverter = new ViewableEntityConverter<Price>(x => $"{x.PricelistId}", x => x.Id, x => null);
+                _viewableEntityConverter = new ViewableEntityConverter<Price>(x => $"{x.PricelistId}", x => x.Id, x => null, x => "test");
             }
         }
     }

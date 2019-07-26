@@ -401,7 +401,7 @@ namespace VirtoCommerce.PricingModule.Test
                 result = reader.ReadToEnd();
             }
 
-            Assert.Equal("Id;PricelistId;Currency;ProductId;Sale;List;MinQuantity;StartDate;EndDate\r\n;;USD;d029526eab5948b189694f1bddba8e68;;0;0;;\r\n;;EUR;85e7aa089a4e4a97a4394d668e37e3f8;;0;0;;\r\n;;EUR;f427108e75ed4676923ddc47632111e3;;0;0;;\r\n", result);
+            Assert.Equal("Id,PricelistId,Currency,ProductId,Sale,List,MinQuantity,StartDate,EndDate\r\n,,USD,d029526eab5948b189694f1bddba8e68,,0,0,,\r\n,,EUR,85e7aa089a4e4a97a4394d668e37e3f8,,0,0,,\r\n,,EUR,f427108e75ed4676923ddc47632111e3,,0,0,,\r\n", result);
 
             return Task.CompletedTask;
         }
