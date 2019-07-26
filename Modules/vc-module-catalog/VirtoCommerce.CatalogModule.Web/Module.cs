@@ -188,7 +188,7 @@ namespace VirtoCommerce.CatalogModule.Web
 
             AbstractTypeFactory<ExportDataQuery>.RegisterType<CatalogExportDataQuery>();
 
-            registrar.RegisterType(typeof(CatalogProduct).Name, "Product", typeof(ProductExportDataQuery).Name)
+            registrar.RegisterType(typeof(CatalogProduct).Name, "Catalog", typeof(ProductExportDataQuery).Name)
                 .WithDataSourceFactory(dataQuery => productExportPagedDataSourceFactory(dataQuery))
                 .WithMetadata(ExportedTypeMetadata.GetFromType<CatalogProduct>(true))
                 .WithTabularDataConverter(new TabularProductDataConverter())
