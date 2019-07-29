@@ -16,54 +16,41 @@
         <p class="form-count">{{'platform.list.count' | translate}}: <span class="count">{{pageSettings.totalItems | number:0}}</span></p>
     </div>
 </div>
-<div class="blade-static __bottom" ng-if="pageSettings.itemsPerPageCount < pageSettings.totalItems" ng-include="'pagerTemplate.html'"></div>
+<div class="blade-static __bottom" ng-include="'$(Platform)/Scripts/common/templates/ok-cancel.tpl.html'"></div>
 <div class="blade-content" ng-class="{'__large-wide': blade.isExpanded, '__normal': !blade.isExpanded}">
     <div class="blade-inner">
         <div class="inner-block" ng-init="setGridOptions({
                 useExternalSorting: true,
                 showTreeRowHeader: false,
                 data: 'items',
-                rowTemplate: 'item-list.row.html',
+                rowTemplate: 'export-item-list.row.html',
                 rowHeight: 60,
                 infiniteScrollRowsFromEnd: 10,
                 columnDefs: [
-                        { name: 'actions', displayName: '', enableColumnResizing: false, enableSorting: false, width: 30, cellTemplate: 'item-list-actions.cell.html', pinnedLeft:true },
                         {
                             name: 'imageUrl', displayName: 'export.blades.export-generic-viewer.labels.picture',
                             enableColumnResizing: false, enableSorting: false, width: 60,
-                            cellTemplate: 'item-list-icon.cell.html'
+                            cellTemplate: 'export-item-list-icon.cell.html'
                         },
-                        { name: 'name', displayName: 'export.blades.export-generic-viewer.labels.name', cellTemplate: 'item-list-name.cell.html' },
+                        { name: 'name', displayName: 'export.blades.export-generic-viewer.labels.name', cellTemplate: 'export-item-list-name.cell.html' },
                     ]})">
             <div class="table-wrapper" ng-if="items.length > 0">
                 <div ui-grid="gridOptions" ui-grid-auto-resize ui-grid-save-state ui-grid-selection ui-grid-resize-columns ui-grid-move-columns ui-grid-pinning ui-grid-height ui-grid-infinite-scroll></div>
-                <ul class="menu __context" role="menu" id="cil_menu_{{blade.level}}">
-                    <li class="menu-item" ng-click='edit(contextMenuEntity)'>
-                        <i class="menu-ico fa fa-edit"></i> {{'platform.commands.manage' | translate}}
-                    </li>
-                </ul>
             </div>
             <div class="note" ng-if="!items.length">{{ 'platform.list.no-data' | translate }}</div>
         </div>
     </div>
 </div>
 
-<script type="text/ng-template" id="item-list.row.html">
+<script type="text/ng-template" id="export-item-list.row.html">
     <div ng-click='grid.appScope.selectItem($event, row.entity)' ng-repeat="(colRenderIndex, col) in colContainer.renderedColumns track by col.uid" 
         ui-grid-one-bind-id-grid="rowRenderIndex + '-' + col.uid + '-cell'" class="ui-grid-cell" 
-        ng-class="{'ui-grid-row-header-cell': col.isRowHeader, '__hovered': grid.appScope.contextMenuEntity === row.entity, '__selected': row.entity.id===grid.appScope.selectedNodeId }" 
-        role="{{col.isRowHeader ? 'rowheader' : 'gridcell' }}" ui-grid-cell context-menu="grid.appScope.contextMenuEntity = row.entity" 
-        data-target="cil_menu_{{grid.appScope.blade.level}}">
+        ng-class="{'ui-grid-row-header-cell': col.isRowHeader, '__selected': row.entity.id===grid.appScope.selectedNodeId }" 
+        role="{{col.isRowHeader ? 'rowheader' : 'gridcell' }}" ui-grid-cell>
     </div>
 </script>
 
-<script type="text/ng-template" id="item-list-actions.cell.html">
-    <div class="ui-grid-actions" left-click-menu="grid.appScope.contextMenuEntity = row.entity" data-target="cil_menu_{{grid.appScope.blade.level}}">
-        <i class="fa fa-ellipsis-v"></i>
-    </div>
-</script>
-
-<script type="text/ng-template" id="item-list-icon.cell.html">
+<script type="text/ng-template" id="export-item-list-icon.cell.html">
     <div class="ui-grid-cell-contents">
         <div class="product-img">
             <img class="image" fallback-src="{{ COL_FIELD }}" ng-src="{{ COL_FIELD | thumbnail: '_64x64' }}" ng-if="COL_FIELD">
@@ -72,7 +59,7 @@
     </div>
 </script>
 
-<script type="text/ng-template" id="item-list-name.cell.html">
+<script type="text/ng-template" id="export-item-list-name.cell.html">
     <div class="ui-grid-cell-contents">
         <div class="inner-contents">
             <div class="table-t">{{COL_FIELD}}</div>
