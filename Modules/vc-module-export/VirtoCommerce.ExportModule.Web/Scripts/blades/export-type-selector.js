@@ -8,61 +8,16 @@ angular.module('virtoCommerce.exportModule')
         blade.refresh = function (disableOpenAnimation) {
             blade.isLoading = true;
 
-            exportApi.getKnowntypes(function (results) {
-                if (blade.selectedProvider.isTabular) {
-                    results = _.filter(results, function (x) { return x.isTabularExportSupported === true; });
-                }
-                _.each(results, function (item) {
-                    item.groupName = item.group + '|' + item.typeName;
-                    var lastIndex = item.typeName.lastIndexOf('.');
-                    item.name = item.typeName.substring(lastIndex + 1);
-                });
-                blade.allGroups = results;
-                typeTree = {};
-                _.each(results, function (exportedType ) {
-                    var paths = (exportedType.groupName ? exportedType.groupName : 'General').split('|');
-                    var lastParent = typeTree;
-                    var lastParentId = '';
-                    _.each(paths, function (path, i) {
-                        lastParentId += '|' + path;
-                        if (!lastParent[path]) {
-                            var lastIndex = path.lastIndexOf('.');
-                            var treeNode = { name: path.substring(lastIndex + 1), groupName: lastParentId.substring(1) }
-                            lastParent[path] = treeNode;
-                            if (exportedType.groupName && _.all(blade.allGroups, function (x) { return x.groupName !== treeNode.groupName; })) {
-                                blade.allGroups.push(treeNode);
-                            }
-                        }
-
-                        if (i < paths.length - 1) {
-                            if (!lastParent[path].children) {
-                                lastParent[path].children = {};
-                            }
-                            lastParent = lastParent[path].children;
-                        }
-                    });
-                });
-
-                blade.isLoading = false;
-
-                // restore previous selection
-                if (blade.searchText) {
-                    blade.currentEntities = typeTree;
-                } else {
-                    // reconstruct tree by breadCrumbs
-                    var lastchildren = typeTree;
-                    for (var i = 1; i < blade.breadcrumbs.length; i++) {
-                        lastchildren = lastchildren[blade.breadcrumbs[i].name].children;
-                    }
-                    blade.currentEntities = lastchildren;
-                }
-
-                // open previous settings detail blade if possible
-                if ($scope.selectedNodeId) {
-                    $scope.selectNode({ groupName: $scope.selectedNodeId }, disableOpenAnimation);
-                }
-            },
-                function (error) { bladeNavigationService.setError('Error ' + error.status, blade); });
+            if (blade.knownTypes) {
+                blade.prepareTypes();
+            } else {
+                exportApi.getKnownTypes(
+                    function(results) {
+                        blade.knownTypes = results;
+                        blade.prepareTypes();
+                    },
+                    function(error) { bladeNavigationService.setError('Error ' + error.status, blade); });
+            }
         };
 
         $scope.selectNode = function (node, disableOpenAnimation) {
@@ -94,6 +49,62 @@ angular.module('virtoCommerce.exportModule')
                 }
             });
         };
+
+        blade.prepareTypes = function() {
+            if (blade.selectedProvider.isTabular) {
+                blade.knownTypes = _.filter(blade.knownTypes, function (x) { return x.isTabularExportSupported === true; });
+            }
+            _.each(blade.knownTypes, function (item) {
+                item.groupName = item.group + '|' + item.typeName;
+                var lastIndex = item.typeName.lastIndexOf('.');
+                item.name = item.typeName.substring(lastIndex + 1);
+            });
+            blade.allGroups = blade.knownTypes;
+            typeTree = {};
+            _.each(blade.knownTypes, function (exportedType) {
+                var paths = (exportedType.groupName ? exportedType.groupName : 'General').split('|');
+                var lastParent = typeTree;
+                var lastParentId = '';
+                _.each(paths, function (path, i) {
+                    lastParentId += '|' + path;
+                    if (!lastParent[path]) {
+                        var lastIndex = path.lastIndexOf('.');
+                        var treeNode = { name: path.substring(lastIndex + 1), groupName: lastParentId.substring(1) }
+                        lastParent[path] = treeNode;
+                        if (exportedType.groupName && _.all(blade.allGroups, function (x) { return x.groupName !== treeNode.groupName; })) {
+                            blade.allGroups.push(treeNode);
+                        }
+                    }
+
+                    if (i < paths.length - 1) {
+                        if (!lastParent[path].children) {
+                            lastParent[path].children = {};
+                        }
+                        lastParent = lastParent[path].children;
+                    }
+                });
+            });
+
+            blade.isLoading = false;
+
+            // restore previous selection
+            if (blade.searchText) {
+                blade.currentEntities = typeTree;
+            } else {
+                // reconstruct tree by breadCrumbs
+                var lastchildren = typeTree;
+                for (var i = 1; i < blade.breadcrumbs.length; i++) {
+                    lastchildren = lastchildren[blade.breadcrumbs[i].name].children;
+                }
+                blade.currentEntities = lastchildren;
+            }
+
+            // open previous settings detail blade if possible
+            if ($scope.selectedNodeId) {
+                $scope.selectNode({ groupName: $scope.selectedNodeId }, disableOpenAnimation);
+            }
+
+        }
 
         //Breadcrumbs
         function setBreadcrumbs(node) {
