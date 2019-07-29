@@ -5,7 +5,6 @@ angular.module('virtoCommerce.exportModule')
         blade.isLoading = true;
         blade.exportDataRequest = blade.exportDataRequest || {};
         blade.isExportedTypeSelected = typeof (blade.exportDataRequest.exportTypeName) !== 'undefined';
-        blade.knowntypes = [];
         
         function initializeBlade() {
             exportApi.getProviders(function (result) {
@@ -20,8 +19,8 @@ angular.module('virtoCommerce.exportModule')
             });
 
             if (blade.isExportedTypeSelected) {
-                exportApi.getKnowntypes(function (results) {
-                    blade.knowntypes = results;
+                exportApi.getKnownTypes(function (results) {
+                    blade.knownTypes = results;
                     if (blade.selectedProvider.isTabular) {
                         results = _.filter(results, function (x) { return x.isTabularExportSupported === true; });
                     }
@@ -74,7 +73,7 @@ angular.module('virtoCommerce.exportModule')
                 controller: 'virtoCommerce.exportModule.exportTypeSelectorController',
                 template: 'Modules/$(VirtoCommerce.Export)/Scripts/blades/export-type-selector.tpl.html',
                 isClosingDisabled: false,
-                knowntypes: blade.knowntypes,
+                knownTypes: blade.knownTypes,
                 exportDataRequest: blade.exportDataRequest,
                 selectedProvider: blade.selectedProvider,
                 onSelected: function(exportDataRequest) {

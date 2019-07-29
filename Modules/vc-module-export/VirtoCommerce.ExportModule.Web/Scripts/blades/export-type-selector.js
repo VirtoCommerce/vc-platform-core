@@ -8,12 +8,12 @@ angular.module('virtoCommerce.exportModule')
         blade.refresh = function (disableOpenAnimation) {
             blade.isLoading = true;
 
-            if (blade.knowntypes === null) {
+            if (blade.knownTypes) {
                 blade.prepareTypes();
             } else {
-                exportApi.getKnowntypes(
+                exportApi.getKnownTypes(
                     function(results) {
-                        blade.knowntypes = results;
+                        blade.knownTypes = results;
                         blade.prepareTypes();
                     },
                     function(error) { bladeNavigationService.setError('Error ' + error.status, blade); });
@@ -52,16 +52,16 @@ angular.module('virtoCommerce.exportModule')
 
         blade.prepareTypes = function() {
             if (blade.selectedProvider.isTabular) {
-                blade.knowntypes = _.filter(blade.knowntypes, function (x) { return x.isTabularExportSupported === true; });
+                blade.knownTypes = _.filter(blade.knownTypes, function (x) { return x.isTabularExportSupported === true; });
             }
-            _.each(blade.knowntypes, function (item) {
+            _.each(blade.knownTypes, function (item) {
                 item.groupName = item.group + '|' + item.typeName;
                 var lastIndex = item.typeName.lastIndexOf('.');
                 item.name = item.typeName.substring(lastIndex + 1);
             });
-            blade.allGroups = blade.knowntypes;
+            blade.allGroups = blade.knownTypes;
             typeTree = {};
-            _.each(blade.knowntypes, function (exportedType) {
+            _.each(blade.knownTypes, function (exportedType) {
                 var paths = (exportedType.groupName ? exportedType.groupName : 'General').split('|');
                 var lastParent = typeTree;
                 var lastParentId = '';
