@@ -1,6 +1,7 @@
 using System.Linq;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Identity;
+using Microsoft.EntityFrameworkCore.Internal;
 using VirtoCommerce.CatalogModule.Core;
 using VirtoCommerce.CatalogModule.Core.Model;
 using VirtoCommerce.CatalogModule.Core.Model.Search;
@@ -34,18 +35,78 @@ namespace VirtoCommerce.CatalogModule.Data.ExportImport
         {
             CatalogProduct[] result;
             int totalCount;
+            var responseGroup = GetResponseGroup();
             if (searchCriteria.ObjectIds.Any(x => !string.IsNullOrWhiteSpace(x)))
             {
-                result = _itemService.GetByIdsAsync(searchCriteria.ObjectIds.ToArray(), ItemResponseGroup.Full.ToString()).GetAwaiter().GetResult();
+                result = _itemService.GetByIdsAsync(searchCriteria.ObjectIds.ToArray(), responseGroup.ToString()).GetAwaiter().GetResult();
                 totalCount = result.Length;
             }
             else
             {
+                searchCriteria.ResponseGroup = responseGroup.ToString();
                 var searchRsult = _productSearchService.SearchProductsAsync((ProductSearchCriteria)searchCriteria).GetAwaiter().GetResult();
                 result = searchRsult.Results.ToArray();
                 totalCount = searchRsult.TotalCount;
             }
             return new FetchResult(result, totalCount);
+        }
+
+        private ItemResponseGroup GetResponseGroup()
+        {
+            var result = ItemResponseGroup.ItemInfo;
+            if (DataQuery.IncludedColumns.IsNullOrEmpty())
+            {
+                result |= ItemResponseGroup.Full;
+            }
+            else
+            {
+                if (DataQuery.IncludedColumns.Any(x => x.Group.StartsWith($"{nameof(CatalogProduct)}.{nameof(CatalogProduct.Variations)}")))
+                {
+                    result |= ItemResponseGroup.WithVariations;
+                }
+
+                if (DataQuery.IncludedColumns.Any(x => x.Group.StartsWith($"{nameof(CatalogProduct)}.{nameof(CatalogProduct.Inventories)}")))
+                {
+                    result |= ItemResponseGroup.Inventory;
+                }
+
+                if (DataQuery.IncludedColumns.Any(x => x.Group.StartsWith($"{nameof(CatalogProduct)}.{nameof(CatalogProduct.Assets)}")))
+                {
+                    result |= ItemResponseGroup.ItemAssets;
+                }
+
+                if (DataQuery.IncludedColumns.Any(x => x.Group.StartsWith($"{nameof(CatalogProduct)}.{nameof(CatalogProduct.Associations)}")))
+                {
+                    result |= ItemResponseGroup.ItemAssociations;
+                }
+
+                if (DataQuery.IncludedColumns.Any(x => x.Group.StartsWith($"{nameof(CatalogProduct)}.{nameof(CatalogProduct.Properties)}")))
+                {
+                    result |= ItemResponseGroup.WithProperties;
+                }
+
+                if (DataQuery.IncludedColumns.Any(x => x.Group.StartsWith($"{nameof(CatalogProduct)}.{nameof(CatalogProduct.Outlines)}")))
+                {
+                    result |= ItemResponseGroup.WithOutlines;
+                }
+
+                if (DataQuery.IncludedColumns.Any(x => x.Group.StartsWith($"{nameof(CatalogProduct)}.{nameof(CatalogProduct.SeoInfos)}")))
+                {
+                    result |= ItemResponseGroup.WithSeo;
+                }
+
+                if (DataQuery.IncludedColumns.Any(x => x.Group.StartsWith($"{nameof(CatalogProduct)}.{nameof(CatalogProduct.Links)}")))
+                {
+                    result |= ItemResponseGroup.WithLinks;
+                }
+
+                if (DataQuery.IncludedColumns.Any(x => x.Group.StartsWith($"{nameof(CatalogProduct)}.{nameof(CatalogProduct.Reviews)}")))
+                {
+                    result |= ItemResponseGroup.ItemEditorialReviews;
+                }
+
+            }
+            return result;
         }
 
         protected override ViewableEntity ToViewableEntity(object obj)
@@ -64,7 +125,7 @@ namespace VirtoCommerce.CatalogModule.Data.ExportImport
         {
             if (_viewableEntityConverter == null)
             {
-                _viewableEntityConverter = new ViewableEntityConverter<CatalogProduct>(x => x.Name, x => x.OuterId, x => null);
+                _viewableEntityConverter = new ViewableEntityConverter<CatalogProduct>(x => x.Name, x => x.OuterId, x => null, x => null);
             }
         }
     }

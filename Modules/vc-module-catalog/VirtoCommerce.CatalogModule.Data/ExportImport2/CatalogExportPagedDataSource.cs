@@ -65,7 +65,7 @@ namespace VirtoCommerce.CatalogModule.Data.ExportImport
         {
             if (_viewableEntityConverter == null)
             {
-                _viewableEntityConverter = new ViewableEntityConverter<Catalog>(x => x.Name, x => x.OuterId, x => null);
+                _viewableEntityConverter = new ViewableEntityConverter<Catalog>(x => x.Name, x => x.OuterId, x => null, x=> null);
             }
         }
     }
