@@ -417,25 +417,6 @@ angular.module('virtoCommerce.catalogModule')
                     canExecuteMethod: function () { return blade.catalogId; },
                     permission: 'catalog:import'
                 },
-                //{
-                //    name: "platform.commands.export",
-                //    icon: 'fa fa-upload',
-                //    executeMethod: function () {
-                //        var newBlade = {
-                //            id: 'catalogExport',
-                //            title: 'catalog.blades.exporter-list.title',
-                //            subtitle: 'catalog.blades.exporter-list.subtitle',
-                //            catalog: blade.catalog,
-                //            controller: 'virtoCommerce.catalogModule.exporterListController',
-                //            template: 'Modules/$(VirtoCommerce.Catalog)/Scripts/blades/export/exporter-list.tpl.html',
-                //            selectedProducts: _.filter($scope.gridApi.selection.getSelectedRows(), function (x) { return x.type == 'product' }),
-                //            selectedCategories: _.filter($scope.gridApi.selection.getSelectedRows(), function (x) { return x.type == 'category' })
-                //        };
-                //        bladeNavigationService.showBlade(newBlade, blade);
-                //    },
-                //    canExecuteMethod: function () { return blade.catalogId; },
-                //    permission: 'catalog:export'
-                //},
                 {
                     name: "platform.commands.export",
                     icon: 'fa fa-upload',

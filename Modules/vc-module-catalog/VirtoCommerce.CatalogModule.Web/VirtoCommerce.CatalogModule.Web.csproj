@@ -28,5 +28,8 @@
         <PackageReference Include="Microsoft.AspNetCore.App" />
         <PackageReference Include="Microsoft.AspNetCore.Mvc.ViewFeatures" Version="2.2.0" />
     </ItemGroup>
+    <ItemGroup>
+      <Folder Include="Scripts\blades\selectors\" />
+    </ItemGroup>
 
 </Project>

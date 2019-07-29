@@ -463,8 +463,8 @@
             },
             "currency-list": {
                 "labels": {
-                    "no-currencies": "No currencies" 
-                } 
+                    "no-currencies": "No currencies"
+                }
             }
         },
         "widgets": {
@@ -703,7 +703,12 @@
             "category-scope": {
                 "title": "Only for selected categories"
             }
-        }
+        },
+        "selectors": {
+            "titles": {
+                "search-in-variations" : "Search in Variations"
+            }
+        } 
     },
     "permissions": {
         "catalog:access": "Open catalogs menu",

@@ -306,6 +306,14 @@ angular.module(catalogsModuleName, ['ui.grid.validate', 'ui.grid.infiniteScroll'
                 icon: 'fa-file-archive-o'
             });
 
+            metaFormsService.registerMetaFields('CatalogProduct' + 'ExportFilter', [
+                {
+                    name: 'searchInVariations',
+                    title: "catalog.selectors.titles.search-in-variations",
+                    valueType: "Boolean"
+                }]);
+
+
             //meta-form used only for external extensions 
             //We did not include the default product fields in meta-form, because the resulting form looks ugly
             //TODO: need to improve meta-form to support more flexible layout management
