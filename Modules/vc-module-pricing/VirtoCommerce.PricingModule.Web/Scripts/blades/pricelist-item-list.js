@@ -4,11 +4,9 @@ angular.module('virtoCommerce.pricingModule')
     var blade = $scope.blade;
     var exportDataRequest = {
         exportTypeName: 'Price',
-        defaultProvider: 'JsonExportProvider',
         isTabularExportSupported: true,
         dataQuery: {
-            exportTypeName: 'PriceExportDataQuery',
-            isAllSelected: true
+            exportTypeName: 'PriceExportDataQuery'
         }
     };
 
@@ -166,6 +164,7 @@ angular.module('virtoCommerce.pricingModule')
             },
             executeMethod: function () {
 
+                exportDataRequest.dataQuery.isAllSelected = true;
                 var selectedRows = $scope.gridApi.selection.getSelectedRows();
                 exportDataRequest.dataQuery.productIds = [];
                 if (selectedRows && selectedRows.length) {

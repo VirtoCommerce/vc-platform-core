@@ -8,7 +8,6 @@ angular.module('virtoCommerce.pricingModule')
             var exportDataRequest = {
                 exportTypeName: 'PricelistAssignment',
                 isTabularExportSupported: true,
-                defaultProvider: 'JsonExportProvider',
                 dataQuery: {
                     exportTypeName: 'PricelistAssignmentExportDataQuery'
                 }
