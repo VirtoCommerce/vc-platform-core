@@ -1,4 +1,4 @@
-﻿angular.module('virtoCommerce.catalogModule')
+angular.module('virtoCommerce.catalogModule')
 .factory('virtoCommerce.catalogModule.catalogs', ['$resource', function ($resource) {
 
     return $resource('api/catalog/catalogs/:id', { id: '@Id' }, {

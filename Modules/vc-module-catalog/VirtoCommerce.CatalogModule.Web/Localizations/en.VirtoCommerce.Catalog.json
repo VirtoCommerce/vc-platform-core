@@ -463,8 +463,21 @@
             },
             "currency-list": {
                 "labels": {
-                    "no-currencies": "No currencies" 
-                } 
+                    "no-currencies": "No currencies"
+                }
+            }
+        },
+        "selectors": {
+            "titles": {
+                "catalog": "Catalog",
+                "parentCategory": "Parent category"
+            },
+            "labels": {
+                "select": "Select",
+                "selected": "Selected: "
+            },
+            "placeholders": {
+                "catalog": "Select catalog…"
             }
         },
         "widgets": {

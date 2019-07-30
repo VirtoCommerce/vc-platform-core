@@ -316,4 +316,19 @@ angular.module(catalogsModuleName, ['ui.grid.validate', 'ui.grid.infiniteScroll'
                 // compile the response, which will put stuff into the cache
                 $compile(response.data);
             });
+
+            // Registering filters to integrate with export module
+            metaFormsService.registerMetaFields('Category' + 'ExportFilter', [
+                {
+                    name: 'catalogSelector',
+                    title: "catalog.selectors.titles.catalog",
+                    templateUrl: 'Modules/$(VirtoCommerce.Catalog)/Scripts/selectors/catalog-selector.tpl.html',
+                }]);
+
+            metaFormsService.registerMetaFields('Category' + 'ExportFilter', [
+                {
+                    name: 'parentCategorySelector',
+                    title: "catalog.selectors.titles.parentCategory",
+                    templateUrl: 'Modules/$(VirtoCommerce.Catalog)/Scripts/selectors/category-selector.tpl.html',
+                }]);
         }]);
