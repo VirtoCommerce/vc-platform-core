@@ -2,16 +2,22 @@
 <div class="blade-content">
     <div class="blade-inner">
         <div class="inner-block">
-            <div class="list __items" ng-init="openItems={}">
-                <div class="list-group" ng-class="{'__opened': openItems[$index]}" ng-click="openItems[$index]=!openItems[$index]" ng-repeat-start="(key,values) in blade.currentEntities">{{key}}</div>
-                <div class="list __sub" ng-repeat-end>
-                    <label class="list-item" ng-repeat="data in values | orderBy:'name'">
-                        <input type="checkbox" ng-model="data.$selected">
-                        <span class="switch"></span>
-                        <span class="list-name">{{ data.name }}</span>
-                        <span class="list-descr">{{ data.exportName }}</span>
+            <div ng-repeat-start="(key,values) in blade.allEntities">
+                <div class="form-group">
+                    <label class="form-label">
+                        {{key}}
                     </label>
+                    <a class="form-label" ng-click="selectAllInGroup(key)">Select all</a>
+                    <a class="form-label" ng-click="clearAllInGroup(key)">Clear</a>
+                    <ui-select multiple ng-model="blade.selectedEntities[key]">
+                        <ui-select-match placeholder="{{'export.blades.export-settings.labels.exported-columns' | translate}}">{{$item.name}}</ui-select-match>
+                        <ui-select-choices repeat="x as x in values | orderBy: 'name' | filter: { name: $select.search }">
+                            <span ng-bind-html="x.name | highlight: $select.search"></span>
+                        </ui-select-choices>
+                    </ui-select>
                 </div>
+            </div>
+            <div class="list __sub" ng-repeat-end>
             </div>
         </div>
     </div>
