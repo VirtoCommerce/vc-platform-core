@@ -39,6 +39,7 @@ angular.module('virtoCommerce.exportModule')
             blade.isLoading = true;
 
             angular.extend(blade.exportDataRequest.dataQuery, buildDataQuery());
+            var dataQuery = blade.exportDataRequest.dataQuery;
 
             exportModuleApi.getData(
                 blade.exportDataRequest,
@@ -47,6 +48,15 @@ angular.module('virtoCommerce.exportModule')
                     $scope.pageSettings.totalItems = data.totalCount;
                     $scope.items = $scope.items.concat(data.results);
                     $scope.hasMore = data.results.length === $scope.pageSettings.itemsPerPageCount;
+
+                    $timeout(function() {
+                        if ($scope.gridApi && dataQuery.objectIds && dataQuery.objectIds.length) {
+                            _.each(dataQuery.objectIds, function(objectId) {
+                                var dataItem = _.findWhere($scope.items, {id: objectId});
+                                $scope.gridApi.selection.selectRow(dataItem);
+                            });
+                        }
+                    });
 
                     if (callback) {
                         callback();
@@ -103,6 +113,11 @@ angular.module('virtoCommerce.exportModule')
 
             result.isAnyFilterApplied = isAnyFilterApplied;
             angular.extend(result, filter.current);
+
+            var dataQuery = blade.exportDataRequest.dataQuery;
+            if (dataQuery.objectIds && dataQuery.length) {
+                angular.extend(result, {objectIds: dataQuery.objectIds});
+            }
 
             if (filter.keyword) {
                 angular.extend(result, { keyword: filter.keyword });
