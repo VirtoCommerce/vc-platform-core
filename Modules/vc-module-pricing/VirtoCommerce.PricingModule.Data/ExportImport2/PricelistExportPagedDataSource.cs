@@ -1,8 +1,9 @@
+using System.Collections;
+using System.Collections.Generic;
 using System.Linq;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Identity;
 using VirtoCommerce.ExportModule.Core.Model;
-using VirtoCommerce.ExportModule.Core.Services;
 using VirtoCommerce.Platform.Core.Common;
 using VirtoCommerce.Platform.Core.Security;
 using VirtoCommerce.PricingModule.Core;
@@ -19,7 +20,6 @@ namespace VirtoCommerce.PricingModule.Data.ExportImport
     {
         private readonly IPricingSearchService _searchService;
         private readonly IPricingService _pricingService;
-        private ViewableEntityConverter<Pricelist> _viewableEntityConverter;
 
         public PricelistExportPagedDataSource(IPricingSearchService searchService, IPricingService pricingService, IAuthorizationPolicyProvider authorizationPolicyProvider, IAuthorizationService authorizationService, IUserClaimsPrincipalFactory<ApplicationUser> userClaimsPrincipalFactory, UserManager<ApplicationUser> userManager)
             : base(authorizationPolicyProvider, authorizationService, userClaimsPrincipalFactory, userManager)
@@ -58,23 +58,27 @@ namespace VirtoCommerce.PricingModule.Data.ExportImport
             return new FetchResult(result, totalCount);
         }
 
-        protected override ViewableEntity ToViewableEntity(object obj)
+        protected override IEnumerable<ViewableEntity> ToViewableEntities(IEnumerable objects)
         {
-            if (!(obj is Pricelist pricelist))
-            {
-                throw new System.InvalidCastException(nameof(Pricelist));
-            }
+            var pricelists = objects.Cast<Pricelist>();
+            var viewableMap = pricelists.ToDictionary(x => x, x => AbstractTypeFactory<PricelistViewableEntity>.TryCreateInstance());
 
-            EnsureViewableConverterCreated();
+            FillViewableEntities(viewableMap);
 
-            return _viewableEntityConverter.ToViewableEntity(pricelist);
+            var pricesIds = pricelists.Select(x => x.Id).ToList();
+            var result = viewableMap.Values.OrderBy(x => pricesIds.IndexOf(x.Id));
+
+            return result;
         }
 
-        protected virtual void EnsureViewableConverterCreated()
+        protected virtual void FillViewableEntities(Dictionary<Pricelist, PricelistViewableEntity> viewableMap)
         {
-            if (_viewableEntityConverter == null)
+            foreach (var kvp in viewableMap)
             {
-                _viewableEntityConverter = new ViewableEntityConverter<Pricelist>(x => $"{x.Name}", x => x.Id, x => null, x => null);
+                var price = kvp.Key;
+                var priceViewableEntity = kvp.Value;
+
+                //priceViewableEntity.FromEntity(price);
             }
         }
     }

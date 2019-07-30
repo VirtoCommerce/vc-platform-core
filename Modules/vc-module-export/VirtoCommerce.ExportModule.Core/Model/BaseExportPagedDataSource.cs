@@ -46,7 +46,7 @@ namespace VirtoCommerce.ExportModule.Core.Model
 
         protected abstract FetchResult FetchData(SearchCriteriaBase searchCriteria);
 
-        protected abstract ViewableEntity ToViewableEntity(object obj);
+        protected abstract IEnumerable<ViewableEntity> ToViewableEntities(IEnumerable objects);
 
         /// <summary>
         /// Checks user passed in <see cref="DataQuery"/> for permissions before fetching data.
@@ -84,19 +84,15 @@ namespace VirtoCommerce.ExportModule.Core.Model
 
         public virtual ViewableSearchResult GetData()
         {
-            Authorize().GetAwaiter().GetResult();
+            EnsureSearchCriteriaInitialized();
 
-            var searchCriteria = DataQuery.ToSearchCriteria();
-            var queryResult = FetchData(searchCriteria);
+            var queryResult = FetchData(_searchCriteria);
             var result = new ViewableSearchResult()
             {
                 TotalCount = queryResult.TotalCount,
             };
 
-            foreach (var obj in queryResult.Results)
-            {
-                result.Results.Add(ToViewableEntity(obj));
-            }
+            result.Results = ToViewableEntities(queryResult.Results).ToList();
 
             return result;
         }

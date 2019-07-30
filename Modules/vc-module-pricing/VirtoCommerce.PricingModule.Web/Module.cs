@@ -177,6 +177,9 @@ namespace VirtoCommerce.PricingModule.Web
             AbstractTypeFactory<ExportDataQuery>.RegisterType<PricelistAssignmentExportDataQuery>();
             AbstractTypeFactory<ExportDataQuery>.RegisterType<PricelistExportDataQuery>();
             AbstractTypeFactory<ExportDataQuery>.RegisterType<PricelistFullExportDataQuery>();
+
+            AbstractTypeFactory<PriceViewableEntity>.RegisterType<PriceViewableEntity>();
+            AbstractTypeFactory<PricelistViewableEntity>.RegisterType<PricelistViewableEntity>();
         }
 
         public void Uninstall()

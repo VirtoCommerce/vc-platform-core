@@ -8,6 +8,7 @@ using System.Threading;
 using System.Threading.Tasks;
 using Moq;
 using Newtonsoft.Json;
+using VirtoCommerce.CatalogModule.Core.Services;
 using VirtoCommerce.CoreModule.Core.Conditions;
 using VirtoCommerce.ExportModule.Core.Model;
 using VirtoCommerce.ExportModule.Core.Services;
@@ -40,6 +41,8 @@ namespace VirtoCommerce.PricingModule.Test
 
             var priceServiceMock = new Mock<IPricingService>();
 
+            var itemServiceMock = new Mock<IItemService>();
+
             var metadata = ExportedTypeMetadata.GetFromType<Price>(true);
             var resolver = (IKnownExportTypesResolver)registrar;
 
@@ -48,6 +51,7 @@ namespace VirtoCommerce.PricingModule.Test
                 dataQuery => new PriceExportPagedDataSource(
                     searchServiceMock.Object,
                     priceServiceMock.Object,
+                    itemServiceMock.Object,
                     authorizationServicesMock.AuthorizationPolicyProvider,
                     authorizationServicesMock.AuthorizationService,
                     authorizationServicesMock.UserClaimsPrincipalFactory,
@@ -351,12 +355,15 @@ namespace VirtoCommerce.PricingModule.Test
 
             var priceServiceMock = new Mock<IPricingService>();
 
+            var itemServiceMock = new Mock<IItemService>();
+
             var metadata = ExportedTypeMetadata.GetFromType<Price>(true);
             resolver.ResolveExportedTypeDefinition(typeof(Price).Name)
                 .WithDataSourceFactory(
                 dataQuery => new PriceExportPagedDataSource(
                     searchServiceMock.Object,
                     priceServiceMock.Object,
+                    itemServiceMock.Object,
                     authorizationServicesMock.AuthorizationPolicyProvider,
                     authorizationServicesMock.AuthorizationService,
                     authorizationServicesMock.UserClaimsPrincipalFactory,

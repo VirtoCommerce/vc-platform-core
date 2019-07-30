@@ -1,8 +1,11 @@
+using System.Collections;
+using System.Collections.Generic;
 using System.Linq;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Identity;
+using VirtoCommerce.CatalogModule.Core.Model;
+using VirtoCommerce.CatalogModule.Core.Services;
 using VirtoCommerce.ExportModule.Core.Model;
-using VirtoCommerce.ExportModule.Core.Services;
 using VirtoCommerce.Platform.Core.Common;
 using VirtoCommerce.Platform.Core.Security;
 using VirtoCommerce.PricingModule.Core;
@@ -19,13 +22,20 @@ namespace VirtoCommerce.PricingModule.Data.ExportImport
     {
         private readonly IPricingSearchService _searchService;
         private readonly IPricingService _pricingService;
-        private ViewableEntityConverter<Price> _viewableEntityConverter;
+        private readonly IItemService _itemService;
 
-        public PriceExportPagedDataSource(IPricingSearchService searchService, IPricingService pricingService, IAuthorizationPolicyProvider authorizationPolicyProvider, IAuthorizationService authorizationService, IUserClaimsPrincipalFactory<ApplicationUser> userClaimsPrincipalFactory, UserManager<ApplicationUser> userManager)
+        public PriceExportPagedDataSource(IPricingSearchService searchService,
+            IPricingService pricingService,
+            IItemService itemService,
+            IAuthorizationPolicyProvider authorizationPolicyProvider,
+            IAuthorizationService authorizationService,
+            IUserClaimsPrincipalFactory<ApplicationUser> userClaimsPrincipalFactory,
+            UserManager<ApplicationUser> userManager)
             : base(authorizationPolicyProvider, authorizationService, userClaimsPrincipalFactory, userManager)
         {
             _searchService = searchService;
             _pricingService = pricingService;
+            _itemService = itemService;
         }
 
         protected override FetchResult FetchData(SearchCriteriaBase searchCriteria)
@@ -48,23 +58,50 @@ namespace VirtoCommerce.PricingModule.Data.ExportImport
             return new FetchResult(result, totalCount);
         }
 
-        protected override ViewableEntity ToViewableEntity(object obj)
+        protected override IEnumerable<ViewableEntity> ToViewableEntities(IEnumerable objects)
         {
-            if (!(obj is Price price))
-            {
-                throw new System.InvalidCastException(nameof(Price));
-            }
+            var prices = objects.Cast<Price>();
+            var viewableMap = prices.ToDictionary(x => x, x => AbstractTypeFactory<PriceViewableEntity>.TryCreateInstance());
 
-            EnsureViewableConverterCreated();
+            FillViewableEntities(viewableMap);
 
-            return _viewableEntityConverter.ToViewableEntity(price);
+            var pricesIds = prices.Select(x => x.Id).ToList();
+            var result = viewableMap.Values.OrderBy(x => pricesIds.IndexOf(x.Id));
+
+            return result;
         }
 
-        protected virtual void EnsureViewableConverterCreated()
+        protected virtual void FillViewableEntities(Dictionary<Price, PriceViewableEntity> viewableMap)
         {
-            if (_viewableEntityConverter == null)
+            var prices = viewableMap.Keys;
+
+            var productIds = prices.Select(x => x.ProductId).Distinct().ToArray();
+            var pricelistIds = prices.Select(x => x.PricelistId).Distinct().ToArray();
+            var products = _itemService.GetByIdsAsync(productIds, ItemResponseGroup.ItemInfo.ToString()).Result;
+            var pricelists = _pricingService.GetPricelistsByIdAsync(pricelistIds).Result;
+
+
+            foreach (var kvp in viewableMap)
             {
-                _viewableEntityConverter = new ViewableEntityConverter<Price>(x => $"{x.PricelistId}", x => x.Id, x => null, x => "test");
+                var price = kvp.Key;
+                var priceViewableEntity = kvp.Value;
+                var product = products.FirstOrDefault(x => x.Id == price.ProductId);
+                var pricelist = pricelists.FirstOrDefault(x => x.Id == price.PricelistId);
+
+                priceViewableEntity.FromEntity(price);
+                priceViewableEntity.Code = product?.Code;
+                priceViewableEntity.Currency = price.Currency;
+                priceViewableEntity.EndDate = price.EndDate;
+                priceViewableEntity.ImageUrl = product?.ImgSrc;
+                priceViewableEntity.List = price.List;
+                priceViewableEntity.MinQuantity = price.MinQuantity;
+                priceViewableEntity.Name = product?.Name;
+                priceViewableEntity.OuterId = price.OuterId;
+                priceViewableEntity.Parent = pricelist?.Name;
+                priceViewableEntity.Pricelist = pricelist?.Name;
+                priceViewableEntity.Product = product?.Name;
+                priceViewableEntity.Sale = price.Sale;
+                priceViewableEntity.StartDate = price.StartDate;
             }
         }
     }
