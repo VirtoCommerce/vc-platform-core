@@ -1,6 +1,6 @@
 using System;
 
-namespace VirtoCommerce.NotificationsModule.Data.Model
+namespace VirtoCommerce.NotificationsModule.Core.Model
 {
     [Flags]
     public enum NotificationResponseGroup

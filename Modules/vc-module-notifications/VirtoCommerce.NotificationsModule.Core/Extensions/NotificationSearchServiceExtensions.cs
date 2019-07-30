@@ -27,7 +27,7 @@ namespace VirtoCommerce.NotificationsModule.Core.Extensions
             }
             var criteria = AbstractTypeFactory<NotificationSearchCriteria>.TryCreateInstance();
             criteria.NotificationType = notificationType;
-            criteria.Take = int.MaxValue;
+            criteria.Take = 1;
             criteria.ResponseGroup = responseGroup;
             var searchResult = await service.SearchNotificationsAsync(criteria);
             //Find first global notification (without tenant)
