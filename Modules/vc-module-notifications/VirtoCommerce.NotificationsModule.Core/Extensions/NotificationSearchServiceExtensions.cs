@@ -19,7 +19,7 @@ namespace VirtoCommerce.NotificationsModule.Core.Extensions
             return result as T;
         }
 
-        public static async Task<Notification> GetNotificationAsync(this INotificationSearchService service, string notificationType, TenantIdentity tenant = null)
+        public static async Task<Notification> GetNotificationAsync(this INotificationSearchService service, string notificationType, TenantIdentity tenant = null, string responseGroup = null)
         {
             if (service == null)
             {
@@ -28,6 +28,7 @@ namespace VirtoCommerce.NotificationsModule.Core.Extensions
             var criteria = AbstractTypeFactory<NotificationSearchCriteria>.TryCreateInstance();
             criteria.NotificationType = notificationType;
             criteria.Take = int.MaxValue;
+            criteria.ResponseGroup = responseGroup;
             var searchResult = await service.SearchNotificationsAsync(criteria);
             //Find first global notification (without tenant)
             var result = searchResult.Results.Where(x => x.TenantIdentity.IsEmpty).FirstOrDefault();

@@ -8,6 +8,7 @@ namespace VirtoCommerce.NotificationsModule.Core.Services
     /// </summary>
     public interface INotificationRegistrar
     {
-        void RegisterNotification<T>() where T : Notification;
+        void RegisterNotification<T>(params NotificationTemplate[] templates) where T : Notification;
+        Notification GenerateNotification(string notificationType);
     }
 }

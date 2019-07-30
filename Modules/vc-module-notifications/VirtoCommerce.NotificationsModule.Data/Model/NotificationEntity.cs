@@ -82,7 +82,7 @@ namespace VirtoCommerce.NotificationsModule.Data.Model
 
             if (notification.Templates != null && notification.Templates.Any())
             {
-                Templates = new ObservableCollection<NotificationTemplateEntity>(notification.Templates
+                Templates = new ObservableCollection<NotificationTemplateEntity>(notification.Templates.Where(t => !t.IsReadonly)
                         .Select(x => AbstractTypeFactory<NotificationTemplateEntity>.TryCreateInstance($"{Kind}TemplateEntity").FromModel(x, pkMap)));
             }
 

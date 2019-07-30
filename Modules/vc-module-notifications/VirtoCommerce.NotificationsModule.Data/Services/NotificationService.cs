@@ -20,6 +20,8 @@ namespace VirtoCommerce.NotificationsModule.Data.Services
         private readonly IEventPublisher _eventPublisher;
         private readonly Func<INotificationRepository> _repositoryFactory;
 
+        private static Dictionary<Type, IList<NotificationTemplate>> notificationTemplates = new Dictionary<Type, IList<NotificationTemplate>>();
+
         public NotificationService(Func<INotificationRepository> repositoryFactory, IEventPublisher eventPublisher)
         {
             _repositoryFactory = repositoryFactory;
@@ -32,7 +34,7 @@ namespace VirtoCommerce.NotificationsModule.Data.Services
             using (var repository = _repositoryFactory())
             {
                 var notifications = await repository.GetByIdsAsync(ids, responseGroup);
-                return notifications.Select(n => n.ToModel(AbstractTypeFactory<Notification>.TryCreateInstance(n.Type))).ToArray();
+                return notifications.Select(n => n.ToModel(GenerateNotification(n.Type))).ToArray();
             }
         }
 
@@ -74,12 +76,25 @@ namespace VirtoCommerce.NotificationsModule.Data.Services
             }
         }
 
-        public void RegisterNotification<T>() where T : Notification
+        public void RegisterNotification<T>(params NotificationTemplate[] templates) where T : Notification
         {
             if (AbstractTypeFactory<Notification>.AllTypeInfos.All(t => t.Type != typeof(T)))
             {
-                AbstractTypeFactory<Notification>.RegisterType<T>();
+                var typeInfo = AbstractTypeFactory<Notification>.RegisterType<T>();
+
+                if (!templates.IsNullOrEmpty())
+                {
+                    notificationTemplates[typeof(T)] = templates;
+                }
+
             }
+        }
+
+        public Notification GenerateNotification(string notificationType)
+        {
+            var result = AbstractTypeFactory<Notification>.TryCreateInstance(notificationType);
+            result.Templates = GetNotificationTemplatesByType(result.GetType());
+            return result;
         }
 
         private void ValidateNotificationProperties(IEnumerable<Notification> notifications)
@@ -94,6 +109,16 @@ namespace VirtoCommerce.NotificationsModule.Data.Services
             {
                 validator.ValidateAndThrow(notification);
             }
+        }
+
+        private IList<NotificationTemplate> GetNotificationTemplatesByType(Type @type)
+        {
+            if (notificationTemplates.TryGetValue(@type, out var values))
+            {
+                return values;
+            }
+
+            return new List<NotificationTemplate>();
         }
     }
 }

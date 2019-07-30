@@ -127,16 +127,32 @@ namespace VirtoCommerce.NotificationsModule.Web
                     break;
             }
 
+            var assembly = typeof(INotificationRepository).Assembly;
             var registrar = appBuilder.ApplicationServices.GetService<INotificationRegistrar>();
             registrar.RegisterNotification<ResetPasswordEmailNotification>();
             registrar.RegisterNotification<ConfirmationEmailNotification>();
-            registrar.RegisterNotification<RegistrationEmailNotification>();
+            registrar.RegisterNotification<RegistrationEmailNotification>(new EmailNotificationTemplate()
+            {
+                Subject = "subj",//assembly.GetManifestResourceStream("VirtoCommerce.NotificationsModule.Data.Notifications.Templates.RegistrationEmailNotificationTemplateSubject.html").ReadToString(),
+                Body = "body",//assembly.GetManifestResourceStream("VirtoCommerce.NotificationsModule.Data.Notifications.Templates.RegistrationEmailNotificationTemplateBody.html").ReadToString(),
+                LanguageCode = "en-US"
+            });
             registrar.RegisterNotification<RegistrationInvitationEmailNotification>();
             registrar.RegisterNotification<RemindUserNameEmailNotification>();
             registrar.RegisterNotification<ResetPasswordSmsNotification>();
             registrar.RegisterNotification<TwoFactorEmailNotification>();
             registrar.RegisterNotification<TwoFactorSmsNotification>();
             registrar.RegisterNotification<ChangePhoneNumberSmsNotification>();
+
+            
+
+            //var templateRegistrar = appBuilder.ApplicationServices.GetService<INotificationTemplateRegistrar>();
+            //templateRegistrar.RegisterNotificationType<RegistrationEmailNotification>(new EmailNotificationTemplate()
+            //{
+            //    Subject = assembly.GetManifestResourceStream("VirtoCommerce.NotificationsModule.Data.Notifications.Templates.RegistrationEmailNotificationTemplateSubject.html").ReadToString(),
+            //    Body = assembly.GetManifestResourceStream("VirtoCommerce.NotificationsModule.Data.Notifications.Templates.RegistrationEmailNotificationTemplateBody.html").ReadToString(),
+            //    LanguageCode = "en-US"
+            //});
         }
 
         public void Uninstall()
