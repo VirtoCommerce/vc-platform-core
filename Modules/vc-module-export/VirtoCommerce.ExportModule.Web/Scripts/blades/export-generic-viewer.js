@@ -71,6 +71,11 @@ angular.module('virtoCommerce.exportModule')
             }
         }
 
+        blade.resetFiltering = function() {
+            filter.keyword = undefined;
+            blade.exportDataRequest.dataQuery = getEmptyDataQuery();
+        };
+
         function buildDataQuery()
         {
             var dataQuery = getEmptyDataQuery();
@@ -181,7 +186,10 @@ angular.module('virtoCommerce.exportModule')
         blade.toolbarCommands = [{
             name: "platform.commands.refresh",
             icon: 'fa fa-refresh',
-            executeMethod: blade.refresh,
+            executeMethod: function() {
+                blade.resetFiltering();
+                blade.refresh();
+            },
             canExecuteMethod: function () {
                 return true;
             }
