@@ -33,12 +33,12 @@ namespace VirtoCommerce.PricingModule.Data.ExportImport
 
             if (searchCriteria.ObjectIds.Any(x => !string.IsNullOrWhiteSpace(x)))
             {
-                result = _pricingService.GetPricelistsByIdAsync(searchCriteria.ObjectIds.ToArray()).Result;
+                result = _pricingService.GetPricelistsByIdAsync(searchCriteria.ObjectIds.ToArray()).GetAwaiter().GetResult();
                 totalCount = result.Length;
             }
             else
             {
-                var pricelistSearchResult = _searchService.SearchPricelistsAsync((PricelistSearchCriteria)searchCriteria).Result;
+                var pricelistSearchResult = _searchService.SearchPricelistsAsync((PricelistSearchCriteria)searchCriteria).GetAwaiter().GetResult();
                 result = pricelistSearchResult.Results.ToArray();
                 totalCount = pricelistSearchResult.TotalCount;
             }
@@ -46,7 +46,7 @@ namespace VirtoCommerce.PricingModule.Data.ExportImport
             if (!result.IsNullOrEmpty())
             {
                 var pricelistIds = result.Select(x => x.Id).ToArray();
-                var prices = _searchService.SearchPricesAsync(new PricesSearchCriteria() { PriceListIds = pricelistIds, Take = int.MaxValue }).Result;
+                var prices = _searchService.SearchPricesAsync(new PricesSearchCriteria() { PriceListIds = pricelistIds, Take = int.MaxValue }).GetAwaiter().GetResult();
                 foreach (var pricelist in result)
                 {
                     pricelist.Prices = prices.Results.Where(x => x.PricelistId == pricelist.Id).ToArray();

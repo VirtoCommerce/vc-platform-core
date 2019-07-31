@@ -45,12 +45,12 @@ namespace VirtoCommerce.PricingModule.Data.ExportImport
 
             if (searchCriteria.ObjectIds.Any(x => !string.IsNullOrWhiteSpace(x)))
             {
-                result = _pricingService.GetPricesByIdAsync(Enumerable.ToArray(searchCriteria.ObjectIds)).Result;
+                result = _pricingService.GetPricesByIdAsync(Enumerable.ToArray(searchCriteria.ObjectIds)).GetAwaiter().GetResult();
                 totalCount = result.Length;
             }
             else
             {
-                var priceSearchResult = _searchService.SearchPricesAsync((PricesSearchCriteria)searchCriteria).Result;
+                var priceSearchResult = _searchService.SearchPricesAsync((PricesSearchCriteria)searchCriteria).GetAwaiter().GetResult();
                 result = priceSearchResult.Results.ToArray();
                 totalCount = priceSearchResult.TotalCount;
             }
@@ -77,8 +77,8 @@ namespace VirtoCommerce.PricingModule.Data.ExportImport
 
             var productIds = models.Select(x => x.ProductId).Distinct().ToArray();
             var pricelistIds = models.Select(x => x.PricelistId).Distinct().ToArray();
-            var products = _itemService.GetByIdsAsync(productIds, ItemResponseGroup.ItemInfo.ToString()).Result;
-            var pricelists = _pricingService.GetPricelistsByIdAsync(pricelistIds).Result;
+            var products = _itemService.GetByIdsAsync(productIds, ItemResponseGroup.ItemInfo.ToString()).GetAwaiter().GetResult();
+            var pricelists = _pricingService.GetPricelistsByIdAsync(pricelistIds).GetAwaiter().GetResult();
 
 
             foreach (var kvp in viewableMap)
