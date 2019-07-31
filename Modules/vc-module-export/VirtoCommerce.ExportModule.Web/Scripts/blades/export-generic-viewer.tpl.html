@@ -20,7 +20,7 @@
 <div class="blade-content" ng-class="{'__large-wide': blade.isExpanded, '__normal': !blade.isExpanded}">
     <div class="blade-inner">
         <div class="inner-block" ng-init="setGridOptions({
-                useExternalSorting: true,
+                enableSorting: false,
                 showTreeRowHeader: false,
                 data: 'items',
                 rowTemplate: 'export-item-list.row.html',
@@ -29,7 +29,7 @@
                 columnDefs: [
                         {
                             name: 'imageUrl', displayName: 'export.blades.export-generic-viewer.labels.picture',
-                            enableColumnResizing: false, enableSorting: false, width: 60,
+                            enableColumnResizing: false, width: 60,
                             cellTemplate: 'export-item-list-icon.cell.html'
                         },
                         { name: 'name', displayName: 'export.blades.export-generic-viewer.labels.name', cellTemplate: 'export-item-list-name.cell.html' },
