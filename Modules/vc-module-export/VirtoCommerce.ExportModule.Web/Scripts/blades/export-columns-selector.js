@@ -34,8 +34,7 @@ angular.module('virtoCommerce.exportModule')
         }
 
         $scope.isValid = function () {
-            var allColumns = _.flatten(_.map(blade.selectedEntities, _.values));
-            return allColumns.length != 0;
+            return _.some(blade.selectedEntities, function (item) { return item.length != 0; });
         }
 
         $scope.saveChanges = function () {
