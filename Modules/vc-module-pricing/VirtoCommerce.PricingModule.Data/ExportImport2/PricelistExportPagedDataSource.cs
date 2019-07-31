@@ -1,5 +1,3 @@
-using System.Collections;
-using System.Collections.Generic;
 using System.Linq;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Identity;
@@ -58,28 +56,27 @@ namespace VirtoCommerce.PricingModule.Data.ExportImport
             return new FetchResult(result, totalCount);
         }
 
-        protected override IEnumerable<ViewableEntity> ToViewableEntities(IEnumerable objects)
+        protected override ViewableEntity ToViewableEntity(object obj)
         {
-            var pricelists = objects.Cast<Pricelist>();
-            var viewableMap = pricelists.ToDictionary(x => x, x => AbstractTypeFactory<PricelistViewableEntity>.TryCreateInstance());
+            if (!(obj is Pricelist model))
+            {
+                throw new System.InvalidCastException(nameof(Pricelist));
+            }
 
-            FillViewableEntities(viewableMap);
+            var result = AbstractTypeFactory<PricelistViewableEntity>.TryCreateInstance();
 
-            var pricesIds = pricelists.Select(x => x.Id).ToList();
-            var result = viewableMap.Values.OrderBy(x => pricesIds.IndexOf(x.Id));
+            result.FromEntity(model);
+
+            result.Code = null;
+            result.ImageUrl = null;
+            result.Name = model.Name;
+            result.Parent = null;
+
+            result.Currency = model.Currency;
+            result.Description = model.Description;
+            result.OuterId = model.OuterId;
 
             return result;
-        }
-
-        protected virtual void FillViewableEntities(Dictionary<Pricelist, PricelistViewableEntity> viewableMap)
-        {
-            foreach (var kvp in viewableMap)
-            {
-                var price = kvp.Key;
-                var priceViewableEntity = kvp.Value;
-
-                //priceViewableEntity.FromEntity(price);
-            }
         }
     }
 }

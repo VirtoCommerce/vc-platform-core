@@ -1,4 +1,4 @@
-using System.Collections;
+using System;
 using System.Collections.Generic;
 using System.Linq;
 using Microsoft.AspNetCore.Authorization;
@@ -58,51 +58,65 @@ namespace VirtoCommerce.PricingModule.Data.ExportImport
             return new FetchResult(result, totalCount);
         }
 
-        protected override IEnumerable<ViewableEntity> ToViewableEntities(IEnumerable objects)
+        protected override IEnumerable<ViewableEntity> ToViewableEntities(IEnumerable<ICloneable> objects)
         {
-            var prices = objects.Cast<Price>();
-            var viewableMap = prices.ToDictionary(x => x, x => AbstractTypeFactory<PriceViewableEntity>.TryCreateInstance());
+            var models = objects.Cast<Price>();
+            var viewableMap = models.ToDictionary(x => x, x => ToViewableEntity(x) as PriceViewableEntity);
 
-            FillViewableEntities(viewableMap);
+            FillViewableEntitiesReferenceFields(viewableMap);
 
-            var pricesIds = prices.Select(x => x.Id).ToList();
-            var result = viewableMap.Values.OrderBy(x => pricesIds.IndexOf(x.Id));
+            var modelIds = models.Select(x => x.Id).ToList();
+            var result = viewableMap.Values.OrderBy(x => modelIds.IndexOf(x.Id));
 
             return result;
         }
 
-        protected virtual void FillViewableEntities(Dictionary<Price, PriceViewableEntity> viewableMap)
+        protected virtual void FillViewableEntitiesReferenceFields(Dictionary<Price, PriceViewableEntity> viewableMap)
         {
-            var prices = viewableMap.Keys;
+            var models = viewableMap.Keys;
 
-            var productIds = prices.Select(x => x.ProductId).Distinct().ToArray();
-            var pricelistIds = prices.Select(x => x.PricelistId).Distinct().ToArray();
+            var productIds = models.Select(x => x.ProductId).Distinct().ToArray();
+            var pricelistIds = models.Select(x => x.PricelistId).Distinct().ToArray();
             var products = _itemService.GetByIdsAsync(productIds, ItemResponseGroup.ItemInfo.ToString()).Result;
             var pricelists = _pricingService.GetPricelistsByIdAsync(pricelistIds).Result;
 
 
             foreach (var kvp in viewableMap)
             {
-                var price = kvp.Key;
-                var priceViewableEntity = kvp.Value;
-                var product = products.FirstOrDefault(x => x.Id == price.ProductId);
-                var pricelist = pricelists.FirstOrDefault(x => x.Id == price.PricelistId);
+                var model = kvp.Key;
+                var viewableEntity = kvp.Value;
+                var product = products.FirstOrDefault(x => x.Id == model.ProductId);
+                var pricelist = pricelists.FirstOrDefault(x => x.Id == model.PricelistId);
 
-                priceViewableEntity.FromEntity(price);
-                priceViewableEntity.Code = product?.Code;
-                priceViewableEntity.Currency = price.Currency;
-                priceViewableEntity.EndDate = price.EndDate;
-                priceViewableEntity.ImageUrl = product?.ImgSrc;
-                priceViewableEntity.List = price.List;
-                priceViewableEntity.MinQuantity = price.MinQuantity;
-                priceViewableEntity.Name = product?.Name;
-                priceViewableEntity.OuterId = price.OuterId;
-                priceViewableEntity.Parent = pricelist?.Name;
-                priceViewableEntity.Pricelist = pricelist?.Name;
-                priceViewableEntity.Product = product?.Name;
-                priceViewableEntity.Sale = price.Sale;
-                priceViewableEntity.StartDate = price.StartDate;
+                viewableEntity.Code = product?.Code;
+                viewableEntity.ImageUrl = product?.ImgSrc;
+                viewableEntity.Name = product?.Name;
+                viewableEntity.Product = product?.Name;
+                viewableEntity.Parent = pricelist?.Name;
+                viewableEntity.Pricelist = pricelist?.Name;
             }
+        }
+
+        protected override ViewableEntity ToViewableEntity(object obj)
+        {
+            if (!(obj is Price model))
+            {
+                throw new System.InvalidCastException(nameof(Price));
+            }
+
+            var result = AbstractTypeFactory<PriceViewableEntity>.TryCreateInstance();
+
+            result.FromEntity(model);
+
+            result.Currency = model.Currency;
+            result.EndDate = model.EndDate;
+            result.List = model.List;
+            result.MinQuantity = model.MinQuantity;
+            result.OuterId = model.OuterId;
+            result.Sale = model.Sale;
+            result.StartDate = model.StartDate;
+
+            return result;
         }
     }
 }

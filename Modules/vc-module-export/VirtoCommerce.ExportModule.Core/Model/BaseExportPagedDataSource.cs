@@ -1,5 +1,4 @@
 using System;
-using System.Collections;
 using System.Collections.Generic;
 using System.Linq;
 using System.Threading.Tasks;
@@ -46,7 +45,8 @@ namespace VirtoCommerce.ExportModule.Core.Model
 
         protected abstract FetchResult FetchData(SearchCriteriaBase searchCriteria);
 
-        protected abstract IEnumerable<ViewableEntity> ToViewableEntities(IEnumerable objects);
+        protected abstract ViewableEntity ToViewableEntity(object obj);
+
 
         /// <summary>
         /// Checks user passed in <see cref="DataQuery"/> for permissions before fetching data.
@@ -122,6 +122,11 @@ namespace VirtoCommerce.ExportModule.Core.Model
                 // Checking permission authorization only once
                 Authorize().GetAwaiter().GetResult();
             }
+        }
+
+        protected virtual IEnumerable<ViewableEntity> ToViewableEntities(IEnumerable<ICloneable> objects)
+        {
+            return objects.Select(x => ToViewableEntity(x));
         }
     }
 }

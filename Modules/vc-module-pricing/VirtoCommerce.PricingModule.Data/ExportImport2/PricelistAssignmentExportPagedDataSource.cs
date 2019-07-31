@@ -1,8 +1,10 @@
-using System.Collections;
+using System;
 using System.Collections.Generic;
 using System.Linq;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Identity;
+using VirtoCommerce.CatalogModule.Core.Model;
+using VirtoCommerce.CatalogModule.Core.Services;
 using VirtoCommerce.ExportModule.Core.Model;
 using VirtoCommerce.Platform.Core.Common;
 using VirtoCommerce.Platform.Core.Security;
@@ -20,12 +22,21 @@ namespace VirtoCommerce.PricingModule.Data.ExportImport
     {
         private readonly IPricingSearchService _searchService;
         private readonly IPricingService _pricingService;
+        private readonly ICatalogService _catalogService;
 
-        public PricelistAssignmentExportPagedDataSource(IPricingSearchService searchService, IPricingService pricingService, IAuthorizationPolicyProvider authorizationPolicyProvider, IAuthorizationService authorizationService, IUserClaimsPrincipalFactory<ApplicationUser> userClaimsPrincipalFactory, UserManager<ApplicationUser> userManager)
+        public PricelistAssignmentExportPagedDataSource(
+            IPricingSearchService searchService,
+            IPricingService pricingService,
+            ICatalogService catalogService,
+            IAuthorizationPolicyProvider authorizationPolicyProvider,
+            IAuthorizationService authorizationService,
+            IUserClaimsPrincipalFactory<ApplicationUser> userClaimsPrincipalFactory,
+            UserManager<ApplicationUser> userManager)
             : base(authorizationPolicyProvider, authorizationService, userClaimsPrincipalFactory, userManager)
         {
             _searchService = searchService;
             _pricingService = pricingService;
+            _catalogService = catalogService;
         }
 
         protected override FetchResult FetchData(SearchCriteriaBase searchCriteria)
@@ -48,9 +59,63 @@ namespace VirtoCommerce.PricingModule.Data.ExportImport
             return new FetchResult(result, totalCount);
         }
 
-        protected override IEnumerable<ViewableEntity> ToViewableEntities(IEnumerable objects)
+        protected override ViewableEntity ToViewableEntity(object obj)
         {
-            throw new System.NotImplementedException();
+            if (!(obj is PricelistAssignment model))
+            {
+                throw new System.InvalidCastException(nameof(PricelistAssignment));
+            }
+
+            var result = AbstractTypeFactory<PricelistAssignmentViewableEntity>.TryCreateInstance();
+
+            result.FromEntity(model);
+
+            result.Code = null;
+            result.ImageUrl = null;
+            result.Name = model.Name;
+            result.Parent = null;
+
+            result.Description = model.Description;
+            result.EndDate = model.EndDate;
+            result.Priority = model.Priority;
+            result.StartDate = model.StartDate;
+
+            return result;
+        }
+
+        protected override IEnumerable<ViewableEntity> ToViewableEntities(IEnumerable<ICloneable> objects)
+        {
+            var models = objects.Cast<PricelistAssignment>();
+            var viewableMap = models.ToDictionary(x => x, x => ToViewableEntity(x) as PricelistAssignmentViewableEntity);
+
+            FillViewableEntitiesReferenceFields(viewableMap);
+
+            var modelIds = models.Select(x => x.Id).ToList();
+            var result = viewableMap.Values.OrderBy(x => modelIds.IndexOf(x.Id));
+
+            return result;
+        }
+
+        protected virtual void FillViewableEntitiesReferenceFields(Dictionary<PricelistAssignment, PricelistAssignmentViewableEntity> viewableMap)
+        {
+            var models = viewableMap.Keys;
+
+            var catalogIds = models.Select(x => x.CatalogId).Distinct().ToArray();
+            var pricelistIds = models.Select(x => x.PricelistId).Distinct().ToArray();
+            var catalogs = _catalogService.GetByIdsAsync(catalogIds, CatalogResponseGroup.Info.ToString()).Result;
+            var pricelists = _pricingService.GetPricelistsByIdAsync(pricelistIds).Result;
+
+
+            foreach (var kvp in viewableMap)
+            {
+                var model = kvp.Key;
+                var viewableEntity = kvp.Value;
+                var catalog = catalogs.FirstOrDefault(x => x.Id == model.CatalogId);
+                var pricelist = pricelists.FirstOrDefault(x => x.Id == model.PricelistId);
+
+                viewableEntity.Catalog = catalog?.Name;
+                viewableEntity.Pricelist = pricelist?.Name;
+            }
         }
     }
 }

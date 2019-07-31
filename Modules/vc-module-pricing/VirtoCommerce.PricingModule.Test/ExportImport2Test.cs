@@ -272,6 +272,7 @@ namespace VirtoCommerce.PricingModule.Test
             searchServiceMock.Setup(x => x.SearchPricelistAssignmentsAsync(It.IsAny<PricelistAssignmentsSearchCriteria>())).ReturnsAsync(GetPricelistAssignmentSearchResult());
 
             var priceServiceMock = new Mock<IPricingService>();
+            var catalogServiceMock = new Mock<ICatalogService>();
 
             var metadata = ExportedTypeMetadata.GetFromType<PricelistAssignment>(true);
             var resolver = (IKnownExportTypesResolver)registrar;
@@ -280,6 +281,7 @@ namespace VirtoCommerce.PricingModule.Test
                 dataQuery => new PricelistAssignmentExportPagedDataSource(
                     searchServiceMock.Object,
                     priceServiceMock.Object,
+                    catalogServiceMock.Object,
                     authorizationServicesMock.AuthorizationPolicyProvider,
                     authorizationServicesMock.AuthorizationService,
                     authorizationServicesMock.UserClaimsPrincipalFactory,
