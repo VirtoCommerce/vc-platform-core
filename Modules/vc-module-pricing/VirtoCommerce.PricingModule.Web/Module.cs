@@ -177,10 +177,15 @@ namespace VirtoCommerce.PricingModule.Web
             AbstractTypeFactory<ExportDataQuery>.RegisterType<PricelistAssignmentExportDataQuery>();
             AbstractTypeFactory<ExportDataQuery>.RegisterType<PricelistExportDataQuery>();
             AbstractTypeFactory<ExportDataQuery>.RegisterType<PricelistFullExportDataQuery>();
+
+            AbstractTypeFactory<PriceViewableEntity>.RegisterType<PriceViewableEntity>();
+            AbstractTypeFactory<PricelistViewableEntity>.RegisterType<PricelistViewableEntity>();
+            AbstractTypeFactory<PricelistAssignmentViewableEntity>.RegisterType<PricelistAssignmentViewableEntity>();
         }
 
         public void Uninstall()
         {
+            // no need to perform actions for now (Comment to remove Sonar warning)
         }
 
         #endregion

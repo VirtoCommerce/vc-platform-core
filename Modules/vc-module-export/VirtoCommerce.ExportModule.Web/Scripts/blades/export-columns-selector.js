@@ -2,17 +2,31 @@ angular.module('virtoCommerce.exportModule')
     .controller('virtoCommerce.exportModule.exportColumnsSelectorController', ['$scope', 'platformWebApp.bladeNavigationService', function ($scope, bladeNavigationService) {
         var blade = $scope.blade;
 
-        var allColumns;
+        blade.isLoading = true;
 
         function initializeBlade() {
             blade.title = 'export.blades.export-settings.labels.exported-columns';
             blade.headIcon = 'fa-folder';
 
-            allColumns = _.each(angular.copy(blade.exportDataRequest.allColumnsOfType), function (column) {
-                column.$selected = _.contains(_.pluck(blade.exportDataRequest.dataQuery.includedColumns, 'name'), column.name);
-            });
-            blade.currentEntities = _.groupBy(allColumns, 'group');
+            var allColumns = angular.copy(blade.exportDataRequest.allColumnsOfType);
+            allColumns = _.sortBy(allColumns, 'group', 'name');
+            var selectedColumns = angular.copy(blade.exportDataRequest.dataQuery.includedColumns);
+            selectedColumns = _.sortBy(selectedColumns, 'name');
+            blade.allEntities = _.groupBy(allColumns, 'group');
+            blade.selectedEntities = _.groupBy(selectedColumns, 'group');
             blade.isLoading = false;
+        }
+
+        $scope.selectAllInGroup = function (groupKey) {
+            blade.selectedEntities[groupKey] = blade.allEntities[groupKey];
+        }
+
+        $scope.clearAllInGroup = function (groupKey) {
+            blade.selectedEntities[groupKey] = [];
+        }
+
+        $scope.sortSelected = function (groupKey) {
+            blade.selectedEntities[groupKey] = _.sortBy(blade.selectedEntities[groupKey], 'name');
         }
 
         $scope.cancelChanges = function () {
@@ -20,11 +34,11 @@ angular.module('virtoCommerce.exportModule')
         }
 
         $scope.isValid = function () {
-            return _.any(allColumns, function (x) { return x.$selected; });
+            return _.some(blade.selectedEntities, function (item) { return item.length; });
         }
 
         $scope.saveChanges = function () {
-            var includedColumns = _.where(allColumns, { $selected: true })
+            var includedColumns = _.flatten(_.map(blade.selectedEntities, _.values));
             if (blade.onSelected) {
                 blade.onSelected(includedColumns);
                 bladeNavigationService.closeBlade(blade);

@@ -26,12 +26,12 @@
                             <span class="list-descr">{{ 'export.blades.export-settings.labels.provider-description' | translate }}</span>
                         </li>
                         <li class="list-item" ng-click="selectExportedData()" ng-class="{'__disabled': !blade.selectedProvider || !blade.isExportedTypeSelected }">
-                            <i class="list-ico fa fa-image"></i>
+                            <i class="list-ico fa fa-cogs"></i>
                             <span class="list-t">{{ 'export.blades.export-settings.labels.exported-data' | translate }}</span>
                             <span class="list-descr">{{ 'export.blades.export-settings.labels.selected' | translate: {count: blade.dataSelected, total: blade.dataTotal} }}</span>
                         </li>
                         <li class="list-item" ng-click="selectExportedColumns()" ng-class="{'__disabled': !blade.selectedProvider || !blade.isExportedTypeSelected}">
-                            <i class="list-ico fa fa-file-text"></i>
+                            <i class="list-ico fa fa-cogs"></i>
                             <span class="list-t">{{ 'export.blades.export-settings.labels.exported-columns' | translate }}</span>
                             <span class="list-descr">{{ 'export.blades.export-settings.labels.selected' | translate: {count: blade.columnSelected, total: blade.columnTotal} }}</span>
                         </li>

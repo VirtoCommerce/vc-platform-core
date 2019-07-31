@@ -1,7 +1,7 @@
 angular.module('virtoCommerce.exportModule')
     .controller('virtoCommerce.exportModule.exportGenericViewerController', 
-    ['$localStorage', '$timeout', '$scope', 'platformWebApp.bladeUtils', 'platformWebApp.uiGridHelper', 'platformWebApp.bladeNavigationService', 'virtoCommerce.exportModule.exportModuleApi',
-    function ($localStorage, $timeout, $scope, bladeUtils, uiGridHelper, bladeNavigationService, exportModuleApi) {
+    ['$localStorage', '$timeout', '$scope', 'platformWebApp.bladeUtils', 'platformWebApp.uiGridHelper','virtoCommerce.exportModule.exportModuleApi',
+    function ($localStorage, $timeout, $scope, bladeUtils, uiGridHelper, exportModuleApi) {
         $scope.uiGridConstants = uiGridHelper.uiGridConstants;
         $scope.hasMore = true;
         $scope.items = [];
@@ -10,6 +10,7 @@ angular.module('virtoCommerce.exportModule')
         $scope.exportSearchFilterIds = [];
         
         var blade = $scope.blade;
+        var bladeNavigationService = bladeUtils.bladeNavigationService;
         blade.isLoading = true;
         blade.isExpanded = true;
 
@@ -23,27 +24,65 @@ angular.module('virtoCommerce.exportModule')
         $scope.$localStorage = $localStorage;
 
         blade.refresh = function () {
+            $scope.items = [];
+            
+            if ($scope.pageSettings.currentPage !== 1) {
+                $scope.pageSettings.currentPage = 1;
+            }
+
             loadData();
 
             resetStateGrid();
         };
 
-        function loadData() {
+        function loadData(callback) {
             blade.isLoading = true;
+
             angular.extend(blade.exportDataRequest.dataQuery, buildDataQuery());
+            var dataQuery = blade.exportDataRequest.dataQuery;
 
             exportModuleApi.getData(
                 blade.exportDataRequest,
                 function (data) {
                     blade.isLoading = false;
                     $scope.pageSettings.totalItems = data.totalCount;
-                    $scope.items = data.results;
+                    $scope.items = $scope.items.concat(data.results);
+                    $scope.hasMore = data.results.length === $scope.pageSettings.itemsPerPageCount;
+
+                    $timeout(function() {
+                        if ($scope.gridApi && dataQuery.objectIds && dataQuery.objectIds.length) {
+                            _.each(dataQuery.objectIds, function(objectId) {
+                                var dataItem = _.findWhere($scope.items, {id: objectId});
+                                $scope.gridApi.selection.selectRow(dataItem);
+                            });
+                        }
+                    });
+
+                    if (callback) {
+                        callback();
+                    }
+            });
+        }
+
+        function showMore() {
+            if ($scope.hasMore) {
+                ++$scope.pageSettings.currentPage;
+                $scope.gridApi.infiniteScroll.saveScrollPercentage();
+                loadData(function () {
+                    $scope.gridApi.infiniteScroll.dataLoaded();
+
+                    $timeout(function () {
+                        // wait for grid to ingest data changes
+                        if ($scope.gridApi.selection.getSelectAllState()) {
+                            $scope.gridApi.selection.selectAllRows();
+                        }
+                    });
                 });
+            }
         }
 
         blade.resetFiltering = function() {
             filter.keyword = undefined;
-            resetFilterConditions();
             blade.exportDataRequest.dataQuery = getEmptyDataQuery();
         };
 
@@ -75,6 +114,11 @@ angular.module('virtoCommerce.exportModule')
             result.isAnyFilterApplied = isAnyFilterApplied;
             angular.extend(result, filter.current);
 
+            var dataQuery = blade.exportDataRequest.dataQuery;
+            if (dataQuery.objectIds && dataQuery.length) {
+                angular.extend(result, {objectIds: dataQuery.objectIds});
+            }
+
             if (filter.keyword) {
                 angular.extend(result, { keyword: filter.keyword });
             }
@@ -82,13 +126,12 @@ angular.module('virtoCommerce.exportModule')
             return result;
         }
 
-        function resetFilterConditions() {
-        }
-
         function resetStateGrid() {
             if ($scope.gridApi) {
                 $scope.items = [];
                 $scope.gridApi.selection.clearSelectedRows();
+                $scope.gridApi.infiniteScroll.resetScroll(true, true);
+                $scope.gridApi.infiniteScroll.dataLoaded();
             }
         }
 
@@ -152,52 +195,13 @@ angular.module('virtoCommerce.exportModule')
         }
 
         filter.criteriaChanged = function () {
-            if ($scope.pageSettings.currentPage > 1) {
-                $scope.pageSettings.currentPage = 1;
-            } else {
-                blade.refresh();
-            }
+            blade.refresh();
         };
 
         blade.toolbarCommands = [{
-            name: 'export.blades.export-generic-viewer.commands.select',
-            icon: 'fa fa-save',
-            canExecuteMethod: function () {
-                return ($scope.items && $scope.items.length);
-            },
-            executeMethod: function () {
-                var dataQuery = buildDataQuery();
-                var selectedIds = _.map($scope.gridApi.selection.getSelectedRows(), function(item) { return item.id; });
-
-                if (selectedIds.length) {
-                    dataQuery.objectIds = selectedIds;
-                } else {
-                    dataQuery.isAllSelected = true;
-                }
-
-                if (blade.onCompleted) {
-                    blade.onCompleted(dataQuery);
-                }
-
-                bladeNavigationService.closeBlade(blade);
-            }
-        }, {
-            name: 'platform.commands.cancel',
-            icon: 'fa fa-times',
-            canExecuteMethod: function () {
-                return true;
-            },
-            executeMethod: function () {
-                bladeNavigationService.closeBlade(blade);
-            }
-        }, {
-            name: "platform.commands.reset",
-            icon: 'fa fa-undo',
+            name: "platform.commands.refresh",
+            icon: 'fa fa-refresh',
             executeMethod: function() {
-                if ($scope.pageSettings.currentPage > 1) {
-                    $scope.pageSettings.currentPage = 1;
-                }
-
                 blade.resetFiltering();
                 blade.refresh();
             },
@@ -207,10 +211,7 @@ angular.module('virtoCommerce.exportModule')
         }];
 
         $scope.setGridOptions = function (gridOptions) {
-
-            //disable watched
             bladeUtils.initializePagination($scope, true);
-            //сhoose the optimal amount that ensures the appearance of the scroll
             $scope.pageSettings.itemsPerPageCount = 20;
 
             uiGridHelper.initialize($scope, gridOptions, function (gridApi) {
@@ -218,8 +219,38 @@ angular.module('virtoCommerce.exportModule')
                 $scope.gridApi = gridApi;
 
                 uiGridHelper.bindRefreshOnSortChanged($scope);
+                $scope.gridApi.infiniteScroll.on.needLoadMoreData($scope, showMore);
+
             });
 
-            bladeUtils.initializePagination($scope);
+            // need to call refresh after digest cycle as we do not "$watch" for $scope.pageSettings.currentPage
+            $timeout(function() {
+                blade.refresh();
+            });
+        };
+
+        $scope.cancelChanges = function () {
+            bladeNavigationService.closeBlade(blade);
+        };
+    
+        $scope.isValid = function () {
+            return ($scope.items && $scope.items.length);
+        };
+    
+        $scope.saveChanges = function () {
+            var dataQuery = buildDataQuery();
+            var selectedIds = _.map($scope.gridApi.selection.getSelectedRows(), function(item) { return item.id; });
+
+            if (selectedIds.length) {
+                dataQuery.objectIds = selectedIds;
+            } else {
+                dataQuery.isAllSelected = true;
+            }
+
+            if (blade.onCompleted) {
+                blade.onCompleted(dataQuery);
+            }
+
+            bladeNavigationService.closeBlade(blade);
         };
     }]);
