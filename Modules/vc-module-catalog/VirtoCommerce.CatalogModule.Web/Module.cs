@@ -17,7 +17,6 @@ using VirtoCommerce.CatalogModule.Core.Model.OutlinePart;
 using VirtoCommerce.CatalogModule.Core.Search;
 using VirtoCommerce.CatalogModule.Core.Services;
 using VirtoCommerce.CatalogModule.Data.ExportImport;
-using VirtoCommerce.CatalogModule.Data.ExportImport.Converters;
 using VirtoCommerce.CatalogModule.Data.Handlers;
 using VirtoCommerce.CatalogModule.Data.Repositories;
 using VirtoCommerce.CatalogModule.Data.Search;
@@ -28,8 +27,6 @@ using VirtoCommerce.CatalogModule.Data.Validation;
 using VirtoCommerce.CatalogModule.Web.Authorization;
 using VirtoCommerce.CatalogModule.Web.JsonConverters;
 using VirtoCommerce.CoreModule.Core.Seo;
-using VirtoCommerce.ExportModule.Core.Model;
-using VirtoCommerce.ExportModule.Core.Services;
 using VirtoCommerce.Platform.Core.Bus;
 using VirtoCommerce.Platform.Core.Common;
 using VirtoCommerce.Platform.Core.ExportImport;
@@ -60,10 +57,7 @@ namespace VirtoCommerce.CatalogModule.Web
             serviceCollection.AddSingleton<ICategorySearchService, CategorySearchService>();
 
             serviceCollection.AddSingleton<ICatalogService, CatalogService>();
-            serviceCollection.AddSingleton<Func<ICatalogService>>(provider => () => provider.CreateScope().ServiceProvider.GetRequiredService<ICatalogService>());
             serviceCollection.AddSingleton<ICatalogSearchService, CatalogSearchService>();
-            serviceCollection.AddSingleton<Func<ICatalogSearchService>>(provider => () => provider.CreateScope().ServiceProvider.GetRequiredService<ICatalogSearchService>());
-
             serviceCollection.AddSingleton<IListEntrySearchService, ListEntrySearchService>();
 
             serviceCollection.AddSingleton<ICategoryService, CategoryService>();
@@ -139,9 +133,6 @@ namespace VirtoCommerce.CatalogModule.Web
             });
 
             serviceCollection.AddSingleton<IAuthorizationHandler, CatalogAuthorizationHandler>();
-
-            serviceCollection.AddScoped<CatalogExportPagedDataSource>(); // Adding as scoped, because of used services (UserManager, PrincipalFactory) scoped too
-            serviceCollection.AddSingleton<Func<ExportDataQuery, CatalogExportPagedDataSource>>(provider => (exportDataQuery) => CreateExportPagedDataSource<CatalogExportPagedDataSource>(provider, exportDataQuery));
         }
 
         public void PostInitialize(IApplicationBuilder appBuilder)
@@ -171,18 +162,6 @@ namespace VirtoCommerce.CatalogModule.Web
             inProcessBus.RegisterHandler<ProductChangedEvent>(async (message, token) => await appBuilder.ApplicationServices.GetService<LogChangesChangedEventHandler>().Handle(message));
             inProcessBus.RegisterHandler<CategoryChangedEvent>(async (message, token) => await appBuilder.ApplicationServices.GetService<LogChangesChangedEventHandler>().Handle(message));
 
-            //Register types allowed to export
-            var registrar = appBuilder.ApplicationServices.GetService<IKnownExportTypesRegistrar>();
-            var catalogExportPagedDataSourceFactory = appBuilder.ApplicationServices.GetService<Func<ExportDataQuery, CatalogExportPagedDataSource>>();
-
-
-            registrar.RegisterType(typeof(Catalog).Name, "Catalog", typeof(CatalogExportDataQuery).Name)
-                .WithDataSourceFactory(dataQuery => catalogExportPagedDataSourceFactory(dataQuery))
-                .WithMetadata(ExportedTypeMetadata.GetFromType<Catalog>(true))
-                .WithTabularDataConverter(new TabularCatalogDataConverter())
-                .WithTabularMetadata(ExportedTypeMetadata.GetFromType<TabularCatalog>(false));
-
-            AbstractTypeFactory<ExportDataQuery>.RegisterType<CatalogExportDataQuery>();
 
             //Force migrations
             using (var serviceScope = appBuilder.ApplicationServices.CreateScope())
@@ -210,20 +189,6 @@ namespace VirtoCommerce.CatalogModule.Web
         {
             await _appBuilder.ApplicationServices.GetRequiredService<CatalogExportImport>().DoImportAsync(inputStream, options,
                 progressCallback, cancellationToken);
-        }
-
-        /// <summary>
-        /// Helps to create ExportDataSource factory method
-        /// </summary>
-        /// <typeparam name="T"></typeparam>
-        /// <param name="provider"></param>
-        /// <param name="exportDataQuery"></param>
-        /// <returns></returns>
-        private static T CreateExportPagedDataSource<T>(IServiceProvider provider, ExportDataQuery exportDataQuery) where T : BaseExportPagedDataSource
-        {
-            var result = provider.CreateScope().ServiceProvider.GetRequiredService<T>();
-            result.DataQuery = exportDataQuery;
-            return result;
         }
     }
 }
