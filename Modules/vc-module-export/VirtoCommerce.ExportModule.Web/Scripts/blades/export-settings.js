@@ -4,6 +4,7 @@ angular.module('virtoCommerce.exportModule')
         blade.canStartProcess = false;
         blade.isLoading = true;
         blade.exportDataRequest = blade.exportDataRequest || {};
+        blade.allColumnsOfType = [];
         blade.isExportedTypeSelected = typeof (blade.exportDataRequest.exportTypeName) !== 'undefined';
         
         function initializeBlade() {
@@ -43,6 +44,7 @@ angular.module('virtoCommerce.exportModule')
 
         $scope.providerChanged = function () {
             blade.exportDataRequest = {};
+            blade.allColumnsOfType = [];
             blade.isExportedTypeSelected = false;
             blade.includedColumnsDescription = null;
         };
@@ -76,9 +78,10 @@ angular.module('virtoCommerce.exportModule')
                 knownTypes: blade.knownTypes,
                 exportDataRequest: blade.exportDataRequest,
                 selectedProvider: blade.selectedProvider,
-                onSelected: function(exportDataRequest) {
-                    blade.exportDataRequest = angular.extend(blade.exportDataRequest, exportDataRequest);
-                    blade.exportDataRequest.dataQuery = angular.copy(exportDataRequest.dataQuery);
+                onSelected: function (selectedTypeData) {
+                    blade.exportDataRequest = angular.extend(blade.exportDataRequest, selectedTypeData.exportDataRequest);
+                    blade.exportDataRequest.dataQuery = angular.copy(selectedTypeData.exportDataRequest.dataQuery);
+                    blade.allColumnsOfType = selectedTypeData.allColumnsOfType;
                     blade.isExportedTypeSelected = typeof (blade.exportDataRequest.exportTypeName) !== 'undefined';
                     blade.includedColumnsDescription = null;
                 }
@@ -94,9 +97,10 @@ angular.module('virtoCommerce.exportModule')
                 template: 'Modules/$(VirtoCommerce.Export)/Scripts/blades/export-columns-selector.tpl.html',
                 isClosingDisabled: false,
                 exportDataRequest: blade.exportDataRequest,
+                allColumnsOfType: blade.allColumnsOfType,
                 onSelected: function (includedColumns) {
                     blade.exportDataRequest.dataQuery.includedColumns = includedColumns;
-                    if (blade.exportDataRequest.dataQuery.includedColumns.length !== blade.exportDataRequest.allColumnsOfType.length) {
+                    if (blade.exportDataRequest.dataQuery.includedColumns.length !== blade.allColumnsOfType.length) {
                         var includedColumnsNames = _.pluck(blade.exportDataRequest.dataQuery.includedColumns, 'name');
                         if (includedColumnsNames.length > 10) {
                             blade.includedColumnsDescription = includedColumnsNames.slice(0, 10).join(', ') + ', ... (+' + (includedColumnsNames.length - 10) + ' ' + $translate.instant('export.blades.export-settings.labels.columns-more') + ')';
