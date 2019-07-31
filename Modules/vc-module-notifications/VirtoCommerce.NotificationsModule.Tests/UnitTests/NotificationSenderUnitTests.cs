@@ -5,6 +5,7 @@ using System.Net.Mail;
 using System.Threading.Tasks;
 using Microsoft.Extensions.Logging;
 using Moq;
+using Newtonsoft.Json.Linq;
 using VirtoCommerce.NotificationsModule.Core.Model;
 using VirtoCommerce.NotificationsModule.Core.Services;
 using VirtoCommerce.NotificationsModule.Core.Types;
@@ -15,6 +16,8 @@ using VirtoCommerce.NotificationsModule.Tests.Common;
 using VirtoCommerce.NotificationsModule.Tests.Model;
 using VirtoCommerce.NotificationsModule.Tests.NotificationTypes;
 using VirtoCommerce.Platform.Core.Common;
+using VirtoCommerce.Platform.Core.Localizations;
+using VirtoCommerce.Platform.Data.Localizations;
 using Xunit;
 
 namespace VirtoCommerce.NotificationsModule.Tests.UnitTests
@@ -31,7 +34,9 @@ namespace VirtoCommerce.NotificationsModule.Tests.UnitTests
 
         public NotificationSenderUnitTests()
         {
-            _templateRender = new LiquidTemplateRenderer();
+            ILocalizationService localizationService = new LocalizationService(null, null, null);
+            localizationService.LocalizationResources = JObject.FromObject(new { order = new { subject = "subj" } });
+            _templateRender = new LiquidTemplateRenderer(localizationService);
             _messageServiceMock = new Mock<INotificationMessageService>();
             _messageSenderMock = new Mock<INotificationMessageSender>();
             _logNotificationSenderMock = new Mock<ILogger<NotificationSender>>();
@@ -54,7 +59,7 @@ namespace VirtoCommerce.NotificationsModule.Tests.UnitTests
         {
             //Arrange
             var language = "en-US";
-            var subject = "Your order was sent";
+            var subject = "Your order was sent {{ 'order.subject' | translate }}";
             var body = "Your order <strong>{{ customer_order.number}}</strong> was sent.<br> Number of sent parcels - " +
                           "<strong>{{ customer_order.shipments | size}}</strong>.<br> Parcels tracking numbers:<br> {% for shipment in customer_order.shipments %} " +
                           "<br><strong>{{ shipment.number}}</strong> {% endfor %}<br><br>Sent date - <strong>{{ customer_order.modified_date }}</strong>.";

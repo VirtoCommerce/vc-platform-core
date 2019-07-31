@@ -95,7 +95,7 @@ namespace VirtoCommerce.NotificationsModule.Tests.UnitTests
             _notificationService = new NotificationService(_repositoryFactory, _eventPublisherMock.Object);
             _notificationRegistrar = _notificationService;
             _notificationServiceMock = new Mock<INotificationService>();
-            _notificationSearchService = new NotificationSearchService(_repositoryFactory, _notificationServiceMock.Object);
+            _notificationSearchService = new NotificationSearchService(_repositoryFactory, _notificationServiceMock.Object, null);
 
             if (!AbstractTypeFactory<NotificationEntity>.AllTypeInfos.SelectMany(x => x.AllSubclasses).Contains(typeof(SocialNetworkNotificationEntity)))
                 AbstractTypeFactory<NotificationEntity>.RegisterType<SocialNetworkNotificationEntity>();

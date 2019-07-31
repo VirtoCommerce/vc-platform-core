@@ -96,14 +96,15 @@ namespace VirtoCommerce.NotificationsModule.Web.Controllers
         /// <summary>
         /// Render content
         /// </summary>
+        /// <param name="language"></param>
         /// <param name="request">request of Notification Template with text and data</param>
         /// <returns></returns>
         [HttpPost]
         [Route("{type}/templates/{language}/rendercontent")]
         [Authorize(ModuleConstants.Security.Permissions.ReadTemplates)]
-        public ActionResult RenderingTemplate([FromBody]NotificationTemplateRequest request)
+        public async Task<ActionResult> RenderingTemplate([FromBody]NotificationTemplateRequest request, string language = null)
         {
-            var result = _notificationTemplateRender.Render(request.Text, request.Data);
+            var result = await _notificationTemplateRender.RenderAsync(request.Text, request.Data, language);
 
             return Ok(new { html = result });
         }

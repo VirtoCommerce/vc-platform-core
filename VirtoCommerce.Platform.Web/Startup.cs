@@ -31,6 +31,7 @@ using VirtoCommerce.Platform.Core.Jobs;
 using VirtoCommerce.Platform.Core.Modularity;
 using VirtoCommerce.Platform.Core.Security;
 using VirtoCommerce.Platform.Data.Extensions;
+using VirtoCommerce.Platform.Data.Localizations;
 using VirtoCommerce.Platform.Data.PushNotifications;
 using VirtoCommerce.Platform.Data.Repositories;
 using VirtoCommerce.Platform.Modules;
@@ -400,6 +401,8 @@ namespace VirtoCommerce.Platform.Web
             app.UseModules();
             //Register platform permissions
             app.UsePlatformPermissions();
+
+            app.UseLocalization();
 
             //Setup SignalR hub
             app.UseSignalR(routes =>
