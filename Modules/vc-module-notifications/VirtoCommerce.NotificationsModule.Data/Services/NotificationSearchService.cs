@@ -15,13 +15,11 @@ namespace VirtoCommerce.NotificationsModule.Data.Services
     {
         private readonly Func<INotificationRepository> _repositoryFactory;
         private readonly INotificationService _notificationService;
-        private readonly INotificationRegistrar _notificationRegistrar;
 
-        public NotificationSearchService(Func<INotificationRepository> repositoryFactory, INotificationService notificationService, INotificationRegistrar notificationRegistrar)
+        public NotificationSearchService(Func<INotificationRepository> repositoryFactory, INotificationService notificationService)
         {
             _repositoryFactory = repositoryFactory;
             _notificationService = notificationService;
-            _notificationRegistrar = notificationRegistrar;
         }
 
         public async Task<NotificationSearchResult> SearchNotificationsAsync(NotificationSearchCriteria criteria)
@@ -56,7 +54,7 @@ namespace VirtoCommerce.NotificationsModule.Data.Services
 
             if (criteria.Take > 0)
             {
-                var transientNotificationsQuery = AbstractTypeFactory<Notification>.AllTypeInfos.Select(x => _notificationRegistrar.GenerateNotification(x.Type.Name))
+                var transientNotificationsQuery = AbstractTypeFactory<Notification>.AllTypeInfos.Select(x => AbstractTypeFactory<Notification>.TryCreateInstance(x.Type.Name))
                                                                               .OfType<Notification>().AsQueryable();
                 if (!string.IsNullOrEmpty(criteria.NotificationType))
                 {
@@ -70,7 +68,10 @@ namespace VirtoCommerce.NotificationsModule.Data.Services
 
                 result.TotalCount += transientNotificationsQuery.Count();
                 var transientNotifications = transientNotificationsQuery.Skip(criteria.Skip).Take(criteria.Take).ToList();
-
+                foreach(var transientNotification in transientNotifications)
+                {
+                    transientNotification.ReduceDetails(criteria.ResponseGroup);
+                }
                 result.Results = result.Results.Concat(transientNotifications)
                     .AsQueryable()
                     .OrderBySortInfos(sortInfos).ToList();

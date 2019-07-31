@@ -28,6 +28,7 @@ using VirtoCommerce.Platform.Core.Modularity;
 using VirtoCommerce.Platform.Core.Notifications;
 using VirtoCommerce.Platform.Core.Security;
 using VirtoCommerce.Platform.Core.Settings;
+using VirtoCommerce.NotificationsModule.Core.Extensions;
 
 namespace VirtoCommerce.NotificationsModule.Web
 {
@@ -45,7 +46,7 @@ namespace VirtoCommerce.NotificationsModule.Web
             serviceCollection.AddTransient<Func<INotificationRepository>>(provider => () => provider.CreateScope().ServiceProvider.GetService<INotificationRepository>());
             serviceCollection.AddTransient<INotificationService, NotificationService>();
             serviceCollection.AddTransient<INotificationSearchService, NotificationSearchService>();
-            serviceCollection.AddTransient<INotificationRegistrar, NotificationService>();
+            serviceCollection.AddSingleton<INotificationRegistrar, NotificationRegistrar>();
             serviceCollection.AddTransient<INotificationMessageService, NotificationMessageService>();
             serviceCollection.AddTransient<INotificationMessageSearchService, NotificationMessageSearchService>();
             serviceCollection.AddTransient<INotificationSender, NotificationSender>();
@@ -92,8 +93,8 @@ namespace VirtoCommerce.NotificationsModule.Web
             var settingsRegistrar = appBuilder.ApplicationServices.GetRequiredService<ISettingsRegistrar>();
             settingsRegistrar.RegisterSettings(ModuleConstants.Settings.AllSettings, ModuleInfo.Id);
 
-            var permissionsProvider = appBuilder.ApplicationServices.GetRequiredService<IPermissionsRegistrar>();
-            permissionsProvider.RegisterPermissions(ModuleConstants.Security.Permissions.AllPermissions.Select(x =>
+            var permissionsRegistrar = appBuilder.ApplicationServices.GetRequiredService<IPermissionsRegistrar>();
+            permissionsRegistrar.RegisterPermissions(ModuleConstants.Security.Permissions.AllPermissions.Select(x =>
                 new Permission()
                 {
                     GroupName = "Notifications",
@@ -130,29 +131,24 @@ namespace VirtoCommerce.NotificationsModule.Web
             var assembly = typeof(INotificationRepository).Assembly;
             var registrar = appBuilder.ApplicationServices.GetService<INotificationRegistrar>();
             registrar.RegisterNotification<ResetPasswordEmailNotification>();
-            registrar.RegisterNotification<ConfirmationEmailNotification>();
-            registrar.RegisterNotification<RegistrationEmailNotification>(new EmailNotificationTemplate()
+            registrar.RegisterNotification<ConfirmationEmailNotification>().WithTemplates(
+                new EmailNotificationTemplate()
+                {
+                    Subject = "aaa",//assembly.GetManifestResourceStream("VirtoCommerce.NotificationsModule.Data.Notifications.Templates.RegistrationEmailNotificationTemplateSubject.html").ReadToString(),
+                    Body = "bbb",//assembly.GetManifestResourceStream("VirtoCommerce.NotificationsModule.Data.Notifications.Templates.RegistrationEmailNotificationTemplateBody.html").ReadToString(),
+                });
+            registrar.RegisterNotification<RegistrationEmailNotification>().WithTemplates(
+                new EmailNotificationTemplate()
             {
                 Subject = "subj",//assembly.GetManifestResourceStream("VirtoCommerce.NotificationsModule.Data.Notifications.Templates.RegistrationEmailNotificationTemplateSubject.html").ReadToString(),
                 Body = "body",//assembly.GetManifestResourceStream("VirtoCommerce.NotificationsModule.Data.Notifications.Templates.RegistrationEmailNotificationTemplateBody.html").ReadToString(),
-                LanguageCode = "en-US"
             });
             registrar.RegisterNotification<RegistrationInvitationEmailNotification>();
             registrar.RegisterNotification<RemindUserNameEmailNotification>();
             registrar.RegisterNotification<ResetPasswordSmsNotification>();
             registrar.RegisterNotification<TwoFactorEmailNotification>();
             registrar.RegisterNotification<TwoFactorSmsNotification>();
-            registrar.RegisterNotification<ChangePhoneNumberSmsNotification>();
-
-            
-
-            //var templateRegistrar = appBuilder.ApplicationServices.GetService<INotificationTemplateRegistrar>();
-            //templateRegistrar.RegisterNotificationType<RegistrationEmailNotification>(new EmailNotificationTemplate()
-            //{
-            //    Subject = assembly.GetManifestResourceStream("VirtoCommerce.NotificationsModule.Data.Notifications.Templates.RegistrationEmailNotificationTemplateSubject.html").ReadToString(),
-            //    Body = assembly.GetManifestResourceStream("VirtoCommerce.NotificationsModule.Data.Notifications.Templates.RegistrationEmailNotificationTemplateBody.html").ReadToString(),
-            //    LanguageCode = "en-US"
-            //});
+            registrar.RegisterNotification<ChangePhoneNumberSmsNotification>();            
         }
 
         public void Uninstall()
