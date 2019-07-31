@@ -9,7 +9,11 @@ namespace VirtoCommerce.NotificationsModule.LiquidRenderer.Filters
         public static string Translate(TemplateContext context, string path, string language = null)
         {
             var localizationResources = (JObject)context.GetValue(new ScriptVariableGlobal("localizationResources"));
-            var key = string.IsNullOrEmpty(language) ? path : $"{language}.{path}";
+            var languageObject = context.GetValue(new ScriptVariableGlobal("language"))?.ToString();
+            var key = !string.IsNullOrEmpty(language) ? $"{language}.{path}" :
+                !string.IsNullOrEmpty(languageObject) ? $"{languageObject}.{path}" :
+                path;
+
             return (localizationResources?.SelectToken(key) ?? key).ToString();
         }
     }

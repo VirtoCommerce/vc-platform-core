@@ -102,7 +102,7 @@
 			tenantId: blade.tenantId,
 			tenantType: blade.tenantType,
             currentEntity: blade.currentEntity,
-            language: blade.currentEntity.language,
+            languageCode: blade.currentEntity.languageCode,
 			controller: 'virtoCommerce.notificationsModule.templateRenderController',
 			template: 'Modules/$(VirtoCommerce.Notifications)/Scripts/blades/notifications-template-render.tpl.html'
 		};

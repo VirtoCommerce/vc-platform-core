@@ -1,3 +1,5 @@
+using System;
+using System.Globalization;
 using System.Threading.Tasks;
 using Scriban;
 using Scriban.Runtime;
@@ -21,10 +23,11 @@ namespace VirtoCommerce.NotificationsModule.LiquidRenderer
             var context = new TemplateContext();
             var scriptObject = GenerateScriptObject();
             scriptObject.Import(model);
-
             if (!string.IsNullOrEmpty(language))
             {
-                scriptObject.Add("language", language);
+                //TODO
+                var culture = new CultureInfo(language);
+                scriptObject.Add("language", culture.TwoLetterISOLanguageName);
             }
             context.PushGlobal(scriptObject);
 

@@ -35,7 +35,7 @@ namespace VirtoCommerce.NotificationsModule.Tests.UnitTests
         public NotificationSenderUnitTests()
         {
             ILocalizationService localizationService = new LocalizationService(null, null, null);
-            localizationService.LocalizationResources = JObject.FromObject(new { order = new { subject = "subj" } });
+            localizationService.LocalizationResources = JObject.FromObject(new { en = new { order = new { subject = "subj" } } });
             _templateRender = new LiquidTemplateRenderer(localizationService);
             _messageServiceMock = new Mock<INotificationMessageService>();
             _messageSenderMock = new Mock<INotificationMessageSender>();

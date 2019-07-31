@@ -20,7 +20,6 @@ namespace VirtoCommerce.NotificationsModule.Tests.UnitTests
             scriptObject1.Import(typeof(TranslationFilter));
             var jObject = JObject.FromObject(new { en = new { order = new { subject1 = "subj" }}});
             scriptObject1.Add("localizationResources", jObject);
-            //TranslationFilter.LocalizationResources = jObject;
             context.PushGlobal(scriptObject1);
 
             //Act

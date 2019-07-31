@@ -46,8 +46,8 @@ namespace VirtoCommerce.NotificationsModule.Core.Model
             var template = (EmailNotificationTemplate)Templates.FindWithLanguage(message.LanguageCode);
             if (template != null)
             {
-                emailMessage.Subject = render.RenderAsync(template.Subject, this).GetAwaiter().GetResult();
-                emailMessage.Body = render.RenderAsync(template.Body, this).GetAwaiter().GetResult();
+                emailMessage.Subject = render.RenderAsync(template.Subject, this, message.LanguageCode).GetAwaiter().GetResult();
+                emailMessage.Body = render.RenderAsync(template.Body, this, message.LanguageCode).GetAwaiter().GetResult();
             }
 
             emailMessage.From = From;

@@ -60,7 +60,7 @@ angular.module('virtoCommerce.notificationsModule')
                         tenantId: blade.tenantId,
                         tenantType: blade.tenantType,
                         currentEntity: template,
-                        language: template.languageCode ? 'default' : template.languageCode,
+                        languageCode: template.languageCode ? template.languageCode : 'default',
                         controller: 'virtoCommerce.notificationsModule.templateRenderController',
                         template: 'Modules/$(VirtoCommerce.Notifications)/Scripts/blades/notifications-template-render.tpl.html'
                     };

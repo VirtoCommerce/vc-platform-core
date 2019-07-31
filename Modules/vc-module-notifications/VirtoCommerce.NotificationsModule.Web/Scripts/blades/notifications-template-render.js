@@ -22,13 +22,13 @@
         var data = angular.copy(blade.notification);
         data.cc = pluckAddress(data.cc);
         data.bcc = pluckAddress(data.bcc);
-        keyTemplateLocalStorage = blade.tenantType + '.' + blade.notification.type + '.' + blade.currentEntity.languageCode;
+        keyTemplateLocalStorage = blade.tenantType + '.' + blade.notification.type + '.' + blade.languageCode;
         var itemFromLocalStorage = $localStorage[keyTemplateLocalStorage];
         if (itemFromLocalStorage) {
             blade.notification.context = itemFromLocalStorage;
         } 
         
-        notifications.renderTemplate({type: blade.notification.type, language: blade.currentEntity.languageCode},{ text: blade.currentEntity.body, data }, function (data) {
+        notifications.renderTemplate({type: blade.notification.type, language: blade.languageCode},{ text: blade.currentEntity.body, data }, function (data) {
             blade.originHtml = data.html;
         });
 		blade.isLoading = false;
