@@ -4,6 +4,7 @@ angular.module('virtoCommerce.exportModule')
         blade.canStartProcess = false;
         blade.isLoading = true;
         blade.exportDataRequest = blade.exportDataRequest || {};
+        blade.allColumnsOfType = [];
         blade.isExportedTypeSelected = typeof (blade.exportDataRequest.exportTypeName) !== 'undefined';
         blade.defaultProvider = $localStorage.defaultExportProvider || 'JsonExportProvider';
 
@@ -90,6 +91,10 @@ angular.module('virtoCommerce.exportModule')
 
         $scope.providerChanged = function () {
             $localStorage.defaultExportProvider = blade.selectedProvider.name;
+            blade.exportDataRequest = {};
+            blade.allColumnsOfType = [];
+            blade.isExportedTypeSelected = false;
+            blade.includedColumnsDescription = null;
         };
 
         $scope.startExport = function () {
@@ -121,10 +126,11 @@ angular.module('virtoCommerce.exportModule')
                 knownTypes: blade.knownTypes,
                 exportDataRequest: blade.exportDataRequest,
                 selectedProvider: blade.selectedProvider,
-                onSelected: function (exportDataRequest, isTabularExportSupported) {
-                    blade.exportDataRequest = angular.extend(blade.exportDataRequest, exportDataRequest);
-                    blade.exportDataRequest.dataQuery = angular.copy(exportDataRequest.dataQuery);
-                    blade.isTabularExportSupported = isTabularExportSupported;
+                onSelected: function (selectedTypeData) {
+                    blade.exportDataRequest = angular.extend(blade.exportDataRequest, selectedTypeData.exportDataRequest);
+                    blade.exportDataRequest.dataQuery = angular.copy(selectedTypeData.exportDataRequest.dataQuery);
+                    blade.allColumnsOfType = selectedTypeData.allColumnsOfType;
+                    blade.isTabularExportSupported = selectedTypeData.isTabularExportSupported;
                     blade.isExportedTypeSelected = typeof (blade.exportDataRequest.exportTypeName) !== 'undefined';
                     if (blade.isExportedTypeSelected) {
                         blade.columnSelected = blade.exportDataRequest.allColumnsOfType.length;
@@ -147,6 +153,7 @@ angular.module('virtoCommerce.exportModule')
                 template: 'Modules/$(VirtoCommerce.Export)/Scripts/blades/export-columns-selector.tpl.html',
                 isClosingDisabled: false,
                 exportDataRequest: blade.exportDataRequest,
+                allColumnsOfType: blade.allColumnsOfType,
                 onSelected: function (includedColumns) {
                     blade.exportDataRequest.dataQuery.includedColumns = includedColumns;
                     blade.columnSelected = includedColumns.length;

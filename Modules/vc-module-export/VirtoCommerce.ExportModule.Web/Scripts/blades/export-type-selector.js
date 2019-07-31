@@ -34,19 +34,21 @@ angular.module('virtoCommerce.exportModule')
                     var selectedTypes = _.filter(blade.allGroups, function (x) { return x.groupName === node.groupName || (node.groupName === 'General' && !x.groupName); });
                     var selectedType = selectedTypes[0];
                     var allColumnsOfType = (blade.selectedProvider.isTabular ? selectedType.tabularMetaData.propertyInfos : selectedType.metaData.propertyInfos);
-                    var isTabularExportSupported = selectedType.isTabularExportSupported;
-                    var exportDataRequest = {
-                        exportTypeName: selectedType.typeName,
+                    var selectedTypeData = {
+                        exportDataRequest: {
+                            exportTypeName: selectedType.typeName,                            
+                            dataQuery: {
+                                exportTypeName: selectedType.exportDataQueryType,
+                                isAllSelected: true,
+                                includedColumns: allColumnsOfType,
+                                take: 10000
+                            }
+                        },
                         allColumnsOfType: allColumnsOfType,
-                        dataQuery: {
-                            exportTypeName: selectedType.exportDataQueryType,
-                            isAllSelected: true,
-                            includedColumns: allColumnsOfType,
-                            take: 10000
-                        }
+						isTabularExportSupported: selectedType.isTabularExportSupported
                     };
                     if (blade.onSelected) {
-                        blade.onSelected(exportDataRequest, isTabularExportSupported);
+                        blade.onSelected(selectedTypeData);
                         bladeNavigationService.closeBlade(blade);
                     }
                 }
