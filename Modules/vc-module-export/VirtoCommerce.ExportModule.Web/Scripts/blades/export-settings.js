@@ -165,12 +165,11 @@ angular.module('virtoCommerce.exportModule')
                 controller: 'virtoCommerce.exportModule.exportGenericViewerController',
                 template: 'Modules/$(VirtoCommerce.Export)/Scripts/blades/export-generic-viewer.tpl.html',
                 isClosingDisabled: false,
-                exportDataRequest: angular.copy(blade.exportDataRequest),
+                exportDataRequest: blade.exportDataRequest,
                 onCompleted: function(dataQuery) {
                     blade.exportDataRequest.dataQuery = dataQuery;
                     blade.dataSelected =
-                        (blade.exportDataRequest.dataQuery.objectIds &&
-                            blade.exportDataRequest.dataQuery.objectIds.length)
+                        (blade.exportDataRequest.dataQuery.objectIds && blade.exportDataRequest.dataQuery.objectIds.length)
                         ? blade.exportDataRequest.dataQuery.objectIds.length
                         : blade.dataTotal;
                 }

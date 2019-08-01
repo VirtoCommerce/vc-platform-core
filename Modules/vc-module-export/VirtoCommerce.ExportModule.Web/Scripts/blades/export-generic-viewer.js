@@ -15,7 +15,8 @@ angular.module('virtoCommerce.exportModule')
         blade.isExpanded = true;
 
         var filter = blade.filter = $scope.filter = {};
-        blade.exportDataRequest = blade.exportDataRequest || { exportTypeName: "NotSpecified" };
+        blade.originalExportDataRequest = blade.exportDataRequest;
+        blade.exportDataRequest = blade.exportDataRequest ? angular.copy(blade.exportDataRequest) : { exportTypeName: "NotSpecified" };
 
         if (blade.exportDataRequest.dataQuery && blade.exportDataRequest.dataQuery.keyword) {
             filter.keyword = blade.exportDataRequest.dataQuery.keyword;
@@ -82,9 +83,13 @@ angular.module('virtoCommerce.exportModule')
         }
 
         blade.resetFiltering = function() {
-            filter.keyword = undefined;
-            blade.exportDataRequest.dataQuery = getEmptyDataQuery();
+            filter.resetKeyword();    
+            $scope.resetRequestCustomFilter();        
         };
+
+        $scope.resetRequestCustomFilter = function () {
+            blade.exportDataRequest.dataQuery = getEmptyDataQuery();
+        }
 
         function buildDataQuery()
         {
@@ -173,6 +178,11 @@ angular.module('virtoCommerce.exportModule')
                 showFilterDetailBlade({ isNew: true, metafieldsId: metafieldsId, exportTypeName: blade.exportDataRequest.exportTypeName });
             } else {
                 bladeNavigationService.closeBlade({ id: 'exportGenericViewerFilter' });
+                
+                if (!filter.current) {
+                    $scope.resetRequestCustomFilter();
+                }
+
                 filter.criteriaChanged();
             }
         };
@@ -197,6 +207,14 @@ angular.module('virtoCommerce.exportModule')
         filter.criteriaChanged = function () {
             blade.refresh();
         };
+
+        filter.resetKeyword = function () {
+            filter.keyword = undefined;
+
+            if (blade.exportDataRequest.dataQuery) {
+                blade.exportDataRequest.dataQuery.keyword = undefined;
+            }
+        }
 
         blade.toolbarCommands = [{
             name: "platform.commands.refresh",
