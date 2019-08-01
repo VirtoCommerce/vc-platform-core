@@ -18,7 +18,7 @@ angular.module('virtoCommerce.exportModule')
                         blade.knownTypesTree = results;
                         blade.prepareTypes();
                     },
-                    function(error) { bladeNavigationService.setError('Error ' + error.status, blade); });
+                    function (error) { bladeNavigationService.setError('Error ' + error.status, blade); });
             }
         };
 
@@ -36,7 +36,7 @@ angular.module('virtoCommerce.exportModule')
                     var allColumnsOfType = (blade.selectedProvider.isTabular ? selectedType.tabularMetaData.propertyInfos : selectedType.metaData.propertyInfos);
                     var selectedTypeData = {
                         exportDataRequest: {
-                            exportTypeName: selectedType.typeName,                            
+                            exportTypeName: selectedType.typeName,
                             dataQuery: {
                                 exportTypeName: selectedType.exportDataQueryType,
                                 isAllSelected: true,
@@ -45,7 +45,7 @@ angular.module('virtoCommerce.exportModule')
                             }
                         },
                         allColumnsOfType: allColumnsOfType,
-						isTabularExportSupported: selectedType.isTabularExportSupported,
+                        isTabularExportSupported: selectedType.isTabularExportSupported,
                         localizedTypeName: selectedType.localizedName
                     };
                     if (blade.onSelected) {
@@ -56,11 +56,11 @@ angular.module('virtoCommerce.exportModule')
             });
         };
 
-        blade.prepareTypes = function() {
+        blade.prepareTypes = function () {
             if (blade.selectedProvider.isTabular) {
                 blade.knownTypesTree = _.filter(blade.knownTypesTree, function (x) { return x.isTabularExportSupported === true; });
             }
-            _.each(blade.knownTypesTree, function (item) {                
+            _.each(blade.knownTypesTree, function (item) {
                 item.localizedName = $translate.instant('export.type-names.' + item.typeName);
                 item.localizedGroup = $translate.instant('export.type-groups.' + item.group);
                 item.groupName = item.group + '|' + item.typeName;

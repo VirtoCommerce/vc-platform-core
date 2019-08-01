@@ -247,13 +247,15 @@
             "description": "Export/Import price lists, assignments and prices"
         }
     },
-    "export.type-names": {
-        "VirtoCommerce.PricingModule.Core.Model.PricelistFullData": "Pricelist full data",
-        "VirtoCommerce.PricingModule.Core.Model.Price": "Price",
-        "VirtoCommerce.PricingModule.Core.Model.Pricelist": "Pricelist",
-        "VirtoCommerce.PricingModule.Core.Model.PricelistAssignment": "Pricelist assignment"
-    },
-    "export.type-groups": {
-        "Pricing": "Pricing"
+    "export": {
+        "type-names": {
+            "VirtoCommerce.PricingModule.Core.Model.PricelistFullData": "Pricelist full data",
+            "VirtoCommerce.PricingModule.Core.Model.Price": "Price",
+            "VirtoCommerce.PricingModule.Core.Model.Pricelist": "Pricelist",
+            "VirtoCommerce.PricingModule.Core.Model.PricelistAssignment": "Pricelist assignment"
+        },
+        "type-groups": {
+            "Pricing": "Pricing"
+        }
     }
 }
