@@ -4,7 +4,9 @@ angular.module('virtoCommerce.exportModule')
         blade.canStartProcess = false;
         blade.isLoading = true;
         blade.exportDataRequest = blade.exportDataRequest || {};
+        blade.allColumnsOfType = [];
         blade.isExportedTypeSelected = typeof (blade.exportDataRequest.exportTypeName) !== 'undefined';
+        blade.localizedTypeName = null;
         blade.defaultProvider = $localStorage.defaultExportProvider || 'JsonExportProvider';
 
 
@@ -12,7 +14,7 @@ angular.module('virtoCommerce.exportModule')
             blade.dataSelected = 0;
             blade.dataTotal = 0;
             blade.columnSelected = 0;
-            blade.columnTotal = 0;
+            blade.columnTotal = 0;  
             blade.isTabularExportSupported = false;
         }
         
@@ -22,7 +24,8 @@ angular.module('virtoCommerce.exportModule')
                 getKnownTypes();
             }
 
-            if (blade.exportDataRequest.dataQuery.objectIds &&
+            if (blade.exportDataRequest.dataQuery &&
+                blade.exportDataRequest.dataQuery.objectIds &&
                 blade.exportDataRequest.dataQuery.objectIds.length) {
                 blade.dataSelected = blade.exportDataRequest.dataQuery.objectIds.length;
             }
@@ -46,10 +49,10 @@ angular.module('virtoCommerce.exportModule')
                 var selectedType = _.find(results,
                     function (x) { return x.typeName === blade.exportDataRequest.exportTypeName; });
                 if (selectedType) {
-                    blade.exportDataRequest.allColumnsOfType = selectedType.metaData.propertyInfos;
+                    blade.allColumnsOfType = selectedType.metaData.propertyInfos;
                     blade.isTabularExportSupported = selectedType.isTabularExportSupported;
-                    blade.columnSelected = blade.exportDataRequest.allColumnsOfType.length;
-                    blade.columnTotal = blade.exportDataRequest.allColumnsOfType.length;
+                    blade.columnSelected = blade.allColumnsOfType.length;
+                    blade.columnTotal = blade.columnSelected;
 
                     getDataTotalCount();
                 } else {
@@ -65,7 +68,7 @@ angular.module('virtoCommerce.exportModule')
                 if (filterNonTabular) {
                     providers = _.filter(providers, function (item) { return !item.isTabular });
                 }
-                blade.providers = _.map(providers, function (item) { return { id: item.typeName, name: item.typeName } });
+                blade.providers = _.map(providers, function (item) { return { id: item.typeName, name: $translate.instant('export.provider-names.' + item.typeName) } });
                 if (blade.selectedProvider && _.findIndex(blade.providers, function (item) { return item.id === blade.selectedProvider.id; }) === -1) {
                     blade.selectedProvider = undefined;
                 }
@@ -128,15 +131,17 @@ angular.module('virtoCommerce.exportModule')
                 knownTypes: blade.knownTypes,
                 exportDataRequest: blade.exportDataRequest,
                 selectedProvider: blade.selectedProvider,
-                onSelected: function (exportDataRequest, isTabularExportSupported) {
-                    resetState();
-                    blade.exportDataRequest = angular.extend(blade.exportDataRequest, exportDataRequest);
-                    blade.exportDataRequest.dataQuery = angular.copy(exportDataRequest.dataQuery);
-                    blade.isTabularExportSupported = isTabularExportSupported;
+                onSelected: function (selectedTypeData) {
+					resetState();
+                    blade.exportDataRequest = angular.extend(blade.exportDataRequest, selectedTypeData.exportDataRequest);
+                    blade.exportDataRequest.dataQuery = angular.copy(selectedTypeData.exportDataRequest.dataQuery);
+                    blade.allColumnsOfType = selectedTypeData.allColumnsOfType;
+                    blade.localizedTypeName = selectedTypeData.localizedTypeName;
+                    blade.isTabularExportSupported = selectedTypeData.isTabularExportSupported;
                     blade.isExportedTypeSelected = typeof (blade.exportDataRequest.exportTypeName) !== 'undefined';
                     if (blade.isExportedTypeSelected) {
-                        blade.columnSelected = blade.exportDataRequest.allColumnsOfType.length;
-                        blade.columnTotal = blade.exportDataRequest.allColumnsOfType.length;
+                        blade.columnSelected = blade.exportDataRequest.dataQuery.includedColumns.length;
+                        blade.columnTotal = selectedTypeData.allColumnsOfType.length;
                         fillProviders();
                         getKnownTypes();
                     }
@@ -155,10 +160,10 @@ angular.module('virtoCommerce.exportModule')
                 template: 'Modules/$(VirtoCommerce.Export)/Scripts/blades/export-columns-selector.tpl.html',
                 isClosingDisabled: false,
                 exportDataRequest: blade.exportDataRequest,
+                allColumnsOfType: blade.allColumnsOfType,
                 onSelected: function (includedColumns) {
                     blade.exportDataRequest.dataQuery.includedColumns = includedColumns;
                     blade.columnSelected = includedColumns.length;
-                    blade.columnTotal = blade.exportDataRequest.allColumnsOfType.length;
                 }
             };
 
