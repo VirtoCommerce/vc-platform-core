@@ -11,6 +11,7 @@ angular.module('virtoCommerce.exportModule')
         blade.dataTotal = 0;
         blade.columnSelected = 0;
         blade.columnTotal = 0;
+        blade.isTabularExportSupported = false;
         
         
         function initializeBlade() {
@@ -27,17 +28,6 @@ angular.module('virtoCommerce.exportModule')
                 }
             });
 
-            if (blade.isExportedTypeSelected) {
-                exportApi.getKnownTypes(function (results) {
-                    blade.knownTypes = results;
-                    if (blade.selectedProvider.isTabular) {
-                        results = _.filter(results, function (x) { return x.isTabularExportSupported === true; });
-                    }
-                    var selectedTypes = _.filter(results,
-                        function (x) { return x.typeName === blade.exportDataRequest.exportTypeName; });
-                    blade.exportDataRequest.allColumnsOfType = selectedTypes[0].metaData.propertyInfos;
-                });
-            }            
             blade.isLoading = false;
         }
 
@@ -51,7 +41,7 @@ angular.module('virtoCommerce.exportModule')
                 var selectedTypes = _.filter(results,
                     function (x) { return x.typeName === blade.exportDataRequest.exportTypeName; });
                 blade.exportDataRequest.allColumnsOfType = selectedTypes[0].metaData.propertyInfos;
-                blade.exportDataRequest.isTabularExportSupported = selectedTypes[0].isTabularExportSupported;
+                blade.isTabularExportSupported = selectedTypes[0].isTabularExportSupported;
                 blade.columnSelected = blade.exportDataRequest.allColumnsOfType.length;
                 blade.columnTotal = blade.exportDataRequest.allColumnsOfType.length;
 
@@ -61,7 +51,7 @@ angular.module('virtoCommerce.exportModule')
 
         function fillProviders() {
             if (blade.allProviders) {
-                var filterNonTabular = blade.exportDataRequest.exportTypeName && !blade.exportDataRequest.isTabularExportSupported;
+                var filterNonTabular = blade.exportDataRequest.exportTypeName && !blade.isTabularExportSupported;
                 var providers = blade.allProviders;
                 if (filterNonTabular) {
                     providers = _.filter(providers, function (item) { return !item.isTabular });
@@ -130,9 +120,10 @@ angular.module('virtoCommerce.exportModule')
                 knownTypes: blade.knownTypes,
                 exportDataRequest: blade.exportDataRequest,
                 selectedProvider: blade.selectedProvider,
-                onSelected: function(exportDataRequest) {
+                onSelected: function (exportDataRequest, isTabularExportSupported) {
                     blade.exportDataRequest = angular.extend(blade.exportDataRequest, exportDataRequest);
                     blade.exportDataRequest.dataQuery = angular.copy(exportDataRequest.dataQuery);
+                    blade.isTabularExportSupported = isTabularExportSupported;
                     blade.isExportedTypeSelected = typeof (blade.exportDataRequest.exportTypeName) !== 'undefined';
                     if (blade.isExportedTypeSelected) {
                         blade.columnSelected = blade.exportDataRequest.allColumnsOfType.length;
@@ -140,6 +131,7 @@ angular.module('virtoCommerce.exportModule')
                         fillProviders();
                         getKnownTypes();
                     }
+                    
                     blade.includedColumnsDescription = null;
                 }
             };
@@ -177,7 +169,7 @@ angular.module('virtoCommerce.exportModule')
                     blade.exportDataRequest.dataQuery = dataQuery;
                     blade.dataSelected =
                         (blade.exportDataRequest.dataQuery.objectIds &&
-                            blade.exportDataRequest.dataQuery.objectIds.length > 0)
+                            blade.exportDataRequest.dataQuery.objectIds.length)
                         ? blade.exportDataRequest.dataQuery.objectIds.length
                         : blade.dataTotal;
                 }
