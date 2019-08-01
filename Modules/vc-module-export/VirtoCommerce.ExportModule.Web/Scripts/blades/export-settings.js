@@ -7,14 +7,17 @@ angular.module('virtoCommerce.exportModule')
         blade.isExportedTypeSelected = typeof (blade.exportDataRequest.exportTypeName) !== 'undefined';
         blade.defaultProvider = $localStorage.defaultExportProvider || 'JsonExportProvider';
 
-        blade.dataSelected = 0;
-        blade.dataTotal = 0;
-        blade.columnSelected = 0;
-        blade.columnTotal = 0;
-        blade.isTabularExportSupported = false;
-        
+
+        function resetState() {
+            blade.dataSelected = 0;
+            blade.dataTotal = 0;
+            blade.columnSelected = 0;
+            blade.columnTotal = 0;
+            blade.isTabularExportSupported = false;
+        }
         
         function initializeBlade() {
+            resetState();
             if (blade.isExportedTypeSelected) {
                 getKnownTypes();
             }
@@ -35,17 +38,18 @@ angular.module('virtoCommerce.exportModule')
         {
             exportApi.getKnownTypes(function (results) {
                 blade.knownTypes = results;
-                if (blade.selectedProvider && blade.selectedProvider.isTabular) {
-                    results = _.filter(results, function (x) { return x.isTabularExportSupported === true; });
-                }
-                var selectedTypes = _.filter(results,
+                var selectedType = _.find(results,
                     function (x) { return x.typeName === blade.exportDataRequest.exportTypeName; });
-                blade.exportDataRequest.allColumnsOfType = selectedTypes[0].metaData.propertyInfos;
-                blade.isTabularExportSupported = selectedTypes[0].isTabularExportSupported;
-                blade.columnSelected = blade.exportDataRequest.allColumnsOfType.length;
-                blade.columnTotal = blade.exportDataRequest.allColumnsOfType.length;
+                if (selectedType) {
+                    blade.exportDataRequest.allColumnsOfType = selectedType.metaData.propertyInfos;
+                    blade.isTabularExportSupported = selectedType.isTabularExportSupported;
+                    blade.columnSelected = blade.exportDataRequest.allColumnsOfType.length;
+                    blade.columnTotal = blade.exportDataRequest.allColumnsOfType.length;
 
-                getDataTotalCount();
+                    getDataTotalCount();
+                } else {
+                    resetState();
+                }
             });
         }
 
