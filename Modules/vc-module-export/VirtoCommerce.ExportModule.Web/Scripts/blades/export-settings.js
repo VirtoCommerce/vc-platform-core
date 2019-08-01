@@ -24,7 +24,8 @@ angular.module('virtoCommerce.exportModule')
                 getKnownTypes();
             }
 
-            if (blade.exportDataRequest.dataQuery.objectIds &&
+            if (blade.exportDataRequest.dataQuery &&
+                blade.exportDataRequest.dataQuery.objectIds &&
                 blade.exportDataRequest.dataQuery.objectIds.length) {
                 blade.dataSelected = blade.exportDataRequest.dataQuery.objectIds.length;
             }
