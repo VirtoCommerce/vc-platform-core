@@ -24,6 +24,11 @@ angular.module('virtoCommerce.exportModule')
                 getKnownTypes();
             }
 
+            if (blade.exportDataRequest.dataQuery.objectIds &&
+                blade.exportDataRequest.dataQuery.objectIds.length) {
+                blade.dataSelected = blade.exportDataRequest.dataQuery.objectIds.length;
+            }
+
             exportApi.getProviders(function (result) {
                 if (result && result.length) {
                     blade.allProviders = result;
@@ -83,8 +88,10 @@ angular.module('virtoCommerce.exportModule')
                     dataQuery: dataQuery
                 }
                 , function (data) {
-                blade.dataTotal = data.totalCount;
-                blade.dataSelected = blade.dataTotal;
+                    blade.dataTotal = data.totalCount;
+                    if (blade.dataSelected === 0) {
+                        blade.dataSelected = blade.dataTotal;
+                    }
             });
 
             
@@ -124,6 +131,7 @@ angular.module('virtoCommerce.exportModule')
                 exportDataRequest: blade.exportDataRequest,
                 selectedProvider: blade.selectedProvider,
                 onSelected: function (selectedTypeData) {
+					resetState();
                     blade.exportDataRequest = angular.extend(blade.exportDataRequest, selectedTypeData.exportDataRequest);
                     blade.exportDataRequest.dataQuery = angular.copy(selectedTypeData.exportDataRequest.dataQuery);
                     blade.allColumnsOfType = selectedTypeData.allColumnsOfType;
@@ -169,12 +177,11 @@ angular.module('virtoCommerce.exportModule')
                 controller: 'virtoCommerce.exportModule.exportGenericViewerController',
                 template: 'Modules/$(VirtoCommerce.Export)/Scripts/blades/export-generic-viewer.tpl.html',
                 isClosingDisabled: false,
-                exportDataRequest: angular.copy(blade.exportDataRequest),
+                exportDataRequest: blade.exportDataRequest,
                 onCompleted: function(dataQuery) {
                     blade.exportDataRequest.dataQuery = dataQuery;
                     blade.dataSelected =
-                        (blade.exportDataRequest.dataQuery.objectIds &&
-                            blade.exportDataRequest.dataQuery.objectIds.length)
+                        (blade.exportDataRequest.dataQuery.objectIds && blade.exportDataRequest.dataQuery.objectIds.length)
                         ? blade.exportDataRequest.dataQuery.objectIds.length
                         : blade.dataTotal;
                 }
