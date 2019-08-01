@@ -131,18 +131,8 @@ namespace VirtoCommerce.NotificationsModule.Web
             var assembly = typeof(INotificationRepository).Assembly;
             var registrar = appBuilder.ApplicationServices.GetService<INotificationRegistrar>();
             registrar.RegisterNotification<ResetPasswordEmailNotification>();
-            registrar.RegisterNotification<ConfirmationEmailNotification>().WithTemplates(
-                new EmailNotificationTemplate()
-                {
-                    Subject = "aaa",//assembly.GetManifestResourceStream("VirtoCommerce.NotificationsModule.Data.Notifications.Templates.RegistrationEmailNotificationTemplateSubject.html").ReadToString(),
-                    Body = "bbb",//assembly.GetManifestResourceStream("VirtoCommerce.NotificationsModule.Data.Notifications.Templates.RegistrationEmailNotificationTemplateBody.html").ReadToString(),
-                });
-            registrar.RegisterNotification<RegistrationEmailNotification>().WithTemplates(
-                new EmailNotificationTemplate()
-            {
-                Subject = "subj",//assembly.GetManifestResourceStream("VirtoCommerce.NotificationsModule.Data.Notifications.Templates.RegistrationEmailNotificationTemplateSubject.html").ReadToString(),
-                Body = "body",//assembly.GetManifestResourceStream("VirtoCommerce.NotificationsModule.Data.Notifications.Templates.RegistrationEmailNotificationTemplateBody.html").ReadToString(),
-            });
+            registrar.RegisterNotification<ConfirmationEmailNotification>();
+            registrar.RegisterNotification<RegistrationEmailNotification>();
             registrar.RegisterNotification<RegistrationInvitationEmailNotification>();
             registrar.RegisterNotification<RemindUserNameEmailNotification>();
             registrar.RegisterNotification<ResetPasswordSmsNotification>();
