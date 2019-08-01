@@ -1,0 +1,24 @@
+﻿<?xml version="1.0" encoding="utf-8"?>
+<package xmlns="http://schemas.microsoft.com/packaging/2012/06/nuspec.xsd">
+  <metadata>
+    <id>VirtoCommerce.Platform.Modules.v3</id>
+    <version>3.0.0-beta-01</version>
+    <authors>VirtoCommerce</authors>
+    <owners>VirtoCommerce</owners>
+    <requireLicenseAcceptance>false</requireLicenseAcceptance>
+    <description>Package Description</description>
+    <dependencies>
+      <group targetFramework=".NETCoreApp2.2">
+        <dependency id="VirtoCommerce.Platform.Core.v3" version="3.0.0-beta-01" exclude="Build,Analyzers" />
+        <dependency id="Microsoft.AspNetCore.Http.Abstractions" version="2.2.0" exclude="Build,Analyzers" />
+        <dependency id="Microsoft.AspNetCore.Mvc.Core" version="2.2.2" exclude="Build,Analyzers" />
+        <dependency id="Microsoft.Extensions.DependencyInjection.Abstractions" version="2.2.0" exclude="Build,Analyzers" />
+        <dependency id="Microsoft.Extensions.Logging.Abstractions" version="2.2.0" exclude="Build,Analyzers" />
+        <dependency id="Microsoft.Extensions.Options" version="2.2.0" exclude="Build,Analyzers" />
+      </group>
+    </dependencies>
+  </metadata>
+  <files>
+    <file src="C:\Projects\Virtoway\VirtoSandbox\vc-platform-core-2\VirtoCommerce.Platform.Modules\bin\Release\netcoreapp2.2\VirtoCommerce.Platform.Modules.dll" target="lib\netcoreapp2.2\VirtoCommerce.Platform.Modules.dll" />
+  </files>
+</package>
