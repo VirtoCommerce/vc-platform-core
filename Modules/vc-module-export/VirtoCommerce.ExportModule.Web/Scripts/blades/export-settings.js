@@ -22,6 +22,11 @@ angular.module('virtoCommerce.exportModule')
                 getKnownTypes();
             }
 
+            if (blade.exportDataRequest.dataQuery.objectIds &&
+                blade.exportDataRequest.dataQuery.objectIds.length) {
+                blade.dataSelected = blade.exportDataRequest.dataQuery.objectIds.length;
+            }
+
             exportApi.getProviders(function (result) {
                 if (result && result.length) {
                     blade.allProviders = result;
@@ -81,8 +86,10 @@ angular.module('virtoCommerce.exportModule')
                     dataQuery: dataQuery
                 }
                 , function (data) {
-                blade.dataTotal = data.totalCount;
-                blade.dataSelected = blade.dataTotal;
+                    blade.dataTotal = data.totalCount;
+                    if (blade.dataSelected === 0) {
+                        blade.dataSelected = blade.dataTotal;
+                    }
             });
 
             
@@ -122,6 +129,7 @@ angular.module('virtoCommerce.exportModule')
                 exportDataRequest: blade.exportDataRequest,
                 selectedProvider: blade.selectedProvider,
                 onSelected: function (exportDataRequest, isTabularExportSupported) {
+                    resetState();
                     blade.exportDataRequest = angular.extend(blade.exportDataRequest, exportDataRequest);
                     blade.exportDataRequest.dataQuery = angular.copy(exportDataRequest.dataQuery);
                     blade.isTabularExportSupported = isTabularExportSupported;
