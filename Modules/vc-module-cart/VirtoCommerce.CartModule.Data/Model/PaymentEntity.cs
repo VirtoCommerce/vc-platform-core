@@ -7,6 +7,7 @@ using VirtoCommerce.CartModule.Core.Model;
 using VirtoCommerce.CoreModule.Core.Common;
 using VirtoCommerce.CoreModule.Core.Tax;
 using VirtoCommerce.Platform.Core.Common;
+using VirtoCommerce.Platform.Core.DynamicProperties;
 using Address = VirtoCommerce.CartModule.Core.Model.Address;
 
 namespace VirtoCommerce.CartModule.Data.Model
@@ -55,10 +56,21 @@ namespace VirtoCommerce.CartModule.Data.Model
         public string ShoppingCartId { get; set; }
         public virtual ShoppingCartEntity ShoppingCart { get; set; }
 
-        public virtual ObservableCollection<DiscountEntity> Discounts { get; set; } = new NullCollection<DiscountEntity>();
-        public virtual ObservableCollection<TaxDetailEntity> TaxDetails { get; set; } = new NullCollection<TaxDetailEntity>();
-        public virtual ObservableCollection<AddressEntity> Addresses { get; set; } = new NullCollection<AddressEntity>();
+        #region NavigationProperties
 
+        public virtual ObservableCollection<DiscountEntity> Discounts { get; set; }
+            = new NullCollection<DiscountEntity>();
+
+        public virtual ObservableCollection<TaxDetailEntity> TaxDetails { get; set; }
+            = new NullCollection<TaxDetailEntity>();
+
+        public virtual ObservableCollection<AddressEntity> Addresses { get; set; }
+            = new NullCollection<AddressEntity>();
+
+        public virtual ObservableCollection<CartDynamicPropertyObjectValueEntity> DynamicPropertyObjectValues { get; set; }
+            = new NullCollection<CartDynamicPropertyObjectValueEntity>();
+
+        #endregion
 
         public virtual Payment ToModel(Payment payment)
         {
@@ -100,6 +112,15 @@ namespace VirtoCommerce.CartModule.Data.Model
             {
                 payment.BillingAddress = Addresses.First().ToModel(AbstractTypeFactory<Address>.TryCreateInstance());
             }
+
+            payment.DynamicProperties = DynamicPropertyObjectValues.GroupBy(g => g.PropertyId).Select(x =>
+            {
+                var property = AbstractTypeFactory<DynamicObjectProperty>.TryCreateInstance();
+                property.Id = x.Key;
+                property.Name = x.FirstOrDefault()?.PropertyName;
+                property.Values = x.Select(v => v.ToModel(AbstractTypeFactory<DynamicPropertyObjectValue>.TryCreateInstance())).ToArray();
+                return property;
+            }).ToArray();
 
             return payment;
         }
@@ -147,6 +168,12 @@ namespace VirtoCommerce.CartModule.Data.Model
                 Discounts = new ObservableCollection<DiscountEntity>(payment.Discounts.Select(x => AbstractTypeFactory<DiscountEntity>.TryCreateInstance().FromModel(x)));
             }
 
+            if (payment.DynamicProperties != null)
+            {
+                DynamicPropertyObjectValues = new ObservableCollection<CartDynamicPropertyObjectValueEntity>(payment.DynamicProperties.SelectMany(p => p.Values
+                    .Select(v => AbstractTypeFactory<CartDynamicPropertyObjectValueEntity>.TryCreateInstance().FromModel(v, payment, p))).OfType<CartDynamicPropertyObjectValueEntity>());
+            }
+
             return this;
         }
 
@@ -184,6 +211,11 @@ namespace VirtoCommerce.CartModule.Data.Model
             {
                 var discountComparer = AbstractTypeFactory<DiscountEntityComparer>.TryCreateInstance();
                 Discounts.Patch(target.Discounts, discountComparer, (sourceDiscount, targetDiscount) => sourceDiscount.Patch(targetDiscount));
+            }
+
+            if (!DynamicPropertyObjectValues.IsNullCollection())
+            {
+                DynamicPropertyObjectValues.Patch(target.DynamicPropertyObjectValues, (sourceDynamicPropertyObjectValues, targetDynamicPropertyObjectValues) => sourceDynamicPropertyObjectValues.Patch(targetDynamicPropertyObjectValues));
             }
         }
     }

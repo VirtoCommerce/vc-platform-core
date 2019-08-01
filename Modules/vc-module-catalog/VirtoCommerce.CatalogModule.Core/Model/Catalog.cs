@@ -39,5 +39,18 @@ namespace VirtoCommerce.CatalogModule.Core.Model
         }
 
         #endregion
+
+
+        public virtual void ReduceDetails(string responseGroup)
+        {
+            //Reduce details according to response group
+            var catalogResponseGroup = EnumUtility.SafeParseFlags(responseGroup, CatalogResponseGroup.Full);
+
+            if (!catalogResponseGroup.HasFlag(CatalogResponseGroup.WithProperties))
+            {
+                Properties = null;
+            }
+
+        }
     }
 }

@@ -2,7 +2,8 @@ angular.module('platformWebApp')
 .factory('platformWebApp.dynamicProperties.api', ['$resource', function ($resource) {
     return $resource('api/platform/dynamic/types/:id/properties/:propertyId', {}, {
         queryTypes: { url: 'api/platform/dynamic/types', isArray: true },
-        update: { method: 'PUT' }
+        update: { method: 'PUT' },
+        search: { method: 'POST', url: 'api/platform/dynamic/properties/search' },
     });
 }])
 .factory('platformWebApp.dynamicProperties.dictionaryItemsApi', ['$resource', function ($resource) {

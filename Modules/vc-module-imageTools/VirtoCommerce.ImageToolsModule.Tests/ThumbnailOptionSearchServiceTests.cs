@@ -6,6 +6,7 @@ using System.Threading.Tasks;
 using MockQueryable.Moq;
 using Moq;
 using VirtoCommerce.ImageToolsModule.Core.Models;
+using VirtoCommerce.ImageToolsModule.Core.Services;
 using VirtoCommerce.ImageToolsModule.Data.Models;
 using VirtoCommerce.ImageToolsModule.Data.Repositories;
 using VirtoCommerce.ImageToolsModule.Data.Services;
@@ -19,7 +20,9 @@ namespace VirtoCommerce.ImageToolsModule.Tests
         public void Search_ThumbnailOptionSearchCriteria_ReturnsGenericSearchResponseOfTasksInExpectedOrder()
         {
             var repoMock = GetOptionsRepositoryMock();
-            var target = new ThumbnailOptionSearchService(() => repoMock.Object);
+            var optionsServiceMock = new Moq.Mock<IThumbnailOptionService>();
+           
+            var target = new ThumbnailOptionSearchService(() => repoMock.Object, optionsServiceMock.Object);
             var criteria = new ThumbnailOptionSearchCriteria { Sort = "Name:desc;FileSuffix:desc" };
             var resultTasks = target.SearchAsync(criteria).GetAwaiter().GetResult();
 

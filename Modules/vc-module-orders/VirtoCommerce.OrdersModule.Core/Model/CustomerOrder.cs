@@ -1,6 +1,8 @@
+using System;
 using System.Collections.Generic;
 using VirtoCommerce.CoreModule.Core.Common;
 using VirtoCommerce.CoreModule.Core.Tax;
+using VirtoCommerce.Platform.Core.Common;
 using VirtoCommerce.Platform.Core.Domain;
 using VirtoCommerce.Platform.Core.Security;
 
@@ -22,7 +24,7 @@ namespace VirtoCommerce.OrdersModule.Core.Model
         /// The basis shopping cart id of which the order was created
         /// </summary>
         public string ShoppingCartId { get; set; }
-    
+
         /// <summary>
         /// Flag determines that the order is the prototype
         /// </summary>
@@ -35,12 +37,12 @@ namespace VirtoCommerce.OrdersModule.Core.Model
         /// Identifier for subscription  associated with this order
         /// </summary>
         public string SubscriptionId { get; set; }
- 
-		public ICollection<Address> Addresses { get; set; }
-		public ICollection<PaymentIn> InPayments { get; set; }
 
-		public ICollection<LineItem> Items { get; set; }
-		public ICollection<Shipment> Shipments { get; set; }
+        public ICollection<Address> Addresses { get; set; }
+        public ICollection<PaymentIn> InPayments { get; set; }
+
+        public ICollection<LineItem> Items { get; set; }
+        public ICollection<Shipment> Shipments { get; set; }
 
 
         #region IHasDiscounts
@@ -53,7 +55,7 @@ namespace VirtoCommerce.OrdersModule.Core.Model
         /// For instance, if the cart subtotal is $100, and $15 is the tax subtotal, a cart-wide discount of 10% will yield a total of $105 ($100 subtotal – $10 discount + $15 tax on the original $100).
         /// </summary>
 		public decimal DiscountAmount { get; set; }
-      
+
         #region ITaxDetailSupport Members
 
         public ICollection<TaxDetail> TaxDetails { get; set; }
@@ -139,6 +141,68 @@ namespace VirtoCommerce.OrdersModule.Core.Model
 
         public string LanguageCode { get; set; }
 
-        #endregion     
+        #endregion
+
+        public virtual void ReduceDetails(string responseGroup)
+        {
+            //Reduce details according to response group
+            var orderResponseGroup = EnumUtility.SafeParseFlags(responseGroup, CustomerOrderResponseGroup.Full);
+
+            if (!orderResponseGroup.HasFlag(CustomerOrderResponseGroup.WithItems))
+            {
+                Items = null;
+            }
+            if (!orderResponseGroup.HasFlag(CustomerOrderResponseGroup.WithShipments))
+            {
+                Shipments = null;
+            }
+            if (!orderResponseGroup.HasFlag(CustomerOrderResponseGroup.WithInPayments))
+            {
+                InPayments = null;
+            }
+            if (!orderResponseGroup.HasFlag(CustomerOrderResponseGroup.WithAddresses))
+            {
+                Addresses = null;
+            }
+            if (!orderResponseGroup.HasFlag(CustomerOrderResponseGroup.WithDiscounts))
+            {
+                Discounts = null;
+            }
+
+            if (!orderResponseGroup.HasFlag(CustomerOrderResponseGroup.WithPrices))
+            {
+                TaxPercentRate = 0m;
+                ShippingTotalWithTax = 0m;
+                PaymentTotalWithTax = 0m;
+                DiscountAmount = 0m;
+                Total = 0m;
+                SubTotal = 0m;
+                SubTotalWithTax = 0m;
+                ShippingTotal = 0m;
+                PaymentTotal = 0m;
+                DiscountTotal = 0m;
+                DiscountTotalWithTax = 0m;
+                TaxTotal = 0m;
+                Sum = 0m;
+                Fee = 0m;
+                FeeTotalWithTax = 0m;
+                FeeTotal = 0m;
+                FeeWithTax = 0m;
+            }
+
+            foreach (var shipment in Shipments ?? Array.Empty<Shipment>())
+            {
+                shipment.ReduceDetails(responseGroup);
+            }
+            foreach (var inPayment in InPayments ?? Array.Empty<PaymentIn>())
+            {
+                inPayment.ReduceDetails(responseGroup);
+            }
+            foreach (var item in Items ?? Array.Empty<LineItem>())
+            {
+                item.ReduceDetails(responseGroup);
+            }
+
+        }
     }
 }

@@ -1,4 +1,4 @@
-﻿//Call this to register our module to main application
+//Call this to register our module to main application
 var moduleName = "virtoCommerce.marketingModule";
 
 if (AppDependencies != undefined) {
@@ -66,7 +66,7 @@ angular.module(moduleName, [])
 
         //Register permission scopes templates used for scope bounded definition in role management ui
       var marketingStoreScope = {
-          type: 'MarketingSelectedStoreScope',
+          type: 'MarketingStoreSelectedScope',
           title: 'Only for promotions in selected stores',
           selectFn: function (blade, callback) {
               var newBlade = {

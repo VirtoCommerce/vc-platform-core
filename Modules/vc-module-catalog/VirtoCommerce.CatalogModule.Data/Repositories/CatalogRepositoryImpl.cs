@@ -59,17 +59,15 @@ namespace VirtoCommerce.CatalogModule.Data.Repositories
                         .Select(x => x.Id)
                         .ToArrayAsync();
                     var catalogProperties = await GetPropertiesByIdsAsync(catalogPropertiesIds);
-
                 }
-
             }
 
             return result;
         }
 
-        public async Task<CategoryEntity[]> GetCategoriesByIdsAsync(string[] categoriesIds, CategoryResponseGroup respGroup)
+        public async Task<CategoryEntity[]> GetCategoriesByIdsAsync(string[] categoriesIds, string responseGroup = null)
         {
-
+            var categoryResponseGroup = EnumUtility.SafeParseFlags(responseGroup, CategoryResponseGroup.Full);
             var result = Array.Empty<CategoryEntity>();
 
             if (!categoriesIds.IsNullOrEmpty())
@@ -78,32 +76,32 @@ namespace VirtoCommerce.CatalogModule.Data.Repositories
 
                 if (result.Any())
                 {
-                    if (respGroup.HasFlag(CategoryResponseGroup.WithOutlines))
+                    if (categoryResponseGroup.HasFlag(CategoryResponseGroup.WithOutlines))
                     {
-                        respGroup |= CategoryResponseGroup.WithLinks | CategoryResponseGroup.WithParents;
+                        categoryResponseGroup |= CategoryResponseGroup.WithLinks | CategoryResponseGroup.WithParents;
                     }
 
-                    if (respGroup.HasFlag(CategoryResponseGroup.WithLinks))
+                    if (categoryResponseGroup.HasFlag(CategoryResponseGroup.WithLinks))
                     {
-                        var incommingLinksTask = CategoryLinks.Where(x => categoriesIds.Contains(x.TargetCategoryId))
+                        var incomingLinksTask = CategoryLinks.Where(x => categoriesIds.Contains(x.TargetCategoryId))
                             .ToArrayAsync();
                         var outgoingLinksTask = CategoryLinks.Where(x => categoriesIds.Contains(x.SourceCategoryId))
                             .ToArrayAsync();
-                        await Task.WhenAll(incommingLinksTask, outgoingLinksTask);
+                        await Task.WhenAll(incomingLinksTask, outgoingLinksTask);
                     }
 
-                    if (respGroup.HasFlag(CategoryResponseGroup.WithImages))
+                    if (categoryResponseGroup.HasFlag(CategoryResponseGroup.WithImages))
                     {
                         var images = await Images.Where(x => categoriesIds.Contains(x.CategoryId)).ToArrayAsync();
                     }
 
-                    if (respGroup.HasFlag(CategoryResponseGroup.WithSeo))
+                    if (categoryResponseGroup.HasFlag(CategoryResponseGroup.WithSeo))
                     {
                         var seoInfos = await SeoInfos.Where(x => categoriesIds.Contains(x.CategoryId)).ToArrayAsync();
                     }
 
                     //Load all properties meta information and information for inheritance
-                    if (respGroup.HasFlag(CategoryResponseGroup.WithProperties))
+                    if (categoryResponseGroup.HasFlag(CategoryResponseGroup.WithProperties))
                     {
                         //Load category property values by separate query
                         var propertyValues = await PropertyValues.Include(x => x.DictionaryItem.DictionaryItemValues)
@@ -119,48 +117,49 @@ namespace VirtoCommerce.CatalogModule.Data.Repositories
             return result;
         }
 
-        public async Task<ItemEntity[]> GetItemByIdsAsync(string[] itemIds, ItemResponseGroup respGroup = ItemResponseGroup.ItemLarge)
+        public async Task<ItemEntity[]> GetItemByIdsAsync(string[] itemIds, string responseGroup = null)
         {
+            var itemResponseGroup = EnumUtility.SafeParseFlags(responseGroup, ItemResponseGroup.ItemLarge);
             var result = Array.Empty<ItemEntity>();
 
             if (!itemIds.IsNullOrEmpty())
             {
-                // Use breaking query EF performance concept https://msdn.microsoft.com/en-us/data/hh949853.aspx#8
+                // Use breaking query EF performance concept https://docs.microsoft.com/en-us/ef/ef6/fundamentals/performance/perf-whitepaper#8-loading-related-entities
                 result = await Items.Include(x => x.Images).Where(x => itemIds.Contains(x.Id)).ToArrayAsync();
 
                 if (result.Any())
                 {
-                    if (respGroup.HasFlag(ItemResponseGroup.Outlines))
+                    if (itemResponseGroup.HasFlag(ItemResponseGroup.Outlines))
                     {
-                        respGroup |= ItemResponseGroup.Links;
+                        itemResponseGroup |= ItemResponseGroup.Links;
                     }
 
-                    if (respGroup.HasFlag(ItemResponseGroup.ItemProperties))
+                    if (itemResponseGroup.HasFlag(ItemResponseGroup.ItemProperties))
                     {
                         var propertyValues = await PropertyValues.Include(x => x.DictionaryItem.DictionaryItemValues).Where(x => itemIds.Contains(x.ItemId)).ToArrayAsync();
                     }
 
-                    if (respGroup.HasFlag(ItemResponseGroup.Links))
+                    if (itemResponseGroup.HasFlag(ItemResponseGroup.Links))
                     {
                         var relations = await CategoryItemRelations.Where(x => itemIds.Contains(x.ItemId)).ToArrayAsync();
                     }
 
-                    if (respGroup.HasFlag(ItemResponseGroup.ItemAssets))
+                    if (itemResponseGroup.HasFlag(ItemResponseGroup.ItemAssets))
                     {
                         var assets = await Assets.Where(x => itemIds.Contains(x.ItemId)).ToArrayAsync();
                     }
 
-                    if (respGroup.HasFlag(ItemResponseGroup.ItemEditorialReviews))
+                    if (itemResponseGroup.HasFlag(ItemResponseGroup.ItemEditorialReviews))
                     {
                         var editorialReviews = await EditorialReviews.Where(x => itemIds.Contains(x.ItemId)).ToArrayAsync();
                     }
 
-                    if (respGroup.HasFlag(ItemResponseGroup.WithSeo))
+                    if (itemResponseGroup.HasFlag(ItemResponseGroup.WithSeo))
                     {
                         var seoInfos = await SeoInfos.Where(x => itemIds.Contains(x.ItemId)).ToArrayAsync();
                     }
 
-                    if (respGroup.HasFlag(ItemResponseGroup.Variations))
+                    if (itemResponseGroup.HasFlag(ItemResponseGroup.Variations))
                     {
                         // TODO: Call GetItemByIds for variations recursively (need to measure performance and data amount first)
 
@@ -171,44 +170,44 @@ namespace VirtoCommerce.CatalogModule.Data.Repositories
                         var variationPropertyValuesTask = PropertyValues.Where(x => variationIds.Contains(x.ItemId)).ToArrayAsync();
                         await Task.WhenAll(variationsTask, variationPropertyValuesTask);
 
-                        if (respGroup.HasFlag(ItemResponseGroup.ItemAssets))
+                        if (itemResponseGroup.HasFlag(ItemResponseGroup.ItemAssets))
                         {
                             var variationAssets = await Assets.Where(x => variationIds.Contains(x.ItemId)).ToArrayAsync();
                         }
 
-                        if (respGroup.HasFlag(ItemResponseGroup.ItemEditorialReviews))
+                        if (itemResponseGroup.HasFlag(ItemResponseGroup.ItemEditorialReviews))
                         {
                             var variationEditorialReviews = await EditorialReviews.Where(x => variationIds.Contains(x.ItemId)).ToArrayAsync();
                         }
 
-                        if (respGroup.HasFlag(ItemResponseGroup.Seo))
+                        if (itemResponseGroup.HasFlag(ItemResponseGroup.Seo))
                         {
                             var variationsSeoInfos = await SeoInfos.Where(x => variationIds.Contains(x.ItemId)).ToArrayAsync();
                         }
                     }
 
-                    if (respGroup.HasFlag(ItemResponseGroup.ItemAssociations))
+                    if (itemResponseGroup.HasFlag(ItemResponseGroup.ItemAssociations))
                     {
-                        var assosiations = await Associations.Where(x => itemIds.Contains(x.ItemId)).ToArrayAsync();
-                        var assosiatedProductIds = assosiations.Where(x => x.AssociatedItemId != null)
+                        var associations = await Associations.Where(x => itemIds.Contains(x.ItemId)).ToArrayAsync();
+                        var associatedProductIds = associations.Where(x => x.AssociatedItemId != null)
                             .Select(x => x.AssociatedItemId).Distinct().ToArray();
 
-                        var assosiatedItems = await GetItemByIdsAsync(assosiatedProductIds, ItemResponseGroup.ItemInfo | ItemResponseGroup.ItemAssets);
+                        var associatedItems = await GetItemByIdsAsync(associatedProductIds, (ItemResponseGroup.ItemInfo | ItemResponseGroup.ItemAssets).ToString());
 
-                        var assosiatedCategoryIdsIds = assosiations.Where(x => x.AssociatedCategoryId != null).Select(x => x.AssociatedCategoryId).Distinct().ToArray();
-                        var associatedCategories = await GetCategoriesByIdsAsync(assosiatedCategoryIdsIds, CategoryResponseGroup.Info | CategoryResponseGroup.WithImages);
+                        var associatedCategoryIdsIds = associations.Where(x => x.AssociatedCategoryId != null).Select(x => x.AssociatedCategoryId).Distinct().ToArray();
+                        var associatedCategories = await GetCategoriesByIdsAsync(associatedCategoryIdsIds, (CategoryResponseGroup.Info | CategoryResponseGroup.WithImages).ToString());
                     }
 
-                    if (respGroup.HasFlag(ItemResponseGroup.ReferencedAssociations))
+                    if (itemResponseGroup.HasFlag(ItemResponseGroup.ReferencedAssociations))
                     {
                         var referencedAssociations = await Associations.Where(x => itemIds.Contains(x.AssociatedItemId)).ToArrayAsync();
                         var referencedProductIds = referencedAssociations.Select(x => x.ItemId).Distinct().ToArray();
-                        var referencedProducts = await GetItemByIdsAsync(referencedProductIds, ItemResponseGroup.ItemInfo);
+                        var referencedProducts = await GetItemByIdsAsync(referencedProductIds, ItemResponseGroup.ItemInfo.ToString());
                     }
 
                     // Load parents
                     var parentIds = result.Where(x => x.Parent == null && x.ParentId != null).Select(x => x.ParentId).ToArray();
-                    var parents = await GetItemByIdsAsync(parentIds, respGroup);
+                    var parents = await GetItemByIdsAsync(parentIds, responseGroup);
                 }
             }
 
@@ -589,5 +588,4 @@ namespace VirtoCommerce.CatalogModule.Data.Repositories
             public object[] Parameters { get; set; }
         }
     }
-
 }

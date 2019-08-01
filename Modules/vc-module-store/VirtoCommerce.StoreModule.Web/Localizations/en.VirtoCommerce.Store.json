@@ -13,8 +13,6 @@
                 "subtitle": "",
                 "labels": {
                     "description": "Description",
-                    "store-url": "Store URL",
-                    "secure-url": "Secure URL",
                     "store-country": "Store country",
                     "store-region": "Store region",
                     "store-email": "Store email",
@@ -27,8 +25,6 @@
                 },
                 "placeholders": {
                     "description": "Enter description",
-                    "store-url": "Enter URL",
-                    "secure-url": "Enter secure URL",
                     "store-country": "Select ...",
                     "store-region": "Enter region",
                     "store-email": "Enter value",
@@ -156,6 +152,9 @@
                     "secure-url": "https://vcshop.com"
                 }
             }
+        },
+        "commands": {
+            "login-on-behalf": "Login on behalf"
         }
     },
     "permissions": {

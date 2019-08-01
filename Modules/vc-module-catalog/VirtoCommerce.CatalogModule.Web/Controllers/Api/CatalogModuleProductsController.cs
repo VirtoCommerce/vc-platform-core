@@ -2,11 +2,14 @@ using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Threading.Tasks;
+using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
+using VirtoCommerce.CatalogModule.Core;
 using VirtoCommerce.CatalogModule.Core.Model;
 using VirtoCommerce.CatalogModule.Core.Model.Search;
 using VirtoCommerce.CatalogModule.Core.Search;
 using VirtoCommerce.CatalogModule.Core.Services;
+using VirtoCommerce.CatalogModule.Web.Authorization;
 using VirtoCommerce.CoreModule.Core.Seo;
 using VirtoCommerce.Platform.Core.Common;
 
@@ -20,17 +23,22 @@ namespace VirtoCommerce.CatalogModule.Web.Controllers.Api
         private readonly ICategoryService _categoryService;
         private readonly ISkuGenerator _skuGenerator;
         private readonly IProductAssociationSearchService _productAssociationSearchService;
-        private readonly IPropertyService _propertyService;
+        private readonly IAuthorizationService _authorizationService;
 
-        public CatalogModuleProductsController(IItemService itemsService, ICatalogService catalogService, ICategoryService categoryService,
-                                               ISkuGenerator skuGenerator, IProductAssociationSearchService productAssociationSearchService, IPropertyService propertyService)
+        public CatalogModuleProductsController(
+            IItemService itemsService
+            , ICatalogService catalogService
+            , ICategoryService categoryService
+            , ISkuGenerator skuGenerator
+            , IProductAssociationSearchService productAssociationSearchService
+            , IAuthorizationService authorizationService)
         {
             _itemsService = itemsService;
             _categoryService = categoryService;
             _catalogService = catalogService;
             _skuGenerator = skuGenerator;
             _productAssociationSearchService = productAssociationSearchService;
-            _propertyService = propertyService;
+            _authorizationService = authorizationService;
         }
 
 
@@ -43,15 +51,18 @@ namespace VirtoCommerce.CatalogModule.Web.Controllers.Api
         [Route("{id}")]
         public async Task<ActionResult<CatalogProduct>> GetProductById(string id, [FromQuery] string respGroup = null)
         {
-            //TODO:
-            //CheckCurrentUserHasPermissionForObjects(CatalogPredefinedPermissions.Read, item);
-            var item = await _itemsService.GetByIdAsync(id, respGroup);
-            if (item == null)
+          
+            var product = await _itemsService.GetByIdAsync(id, respGroup);
+            if (product == null)
             {
                 return NotFound();
             }
-            //retVal.SecurityScopes = GetObjectPermissionScopeStrings(item);
-            return Ok(item);
+            var authorizationResult = await _authorizationService.AuthorizeAsync(User, product, new CatalogAuthorizationRequirement(ModuleConstants.Security.Permissions.Read));
+            if (!authorizationResult.Succeeded)
+            {
+                return Unauthorized();
+            }
+            return Ok(product);
         }
 
         /// <summary>
@@ -68,14 +79,12 @@ namespace VirtoCommerce.CatalogModule.Web.Controllers.Api
             {
                 return NotFound();
             }
+            var authorizationResult = await _authorizationService.AuthorizeAsync(User, items, new CatalogAuthorizationRequirement(ModuleConstants.Security.Permissions.Read));
+            if (!authorizationResult.Succeeded)
+            {
+                return Unauthorized();
+            }
 
-            //CheckCurrentUserHasPermissionForObjects(CatalogPredefinedPermissions.Read, items);
-
-            //var retVal = items.Select(x => x.ToWebModel(_blobUrlResolver)).ToArray();
-            //foreach (var product in retVal)
-            //{
-            //    product.SecurityScopes = GetObjectPermissionScopeStrings(product);
-            //}
             return Ok(items);
         }
 
@@ -102,7 +111,6 @@ namespace VirtoCommerce.CatalogModule.Web.Controllers.Api
         [Route("~/api/catalog/{catalogId}/products/getnew")]
         public async Task<ActionResult<CatalogProduct>> GetNewProductByCatalog(string catalogId)
         {
-            //CheckCurrentUserHasPermissionForObjects(CatalogPredefinedPermissions.Create, new Catalog { Id = catalogId });
             return await GetNewProductByCatalogAndCategory(catalogId, null);
         }
 
@@ -122,8 +130,6 @@ namespace VirtoCommerce.CatalogModule.Web.Controllers.Api
             result.CatalogId = catalogId;
             result.IsActive = true;
             result.SeoInfos = Array.Empty<SeoInfo>();
-
-            //CheckCurrentUserHasPermissionForObjects(CatalogPredefinedPermissions.Create, retVal.ToModuleModel(_blobUrlResolver));
 
             Entity parent = null;
             if (catalogId != null)
@@ -166,7 +172,7 @@ namespace VirtoCommerce.CatalogModule.Web.Controllers.Api
             {
                 return NotFound();
             }
-            //CheckCurrentUserHasPermissionForObjects(CatalogPredefinedPermissions.Create, product);
+
             var newVariation = AbstractTypeFactory<CatalogProduct>.TryCreateInstance();
 
             newVariation.Name = product.Name;
@@ -209,8 +215,6 @@ namespace VirtoCommerce.CatalogModule.Web.Controllers.Api
                 variation.SeoInfos.Clear();
             }
 
-            //var result = product.ToWebModel(_blobUrlResolver);
-
             // Clear ID for all related entities except properties
             var allEntities = product.GetFlatObjectsListWithInterface<IEntity>();
             foreach (var entity in allEntities)
@@ -233,6 +237,12 @@ namespace VirtoCommerce.CatalogModule.Web.Controllers.Api
         [Route("")]
         public async Task<ActionResult<CatalogProduct>> SaveProduct([FromBody] CatalogProduct product)
         {
+            var authorizationResult = await _authorizationService.AuthorizeAsync(User, product, new CatalogAuthorizationRequirement(ModuleConstants.Security.Permissions.Update));
+            if (!authorizationResult.Succeeded)
+            {
+                return Unauthorized();
+            }
+
             var result = (await InnerSaveProducts(new[] { product })).FirstOrDefault();
             if (result != null)
             {
@@ -249,8 +259,14 @@ namespace VirtoCommerce.CatalogModule.Web.Controllers.Api
         [Route("batch")]
         public async Task<ActionResult> SaveProducts([FromBody] CatalogProduct[] products)
         {
+            var authorizationResult = await _authorizationService.AuthorizeAsync(User, products, new CatalogAuthorizationRequirement(ModuleConstants.Security.Permissions.Update));
+            if (!authorizationResult.Succeeded)
+            {
+                return Unauthorized();
+            }
+
             await InnerSaveProducts(products);
-            return NoContent();
+            return Ok();
         }
 
 
@@ -262,11 +278,14 @@ namespace VirtoCommerce.CatalogModule.Web.Controllers.Api
         [Route("")]
         public async Task<ActionResult> DeleteProduct([FromQuery] string[] ids)
         {
-            //var products = await _itemsService.GetByIdsAsync(ids, ItemResponseGroup.ItemInfo);
-            //CheckCurrentUserHasPermissionForObjects(CatalogPredefinedPermissions.Delete, products);
-
+            var products = await _itemsService.GetByIdsAsync(ids, ItemResponseGroup.ItemInfo.ToString());
+            var authorizationResult = await _authorizationService.AuthorizeAsync(User, products, new CatalogAuthorizationRequirement(ModuleConstants.Security.Permissions.Delete));
+            if (!authorizationResult.Succeeded)
+            {
+                return Unauthorized();
+            }
             await _itemsService.DeleteAsync(ids);
-            return NoContent();
+            return Ok();
         }
 
         /// <summary>
@@ -276,7 +295,7 @@ namespace VirtoCommerce.CatalogModule.Web.Controllers.Api
         [HttpPost]
         [Route("associations/search")]
         public async Task<ActionResult<ProductAssociationSearchResult>> SearchProductAssociations([FromBody] ProductAssociationSearchCriteria criteria)
-        {
+        {       
             var searchResult = await _productAssociationSearchService.SearchProductAssociationsAsync(criteria);
             var result = new ProductAssociationSearchResult
             {
@@ -311,7 +330,6 @@ namespace VirtoCommerce.CatalogModule.Web.Controllers.Api
                         }
                     }
 
-                    //CheckCurrentUserHasPermissionForObjects(CatalogPredefinedPermissions.Create, moduleProduct);
                 }
 
                 toSaveList.Add(product);

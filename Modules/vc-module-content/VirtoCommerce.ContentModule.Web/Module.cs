@@ -10,6 +10,7 @@ using Microsoft.Extensions.DependencyInjection;
 using VirtoCommerce.ContentModule.Azure;
 using VirtoCommerce.ContentModule.Azure.Extensions;
 using VirtoCommerce.ContentModule.Core;
+using VirtoCommerce.ContentModule.Core.Model;
 using VirtoCommerce.ContentModule.Core.Services;
 using VirtoCommerce.ContentModule.Data.ExportImport;
 using VirtoCommerce.ContentModule.Data.Repositories;
@@ -17,7 +18,6 @@ using VirtoCommerce.ContentModule.Data.Services;
 using VirtoCommerce.ContentModule.FileSystem;
 using VirtoCommerce.ContentModule.FileSystem.Extensions;
 using VirtoCommerce.ContentModule.Web.Extensions;
-using VirtoCommerce.ContentModule.Web.Infrastructure;
 using VirtoCommerce.Platform.Assets.AzureBlobStorage;
 using VirtoCommerce.Platform.Core.Common;
 using VirtoCommerce.Platform.Core.DynamicProperties;
@@ -42,11 +42,11 @@ namespace VirtoCommerce.ContentModule.Web
 
             serviceCollection.AddDbContext<MenuDbContext>(options => options.UseSqlServer(configuration.GetConnectionString("VirtoCommerce")));
             serviceCollection.AddTransient<IMenuRepository, MenuRepository>();
-            serviceCollection.AddSingleton<Func<IMenuRepository>>(provider => () => provider.CreateScope().ServiceProvider.GetService<IMenuRepository>());
+            serviceCollection.AddTransient<Func<IMenuRepository>>(provider => () => provider.CreateScope().ServiceProvider.GetService<IMenuRepository>());
 
-            serviceCollection.AddSingleton<IMenuService, MenuService>();
+            serviceCollection.AddTransient<IMenuService, MenuService>();
 
-            serviceCollection.AddSingleton<ContentExportImport>();
+            serviceCollection.AddTransient<ContentExportImport>();
 
             var contentProvider = configuration.GetSection("Content:Provider").Value;
             if (contentProvider.EqualsInvariant(AzureBlobProvider.ProviderName))
@@ -94,7 +94,7 @@ namespace VirtoCommerce.ContentModule.Web
             }
 
             var dynamicPropertyService = appBuilder.ApplicationServices.GetRequiredService<IDynamicPropertyService>();
-            dynamicPropertyService.SaveDynamicPropertiesAsync(DynamicProperties.AllDynamicProperties.ToArray()).GetAwaiter().GetResult();
+            dynamicPropertyService.SaveDynamicPropertiesAsync(FrontMatterHeaders.AllDynamicProperties.ToArray()).GetAwaiter().GetResult();
         }
 
         public void Uninstall()

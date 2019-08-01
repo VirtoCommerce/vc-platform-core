@@ -7,6 +7,7 @@ using VirtoCommerce.CartModule.Core.Model;
 using VirtoCommerce.CoreModule.Core.Common;
 using VirtoCommerce.CoreModule.Core.Tax;
 using VirtoCommerce.Platform.Core.Common;
+using VirtoCommerce.Platform.Core.DynamicProperties;
 
 namespace VirtoCommerce.CartModule.Data.Model
 {
@@ -125,9 +126,18 @@ namespace VirtoCommerce.CartModule.Data.Model
         public string ShoppingCartId { get; set; }
         public virtual ShoppingCartEntity ShoppingCart { get; set; }
 
-        public virtual ObservableCollection<TaxDetailEntity> TaxDetails { get; set; } = new NullCollection<TaxDetailEntity>();
-        public virtual ObservableCollection<DiscountEntity> Discounts { get; set; } = new NullCollection<DiscountEntity>();
+        #region NavigationProperties
 
+        public virtual ObservableCollection<TaxDetailEntity> TaxDetails { get; set; }
+            = new NullCollection<TaxDetailEntity>();
+
+        public virtual ObservableCollection<DiscountEntity> Discounts { get; set; }
+            = new NullCollection<DiscountEntity>();
+
+        public virtual ObservableCollection<CartDynamicPropertyObjectValueEntity> DynamicPropertyObjectValues { get; set; }
+            = new NullCollection<CartDynamicPropertyObjectValueEntity>();
+
+        #endregion
 
         public virtual LineItem ToModel(LineItem lineItem)
         {
@@ -188,6 +198,15 @@ namespace VirtoCommerce.CartModule.Data.Model
                 lineItem.TaxDetails = TaxDetails.Select(x => x.ToModel(AbstractTypeFactory<TaxDetail>.TryCreateInstance())).ToList();
             }
 
+            lineItem.DynamicProperties = DynamicPropertyObjectValues.GroupBy(g => g.PropertyId).Select(x =>
+            {
+                var property = AbstractTypeFactory<DynamicObjectProperty>.TryCreateInstance();
+                property.Id = x.Key;
+                property.Name = x.FirstOrDefault()?.PropertyName;
+                property.Values = x.Select(v => v.ToModel(AbstractTypeFactory<DynamicPropertyObjectValue>.TryCreateInstance())).ToArray();
+                return property;
+            }).ToArray();
+
             return lineItem;
         }
 
@@ -234,7 +253,7 @@ namespace VirtoCommerce.CartModule.Data.Model
             ShipmentMethodCode = lineItem.ShipmentMethodCode;
             RequiredShipping = lineItem.RequiredShipping;
             ProductType = lineItem.ProductType;
-            FulfillmentLocationCode = FulfillmentLocationCode;
+            FulfillmentLocationCode = lineItem.FulfillmentLocationCode;
             Comment = lineItem.Note;
             CatalogId = lineItem.CatalogId;
             CategoryId = lineItem.CategoryId;
@@ -252,6 +271,12 @@ namespace VirtoCommerce.CartModule.Data.Model
             if (lineItem.TaxDetails != null)
             {
                 TaxDetails = new ObservableCollection<TaxDetailEntity>(lineItem.TaxDetails.Select(x => AbstractTypeFactory<TaxDetailEntity>.TryCreateInstance().FromModel(x)));
+            }
+
+            if (lineItem.DynamicProperties != null)
+            {
+                DynamicPropertyObjectValues = new ObservableCollection<CartDynamicPropertyObjectValueEntity>(lineItem.DynamicProperties.SelectMany(p => p.Values
+                    .Select(v => AbstractTypeFactory<CartDynamicPropertyObjectValueEntity>.TryCreateInstance().FromModel(v, lineItem, p))).OfType<CartDynamicPropertyObjectValueEntity>());
             }
 
             return this;
@@ -306,6 +331,11 @@ namespace VirtoCommerce.CartModule.Data.Model
             {
                 var taxDetailComparer = AbstractTypeFactory<TaxDetailEntityComparer>.TryCreateInstance();
                 TaxDetails.Patch(target.TaxDetails, taxDetailComparer, (sourceTaxDetail, targetTaxDetail) => sourceTaxDetail.Patch(targetTaxDetail));
+            }
+
+            if (!DynamicPropertyObjectValues.IsNullCollection())
+            {
+                DynamicPropertyObjectValues.Patch(target.DynamicPropertyObjectValues, (sourceDynamicPropertyObjectValues, targetDynamicPropertyObjectValues) => sourceDynamicPropertyObjectValues.Patch(targetDynamicPropertyObjectValues));
             }
         }
     }

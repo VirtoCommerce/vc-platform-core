@@ -107,7 +107,8 @@
                     "filter-new": "<strong>Add new filter</strong>",
                     "filter-only-pending": "Only pending",
                     "filter-with-errors": "With errors",
-                    "detail": "Show detail"
+                    "detail": "Show detail",
+                    "sendAttemptCount": "Sending attempts count"
                 },
                 "placeholders": {
                     "select-filter": "Select filter"

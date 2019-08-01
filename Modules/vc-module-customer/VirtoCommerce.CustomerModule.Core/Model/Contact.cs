@@ -1,5 +1,6 @@
 using System;
 using System.Collections.Generic;
+using VirtoCommerce.Platform.Core.Common;
 using VirtoCommerce.Platform.Core.Security;
 
 namespace VirtoCommerce.CustomerModule.Core.Model
@@ -22,6 +23,8 @@ namespace VirtoCommerce.CustomerModule.Core.Model
         public string PreferredCommunication { get; set; }
         public string PhotoUrl { get; set; }
 
+        public override string ObjectType => typeof(Contact).FullName;
+
         #region IHasSecurityAccounts Members
 
         /// <summary>
@@ -30,5 +33,17 @@ namespace VirtoCommerce.CustomerModule.Core.Model
         public ICollection<ApplicationUser> SecurityAccounts { get; set; } = new List<ApplicationUser>();
 
         #endregion
+
+        public override void ReduceDetails(string responseGroup)
+        {
+            base.ReduceDetails(responseGroup);
+            //Reduce details according to response group
+            var memberResponseGroup = EnumUtility.SafeParseFlags(responseGroup, MemberResponseGroup.Full);
+
+            if (!memberResponseGroup.HasFlag(MemberResponseGroup.WithSecurityAccounts))
+            {
+                SecurityAccounts = null;
+            }
+        }
     }
 }

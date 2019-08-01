@@ -60,9 +60,9 @@ namespace VirtoCommerce.OrdersModule.Tests
 
             var container = new ServiceCollection();
             container.AddDbContext<OrderDbContext>(options => options.UseSqlServer("Data Source=(local);Initial Catalog=VirtoCommerce3;Persist Security Info=True;User ID=virto;Password=virto;MultipleActiveResultSets=True;Connect Timeout=30"));
-            container.AddScoped<IOrderRepository, OrderRepositoryImpl>();
-            container.AddScoped<ICustomerOrderService, CustomerOrderServiceImpl>();
-            container.AddScoped<ICustomerOrderSearchService, CustomerOrderSearchServiceImpl>();
+            container.AddScoped<IOrderRepository, OrderRepository>();
+            container.AddScoped<ICustomerOrderService, CustomerOrderService>();
+            container.AddScoped<ICustomerOrderSearchService, CustomerOrderSearchService>();
             container.AddScoped<Func<IOrderRepository>>(provider => () => provider.CreateScope().ServiceProvider.GetService<IOrderRepository>());
             container.AddScoped<IEventPublisher, InProcessBus>();
             container.AddSingleton(tc => _customerOrderTotalsCalculatorMock.Object);

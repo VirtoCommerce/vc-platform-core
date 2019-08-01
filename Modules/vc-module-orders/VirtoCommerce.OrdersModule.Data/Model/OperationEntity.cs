@@ -32,13 +32,22 @@ namespace VirtoCommerce.OrdersModule.Data.Model
         [StringLength(2048)]
         public string CancelReason { get; set; }
 
+        [NotMapped]
+        public bool NeedPatchSum { get; set; } = true;
+
         [StringLength(128)]
         public string OuterId { get; set; }
+
+        #region NavigationProperties
+
+        #endregion
 
         public virtual OrderOperation ToModel(OrderOperation operation)
         {
             if (operation == null)
+            {
                 throw new ArgumentNullException(nameof(operation));
+            }
 
             operation.Id = Id;
             operation.CreatedDate = CreatedDate;
@@ -57,13 +66,16 @@ namespace VirtoCommerce.OrdersModule.Data.Model
             operation.IsApproved = IsApproved;
             operation.Sum = Sum;
             operation.ChildrenOperations = GetAllChildOperations(operation);
+
             return operation;
         }
 
         public virtual OperationEntity FromModel(OrderOperation operation, PrimaryKeyResolvingMap pkMap)
         {
             if (operation == null)
+            {
                 throw new ArgumentNullException(nameof(operation));
+            }
 
             pkMap.AddPair(operation, this);
 
@@ -87,20 +99,26 @@ namespace VirtoCommerce.OrdersModule.Data.Model
             return this;
         }
 
-        public virtual void Patch(OperationEntity operation)
+        public virtual void Patch(OperationEntity target)
         {
-            if (operation == null)
-                throw new ArgumentNullException(nameof(operation));
+            if (target == null)
+            {
+                throw new ArgumentNullException(nameof(target));
+            }
 
-            operation.Comment = Comment;
-            operation.Currency = Currency;
-            operation.Number = Number;
-            operation.Status = Status;
-            operation.IsCancelled = IsCancelled;
-            operation.CancelledDate = CancelledDate;
-            operation.CancelReason = CancelReason;
-            operation.IsApproved = IsApproved;
-            operation.Sum = Sum;
+            target.Comment = Comment;
+            target.Currency = Currency;
+            target.Number = Number;
+            target.Status = Status;
+            target.IsCancelled = IsCancelled;
+            target.CancelledDate = CancelledDate;
+            target.CancelReason = CancelReason;
+            target.IsApproved = IsApproved;
+
+            if (NeedPatchSum)
+            {
+                target.Sum = Sum;
+            }
         }
 
         private static IEnumerable<IOperation> GetAllChildOperations(IOperation operation)

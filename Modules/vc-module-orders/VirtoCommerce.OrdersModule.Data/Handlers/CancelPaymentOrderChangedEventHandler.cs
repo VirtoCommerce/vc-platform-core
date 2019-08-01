@@ -11,6 +11,7 @@ using VirtoCommerce.PaymentModule.Core.Services;
 using VirtoCommerce.PaymentModule.Model.Requests;
 using VirtoCommerce.Platform.Core.Common;
 using VirtoCommerce.Platform.Core.Events;
+using VirtoCommerce.StoreModule.Core.Model;
 using VirtoCommerce.StoreModule.Core.Services;
 
 namespace VirtoCommerce.OrdersModule.Data.Handlers
@@ -43,7 +44,7 @@ namespace VirtoCommerce.OrdersModule.Data.Handlers
 
         protected virtual async Task TryToCancelOrder(GenericChangedEntry<CustomerOrder> changedEntry)
         {
-            var store = await _storeService.GetByIdAsync(changedEntry.NewEntry.StoreId);
+            var store = await _storeService.GetByIdAsync(changedEntry.NewEntry.StoreId, StoreResponseGroup.StoreInfo.ToString());
 
             //Try to load payment methods for payments
             var gatewayCodes = changedEntry.NewEntry.InPayments.Select(x => x.GatewayCode).ToArray();
@@ -70,24 +71,24 @@ namespace VirtoCommerce.OrdersModule.Data.Handlers
                     }
                 }
             }
-            TryToCancelOrderPayments(toCancelPayments);
+            TryToCancelOrderPayments(toCancelPayments, changedEntry.NewEntry);
             if (!toCancelPayments.IsNullOrEmpty())
             {
                 await _orderService.SaveChangesAsync(new[] { changedEntry.NewEntry });
             }
         }
 
-        protected virtual void TryToCancelOrderPayments(IEnumerable<PaymentIn> toCancelPayments)
+        protected virtual void TryToCancelOrderPayments(IEnumerable<PaymentIn> toCancelPayments, CustomerOrder order)
         {
             foreach (var payment in toCancelPayments ?? Enumerable.Empty<PaymentIn>())
             {
                 if (payment.PaymentStatus == PaymentStatus.Authorized)
                 {
-                    payment.PaymentMethod?.VoidProcessPayment(new VoidPaymentRequest { PaymentId = payment.Id });
+                    payment.PaymentMethod?.VoidProcessPayment(new VoidPaymentRequest { PaymentId = payment.Id, OrderId = order.Id });
                 }
                 else if (payment.PaymentStatus == PaymentStatus.Paid)
                 {
-                    payment.PaymentMethod?.RefundProcessPayment(new RefundPaymentRequest { PaymentId = payment.Id });
+                    payment.PaymentMethod?.RefundProcessPayment(new RefundPaymentRequest { PaymentId = payment.Id, OrderId = order.Id });
                 }
                 else
                 {

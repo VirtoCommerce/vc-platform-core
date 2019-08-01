@@ -1,4 +1,5 @@
 using System;
+using System.Collections.Generic;
 using System.Collections.ObjectModel;
 using System.ComponentModel.DataAnnotations;
 using System.ComponentModel.DataAnnotations.Schema;
@@ -8,11 +9,12 @@ using VirtoCommerce.CoreModule.Core.Tax;
 using VirtoCommerce.OrdersModule.Core.Model;
 using VirtoCommerce.PaymentModule.Core.Model;
 using VirtoCommerce.Platform.Core.Common;
+using VirtoCommerce.Platform.Core.DynamicProperties;
 using Address = VirtoCommerce.OrdersModule.Core.Model.Address;
 
 namespace VirtoCommerce.OrdersModule.Data.Model
 {
-    public class PaymentInEntity : OperationEntity
+    public class PaymentInEntity : OperationEntity, ISupportPartialPriceUpdate
     {
         [StringLength(64)]
         public string OrganizationId { get; set; }
@@ -68,13 +70,15 @@ namespace VirtoCommerce.OrdersModule.Data.Model
 
         public virtual ObservableCollection<DiscountEntity> Discounts { get; set; } = new NullCollection<DiscountEntity>();
         public virtual ObservableCollection<TaxDetailEntity> TaxDetails { get; set; } = new NullCollection<TaxDetailEntity>();
-
+        public virtual ObservableCollection<OrderDynamicPropertyObjectValueEntity> DynamicPropertyObjectValues { get; set; } = new NullCollection<OrderDynamicPropertyObjectValueEntity>();
 
         public override OrderOperation ToModel(OrderOperation operation)
         {
             var payment = operation as PaymentIn;
             if (payment == null)
+            {
                 throw new ArgumentException(@"operation argument must be of type PaymentIn", nameof(operation));
+            }
 
             if (!Addresses.IsNullOrEmpty())
             {
@@ -111,6 +115,15 @@ namespace VirtoCommerce.OrdersModule.Data.Model
             payment.TaxDetails = TaxDetails.Select(x => x.ToModel(AbstractTypeFactory<TaxDetail>.TryCreateInstance())).ToList();
             payment.Discounts = Discounts.Select(x => x.ToModel(AbstractTypeFactory<Discount>.TryCreateInstance())).ToList();
 
+            payment.DynamicProperties = DynamicPropertyObjectValues.GroupBy(g => g.PropertyId).Select(x =>
+            {
+                var property = AbstractTypeFactory<DynamicObjectProperty>.TryCreateInstance();
+                property.Id = x.Key;
+                property.Name = x.FirstOrDefault()?.PropertyName;
+                property.Values = x.Select(v => v.ToModel(AbstractTypeFactory<DynamicPropertyObjectValue>.TryCreateInstance())).ToArray();
+                return property;
+            }).ToArray();
+
             base.ToModel(payment);
 
             payment.PaymentStatus = EnumUtility.SafeParse(Status, PaymentStatus.Custom);
@@ -122,7 +135,9 @@ namespace VirtoCommerce.OrdersModule.Data.Model
         {
             var payment = operation as PaymentIn;
             if (payment == null)
+            {
                 throw new ArgumentException(@"operation argument must be of type PaymentIn", nameof(operation));
+            }
 
             base.FromModel(payment, pkMap);
 
@@ -182,27 +197,26 @@ namespace VirtoCommerce.OrdersModule.Data.Model
                 Status = payment.PaymentStatus.ToString();
             }
 
+            if (payment.DynamicProperties != null)
+            {
+                DynamicPropertyObjectValues = new ObservableCollection<OrderDynamicPropertyObjectValueEntity>(payment.DynamicProperties.SelectMany(p => p.Values
+                    .Select(v => AbstractTypeFactory<OrderDynamicPropertyObjectValueEntity>.TryCreateInstance().FromModel(v, payment, p))).OfType<OrderDynamicPropertyObjectValueEntity>());
+            }
+
             return this;
         }
 
         public override void Patch(OperationEntity operation)
         {
-            base.Patch(operation);
-
             var target = operation as PaymentInEntity;
             if (target == null)
                 throw new ArgumentException(@"operation argument must be of type PaymentInEntity", nameof(operation));
 
-            target.Price = Price;
-            target.PriceWithTax = PriceWithTax;
-            target.DiscountAmount = DiscountAmount;
-            target.DiscountAmountWithTax = DiscountAmountWithTax;
-            target.TaxType = TaxType;
-            target.TaxPercentRate = TaxPercentRate;
-            target.TaxTotal = TaxTotal;
-            target.Total = Total;
-            target.TotalWithTax = TotalWithTax;
+            var isNeedPatch = !(GetNonCalculatablePrices().All(x => x == 0m) && target.GetNonCalculatablePrices().Any(x => x != 0m));
+            base.NeedPatchSum = isNeedPatch;
+            base.Patch(operation);
 
+            target.TaxType = TaxType;
             target.CustomerId = CustomerId;
             target.CustomerName = CustomerName;
             target.OrganizationId = OrganizationId;
@@ -217,7 +231,20 @@ namespace VirtoCommerce.OrdersModule.Data.Model
             target.IsCancelled = IsCancelled;
             target.CancelledDate = CancelledDate;
             target.CancelReason = CancelReason;
-            target.Sum = Sum;
+
+            if (isNeedPatch)
+            {
+                target.Price = Price;
+                target.PriceWithTax = PriceWithTax;
+                target.DiscountAmount = DiscountAmount;
+                target.DiscountAmountWithTax = DiscountAmountWithTax;
+                target.TaxPercentRate = TaxPercentRate;
+                target.TaxTotal = TaxTotal;
+                target.Total = Total;
+                target.TotalWithTax = TotalWithTax;
+                target.Sum = Sum;
+            }
+
 
             if (!Addresses.IsNullCollection())
             {
@@ -240,6 +267,31 @@ namespace VirtoCommerce.OrdersModule.Data.Model
             {
                 Transactions.Patch(target.Transactions, (sourceTran, targetTran) => sourceTran.Patch(targetTran));
             }
+
+            if (!DynamicPropertyObjectValues.IsNullCollection())
+            {
+                DynamicPropertyObjectValues.Patch(target.DynamicPropertyObjectValues, (sourceDynamicPropertyObjectValues, targetDynamicPropertyObjectValues) => sourceDynamicPropertyObjectValues.Patch(targetDynamicPropertyObjectValues));
+            }
+        }
+        public virtual void ResetPrices()
+        {
+            Price = 0m;
+            PriceWithTax = 0m;
+            DiscountAmount = 0m;
+            DiscountAmountWithTax = 0m;
+            Total = 0m;
+            TotalWithTax = 0m;
+            TaxTotal = 0m;
+            TaxPercentRate = 0m;
+            Sum = 0m;
+        }
+
+        public virtual IEnumerable<decimal> GetNonCalculatablePrices()
+        {
+            yield return TaxPercentRate;
+            yield return Price;
+            yield return DiscountAmount;
+            yield return Sum;
         }
     }
 }

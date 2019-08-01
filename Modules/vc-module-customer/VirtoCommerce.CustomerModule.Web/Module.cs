@@ -12,6 +12,7 @@ using VirtoCommerce.CustomerModule.Core;
 using VirtoCommerce.CustomerModule.Core.Events;
 using VirtoCommerce.CustomerModule.Core.Model;
 using VirtoCommerce.CustomerModule.Core.Services;
+using VirtoCommerce.CustomerModule.Core.Services.Indexed;
 using VirtoCommerce.CustomerModule.Data.ExportImport;
 using VirtoCommerce.CustomerModule.Data.Handlers;
 using VirtoCommerce.CustomerModule.Data.Model;
@@ -26,6 +27,7 @@ using VirtoCommerce.Platform.Core.DynamicProperties;
 using VirtoCommerce.Platform.Core.ExportImport;
 using VirtoCommerce.Platform.Core.Modularity;
 using VirtoCommerce.Platform.Core.Security;
+using VirtoCommerce.Platform.Core.Security.Events;
 using VirtoCommerce.Platform.Core.Settings;
 using VirtoCommerce.Platform.Data.Extensions;
 using VirtoCommerce.SearchModule.Core.Model;
@@ -41,18 +43,16 @@ namespace VirtoCommerce.CustomerModule.Web
         public void Initialize(IServiceCollection serviceCollection)
         {
             var configuration = serviceCollection.BuildServiceProvider().GetRequiredService<IConfiguration>();
-            serviceCollection.AddTransient<ICustomerRepository, CustomerRepositoryImpl>();
+            serviceCollection.AddTransient<ICustomerRepository, CustomerRepository>();
             var connectionString = configuration.GetConnectionString("VirtoCommerce.Customer") ?? configuration.GetConnectionString("VirtoCommerce");
             serviceCollection.AddDbContext<CustomerDbContext>(options => options.UseSqlServer(connectionString));
             serviceCollection.AddSingleton<Func<ICustomerRepository>>(provider => () => provider.CreateScope().ServiceProvider.GetRequiredService<ICustomerRepository>());
             serviceCollection.AddSingleton<Func<IMemberRepository>>(provider => () => provider.CreateScope().ServiceProvider.GetRequiredService<ICustomerRepository>());
-            serviceCollection.AddSingleton<IMemberService, CommerceMembersServiceImpl>();
 
             serviceCollection.AddSingleton<ISearchRequestBuilder, MemberSearchRequestBuilder>();
-            serviceCollection.AddSingleton<MemberSearchServiceBase>();
-            serviceCollection.AddSingleton<MemberIndexedSearchService>();
-            serviceCollection.AddSingleton<CommerceMembersSearchServiceImpl>();
-            serviceCollection.AddSingleton<IMemberSearchService, MemberSearchServiceDecorator>();
+            serviceCollection.AddTransient<IIndexedMemberSearchService, MemberIndexedSearchService>();
+            serviceCollection.AddTransient<IMemberSearchService, MemberSearchService>();
+            serviceCollection.AddTransient<IMemberService, MemberService>();
             serviceCollection.AddSingleton<CustomerExportImport>();
 
             serviceCollection.AddSingleton<MemberDocumentChangesProvider>();
@@ -68,7 +68,8 @@ namespace VirtoCommerce.CustomerModule.Web
                 },
             });
 
-            serviceCollection.AddSingleton<LogChangesChangedEventHandler>();
+            serviceCollection.AddTransient<LogChangesEventHandler>();
+            serviceCollection.AddTransient<SecurtityAccountChangesEventHandler>();
         }
 
         public void PostInitialize(IApplicationBuilder appBuilder)
@@ -102,8 +103,8 @@ namespace VirtoCommerce.CustomerModule.Web
             mvcJsonOptions.Value.SerializerSettings.Converters.Add(new PolymorphicMemberJsonConverter());
 
             var inProcessBus = appBuilder.ApplicationServices.GetService<IHandlerRegistrar>();
-            inProcessBus.RegisterHandler<MemberChangedEvent>(async (message, token) => await appBuilder.ApplicationServices.GetService<LogChangesChangedEventHandler>().Handle(message));
-
+            inProcessBus.RegisterHandler<MemberChangedEvent>(async (message, token) => await appBuilder.ApplicationServices.GetService<LogChangesEventHandler>().Handle(message));
+            inProcessBus.RegisterHandler<UserChangedEvent>(async (message, token) => await appBuilder.ApplicationServices.GetService<SecurtityAccountChangesEventHandler>().Handle(message));
             using (var serviceScope = appBuilder.ApplicationServices.CreateScope())
             {
                 var dbContext = serviceScope.ServiceProvider.GetRequiredService<CustomerDbContext>();

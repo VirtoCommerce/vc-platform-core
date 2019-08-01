@@ -28,10 +28,8 @@ namespace VirtoCommerce.CatalogModule.Data.Search
             _itemService = itemService;
             _categoryService = categoryService;
 
-
-            _productSortingAliases["sku"] = ReflectionUtility.GetPropertyName<CatalogProduct>(x => x.Code);
-            _categorySortingAliases["sku"] = ReflectionUtility.GetPropertyName<Category>(x => x.Code);
-
+            _productSortingAliases["sku"] = nameof(CatalogProduct.Code);
+            _categorySortingAliases["sku"] = nameof(Category.Code);
         }
 
         public async Task<ListEntrySearchResult> SearchAsync(CatalogListEntrySearchCriteria criteria)
@@ -40,10 +38,9 @@ namespace VirtoCommerce.CatalogModule.Data.Search
             {
                 throw new ArgumentNullException(nameof(criteria));
             }
+
             criteria.Normalize();
-
             var result = AbstractTypeFactory<ListEntrySearchResult>.TryCreateInstance();
-
 
             //Need search in children categories if user specify keyword
             if (!string.IsNullOrEmpty(criteria.Keyword))
@@ -71,8 +68,8 @@ namespace VirtoCommerce.CatalogModule.Data.Search
             }
             if (criteria.ObjectTypes.IsNullOrEmpty() || criteria.ObjectTypes.Contains(nameof(CatalogProduct)))
             {
-                criteria.Skip = criteria.Skip - categorySkip;
-                criteria.Take = criteria.Take - categoryTake;
+                criteria.Skip -= categorySkip;
+                criteria.Take -= categoryTake;
                 var productsSearchResult = await SearchItemsAsync(criteria);
 
                 var productListEntries = productsSearchResult.Results.Select(x => AbstractTypeFactory<ProductListEntry>.TryCreateInstance().FromModel(x)).ToList();
@@ -80,10 +77,9 @@ namespace VirtoCommerce.CatalogModule.Data.Search
                 result.TotalCount += productsSearchResult.TotalCount;
                 result.ListEntries.AddRange(productListEntries);
             }
+
             return result;
-
         }
-
 
         protected virtual async Task<GenericSearchResult<Category>> SearchCategoriesAsync(CatalogListEntrySearchCriteria criteria)
         {
@@ -150,20 +146,15 @@ namespace VirtoCommerce.CatalogModule.Data.Search
                     query = query.Where(x => x.Code == criteria.Code);
                 }
                 //Extension point 
-                query = BuildCategorySearchQuery(query, criteria);
+                query = BuildQuery(query, criteria);
+                var sortInfos = BuildSortExpression(criteria);
+                //Try to replace sorting columns names
+                TryTransformSortingInfoColumnNames(_categorySortingAliases, sortInfos);
 
                 result.TotalCount = await query.CountAsync();
                 if (criteria.Take > 0)
                 {
-                    var sortInfos = criteria.SortInfos;
-                    if (sortInfos.IsNullOrEmpty())
-                    {
-                        sortInfos = new[] { new SortInfo { SortColumn = "Name" } };
-                    }
-                    //Try to replace sorting columns names
-                    TryTransformSortingInfoColumnNames(_categorySortingAliases, sortInfos.ToArray());
-
-                    query = query.OrderBySortInfos(sortInfos);
+                    query = query.OrderBySortInfos(sortInfos).ThenBy(x => x.Id);
 
                     var categoryIds = query.Select(x => x.Id).ToList();
                     var essentialResponseGroup = CategoryResponseGroup.Info | CategoryResponseGroup.WithImages | CategoryResponseGroup.WithSeo | CategoryResponseGroup.WithLinks | CategoryResponseGroup.WithParents | CategoryResponseGroup.WithProperties | CategoryResponseGroup.WithOutlines;
@@ -171,21 +162,13 @@ namespace VirtoCommerce.CatalogModule.Data.Search
                     result.Results = (await _categoryService.GetByIdsAsync(categoryIds.ToArray(), criteria.ResponseGroup, criteria.CatalogId)).OrderBy(x => categoryIds.IndexOf(x.Id)).ToList();
                 }
             }
+
             return result;
         }
 
         protected virtual async Task<GenericSearchResult<CatalogProduct>> SearchItemsAsync(CatalogListEntrySearchCriteria criteria)
         {
             var result = new GenericSearchResult<CatalogProduct>();
-
-            var sortInfos = criteria.SortInfos;
-            if (sortInfos.IsNullOrEmpty())
-            {
-                sortInfos = new[] { new SortInfo { SortColumn = "Priority", SortDirection = SortDirection.Descending }, new SortInfo { SortColumn = "Name", SortDirection = SortDirection.Ascending } };
-            }
-            //Try to replace sorting columns names
-            TryTransformSortingInfoColumnNames(_productSortingAliases, sortInfos.ToArray());
-
 
             using (var repository = _catalogRepositoryFactory())
             {
@@ -213,12 +196,15 @@ namespace VirtoCommerce.CatalogModule.Data.Search
                 }
 
                 // Build the query based on the search criteria
-                var query = BuildSearchQuery(repository.Items, criteria, searchCategoryIds);
+                var query = BuildQuery(repository.Items, criteria, searchCategoryIds);
+                var sortInfos = BuildSortExpression(criteria);
+                //Try to replace sorting columns names
+                TryTransformSortingInfoColumnNames(_productSortingAliases, sortInfos.ToArray());
 
                 result.TotalCount = await query.CountAsync();
                 if (criteria.Take > 0)
                 {
-                    query = query.OrderBySortInfos(sortInfos);
+                    query = query.OrderBySortInfos(sortInfos).ThenBy(x => x.Id);
 
                     var itemIds = query.Skip(criteria.Skip)
                                        .Take(criteria.Take)
@@ -230,16 +216,32 @@ namespace VirtoCommerce.CatalogModule.Data.Search
                     result.Results = (await _itemService.GetByIdsAsync(itemIds.ToArray(), criteria.ResponseGroup, criteria.CatalogId)).OrderBy(x => itemIds.IndexOf(x.Id)).ToList();
                 }
             }
-            return result;
 
+            return result;
         }
 
-        protected virtual IQueryable<CategoryEntity> BuildCategorySearchQuery(IQueryable<CategoryEntity> query, CatalogListEntrySearchCriteria criteria)
+        protected virtual IList<SortInfo> BuildSortExpression(CatalogListEntrySearchCriteria criteria)
+        {
+            var sortInfos = criteria.SortInfos;
+            if (sortInfos.IsNullOrEmpty())
+            {
+                sortInfos = new[]
+                {
+                    new SortInfo { SortColumn = nameof(ItemEntity.Priority), SortDirection = SortDirection.Descending },
+                    new SortInfo { SortColumn = nameof(CategoryEntity.Name) }
+                };
+            }
+            return sortInfos;
+        }
+
+
+        protected virtual IQueryable<CategoryEntity> BuildQuery(IQueryable<CategoryEntity> query, CatalogListEntrySearchCriteria criteria)
         {
             return query;
         }
 
-        protected virtual IQueryable<ItemEntity> BuildSearchQuery(IQueryable<ItemEntity> query, CatalogListEntrySearchCriteria criteria, string[] searchCategoryIds)
+
+        protected virtual IQueryable<ItemEntity> BuildQuery(IQueryable<ItemEntity> query, CatalogListEntrySearchCriteria criteria, string[] searchCategoryIds)
         {
             query = query.Where(x => criteria.WithHidden || x.IsActive);
 
@@ -272,7 +274,6 @@ namespace VirtoCommerce.CatalogModule.Data.Search
                 query = query.Where(x => criteria.VendorIds.Contains(x.Vendor));
             }
 
-
             if (!criteria.ProductTypes.IsNullOrEmpty())
             {
                 query = query.Where(x => criteria.ProductTypes.Contains(x.ProductType));
@@ -291,7 +292,7 @@ namespace VirtoCommerce.CatalogModule.Data.Search
             return query;
         }
 
-        protected virtual void TryTransformSortingInfoColumnNames(IDictionary<string, string> transformationMap, SortInfo[] sortingInfos)
+        protected virtual void TryTransformSortingInfoColumnNames(IDictionary<string, string> transformationMap, IEnumerable<SortInfo> sortingInfos)
         {
             //Try to replace sorting columns names
             foreach (var sortInfo in sortingInfos)

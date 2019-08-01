@@ -19,11 +19,14 @@ namespace VirtoCommerce.CustomerModule.Data.Repositories
         protected override void OnModelCreating(ModelBuilder modelBuilder)
         {
             #region Member
+
             modelBuilder.Entity<MemberEntity>().HasKey(x => x.Id);
             modelBuilder.Entity<MemberEntity>().ToTable("Member");
             modelBuilder.Entity<MemberEntity>().Property(x => x.Id).HasMaxLength(128);
             modelBuilder.Entity<MemberEntity>().HasIndex(i => i.MemberType).IsUnique(false).HasName("IX_MemberType");
             modelBuilder.Entity<MemberEntity>().HasIndex(i => i.Name).IsUnique(false).HasName("IX_Member_Name");
+            modelBuilder.Entity<MemberEntity>().HasDiscriminator<string>("Discriminator");
+            modelBuilder.Entity<MemberEntity>().Property("Discriminator").HasMaxLength(128);
 
             #endregion
 
@@ -117,13 +120,25 @@ namespace VirtoCommerce.CustomerModule.Data.Repositories
 
             #endregion
 
-
             #region SeoInfo
             modelBuilder.Entity<SeoInfoEntity>().ToTable("MemberSeoInfo").HasKey(x => x.Id);
             modelBuilder.Entity<SeoInfoEntity>().Property(x => x.Id).HasMaxLength(128);
             modelBuilder.Entity<SeoInfoEntity>().HasOne(x => x.Member).WithMany(x => x.SeoInfos).HasForeignKey(x => x.MemberId)
                 .OnDelete(DeleteBehavior.Cascade);
 
+            #endregion
+
+            #region DynamicProperty
+
+            modelBuilder.Entity<MemberDynamicPropertyObjectValueEntity>().ToTable("MemberDynamicPropertyObjectValue").HasKey(x => x.Id);
+            modelBuilder.Entity<MemberDynamicPropertyObjectValueEntity>().Property(x => x.Id).HasMaxLength(128);
+            modelBuilder.Entity<MemberDynamicPropertyObjectValueEntity>().Property(x => x.DecimalValue).HasColumnType("decimal(18,5)");
+            modelBuilder.Entity<MemberDynamicPropertyObjectValueEntity>().HasOne(p => p.Member)
+                .WithMany(s => s.DynamicPropertyObjectValues).HasForeignKey(k => k.ObjectId)
+                .OnDelete(DeleteBehavior.Cascade);
+            modelBuilder.Entity<MemberDynamicPropertyObjectValueEntity>().HasIndex(x => new { x.ObjectType, x.ObjectId })
+                .IsUnique(false)
+                .HasName("IX_ObjectType_ObjectId");
             #endregion
 
             base.OnModelCreating(modelBuilder);

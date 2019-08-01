@@ -1,6 +1,5 @@
 using System.Linq;
 using System.Threading.Tasks;
-using VirtoCommerce.CatalogModule.Core.Model;
 using VirtoCommerce.CatalogModule.Core.Model.Search;
 using VirtoCommerce.CatalogModule.Data.Model;
 using VirtoCommerce.Platform.Core.Common;
@@ -26,12 +25,11 @@ namespace VirtoCommerce.CatalogModule.Data.Repositories
 
         Task<string[]> GetAllChildrenCategoriesIdsAsync(string[] categoryIds);
         Task<CatalogEntity[]> GetCatalogsByIdsAsync(string[] catalogIds);
-        Task<CategoryEntity[]> GetCategoriesByIdsAsync(string[] categoriesIds, CategoryResponseGroup respGroup);
-        Task<ItemEntity[]> GetItemByIdsAsync(string[] itemIds, ItemResponseGroup respGroup = ItemResponseGroup.ItemLarge);
+        Task<CategoryEntity[]> GetCategoriesByIdsAsync(string[] categoriesIds, string responseGroup);
+        Task<ItemEntity[]> GetItemByIdsAsync(string[] itemIds, string responseGroup = null);
         Task<PropertyEntity[]> GetAllCatalogPropertiesAsync(string catalogId);
         Task<PropertyEntity[]> GetPropertiesByIdsAsync(string[] propIds, bool loadDictValues = false);
         Task<PropertyDictionaryItemEntity[]> GetPropertyDictionaryItemsByIdsAsync(string[] dictItemIds);
-
 
         Task<GenericSearchResult<AssociationEntity>> SearchAssociations(ProductAssociationSearchCriteria criteria);
 

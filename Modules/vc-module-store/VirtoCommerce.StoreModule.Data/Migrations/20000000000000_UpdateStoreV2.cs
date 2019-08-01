@@ -11,7 +11,8 @@ namespace VirtoCommerce.StoreModule.Data.Migrations
                  WHERE TABLE_NAME = '__MigrationHistory'))
                  BEGIN
                     INSERT INTO [dbo].[__EFMigrationsHistory] ([MigrationId],[ProductVersion]) VALUES ('20190522054351_InitialStore', '2.2.3-servicing-35854')
-                    UPDATE [PlatformDynamicProperty] SET ObjectType = 'VirtoCommerce.StoreModule.Core.Model.Store' WHERE ObjectType = 'VirtoCommerce.Domain.Store.Model.Store'
+                    UPDATE [PlatformDynamicProperty]            SET ObjectType = 'VirtoCommerce.StoreModule.Core.Model.Store' WHERE ObjectType = 'VirtoCommerce.Domain.Store.Model.Store'
+                    UPDATE [PlatformDynamicPropertyObjectValue] SET ObjectType = 'VirtoCommerce.StoreModule.Core.Model.Store' WHERE ObjectType = 'VirtoCommerce.Domain.Store.Model.Store'
                 END");
 
             migrationBuilder.Sql(@"IF (EXISTS (SELECT * 
@@ -57,7 +58,6 @@ namespace VirtoCommerce.StoreModule.Data.Migrations
 
         protected override void Down(MigrationBuilder migrationBuilder)
         {
-
         }
     }
 }

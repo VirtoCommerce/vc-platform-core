@@ -3,6 +3,7 @@ using System.IO;
 using System.Linq;
 using System.Threading.Tasks;
 using FluentValidation;
+using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Builder;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.EntityFrameworkCore;
@@ -23,6 +24,7 @@ using VirtoCommerce.CatalogModule.Data.Search.BrowseFilters;
 using VirtoCommerce.CatalogModule.Data.Search.Indexing;
 using VirtoCommerce.CatalogModule.Data.Services;
 using VirtoCommerce.CatalogModule.Data.Validation;
+using VirtoCommerce.CatalogModule.Web.Authorization;
 using VirtoCommerce.CatalogModule.Web.JsonConverters;
 using VirtoCommerce.CoreModule.Core.Seo;
 using VirtoCommerce.Platform.Core.Bus;
@@ -49,48 +51,48 @@ namespace VirtoCommerce.CatalogModule.Web
             serviceCollection.AddTransient<ICatalogRepository, CatalogRepositoryImpl>();
             var connectionString = configuration.GetConnectionString("VirtoCommerce.Catalog") ?? configuration.GetConnectionString("VirtoCommerce");
             serviceCollection.AddDbContext<CatalogDbContext>(options => options.UseSqlServer(connectionString));
-            serviceCollection.AddSingleton<Func<ICatalogRepository>>(provider => () => provider.CreateScope().ServiceProvider.GetRequiredService<ICatalogRepository>());
+            serviceCollection.AddTransient<Func<ICatalogRepository>>(provider => () => provider.CreateScope().ServiceProvider.GetRequiredService<ICatalogRepository>());
 
-            serviceCollection.AddSingleton<IProductSearchService, ProductSearchService>();
-            serviceCollection.AddSingleton<ICategorySearchService, CategorySearchService>();
+            serviceCollection.AddTransient<IProductSearchService, ProductSearchService>();
+            serviceCollection.AddTransient<ICategorySearchService, CategorySearchService>();
 
-            serviceCollection.AddSingleton<ICatalogService, CatalogService>();
-            serviceCollection.AddSingleton<IListEntrySearchService, ListEntrySearchService>();
+            serviceCollection.AddTransient<ICatalogService, CatalogService>();
+            serviceCollection.AddTransient<ICatalogSearchService, CatalogSearchService>();
+            serviceCollection.AddTransient<IListEntrySearchService, ListEntrySearchService>();
 
-            serviceCollection.AddSingleton<ICategoryService, CategoryService>();
-            serviceCollection.AddSingleton<ICategoryIndexedSearchService, CategoryIndexedSearchService>();
+            serviceCollection.AddTransient<ICategoryService, CategoryService>();
+            serviceCollection.AddTransient<ICategoryIndexedSearchService, CategoryIndexedSearchService>();
 
-            serviceCollection.AddSingleton<IItemService, ItemService>();
-            serviceCollection.AddSingleton<IProductIndexedSearchService, ProductIndexedSearchService>();
-            serviceCollection.AddSingleton<IAssociationService, AssociationService>();
+            serviceCollection.AddTransient<IItemService, ItemService>();
+            serviceCollection.AddTransient<IProductIndexedSearchService, ProductIndexedSearchService>();
+            serviceCollection.AddTransient<IAssociationService, AssociationService>();
 
-            serviceCollection.AddSingleton<IAggregationConverter, AggregationConverter>();
-            serviceCollection.AddSingleton<IBrowseFilterService, BrowseFilterService>();
-            serviceCollection.AddSingleton<ITermFilterBuilder, TermFilterBuilder>();
+            serviceCollection.AddTransient<IAggregationConverter, AggregationConverter>();
+            serviceCollection.AddTransient<IBrowseFilterService, BrowseFilterService>();
+            serviceCollection.AddTransient<ITermFilterBuilder, TermFilterBuilder>();
 
-            serviceCollection.AddSingleton<ISearchRequestBuilder, ProductSearchRequestBuilder>();
-            serviceCollection.AddSingleton<ISearchRequestBuilder, CategorySearchRequestBuilder>();
+            serviceCollection.AddTransient<ISearchRequestBuilder, ProductSearchRequestBuilder>();
+            serviceCollection.AddTransient<ISearchRequestBuilder, CategorySearchRequestBuilder>();
 
-            serviceCollection.AddSingleton<IPropertyService, PropertyService>();
-            serviceCollection.AddSingleton<IPropertySearchService, PropertySearchService>();
-            serviceCollection.AddSingleton<IProperyDictionaryItemService, PropertyDictionaryItemService>();
-            serviceCollection.AddSingleton<IProperyDictionaryItemSearchService, ProperyDictionaryItemSearchService>();
-            serviceCollection.AddSingleton<IProductAssociationSearchService, ProductAssociationSearchService>();
-            serviceCollection.AddSingleton<IOutlineService, OutlineService>();
-            serviceCollection.AddSingleton<ISkuGenerator, DefaultSkuGenerator>();
+            serviceCollection.AddTransient<IPropertyService, PropertyService>();
+            serviceCollection.AddTransient<IPropertySearchService, PropertySearchService>();
+            serviceCollection.AddTransient<IProperyDictionaryItemService, PropertyDictionaryItemService>();
+            serviceCollection.AddTransient<IProperyDictionaryItemSearchService, ProperyDictionaryItemSearchService>();
+            serviceCollection.AddTransient<IProductAssociationSearchService, ProductAssociationSearchService>();
+            serviceCollection.AddTransient<IOutlineService, OutlineService>();
+            serviceCollection.AddTransient<ISkuGenerator, DefaultSkuGenerator>();
 
-            serviceCollection.AddSingleton<LogChangesChangedEventHandler>();
+            serviceCollection.AddTransient<LogChangesChangedEventHandler>();
 
-            serviceCollection.AddSingleton<ISeoBySlugResolver, SeoBySlugResolver>();
-
+            serviceCollection.AddTransient<ISeoBySlugResolver, SeoBySlugResolver>();
 
             PropertyValueValidator PropertyValueValidatorFactory(PropertyValidationRule rule) => new PropertyValueValidator(rule);
             serviceCollection.AddSingleton((Func<PropertyValidationRule, PropertyValueValidator>)PropertyValueValidatorFactory);
-            serviceCollection.AddSingleton<AbstractValidator<IHasProperties>, HasPropertiesValidator>();
+            serviceCollection.AddTransient<AbstractValidator<IHasProperties>, HasPropertiesValidator>();
 
-            serviceCollection.AddSingleton<CatalogExportImport>();
+            serviceCollection.AddTransient<CatalogExportImport>();
 
-            serviceCollection.AddSingleton<IOutlinePartResolver>(provider =>
+            serviceCollection.AddTransient<IOutlinePartResolver>(provider =>
             {
                 var settingsManager = provider.GetService<ISettingsManager>();
                 if (settingsManager.GetValue(ModuleConstants.Settings.General.CodesInOutline.Name, false))
@@ -103,11 +105,10 @@ namespace VirtoCommerce.CatalogModule.Web
                 }
             });
 
-
-            serviceCollection.AddSingleton<ProductDocumentChangesProvider>();
-            serviceCollection.AddSingleton<ProductDocumentBuilder>();
-            serviceCollection.AddSingleton<CategoryDocumentChangesProvider>();
-            serviceCollection.AddSingleton<CategoryDocumentBuilder>();
+            serviceCollection.AddTransient<ProductDocumentChangesProvider>();
+            serviceCollection.AddTransient<ProductDocumentBuilder>();
+            serviceCollection.AddTransient<CategoryDocumentChangesProvider>();
+            serviceCollection.AddTransient<CategoryDocumentBuilder>();
 
             // Product indexing configuration
             serviceCollection.AddSingleton(provider => new IndexDocumentConfiguration
@@ -130,6 +131,8 @@ namespace VirtoCommerce.CatalogModule.Web
                     DocumentBuilder = provider.GetService<CategoryDocumentBuilder>(),
                 },
             });
+
+            serviceCollection.AddTransient<IAuthorizationHandler, CatalogAuthorizationHandler>();
         }
 
         public void PostInitialize(IApplicationBuilder appBuilder)
@@ -142,6 +145,15 @@ namespace VirtoCommerce.CatalogModule.Web
             //Register module permissions
             var permissionsProvider = appBuilder.ApplicationServices.GetRequiredService<IPermissionsRegistrar>();
             permissionsProvider.RegisterPermissions(ModuleConstants.Security.Permissions.AllPermissions.Select(x => new Permission() { GroupName = "Catalog", Name = x }).ToArray());
+
+
+            //Register Permission scopes
+            AbstractTypeFactory<PermissionScope>.RegisterType<SelectedCatalogScope>();
+            permissionsProvider.WithAvailabeScopesForPermissions(new[] {
+                                                                        ModuleConstants.Security.Permissions.Read,
+                                                                        ModuleConstants.Security.Permissions.Update,
+                                                                        ModuleConstants.Security.Permissions.Delete,
+                                                                         }, new SelectedCatalogScope());
 
             var mvcJsonOptions = appBuilder.ApplicationServices.GetService<IOptions<MvcJsonOptions>>();
             mvcJsonOptions.Value.SerializerSettings.Converters.Add(new SearchCriteriaJsonConverter());

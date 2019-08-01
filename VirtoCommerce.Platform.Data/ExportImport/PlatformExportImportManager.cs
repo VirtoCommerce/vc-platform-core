@@ -28,15 +28,19 @@ namespace VirtoCommerce.Platform.Data.ExportImport
         private readonly IDynamicPropertyService _dynamicPropertyService;
         private readonly IDynamicPropertySearchService _dynamicPropertySearchService;
         private readonly IPermissionsRegistrar _permissionsProvider;
+        private readonly IDynamicPropertyDictionaryItemsService _dynamicPropertyDictionaryItemsService;
+        private readonly IDynamicPropertyDictionaryItemsSearchService _dynamicPropertyDictionaryItemsSearchService;
 
         public PlatformExportImportManager(UserManager<ApplicationUser> userManager, RoleManager<Role> roleManager, IPermissionsRegistrar permissionsProvider, ISettingsManager settingsManager,
-                IDynamicPropertyService dynamicPropertyService, IDynamicPropertySearchService dynamicPropertySearchService, ILocalModuleCatalog moduleCatalog)
+                IDynamicPropertyService dynamicPropertyService, IDynamicPropertySearchService dynamicPropertySearchService, ILocalModuleCatalog moduleCatalog, IDynamicPropertyDictionaryItemsService dynamicPropertyDictionaryItemsService, IDynamicPropertyDictionaryItemsSearchService dynamicPropertyDictionaryItemsSearchService)
         {
             _dynamicPropertyService = dynamicPropertyService;
             _userManager = userManager;
             _roleManager = roleManager;
             _settingsManager = settingsManager;
             _moduleCatalog = moduleCatalog;
+            _dynamicPropertyDictionaryItemsService = dynamicPropertyDictionaryItemsService;
+            _dynamicPropertyDictionaryItemsSearchService = dynamicPropertyDictionaryItemsSearchService;
             _permissionsProvider = permissionsProvider;
             _dynamicPropertySearchService = dynamicPropertySearchService;
         }
@@ -212,7 +216,7 @@ namespace VirtoCommerce.Platform.Data.ExportImport
                                 else if (manifest.HandleSettings && reader.Value.ToString() == "DynamicPropertyDictionaryItems")
                                 {
                                     await reader.DeserializeJsonArrayWithPagingAsync<DynamicPropertyDictionaryItem>(jsonSerializer, batchSize,
-                                        items => _dynamicPropertyService.SaveDictionaryItemsAsync(items.ToArray()), processedCount =>
+                                        items => _dynamicPropertyDictionaryItemsService.SaveDictionaryItemsAsync(items.ToArray()), processedCount =>
                                     {
                                         progressInfo.Description = $"{ processedCount } coupons have been imported";
                                         progressCallback(progressInfo);
@@ -344,7 +348,7 @@ namespace VirtoCommerce.Platform.Data.ExportImport
                     progressInfo.Description = "Dynamic properties Dictionary Items: load properties...";
                     progressCallback(progressInfo);
 
-                    var dynamicPropertyDictionaryItems = (await _dynamicPropertySearchService.SearchDictionaryItemsAsync(new DynamicPropertyDictionaryItemSearchCriteria { Take = int.MaxValue })).Results;
+                    var dynamicPropertyDictionaryItems = (await _dynamicPropertyDictionaryItemsSearchService.SearchDictionaryItemsAsync(new DynamicPropertyDictionaryItemSearchCriteria { Take = int.MaxValue })).Results;
                     foreach (var dynamicPropertyDictionaryItem in dynamicPropertyDictionaryItems)
                     {
                         serializer.Serialize(writer, dynamicPropertyDictionaryItem);
@@ -427,7 +431,7 @@ namespace VirtoCommerce.Platform.Data.ExportImport
                             //TODO: Add JsonConverter which will be materialized concrete ExportImport option type
                             //ToDo: Added check ExportImportOptions for modules (DefaultIfEmpty)
                             var options = manifest.Options
-                                .DefaultIfEmpty(new ExportImportOptions { HandleBinaryData = manifest.HandleBinaryData, ModuleIdentity = new ModuleIdentity(module.Id, module.Version) })
+                                .DefaultIfEmpty(new ExportImportOptions { HandleBinaryData = manifest.HandleBinaryData, ModuleIdentity = new ModuleIdentity(module.Id, SemanticVersion.Parse(module.Version)) })
                                 .FirstOrDefault(x => x.ModuleIdentity.Id == moduleDescriptor.Identity.Id);
                             await exporter.ExportAsync(zipEntry.Open(), options, ModuleProgressCallback, cancellationToken);
                         }

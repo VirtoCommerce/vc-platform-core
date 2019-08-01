@@ -1,15 +1,16 @@
 angular.module('virtoCommerce.inventoryModule')
     .controller('virtoCommerce.inventoryModule.fulfillmentCenterDetailController', ['$scope', 'platformWebApp.dialogService', 'platformWebApp.bladeNavigationService', 'virtoCommerce.inventoryModule.fulfillments', 'platformWebApp.common.countries', 'platformWebApp.metaFormsService', function ($scope, dialogService, bladeNavigationService, fulfillments, countries, metaFormsService) {
+
         var blade = $scope.blade;
         blade.updatePermission = 'inventory:fulfillment:edit';
-        blade.refresh = function(parentRefresh) {
+        blade.refresh = function (parentRefresh) {
             if (blade.currentEntityId) {
                 blade.isLoading = true;
                 fulfillments.get({ id: blade.currentEntityId },
-                    function(data) {
+                    function (data) {
                         initializeBlade(data);
                         if (parentRefresh) {
-                            blade.parentBlade.refresh();
+                            blade.parentBlade.refresh(true);
                         }
                     });
             } else {

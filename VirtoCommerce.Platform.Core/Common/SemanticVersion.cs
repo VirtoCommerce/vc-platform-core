@@ -16,7 +16,7 @@ namespace VirtoCommerce.Platform.Core.Common
                 throw new ArgumentNullException(nameof(version));
             }
 
-            _version = version;
+            _version = NormalizeVersionValue(version);
         }
 
         /// <summary>
@@ -77,14 +77,13 @@ namespace VirtoCommerce.Platform.Core.Common
             throw new FormatException();
         }
 
-
-
         private static Version NormalizeVersionValue(Version version)
         {
+            //Normalize version (need to use always only three properties (revision must be skipped) to prevent equality mismatches
+            //e.g 1.0.0 and 1.0.0.0 aren't the same
             return new Version(version.Major,
                                version.Minor,
-                               Math.Max(version.Build, 0),
-                               Math.Max(version.Revision, 0));
+                               Math.Max(version.Build, 0));
         }
 
         public static bool operator ==(SemanticVersion a, SemanticVersion b)

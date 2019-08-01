@@ -1,6 +1,7 @@
 using System.Collections.Generic;
 using System.Linq;
 using System.Threading.Tasks;
+using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 using VirtoCommerce.CatalogModule.Core;
 using VirtoCommerce.CatalogModule.Core.Model;
@@ -8,6 +9,7 @@ using VirtoCommerce.CatalogModule.Core.Model.ListEntry;
 using VirtoCommerce.CatalogModule.Core.Model.Search;
 using VirtoCommerce.CatalogModule.Core.Search;
 using VirtoCommerce.CatalogModule.Core.Services;
+using VirtoCommerce.CatalogModule.Web.Authorization;
 using VirtoCommerce.CatalogModule.Web.Model;
 using VirtoCommerce.Platform.Core.Common;
 using VirtoCommerce.Platform.Core.Settings;
@@ -24,12 +26,20 @@ namespace VirtoCommerce.CatalogModule.Web.Controllers.Api
         private readonly IItemService _itemService;
         private readonly IListEntrySearchService _listEntrySearchService;
         private readonly ISettingsManager _settingsManager;
+        private readonly IAuthorizationService _authorizationService;
 
-        public CatalogModuleListEntryController(IProductIndexedSearchService productIndexedSearchService, IListEntrySearchService listEntrySearchService,
-            ICategoryService categoryService, IItemService itemService, ICatalogService catalogService, ISettingsManager settingsManager)
+        public CatalogModuleListEntryController(
+            IProductIndexedSearchService productIndexedSearchService
+            , IListEntrySearchService listEntrySearchService
+            , ICategoryService categoryService
+            , IItemService itemService
+            , ICatalogService catalogService
+            , IAuthorizationService authorizationService
+            , ISettingsManager settingsManager)
         {
             _productIndexedSearchService = productIndexedSearchService;
             _categoryService = categoryService;
+            _authorizationService = authorizationService;
             _itemService = itemService;
             _catalogService = catalogService;
             _listEntrySearchService = listEntrySearchService;
@@ -45,10 +55,14 @@ namespace VirtoCommerce.CatalogModule.Web.Controllers.Api
         [Route("")]
         public async Task<ActionResult<ListEntrySearchResult>> ListItemsSearchAsync([FromBody]CatalogListEntrySearchCriteria criteria)
         {
-            //TODO:
-            //ApplyRestrictionsForCurrentUser(coreModelCriteria);
             var result = new ListEntrySearchResult();
             var useIndexedSearch = _settingsManager.GetValue(ModuleConstants.Settings.Search.UseCatalogIndexedSearchInManager.Name, true);
+
+            var authorizationResult = await _authorizationService.AuthorizeAsync(User, criteria, new CatalogAuthorizationRequirement(ModuleConstants.Security.Permissions.Read));
+            if (!authorizationResult.Succeeded)
+            {
+                return Unauthorized();
+            }
 
             if (useIndexedSearch && !string.IsNullOrEmpty(criteria.Keyword))
             {
@@ -89,11 +103,16 @@ namespace VirtoCommerce.CatalogModule.Web.Controllers.Api
         [Route("~/api/catalog/listentrylinks")]
         public async Task<ActionResult> CreateLinks([FromBody] CategoryLink[] links)
         {
-            //TODO:
-            //Scope bound security check
-            //CheckCurrentUserHasPermissionForObjects(CatalogPredefinedPermissions.Create, links);
+           
             var entryIds = links.Select(x => x.EntryId).ToArray();
             var hasLinkEntries = await LoadCatalogEntriesAsync<IHasLinks>(entryIds);
+
+            var authorizationResult = await _authorizationService.AuthorizeAsync(User, hasLinkEntries, new CatalogAuthorizationRequirement(ModuleConstants.Security.Permissions.Update));
+            if (!authorizationResult.Succeeded)
+            {
+                return Unauthorized();
+            }
+
             foreach (var link in links)
             {
                 var hasLinkEntry = hasLinkEntries.FirstOrDefault(x => x.Id.Equals(link.EntryId));
@@ -106,10 +125,8 @@ namespace VirtoCommerce.CatalogModule.Web.Controllers.Api
             {
                 await SaveListCatalogEntitiesAsync(hasLinkEntries.ToArray());
             }
-            return NoContent();
+            return Ok();
         }
-
-
 
         /// <summary>
         /// Bulk create links to categories and items
@@ -134,20 +151,33 @@ namespace VirtoCommerce.CatalogModule.Web.Controllers.Api
                 var links = new List<IHasLinks>();
 
                 var searchResult = await _listEntrySearchService.SearchAsync(searchCriteria);
-                var hasLinksEntities = await LoadCatalogEntriesAsync<IHasLinks>(searchResult.ListEntries.Select(x => x.Id).ToArray());
-                haveProducts = hasLinksEntities.Any();
+                var hasLinkEntries = await LoadCatalogEntriesAsync<IHasLinks>(searchResult.ListEntries.Select(x => x.Id).ToArray());
+                haveProducts = hasLinkEntries.Any();
 
                 searchCriteria.Skip += searchCriteria.Take;
 
-                //CheckCurrentUserHasPermissionForObjects(CatalogPredefinedPermissions.Create, links.ToArray());
+                var authorizationResult = await _authorizationService.AuthorizeAsync(User, hasLinkEntries, new CatalogAuthorizationRequirement(ModuleConstants.Security.Permissions.Update));
+                if (!authorizationResult.Succeeded)
+                {
+                    return Unauthorized();
+                }
+
+                foreach (var hasLinkEntry in hasLinkEntries)
+                {
+                    var link = AbstractTypeFactory<CategoryLink>.TryCreateInstance();
+                    link.CategoryId = creationRequest.CategoryId;
+                    link.CatalogId = creationRequest.CatalogId;
+                    hasLinkEntry.Links.Add(link);
+                }
+
                 if (haveProducts)
                 {
-                    await SaveListCatalogEntitiesAsync(hasLinksEntities.ToArray());
+                    await SaveListCatalogEntitiesAsync(hasLinkEntries.ToArray());
                 }
 
             } while (haveProducts);
 
-            return NoContent();
+            return Ok();
         }
 
         [ApiExplorerSettings(IgnoreApi = true)]
@@ -155,10 +185,6 @@ namespace VirtoCommerce.CatalogModule.Web.Controllers.Api
         [Route("~/api/catalog/getslug")]
         public ActionResult<string> GetSlug(string text)
         {
-            //if (text == null)
-            //{
-            //    return InternalServerError(new NullReferenceException("text"));
-            //}
             return Ok(text.GenerateSlug());
         }
 
@@ -169,12 +195,15 @@ namespace VirtoCommerce.CatalogModule.Web.Controllers.Api
         [HttpPost]
         [Route("~/api/catalog/listentrylinks/delete")]
         public async Task<ActionResult> DeleteLinks([FromBody]CategoryLink[] links)
-        {
-            //Scope bound security check
-            //CheckCurrentUserHasPermissionForObjects(CatalogPredefinedPermissions.Delete, links);
-
+        {           
             var entryIds = links.Select(x => x.EntryId).ToArray();
             var hasLinkEntries = await LoadCatalogEntriesAsync<IHasLinks>(entryIds);
+
+            var authorizationResult = await _authorizationService.AuthorizeAsync(User, hasLinkEntries, new CatalogAuthorizationRequirement(ModuleConstants.Security.Permissions.Delete));
+            if (!authorizationResult.Succeeded)
+            {
+                return Unauthorized();
+            }
             foreach (var link in links)
             {
                 var hasLinkEntry = hasLinkEntries.FirstOrDefault(x => x.Id.Equals(link.EntryId));
@@ -194,29 +223,35 @@ namespace VirtoCommerce.CatalogModule.Web.Controllers.Api
         /// <summary>
         /// Move categories or products to another location.
         /// </summary>
-        /// <param name="moveInfo">Move operation details</param>
+        /// <param name="moveRequest">Move operation request</param>
         [HttpPost]
         [Route("move")]
-        public async Task<ActionResult> Move([FromBody]MoveInfo moveInfo)
+        public async Task<ActionResult> Move([FromBody]ListEntriesMoveRequest moveRequest)
         {
-            var dstCatalog = (await _catalogService.GetByIdsAsync(new[] { moveInfo.Catalog })).FirstOrDefault();
+            var authorizationResult = await _authorizationService.AuthorizeAsync(User, moveRequest, new CatalogAuthorizationRequirement(ModuleConstants.Security.Permissions.Update));
+            if (!authorizationResult.Succeeded)
+            {
+                return Unauthorized();
+            }
+
+            var dstCatalog = (await _catalogService.GetByIdsAsync(new[] { moveRequest.Catalog })).FirstOrDefault();
             if (dstCatalog.IsVirtual)
             {
-                return BadRequest("Unable to move to an virtual catalog");
+                return BadRequest("Unable to move to a virtual catalog");
             }
-            var catalogEntries = (await LoadCatalogEntriesAsync<IEntity>(moveInfo.ListEntries.Select(x => x.Id).ToArray())).ToList();
-            foreach (var listEntry in moveInfo.ListEntries.ToList())
+            var catalogEntries = (await LoadCatalogEntriesAsync<IEntity>(moveRequest.ListEntries.Select(x => x.Id).ToArray())).ToList();
+            foreach (var listEntry in moveRequest.ListEntries.ToList())
             {
                 var existEntry = catalogEntries.FirstOrDefault(x => x.Equals(listEntry));
                 if (existEntry != null)
                 {
                     if (existEntry is Category category)
                     {
-                        category.Move(moveInfo.Catalog, moveInfo.Category);
+                        category.Move(moveRequest.Catalog, moveRequest.Category);
                     }
                     if (existEntry is CatalogProduct product)
                     {
-                        product.Move(moveInfo.Catalog, moveInfo.Category);
+                        product.Move(moveRequest.Catalog, moveRequest.Category);
                         if (!product.Variations.IsNullOrEmpty())
                         {
                             catalogEntries.AddRange(product.Variations);
@@ -224,11 +259,6 @@ namespace VirtoCommerce.CatalogModule.Web.Controllers.Api
                     }
                 }
             }
-
-            //TODO:
-            //Scope bound security check
-            //CheckCurrentUserHasPermissionForObjects(CatalogPredefinedPermissions.Create, categories);
-            //CheckCurrentUserHasPermissionForObjects(CatalogPredefinedPermissions.Create, products);
             await SaveListCatalogEntitiesAsync(catalogEntries.ToArray());
             return NoContent();
         }

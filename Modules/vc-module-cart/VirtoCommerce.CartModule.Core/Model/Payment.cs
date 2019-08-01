@@ -52,7 +52,7 @@ namespace VirtoCommerce.CartModule.Core.Model
         #endregion
 
         #region IHasDynamicProperties Members
-        public string ObjectType { get; set; }
+        public string ObjectType => typeof(Payment).FullName;
         public ICollection<DynamicObjectProperty> DynamicProperties { get; set; }
         #endregion
     }

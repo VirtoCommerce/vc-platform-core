@@ -82,6 +82,18 @@ namespace VirtoCommerce.OrdersModule.Data.Migrations
                              ALTER TABLE [dbo].[OrderShipment] DROP CONSTRAINT [FK_dbo.OrderShipment_dbo.OrderOperation_Id]
                         END
 
+                        BEGIN
+                            UPDATE [PlatformDynamicProperty] SET ObjectType = 'VirtoCommerce.OrderModule.Core.Model.CustomerOrder'  WHERE ObjectType = 'VirtoCommerce.Domain.Order.Model.CustomerOrder'
+                            UPDATE [PlatformDynamicProperty] SET ObjectType = 'VirtoCommerce.OrderModule.Core.Model.LineItem'       WHERE ObjectType = 'VirtoCommerce.Domain.Order.Model.LineItem'
+                            UPDATE [PlatformDynamicProperty] SET ObjectType = 'VirtoCommerce.OrderModule.Core.Model.PaymentIn'      WHERE ObjectType = 'VirtoCommerce.Domain.Order.Model.PaymentIn'
+                            UPDATE [PlatformDynamicProperty] SET ObjectType = 'VirtoCommerce.OrderModule.Core.Model.Shipment'       WHERE ObjectType = 'VirtoCommerce.Domain.Order.Model.Shipment'
+
+                            UPDATE [PlatformDynamicPropertyObjectValue] SET ObjectType = 'VirtoCommerce.OrderModule.Core.Model.CustomerOrder'   WHERE ObjectType = 'VirtoCommerce.Domain.Order.Model.CustomerOrder'
+                            UPDATE [PlatformDynamicPropertyObjectValue] SET ObjectType = 'VirtoCommerce.OrderModule.Core.Model.LineItem'        WHERE ObjectType = 'VirtoCommerce.Domain.Order.Model.LineItem'
+                            UPDATE [PlatformDynamicPropertyObjectValue] SET ObjectType = 'VirtoCommerce.OrderModule.Core.Model.PaymentIn'       WHERE ObjectType = 'VirtoCommerce.Domain.Order.Model.PaymentIn'
+                            UPDATE [PlatformDynamicPropertyObjectValue] SET ObjectType = 'VirtoCommerce.OrderModule.Core.Model.Shipment'        WHERE ObjectType = 'VirtoCommerce.Domain.Order.Model.Shipment'
+                        END
+
                     END");
         }
 

@@ -1,16 +1,16 @@
-angular.module('platformWebApp')
-.controller('platformWebApp.changeLog.operationListController', ['$scope', 'platformWebApp.bladeNavigationService', 'platformWebApp.changeLogApi', function ($scope, bladeNavigationService, changeLogApi) {
+angular.module('platformWebApp').controller('platformWebApp.changeLog.operationListController', ['$scope', 'platformWebApp.bladeNavigationService', 'platformWebApp.changeLogApi', function ($scope, bladeNavigationService, changeLogApi) {
     $scope.blade.isLoading = false;
 
     if (!$scope.blade.currentEntities) {
         $scope.blade.isLoading = true;
+        var objectType = $scope.blade.tenantType ? $scope.blade.tenantType.split('.').pop() : '';
         changeLogApi.search({
-            objectIds: [ $scope.blade.tenantId ],
-            objectType: $scope.blade.tenantType.split('.').pop(),
+            objectIds: [$scope.blade.tenantId],
+            objectType: objectType,
             take: 50
         }, function (data) {
             $scope.blade.isLoading = false;
-            $scope.blade.currentEntities = data.results;
+            $scope.blade.currentEntities = data;
         });
     }
 

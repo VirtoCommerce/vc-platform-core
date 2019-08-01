@@ -34,12 +34,12 @@ namespace VirtoCommerce.PaymentModule.Web
             var connectionString = configuration.GetConnectionString("VirtoCommerce.Payment") ?? configuration.GetConnectionString("VirtoCommerce");
             serviceCollection.AddDbContext<PaymentDbContext>(options => options.UseSqlServer(connectionString));
             serviceCollection.AddTransient<IPaymentRepository, PaymentRepository>();
-            serviceCollection.AddSingleton<Func<IPaymentRepository>>(provider => () => provider.CreateScope().ServiceProvider.GetService<IPaymentRepository>());
+            serviceCollection.AddTransient<Func<IPaymentRepository>>(provider => () => provider.CreateScope().ServiceProvider.GetService<IPaymentRepository>());
 
-            serviceCollection.AddSingleton<IPaymentMethodsService, PaymentMethodsService>();
-            serviceCollection.AddSingleton<IPaymentMethodsRegistrar, PaymentMethodsService>();
-            serviceCollection.AddSingleton<IPaymentMethodsSearchService, PaymentMethodsSearchService>();
-            serviceCollection.AddSingleton<PaymentExportImport>();
+            serviceCollection.AddTransient<IPaymentMethodsService, PaymentMethodsService>();
+            serviceCollection.AddTransient<IPaymentMethodsRegistrar, PaymentMethodsService>();
+            serviceCollection.AddTransient<IPaymentMethodsSearchService, PaymentMethodsSearchService>();
+            serviceCollection.AddTransient<PaymentExportImport>();
         }
 
         public void PostInitialize(IApplicationBuilder appBuilder)

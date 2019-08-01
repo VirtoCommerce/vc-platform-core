@@ -79,7 +79,7 @@ namespace VirtoCommerce.SubscriptionModule.Data.Handlers
         /// </summary>
         protected virtual async Task SetNotificationParametersAsync(SubscriptionEmailNotificationBase notification, Subscription subscription)
         {
-            var store = await _storeService.GetByIdAsync(subscription.StoreId);
+            var store = await _storeService.GetByIdAsync(subscription.StoreId, StoreResponseGroup.StoreInfo.ToString());
 
             notification.IsActive = true;
             notification.Subscription = subscription;

@@ -42,17 +42,18 @@ namespace VirtoCommerce.NotificationsModule.Web
             var configuration = snapshot.GetService<IConfiguration>();
             serviceCollection.AddDbContext<NotificationDbContext>(options => options.UseSqlServer(configuration.GetConnectionString("VirtoCommerce")));
             serviceCollection.AddTransient<INotificationRepository, NotificationRepository>();
-            serviceCollection.AddSingleton<Func<INotificationRepository>>(provider => () => provider.CreateScope().ServiceProvider.GetService<INotificationRepository>());
-            serviceCollection.AddSingleton<INotificationService, NotificationService>();
-            serviceCollection.AddSingleton<INotificationSearchService, NotificationSearchService>();
-            serviceCollection.AddSingleton<INotificationRegistrar, NotificationService>();
-            serviceCollection.AddSingleton<INotificationMessageService, NotificationMessageService>();
-            serviceCollection.AddSingleton<INotificationMessageSearchService, NotificationMessageSearchService>();
-            serviceCollection.AddSingleton<INotificationSender, NotificationSender>();
-            serviceCollection.AddSingleton<INotificationTemplateRenderer, LiquidTemplateRenderer>();
-            serviceCollection.AddSingleton<INotificationMessageSenderProviderFactory, NotificationMessageSenderProviderFactory>();
+            serviceCollection.AddTransient<Func<INotificationRepository>>(provider => () => provider.CreateScope().ServiceProvider.GetService<INotificationRepository>());
+            serviceCollection.AddTransient<INotificationService, NotificationService>();
+            serviceCollection.AddTransient<INotificationSearchService, NotificationSearchService>();
+            serviceCollection.AddTransient<INotificationRegistrar, NotificationService>();
+            serviceCollection.AddTransient<INotificationMessageService, NotificationMessageService>();
+            serviceCollection.AddTransient<INotificationMessageSearchService, NotificationMessageSearchService>();
+            serviceCollection.AddTransient<INotificationSender, NotificationSender>();
+            serviceCollection.AddTransient<INotificationTemplateRenderer, LiquidTemplateRenderer>();
             serviceCollection.AddTransient<IEmailSender, EmailNotificationMessageSender>();
-            serviceCollection.AddSingleton<NotificationsExportImport>();
+            serviceCollection.AddTransient<NotificationsExportImport>();
+
+            serviceCollection.AddSingleton<INotificationMessageSenderProviderFactory, NotificationMessageSenderProviderFactory>();
 
             serviceCollection.AddOptions<EmailSendingOptions>().Bind(configuration.GetSection("Notifications")).ValidateDataAnnotations();
             var emailSendingOptions = serviceCollection.BuildServiceProvider().GetService<IOptions<EmailSendingOptions>>().Value;

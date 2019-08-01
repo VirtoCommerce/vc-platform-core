@@ -30,13 +30,13 @@ namespace VirtoCommerce.LicensingModule.Web
             var configuration = snapshot.GetService<IConfiguration>();
             serviceCollection.AddTransient<ILicenseRepository, LicenseRepository>();
             serviceCollection.AddDbContext<LicenseDbContext>(options => options.UseSqlServer(configuration.GetConnectionString("VirtoCommerce")));
-            serviceCollection.AddSingleton<Func<ILicenseRepository>>(provider => () => provider.CreateScope().ServiceProvider.GetService<ILicenseRepository>());
-            serviceCollection.AddSingleton(provider => new LogLicenseChangedEventHandler(provider.CreateScope().ServiceProvider.GetService<IChangeLogService>()));
+            serviceCollection.AddTransient<Func<ILicenseRepository>>(provider => () => provider.CreateScope().ServiceProvider.GetService<ILicenseRepository>());
+            serviceCollection.AddTransient(provider => new LogLicenseChangedEventHandler(provider.CreateScope().ServiceProvider.GetService<IChangeLogService>()));
             var providerSnapshot = serviceCollection.BuildServiceProvider();
             var inProcessBus = providerSnapshot.GetService<IHandlerRegistrar>();
             inProcessBus.RegisterHandler<LicenseChangedEvent>(async (message, token) => await providerSnapshot.GetService<LogLicenseChangedEventHandler>().Handle(message));
             inProcessBus.RegisterHandler<LicenseSignedEvent>(async (message, token) => await providerSnapshot.GetService<LogLicenseChangedEventHandler>().Handle(message));
-            serviceCollection.AddSingleton<ILicenseService, LicenseService>();
+            serviceCollection.AddTransient<ILicenseService, LicenseService>();
             serviceCollection.AddOptions<LicenseOptions>().Bind(configuration.GetSection("VirtoCommerce")).ValidateDataAnnotations();
         }
 

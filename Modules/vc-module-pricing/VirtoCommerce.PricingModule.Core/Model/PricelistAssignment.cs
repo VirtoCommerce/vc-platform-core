@@ -9,7 +9,7 @@ namespace VirtoCommerce.PricingModule.Core.Model
     /// <summary>
     /// Used to assign pricelist to specific catalog by using conditional expression 
     /// </summary>
-	public class PricelistAssignment : AuditableEntity
+	public class PricelistAssignment : AuditableEntity, ICloneable
     {
         public string CatalogId { get; set; }
         public string PricelistId { get; set; }
@@ -39,7 +39,7 @@ namespace VirtoCommerce.PricingModule.Core.Model
         //           This property causes NSwag to include lots of types including MethodImplAttributes, which leads to the invalid Swagger JSON.
         private Condition[] _conditions;
         [JsonIgnore]
-        public Condition[] Conditions => _conditions ?? (_conditions = ((PriceConditionTree)DynamicExpression).GetConditions());
+        public Condition[] Conditions => _conditions ?? (DynamicExpression != null ? _conditions = ((PriceConditionTree)DynamicExpression).GetConditions() : null);
 
         /// <summary>
         /// List of conditions and rules to define Prices Assignment is valid
@@ -47,5 +47,19 @@ namespace VirtoCommerce.PricingModule.Core.Model
         public IConditionTree DynamicExpression { get; set; }
 
         public string OuterId { get; set; }
+
+
+        #region ICloneable members
+        public virtual object Clone()
+        {
+            var result = MemberwiseClone() as PricelistAssignment;
+            if (Pricelist != null)
+            {
+                result.Pricelist = result.Pricelist.Clone() as Pricelist;
+            }
+            //TODO: Clone Conditions, DynamicExpression
+            return result;
+        }
+        #endregion
     }
 }

@@ -2,18 +2,22 @@ using System.Collections.Generic;
 using VirtoCommerce.Platform.Core.Common;
 using VirtoCommerce.Platform.Core.DynamicProperties;
 
-namespace VirtoCommerce.ContentModule.Web
+namespace VirtoCommerce.ContentModule.Core.Model
 {
     public class FrontMatterHeaders : Entity, IHasDynamicProperties
     {
-        public string ObjectType => GetType().FullName;
+        #region IHasDynamicProperties Members
+
+        public string ObjectType => typeof(FrontMatterHeaders).FullName;
         public ICollection<DynamicObjectProperty> DynamicProperties { get; set; }
+
+        #endregion
 
         #region DynamicProperty
 
         //https://jekyllrb.com/docs/frontmatter/
         //Register special ContentItem.FrontMatterHeaders type which will be used to define YAML headers for pages, blogs and posts
-        static string frontMatterHeaderType = typeof(FrontMatterHeaders).FullName;
+        private static string frontMatterHeaderType = typeof(FrontMatterHeaders).FullName;
 
         //Title
         public static DynamicProperty titleHeader = new DynamicProperty

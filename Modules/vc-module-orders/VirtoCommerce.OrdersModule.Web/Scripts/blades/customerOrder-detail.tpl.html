@@ -1,4 +1,4 @@
-﻿<div class="blade-content __medium-wide">
+<div class="blade-content __medium-wide">
     <div class="blade-inner">
         <div class="inner-block">
             <div class="order-status" ng-if="blade.currentEntity.status">
@@ -64,13 +64,13 @@
 <script type="text/ng-template" id="discountAmount.html">
     <div class="form-input __currency">
         <span class="currency">{{blade.currentEntity.currency}}</span>
-        <input money required ng-model="blade.currentEntity.discountAmount" ng-model-options="{ updateOn: 'blur' }" ng-change="blade.recalculate()" id="discountAmount" focus-on="discountAmount">
+        <input money mask-money="!blade.isVisiblePrices" required ng-model="blade.currentEntity.discountAmount" ng-model-options="{ updateOn: 'blur' }" ng-change="blade.recalculate()" id="discountAmount" focus-on="discountAmount">
     </div>
 </script>
 <script type="text/ng-template" id="discountAmountWithTax.html">
     <div class="form-input __currency">
         <span class="currency">{{blade.currentEntity.currency}}</span>
-        <input money required ng-model="blade.currentEntity.discountAmountWithTax" ng-model-options="{ updateOn: 'blur' }" ng-change="blade.recalculate()" id="discountAmountWithTax" focus-on="discountAmountWithTax">
+        <input money mask-money="!blade.isVisiblePrices" required ng-model="blade.currentEntity.discountAmountWithTax" ng-model-options="{ updateOn: 'blur' }" ng-change="blade.recalculate()" id="discountAmountWithTax" focus-on="discountAmountWithTax">
     </div>
 </script>
 

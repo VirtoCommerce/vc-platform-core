@@ -5,7 +5,7 @@ namespace VirtoCommerce.NotificationsModule.Core.Exceptions
 {
     public class SentNotificationException : PlatformException
     {
-        public SentNotificationException(string message, Exception ex) : base(message, ex)
+        public SentNotificationException(Exception ex) : base(ex.ToString(), ex.InnerException)
         {
         }
     }

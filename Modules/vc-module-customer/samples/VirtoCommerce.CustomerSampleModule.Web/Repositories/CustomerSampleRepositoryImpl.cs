@@ -6,7 +6,7 @@ using VirtoCommerce.CustomerSampleModule.Web.Model;
 
 namespace VirtoCommerce.CustomerSampleModule.Web.Repositories
 {
-    public class CustomerSampleRepositoryImpl : CustomerRepositoryImpl
+    public class CustomerSampleRepositoryImpl : CustomerRepository
     {
         public CustomerSampleRepositoryImpl(CustomerSampleDbContext dbContext) : base(dbContext)
         {

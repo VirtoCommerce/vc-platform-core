@@ -106,6 +106,54 @@ namespace VirtoCommerce.CartModule.Data.Repositories
                         .HasForeignKey(x => x.ShoppingCartId).OnDelete(DeleteBehavior.Cascade);
             #endregion
 
+            #region DynamicPropertyValues
+
+            modelBuilder.Entity<CartDynamicPropertyObjectValueEntity>().ToTable("CartDynamicPropertyObjectValue").HasKey(x => x.Id);
+            modelBuilder.Entity<CartDynamicPropertyObjectValueEntity>().Property(x => x.Id).HasMaxLength(128);
+            modelBuilder.Entity<CartDynamicPropertyObjectValueEntity>().Property(x => x.DecimalValue).HasColumnType("decimal(18,5)");
+
+            modelBuilder.Entity<CartDynamicPropertyObjectValueEntity>().HasIndex(x => new { x.ObjectType, x.ObjectId })
+                .IsUnique(false)
+                .HasName("IX_ObjectType_ObjectId");
+
+            //need to set DeleteBehavior.Cascade manually
+            modelBuilder.Entity<CartDynamicPropertyObjectValueEntity>().HasOne(p => p.ShoppingCart)
+                .WithMany(s => s.DynamicPropertyObjectValues).HasForeignKey(k => k.ShoppingCartId)
+                .OnDelete(DeleteBehavior.Cascade);
+
+            //need to set DeleteBehavior.Cascade manually
+            modelBuilder.Entity<CartDynamicPropertyObjectValueEntity>().HasOne(p => p.Shipment)
+                .WithMany(s => s.DynamicPropertyObjectValues).HasForeignKey(k => k.ShipmentId)
+                .OnDelete(DeleteBehavior.Cascade);
+
+            //need to set DeleteBehavior.Cascade manually
+            modelBuilder.Entity<CartDynamicPropertyObjectValueEntity>().HasOne(p => p.Payment)
+                .WithMany(s => s.DynamicPropertyObjectValues).HasForeignKey(k => k.PaymentId)
+                .OnDelete(DeleteBehavior.Cascade);
+
+            //need to set DeleteBehavior.Cascade manually
+            modelBuilder.Entity<CartDynamicPropertyObjectValueEntity>().HasOne(p => p.LineItem)
+                .WithMany(s => s.DynamicPropertyObjectValues).HasForeignKey(k => k.LineItemId)
+                .OnDelete(DeleteBehavior.Cascade);
+
+            modelBuilder.Entity<CartDynamicPropertyObjectValueEntity>().HasIndex(x => new { x.ObjectType, x.ShoppingCartId })
+                .IsUnique(false)
+                .HasName("IX_ObjectType_ShoppingCartId");
+
+            modelBuilder.Entity<CartDynamicPropertyObjectValueEntity>().HasIndex(x => new { x.ObjectType, x.ShipmentId })
+                .IsUnique(false)
+                .HasName("IX_ObjectType_ShipmentId");
+
+            modelBuilder.Entity<CartDynamicPropertyObjectValueEntity>().HasIndex(x => new { x.ObjectType, x.PaymentId })
+                .IsUnique(false)
+                .HasName("IX_ObjectType_PaymentId");
+
+            modelBuilder.Entity<CartDynamicPropertyObjectValueEntity>().HasIndex(x => new { x.ObjectType, x.LineItemId })
+                .IsUnique(false)
+                .HasName("IX_ObjectType_LineItemId");
+
+            #endregion
+
             base.OnModelCreating(modelBuilder);
         }
     }

@@ -216,65 +216,6 @@ namespace VirtoCommerce.Platform.Data.Migrations
                     b.ToTable("PlatformDynamicPropertyName");
                 });
 
-            modelBuilder.Entity("VirtoCommerce.Platform.Data.Model.DynamicPropertyObjectValueEntity", b =>
-                {
-                    b.Property<string>("Id")
-                        .ValueGeneratedOnAdd()
-                        .HasMaxLength(128);
-
-                    b.Property<bool?>("BooleanValue");
-
-                    b.Property<string>("CreatedBy")
-                        .HasMaxLength(64);
-
-                    b.Property<DateTime>("CreatedDate");
-
-                    b.Property<DateTime?>("DateTimeValue");
-
-                    b.Property<decimal?>("DecimalValue")
-                        .HasColumnType("decimal(18,5)");
-
-                    b.Property<string>("DictionaryItemId");
-
-                    b.Property<int?>("IntegerValue");
-
-                    b.Property<string>("Locale")
-                        .HasMaxLength(64);
-
-                    b.Property<string>("LongTextValue");
-
-                    b.Property<string>("ModifiedBy")
-                        .HasMaxLength(64);
-
-                    b.Property<DateTime?>("ModifiedDate");
-
-                    b.Property<string>("ObjectId")
-                        .HasMaxLength(128);
-
-                    b.Property<string>("ObjectType")
-                        .HasMaxLength(256);
-
-                    b.Property<string>("PropertyId");
-
-                    b.Property<string>("ShortTextValue")
-                        .HasMaxLength(512);
-
-                    b.Property<string>("ValueType")
-                        .IsRequired()
-                        .HasMaxLength(64);
-
-                    b.HasKey("Id");
-
-                    b.HasIndex("DictionaryItemId");
-
-                    b.HasIndex("PropertyId");
-
-                    b.HasIndex("ObjectType", "ObjectId")
-                        .HasName("IX_ObjectType_ObjectId");
-
-                    b.ToTable("PlatformDynamicPropertyObjectValue");
-                });
-
             modelBuilder.Entity("VirtoCommerce.Platform.Data.Model.OperationLogEntity", b =>
                 {
                     b.Property<string>("Id")
@@ -408,18 +349,6 @@ namespace VirtoCommerce.Platform.Data.Migrations
                 {
                     b.HasOne("VirtoCommerce.Platform.Data.Model.DynamicPropertyEntity", "Property")
                         .WithMany("DisplayNames")
-                        .HasForeignKey("PropertyId")
-                        .OnDelete(DeleteBehavior.Cascade);
-                });
-
-            modelBuilder.Entity("VirtoCommerce.Platform.Data.Model.DynamicPropertyObjectValueEntity", b =>
-                {
-                    b.HasOne("VirtoCommerce.Platform.Data.Model.DynamicPropertyDictionaryItemEntity", "DictionaryItem")
-                        .WithMany("ObjectValues")
-                        .HasForeignKey("DictionaryItemId");
-
-                    b.HasOne("VirtoCommerce.Platform.Data.Model.DynamicPropertyEntity", "Property")
-                        .WithMany("ObjectValues")
                         .HasForeignKey("PropertyId")
                         .OnDelete(DeleteBehavior.Cascade);
                 });

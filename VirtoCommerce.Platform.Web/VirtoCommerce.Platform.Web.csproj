@@ -1,7 +1,7 @@
 <Project Sdk="Microsoft.NET.Sdk.Web">
     <PropertyGroup>
         <TargetFramework>netcoreapp2.2</TargetFramework>
-		<AspNetCoreHostingModel>InProcess</AspNetCoreHostingModel>
+	      <AspNetCoreHostingModel>InProcess</AspNetCoreHostingModel>
         <DockerComposeProjectPath>..\docker-compose.dcproj</DockerComposeProjectPath>
         <AssemblyVersion>3.0.0.0</AssemblyVersion>
         <Version>3.0.0</Version>

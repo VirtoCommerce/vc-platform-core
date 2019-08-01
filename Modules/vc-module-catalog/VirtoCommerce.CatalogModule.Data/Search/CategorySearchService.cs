@@ -1,10 +1,12 @@
 using System;
+using System.Collections.Generic;
 using System.Linq;
 using System.Threading.Tasks;
 using Microsoft.EntityFrameworkCore;
 using VirtoCommerce.CatalogModule.Core.Model.Search;
 using VirtoCommerce.CatalogModule.Core.Search;
 using VirtoCommerce.CatalogModule.Core.Services;
+using VirtoCommerce.CatalogModule.Data.Model;
 using VirtoCommerce.CatalogModule.Data.Repositories;
 using VirtoCommerce.Platform.Core.Common;
 using VirtoCommerce.Platform.Data.Infrastructure;
@@ -29,34 +31,54 @@ namespace VirtoCommerce.CatalogModule.Data.Search
             {
                 //Optimize performance and CPU usage
                 repository.DisableChangesTracking();
-                var query = repository.Categories;
-                if (!string.IsNullOrEmpty(criteria.Keyword))
-                {
-                    query = query.Where(x => x.Name.Contains(criteria.Keyword));
-                }
-                if (!string.IsNullOrEmpty(criteria.CatalogId))
-                {
-                    query = query.Where(x => x.CatalogId == criteria.CatalogId);
-                }
-                if (!string.IsNullOrEmpty(criteria.CategoryId))
-                {
-                    query = query.Where(x => x.ParentCategoryId == criteria.CategoryId);
-                }
-                var sortInfos = criteria.SortInfos;
-                if (sortInfos.IsNullOrEmpty())
-                {
-                    sortInfos = new[] { new SortInfo { SortColumn = "Name" } };
-                }
-                query = query.OrderBySortInfos(sortInfos).ThenBy(x => x.Id);
+
+                var sortInfos = BuildSortExpression(criteria);
+                var query = BuildQuery(repository, criteria);
+
                 result.TotalCount = await query.CountAsync();
                 if (criteria.Take > 0)
                 {
-                    var ids = await query.Skip(criteria.Skip).Take(criteria.Take).Select(x => x.Id).ToListAsync();
-                    var categories = await _categoryService.GetByIdsAsync(ids.ToArray(), criteria.ResponseGroup);
-                    result.Results = categories.OrderBy(x => ids.IndexOf(x.Id)).ToList();
+                    var ids = await query.OrderBySortInfos(sortInfos).ThenBy(x => x.Id)
+                                        .Select(x => x.Id)
+                                        .Skip(criteria.Skip).Take(criteria.Take)
+                                        .ToArrayAsync();
+
+                    result.Results = (await _categoryService.GetByIdsAsync(ids, criteria.ResponseGroup)).OrderBy(x => Array.IndexOf(ids, x.Id)).ToList();
                 }
             }
+
             return result;
+        }
+
+        protected virtual IList<SortInfo> BuildSortExpression(CategorySearchCriteria criteria)
+        {
+            var sortInfos = criteria.SortInfos;
+            if (sortInfos.IsNullOrEmpty())
+            {
+                sortInfos = new[]
+                {
+                    new SortInfo { SortColumn = nameof(CategoryEntity.Name) }
+                };
+            }
+            return sortInfos;
+        }
+
+        protected virtual IQueryable<CategoryEntity> BuildQuery(ICatalogRepository repository, CategorySearchCriteria criteria)
+        {
+            var query = repository.Categories;
+            if (!string.IsNullOrEmpty(criteria.Keyword))
+            {
+                query = query.Where(x => x.Name.Contains(criteria.Keyword));
+            }
+            if (!string.IsNullOrEmpty(criteria.CatalogId))
+            {
+                query = query.Where(x => x.CatalogId == criteria.CatalogId);
+            }
+            if (!string.IsNullOrEmpty(criteria.CategoryId))
+            {
+                query = query.Where(x => x.ParentCategoryId == criteria.CategoryId);
+            }
+            return query;
         }
     }
 }

@@ -59,10 +59,19 @@ namespace VirtoCommerce.OrdersModule.Data.Model
             OuterId = shipmentItem.OuterId;
 
             BarCode = shipmentItem.BarCode;
-            shipmentItem.Quantity = shipmentItem.Quantity;
+            Quantity = shipmentItem.Quantity;
 
             pkMap.AddPair(shipmentItem, this);
-            ModelLineItem = shipmentItem.LineItem;
+            if (shipmentItem.LineItem != null)
+            {
+                LineItemId = shipmentItem.LineItem.Id;
+                //Store ModelLineItem for future linking with the order line item only for new objects otherwise we will get error when saving
+                if (shipmentItem.LineItem.IsTransient())
+                {
+                    ModelLineItem = shipmentItem.LineItem;
+                }
+            }
+
             return this;
         }
 

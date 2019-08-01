@@ -8,6 +8,7 @@ using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Options;
 using VirtoCommerce.CartModule.Core;
 using VirtoCommerce.CartModule.Core.Events;
+using VirtoCommerce.CartModule.Core.Model;
 using VirtoCommerce.CartModule.Core.Services;
 using VirtoCommerce.CartModule.Data.Handlers;
 using VirtoCommerce.CartModule.Data.Repositories;
@@ -15,6 +16,7 @@ using VirtoCommerce.CartModule.Data.Services;
 using VirtoCommerce.CartModule.Web.JsonConverters;
 using VirtoCommerce.Platform.Core.Bus;
 using VirtoCommerce.Platform.Core.Common;
+using VirtoCommerce.Platform.Core.DynamicProperties;
 using VirtoCommerce.Platform.Core.Modularity;
 using VirtoCommerce.Platform.Core.Security;
 using VirtoCommerce.Platform.Data.Extensions;
@@ -27,16 +29,16 @@ namespace VirtoCommerce.CartModule.Web
         public void Initialize(IServiceCollection serviceCollection)
         {
             var configuration = serviceCollection.BuildServiceProvider().GetRequiredService<IConfiguration>();
-            serviceCollection.AddTransient<ICartRepository, CartRepositoryImpl>();
+            serviceCollection.AddTransient<ICartRepository, CartRepository>();
             var connectionString = configuration.GetConnectionString("VirtoCommerce.Cart") ?? configuration.GetConnectionString("VirtoCommerce");
             serviceCollection.AddDbContext<CartDbContext>(options => options.UseSqlServer(connectionString));
-            serviceCollection.AddSingleton<Func<ICartRepository>>(provider => () => provider.CreateScope().ServiceProvider.GetRequiredService<ICartRepository>());
-            serviceCollection.AddSingleton<IShoppingCartService, ShoppingCartServiceImpl>();
-            serviceCollection.AddSingleton<IShoppingCartSearchService, ShoppingCartSearchServiceImpl>();
-            serviceCollection.AddSingleton<IShoppingCartTotalsCalculator, DefaultShoppingCartTotalsCalculator>();
-            serviceCollection.AddSingleton<IShoppingCartBuilder, ShoppingCartBuilderImpl>();
+            serviceCollection.AddTransient<Func<ICartRepository>>(provider => () => provider.CreateScope().ServiceProvider.GetRequiredService<ICartRepository>());
+            serviceCollection.AddTransient<IShoppingCartService, ShoppingCartService>();
+            serviceCollection.AddTransient<IShoppingCartSearchService, ShoppingCartSearchService>();
+            serviceCollection.AddTransient<IShoppingCartTotalsCalculator, DefaultShoppingCartTotalsCalculator>();
+            serviceCollection.AddTransient<IShoppingCartBuilder, ShoppingCartBuilder>();
 
-            serviceCollection.AddSingleton<CartChangedEventHandler>();
+            serviceCollection.AddTransient<CartChangedEventHandler>();
             var providerSnapshot = serviceCollection.BuildServiceProvider();
             var inProcessBus = providerSnapshot.GetService<IHandlerRegistrar>();
             inProcessBus.RegisterHandler<CartChangedEvent>(async (message, token) => await providerSnapshot.GetService<CartChangedEventHandler>().Handle(message));
@@ -56,6 +58,12 @@ namespace VirtoCommerce.CartModule.Web
 
             var mvcJsonOptions = appBuilder.ApplicationServices.GetService<IOptions<MvcJsonOptions>>();
             mvcJsonOptions.Value.SerializerSettings.Converters.Add(new PolymorphicCartJsonConverter());
+
+            var dynamicPropertyRegistrar = appBuilder.ApplicationServices.GetRequiredService<IDynamicPropertyRegistrar>();
+            dynamicPropertyRegistrar.RegisterType<LineItem>();
+            dynamicPropertyRegistrar.RegisterType<Payment>();
+            dynamicPropertyRegistrar.RegisterType<Shipment>();
+            dynamicPropertyRegistrar.RegisterType<ShoppingCart>();
 
             using (var serviceScope = appBuilder.ApplicationServices.CreateScope())
             {

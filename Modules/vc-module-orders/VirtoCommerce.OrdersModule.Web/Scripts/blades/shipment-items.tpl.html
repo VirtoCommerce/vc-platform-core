@@ -1,4 +1,4 @@
-﻿<div class="blade-static">
+<div class="blade-static">
     <div class="form-group">
         <p class="form-count">{{'platform.list.count' | translate}}: <span class="count">{{pageSettings.totalItems | number:0}}</span></p>
     </div>
@@ -52,11 +52,11 @@
                             </td>
                             <td class="table-col">
                                 <div class="form-input __mini">
-                                    {{data.lineItem.price | currency:data.lineItem.currency}}
+                                    {{data.lineItem.price | currency:data.lineItem.currency | showPrice:blade.isVisiblePrices}}
                                 </div>
                             </td>
                             <td class="table-col __total">
-                                <span>{{data._total | currency:data.lineItem.currency}}</span>
+                                <span>{{data._total | currency:data.lineItem.currency | showPrice:blade.isVisiblePrices}}</span>
                             </td>
                         </tr>
                         <tr ng-repeat-end class="table-item" ng-class="{'__selected': data.id === selectedNodeId}" context-menu data-target="col_menu_{{data.id}}" ng-click='selectItem(data)'>

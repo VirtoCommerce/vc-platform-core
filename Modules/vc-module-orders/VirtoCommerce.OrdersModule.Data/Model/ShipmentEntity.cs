@@ -1,4 +1,5 @@
 using System;
+using System.Collections.Generic;
 using System.Collections.ObjectModel;
 using System.ComponentModel.DataAnnotations;
 using System.ComponentModel.DataAnnotations.Schema;
@@ -7,11 +8,12 @@ using VirtoCommerce.CoreModule.Core.Common;
 using VirtoCommerce.CoreModule.Core.Tax;
 using VirtoCommerce.OrdersModule.Core.Model;
 using VirtoCommerce.Platform.Core.Common;
+using VirtoCommerce.Platform.Core.DynamicProperties;
 using Address = VirtoCommerce.OrdersModule.Core.Model.Address;
 
 namespace VirtoCommerce.OrdersModule.Data.Model
 {
-    public class ShipmentEntity : OperationEntity
+    public class ShipmentEntity : OperationEntity, ISupportPartialPriceUpdate
     {
         [StringLength(64)]
         public string OrganizationId { get; set; }
@@ -69,19 +71,25 @@ namespace VirtoCommerce.OrdersModule.Data.Model
         public string CustomerOrderId { get; set; }
         public virtual CustomerOrderEntity CustomerOrder { get; set; }
 
+        #region NavigationProperties
+
         public virtual ObservableCollection<ShipmentItemEntity> Items { get; set; } = new NullCollection<ShipmentItemEntity>();
         public virtual ObservableCollection<ShipmentPackageEntity> Packages { get; set; } = new NullCollection<ShipmentPackageEntity>();
         public virtual ObservableCollection<PaymentInEntity> InPayments { get; set; } = new NullCollection<PaymentInEntity>();
         public virtual ObservableCollection<AddressEntity> Addresses { get; set; } = new NullCollection<AddressEntity>();
         public virtual ObservableCollection<DiscountEntity> Discounts { get; set; } = new NullCollection<DiscountEntity>();
         public virtual ObservableCollection<TaxDetailEntity> TaxDetails { get; set; } = new NullCollection<TaxDetailEntity>();
+        public virtual ObservableCollection<OrderDynamicPropertyObjectValueEntity> DynamicPropertyObjectValues { get; set; } = new NullCollection<OrderDynamicPropertyObjectValueEntity>();
 
+        #endregion
 
         public override OrderOperation ToModel(OrderOperation operation)
         {
             var shipment = operation as Shipment;
             if (shipment == null)
+            {
                 throw new ArgumentException(@"operation argument must be of type Shipment", nameof(operation));
+            }
 
             if (!Addresses.IsNullOrEmpty())
             {
@@ -127,6 +135,15 @@ namespace VirtoCommerce.OrdersModule.Data.Model
             shipment.Packages = Packages.Select(x => x.ToModel(AbstractTypeFactory<ShipmentPackage>.TryCreateInstance())).ToList();
             shipment.TaxDetails = TaxDetails.Select(x => x.ToModel(AbstractTypeFactory<TaxDetail>.TryCreateInstance())).ToList();
 
+            shipment.DynamicProperties = DynamicPropertyObjectValues.GroupBy(g => g.PropertyId).Select(x =>
+            {
+                var property = AbstractTypeFactory<DynamicObjectProperty>.TryCreateInstance();
+                property.Id = x.Key;
+                property.Name = x.FirstOrDefault()?.PropertyName;
+                property.Values = x.Select(v => v.ToModel(AbstractTypeFactory<DynamicPropertyObjectValue>.TryCreateInstance())).ToArray();
+                return property;
+            }).ToArray();
+
             base.ToModel(shipment);
 
             operation.Sum = shipment.TotalWithTax;
@@ -138,7 +155,9 @@ namespace VirtoCommerce.OrdersModule.Data.Model
         {
             var shipment = operation as Shipment;
             if (shipment == null)
+            {
                 throw new ArgumentException(@"operation argument must be of type Shipment", nameof(operation));
+            }
 
             base.FromModel(shipment, pkMap);
 
@@ -212,6 +231,12 @@ namespace VirtoCommerce.OrdersModule.Data.Model
                 Discounts = new ObservableCollection<DiscountEntity>(shipment.Discounts.Select(x => AbstractTypeFactory<DiscountEntity>.TryCreateInstance().FromModel(x)));
             }
 
+            if (shipment.DynamicProperties != null)
+            {
+                DynamicPropertyObjectValues = new ObservableCollection<OrderDynamicPropertyObjectValueEntity>(shipment.DynamicProperties.SelectMany(p => p.Values
+                    .Select(v => AbstractTypeFactory<OrderDynamicPropertyObjectValueEntity>.TryCreateInstance().FromModel(v, shipment, p))).OfType<OrderDynamicPropertyObjectValueEntity>());
+            }
+
             Sum = shipment.TotalWithTax;
 
             return this;
@@ -219,16 +244,17 @@ namespace VirtoCommerce.OrdersModule.Data.Model
 
         public override void Patch(OperationEntity operation)
         {
-            base.Patch(operation);
-
             var target = operation as ShipmentEntity;
             if (target == null)
+            {
                 throw new ArgumentException(@"operation argument must be of type ShipmentEntity", nameof(operation));
+            }
 
-            target.Price = Price;
-            target.PriceWithTax = PriceWithTax;
-            target.DiscountAmount = DiscountAmount;
-            target.DiscountAmountWithTax = DiscountAmountWithTax;
+            var isNeedPatch = !(GetNonCalculatablePrices().Any(x => x == 0m) && target.GetNonCalculatablePrices().Any(x => x != 0m));
+
+            base.NeedPatchSum = isNeedPatch;
+            base.Patch(operation);
+
             target.FulfillmentCenterId = FulfillmentCenterId;
             target.FulfillmentCenterName = FulfillmentCenterName;
             target.OrganizationId = OrganizationId;
@@ -246,10 +272,18 @@ namespace VirtoCommerce.OrdersModule.Data.Model
             target.WeightUnit = WeightUnit;
             target.Length = Length;
             target.TaxType = TaxType;
-            target.TaxPercentRate = TaxPercentRate;
-            target.TaxTotal = TaxTotal;
-            target.Total = Total;
-            target.TotalWithTax = TotalWithTax;
+
+            if (isNeedPatch)
+            {
+                target.Price = Price;
+                target.PriceWithTax = PriceWithTax;
+                target.DiscountAmount = DiscountAmount;
+                target.DiscountAmountWithTax = DiscountAmountWithTax;
+                target.TaxPercentRate = TaxPercentRate;
+                target.TaxTotal = TaxTotal;
+                target.Total = Total;
+                target.TotalWithTax = TotalWithTax;
+            }
 
             if (!InPayments.IsNullCollection())
             {
@@ -282,6 +316,30 @@ namespace VirtoCommerce.OrdersModule.Data.Model
                 var taxDetailComparer = AnonymousComparer.Create((TaxDetailEntity x) => x.Name);
                 TaxDetails.Patch(target.TaxDetails, taxDetailComparer, (sourceTaxDetail, targetTaxDetail) => sourceTaxDetail.Patch(targetTaxDetail));
             }
+
+            if (!DynamicPropertyObjectValues.IsNullCollection())
+            {
+                DynamicPropertyObjectValues.Patch(target.DynamicPropertyObjectValues, (sourceDynamicPropertyObjectValues, targetDynamicPropertyObjectValues) => sourceDynamicPropertyObjectValues.Patch(targetDynamicPropertyObjectValues));
+            }
+        }
+        public virtual void ResetPrices()
+        {
+            Price = 0m;
+            PriceWithTax = 0m;
+            DiscountAmount = 0m;
+            DiscountAmountWithTax = 0m;
+            Total = 0m;
+            TotalWithTax = 0m;
+            TaxTotal = 0m;
+            TaxPercentRate = 0m;
+            Sum = 0m;
+        }
+
+        public virtual IEnumerable<decimal> GetNonCalculatablePrices()
+        {
+            yield return TaxPercentRate;
+            yield return Price;
+            yield return DiscountAmount;
         }
     }
 }

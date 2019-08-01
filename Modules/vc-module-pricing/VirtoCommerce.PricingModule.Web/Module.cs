@@ -51,16 +51,17 @@ namespace VirtoCommerce.PricingModule.Web
             var connectionString = configuration.GetConnectionString("VirtoCommerce.Pricing") ?? configuration.GetConnectionString("VirtoCommerce");
             serviceCollection.AddDbContext<PricingDbContext>(options => options.UseSqlServer(connectionString));
             serviceCollection.AddTransient<IPricingRepository, PricingRepositoryImpl>();
-            serviceCollection.AddSingleton<Func<IPricingRepository>>(provider => () => provider.CreateScope().ServiceProvider.GetRequiredService<IPricingRepository>());
+            serviceCollection.AddTransient<Func<IPricingRepository>>(provider => () => provider.CreateScope().ServiceProvider.GetRequiredService<IPricingRepository>());
 
             serviceCollection.AddTransient<IPricingService, PricingServiceImpl>();
             serviceCollection.AddTransient<IPricingSearchService, PricingSearchServiceImpl>();
-            serviceCollection.AddSingleton<IPricingExtensionManager, DefaultPricingExtensionManagerImpl>();
-            serviceCollection.AddSingleton<PricingExportImport>();
-            serviceCollection.AddSingleton<PolymorphicPricingJsonConverter>();
+            serviceCollection.AddTransient<PricingExportImport>();
+            serviceCollection.AddTransient<PolymorphicPricingJsonConverter>();
             serviceCollection.AddTransient<ProductPriceDocumentChangesProvider>();
             serviceCollection.AddTransient<ProductPriceDocumentBuilder>();
-            serviceCollection.AddSingleton<LogChangesChangedEventHandler>();
+            serviceCollection.AddTransient<LogChangesChangedEventHandler>();
+
+            serviceCollection.AddSingleton<IPricingExtensionManager, DefaultPricingExtensionManagerImpl>();
         }
 
         public void PostInitialize(IApplicationBuilder appBuilder)

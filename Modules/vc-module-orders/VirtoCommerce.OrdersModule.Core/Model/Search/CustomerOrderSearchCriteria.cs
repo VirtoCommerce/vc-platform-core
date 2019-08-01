@@ -5,6 +5,7 @@ namespace VirtoCommerce.OrdersModule.Core.Model.Search
 {
     public class CustomerOrderSearchCriteria : SearchCriteriaBase
     {
+        public string[] Ids { get; set; }
         /// <summary>
         /// Search by numbers
         /// </summary>
@@ -89,8 +90,7 @@ namespace VirtoCommerce.OrdersModule.Core.Model.Search
         /// It used to limit search within an operation (customer order for example)
         /// </summary>
         public string OperationId { get; set; }
-
-        public string CustomerId { get; set; }
+        public string[] CustomerIds { get; set; }
         public string EmployeeId { get; set; }
         public string[] StoreIds { get; set; }
         public DateTime? StartDate { get; set; }

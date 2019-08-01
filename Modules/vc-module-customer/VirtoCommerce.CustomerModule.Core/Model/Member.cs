@@ -24,7 +24,7 @@ namespace VirtoCommerce.CustomerModule.Core.Model
 
         #region IHasDynamicProperties Members
 
-        public string ObjectType { get; set; }
+        public virtual string ObjectType => typeof(Member).FullName;
         public ICollection<DynamicObjectProperty> DynamicProperties { get; set; }
 
         #endregion
@@ -36,5 +36,40 @@ namespace VirtoCommerce.CustomerModule.Core.Model
         public virtual IList<SeoInfo> SeoInfos { get; set; }
 
         #endregion
+
+        public virtual void ReduceDetails(string responseGroup)
+        {
+            //Reduce details according to response group
+            var memberResponseGroup = EnumUtility.SafeParseFlags(responseGroup, MemberResponseGroup.Full);
+
+            if (!memberResponseGroup.HasFlag(MemberResponseGroup.WithNotes))
+            {
+                Notes = null;
+            }
+            if (!memberResponseGroup.HasFlag(MemberResponseGroup.WithAddresses))
+            {
+                Addresses = null;
+            }
+            if (!memberResponseGroup.HasFlag(MemberResponseGroup.WithEmails))
+            {
+                Emails = null;
+            }
+            if (!memberResponseGroup.HasFlag(MemberResponseGroup.WithGroups))
+            {
+                Groups = null;
+            }
+            if (!memberResponseGroup.HasFlag(MemberResponseGroup.WithPhones))
+            {
+                Phones = null;
+            }
+            if (!memberResponseGroup.HasFlag(MemberResponseGroup.WithSeo))
+            {
+                SeoInfos = null;
+            }
+            if (!memberResponseGroup.HasFlag(MemberResponseGroup.WithDynamicProperties))
+            {
+                DynamicProperties = null;
+            }
+        }
     }
 }
