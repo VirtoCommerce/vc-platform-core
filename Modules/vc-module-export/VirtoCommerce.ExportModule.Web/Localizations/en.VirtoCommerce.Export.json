@@ -4,6 +4,10 @@
         "commands": {
             "pick-all": "Pick all"
         },
+        "provider-names": {
+            "JsonExportProvider": "JSON export provider",
+            "CsvExportProvider": "CSV export provider"
+        },
         "blades": {
             "export-settings": {
                 "title": "Export settings",
