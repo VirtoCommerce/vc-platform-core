@@ -27,11 +27,11 @@
                     "exported-columns": "Select columns",
                     "exported-columns-group": "Select columns in this group",
                     "all": "All",
-                    "provider-description": "Available exported types depend on selected provider. Some types do not support tabular export (CSV provider).",
+                    "provider-description": "Tabular providers (e.g. Csv provider) are unavailable for exported types which do not support tabular export.",
                     "exported-columns-description": "Please select columns.",
                     "exported-data-description": "Please select data range.",
                     "exported-type-description": "Please select data type.",
-                    "selected": "Selected: ",
+                    "selected": "{{ count }} of {{total}} selected ",
                     "allFiltered": "All (filter specified)"
                 },
                 "placeholders": {

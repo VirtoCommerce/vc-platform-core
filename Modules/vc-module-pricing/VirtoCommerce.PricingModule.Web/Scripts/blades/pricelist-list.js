@@ -7,7 +7,6 @@ function ($scope, pricelists, dialogService, uiGridHelper, bladeUtils) {
     var exportDataRequest = {
         exportTypeName: 'Pricelist',
         isTabularExportSupported: true,
-        defaultProvider: 'JsonExportProvider',
         dataQuery: {
             exportTypeName: 'PricelistExportDataQuery'
         }
