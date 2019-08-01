@@ -1,5 +1,5 @@
 angular.module('virtoCommerce.exportModule')
-    .controller('virtoCommerce.exportModule.exportTypeSelectorController', ['$scope', 'platformWebApp.bladeNavigationService', 'virtoCommerce.exportModule.exportModuleApi', function ($scope, bladeNavigationService, exportApi) {
+    .controller('virtoCommerce.exportModule.exportTypeSelectorController', ['$scope', '$translate', 'platformWebApp.bladeNavigationService', 'virtoCommerce.exportModule.exportModuleApi', function ($scope, $translate, bladeNavigationService, exportApi) {
         var typeTree;
         var blade = $scope.blade;
         blade.title = 'export.blades.export-settings.labels.exported-type';
@@ -14,7 +14,7 @@ angular.module('virtoCommerce.exportModule')
                 blade.prepareTypes();
             } else {
                 exportApi.getKnownTypes(
-                    function(results) {
+                    function (results) {
                         blade.knownTypesTree = results;
                         blade.prepareTypes();
                     },
@@ -45,7 +45,8 @@ angular.module('virtoCommerce.exportModule')
                             }
                         },
                         allColumnsOfType: allColumnsOfType,
-						isTabularExportSupported: selectedType.isTabularExportSupported
+						isTabularExportSupported: selectedType.isTabularExportSupported,
+                        localizedTypeName: selectedType.localizedName
                     };
                     if (blade.onSelected) {
                         blade.onSelected(selectedTypeData);
@@ -59,8 +60,11 @@ angular.module('virtoCommerce.exportModule')
             if (blade.selectedProvider.isTabular) {
                 blade.knownTypesTree = _.filter(blade.knownTypesTree, function (x) { return x.isTabularExportSupported === true; });
             }
-            _.each(blade.knownTypesTree, function (item) {
+            _.each(blade.knownTypesTree, function (item) {                
+                item.localizedName = $translate.instant('export.type-names.' + item.typeName);
+                item.localizedGroup = $translate.instant('export.type-groups.' + item.group);
                 item.groupName = item.group + '|' + item.typeName;
+                item.localizedGroupName = item.localizedGroup + '|' + item.localizedName;
                 var lastIndex = item.typeName.lastIndexOf('.');
                 item.name = item.typeName.substring(lastIndex + 1);
             });
@@ -74,9 +78,10 @@ angular.module('virtoCommerce.exportModule')
                     lastParentId += '|' + path;
                     if (!lastParent[path]) {
                         var lastIndex = path.lastIndexOf('.');
-                        var treeNode = { name: path.substring(lastIndex + 1), groupName: lastParentId.substring(1) }
+                        var treeNode = { name: path.substring(lastIndex + 1), localizedName: exportedType.localizedName, groupName: lastParentId.substring(1) }
                         lastParent[path] = treeNode;
                         if (exportedType.groupName && _.all(blade.allGroups, function (x) { return x.groupName !== treeNode.groupName; })) {
+                            treeNode.localizedName = exportedType.localizedGroup;
                             blade.allGroups.push(treeNode);
                         }
                     }
@@ -124,7 +129,7 @@ angular.module('virtoCommerce.exportModule')
                     lastParentId += '|' + path;
                     var breadCrumb = {
                         id: lastParentId.substring(1),
-                        name: path,
+                        name: $translate.instant('export.type-groups.' + path),
                         children: lastchildren,
                         navigate: function () {
                             $scope.selectNode({ groupName: this.id, children: this.children });

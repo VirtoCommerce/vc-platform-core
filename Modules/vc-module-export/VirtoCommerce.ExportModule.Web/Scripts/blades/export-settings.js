@@ -6,6 +6,7 @@ angular.module('virtoCommerce.exportModule')
         blade.exportDataRequest = blade.exportDataRequest || {};
         blade.allColumnsOfType = [];
         blade.isExportedTypeSelected = typeof (blade.exportDataRequest.exportTypeName) !== 'undefined';
+        blade.localizedTypeName = null;
         blade.defaultProvider = $localStorage.defaultExportProvider || 'JsonExportProvider';
 
 
@@ -61,7 +62,7 @@ angular.module('virtoCommerce.exportModule')
                 if (filterNonTabular) {
                     providers = _.filter(providers, function (item) { return !item.isTabular });
                 }
-                blade.providers = _.map(providers, function (item) { return { id: item.typeName, name: item.typeName } });
+                blade.providers = _.map(providers, function (item) { return { id: item.typeName, name: $translate.instant('export.provider-names.' + item.typeName) } });
                 if (blade.selectedProvider && _.findIndex(blade.providers, function (item) { return item.id === blade.selectedProvider.id; }) === -1) {
                     blade.selectedProvider = undefined;
                 }
@@ -93,6 +94,7 @@ angular.module('virtoCommerce.exportModule')
             $localStorage.defaultExportProvider = blade.selectedProvider.name;
             blade.exportDataRequest = {};
             blade.allColumnsOfType = [];
+            blade.localizedTypeName = null;
             blade.isExportedTypeSelected = false;
             blade.includedColumnsDescription = null;
         };
@@ -130,6 +132,7 @@ angular.module('virtoCommerce.exportModule')
                     blade.exportDataRequest = angular.extend(blade.exportDataRequest, selectedTypeData.exportDataRequest);
                     blade.exportDataRequest.dataQuery = angular.copy(selectedTypeData.exportDataRequest.dataQuery);
                     blade.allColumnsOfType = selectedTypeData.allColumnsOfType;
+                    blade.localizedTypeName = selectedTypeData.localizedTypeName;
                     blade.isTabularExportSupported = selectedTypeData.isTabularExportSupported;
                     blade.isExportedTypeSelected = typeof (blade.exportDataRequest.exportTypeName) !== 'undefined';
                     if (blade.isExportedTypeSelected) {
