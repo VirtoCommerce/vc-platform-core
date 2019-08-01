@@ -27,8 +27,6 @@ namespace VirtoCommerce.Platform.Data.Localizations
             _memoryCache = memoryCache;
         }
 
-        public object LocalizationResources { get; set; }
-
         public object GetByLanguage(string language = "en")
         {
             var searchPattern = string.Format("{0}.*{1}", language, LocalizationFilesFormat);
