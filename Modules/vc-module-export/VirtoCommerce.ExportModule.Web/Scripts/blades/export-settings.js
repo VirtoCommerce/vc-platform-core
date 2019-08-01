@@ -35,7 +35,7 @@ angular.module('virtoCommerce.exportModule')
         {
             exportApi.getKnownTypes(function (results) {
                 blade.knownTypes = results;
-                if (blade.selectedProvider.isTabular) {
+                if (blade.selectedProvider && blade.selectedProvider.isTabular) {
                     results = _.filter(results, function (x) { return x.isTabularExportSupported === true; });
                 }
                 var selectedTypes = _.filter(results,
@@ -85,9 +85,6 @@ angular.module('virtoCommerce.exportModule')
         }
 
         $scope.providerChanged = function () {
-            blade.exportDataRequest = {};
-            blade.isExportedTypeSelected = false;
-            blade.includedColumnsDescription = null;
             $localStorage.defaultExportProvider = blade.selectedProvider.name;
         };
 
