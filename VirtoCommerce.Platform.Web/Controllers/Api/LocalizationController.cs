@@ -40,7 +40,7 @@ namespace VirtoCommerce.Platform.Web.Controllers.Api
         [AllowAnonymous]
         public ActionResult<object> GetLocalization(string lang = "en")
         {
-            var result = _localizationService.GetLocalization(lang);
+            var result = _localizationService.GetByLanguage(lang);
             
             return Ok(result);
         }

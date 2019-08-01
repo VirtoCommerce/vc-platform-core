@@ -29,18 +29,25 @@ namespace VirtoCommerce.Platform.Data.Localizations
 
         public object LocalizationResources { get; set; }
 
-        public object GetLocalization(string lang = "en")
+        public object GetByLanguage(string language = "en")
         {
-            var searchPattern = string.Format("{0}.*{1}", lang, LocalizationFilesFormat);
+            var searchPattern = string.Format("{0}.*{1}", language, LocalizationFilesFormat);
             var files = GetAllLocalizationFiles(searchPattern, LocalizationFilesFolder);
-            var result = new JObject();
-            foreach (var file in files)
-            {
-                var part = JObject.Parse(File.ReadAllText(file));
-                result.Merge(part, new JsonMergeSettings { MergeArrayHandling = MergeArrayHandling.Merge });
-            }
 
-            return result;
+            var cacheKey = CacheKey.With(GetType(), "GetByLanguage", language);
+            return _memoryCache.GetOrCreateExclusive(cacheKey, cacheEntry =>
+            {
+                //Add cache  expiration token
+                cacheEntry.AddExpirationToken(LocalizationCacheRegion.CreateChangeToken());
+                var result = new JObject();
+                foreach (var file in files)
+                {
+                    var part = JObject.Parse(File.ReadAllText(file));
+                    result.Merge(part, new JsonMergeSettings { MergeArrayHandling = MergeArrayHandling.Merge });
+                }
+
+                return result;
+            });
         }
 
         public string[] GetLocales()
@@ -53,25 +60,18 @@ namespace VirtoCommerce.Platform.Data.Localizations
             return locales;
         }
 
-        public void FillLocalizationResources()
+        public object GetResources()
         {
-            var files = GetAllLocalizationFiles("*" + LocalizationFilesFormat, LocalizationFilesFolder);
-            var locales = files.Select(Path.GetFileName).Select(x => x.Substring(0, x.IndexOf('.'))).Distinct().ToArray();
+            var locales = GetLocales();
             var result = new JObject();
 
             foreach (var locale in locales)
             {
-                var localizationValues = new JObject();
-                foreach (var file in files.Where(f => Path.GetFileName(f).StartsWith(locale)))
-                {
-                    var fileName = Path.GetFileName(file);
-                    var part = JObject.Parse(File.ReadAllText(file));
-                    localizationValues.Merge(part, new JsonMergeSettings { MergeArrayHandling = MergeArrayHandling.Merge });
-                }
+                var localizationValues = (JObject)GetByLanguage(locale);
                 result.Add(locale, localizationValues);
             }
 
-            LocalizationResources = result;
+            return result;
         }
 
         private string[] GetAllLocalizationFiles(string searchPattern, string localizationsFolder)
@@ -119,7 +119,7 @@ namespace VirtoCommerce.Platform.Data.Localizations
                 : new string[0];
         }
 
-        public string MapPath(IHostingEnvironment hostEnv, string path)
+        private string MapPath(IHostingEnvironment hostEnv, string path)
         {
             var result = hostEnv.WebRootPath;
 

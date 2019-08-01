@@ -31,12 +31,13 @@ namespace VirtoCommerce.NotificationsModule.Tests.UnitTests
         private readonly Mock<INotificationMessageSender> _messageSenderMock;
         private readonly Mock<ILogger<NotificationSender>> _logNotificationSenderMock;
         private readonly Mock<INotificationMessageSenderProviderFactory> _senderFactoryMock;
+        private readonly Mock<ILocalizationService> _localizationServiceMock;
 
         public NotificationSenderUnitTests()
         {
-            ILocalizationService localizationService = new LocalizationService(null, null, null);
-            localizationService.LocalizationResources = JObject.FromObject(new { en = new { order = new { subject = "subj" } } });
-            _templateRender = new LiquidTemplateRenderer(localizationService);
+            _localizationServiceMock = new Mock<ILocalizationService>();
+            //localizationService.LocalizationResources = JObject.FromObject(new { en = new { order = new { subject = "subj" } } });
+            _templateRender = new LiquidTemplateRenderer(_localizationServiceMock.Object);
             _messageServiceMock = new Mock<INotificationMessageService>();
             _messageSenderMock = new Mock<INotificationMessageSender>();
             _logNotificationSenderMock = new Mock<ILogger<NotificationSender>>();
@@ -59,7 +60,7 @@ namespace VirtoCommerce.NotificationsModule.Tests.UnitTests
         {
             //Arrange
             var language = "en-US";
-            var subject = "Your order was sent {{ 'order.subject' | translate }}";
+            var subject = "Your order was sent";
             var body = "Your order <strong>{{ customer_order.number}}</strong> was sent.<br> Number of sent parcels - " +
                           "<strong>{{ customer_order.shipments | size}}</strong>.<br> Parcels tracking numbers:<br> {% for shipment in customer_order.shipments %} " +
                           "<br><strong>{{ shipment.number}}</strong> {% endfor %}<br><br>Sent date - <strong>{{ customer_order.modified_date }}</strong>.";

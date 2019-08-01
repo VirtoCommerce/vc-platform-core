@@ -1,4 +1,3 @@
-using System;
 using System.Globalization;
 using System.Threading.Tasks;
 using Scriban;
@@ -42,7 +41,7 @@ namespace VirtoCommerce.NotificationsModule.LiquidRenderer
             var scriptObject = new ScriptObject();
             scriptObject.Import(typeof(TranslationFilter));
             scriptObject.Import(typeof(StandardFilters));
-            scriptObject.Add("localizationResources", _localizationService.LocalizationResources);
+            scriptObject.Add("localizationResources", _localizationService.GetResources());
 
             return scriptObject;
         }

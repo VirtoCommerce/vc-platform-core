@@ -10,13 +10,18 @@ namespace VirtoCommerce.NotificationsModule.Data.Services
         public NotificationBuilder RegisterNotification<T>() where T : Notification
         {
             var result = new NotificationBuilder();
-            AbstractTypeFactory<Notification>.RegisterType<T>().WithSetupAction((notification) =>
+
+            if (AbstractTypeFactory<Notification>.AllTypeInfos.All(t => t.Type != typeof(T)))
             {
-                if (result.PredefinedTemplates != null)
+                AbstractTypeFactory<Notification>.RegisterType<T>().WithSetupAction((notification) =>
                 {
-                    notification.Templates = result.PredefinedTemplates.ToList();
-                }
-            });
+                    if (result.PredefinedTemplates != null)
+                    {
+                        notification.Templates = result.PredefinedTemplates.ToList();
+                    }
+                });
+            }
+                
             return result;
         }
     }

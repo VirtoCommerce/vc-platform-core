@@ -10,10 +10,9 @@
     }
 
     var codemirrorEditor;
-    var keyTemplateLocalStorage;
     blade.dynamicProperties = '';
 
-    $scope.saveChanges = function () {
+    function saveTemplate() {
         var date = new Date();
         var now = date.getFullYear() + '-' + ('0' + (date.getMonth() + 1)).slice(-2) + '-' + ('0' + date.getDate()).slice(-2);
         if (!blade.isNew) {
@@ -25,7 +24,8 @@
             blade.origEntity = angular.copy(blade.currentEntity);
         }
         var ind = blade.notification.templates.findIndex(function (element) {
-            return element.id === blade.currentEntity.id || element.languageCode === blade.currentEntity.languageCode;
+            return (blade.currentEntity.id && element.id === blade.currentEntity.id) 
+                || element.languageCode === blade.currentEntity.languageCode;
         });
         if (ind >= 0) {
             blade.notification.templates[ind] = blade.currentEntity;
@@ -33,6 +33,10 @@
         else {
             blade.notification.templates.push(blade.currentEntity);
         }
+    }
+
+    $scope.saveChanges = function () {
+        saveTemplate();
         blade.parentBlade.initialize();
         $scope.bladeClose();
     };
@@ -82,7 +86,7 @@
 
 	blade.initialize = function () {
 		blade.isLoading = true;
-        var found = _.find(blade.notification.templates, function(templ){ return templ.languageCode === blade.languageCode });
+        var found = _.find(blade.notification.templates, function(templ){ return !templ.isReadonly && templ.languageCode === blade.languageCode });
         if (found){
             blade.currentEntity = angular.copy(found);        
             blade.origEntity = angular.copy(blade.currentEntity);
@@ -116,16 +120,18 @@
             executeMethod: function () {
                 blade.renderTemplate();
             },
-            canExecuteMethod: function () {
-                return true;
-            },
-			permission: 'notifications:templates:read'
+            canExecuteMethod: canRender,
+            permission: 'notifications:templates:read'
         }
     ];
 	 
      
     function isDirty() {
         return (!angular.equals(blade.origEntity, blade.currentEntity) || blade.isNew) && blade.hasUpdatePermission();
+    }
+    
+    function canRender() {
+        return !isDirty();
 	}
  
      
