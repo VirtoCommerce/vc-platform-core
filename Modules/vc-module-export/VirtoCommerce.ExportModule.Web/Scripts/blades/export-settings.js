@@ -179,12 +179,9 @@ angular.module('virtoCommerce.exportModule')
                 template: 'Modules/$(VirtoCommerce.Export)/Scripts/blades/export-generic-viewer.tpl.html',
                 isClosingDisabled: false,
                 exportDataRequest: blade.exportDataRequest,
-                onCompleted: function(dataQuery) {
+                onCompleted: function (dataQuery, selectedItemsCount) {
                     blade.exportDataRequest.dataQuery = dataQuery;
-                    blade.dataSelected =
-                        (blade.exportDataRequest.dataQuery.objectIds && blade.exportDataRequest.dataQuery.objectIds.length)
-                        ? blade.exportDataRequest.dataQuery.objectIds.length
-                        : blade.dataTotal;
+                    blade.dataSelected = selectedItemsCount;
                 }
             };
 
