@@ -1,6 +1,10 @@
 using Moq;
 using Newtonsoft.Json.Linq;
+using VirtoCommerce.NotificationsModule.Core.Extensions;
+using VirtoCommerce.NotificationsModule.Core.Model;
+using VirtoCommerce.NotificationsModule.Core.Types;
 using VirtoCommerce.NotificationsModule.LiquidRenderer;
+using VirtoCommerce.Platform.Core.Common;
 using VirtoCommerce.Platform.Core.Localizations;
 using Xunit;
 
@@ -36,10 +40,10 @@ namespace VirtoCommerce.NotificationsModule.Tests.UnitTests
         [Theory]
         [InlineData(null)]
         [InlineData("")]
-        public void Render_TranslateAsEmpty(string language)
+        public void Render_TranslateAsDefault(string language)
         {
             //Arrange
-            var jObject = JObject.FromObject(new { order = new { subject1 = "subj" } } );
+            var jObject = JObject.FromObject(new { @default = new { order = new { subject1 = "subj" } } });
             _localizationServiceMock.Setup(x => x.GetResources()).Returns(jObject);
             string input = "{{ 'order.subject1' | translate language }} test";
 

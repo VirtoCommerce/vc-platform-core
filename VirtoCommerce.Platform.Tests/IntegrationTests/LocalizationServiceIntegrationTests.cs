@@ -37,7 +37,6 @@ namespace VirtoCommerce.Platform.Tests.IntegrationTests
         public void GetResources_SelectToken_Success()
         {
             //Arrange
-
             var cacheKey = CacheKey.With(_localizationService.GetType(), "GetAllLocalizationFiles", "*.json", "Localizations");
             _platformMemoryCacheMock.Setup(pmc => pmc.CreateEntry(cacheKey)).Returns(_cacheEntryMock.Object);
             var enCacheKey = CacheKey.With(_localizationService.GetType(), "GetAllLocalizationFiles", "en.*.json", "Localizations");

@@ -19,16 +19,17 @@
 	blade.initialize = function () {
 		blade.isLoading = true;
 		blade.isRender = false;
+		var language = blade.languageCode ? blade.languageCode : 'default';
         var data = angular.copy(blade.notification);
         data.cc = pluckAddress(data.cc);
         data.bcc = pluckAddress(data.bcc);
-        keyTemplateLocalStorage = blade.tenantType + '.' + blade.notification.type + '.' + blade.languageCode;
+        keyTemplateLocalStorage = blade.tenantType + '.' + blade.notification.type + '.' + language;
         var itemFromLocalStorage = $localStorage[keyTemplateLocalStorage];
         if (itemFromLocalStorage) {
             blade.notification.context = itemFromLocalStorage;
-        } 
+		} 
         
-        notifications.renderTemplate({type: blade.notification.type, language: blade.languageCode},{ text: blade.currentEntity.body, data }, function (data) {
+        notifications.renderTemplate({type: blade.notification.type, language: language},{ text: blade.currentEntity.body, data }, function (data) {
             blade.originHtml = data.html;
         });
 		blade.isLoading = false;

@@ -12,7 +12,7 @@ namespace VirtoCommerce.NotificationsModule.LiquidRenderer.Filters
             var languageObject = context.GetValue(new ScriptVariableGlobal("language"))?.ToString();
             var key = !string.IsNullOrEmpty(language) ? $"{language}.{path}" :
                 !string.IsNullOrEmpty(languageObject) ? $"{languageObject}.{path}" :
-                path;
+                $"default.{path}";
 
             return (localizationResources?.SelectToken(key) ?? key).ToString();
         }
