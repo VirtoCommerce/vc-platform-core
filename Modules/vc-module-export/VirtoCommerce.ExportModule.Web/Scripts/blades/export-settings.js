@@ -49,7 +49,8 @@ angular.module('virtoCommerce.exportModule')
                 var selectedType = _.find(results,
                     function (x) { return x.typeName === blade.exportDataRequest.exportTypeName; });
                 if (selectedType) {
-                    blade.allColumnsOfType = selectedType.metaData.propertyInfos;
+                    blade.allColumnsOfType = blade.selectedProvider.isTabular ? selectedType.tabularMetaData.propertyInfos : selectedType.metaData.propertyInfos;
+                    blade.exportDataRequest.dataQuery.includedColumns = blade.allColumnsOfType;
                     blade.isTabularExportSupported = selectedType.isTabularExportSupported;
                     blade.columnSelected = blade.allColumnsOfType.length;
                     blade.columnTotal = blade.columnSelected;
@@ -68,7 +69,7 @@ angular.module('virtoCommerce.exportModule')
                 if (filterNonTabular) {
                     providers = _.filter(providers, function (item) { return !item.isTabular });
                 }
-                blade.providers = _.map(providers, function (item) { return { id: item.typeName, name: $translate.instant('export.provider-names.' + item.typeName) } });
+                blade.providers = _.map(providers, function (item) { return { id: item.typeName, name: $translate.instant('export.provider-names.' + item.typeName), isTabular: item.isTabular } });
                 if (blade.selectedProvider && _.findIndex(blade.providers, function (item) { return item.id === blade.selectedProvider.id; }) === -1) {
                     blade.selectedProvider = undefined;
                 }
@@ -100,6 +101,10 @@ angular.module('virtoCommerce.exportModule')
 
         $scope.providerChanged = function () {
             $localStorage.defaultExportProvider = blade.selectedProvider.id;
+            resetState();
+            if (blade.isExportedTypeSelected) {
+                getKnownTypes();
+            }
         };
 
         $scope.startExport = function () {
