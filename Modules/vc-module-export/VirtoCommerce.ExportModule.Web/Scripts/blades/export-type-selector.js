@@ -62,7 +62,9 @@ angular.module('virtoCommerce.exportModule')
             }
             _.each(blade.knownTypesTree, function (item) {
                 item.localizedName = $translate.instant('export.type-names.' + item.typeName);
+                item.localizedNameDescription = $translate.instant('export.type-names.' + item.typeName + '.description');
                 item.localizedGroup = $translate.instant('export.type-groups.' + item.group);
+                item.localizedGroupDescription = $translate.instant('export.type-groups.' + item.group + '.description');
                 item.groupName = item.group + '|' + item.typeName;
                 item.localizedGroupName = item.localizedGroup + '|' + item.localizedName;
                 var lastIndex = item.typeName.lastIndexOf('.');
@@ -78,10 +80,17 @@ angular.module('virtoCommerce.exportModule')
                     lastParentId += '|' + path;
                     if (!lastParent[path]) {
                         var lastIndex = path.lastIndexOf('.');
-                        var treeNode = { name: path.substring(lastIndex + 1), localizedName: exportedType.localizedName, groupName: lastParentId.substring(1) }
+                        var treeNode =
+                            {
+                                name: path.substring(lastIndex + 1),
+                                localizedName: exportedType.localizedName,
+                                localizedDescription: exportedType.localizedNameDescription,
+                                groupName: lastParentId.substring(1)
+                            }
                         lastParent[path] = treeNode;
                         if (exportedType.groupName && _.all(blade.allGroups, function (x) { return x.groupName !== treeNode.groupName; })) {
                             treeNode.localizedName = exportedType.localizedGroup;
+                            treeNode.localizedDescription = exportedType.localizedGroupDescription;
                             blade.allGroups.push(treeNode);
                         }
                     }

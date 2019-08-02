@@ -250,12 +250,17 @@
     "export": {
         "type-names": {
             "VirtoCommerce.PricingModule.Core.Model.PricelistFullData": "Pricelist full data",
+            "VirtoCommerce.PricingModule.Core.Model.PricelistFullData.description": "Pricelist data with related objects. Supports JSON export provider only",
             "VirtoCommerce.PricingModule.Core.Model.Price": "Price",
+            "VirtoCommerce.PricingModule.Core.Model.Price.description": "Prices without related objects",
             "VirtoCommerce.PricingModule.Core.Model.Pricelist": "Pricelist",
-            "VirtoCommerce.PricingModule.Core.Model.PricelistAssignment": "Pricelist assignment"
+            "VirtoCommerce.PricingModule.Core.Model.Pricelist.description": "Pricelists only",
+            "VirtoCommerce.PricingModule.Core.Model.PricelistAssignment": "Pricelist assignment",
+            "VirtoCommerce.PricingModule.Core.Model.PricelistAssignment.description": "Export pricelist assignments"
         },
         "type-groups": {
-            "Pricing": "Pricing"
+            "Pricing": "Pricing",
+            "Pricing.description": "Prices, pricelists & assignments"
         }
     }
 }

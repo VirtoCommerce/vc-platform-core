@@ -16,9 +16,11 @@
                 <li class="list-item" ng-repeat="data in blade.allGroups | filter:blade.searchText | orderBy: 'localizedName' track by $index" ng-class="{'__selected': data.groupName === selectedNodeId}" ng-click='selectNode(data)' ng-if="blade.searchText">
                     <span class="list-t">{{data.localizedName}}</span>
                     <span class="list-descr" ng-if="data.localizedGroupName">{{data.localizedGroupName}}</span>
+                    <span class="list-descr" ng-if="data.localizedDescription">{{data.localizedDescription}}</span>
                 </li>
                 <li class="list-item" ng-repeat="data in blade.currentEntities | orderBy: 'localizedName' track by data.groupName" ng-class="{'__selected': data.groupName === selectedNodeId}" ng-click='selectNode(data)' ng-if="!blade.searchText">
                     <span class="list-t">{{data.localizedName}}</span>
+                    <span class="list-descr" ng-if="data.localizedDescription">{{data.localizedDescription}}</span>
                 </li>
             </ul>
         </div>
