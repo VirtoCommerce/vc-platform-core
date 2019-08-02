@@ -1,19 +1,21 @@
 angular.module('virtoCommerce.pricingModule')
-    .controller('virtoCommerce.pricingModule.assignmentListController', ['$scope', 'virtoCommerce.pricingModule.pricelistAssignments', 'platformWebApp.dialogService', 'platformWebApp.uiGridHelper', 'platformWebApp.bladeUtils', 'virtoCommerce.catalogModule.catalogs',
-        function ($scope, assignments, dialogService, uiGridHelper, bladeUtils, catalogs) {
+    .controller('virtoCommerce.pricingModule.assignmentListController', ['$scope', 'virtoCommerce.pricingModule.pricelistAssignments', 'platformWebApp.dialogService', 'platformWebApp.uiGridHelper', 'platformWebApp.bladeUtils', 'virtoCommerce.catalogModule.catalogs', '$localStorage',
+        function ($scope, assignments, dialogService, uiGridHelper, bladeUtils, catalogs, $localStorage) {
             $scope.uiGridConstants = uiGridHelper.uiGridConstants;
             var blade = $scope.blade;
             var bladeNavigationService = bladeUtils.bladeNavigationService;
-
-            var exportDataRequest = {
+            var defaultDataRequest = {
                 exportTypeName: 'PricelistAssignment',
                 isTabularExportSupported: true,
                 dataQuery: {
                     exportTypeName: 'PricelistAssignmentExportDataQuery'
                 }
             };
+            var exportDataRequest = angular.copy(defaultDataRequest);
+            var filter = blade.filter = $scope.filter = {};
 
             blade.refresh = function () {
+                
                 blade.isLoading = true;
                 assignments.search(getSearchCriteria(), function (data) {
                     //Loading catalogs for assignments because they do not contains them
@@ -189,14 +191,10 @@ angular.module('virtoCommerce.pricingModule')
                 }
             ];
 
-            var filter = $scope.filter = {};
             filter.criteriaChanged = function () {
-                if ($scope.pageSettings.currentPage > 1) {
-                    $scope.pageSettings.currentPage = 1;
-                } else {
-                    blade.refresh();
-                }
+                blade.refresh();
             };
+
             // ui-grid
             $scope.setGridOptions = function (gridOptions) {
                 $scope.gridOptions = gridOptions;
@@ -212,13 +210,88 @@ angular.module('virtoCommerce.pricingModule')
 
             function getSearchCriteria() {
                 var result = {
-                    pricelistIds: blade.pricelistId ? [blade.pricelistId] : [],
                     keyword: filter.keyword,
                     sort: uiGridHelper.getSortExpression($scope),
                     skip: ($scope.pageSettings.currentPage - 1) * $scope.pageSettings.itemsPerPageCount,
                     take: $scope.pageSettings.itemsPerPageCount
                 };
+                if (filter.current) {
+                    result.pricelistIds = filter.current.priceListIds;
+                } else {
+                    result.pricelistIds = blade.pricelistId ? [blade.pricelistId] : [];
+                }
+
                 return result;
+            }
+            if (!$localStorage.exportSearchFilters) {
+                $localStorage.exportSearchFilters = [];
+            }
+
+            if (!$localStorage.exportSearchFilters[exportDataRequest.exportTypeName]) {
+                $localStorage.exportSearchFilters[exportDataRequest.exportTypeName] = [{ name: 'export.blades.export-generic-viewer.labels.new-filter' }];
+            }
+
+            $scope.exportSearchFilters = $localStorage.exportSearchFilters[exportDataRequest.exportTypeName];
+
+            if (!$localStorage.exportSearchFilterIds) {
+                $localStorage.exportSearchFilterIds = [];
+            }
+
+            $scope.exportSearchFilterId = $localStorage.exportSearchFilterIds[exportDataRequest.exportTypeName];
+
+            if ($scope.exportSearchFilterId) {
+                filter.current = _.findWhere($scope.exportSearchFilters, { id: $scope.exportSearchFilterId });
+            }
+
+            filter.change = function () {
+                $localStorage.exportSearchFilterId = filter.current ? filter.current.id : null;
+                var metafieldsId = exportDataRequest.exportTypeName + 'ExportFilter';
+                if (filter.current && !filter.current.id) {
+                    filter.current = null;
+                    showFilterDetailBlade({ isNew: true, metafieldsId: metafieldsId, exportTypeName: exportDataRequest.exportTypeName });
+                } else {
+                    bladeNavigationService.closeBlade({ id: 'exportGenericViewerFilter' });
+
+                    if (!filter.current) {
+                        $scope.resetRequestCustomFilter();
+                    }
+
+                    filter.criteriaChanged();
+                }
+            };
+
+            filter.edit = function () {
+                if (filter.current) {
+                    var metafieldsId = exportDataRequest.exportTypeName + 'ExportFilter';
+                    showFilterDetailBlade({ data: filter.current, metafieldsId: metafieldsId, exportTypeName: exportDataRequest.exportTypeName });
+                }
+            };
+
+            function showFilterDetailBlade(bladeData) {
+                var newBlade = {
+                    id: 'exportGenericViewerFilter',
+                    controller: 'virtoCommerce.exportModule.exportGenericViewerFilterController',
+                    template: 'Modules/$(VirtoCommerce.Export)/Scripts/blades/export-generic-viewer-filter.tpl.html'
+                };
+                angular.extend(newBlade, bladeData);
+                bladeNavigationService.showBlade(newBlade, blade);
+            }
+
+            filter.criteriaChanged = function () {
+                blade.refresh();
+            };
+
+            filter.resetKeyword = function () {
+                filter.keyword = undefined;
+
+                if (exportDataRequest.dataQuery) {
+                    exportDataRequest.dataQuery.keyword = undefined;
+                }
+            }
+
+
+            $scope.resetRequestCustomFilter = function () {
+                angular.copy(exportDataRequest, defaultDataRequest);
             }
             // actions on load
             //blade.refresh();
