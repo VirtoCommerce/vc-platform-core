@@ -192,9 +192,14 @@ angular.module('virtoCommerce.pricingModule')
             ];
 
             filter.criteriaChanged = function () {
-                blade.refresh();
-            };
-
+              
+                    if ($scope.pageSettings.currentPage > 1) {
+                        blade.refresh();
+                        $scope.pageSettings.currentPage = 1;
+                    } else {
+                        blade.refresh();
+                    }
+                };
             // ui-grid
             $scope.setGridOptions = function (gridOptions) {
                 $scope.gridOptions = gridOptions;
