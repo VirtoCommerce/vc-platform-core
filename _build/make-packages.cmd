@@ -10,37 +10,37 @@ IF NOT DEFINED ARTIFACTS_PATH (
 cd ..
 cd /d VirtoCommerce.Platform.Assets.AzureBlobStorage
 
-call %PROJECT_PATH%/.nuget/nuget.exe pack VirtoCommerce.Platform.Assets.AzureBlobStorage.v3.nuspec -properties Configuration=Release -OutputDirectory %ARTIFACTS_PATH%
+call nuget pack -IncludeReferencedProjects -Symbols -Properties Configuration=Release -OutputDirectory %ARTIFACTS_PATH%
 IF !ERRORLEVEL! NEQ 0 goto error
 
 cd ..
 cd /d VirtoCommerce.Platform.Assets.FileSystem
 
-call %PROJECT_PATH%/.nuget/nuget.exe pack VirtoCommerce.Platform.Assets.FileSystem.v3.nuspec -properties Configuration=Release -OutputDirectory %ARTIFACTS_PATH%
+call nuget pack -IncludeReferencedProjects -Symbols -Properties Configuration=Release -OutputDirectory %ARTIFACTS_PATH%
 IF !ERRORLEVEL! NEQ 0 goto error
 
 cd ..
 cd /d VirtoCommerce.Platform.Core
 
-call %PROJECT_PATH%/.nuget/nuget.exe pack VirtoCommerce.Platform.Core.v3.nuspec -properties Configuration=Release -OutputDirectory %ARTIFACTS_PATH%
+call nuget pack -IncludeReferencedProjects -Symbols -Properties Configuration=Release -OutputDirectory %ARTIFACTS_PATH%
 IF !ERRORLEVEL! NEQ 0 goto error
 
 cd ..
 cd /d VirtoCommerce.Platform.Data
 
-call %PROJECT_PATH%/.nuget/nuget.exe pack VirtoCommerce.Platform.Data.v3.nuspec -properties Configuration=Release -OutputDirectory %ARTIFACTS_PATH%
+call nuget pack -IncludeReferencedProjects -Symbols -Properties Configuration=Release -OutputDirectory %ARTIFACTS_PATH%
 IF !ERRORLEVEL! NEQ 0 goto error
 
 cd ..
 cd /d VirtoCommerce.Platform.Modules
 
-call %PROJECT_PATH%/.nuget/nuget.exe pack VirtoCommerce.Platform.Modules.v3.nuspec -properties Configuration=Release -OutputDirectory %ARTIFACTS_PATH%
+call nuget pack -IncludeReferencedProjects -Symbols -Properties Configuration=Release -OutputDirectory %ARTIFACTS_PATH%
 IF !ERRORLEVEL! NEQ 0 goto error
 
 cd ..
 cd /d VirtoCommerce.Platform.Security
 
-call %PROJECT_PATH%/.nuget/nuget.exe pack VirtoCommerce.Platform.Security.v3.nuspec -properties Configuration=Release -OutputDirectory %ARTIFACTS_PATH%
+call nuget pack -IncludeReferencedProjects -Symbols -Properties Configuration=Release -OutputDirectory %ARTIFACTS_PATH%
 IF !ERRORLEVEL! NEQ 0 goto error
 
 goto end

@@ -1,7 +1,6 @@
 function Pack-Module
 {
     Param(
-        [string] $NugetDir,
         [string] $ProjectDir,
         [string] $OutputDir
     )
@@ -29,12 +28,12 @@ function Pack-Module
         if(!($_.Name.Contains(".Web")) -And !($_.Name.Contains(".Test")) -And !($_.Name.Contains(".Tests"))) {			
             if(Test-Path "$_\*" -Include *.nuspec -PathType Leaf) {
                 $workingFile = @(Get-ChildItem -Path "$_\*.nuspec")
-                & "$NugetDir\nuget.exe" pack $workingFile.FullName -properties Configuration=Release -Build -OutputDirectory $OutputDir
+                nuget pack $workingFile.FullName -properties Configuration=Release -Build -OutputDirectory $OutputDir
             }
             else {
                 if(Test-Path "$_\*" -Include *.csproj -PathType Leaf) {
                     $workingFile = @(Get-ChildItem -Path "$_\*.csproj")
-                    & "$NugetDir\nuget.exe" pack $workingFile.FullName -properties Configuration=Release -Build -OutputDirectory $OutputDir
+                    nuget pack $workingFile.FullName -IncludeReferencedProjects -Symbols -Properties Configuration=Release -Build -OutputDirectory $OutputDir
                 }
             }
 	    }	     
