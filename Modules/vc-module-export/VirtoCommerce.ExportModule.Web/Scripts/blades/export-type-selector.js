@@ -33,7 +33,7 @@ angular.module('virtoCommerce.exportModule')
                 } else {
                     var selectedTypes = _.filter(blade.allGroups, function (x) { return x.groupName === node.groupName || (node.groupName === 'General' && !x.groupName); });
                     var selectedType = selectedTypes[0];
-                    var allColumnsOfType = (blade.selectedProvider.isTabular ? selectedType.tabularMetaData.propertyInfos : selectedType.metaData.propertyInfos);
+                    var allColumnsOfType = (blade.selectedProvider && blade.selectedProvider.isTabular ? selectedType.tabularMetaData.propertyInfos : selectedType.metaData.propertyInfos);
                     var selectedTypeData = {
                         exportDataRequest: {
                             exportTypeName: selectedType.typeName,
@@ -57,7 +57,7 @@ angular.module('virtoCommerce.exportModule')
         };
 
         blade.prepareTypes = function () {
-            if (blade.selectedProvider.isTabular) {
+            if (blade.selectedProvider && blade.selectedProvider.isTabular) {
                 blade.knownTypesTree = _.filter(blade.knownTypesTree, function (x) { return x.isTabularExportSupported === true; });
             }
             _.each(blade.knownTypesTree, function (item) {
