@@ -10,18 +10,18 @@ namespace VirtoCommerce.ExportModule.Data.Services
 {
     public class ExportProviderFactory : IExportProviderFactory
     {
-        private readonly IEnumerable<Func<IExportProviderConfiguration, IExportProvider>> _providerFactories;
+        private readonly IEnumerable<Func<IExportProviderConfiguration, ExportedTypeColumnInfo[], IExportProvider>> _providerFactories;
 
-        public ExportProviderFactory(IEnumerable<Func<IExportProviderConfiguration, IExportProvider>> providerFactories)
+        public ExportProviderFactory(IEnumerable<Func<IExportProviderConfiguration, ExportedTypeColumnInfo[], IExportProvider>> providerFactories)
         {
             _providerFactories = providerFactories;
         }
 
-        public virtual IExportProvider CreateProvider(string name, IExportProviderConfiguration config)
+        public virtual IExportProvider CreateProvider(string name, IExportProviderConfiguration config, ExportedTypeColumnInfo[] includedColumns)
         {
-            var result = _providerFactories.FirstOrDefault(x => x(new EmptyProviderConfiguration()).TypeName.EqualsInvariant(name));
+            var result = _providerFactories.FirstOrDefault(x => x(new EmptyProviderConfiguration(), includedColumns).TypeName.EqualsInvariant(name));
 
-            return result != null ? result(config) : null;
+            return result != null ? result(config, includedColumns) : null;
         }
     }
 }

@@ -6,6 +6,5 @@ namespace VirtoCommerce.ExportModule.Data.Model
     public class CsvProviderConfiguration : IExportProviderConfiguration
     {
         public Configuration Configuration { get; set; }
-        public ExportedTypeColumnInfo[] IncludedColumns { get; set; }
     }
 }

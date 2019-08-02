@@ -23,7 +23,7 @@ namespace VirtoCommerce.ExportModule.Web.Controllers
     [Route("api/export")]
     public class ExportController : Controller
     {
-        private readonly IEnumerable<Func<IExportProviderConfiguration, IExportProvider>> _exportProviderFactories;
+        private readonly IEnumerable<Func<IExportProviderConfiguration, ExportedTypeColumnInfo[], IExportProvider>> _exportProviderFactories;
         private readonly IKnownExportTypesRegistrar _knownExportTypesRegistrar;
         private readonly IUserNameResolver _userNameResolver;
         private readonly IPushNotificationManager _pushNotificationManager;
@@ -31,7 +31,7 @@ namespace VirtoCommerce.ExportModule.Web.Controllers
         private readonly IKnownExportTypesResolver _knownExportTypesResolver;
 
         public ExportController(
-            IEnumerable<Func<IExportProviderConfiguration, IExportProvider>> exportProviderFactories,
+            IEnumerable<Func<IExportProviderConfiguration, ExportedTypeColumnInfo[], IExportProvider>> exportProviderFactories,
             IKnownExportTypesRegistrar knownExportTypesRegistrar,
             IUserNameResolver userNameResolver,
             IPushNotificationManager pushNotificationManager,
@@ -67,7 +67,7 @@ namespace VirtoCommerce.ExportModule.Web.Controllers
         [Authorize(ModuleConstants.Security.Permissions.Access)]
         public ActionResult<IExportProvider[]> GetExportProviders()
         {
-            return Ok(_exportProviderFactories.Select(x => x(new EmptyProviderConfiguration())).ToArray());
+            return Ok(_exportProviderFactories.Select(x => x(new EmptyProviderConfiguration(), null)).ToArray());
         }
 
         /// <summary>
