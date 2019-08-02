@@ -16,15 +16,17 @@ namespace VirtoCommerce.ExportModule.Data.Services
     public sealed class CsvExportProvider : IExportProvider
     {
         public string TypeName => nameof(CsvExportProvider);
+        public ExportedTypeColumnInfo[] IncludedColumns { get; private set; }
         public string ExportedFileExtension => "csv";
         public bool IsTabular => true;
         public IExportProviderConfiguration Configuration { get; }
 
         private CsvWriter _csvWriter;
 
-        public CsvExportProvider(IExportProviderConfiguration exportProviderConfiguration)
+        public CsvExportProvider(IExportProviderConfiguration exportProviderConfiguration, ExportedTypeColumnInfo[] includedColumns)
         {
             Configuration = exportProviderConfiguration;
+            IncludedColumns = includedColumns;
         }
 
         public void WriteRecord(TextWriter writer, object objectToRecord)
@@ -60,11 +62,10 @@ namespace VirtoCommerce.ExportModule.Data.Services
 
             if (mapForType == null)
             {
-                var includedColumns = (Configuration as CsvProviderConfiguration)?.IncludedColumns;
-                var constructor = typeof(MetadataFilteredMap<>).MakeGenericType(objectType).GetConstructor(includedColumns != null
+                var constructor = typeof(MetadataFilteredMap<>).MakeGenericType(objectType).GetConstructor(IncludedColumns != null
                     ? new[] { typeof(ExportedTypeColumnInfo[]) }
                     : Array.Empty<Type>());
-                var classMap = (ClassMap)constructor.Invoke(includedColumns != null ? new[] { includedColumns } : null);
+                var classMap = (ClassMap)constructor.Invoke(IncludedColumns != null ? new[] { IncludedColumns } : null);
 
                 csvConfiguration.RegisterClassMap(classMap);
             }

@@ -35,7 +35,7 @@ angular.module('virtoCommerce.exportModule')
                     blade.allProviders = result;
                     fillProviders();
                     blade.selectedProvider = _.find(blade.providers,
-                        function (item) { return item.name === blade.defaultProvider });
+                        function (item) { return item.id === blade.defaultProvider });
                 }
             });
 
@@ -99,7 +99,7 @@ angular.module('virtoCommerce.exportModule')
         }
 
         $scope.providerChanged = function () {
-            $localStorage.defaultExportProvider = blade.selectedProvider.name;
+            $localStorage.defaultExportProvider = blade.selectedProvider.id;
         };
 
         $scope.startExport = function () {

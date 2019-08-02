@@ -46,7 +46,7 @@ namespace VirtoCommerce.ExportModule.Web.BackgroundJobs
 
                 // Do not like provider creation here to get file extension, maybe need to pass created provider to Exporter.
                 // Create stream inside Exporter is not good as it is not Exporter resposibility to decide where to write.
-                var provider = _exportProviderFactory.CreateProvider(request.ProviderName, request.ProviderConfig);
+                var provider = _exportProviderFactory.CreateProvider(request.ProviderName, request.ProviderConfig, request.DataQuery.IncludedColumns);
 
                 if (!string.IsNullOrEmpty(provider.ExportedFileExtension))
                 {
