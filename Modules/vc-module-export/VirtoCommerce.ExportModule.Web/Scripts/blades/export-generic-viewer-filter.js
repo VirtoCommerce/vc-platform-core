@@ -6,11 +6,24 @@ angular.module('virtoCommerce.exportModule')
 
         blade.metaFields = metaFormsService.getMetaFields(blade.metafieldsId) || [];
 
-        $scope.saveChanges = function () {
+        $scope.apply = function (needSave) {
+            if (blade.onBeforeApply) {
+                blade.onBeforeApply();
+            }
+
             angular.copy(blade.currentEntity, blade.origEntity);
-            if (blade.isNew) {
-                $localStorage.exportSearchFilters[blade.exportTypeName].push(blade.origEntity);
+
+            if (needSave) {
                 $localStorage.exportSearchFilterIds[blade.exportTypeName] = blade.origEntity.id;
+            } 
+
+            if (blade.isNew) {
+                if (needSave) {
+                    $localStorage.exportSearchFilters[blade.exportTypeName].push(blade.origEntity);
+                } else {
+                    $localStorage.exportSearchFilterIds[blade.exportTypeName] = undefined;
+                }
+
                 blade.parentBlade.filter.current = blade.origEntity;
                 blade.isNew = false;
             }
@@ -40,9 +53,18 @@ angular.module('virtoCommerce.exportModule')
 
         blade.toolbarCommands = [
                 {
+                    name: "export.blades.generic-filter.commands.apply", icon: 'fa fa-filter',
+                    executeMethod: function () {
+                        $scope.apply(false);
+                    },
+                    canExecuteMethod: function () {
+                        return formScope;
+                    }
+                },
+                {
                     name: "core.commands.apply-filter", icon: 'fa fa-filter',
                     executeMethod: function () {
-                        $scope.saveChanges();
+                        $scope.apply(true);
                     },
                     canExecuteMethod: function () {
                         return formScope && formScope.$valid;
@@ -74,9 +96,7 @@ angular.module('virtoCommerce.exportModule')
 
         // actions on load
         if (blade.isNew) {
-            $translate('export.blades.generic-filter.labels.unnamed-filter').then(function (result) {
-                initializeBlade({ id: new Date().getTime(), name: result });
-            });
+            initializeBlade({ id: new Date().getTime()});
         } else {
             initializeBlade(blade.data);
         }
