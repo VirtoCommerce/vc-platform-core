@@ -91,9 +91,9 @@ namespace VirtoCommerce.PricingModule.Data.ExportImport
                 viewableEntity.Code = product?.Code;
                 viewableEntity.ImageUrl = product?.ImgSrc;
                 viewableEntity.Name = product?.Name;
-                viewableEntity.Product = product?.Name;
+                viewableEntity.ProductName = product?.Name;
                 viewableEntity.Parent = pricelist?.Name;
-                viewableEntity.Pricelist = pricelist?.Name;
+                viewableEntity.PricelistName = pricelist?.Name;
             }
         }
 
@@ -113,6 +113,8 @@ namespace VirtoCommerce.PricingModule.Data.ExportImport
             result.List = model.List;
             result.MinQuantity = model.MinQuantity;
             result.OuterId = model.OuterId;
+            result.PricelistId = model.PricelistId;
+            result.ProductId = model.ProductId;
             result.Sale = model.Sale;
             result.StartDate = model.StartDate;
 

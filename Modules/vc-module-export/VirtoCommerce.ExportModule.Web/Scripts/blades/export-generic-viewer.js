@@ -1,7 +1,7 @@
 angular.module('virtoCommerce.exportModule')
     .controller('virtoCommerce.exportModule.exportGenericViewerController', 
-    ['$localStorage', '$timeout', '$scope', 'platformWebApp.bladeUtils', 'platformWebApp.uiGridHelper','virtoCommerce.exportModule.exportModuleApi',
-    function ($localStorage, $timeout, $scope, bladeUtils, uiGridHelper, exportModuleApi) {
+    ['$localStorage', '$timeout', '$scope', 'platformWebApp.bladeUtils', 'platformWebApp.uiGridHelper','virtoCommerce.exportModule.exportModuleApi', 'virtoCommerce.exportModule.genericViewerItemService',
+    function ($localStorage, $timeout, $scope, bladeUtils, uiGridHelper, exportModuleApi, genericViewerItemService) {
         $scope.uiGridConstants = uiGridHelper.uiGridConstants;
         $scope.hasMore = true;
         $scope.items = [];
@@ -146,7 +146,12 @@ angular.module('virtoCommerce.exportModule')
 
         $scope.selectItem = function (e, listItem) {
             blade.setSelectedItem(listItem);
-            // TODO item view on select
+            
+            var viewerFunc = genericViewerItemService.getViewer(listItem.type);
+            
+            if (viewerFunc) {
+                bladeNavigationService.showBlade(viewerFunc(listItem), blade);
+            }
         };
 
 
