@@ -75,8 +75,10 @@ namespace VirtoCommerce.PricingModule.Data.ExportImport
             result.Name = model.Name;
             result.Parent = null;
 
+            result.CatalogId = model.CatalogId;
             result.Description = model.Description;
             result.EndDate = model.EndDate;
+            result.PricelistId = model.PricelistId;
             result.Priority = model.Priority;
             result.StartDate = model.StartDate;
 
@@ -113,8 +115,8 @@ namespace VirtoCommerce.PricingModule.Data.ExportImport
                 var catalog = catalogs.FirstOrDefault(x => x.Id == model.CatalogId);
                 var pricelist = pricelists.FirstOrDefault(x => x.Id == model.PricelistId);
 
-                viewableEntity.Catalog = catalog?.Name;
-                viewableEntity.Pricelist = pricelist?.Name;
+                viewableEntity.CatalogName = catalog?.Name;
+                viewableEntity.PricelistName = pricelist?.Name;
             }
         }
     }

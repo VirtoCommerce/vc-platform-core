@@ -91,9 +91,9 @@ namespace VirtoCommerce.PricingModule.Data.ExportImport
                 viewableEntity.Code = product?.Code;
                 viewableEntity.ImageUrl = product?.ImgSrc;
                 viewableEntity.Name = product?.Name;
-                viewableEntity.Product = product?.Name;
+                viewableEntity.ProductName = product?.Name;
                 viewableEntity.Parent = pricelist?.Name;
-                viewableEntity.Pricelist = pricelist?.Name;
+                viewableEntity.PricelistName = pricelist?.Name;
             }
         }
 

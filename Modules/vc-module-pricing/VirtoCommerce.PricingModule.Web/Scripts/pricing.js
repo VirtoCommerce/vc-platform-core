@@ -95,22 +95,44 @@ angular.module(moduleName, ['ui.grid.cellNav', 'ui.grid.edit', 'ui.grid.validate
           }]);
 
       genericViewerItemService.registerViewer('Price', function (item) {
-          var priceData = angular.copy(item);
-
-          priceData.product = undefined;
-          priceData.pricelist = undefined;
+          var itemCopy = angular.copy(item);
 
           return {
               id: 'itemPrices',
-              itemId: item.productId,
-              priceListId: item.pricelistId,
-              data: { prices: [priceData] },
-              currency: item.currency,
+              itemId: itemCopy.productId,
+              priceListId: itemCopy.pricelistId,
+              data: { prices: [itemCopy] },
+              currency: itemCopy.currency,
               title: 'pricing.blades.prices-list.title',
-              titleValues: { name: item.name },
+              titleValues: { name: itemCopy.name },
               subtitle: 'pricing.blades.prices-list.subtitle',
               controller: 'virtoCommerce.pricingModule.pricesListController',
               template: 'Modules/$(VirtoCommerce.Pricing)/Scripts/blades/prices-list.tpl.html'
+          };
+      });
+
+      genericViewerItemService.registerViewer('Pricelist', function (item) {
+          var itemCopy = angular.copy(item);
+
+          return {
+              id: 'listItemChild',
+              controller: 'virtoCommerce.pricingModule.pricelistDetailController',
+              template: 'Modules/$(VirtoCommerce.Pricing)/Scripts/blades/pricelist-detail.tpl.html',
+              currentEntityId: itemCopy.id,
+              title: itemCopy.name
+          };
+      });
+
+      genericViewerItemService.registerViewer('PricelistAssignment', function (item) {
+          var itemCopy = angular.copy(item);
+
+          return {
+              id: 'pricelistAssignmentDetail',
+              controller: 'virtoCommerce.pricingModule.assignmentDetailController',
+              template: 'Modules/$(VirtoCommerce.Pricing)/Scripts/blades/assignment-detail.tpl.html',
+              currentEntityId: itemCopy.id,
+              title: itemCopy.name,
+              subtitle: 'pricing.blades.assignment-detail.subtitle'
           };
       });
   }]);
