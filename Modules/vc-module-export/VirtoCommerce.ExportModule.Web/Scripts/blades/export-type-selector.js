@@ -53,9 +53,6 @@ angular.module('virtoCommerce.exportModule')
         };
 
         blade.prepareTypes = function () {
-            if (blade.selectedProvider && blade.selectedProvider.isTabular) {
-                blade.knownTypesTree = _.filter(blade.knownTypesTree, function (x) { return x.isTabularExportSupported === true; });
-            }
             _.each(blade.knownTypesTree, function (item) {
                 item.localizedName = $translate.instant('export.types.' + item.typeName + '.name');
                 item.localizedNameDescription = $translate.instant('export.types.' + item.typeName + '.description');
