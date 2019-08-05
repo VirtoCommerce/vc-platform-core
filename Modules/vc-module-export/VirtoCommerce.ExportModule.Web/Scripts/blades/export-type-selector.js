@@ -39,7 +39,6 @@ angular.module('virtoCommerce.exportModule')
                             dataQuery: {
                                 exportTypeName: selectedType.exportDataQueryType,
                                 isAllSelected: true,
-                                includedColumns: (blade.selectedProvider && blade.selectedProvider.isTabular ? selectedType.tabularMetaData.propertyInfos : selectedType.metaData.propertyInfos),
                                 take: 10000
                             }
                         },
