@@ -78,6 +78,9 @@
                 },
                 "placeholders": {
                     "filter-name": "How will you call this filter?"
+                },
+                "commands": {
+                    "apply": "Apply"
                 }
             }
         }
