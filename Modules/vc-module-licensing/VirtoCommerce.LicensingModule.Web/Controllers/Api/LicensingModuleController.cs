@@ -76,7 +76,7 @@ namespace VirtoCommerce.LicensingModule.Web.Controllers.Api
         [HttpGet]
         [Route("download/{activationCode}")]
         [Authorize(ModuleConstants.Security.Permissions.Issue)]
-        public async Task<ActionResult<ContentResult>> Download(string activationCode)
+        public async Task<ContentResult> Download(string activationCode)
         {
             var remoteIpAddress = Request.HttpContext.Connection.RemoteIpAddress;
             return await GetSignedLicenseAsync(activationCode, false, remoteIpAddress.ToString());
@@ -85,14 +85,14 @@ namespace VirtoCommerce.LicensingModule.Web.Controllers.Api
         [HttpGet]
         [Route("activate/{activationCode}")]
         [AllowAnonymous]
-        public async Task<ActionResult<ContentResult>> Activate(string activationCode)
+        public async Task<ContentResult> Activate(string activationCode)
         {
             var remoteIpAddress = HttpContext.Connection.RemoteIpAddress;
             return await GetSignedLicenseAsync(activationCode, true, remoteIpAddress.ToString());
         }
 
 
-        private async Task<ActionResult> GetSignedLicenseAsync(string activationCode, bool isActivated, string ip)
+        private async Task<ContentResult> GetSignedLicenseAsync(string activationCode, bool isActivated, string ip)
         {
             var signedLicense = await _licenseService.GetSignedLicenseAsync(activationCode, ip, isActivated);
 
@@ -114,7 +114,7 @@ namespace VirtoCommerce.LicensingModule.Web.Controllers.Api
                 return result;
             }
 
-            return new NotFoundResult();
+            return new ContentResult { StatusCode = 400 };
         }
 
     }
