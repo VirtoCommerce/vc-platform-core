@@ -33,20 +33,17 @@ angular.module('virtoCommerce.exportModule')
                 } else {
                     var selectedTypes = _.filter(blade.allGroups, function (x) { return x.groupName === node.groupName || (node.groupName === 'General' && !x.groupName); });
                     var selectedType = selectedTypes[0];
-                    var allColumnsOfType = (blade.selectedProvider && blade.selectedProvider.isTabular ? selectedType.tabularMetaData.propertyInfos : selectedType.metaData.propertyInfos);
                     var selectedTypeData = {
                         exportDataRequest: {
                             exportTypeName: selectedType.typeName,
                             dataQuery: {
                                 exportTypeName: selectedType.exportDataQueryType,
                                 isAllSelected: true,
-                                includedColumns: allColumnsOfType,
+                                includedColumns: (blade.selectedProvider && blade.selectedProvider.isTabular ? selectedType.tabularMetaData.propertyInfos : selectedType.metaData.propertyInfos),
                                 take: 10000
                             }
                         },
-                        allColumnsOfType: allColumnsOfType,
-                        isTabularExportSupported: selectedType.isTabularExportSupported,
-                        localizedTypeName: selectedType.localizedName
+                        selectedType:selectedType
                     };
                     if (blade.onSelected) {
                         blade.onSelected(selectedTypeData);
@@ -61,10 +58,10 @@ angular.module('virtoCommerce.exportModule')
                 blade.knownTypesTree = _.filter(blade.knownTypesTree, function (x) { return x.isTabularExportSupported === true; });
             }
             _.each(blade.knownTypesTree, function (item) {
-                item.localizedName = $translate.instant('export.type-names.' + item.typeName);
-                item.localizedNameDescription = $translate.instant('export.type-names.' + item.typeName + '.description');
-                item.localizedGroup = $translate.instant('export.type-groups.' + item.group);
-                item.localizedGroupDescription = $translate.instant('export.type-groups.' + item.group + '.description');
+                item.localizedName = $translate.instant('export.types.' + item.typeName + '.name');
+                item.localizedNameDescription = $translate.instant('export.types.' + item.typeName + '.description');
+                item.localizedGroup = $translate.instant('export.groups.' + item.group + '.name');
+                item.localizedGroupDescription = $translate.instant('export.groups.' + item.group + '.description');
                 item.groupName = item.group + '|' + item.typeName;
                 item.localizedGroupName = item.localizedGroup + '|' + item.localizedName;
                 var lastIndex = item.typeName.lastIndexOf('.');
@@ -138,7 +135,7 @@ angular.module('virtoCommerce.exportModule')
                     lastParentId += '|' + path;
                     var breadCrumb = {
                         id: lastParentId.substring(1),
-                        name: $translate.instant('export.type-groups.' + path),
+                        name: $translate.instant('export.groups.' + path + '.name'),
                         children: lastchildren,
                         navigate: function () {
                             $scope.selectNode({ groupName: this.id, children: this.children });
