@@ -15,6 +15,7 @@ using VirtoCommerce.NotificationsModule.LiquidRenderer;
 using VirtoCommerce.NotificationsModule.Tests.Common;
 using VirtoCommerce.NotificationsModule.Tests.Model;
 using VirtoCommerce.NotificationsModule.Tests.NotificationTypes;
+using VirtoCommerce.Platform.Core.Assets;
 using VirtoCommerce.Platform.Core.Common;
 using VirtoCommerce.Platform.Core.Localizations;
 using VirtoCommerce.Platform.Data.Localizations;
@@ -32,12 +33,14 @@ namespace VirtoCommerce.NotificationsModule.Tests.UnitTests
         private readonly Mock<ILogger<NotificationSender>> _logNotificationSenderMock;
         private readonly Mock<INotificationMessageSenderProviderFactory> _senderFactoryMock;
         private readonly Mock<ILocalizationService> _localizationServiceMock;
+        private readonly Mock<IBlobUrlResolver> _blobUrlResolverMock;
 
         public NotificationSenderUnitTests()
         {
             _localizationServiceMock = new Mock<ILocalizationService>();
+            _blobUrlResolverMock = new Mock<IBlobUrlResolver>();
             //localizationService.LocalizationResources = JObject.FromObject(new { en = new { order = new { subject = "subj" } } });
-            _templateRender = new LiquidTemplateRenderer(_localizationServiceMock.Object);
+            _templateRender = new LiquidTemplateRenderer(_localizationServiceMock.Object, _blobUrlResolverMock.Object);
             _messageServiceMock = new Mock<INotificationMessageService>();
             _messageSenderMock = new Mock<INotificationMessageSender>();
             _logNotificationSenderMock = new Mock<ILogger<NotificationSender>>();
