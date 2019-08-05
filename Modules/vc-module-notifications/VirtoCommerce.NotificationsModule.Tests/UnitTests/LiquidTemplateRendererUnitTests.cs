@@ -12,11 +12,11 @@ namespace VirtoCommerce.NotificationsModule.Tests.UnitTests
 {
     public class LiquidTemplateRendererUnitTests
     {
-        private readonly Mock<ILocalizationService> _localizationServiceMock;
+        private readonly Mock<ITranslationService> _localizationServiceMock;
         private readonly LiquidTemplateRenderer _liquidTemplateRenderer;
         public LiquidTemplateRendererUnitTests()
         {
-            _localizationServiceMock = new Mock<ILocalizationService>();
+            _localizationServiceMock = new Mock<ITranslationService>();
             _liquidTemplateRenderer = new LiquidTemplateRenderer(_localizationServiceMock.Object);
         }
 

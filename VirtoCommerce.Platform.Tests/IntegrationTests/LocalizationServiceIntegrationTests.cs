@@ -19,7 +19,7 @@ namespace VirtoCommerce.Platform.Tests.IntegrationTests
         private readonly Mock<IPlatformMemoryCache> _platformMemoryCacheMock;
         private readonly Mock<ICacheEntry> _cacheEntryMock;
 
-        private readonly LocalizationService _localizationService;
+        private readonly TranslationService _localizationService;
         public LocalizationServiceIntegrationTests()
         {
             _localModuleCatalogMock = new Mock<ILocalModuleCatalog>();
@@ -30,7 +30,7 @@ namespace VirtoCommerce.Platform.Tests.IntegrationTests
             var dir = @"..\..\..\";
             _hostingEnvironmentMock.Setup(x => x.WebRootPath).Returns(dir);
 
-            _localizationService = new LocalizationService(_localModuleCatalogMock.Object, _hostingEnvironmentMock.Object, _platformMemoryCacheMock.Object);
+            _localizationService = new TranslationService(_localModuleCatalogMock.Object, _hostingEnvironmentMock.Object, _platformMemoryCacheMock.Object);
         }
 
         [Fact]

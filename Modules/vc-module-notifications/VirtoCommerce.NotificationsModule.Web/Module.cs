@@ -29,6 +29,7 @@ using VirtoCommerce.Platform.Core.Notifications;
 using VirtoCommerce.Platform.Core.Security;
 using VirtoCommerce.Platform.Core.Settings;
 using VirtoCommerce.NotificationsModule.Core.Extensions;
+using VirtoCommerce.Platform.Core.Localizations;
 
 namespace VirtoCommerce.NotificationsModule.Web
 {
@@ -89,6 +90,9 @@ namespace VirtoCommerce.NotificationsModule.Web
 
             AbstractTypeFactory<NotificationMessageEntity>.RegisterType<EmailNotificationMessageEntity>();
             AbstractTypeFactory<NotificationMessageEntity>.RegisterType<SmsNotificationMessageEntity>();
+
+            AbstractTypeFactory<NotificationScriptObject>.RegisterType<NotificationScriptObject>()
+                                                         .WithFactory(() => new NotificationScriptObject(appBuilder.ApplicationServices.GetRequiredService<ITranslationService>()));
 
             var settingsRegistrar = appBuilder.ApplicationServices.GetRequiredService<ISettingsRegistrar>();
             settingsRegistrar.RegisterSettings(ModuleConstants.Settings.AllSettings, ModuleInfo.Id);

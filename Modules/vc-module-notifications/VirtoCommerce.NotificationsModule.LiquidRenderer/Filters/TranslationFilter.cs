@@ -1,20 +1,26 @@
-using Newtonsoft.Json.Linq;
 using Scriban;
 using Scriban.Syntax;
+using VirtoCommerce.Platform.Core.Localizations;
 
 namespace VirtoCommerce.NotificationsModule.LiquidRenderer.Filters
 {
     public static class TranslationFilter
     {
-        public static string Translate(TemplateContext context, string path, string language = null)
+        public static string Translate(TemplateContext context, string key, string language = null)
         {
-            var localizationResources = (JObject)context.GetValue(new ScriptVariableGlobal("localizationResources"));
-            var languageObject = context.GetValue(new ScriptVariableGlobal("language"))?.ToString();
-            var key = !string.IsNullOrEmpty(language) ? $"{language}.{path}" :
-                !string.IsNullOrEmpty(languageObject) ? $"{languageObject}.{path}" :
-                $"default.{path}";
+            var result = key;
 
-            return (localizationResources?.SelectToken(key) ?? key).ToString();
+            var localizationService = (ITranslationService)context.GetValue(new ScriptVariableGlobal(nameof(NotificationScriptObject.TranslationService)));
+            if (string.IsNullOrEmpty(language))
+            {
+                language = context.GetValue(new ScriptVariableGlobal(nameof(NotificationScriptObject.Language)))?.ToString();
+            }
+            var translation = localizationService.GetTranslationDataForLanguage(language);
+            if (translation != null)
+            {
+                result = (translation.SelectToken(key) ?? key).ToString();                
+            }
+            return result;
         }
     }
 }

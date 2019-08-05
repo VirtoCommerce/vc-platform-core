@@ -57,7 +57,10 @@ namespace VirtoCommerce.Platform.Data.Extensions
                 return JsonSerializer.Create(serv.Value.SerializerSettings);
             });
 
-            services.AddSingleton<ILocalizationService, LocalizationService>();
+            //Register dependencies for translation
+            services.AddSingleton<ITranslationDataProvider, PlatformTranslationDataProvider>();
+            services.AddSingleton<ITranslationDataProvider, ModulesTranslationDataProvider>();
+            services.AddSingleton<ITranslationService, TranslationService>();
 
             return services;
 
