@@ -11,10 +11,17 @@ namespace VirtoCommerce.NotificationsModule.LiquidRenderer.Filters
             var result = key;
 
             var localizationService = (ITranslationService)context.GetValue(new ScriptVariableGlobal(nameof(NotificationScriptObject.TranslationService)));
+
             if (string.IsNullOrEmpty(language))
             {
                 language = context.GetValue(new ScriptVariableGlobal(nameof(NotificationScriptObject.Language)))?.ToString();
             }
+
+            if (!string.IsNullOrEmpty(language))
+            {
+                key = $"{language}.{key}";
+            }
+
             var translation = localizationService.GetTranslationDataForLanguage(language);
             if (translation != null)
             {

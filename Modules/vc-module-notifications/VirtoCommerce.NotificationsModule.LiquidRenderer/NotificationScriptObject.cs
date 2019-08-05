@@ -12,6 +12,8 @@ namespace VirtoCommerce.NotificationsModule.LiquidRenderer
             this.Import(typeof(TranslationFilter));
             this.Import(typeof(StandardFilters));
             this.Import(typeof(UrlFilters));
+            this.Add(nameof(TranslationService), translationService);
+            this.Add(nameof(BlobUrlResolver), blobUrlResolver);
 
             TranslationService = translationService;
             BlobUrlResolver = blobUrlResolver;

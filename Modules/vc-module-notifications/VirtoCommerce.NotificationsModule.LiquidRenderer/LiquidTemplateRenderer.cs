@@ -14,7 +14,7 @@ namespace VirtoCommerce.NotificationsModule.LiquidRenderer
 
         public async Task<string> RenderAsync(string stringTemplate, object model, string language = null)
         {
-            var context = new TemplateContext()
+            var context = new LiquidTemplateContext()
             {
                 EnableRelaxedMemberAccess = true,
                 NewLine = Environment.NewLine,
@@ -25,7 +25,7 @@ namespace VirtoCommerce.NotificationsModule.LiquidRenderer
             };
             var scriptObject = AbstractTypeFactory<NotificationScriptObject>.TryCreateInstance();
             scriptObject.Import(model);
-            scriptObject.Language = language;
+            scriptObject.Add(nameof(NotificationScriptObject.Language), language);
 
             context.PushGlobal(scriptObject);
 

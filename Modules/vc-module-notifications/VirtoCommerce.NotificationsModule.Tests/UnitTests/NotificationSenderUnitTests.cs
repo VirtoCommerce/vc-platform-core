@@ -31,13 +31,10 @@ namespace VirtoCommerce.NotificationsModule.Tests.UnitTests
         private readonly Mock<INotificationMessageSender> _messageSenderMock;
         private readonly Mock<ILogger<NotificationSender>> _logNotificationSenderMock;
         private readonly Mock<INotificationMessageSenderProviderFactory> _senderFactoryMock;
-        private readonly Mock<ITranslationService> _localizationServiceMock;
-
+        
         public NotificationSenderUnitTests()
         {
-            _localizationServiceMock = new Mock<ITranslationService>();
-            //localizationService.LocalizationResources = JObject.FromObject(new { en = new { order = new { subject = "subj" } } });
-            _templateRender = new LiquidTemplateRenderer(_localizationServiceMock.Object);
+            _templateRender = new LiquidTemplateRenderer();
             _messageServiceMock = new Mock<INotificationMessageService>();
             _messageSenderMock = new Mock<INotificationMessageSender>();
             _logNotificationSenderMock = new Mock<ILogger<NotificationSender>>();

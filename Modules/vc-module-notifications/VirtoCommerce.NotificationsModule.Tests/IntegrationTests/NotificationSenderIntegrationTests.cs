@@ -46,7 +46,7 @@ namespace VirtoCommerce.NotificationsModule.Tests.IntegrationTests
                 Login = "tasker.for.test@gmail.com",
                 Password = ""
             };
-            _templateRender = new LiquidTemplateRenderer(null, null);
+            _templateRender = new LiquidTemplateRenderer();
             _messageServiceMock = new Mock<INotificationMessageService>();
             _emailSendingOptionsMock = new Mock<IOptions<SmtpSenderOptions>>();
             _serviceMock = new Mock<INotificationService>();
