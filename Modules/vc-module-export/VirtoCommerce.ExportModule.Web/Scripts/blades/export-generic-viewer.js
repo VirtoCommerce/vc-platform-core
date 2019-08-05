@@ -51,11 +51,16 @@ angular.module('virtoCommerce.exportModule')
                     $scope.hasMore = data.results.length === $scope.pageSettings.itemsPerPageCount;
 
                     $timeout(function() {
-                        if ($scope.gridApi && dataQuery.objectIds && dataQuery.objectIds.length) {
-                            _.each(dataQuery.objectIds, function(objectId) {
-                                var dataItem = _.findWhere($scope.items, {id: objectId});
-                                $scope.gridApi.selection.selectRow(dataItem);
-                            });
+                        if ($scope.gridApi) {
+                            if (dataQuery.objectIds && dataQuery.objectIds.length) {
+                                _.each(dataQuery.objectIds, function(objectId) {
+                                    var dataItem = _.findWhere($scope.items, {id: objectId});
+                                    $scope.gridApi.selection.selectRow(dataItem);
+                                });
+                            } 
+                            else if (dataQuery.isAllSelected) {
+                                $scope.gridApi.selection.selectAllRows();
+                            } 
                         }
                     });
 
@@ -275,14 +280,16 @@ angular.module('virtoCommerce.exportModule')
         $scope.saveChanges = function () {
             var dataQuery = buildDataQuery();
             var selectedItemsCount = $scope.pageSettings.totalItems;
+            var isAllSelected = $scope.gridApi.selection.getSelectAllState();
             var selectedIds = _.map($scope.gridApi.selection.getSelectedRows(), function(item) { return item.id; });
 
-            if (selectedIds.length) {
+            if (blade.exportDataRequest.dataQuery.objectIds || !isAllSelected) {
                 dataQuery.objectIds = selectedIds;
                 selectedItemsCount = selectedIds.length;
-            } else {
-                dataQuery.isAllSelected = true;
             }
+            else {
+                dataQuery.isAllSelected = true;
+            } 
 
             if (blade.onCompleted) {
                 blade.onCompleted(dataQuery, selectedItemsCount);
