@@ -18,7 +18,7 @@ angular.module(moduleName, ['ui.grid.cellNav', 'ui.grid.edit', 'ui.grid.validate
                     controller: 'virtoCommerce.exportModule.exportSettingsController',
                     template: 'Modules/$(VirtoCommerce.Export)/Scripts/blades/export-settings.tpl.html',
                     exportDataRequest: {},
-                    isClosingDisabled: false
+                    isClosingDisabled: true
                 };
                 bladeNavigationService.showBlade(newBlade);
             }]
