@@ -28,8 +28,6 @@ using VirtoCommerce.Platform.Core.Modularity;
 using VirtoCommerce.Platform.Core.Notifications;
 using VirtoCommerce.Platform.Core.Security;
 using VirtoCommerce.Platform.Core.Settings;
-using VirtoCommerce.NotificationsModule.Core.Extensions;
-using VirtoCommerce.Platform.Core.Localizations;
 
 namespace VirtoCommerce.NotificationsModule.Web
 {
@@ -54,6 +52,7 @@ namespace VirtoCommerce.NotificationsModule.Web
             serviceCollection.AddTransient<INotificationTemplateRenderer, LiquidTemplateRenderer>();
             serviceCollection.AddTransient<IEmailSender, EmailNotificationMessageSender>();
             serviceCollection.AddTransient<NotificationsExportImport>();
+            serviceCollection.AddTransient<NotificationScriptObject>();
 
             serviceCollection.AddSingleton<INotificationMessageSenderProviderFactory, NotificationMessageSenderProviderFactory>();
 
@@ -92,7 +91,7 @@ namespace VirtoCommerce.NotificationsModule.Web
             AbstractTypeFactory<NotificationMessageEntity>.RegisterType<SmsNotificationMessageEntity>();
 
             AbstractTypeFactory<NotificationScriptObject>.RegisterType<NotificationScriptObject>()
-                                                         .WithFactory(() => new NotificationScriptObject(appBuilder.ApplicationServices.GetRequiredService<ITranslationService>()));
+                                                         .WithFactory(() => appBuilder.ApplicationServices.GetRequiredService<NotificationScriptObject>());
 
             var settingsRegistrar = appBuilder.ApplicationServices.GetRequiredService<ISettingsRegistrar>();
             settingsRegistrar.RegisterSettings(ModuleConstants.Settings.AllSettings, ModuleInfo.Id);

@@ -11,12 +11,6 @@ namespace VirtoCommerce.NotificationsModule.LiquidRenderer
 {
     public class LiquidTemplateRenderer : INotificationTemplateRenderer
     {
-        private readonly ITranslationService _localizationService;
-
-        public LiquidTemplateRenderer(ITranslationService localizationService)
-        {
-            _localizationService = localizationService;
-        }
 
         public async Task<string> RenderAsync(string stringTemplate, object model, string language = null)
         {
