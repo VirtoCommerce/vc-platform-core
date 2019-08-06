@@ -40,7 +40,6 @@ namespace VirtoCommerce.CustomerModule.Data.Services
             _userSearchService = userSearchService;
         }
 
-
         #region IMemberService Members
 
         /// <summary>
@@ -74,7 +73,7 @@ namespace VirtoCommerce.CustomerModule.Data.Services
                         var member = AbstractTypeFactory<Member>.TryCreateInstance(dataMember.MemberType);
                         if (member != null)
                         {
-                            dataMember.ToModel(member);                           
+                            dataMember.ToModel(member);
 
                             member.ReduceDetails(responseGroup);
 
