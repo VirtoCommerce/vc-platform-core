@@ -1,5 +1,4 @@
 using VirtoCommerce.NotificationsModule.Core.Model;
-using VirtoCommerce.Platform.Core.Common;
 
 namespace VirtoCommerce.NotificationsModule.Core.Services
 {
@@ -8,6 +7,8 @@ namespace VirtoCommerce.NotificationsModule.Core.Services
     /// </summary>
     public interface INotificationRegistrar
     {
-        void RegisterNotification<T>() where T : Notification;
+        NotificationBuilder RegisterNotification<T>() where T : Notification;
+
+        NotificationBuilder OverrideNotificationType<OldType, NewType>() where OldType : Notification where NewType : Notification;
     }
 }

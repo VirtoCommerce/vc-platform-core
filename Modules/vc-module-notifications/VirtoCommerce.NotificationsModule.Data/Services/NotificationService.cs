@@ -15,7 +15,7 @@ using VirtoCommerce.Platform.Core.Events;
 namespace VirtoCommerce.NotificationsModule.Data.Services
 {
 
-    public class NotificationService : INotificationService, INotificationRegistrar
+    public class NotificationService : INotificationService
     {
         private readonly IEventPublisher _eventPublisher;
         private readonly Func<INotificationRepository> _repositoryFactory;
@@ -74,26 +74,18 @@ namespace VirtoCommerce.NotificationsModule.Data.Services
             }
         }
 
-        public void RegisterNotification<T>() where T : Notification
-        {
-            if (AbstractTypeFactory<Notification>.AllTypeInfos.All(t => t.Type != typeof(T)))
-            {
-                AbstractTypeFactory<Notification>.RegisterType<T>();
-            }
-        }
-
+      
         private void ValidateNotificationProperties(IEnumerable<Notification> notifications)
         {
             if (notifications == null)
             {
                 throw new ArgumentNullException(nameof(notifications));
             }
-
             var validator = new NotificationValidator();
             foreach (var notification in notifications)
             {
                 validator.ValidateAndThrow(notification);
             }
-        }
+        }       
     }
 }

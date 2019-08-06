@@ -1,3 +1,5 @@
+using System.Threading.Tasks;
+
 namespace VirtoCommerce.NotificationsModule.Core.Services
 {
     /// <summary>
@@ -5,6 +7,6 @@ namespace VirtoCommerce.NotificationsModule.Core.Services
     /// </summary>
     public interface INotificationTemplateRenderer
     {
-        string Render(string template, object data);
+        Task<string> RenderAsync(string stringTemplate, object model, string language = null);
     }
 }
