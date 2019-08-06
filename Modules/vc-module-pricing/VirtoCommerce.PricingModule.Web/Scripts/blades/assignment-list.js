@@ -5,7 +5,7 @@ angular.module('virtoCommerce.pricingModule')
             var blade = $scope.blade;
             var bladeNavigationService = bladeUtils.bladeNavigationService;
             var defaultDataRequest = {
-                exportTypeName: 'PricelistAssignment',
+                exportTypeName: 'VirtoCommerce.PricingModule.Core.Model.PricelistAssignment',
                 isTabularExportSupported: true,
                 dataQuery: {
                     exportTypeName: 'PricelistAssignmentExportDataQuery'

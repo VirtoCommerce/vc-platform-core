@@ -1,0 +1,10 @@
+<div class="form-input" ng-controller="virtoCommerce.pricingModule.currencySelectorController">
+    <div class="form-input" ng-init="currencies = currencyUtils.getCurrencies()">
+        <ui-select ng-model="blade.currentEntity.currency" required>
+            <ui-select-match placeholder="{{'pricing.blades.pricelist-detail.placeholders.currency' | translate}}">{{$select.selected.code}}</ui-select-match>
+            <ui-select-choices repeat="x.code as x in currencies | filter: $select.search">
+                <span ng-bind-html="x.code | highlight: $select.search"></span>
+            </ui-select-choices>
+        </ui-select>
+    </div>
+</div>

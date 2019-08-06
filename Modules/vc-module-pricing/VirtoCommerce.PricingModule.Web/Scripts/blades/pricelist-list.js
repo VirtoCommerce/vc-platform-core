@@ -5,7 +5,7 @@ function ($scope, pricelists, dialogService, uiGridHelper, bladeUtils) {
     var bladeNavigationService = bladeUtils.bladeNavigationService;
 
     var exportDataRequest = {
-        exportTypeName: 'Pricelist',
+        exportTypeName: 'VirtoCommerce.PricingModule.Core.Model.Pricelist',
         isTabularExportSupported: true,
         dataQuery: {
             exportTypeName: 'PricelistExportDataQuery'

@@ -703,7 +703,12 @@
             "category-scope": {
                 "title": "Only for selected categories"
             }
-        }
+        },
+        "selectors": {
+            "placeholders": {
+                "catalog-lists": "Select catalog..." 
+            } 
+        } 
     },
     "permissions": {
         "catalog:access": "Open catalogs menu",

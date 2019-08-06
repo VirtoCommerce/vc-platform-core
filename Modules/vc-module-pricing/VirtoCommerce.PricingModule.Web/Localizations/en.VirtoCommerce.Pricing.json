@@ -194,7 +194,9 @@
             "titles": {
                 "price-lists": "Price lists",
                 "modified-since": "Modified since",
-                "products": "Products"
+                "products": "Products",
+                "curency": "Currencies"
+
             },
             "labels": {
                 "select": "Select",

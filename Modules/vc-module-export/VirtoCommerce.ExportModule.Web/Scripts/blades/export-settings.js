@@ -49,6 +49,7 @@ angular.module('virtoCommerce.exportModule')
                 var selectedType = _.find(results,
                     function (x) { return x.typeName === blade.exportDataRequest.exportTypeName; });
                 if (selectedType) {
+                    blade.localizedTypeName = $translate.instant('export.type-names.' + blade.exportDataRequest.exportTypeName);
                     blade.allColumnsOfType = selectedType.metaData.propertyInfos;
                     blade.isTabularExportSupported = selectedType.isTabularExportSupported;
                     blade.columnSelected = blade.allColumnsOfType.length;
