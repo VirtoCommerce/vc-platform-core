@@ -102,7 +102,7 @@ namespace VirtoCommerce.NotificationsModule.Web.Controllers
         [HttpPost]
         [Route("{type}/templates/{language}/rendercontent")]
         [Authorize(ModuleConstants.Security.Permissions.ReadTemplates)]
-        public async Task<ActionResult> RenderingTemplate([FromBody]NotificationTemplateRequest request, string language = null)
+        public async Task<ActionResult> RenderingTemplate([FromBody]NotificationTemplateRequest request, string language)
         {
             var template = request.Data.Templates.FindWithLanguage(language);
             var result = await _notificationTemplateRender.RenderAsync(request.Text, request.Data, template.LanguageCode);
