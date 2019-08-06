@@ -11,7 +11,7 @@
                     <ul class="list __items">
                         <li class="list-item" ng-click="selectExportedType()" >
                             <i class="list-ico fa fa-cogs"></i>
-                            <span class="list-t">{{ blade.localizedTypeName || ('export.blades.export-settings.labels.exported-type' | translate) }}</span>
+                            <span class="list-t">{{ blade.selectedType.localizedName || ('export.blades.export-settings.labels.exported-type' | translate) }}</span>
                             <span class="list-descr">{{ 'export.blades.export-settings.labels.exported-type-description' | translate }} </span>
                         </li>
                         <li class="list-item">

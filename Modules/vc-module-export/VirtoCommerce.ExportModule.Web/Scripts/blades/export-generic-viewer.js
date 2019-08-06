@@ -51,11 +51,16 @@ angular.module('virtoCommerce.exportModule')
                     $scope.hasMore = data.results.length === $scope.pageSettings.itemsPerPageCount;
 
                     $timeout(function() {
-                        if ($scope.gridApi && dataQuery.objectIds && dataQuery.objectIds.length) {
-                            _.each(dataQuery.objectIds, function(objectId) {
-                                var dataItem = _.findWhere($scope.items, {id: objectId});
-                                $scope.gridApi.selection.selectRow(dataItem);
-                            });
+                        if ($scope.gridApi) {
+                            if (dataQuery.objectIds && dataQuery.objectIds.length) {
+                                _.each(dataQuery.objectIds, function(objectId) {
+                                    var dataItem = _.findWhere($scope.items, {id: objectId});
+                                    $scope.gridApi.selection.selectRow(dataItem);
+                                });
+                            } 
+                            else if (dataQuery.isAllSelected) {
+                                $scope.gridApi.selection.selectAllRows();
+                            } 
                         }
                     });
 
@@ -84,10 +89,10 @@ angular.module('virtoCommerce.exportModule')
 
         blade.resetFiltering = function() {
             filter.resetKeyword();    
-            $scope.resetRequestCustomFilter();        
+            blade.resetRequestCustomFilter();        
         };
 
-        $scope.resetRequestCustomFilter = function () {
+        blade.resetRequestCustomFilter = function () {
             blade.exportDataRequest.dataQuery = getEmptyDataQuery();
         }
 
@@ -156,7 +161,7 @@ angular.module('virtoCommerce.exportModule')
 
 
         if (!$localStorage.exportSearchFilters) {
-            $localStorage.exportSearchFilters = [];
+            $localStorage.exportSearchFilters = {};
         }
 
         if (!$localStorage.exportSearchFilters[blade.exportDataRequest.exportTypeName]) {
@@ -166,7 +171,7 @@ angular.module('virtoCommerce.exportModule')
         $scope.exportSearchFilters = $localStorage.exportSearchFilters[blade.exportDataRequest.exportTypeName];
 
         if (!$localStorage.exportSearchFilterIds) {
-            $localStorage.exportSearchFilterIds = [];
+            $localStorage.exportSearchFilterIds = {};
         }
 
         $scope.exportSearchFilterId = $localStorage.exportSearchFilterIds[blade.exportDataRequest.exportTypeName];
@@ -185,7 +190,7 @@ angular.module('virtoCommerce.exportModule')
                 bladeNavigationService.closeBlade({ id: 'exportGenericViewerFilter' });
                 
                 if (!filter.current) {
-                    $scope.resetRequestCustomFilter();
+                    blade.resetRequestCustomFilter();
                 }
 
                 filter.criteriaChanged();
@@ -193,17 +198,29 @@ angular.module('virtoCommerce.exportModule')
         };
 
         filter.edit = function () {
+            var metafieldsId = blade.exportDataRequest.exportTypeName  + 'ExportFilter';
+            var filterDetailsPerams = { 
+                data: filter.current, 
+                metafieldsId: metafieldsId, 
+                exportTypeName: blade.exportDataRequest.exportTypeName 
+            };
+
             if (filter.current) {
-                var metafieldsId = blade.exportDataRequest.exportTypeName  + 'ExportFilter';
-                showFilterDetailBlade({ data: filter.current, metafieldsId: metafieldsId, exportTypeName: blade.exportDataRequest.exportTypeName });
+                angular.extend(filterDetailsPerams, { data: filter.current }); 
             }
+            else {
+                angular.extend(filterDetailsPerams, { isNew: true });
+            }
+
+            showFilterDetailBlade(filterDetailsPerams);
         };
 
         function showFilterDetailBlade(bladeData) {
             var newBlade = {
                 id: 'exportGenericViewerFilter',
                 controller: 'virtoCommerce.exportModule.exportGenericViewerFilterController',
-                template: 'Modules/$(VirtoCommerce.Export)/Scripts/blades/export-generic-viewer-filter.tpl.html'
+                template: 'Modules/$(VirtoCommerce.Export)/Scripts/blades/export-generic-viewer-filter.tpl.html',
+                onBeforeApply: blade.resetRequestCustomFilter
             };
             angular.extend(newBlade, bladeData);
             bladeNavigationService.showBlade(newBlade, blade);
@@ -263,14 +280,16 @@ angular.module('virtoCommerce.exportModule')
         $scope.saveChanges = function () {
             var dataQuery = buildDataQuery();
             var selectedItemsCount = $scope.pageSettings.totalItems;
+            var isAllSelected = $scope.gridApi.selection.getSelectAllState();
             var selectedIds = _.map($scope.gridApi.selection.getSelectedRows(), function(item) { return item.id; });
 
-            if (selectedIds.length) {
+            if (blade.exportDataRequest.dataQuery.objectIds || !isAllSelected) {
                 dataQuery.objectIds = selectedIds;
                 selectedItemsCount = selectedIds.length;
-            } else {
-                dataQuery.isAllSelected = true;
             }
+            else {
+                dataQuery.isAllSelected = true;
+            } 
 
             if (blade.onCompleted) {
                 blade.onCompleted(dataQuery, selectedItemsCount);
