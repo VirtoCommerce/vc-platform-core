@@ -69,7 +69,7 @@ namespace VirtoCommerce.NotificationsModule.Tests.UnitTests
             {
                 return new[]
                 {
-                    new object[] { "en", JObject.FromObject(new { en = new { order = new { subject1 = "subj" } } }) },
+                    new object[] { "en", JObject.FromObject(new { order = new { subject1 = "subj" } }) },
                     new object[] { null, JObject.FromObject(new { order = new { subject1 = "subj" } }) }
                 };
             }
