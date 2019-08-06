@@ -5,7 +5,6 @@ using Scriban.Parsing;
 using Scriban.Runtime;
 using VirtoCommerce.NotificationsModule.Core.Services;
 using VirtoCommerce.Platform.Core.Common;
-using VirtoCommerce.Platform.Core.Localizations;
 
 namespace VirtoCommerce.NotificationsModule.LiquidRenderer
 {
@@ -24,8 +23,8 @@ namespace VirtoCommerce.NotificationsModule.LiquidRenderer
                 }
             };
             var scriptObject = AbstractTypeFactory<NotificationScriptObject>.TryCreateInstance();
+            scriptObject.Language = language;
             scriptObject.Import(model);
-            scriptObject.Add(nameof(NotificationScriptObject.Language), language);
 
             context.PushGlobal(scriptObject);
 

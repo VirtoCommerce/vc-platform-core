@@ -12,14 +12,45 @@ namespace VirtoCommerce.NotificationsModule.LiquidRenderer
             this.Import(typeof(TranslationFilter));
             this.Import(typeof(StandardFilters));
             this.Import(typeof(UrlFilters));
-            this.Add(nameof(TranslationService), translationService);
-            this.Add(nameof(BlobUrlResolver), blobUrlResolver);
 
             TranslationService = translationService;
             BlobUrlResolver = blobUrlResolver;
         }
-        public string Language { get; set; }
-        public ITranslationService TranslationService { get; }
-        public IBlobUrlResolver BlobUrlResolver { get; }
+
+        public string Language
+        {
+            get
+            {
+                return GetSafeValue<string>(nameof(Language));
+            }
+            set
+            {
+                SetValue(nameof(Language), value, readOnly: true);
+            }
+        }
+
+        public ITranslationService TranslationService
+        {
+            get
+            {
+                return GetSafeValue<ITranslationService>(nameof(TranslationService));
+            }
+            set
+            {
+                SetValue(nameof(TranslationService), value, readOnly: true);
+            }
+        }
+
+        public IBlobUrlResolver BlobUrlResolver
+        {
+            get
+            {
+                return GetSafeValue<IBlobUrlResolver>(nameof(BlobUrlResolver));
+            }
+            set
+            {
+                SetValue(nameof(BlobUrlResolver), value, readOnly: true);
+            }
+        }
     }
 }
