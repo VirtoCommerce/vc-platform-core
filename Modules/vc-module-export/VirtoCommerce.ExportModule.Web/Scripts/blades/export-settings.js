@@ -178,7 +178,7 @@ angular.module('virtoCommerce.exportModule')
         };
 
         $scope.validateExportParameters = function () {
-            return blade.exportDataRequest && blade.exportDataRequest.exportTypeName && blade.selectedProvider && blade.exportDataRequest.dataQuery;
+            return blade.exportDataRequest && blade.exportDataRequest.exportTypeName && blade.selectedProvider && blade.exportDataRequest.dataQuery && blade.dataSelected;
         };
 
         $scope.blade.headIcon = 'fa-upload';

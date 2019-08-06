@@ -283,13 +283,14 @@ angular.module('virtoCommerce.exportModule')
             var isAllSelected = $scope.gridApi.selection.getSelectAllState();
             var selectedIds = _.map($scope.gridApi.selection.getSelectedRows(), function(item) { return item.id; });
 
-            if (blade.exportDataRequest.dataQuery.objectIds || !isAllSelected) {
+            dataQuery.isAllSelected = isAllSelected;
+            
+            if ((blade.exportDataRequest.dataQuery.objectIds && blade.exportDataRequest.dataQuery.objectIds.length) 
+                || (!isAllSelected && selectedIds.length) 
+                || (selectedIds.length == 0)) {
                 dataQuery.objectIds = selectedIds;
                 selectedItemsCount = selectedIds.length;
             }
-            else {
-                dataQuery.isAllSelected = true;
-            } 
 
             if (blade.onCompleted) {
                 blade.onCompleted(dataQuery, selectedItemsCount);

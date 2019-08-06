@@ -417,7 +417,7 @@ namespace VirtoCommerce.PricingModule.Test
                 result = reader.ReadToEnd();
             }
 
-            Assert.Equal("Currency;ProductId\r\nUSD;d029526eab5948b189694f1bddba8e68\r\nEUR;85e7aa089a4e4a97a4394d668e37e3f8\r\nEUR;f427108e75ed4676923ddc47632111e3\r\n", result);
+            Assert.Equal("Currency,ProductId\r\nUSD,d029526eab5948b189694f1bddba8e68\r\nEUR,85e7aa089a4e4a97a4394d668e37e3f8\r\nEUR,f427108e75ed4676923ddc47632111e3\r\n", result);
 
             return Task.CompletedTask;
         }
