@@ -8,5 +8,7 @@ namespace VirtoCommerce.NotificationsModule.Core.Services
     public interface INotificationRegistrar
     {
         NotificationBuilder RegisterNotification<T>() where T : Notification;
+
+        NotificationBuilder OverrideNotificationType<OldType, NewType>() where OldType : Notification where NewType : Notification;
     }
 }

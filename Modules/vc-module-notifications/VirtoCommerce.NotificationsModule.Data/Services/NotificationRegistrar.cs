@@ -24,5 +24,20 @@ namespace VirtoCommerce.NotificationsModule.Data.Services
                 
             return result;
         }
+
+        public NotificationBuilder OverrideNotificationType<OldType,NewType>() where OldType : Notification where NewType : Notification
+        {
+            var result = new NotificationBuilder();
+
+            AbstractTypeFactory<Notification>.OverrideType<OldType, NewType>().WithSetupAction((notification) =>
+            {
+                if (result.PredefinedTemplates != null)
+                {
+                    notification.Templates = result.PredefinedTemplates.ToList();
+                }
+            });
+
+            return result;
+        }
     }
 }
