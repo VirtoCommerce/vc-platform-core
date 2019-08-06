@@ -90,7 +90,7 @@ angular.module(moduleName, ['ui.grid.cellNav', 'ui.grid.edit', 'ui.grid.validate
       metaFormsService.registerMetaFields('VirtoCommerce.PricingModule.Core.Model.Pricelist' + 'ExportFilter', [
           {
               name: 'currencySelector',
-              title: "pricing.selectors.titles.price-lists",
+              title: "pricing.selectors.titles.currencies",
               templateUrl: 'Modules/$(VirtoCommerce.Pricing)/Scripts/selectors/currency-selector.tpl.html',
           }]);
 
