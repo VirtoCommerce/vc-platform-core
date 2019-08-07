@@ -1,6 +1,7 @@
 using System;
 using System.Collections.Generic;
 using System.Diagnostics.CodeAnalysis;
+using System.Globalization;
 using System.IO;
 using System.Linq;
 using System.Text;
@@ -12,6 +13,8 @@ using VirtoCommerce.CatalogModule.Core.Services;
 using VirtoCommerce.CoreModule.Core.Conditions;
 using VirtoCommerce.ExportModule.Core.Model;
 using VirtoCommerce.ExportModule.Core.Services;
+using VirtoCommerce.ExportModule.Data.Extensions;
+using VirtoCommerce.ExportModule.Data.Model;
 using VirtoCommerce.ExportModule.Data.Services;
 using VirtoCommerce.ExportModule.Test.MockHelpers;
 using VirtoCommerce.Platform.Core.Common;
@@ -43,7 +46,7 @@ namespace VirtoCommerce.PricingModule.Test
 
             var itemServiceMock = new Mock<IItemService>();
 
-            var metadata = ExportedTypeMetadata.GetFromType<Price>(true);
+            var metadata = typeof(Price).GetPropertyNames(true);
             var resolver = (IKnownExportTypesResolver)registrar;
 
             resolver.ResolveExportedTypeDefinition(typeof(Price).Name)
@@ -128,7 +131,7 @@ namespace VirtoCommerce.PricingModule.Test
 
             var priceServiceMock = new Mock<IPricingService>();
 
-            var metadata = ExportedTypeMetadata.GetFromType<Pricelist>(true);
+            var metadata = typeof(Pricelist).GetPropertyNames(true);
             var resolver = (IKnownExportTypesResolver)registrar;
             resolver.ResolveExportedTypeDefinition(typeof(Pricelist).Name)
                 .WithDataSourceFactory(
@@ -212,7 +215,7 @@ namespace VirtoCommerce.PricingModule.Test
 
             var priceServiceMock = new Mock<IPricingService>();
 
-            var metadata = ExportedTypeMetadata.GetFromType<Pricelist>(true);
+            var metadata = typeof(Pricelist).GetPropertyNames(true);
             var resolver = (IKnownExportTypesResolver)registrar;
             resolver.ResolveExportedTypeDefinition(typeof(Pricelist).Name)
                 .WithDataSourceFactory(
@@ -279,7 +282,7 @@ namespace VirtoCommerce.PricingModule.Test
             var priceServiceMock = new Mock<IPricingService>();
             var catalogServiceMock = new Mock<ICatalogService>();
 
-            var metadata = ExportedTypeMetadata.GetFromType<PricelistAssignment>(true);
+            var metadata = typeof(PricelistAssignment).GetPropertyNames(true);
             var resolver = (IKnownExportTypesResolver)registrar;
             resolver.ResolveExportedTypeDefinition(typeof(PricelistAssignment).Name)
                 .WithDataSourceFactory(
@@ -365,7 +368,7 @@ namespace VirtoCommerce.PricingModule.Test
 
             var itemServiceMock = new Mock<IItemService>();
 
-            var metadata = ExportedTypeMetadata.GetFromType<Price>(true);
+            var metadata = typeof(Price).GetPropertyNames(true);
             resolver.ResolveExportedTypeDefinition(typeof(Price).Name)
                 .WithDataSourceFactory(
                 dataQuery => new PriceExportPagedDataSource(
@@ -381,12 +384,12 @@ namespace VirtoCommerce.PricingModule.Test
                 })
                 .WithMetadata(metadata)
                 .WithTabularDataConverter(new TabularPriceDataConverter())
-                .WithTabularMetadata(ExportedTypeMetadata.GetFromType<TabularPrice>(false));
+                .WithTabularMetadata(typeof(TabularPrice).GetPropertyNames(false));
 
             var exportProviderFactories = new[]
             {
                 new Func<IExportProviderConfiguration, ExportedTypeColumnInfo[], IExportProvider>((config, includedColumns) => new JsonExportProvider(config, includedColumns)),
-                new Func<IExportProviderConfiguration, ExportedTypeColumnInfo[], IExportProvider>((config, includedColumns) => new CsvExportProvider(config, includedColumns)),
+                new Func<IExportProviderConfiguration, ExportedTypeColumnInfo[], IExportProvider>((config, includedColumns) => new CsvExportProvider(new CsvProviderConfiguration(){Configuration = new CsvHelper.Configuration.Configuration(cultureInfo: CultureInfo.InvariantCulture) }, includedColumns)),
             };
 
             var includedColumnNames = new string[] { "Currency", "ProductId" };
