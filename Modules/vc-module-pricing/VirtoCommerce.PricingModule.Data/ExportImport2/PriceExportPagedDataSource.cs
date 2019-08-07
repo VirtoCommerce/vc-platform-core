@@ -12,6 +12,7 @@ using VirtoCommerce.PricingModule.Core;
 using VirtoCommerce.PricingModule.Core.Model;
 using VirtoCommerce.PricingModule.Core.Model.Search;
 using VirtoCommerce.PricingModule.Core.Services;
+using VirtoCommerce.PricingModule.Data.Authorization;
 
 namespace VirtoCommerce.PricingModule.Data.ExportImport
 {
@@ -23,25 +24,38 @@ namespace VirtoCommerce.PricingModule.Data.ExportImport
         private readonly IPricingSearchService _searchService;
         private readonly IPricingService _pricingService;
         private readonly IItemService _itemService;
+        private readonly IAuthorizationService _authorizationService;
+        private readonly IUserClaimsPrincipalFactory<ApplicationUser> _userClaimsPrincipalFactory;
+        private readonly UserManager<ApplicationUser> _userManager;
 
         public PriceExportPagedDataSource(IPricingSearchService searchService,
             IPricingService pricingService,
             IItemService itemService,
-            IAuthorizationPolicyProvider authorizationPolicyProvider,
             IAuthorizationService authorizationService,
             IUserClaimsPrincipalFactory<ApplicationUser> userClaimsPrincipalFactory,
             UserManager<ApplicationUser> userManager)
-            : base(authorizationPolicyProvider, authorizationService, userClaimsPrincipalFactory, userManager)
         {
             _searchService = searchService;
             _pricingService = pricingService;
             _itemService = itemService;
+            _authorizationService = authorizationService;
+            _userClaimsPrincipalFactory = userClaimsPrincipalFactory;
+            _userManager = userManager;
         }
 
         protected override FetchResult FetchData(SearchCriteriaBase searchCriteria)
         {
             Price[] result;
             int totalCount;
+
+            var user = _userManager.FindByNameAsync(DataQuery.UserName).GetAwaiter().GetResult();
+            var claimsPrincipal = _userClaimsPrincipalFactory.CreateAsync(user).GetAwaiter().GetResult();
+            var authorizationResult = _authorizationService.AuthorizeAsync(claimsPrincipal, null, new PricingAuthorizationRequirement(ModuleConstants.Security.Permissions.Export)).GetAwaiter().GetResult();
+            if (!authorizationResult.Succeeded)
+            {
+                throw new UnauthorizedAccessException();
+            }
+
 
             if (searchCriteria.ObjectIds.Any(x => !string.IsNullOrWhiteSpace(x)))
             {
