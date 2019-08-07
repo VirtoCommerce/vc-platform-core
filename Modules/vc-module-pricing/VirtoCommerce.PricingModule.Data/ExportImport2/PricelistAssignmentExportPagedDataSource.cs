@@ -46,39 +46,13 @@ namespace VirtoCommerce.PricingModule.Data.ExportImport
                 totalCount = pricelistAssignmentSearchResult.TotalCount;
             }
 
-            return new FetchResult(result, totalCount);
+            return new FetchResult(ToExportable(result), totalCount);
         }
 
-        protected override ViewableEntity ToViewableEntity(object obj)
-        {
-            if (!(obj is PricelistAssignment model))
-            {
-                throw new System.InvalidCastException(nameof(PricelistAssignment));
-            }
-
-            var result = AbstractTypeFactory<PricelistAssignmentViewableEntity>.TryCreateInstance();
-
-            result.FromEntity(model);
-
-            result.Code = null;
-            result.ImageUrl = null;
-            result.Name = model.Name;
-            result.Parent = null;
-
-            result.CatalogId = model.CatalogId;
-            result.Description = model.Description;
-            result.EndDate = model.EndDate;
-            result.PricelistId = model.PricelistId;
-            result.Priority = model.Priority;
-            result.StartDate = model.StartDate;
-
-            return result;
-        }
-
-        protected override IEnumerable<ViewableEntity> ToViewableEntities(IEnumerable<ICloneable> objects)
+        protected virtual IEnumerable<IExportViewable> ToExportable(IEnumerable<ICloneable> objects)
         {
             var models = objects.Cast<PricelistAssignment>();
-            var viewableMap = models.ToDictionary(x => x, x => ToViewableEntity(x) as PricelistAssignmentViewableEntity);
+            var viewableMap = models.ToDictionary(x => x, x => AbstractTypeFactory<ExportablePricelistAssignment>.TryCreateInstance().FromModel(x));
 
             FillViewableEntitiesReferenceFields(viewableMap);
 
@@ -88,7 +62,7 @@ namespace VirtoCommerce.PricingModule.Data.ExportImport
             return result;
         }
 
-        protected virtual void FillViewableEntitiesReferenceFields(Dictionary<PricelistAssignment, PricelistAssignmentViewableEntity> viewableMap)
+        protected virtual void FillViewableEntitiesReferenceFields(Dictionary<PricelistAssignment, ExportablePricelistAssignment> viewableMap)
         {
             var models = viewableMap.Keys;
 

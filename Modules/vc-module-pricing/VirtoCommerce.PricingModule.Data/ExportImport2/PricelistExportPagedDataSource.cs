@@ -46,30 +46,7 @@ namespace VirtoCommerce.PricingModule.Data.ExportImport
                 }
             }
 
-            return new FetchResult(result, totalCount);
-        }
-
-        protected override ViewableEntity ToViewableEntity(object obj)
-        {
-            if (!(obj is Pricelist model))
-            {
-                throw new System.InvalidCastException(nameof(Pricelist));
-            }
-
-            var result = AbstractTypeFactory<PricelistViewableEntity>.TryCreateInstance();
-
-            result.FromEntity(model);
-
-            result.Code = null;
-            result.ImageUrl = null;
-            result.Name = model.Name;
-            result.Parent = null;
-
-            result.Currency = model.Currency;
-            result.Description = model.Description;
-            result.OuterId = model.OuterId;
-
-            return result;
+            return new FetchResult(result.Select(x => AbstractTypeFactory<ExportablePricelist>.TryCreateInstance().FromModel(x)), totalCount);
         }
     }
 }

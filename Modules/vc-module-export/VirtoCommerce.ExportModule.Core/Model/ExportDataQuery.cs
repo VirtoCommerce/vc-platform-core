@@ -14,7 +14,7 @@ namespace VirtoCommerce.ExportModule.Core.Model
         public string Sort { get; set; }
         public ExportedTypeColumnInfo[] IncludedColumns { get; set; } = Array.Empty<ExportedTypeColumnInfo>();
         public int? Skip { get; set; }
-        public int? Take { get; set; }
+        public int? Take { get; set; } = 50;
 
         public abstract SearchCriteriaBase CreateSearchCriteria();
 

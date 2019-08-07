@@ -177,33 +177,33 @@ namespace VirtoCommerce.PricingModule.Web
             var pricelistAssignmentExportPagedDataSourceFactory = appBuilder.ApplicationServices.GetService<Func<ExportDataQuery, PricelistAssignmentExportPagedDataSource>>();
 
             registrar.RegisterType(
-                 ExportedTypeDefinitionBuilder.Build<Price, PriceExportDataQuery>()
+                 ExportedTypeDefinitionBuilder.Build<ExportablePrice, PriceExportDataQuery>()
                     .WithDataSourceFactory(dataQuery => priceExportPagedDataSourceFactory(dataQuery))
-                    .WithMetadata(typeof(Price).GetPropertyNames(false))
+                    .WithMetadata(typeof(ExportablePrice).GetPropertyNames(false))
                     .WithTabularDataConverter(new TabularPriceDataConverter())
                     .WithTabularMetadata(typeof(TabularPrice).GetPropertyNames(false))
                     .ExportedTypeDefinition);
 
             registrar.RegisterType(
-                 ExportedTypeDefinitionBuilder.Build<Pricelist, PricelistExportDataQuery>()
+                 ExportedTypeDefinitionBuilder.Build<ExportablePricelist, PricelistExportDataQuery>()
                     .WithDataSourceFactory(dataQuery => pricelistExportPagedDataSourceFactory(dataQuery))
-                    .WithMetadata(typeof(Pricelist).GetPropertyNames(false))
+                    .WithMetadata(typeof(ExportablePricelist).GetPropertyNames(false))
                     .WithTabularDataConverter(new TabularPricelistDataConverter())
                     .WithTabularMetadata(typeof(TabularPricelist).GetPropertyNames(false))
                     .ExportedTypeDefinition);
 
             registrar.RegisterType(
-                 ExportedTypeDefinitionBuilder.Build<PricelistAssignment, PricelistAssignmentExportDataQuery>()
+                 ExportedTypeDefinitionBuilder.Build<ExportablePricelistAssignment, PricelistAssignmentExportDataQuery>()
                     .WithDataSourceFactory(dataQuery => pricelistAssignmentExportPagedDataSourceFactory(dataQuery))
-                    .WithMetadata(typeof(PricelistAssignment).GetPropertyNames(false))
+                    .WithMetadata(typeof(ExportablePricelistAssignment).GetPropertyNames(false))
                     .WithTabularDataConverter(new TabularPricelistAssignmentDataConverter())
                     .WithTabularMetadata(typeof(TabularPricelistAssignment).GetPropertyNames(false))
                     .ExportedTypeDefinition);
 
             registrar.RegisterType(
-                new ExportedTypeDefinitionBuilder($@"{typeof(Pricelist).FullName}FullData", typeof(Pricelist).Namespace, typeof(PricelistFullExportDataQuery).Name)
+                new ExportedTypeDefinitionBuilder($@"{typeof(ExportablePricelist).FullName}FullData", typeof(ExportablePricelist).Namespace, typeof(PricelistFullExportDataQuery).Name)
                     .WithDataSourceFactory(dataQuery => pricelistExportPagedDataSourceFactory(dataQuery))
-                    .WithMetadata(typeof(Pricelist).GetPropertyNames(true))
+                    .WithMetadata(typeof(ExportablePricelist).GetPropertyNames(true))
                     .ExportedTypeDefinition);
 
             AbstractTypeFactory<ExportDataQuery>.RegisterType<PriceExportDataQuery>();
@@ -211,9 +211,9 @@ namespace VirtoCommerce.PricingModule.Web
             AbstractTypeFactory<ExportDataQuery>.RegisterType<PricelistExportDataQuery>();
             AbstractTypeFactory<ExportDataQuery>.RegisterType<PricelistFullExportDataQuery>();
 
-            AbstractTypeFactory<PriceViewableEntity>.RegisterType<PriceViewableEntity>();
-            AbstractTypeFactory<PricelistViewableEntity>.RegisterType<PricelistViewableEntity>();
-            AbstractTypeFactory<PricelistAssignmentViewableEntity>.RegisterType<PricelistAssignmentViewableEntity>();
+            AbstractTypeFactory<ExportablePrice>.RegisterType<ExportablePrice>();
+            AbstractTypeFactory<ExportablePricelist>.RegisterType<ExportablePricelist>();
+            AbstractTypeFactory<ExportablePricelistAssignment>.RegisterType<ExportablePricelistAssignment>();
         }
 
         public void Uninstall()

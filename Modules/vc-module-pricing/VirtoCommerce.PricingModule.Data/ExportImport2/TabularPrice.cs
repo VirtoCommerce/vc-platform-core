@@ -11,7 +11,5 @@ namespace VirtoCommerce.PricingModule.Data.ExportImport
         public decimal? Sale { get; set; }
         public decimal List { get; set; }
         public int MinQuantity { get; set; }
-        public DateTime? StartDate { get; set; }
-        public DateTime? EndDate { get; set; }
     }
 }

@@ -42,10 +42,10 @@ namespace VirtoCommerce.PricingModule.Test
 
             var itemServiceMock = new Mock<IItemService>();
 
-            var metadata = typeof(Price).GetPropertyNames(true);
+            var metadata = typeof(ExportablePrice).GetPropertyNames(true);
             var resolver = (IKnownExportTypesResolver)registrar;
 
-            registrar.RegisterType(ExportedTypeDefinitionBuilder.Build<Price, PriceExportDataQuery>()
+            registrar.RegisterType(ExportedTypeDefinitionBuilder.Build<ExportablePrice, PriceExportDataQuery>()
                 .WithDataSourceFactory(
                     dataQuery => new PriceExportPagedDataSource(
                         searchServiceMock.Object,
@@ -80,7 +80,7 @@ namespace VirtoCommerce.PricingModule.Test
                         {
                             IncludedColumns = IncludedColumns
                         },
-                        ExportTypeName = typeof(Price).FullName,
+                        ExportTypeName = typeof(ExportablePrice).FullName,
                         ProviderName = nameof(JsonExportProvider)
                     },
                     new Action<ExportProgressInfo>(x => Console.WriteLine(x.Description)),
@@ -93,7 +93,7 @@ namespace VirtoCommerce.PricingModule.Test
             }
 
             //Assert
-            var prices = JsonConvert.DeserializeObject<Price[]>(result);
+            var prices = JsonConvert.DeserializeObject<ExportablePrice[]>(result);
 
             Assert.NotNull(prices);
             Assert.Equal(3, prices.Length);
@@ -121,9 +121,9 @@ namespace VirtoCommerce.PricingModule.Test
 
             var priceServiceMock = new Mock<IPricingService>();
 
-            var metadata = typeof(Pricelist).GetPropertyNames(true);
+            var metadata = typeof(ExportablePricelist).GetPropertyNames(true);
             var resolver = (IKnownExportTypesResolver)registrar;
-            registrar.RegisterType(ExportedTypeDefinitionBuilder.Build<Pricelist, PricelistExportDataQuery>()
+            registrar.RegisterType(ExportedTypeDefinitionBuilder.Build<ExportablePricelist, PricelistExportDataQuery>()
                 .WithDataSourceFactory(
                     dataQuery => new PricelistExportPagedDataSource(
                         searchServiceMock.Object,
@@ -155,7 +155,7 @@ namespace VirtoCommerce.PricingModule.Test
                         {
                             IncludedColumns = IncludedColumns
                         },
-                        ExportTypeName = typeof(Pricelist).FullName,
+                        ExportTypeName = typeof(ExportablePricelist).FullName,
                         ProviderName = nameof(JsonExportProvider)
                     },
                     new Action<ExportProgressInfo>(x => Console.WriteLine(x.Description)),
@@ -168,7 +168,7 @@ namespace VirtoCommerce.PricingModule.Test
             }
 
             //Assert
-            var pricelists = JsonConvert.DeserializeObject<Pricelist[]>(result);
+            var pricelists = JsonConvert.DeserializeObject<ExportablePricelist[]>(result);
 
             Assert.NotNull(pricelists);
             Assert.NotEmpty(pricelists);
@@ -194,9 +194,9 @@ namespace VirtoCommerce.PricingModule.Test
             var priceServiceMock = new Mock<IPricingService>();
             var catalogServiceMock = new Mock<ICatalogService>();
 
-            var metadata = typeof(PricelistAssignment).GetPropertyNames(true);
+            var metadata = typeof(ExportablePricelistAssignment).GetPropertyNames(true);
             var resolver = (IKnownExportTypesResolver)registrar;
-            registrar.RegisterType(ExportedTypeDefinitionBuilder.Build<PricelistAssignment, PricelistAssignmentExportDataQuery>()
+            registrar.RegisterType(ExportedTypeDefinitionBuilder.Build<ExportablePricelistAssignment, PricelistExportDataQuery>()
                 .WithDataSourceFactory(
                     dataQuery => new PricelistAssignmentExportPagedDataSource(
                         searchServiceMock.Object,
@@ -229,7 +229,7 @@ namespace VirtoCommerce.PricingModule.Test
                         {
                             IncludedColumns = IncludedColumns
                         },
-                        ExportTypeName = typeof(PricelistAssignment).FullName,
+                        ExportTypeName = typeof(ExportablePricelistAssignment).FullName,
                         ProviderName = nameof(JsonExportProvider)
                     },
                     new Action<ExportProgressInfo>(x => Console.WriteLine(x.Description)),
@@ -242,7 +242,7 @@ namespace VirtoCommerce.PricingModule.Test
             }
 
             //Assert
-            var pricelistsAssigments = JsonConvert.DeserializeObject<PricelistAssignment[]>(result);
+            var pricelistsAssigments = JsonConvert.DeserializeObject<ExportablePricelistAssignment[]>(result);
 
             Assert.NotNull(pricelistsAssigments);
             Assert.NotEmpty(pricelistsAssigments);
@@ -274,8 +274,8 @@ namespace VirtoCommerce.PricingModule.Test
 
             var itemServiceMock = new Mock<IItemService>();
 
-            var metadata = typeof(Price).GetPropertyNames(true);
-            registrar.RegisterType(ExportedTypeDefinitionBuilder.Build<Price, PriceExportDataQuery>()
+            var metadata = typeof(ExportablePrice).GetPropertyNames(true);
+            registrar.RegisterType(ExportedTypeDefinitionBuilder.Build<ExportablePrice, PricelistExportDataQuery>()
                 .WithDataSourceFactory(
                     dataQuery => new PriceExportPagedDataSource(
                         searchServiceMock.Object,
@@ -311,7 +311,7 @@ namespace VirtoCommerce.PricingModule.Test
                         {
                             IncludedColumns = IncludedColumns,
                         },
-                        ExportTypeName = typeof(Price).FullName,
+                        ExportTypeName = typeof(ExportablePrice).FullName,
                         ProviderName = nameof(CsvExportProvider)
                     },
                     new Action<ExportProgressInfo>(x => Console.WriteLine(x.Description)),

@@ -44,13 +44,13 @@ namespace VirtoCommerce.PricingModule.Data.ExportImport
                 totalCount = priceSearchResult.TotalCount;
             }
 
-            return new FetchResult(result, totalCount);
+            return new FetchResult(ToExportable(result), totalCount);
         }
 
-        protected override IEnumerable<ViewableEntity> ToViewableEntities(IEnumerable<ICloneable> objects)
+        protected virtual IEnumerable<IExportViewable> ToExportable(IEnumerable<ICloneable> objects)
         {
             var models = objects.Cast<Price>();
-            var viewableMap = models.ToDictionary(x => x, x => ToViewableEntity(x) as PriceViewableEntity);
+            var viewableMap = models.ToDictionary(x => x, x => AbstractTypeFactory<ExportablePrice>.TryCreateInstance().FromModel(x));
 
             FillViewableEntitiesReferenceFields(viewableMap);
 
@@ -60,7 +60,7 @@ namespace VirtoCommerce.PricingModule.Data.ExportImport
             return result;
         }
 
-        protected virtual void FillViewableEntitiesReferenceFields(Dictionary<Price, PriceViewableEntity> viewableMap)
+        protected virtual void FillViewableEntitiesReferenceFields(Dictionary<Price, ExportablePrice> viewableMap)
         {
             var models = viewableMap.Keys;
 
@@ -84,30 +84,6 @@ namespace VirtoCommerce.PricingModule.Data.ExportImport
                 viewableEntity.Parent = pricelist?.Name;
                 viewableEntity.PricelistName = pricelist?.Name;
             }
-        }
-
-        protected override ViewableEntity ToViewableEntity(object obj)
-        {
-            if (!(obj is Price model))
-            {
-                throw new System.InvalidCastException(nameof(Price));
-            }
-
-            var result = AbstractTypeFactory<PriceViewableEntity>.TryCreateInstance();
-
-            result.FromEntity(model);
-
-            result.Currency = model.Currency;
-            result.EndDate = model.EndDate;
-            result.List = model.List;
-            result.MinQuantity = model.MinQuantity;
-            result.OuterId = model.OuterId;
-            result.PricelistId = model.PricelistId;
-            result.ProductId = model.ProductId;
-            result.Sale = model.Sale;
-            result.StartDate = model.StartDate;
-
-            return result;
         }
     }
 }
