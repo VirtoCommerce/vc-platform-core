@@ -10,18 +10,14 @@ angular.module('virtoCommerce.exportModule')
         blade.columnSelected = 0;
         blade.columnTotal = 0;
         blade.defaultProvider = $localStorage.defaultExportProvider || 'JsonExportProvider';
+        blade.isExportedTypeSelected = typeof (blade.exportDataRequest.exportTypeName) !== 'undefined';
 
         function initializeBlade() {
             if (blade.isExportedTypeSelected) {
                 getKnownTypes();
+                blade.dataSelected = blade.totalItemsCount || 0;
             }
-
-            if (blade.exportDataRequest.dataQuery &&
-                blade.exportDataRequest.dataQuery.objectIds &&
-                blade.exportDataRequest.dataQuery.objectIds.length) {
-                blade.dataSelected = blade.exportDataRequest.dataQuery.objectIds.length;
-            }
-
+             
             exportApi.getProviders(function (result) {
                 if (result && result.length) {
                     blade.allProviders = result;
@@ -41,6 +37,7 @@ angular.module('virtoCommerce.exportModule')
                     function (x) { return x.typeName === blade.exportDataRequest.exportTypeName; });
                 if (selectedType) {
                     blade.selectedType = selectedType;
+                    blade.selectedType.localizedName = $translate.instant('export.types.' + blade.exportDataRequest.exportTypeName + '.name');
                     resetColumnInfo();
                     getDataTotalCount();
                 }

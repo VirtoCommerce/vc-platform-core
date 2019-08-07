@@ -199,20 +199,20 @@ angular.module('virtoCommerce.exportModule')
 
         filter.edit = function () {
             var metafieldsId = blade.exportDataRequest.exportTypeName  + 'ExportFilter';
-            var filterDetailsPerams = { 
+            var filterDetailsParams = { 
                 data: filter.current, 
                 metafieldsId: metafieldsId, 
                 exportTypeName: blade.exportDataRequest.exportTypeName 
             };
 
             if (filter.current) {
-                angular.extend(filterDetailsPerams, { data: filter.current }); 
+                angular.extend(filterDetailsParams, { data: filter.current }); 
             }
             else {
-                angular.extend(filterDetailsPerams, { isNew: true });
+                angular.extend(filterDetailsParams, { isNew: true });
             }
 
-            showFilterDetailBlade(filterDetailsPerams);
+            showFilterDetailBlade(filterDetailsParams);
         };
 
         function showFilterDetailBlade(bladeData) {

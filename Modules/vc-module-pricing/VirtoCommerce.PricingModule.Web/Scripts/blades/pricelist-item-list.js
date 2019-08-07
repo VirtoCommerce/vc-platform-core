@@ -3,7 +3,7 @@ angular.module('virtoCommerce.pricingModule')
     $scope.uiGridConstants = uiGridConstants;
     var blade = $scope.blade;
     var exportDataRequest = {
-        exportTypeName: 'Price',
+        exportTypeName: 'VirtoCommerce.PricingModule.Core.Model.Price',
         isTabularExportSupported: true,
         dataQuery: {
             exportTypeName: 'PriceExportDataQuery'

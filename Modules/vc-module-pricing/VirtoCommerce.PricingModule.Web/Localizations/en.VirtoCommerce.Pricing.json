@@ -194,14 +194,17 @@
             "titles": {
                 "price-lists": "Price lists",
                 "modified-since": "Modified since",
-                "products": "Products"
+                "products": "Products",
+                "currencies": "Currencies"
+
             },
             "labels": {
                 "select": "Select",
                 "selected": "Selected: "
             },
             "placeholders": {
-                "price-lists": "Select price lists…"
+                "price-lists": "Select price lists…",
+                "catalog-lists": "Select catalog…"
             }
         }
     },

@@ -5,7 +5,7 @@ angular.module('virtoCommerce.pricingModule')
             var blade = $scope.blade;
             var bladeNavigationService = bladeUtils.bladeNavigationService;
             var defaultDataRequest = {
-                exportTypeName: 'PricelistAssignment',
+                exportTypeName: 'VirtoCommerce.PricingModule.Core.Model.PricelistAssignment',
                 isTabularExportSupported: true,
                 dataQuery: {
                     exportTypeName: 'PricelistAssignmentExportDataQuery'
@@ -184,7 +184,8 @@ angular.module('virtoCommerce.pricingModule')
                             subtitle: 'pricing.blades.exporter.priceAssignmentSubtitle',
                             controller: 'virtoCommerce.exportModule.exportSettingsController',
                             template: 'Modules/$(VirtoCommerce.Export)/Scripts/blades/export-settings.tpl.html',
-                            exportDataRequest: exportDataRequest
+                            exportDataRequest: exportDataRequest,
+                            totalItemsCount: exportDataRequest.dataQuery.objectIds.length || $scope.pageSettings.totalItems
                         };
                         bladeNavigationService.showBlade(newBlade, blade);
                     }
@@ -222,6 +223,7 @@ angular.module('virtoCommerce.pricingModule')
                 };
                 if (filter.current) {
                     result.pricelistIds = filter.current.priceListIds;
+                    result.catalogIds = filter.current.catalogIds || [];
                 } else {
                     result.pricelistIds = blade.pricelistId ? [blade.pricelistId] : [];
                 }
@@ -258,7 +260,7 @@ angular.module('virtoCommerce.pricingModule')
                     bladeNavigationService.closeBlade({ id: 'exportGenericViewerFilter' });
 
                     if (!filter.current) {
-                        $scope.resetRequestCustomFilter();
+                        blade.resetRequestCustomFilter();
                     }
 
                     filter.criteriaChanged();
@@ -266,17 +268,29 @@ angular.module('virtoCommerce.pricingModule')
             };
 
             filter.edit = function () {
+                var metafieldsId = exportDataRequest.exportTypeName + 'ExportFilter';
+                var filterDetailsParams = {
+                    data: filter.current,
+                    metafieldsId: metafieldsId,
+                    exportTypeName: exportDataRequest.exportTypeName
+                };
+
                 if (filter.current) {
-                    var metafieldsId = exportDataRequest.exportTypeName + 'ExportFilter';
-                    showFilterDetailBlade({ data: filter.current, metafieldsId: metafieldsId, exportTypeName: exportDataRequest.exportTypeName });
+                    angular.extend(filterDetailsParams, { data: filter.current });
                 }
+                else {
+                    angular.extend(filterDetailsParams, { isNew: true });
+                }
+
+                showFilterDetailBlade(filterDetailsParams);
             };
 
             function showFilterDetailBlade(bladeData) {
                 var newBlade = {
                     id: 'exportGenericViewerFilter',
                     controller: 'virtoCommerce.exportModule.exportGenericViewerFilterController',
-                    template: 'Modules/$(VirtoCommerce.Export)/Scripts/blades/export-generic-viewer-filter.tpl.html'
+                    template: 'Modules/$(VirtoCommerce.Export)/Scripts/blades/export-generic-viewer-filter.tpl.html',
+                    onBeforeApply: blade.resetRequestCustomFilter
                 };
                 angular.extend(newBlade, bladeData);
                 bladeNavigationService.showBlade(newBlade, blade);
@@ -295,7 +309,7 @@ angular.module('virtoCommerce.pricingModule')
             }
 
 
-            $scope.resetRequestCustomFilter = function () {
+            blade.resetRequestCustomFilter = function () {
                 angular.copy(exportDataRequest, defaultDataRequest);
             }
             // actions on load

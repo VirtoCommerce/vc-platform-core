@@ -7,7 +7,7 @@ namespace VirtoCommerce.PricingModule.Data.ExportImport
     public class PricelistAssignmentExportDataQuery : ExportDataQuery
     {
         public string[] PriceListIds { get; set; }
-
+        public string[] CatalogIds { get; set; }
         public override SearchCriteriaBase CreateSearchCriteria()
         {
             return new PricelistAssignmentsSearchCriteria();
@@ -19,6 +19,7 @@ namespace VirtoCommerce.PricingModule.Data.ExportImport
             if (result is PricelistAssignmentsSearchCriteria pricelistAssignmentsSearchCriteria)
             {
                 pricelistAssignmentsSearchCriteria.PriceListIds = PriceListIds;
+                pricelistAssignmentsSearchCriteria.CatalogIds = CatalogIds;
             }
 
             return result;
@@ -29,6 +30,7 @@ namespace VirtoCommerce.PricingModule.Data.ExportImport
             if (searchCriteria is PricelistAssignmentsSearchCriteria pricelistAssignmentsSearchCriteria)
             {
                 PriceListIds = pricelistAssignmentsSearchCriteria.PriceListIds;
+                CatalogIds = pricelistAssignmentsSearchCriteria.CatalogIds;
             }
 
             return base.FromSearchCriteria(searchCriteria);
