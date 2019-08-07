@@ -22,12 +22,12 @@ namespace VirtoCommerce.ExportModule.Data.Extensions
         /// <typeparam name="T">Type for getting metadata.</typeparam>
         /// <param name="extractReferenceProperties">If true, reference properties properties (<see cref="Enitity"/> and collection of <see cref="Enitity"/>) will be extracted recursively.</param>
         /// <returns>Metadata for the T type.</returns>
-        public static ExportedTypeMetadata GetFromType(this Type type, bool extractReferenceProperties)
+        public static ExportedTypeMetadata GetPropertyNames(this Type type, bool extractReferenceProperties)
         {
             var result = new ExportedTypeMetadata();
             var passedNodes = new List<MemberInfo>();
 
-            result.PropertyInfos = GetFromType(type, type.Name, string.Empty, passedNodes, extractReferenceProperties)
+            result.PropertyInfos = GetPropertyNames(type, type.Name, string.Empty, passedNodes, extractReferenceProperties)
                 .Where(x => !x.IsReference)
                 .Select(x => x.ColumnInfo)
                 .ToArray();
@@ -35,7 +35,7 @@ namespace VirtoCommerce.ExportModule.Data.Extensions
             return result;
         }
 
-        private static ExportTypePropertyInfoEx[] GetFromType(Type type, string groupName, string baseMemberName, List<MemberInfo> passedNodes, bool extractNestedProperties)
+        private static ExportTypePropertyInfoEx[] GetPropertyNames(Type type, string groupName, string baseMemberName, List<MemberInfo> passedNodes, bool extractNestedProperties)
         {
             var result = new List<ExportTypePropertyInfoEx>();
             var nestedMemberInfos = new List<(MemberInfo MemberInfo, Type NestedType)>();
@@ -78,7 +78,7 @@ namespace VirtoCommerce.ExportModule.Data.Extensions
             foreach (var nestedMemberInfo in nestedMemberInfos)
             {
                 //Continue searching for nested members
-                result.AddRange(GetFromType(
+                result.AddRange(GetPropertyNames(
                     nestedMemberInfo.NestedType,
                     string.Format($@"{groupName}.{nestedMemberInfo.MemberInfo.Name}"),
                     ((PropertyInfo)nestedMemberInfo.MemberInfo).GetDerivedName(baseMemberName),

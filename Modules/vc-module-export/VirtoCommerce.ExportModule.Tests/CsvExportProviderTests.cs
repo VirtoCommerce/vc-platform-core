@@ -384,7 +384,7 @@ namespace VirtoCommerce.ExportModule.Tests
                 }
             };
 
-            var configuration = new Configuration(cultureInfo: CultureInfo.GetCultureInfo("en-US"));
+            var configuration = new Configuration(cultureInfo: CultureInfo.InvariantCulture);
             configuration.RegisterClassMap<PricelistTestMapping>();
 
             //Act
@@ -460,7 +460,7 @@ namespace VirtoCommerce.ExportModule.Tests
 
         private string SerializeAndRead(ExportedTypeMetadata metadata, IEnumerable items, Configuration configuration = null)
         {
-            var csvConfiguration = new CsvProviderConfiguration() { Configuration = configuration ?? new Configuration(cultureInfo: CultureInfo.GetCultureInfo("en-US")) };
+            var csvConfiguration = new CsvProviderConfiguration() { Configuration = configuration ?? new Configuration(cultureInfo: CultureInfo.InvariantCulture) };
 
             using (var stream = new MemoryStream())
             using (var writer = new StreamWriter(stream, Encoding.UTF8) { AutoFlush = true })
