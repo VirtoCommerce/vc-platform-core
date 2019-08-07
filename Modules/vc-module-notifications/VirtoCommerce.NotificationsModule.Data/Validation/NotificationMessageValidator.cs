@@ -7,7 +7,6 @@ namespace VirtoCommerce.NotificationsModule.Data.Validation
     {
         public NotificationMessageValidator()
         {
-            RuleFor(m => m.NotificationId).NotEmpty();
             RuleFor(m => m.NotificationType).NotEmpty();
 
             //special rules for derived types

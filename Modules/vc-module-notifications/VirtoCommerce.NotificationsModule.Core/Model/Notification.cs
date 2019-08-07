@@ -50,7 +50,8 @@ namespace VirtoCommerce.NotificationsModule.Core.Model
             {
                 Templates = null;
             }
-
         }
+
+        public abstract void SetFromToMembers(string from, string to);
     }
 }
