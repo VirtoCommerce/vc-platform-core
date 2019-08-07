@@ -8,6 +8,7 @@ using CsvHelper;
 using CsvHelper.Configuration;
 using VirtoCommerce.ExportModule.Core.Model;
 using VirtoCommerce.ExportModule.Core.Services;
+using VirtoCommerce.ExportModule.Data.Extensions;
 using VirtoCommerce.ExportModule.Data.Model;
 using VirtoCommerce.Platform.Core.Common;
 
@@ -85,7 +86,7 @@ namespace VirtoCommerce.ExportModule.Data.Services
         public MetadataFilteredMap(ExportedTypeColumnInfo[] includedColumns)
         {
             var exportedType = typeof(T);
-            var includedPropertiesInfo = includedColumns ?? ExportedTypeMetadata.GetFromType<T>(true).PropertyInfos;
+            var includedPropertiesInfo = includedColumns ?? exportedType.GetFromType(true).PropertyInfos;
             var columnIndex = 0;
 
             foreach (var includedPropertyInfo in includedPropertiesInfo)
