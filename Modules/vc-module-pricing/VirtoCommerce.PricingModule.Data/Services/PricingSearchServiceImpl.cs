@@ -113,9 +113,9 @@ namespace VirtoCommerce.PricingModule.Data.Services
                         query = query.Where(x => x.Name.Contains(criteria.Keyword) || x.Description.Contains(criteria.Keyword));
                     }
 
-                    if (!string.IsNullOrWhiteSpace(criteria.Currency))
+                    if (!criteria.Currencies.IsNullOrEmpty())
                     {
-                        query = query.Where(x => x.Currency == criteria.Currency);
+                        query = query.Where(x => criteria.Currencies.Contains(x.Currency));
                     }
 
                     var sortInfos = criteria.SortInfos;

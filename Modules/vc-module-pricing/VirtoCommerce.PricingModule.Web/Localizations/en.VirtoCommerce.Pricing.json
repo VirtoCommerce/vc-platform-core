@@ -203,7 +203,8 @@
                 "selected": "Selected: "
             },
             "placeholders": {
-                "price-lists": "Select price lists…"
+                "price-lists": "Select price lists…",
+                "catalog-lists": "Select catalog…"
             }
         }
     },

@@ -265,7 +265,7 @@ function ($scope, pricelists, dialogService, uiGridHelper, bladeUtils, $localSto
         };
 
         if (filter.current) {
-            result.currency = filter.current.currency;
+            result.currencies = filter.current.currencies;
         } 
         return result;
     }

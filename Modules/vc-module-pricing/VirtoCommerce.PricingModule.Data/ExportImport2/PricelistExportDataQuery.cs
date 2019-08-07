@@ -6,7 +6,7 @@ namespace VirtoCommerce.PricingModule.Data.ExportImport
 {
     public class PricelistExportDataQuery : ExportDataQuery
     {
-        public string Currency { get; set; }
+        public string[] Currencies { get; set; }
 
         public override SearchCriteriaBase CreateSearchCriteria()
         {
@@ -18,7 +18,7 @@ namespace VirtoCommerce.PricingModule.Data.ExportImport
             var result = base.ToSearchCriteria();
             if (result is PricelistSearchCriteria pricelistSearchCriteria)
             {
-                pricelistSearchCriteria.Currency = Currency;
+                pricelistSearchCriteria.Currencies = Currencies;
             }
 
             return result;
@@ -29,7 +29,7 @@ namespace VirtoCommerce.PricingModule.Data.ExportImport
             var result = base.FromSearchCriteria(searchCriteria);
             if (searchCriteria is PricelistSearchCriteria pricelistSearchCriteria)
             {
-                Currency = pricelistSearchCriteria.Currency;
+                Currencies = pricelistSearchCriteria.Currencies;
             }
 
             return result;

@@ -103,7 +103,7 @@ angular.module(moduleName, ['ui.grid.cellNav', 'ui.grid.edit', 'ui.grid.validate
           {
               name: 'catalogSelector',
               title: "Select Catalog",
-          templateUrl: 'Modules/$(VirtoCommerce.Catalog)/Scripts/selectors/catalog-selector.tpl.html',
+              templateUrl: 'Modules/$(VirtoCommerce.Pricing)/Scripts/selectors/catalog-selector.tpl.html',
           }
           ]);
 

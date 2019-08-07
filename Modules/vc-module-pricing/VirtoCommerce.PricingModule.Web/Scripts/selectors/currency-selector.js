@@ -3,6 +3,6 @@ angular.module('virtoCommerce.pricingModule')
         [
             '$scope', 'virtoCommerce.coreModule.currency.currencyUtils',
             function($scope, currencyUtils) {
-                $scope.currencyUtils = currencyUtils;
+                $scope.currencies = currencyUtils.getCurrencies();
             }
         ]);
