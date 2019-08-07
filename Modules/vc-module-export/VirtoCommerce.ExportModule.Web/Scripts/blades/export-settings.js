@@ -106,13 +106,18 @@ angular.module('virtoCommerce.exportModule')
             }
 
             blade.exportDataRequest.providerName = blade.selectedProvider.id;
+            blade.isExporting = true;
+
             var progressBlade = {
                 id: 'exportProgress',
                 title: 'export.blades.export-progress.title',
                 controller: 'virtoCommerce.exportModule.exportProgressController',
                 template: 'Modules/$(VirtoCommerce.Export)/Scripts/blades/export-progress.tpl.html',
                 exportDataRequest: blade.exportDataRequest,
-                isClosingDisabled: false
+                isClosingDisabled: true,
+                onCompleted: function () {
+                    blade.isExporting = false;
+                }
             };
 
             bladeNavigationService.showBlade(progressBlade, blade);
@@ -181,7 +186,12 @@ angular.module('virtoCommerce.exportModule')
         };
 
         $scope.validateExportParameters = function () {
-            return blade.exportDataRequest && blade.exportDataRequest.exportTypeName && blade.selectedProvider && blade.exportDataRequest.dataQuery && blade.dataSelected;
+            return !blade.isExporting && 
+                blade.exportDataRequest && 
+                blade.exportDataRequest.exportTypeName && 
+                blade.selectedProvider && 
+                blade.exportDataRequest.dataQuery && 
+                blade.dataSelected;
         };
 
         $scope.blade.headIcon = 'fa-upload';

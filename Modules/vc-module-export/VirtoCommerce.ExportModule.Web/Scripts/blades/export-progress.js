@@ -18,6 +18,12 @@ angular.module('virtoCommerce.exportModule')
                 if (notification.errorCount > 0) {
                     bladeNavigationService.setError('Export error', blade);
                 }
+                
+                if (blade.notification.finished) {
+                    if (blade.onCompleted) {
+                        blade.onCompleted();
+                    }
+                }
             }
         });
 
