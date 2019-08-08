@@ -10,42 +10,18 @@ namespace VirtoCommerce.ExportModule.Core.Model
 
         public string Group { get; set; }
 
-        public ExportedTypeMetadata MetaData { get; protected set; }
+        public ExportedTypeMetadata MetaData { get; set; }
 
-        public ExportedTypeMetadata TabularMetaData { get; protected set; }
+        public ExportedTypeMetadata TabularMetaData { get; set; }
 
         public string ExportDataQueryType { get; set; }
 
         public bool IsTabularExportSupported { get => TabularDataConverter != null; }
 
         [JsonIgnore]
-        public ITabularDataConverter TabularDataConverter { get; protected set; }
+        public ITabularDataConverter TabularDataConverter { get; set; }
 
         [JsonIgnore]
-        public Func<ExportDataQuery, IPagedDataSource> ExportedDataSourceFactory { get; protected set; }
-
-        public ExportedTypeDefinition WithDataSourceFactory(Func<ExportDataQuery, IPagedDataSource> factory)
-        {
-            ExportedDataSourceFactory = factory;
-            return this;
-        }
-
-        public ExportedTypeDefinition WithMetadata(ExportedTypeMetadata metadata)
-        {
-            MetaData = metadata;
-            return this;
-        }
-
-        public ExportedTypeDefinition WithTabularMetadata(ExportedTypeMetadata tabularMetadata)
-        {
-            TabularMetaData = tabularMetadata;
-            return this;
-        }
-
-        public ExportedTypeDefinition WithTabularDataConverter(ITabularDataConverter tabularDataConverter)
-        {
-            TabularDataConverter = tabularDataConverter;
-            return this;
-        }
+        public Func<ExportDataQuery, IPagedDataSource> ExportedDataSourceFactory { get; set; }
     }
 }
