@@ -58,7 +58,7 @@ namespace VirtoCommerce.CatalogModule.Web.Authorization
                         {
                             context.Succeed(requirement);
                         }
-                    }
+                    }                             
                     else if (context.Resource is IEnumerable<IHasCatalogId> hasCatalogIds)
                     {
                         var catalogIds = hasCatalogIds.Select(x => x.CatalogId).Distinct().ToList();
