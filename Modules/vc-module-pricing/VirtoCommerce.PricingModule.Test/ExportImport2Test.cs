@@ -52,10 +52,8 @@ namespace VirtoCommerce.PricingModule.Test
                     searchServiceMock.Object,
                     priceServiceMock.Object,
                     itemServiceMock.Object,
-                    authorizationServicesMock.AuthorizationPolicyProvider,
                     authorizationServicesMock.AuthorizationService,
-                    authorizationServicesMock.UserClaimsPrincipalFactory,
-                    authorizationServicesMock.UserManager)
+                    authorizationServicesMock.UserClaimsResolver)
                 {
                     DataQuery = dataQuery
                 })
@@ -135,10 +133,8 @@ namespace VirtoCommerce.PricingModule.Test
                 dataQuery => new PricelistExportPagedDataSource(
                     searchServiceMock.Object,
                     priceServiceMock.Object,
-                    authorizationServicesMock.AuthorizationPolicyProvider,
                     authorizationServicesMock.AuthorizationService,
-                    authorizationServicesMock.UserClaimsPrincipalFactory,
-                    authorizationServicesMock.UserManager)
+                    authorizationServicesMock.UserClaimsResolver)
                 {
                     DataQuery = dataQuery
                 })
@@ -219,10 +215,8 @@ namespace VirtoCommerce.PricingModule.Test
                 dataQuery => new PricelistExportPagedDataSource(
                     searchServiceMock.Object,
                     priceServiceMock.Object,
-                    authorizationServicesMock.AuthorizationPolicyProvider,
                     authorizationServicesMock.AuthorizationService,
-                    authorizationServicesMock.UserClaimsPrincipalFactory,
-                    authorizationServicesMock.UserManager)
+                    authorizationServicesMock.UserClaimsResolver)
                 {
                     DataQuery = dataQuery
                 })
@@ -287,10 +281,8 @@ namespace VirtoCommerce.PricingModule.Test
                     searchServiceMock.Object,
                     priceServiceMock.Object,
                     catalogServiceMock.Object,
-                    authorizationServicesMock.AuthorizationPolicyProvider,
                     authorizationServicesMock.AuthorizationService,
-                    authorizationServicesMock.UserClaimsPrincipalFactory,
-                    authorizationServicesMock.UserManager)
+                    authorizationServicesMock.UserClaimsResolver)
                 {
                     DataQuery = dataQuery
                 })
@@ -372,10 +364,8 @@ namespace VirtoCommerce.PricingModule.Test
                     searchServiceMock.Object,
                     priceServiceMock.Object,
                     itemServiceMock.Object,
-                    authorizationServicesMock.AuthorizationPolicyProvider,
                     authorizationServicesMock.AuthorizationService,
-                    authorizationServicesMock.UserClaimsPrincipalFactory,
-                    authorizationServicesMock.UserManager)
+                    authorizationServicesMock.UserClaimsResolver)
                 {
                     DataQuery = dataQuery
                 })

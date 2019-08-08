@@ -19,8 +19,7 @@ namespace VirtoCommerce.ExportModule.Test.MockHelpers
         /// <returns></returns>
         public static (IAuthorizationService AuthorizationService,
             IAuthorizationPolicyProvider AuthorizationPolicyProvider,
-            IUserClaimsPrincipalFactory<ApplicationUser> UserClaimsPrincipalFactory,
-            UserManager<ApplicationUser> UserManager)
+            IUserClaimsResolver UserClaimsResolver)
             AuthServicesMock(bool authorizationResult)
         {
             var authorizationServiceMock = new Mock<IAuthorizationService>();
@@ -29,10 +28,11 @@ namespace VirtoCommerce.ExportModule.Test.MockHelpers
             var authorizationPolicyProviderMock = new Mock<IAuthorizationPolicyProvider>();
             authorizationPolicyProviderMock.Setup(x => x.GetPolicyAsync(It.IsAny<string>())).ReturnsAsync(new AuthorizationPolicy(new IAuthorizationRequirement[] { new Mock<IAuthorizationRequirement>().Object }, new string[] { }));
 
+            var userClaimsResolver = new Mock<IUserClaimsResolver>();
             var userClaimsPrincipalFactoryMock = new Mock<IUserClaimsPrincipalFactory<ApplicationUser>>();
             var userManagerMock = new Mock<UserManager<ApplicationUser>>(new Mock<IUserStore<ApplicationUser>>().Object, null, null, null, null, null, null, null, null);
 
-            return (authorizationServiceMock.Object, authorizationPolicyProviderMock.Object, userClaimsPrincipalFactoryMock.Object, userManagerMock.Object);
+            return (authorizationServiceMock.Object, authorizationPolicyProviderMock.Object, userClaimsResolver.Object);
         }
     }
 }
