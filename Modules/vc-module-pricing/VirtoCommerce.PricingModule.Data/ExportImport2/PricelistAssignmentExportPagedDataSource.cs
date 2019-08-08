@@ -2,47 +2,41 @@ using System;
 using System.Collections.Generic;
 using System.Linq;
 using Microsoft.AspNetCore.Authorization;
-using Microsoft.AspNetCore.Identity;
 using VirtoCommerce.CatalogModule.Core.Model;
 using VirtoCommerce.CatalogModule.Core.Services;
 using VirtoCommerce.ExportModule.Core.Model;
 using VirtoCommerce.Platform.Core.Common;
 using VirtoCommerce.Platform.Core.Security;
+using VirtoCommerce.Platform.Security.Authorization;
 using VirtoCommerce.PricingModule.Core;
 using VirtoCommerce.PricingModule.Core.Model;
 using VirtoCommerce.PricingModule.Core.Model.Search;
 using VirtoCommerce.PricingModule.Core.Services;
-using VirtoCommerce.PricingModule.Data.Authorization;
 
 namespace VirtoCommerce.PricingModule.Data.ExportImport
 {
-    // These permissions required to fetch data
-    [Authorize(ModuleConstants.Security.Permissions.Export)]
-    [Authorize(ModuleConstants.Security.Permissions.Read)]
     public class PricelistAssignmentExportPagedDataSource : BaseExportPagedDataSource
     {
         private readonly IPricingSearchService _searchService;
         private readonly IPricingService _pricingService;
         private readonly ICatalogService _catalogService;
         private readonly IAuthorizationService _authorizationService;
-        private readonly IUserClaimsPrincipalFactory<ApplicationUser> _userClaimsPrincipalFactory;
-        private readonly UserManager<ApplicationUser> _userManager;
+        private readonly IUserClaimsResolver _userClaimsResolver;
 
         public PricelistAssignmentExportPagedDataSource(
             IPricingSearchService searchService,
             IPricingService pricingService,
             ICatalogService catalogService,
             IAuthorizationService authorizationService,
-            IUserClaimsPrincipalFactory<ApplicationUser> userClaimsPrincipalFactory,
-            UserManager<ApplicationUser> userManager)
-            
+            IUserClaimsResolver userClaimsResolver
+            )
+
         {
             _searchService = searchService;
             _pricingService = pricingService;
             _catalogService = catalogService;
             _authorizationService = authorizationService;
-            _userClaimsPrincipalFactory = userClaimsPrincipalFactory;
-            _userManager = userManager;
+            _userClaimsResolver = userClaimsResolver;
         }
 
         protected override FetchResult FetchData(SearchCriteriaBase searchCriteria)
@@ -50,14 +44,17 @@ namespace VirtoCommerce.PricingModule.Data.ExportImport
             PricelistAssignment[] result;
             int totalCount;
 
-            var user = _userManager.FindByNameAsync(DataQuery.UserName).GetAwaiter().GetResult();
-            var claimsPrincipal = _userClaimsPrincipalFactory.CreateAsync(user).GetAwaiter().GetResult();
-            var authorizationResult = _authorizationService.AuthorizeAsync(claimsPrincipal, null, new PricingAuthorizationRequirement(ModuleConstants.Security.Permissions.Export)).GetAwaiter().GetResult();
+            var claimsPrincipal = _userClaimsResolver.GetUserClaims(DataQuery.UserName).GetAwaiter().GetResult();
+            var authorizationResult = _authorizationService.AuthorizeAsync(claimsPrincipal, null, new[]
+            {
+                new PermissionAuthorizationRequirement(ModuleConstants.Security.Permissions.Export),
+                new PermissionAuthorizationRequirement(ModuleConstants.Security.Permissions.Read)
+            }).GetAwaiter().GetResult();
+
             if (!authorizationResult.Succeeded)
             {
                 throw new UnauthorizedAccessException();
             }
-
 
             if (searchCriteria.ObjectIds.Any(x => !string.IsNullOrWhiteSpace(x)))
             {
