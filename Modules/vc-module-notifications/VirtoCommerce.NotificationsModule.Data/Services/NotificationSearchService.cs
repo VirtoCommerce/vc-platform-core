@@ -54,7 +54,10 @@ namespace VirtoCommerce.NotificationsModule.Data.Services
 
             if (criteria.Take > 0)
             {
-                var transientNotificationsQuery = AbstractTypeFactory<Notification>.AllTypeInfos.Select(x => AbstractTypeFactory<Notification>.TryCreateInstance(x.Type.Name))
+                var transientNotificationsQuery = AbstractTypeFactory<Notification>.AllTypeInfos.Select(x =>
+                {
+                    return AbstractTypeFactory<Notification>.TryCreateInstance(x.Type.Name);
+                })
                                                                               .OfType<Notification>().AsQueryable();
                 if (!string.IsNullOrEmpty(criteria.NotificationType))
                 {
