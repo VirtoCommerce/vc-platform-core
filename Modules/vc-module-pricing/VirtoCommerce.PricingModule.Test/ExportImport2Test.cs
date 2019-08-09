@@ -13,7 +13,6 @@ using VirtoCommerce.CoreModule.Core.Conditions;
 using VirtoCommerce.ExportModule.Core.Model;
 using VirtoCommerce.ExportModule.Core.Services;
 using VirtoCommerce.ExportModule.Data.Services;
-using VirtoCommerce.ExportModule.Test.MockHelpers;
 using VirtoCommerce.Platform.Core.Common;
 using VirtoCommerce.PricingModule.Core.Model;
 using VirtoCommerce.PricingModule.Core.Model.Search;
@@ -34,8 +33,6 @@ namespace VirtoCommerce.PricingModule.Test
             IKnownExportTypesRegistrar registrar = new KnownExportTypesService();
             registrar.RegisterType(typeof(Price).Name, "Pricing", typeof(PriceExportDataQuery).Name);
 
-            var authorizationServicesMock = AuthMockHelper.AuthServicesMock(true);
-
             var searchServiceMock = new Mock<IPricingSearchService>();
             searchServiceMock.Setup(x => x.SearchPricesAsync(It.IsAny<PricesSearchCriteria>())).ReturnsAsync(GetTestPriceResult());
 
@@ -51,9 +48,7 @@ namespace VirtoCommerce.PricingModule.Test
                 dataQuery => new PriceExportPagedDataSource(
                     searchServiceMock.Object,
                     priceServiceMock.Object,
-                    itemServiceMock.Object,
-                    authorizationServicesMock.AuthorizationService,
-                    authorizationServicesMock.UserClaimsResolver)
+                    itemServiceMock.Object)
                 {
                     DataQuery = dataQuery
                 })
@@ -114,8 +109,6 @@ namespace VirtoCommerce.PricingModule.Test
             IKnownExportTypesRegistrar registrar = new KnownExportTypesService();
             registrar.RegisterType(typeof(Pricelist).Name, "Pricing", typeof(PricelistExportDataQuery).Name);
 
-            var authorizationServicesMock = AuthMockHelper.AuthServicesMock(true);
-
             var searchServiceMock = new Mock<IPricingSearchService>();
             searchServiceMock.Setup(x => x.SearchPricelistsAsync(It.IsAny<PricelistSearchCriteria>())).ReturnsAsync(GetTestPricelistResult());
             searchServiceMock.Setup(x => x.SearchPricesAsync(It.IsAny<PricesSearchCriteria>())).ReturnsAsync(new PriceSearchResult()
@@ -132,9 +125,7 @@ namespace VirtoCommerce.PricingModule.Test
                 .WithDataSourceFactory(
                 dataQuery => new PricelistExportPagedDataSource(
                     searchServiceMock.Object,
-                    priceServiceMock.Object,
-                    authorizationServicesMock.AuthorizationService,
-                    authorizationServicesMock.UserClaimsResolver)
+                    priceServiceMock.Object)
                 {
                     DataQuery = dataQuery
                 })
@@ -196,8 +187,6 @@ namespace VirtoCommerce.PricingModule.Test
             IKnownExportTypesRegistrar registrar = new KnownExportTypesService();
             registrar.RegisterType(typeof(Pricelist).Name, "Pricing", typeof(PricelistExportDataQuery).Name);
 
-            var authorizationServicesMock = AuthMockHelper.AuthServicesMock(false);
-
             var searchServiceMock = new Mock<IPricingSearchService>();
             searchServiceMock.Setup(x => x.SearchPricelistsAsync(It.IsAny<PricelistSearchCriteria>())).ReturnsAsync(GetTestPricelistResult());
             searchServiceMock.Setup(x => x.SearchPricesAsync(It.IsAny<PricesSearchCriteria>())).ReturnsAsync(new PriceSearchResult()
@@ -214,9 +203,7 @@ namespace VirtoCommerce.PricingModule.Test
                 .WithDataSourceFactory(
                 dataQuery => new PricelistExportPagedDataSource(
                     searchServiceMock.Object,
-                    priceServiceMock.Object,
-                    authorizationServicesMock.AuthorizationService,
-                    authorizationServicesMock.UserClaimsResolver)
+                    priceServiceMock.Object)
                 {
                     DataQuery = dataQuery
                 })
@@ -265,8 +252,6 @@ namespace VirtoCommerce.PricingModule.Test
             IKnownExportTypesRegistrar registrar = new KnownExportTypesService();
             registrar.RegisterType(typeof(PricelistAssignment).Name, "Pricing", typeof(PricelistAssignmentExportDataQuery).Name);
 
-            var authorizationServicesMock = AuthMockHelper.AuthServicesMock(true);
-
             var searchServiceMock = new Mock<IPricingSearchService>();
             searchServiceMock.Setup(x => x.SearchPricelistAssignmentsAsync(It.IsAny<PricelistAssignmentsSearchCriteria>())).ReturnsAsync(GetPricelistAssignmentSearchResult());
 
@@ -280,9 +265,7 @@ namespace VirtoCommerce.PricingModule.Test
                 dataQuery => new PricelistAssignmentExportPagedDataSource(
                     searchServiceMock.Object,
                     priceServiceMock.Object,
-                    catalogServiceMock.Object,
-                    authorizationServicesMock.AuthorizationService,
-                    authorizationServicesMock.UserClaimsResolver)
+                    catalogServiceMock.Object)
                 {
                     DataQuery = dataQuery
                 })
@@ -346,8 +329,6 @@ namespace VirtoCommerce.PricingModule.Test
             IKnownExportTypesRegistrar registrar = new KnownExportTypesService();
             registrar.RegisterType(typeof(Price).Name, "Pricing", typeof(PriceExportDataQuery).Name);
 
-            var authorizationServicesMock = AuthMockHelper.AuthServicesMock(true);
-
             var resolver = (IKnownExportTypesResolver)registrar;
 
             var searchServiceMock = new Mock<IPricingSearchService>();
@@ -363,9 +344,7 @@ namespace VirtoCommerce.PricingModule.Test
                 dataQuery => new PriceExportPagedDataSource(
                     searchServiceMock.Object,
                     priceServiceMock.Object,
-                    itemServiceMock.Object,
-                    authorizationServicesMock.AuthorizationService,
-                    authorizationServicesMock.UserClaimsResolver)
+                    itemServiceMock.Object)
                 {
                     DataQuery = dataQuery
                 })
