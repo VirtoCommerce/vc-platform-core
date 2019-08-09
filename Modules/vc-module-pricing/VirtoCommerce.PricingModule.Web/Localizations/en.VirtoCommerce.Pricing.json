@@ -270,7 +270,7 @@
             }
         },
         "groups": {
-            "VirtoCommerce.PricingModule.Core.Model": {
+            "VirtoCommerce.PricingModule.Data.ExportImport": {
                 "name": "Pricing",
                 "description": "Prices, pricelists & assignments"
             }
