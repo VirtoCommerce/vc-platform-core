@@ -22,6 +22,7 @@ using VirtoCommerce.Platform.Core.Modularity;
 using VirtoCommerce.Platform.Core.Security;
 using VirtoCommerce.Platform.Core.Settings;
 using VirtoCommerce.Platform.Data.Extensions;
+using VirtoCommerce.Platform.Security.Authorization;
 using VirtoCommerce.PricingModule.Core;
 using VirtoCommerce.PricingModule.Core.Events;
 using VirtoCommerce.PricingModule.Core.Model;
@@ -33,7 +34,6 @@ using VirtoCommerce.PricingModule.Data.Handlers;
 using VirtoCommerce.PricingModule.Data.Repositories;
 using VirtoCommerce.PricingModule.Data.Search;
 using VirtoCommerce.PricingModule.Data.Services;
-using VirtoCommerce.PricingModule.Web.Authorization;
 using VirtoCommerce.PricingModule.Web.JsonConverters;
 using VirtoCommerce.SearchModule.Core.Model;
 using VirtoCommerce.SearchModule.Core.Services;
@@ -81,7 +81,23 @@ namespace VirtoCommerce.PricingModule.Web
             serviceCollection.AddSingleton<Func<ExportDataQuery, PricelistAssignmentExportPagedDataSource>>(provider =>
                 (exportDataQuery) => CreateExportPagedDataSource<PricelistAssignmentExportPagedDataSource>(provider, exportDataQuery));
 
-            serviceCollection.AddSingleton<IAuthorizationPolicyProvider, ExportAuthorizationPolicyProvider>();
+            var requirements = new IAuthorizationRequirement[]
+            {
+                new PermissionAuthorizationRequirement(ModuleConstants.Security.Permissions.Export), new PermissionAuthorizationRequirement(ModuleConstants.Security.Permissions.Read)
+            };
+
+            var exportPolicy = new AuthorizationPolicyBuilder()
+                .AddRequirements(requirements)
+                .Build();
+
+            serviceCollection.Configure<Microsoft.AspNetCore.Authorization.AuthorizationOptions>(configure =>
+            {
+                configure.AddPolicy("VirtoCommerce.PricingModule.Core.Model.PricelistFullDataExportDataPolicy", exportPolicy);
+                configure.AddPolicy(typeof(Price).FullName + "ExportDataPolicy", exportPolicy);
+                configure.AddPolicy(typeof(PricelistAssignment).FullName + "ExportDataPolicy", exportPolicy);
+                configure.AddPolicy(typeof(Pricelist).FullName + "ExportDataPolicy", exportPolicy);
+            });
+
         }
 
         public void PostInitialize(IApplicationBuilder appBuilder)
