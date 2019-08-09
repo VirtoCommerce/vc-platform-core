@@ -3,6 +3,7 @@ using System.IO;
 using System.Text;
 using VirtoCommerce.ExportModule.Core.Model;
 using VirtoCommerce.ExportModule.Core.Services;
+using VirtoCommerce.ExportModule.Data.Extensions;
 using VirtoCommerce.Platform.Core.Common;
 
 namespace VirtoCommerce.ExportModule.Data.Services
@@ -75,12 +76,9 @@ namespace VirtoCommerce.ExportModule.Data.Services
                         {
                             try
                             {
-                                var preparedObject = (object)obj;
-                                /*
                                 var preparedObject = obj.Clone();
 
                                 request.DataQuery.FilterProperties(preparedObject);
-                                */
 
                                 if (needTabularData)
                                 {

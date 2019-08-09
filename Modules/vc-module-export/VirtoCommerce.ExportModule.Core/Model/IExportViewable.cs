@@ -1,6 +1,8 @@
+using System;
+
 namespace VirtoCommerce.ExportModule.Core.Model
 {
-    public interface IExportViewable
+    public interface IExportViewable : ICloneable
     {
         string Name { get; set; }
         string Code { get; set; }
