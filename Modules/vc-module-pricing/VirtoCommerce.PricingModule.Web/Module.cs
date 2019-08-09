@@ -94,10 +94,10 @@ namespace VirtoCommerce.PricingModule.Web
 
             serviceCollection.Configure<Microsoft.AspNetCore.Authorization.AuthorizationOptions>(configure =>
             {
-                configure.AddPolicy("VirtoCommerce.PricingModule.Core.Model.PricelistFullDataExportDataPolicy", exportPolicy);
+                configure.AddPolicy(typeof(Pricelist).FullName + "FullDataExportDataPolicy", exportPolicy);
+                configure.AddPolicy(typeof(Pricelist).FullName + "ExportDataPolicy", exportPolicy);
                 configure.AddPolicy(typeof(Price).FullName + "ExportDataPolicy", exportPolicy);
                 configure.AddPolicy(typeof(PricelistAssignment).FullName + "ExportDataPolicy", exportPolicy);
-                configure.AddPolicy(typeof(Pricelist).FullName + "ExportDataPolicy", exportPolicy);
             });
 
         }
