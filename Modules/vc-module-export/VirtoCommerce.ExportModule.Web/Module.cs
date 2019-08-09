@@ -1,10 +1,8 @@
 using System;
 using System.Linq;
-using Hangfire.Common;
 using Microsoft.AspNetCore.Builder;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.Extensions.DependencyInjection;
-using Microsoft.Extensions.Options;
 using VirtoCommerce.ExportModule.Core;
 using VirtoCommerce.ExportModule.Core.Model;
 using VirtoCommerce.ExportModule.Core.Services;
@@ -30,17 +28,16 @@ namespace VirtoCommerce.ExportModule.Web
             serviceCollection.AddTransient<IExportProviderFactory, ExportProviderFactory>();
 
             serviceCollection.AddTransient<IDataExporter, DataExporter>();
+
+            serviceCollection.Configure<MvcJsonOptions>(configure =>
+            {
+                configure.SerializerSettings.Converters.Add(new PolymorphicExportDataQueryJsonConverter());
+            });
+
         }
 
         public void PostInitialize(IApplicationBuilder appBuilder)
         {
-            var mvcJsonOptions = appBuilder.ApplicationServices.GetRequiredService<IOptions<MvcJsonOptions>>();
-
-            mvcJsonOptions.Value.SerializerSettings.Converters.Add(new PolymorphicExportDataQueryJsonConverter());
-
-            // This line refreshes Hangfire JsonConverter with the current JsonSerializerSettings - PolymorphicExportDataQueryJsonConverter needs to be included
-            JobHelper.SetSerializerSettings(mvcJsonOptions.Value.SerializerSettings);
-
             //Register module permissions
             var permissionsProvider = appBuilder.ApplicationServices.GetRequiredService<IPermissionsRegistrar>();
             permissionsProvider.RegisterPermissions(ModuleConstants.Security.Permissions.AllPermissions.Select(x => new Permission() { GroupName = "Export", Name = x }).ToArray());
