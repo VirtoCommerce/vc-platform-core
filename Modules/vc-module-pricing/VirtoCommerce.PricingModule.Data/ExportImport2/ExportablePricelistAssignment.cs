@@ -52,5 +52,10 @@ namespace VirtoCommerce.PricingModule.Data.ExportImport
 
             return result;
         }
+
+        public object Clone()
+        {
+            return MemberwiseClone() as ExportablePricelistAssignment;
+        }
     }
 }
