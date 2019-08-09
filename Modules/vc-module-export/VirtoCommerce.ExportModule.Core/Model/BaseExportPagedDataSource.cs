@@ -1,11 +1,7 @@
 using System;
 using System.Collections.Generic;
 using System.Linq;
-using System.Threading.Tasks;
-using Microsoft.AspNetCore.Authorization;
-using Microsoft.AspNetCore.Identity;
 using VirtoCommerce.Platform.Core.Common;
-using VirtoCommerce.Platform.Core.Security;
 
 namespace VirtoCommerce.ExportModule.Core.Model
 {
@@ -30,44 +26,13 @@ namespace VirtoCommerce.ExportModule.Core.Model
         private int _totalCount = -1;
         private SearchCriteriaBase _searchCriteria;
 
-        private readonly IAuthorizationService _authorizationService;
-        private readonly IUserClaimsPrincipalFactory<ApplicationUser> _userClaimsPrincipalFactory;
-        private readonly IAuthorizationPolicyProvider _authorizationPolicyProvider;
-        private readonly UserManager<ApplicationUser> _userManager;
-
-        protected BaseExportPagedDataSource(IAuthorizationPolicyProvider authorizationPolicyProvider, IAuthorizationService authorizationService, IUserClaimsPrincipalFactory<ApplicationUser> userClaimsPrincipalFactory, UserManager<ApplicationUser> userManager)
+        protected BaseExportPagedDataSource()
         {
-            _authorizationService = authorizationService;
-            _userClaimsPrincipalFactory = userClaimsPrincipalFactory;
-            _authorizationPolicyProvider = authorizationPolicyProvider;
-            _userManager = userManager;
         }
 
         protected abstract FetchResult FetchData(SearchCriteriaBase searchCriteria);
 
         protected abstract ViewableEntity ToViewableEntity(object obj);
-
-
-        /// <summary>
-        /// Checks user passed in <see cref="DataQuery"/> for permissions before fetching data.
-        /// Permissions should be attached to *ExportPagedDataSource class using <see cref="AuthorizeAttribute"/>
-        /// </summary>
-        /// <returns></returns>
-        public virtual async Task Authorize()
-        {
-            var user = await _userManager.FindByNameAsync(DataQuery.UserName);
-            var claimsPrincipal = await _userClaimsPrincipalFactory.CreateAsync(user);
-            var policies = GetType().GetCustomAttributes(typeof(AuthorizeAttribute), true).Select(x => ((AuthorizeAttribute)x).Policy);
-            foreach (var policyString in policies)
-            {
-                var policy = await _authorizationPolicyProvider.GetPolicyAsync(policyString);
-                var authorizationResult = await _authorizationService.AuthorizeAsync(claimsPrincipal, null, policy.Requirements);
-                if (!authorizationResult.Succeeded)
-                {
-                    throw new UnauthorizedAccessException();
-                }
-            }
-        }
 
         public virtual IEnumerable<ICloneable> FetchNextPage()
         {
@@ -118,9 +83,6 @@ namespace VirtoCommerce.ExportModule.Core.Model
             if (_searchCriteria == null)
             {
                 _searchCriteria = DataQuery.ToSearchCriteria();
-
-                // Checking permission authorization only once
-                Authorize().GetAwaiter().GetResult();
             }
         }
 

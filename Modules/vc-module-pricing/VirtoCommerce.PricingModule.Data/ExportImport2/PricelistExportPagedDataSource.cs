@@ -1,26 +1,19 @@
 using System.Linq;
-using Microsoft.AspNetCore.Authorization;
-using Microsoft.AspNetCore.Identity;
 using VirtoCommerce.ExportModule.Core.Model;
 using VirtoCommerce.Platform.Core.Common;
-using VirtoCommerce.Platform.Core.Security;
-using VirtoCommerce.PricingModule.Core;
 using VirtoCommerce.PricingModule.Core.Model;
 using VirtoCommerce.PricingModule.Core.Model.Search;
 using VirtoCommerce.PricingModule.Core.Services;
 
 namespace VirtoCommerce.PricingModule.Data.ExportImport
 {
-    // These permissions required to fetch data
-    [Authorize(ModuleConstants.Security.Permissions.Export)]
-    [Authorize(ModuleConstants.Security.Permissions.Read)]
     public class PricelistExportPagedDataSource : BaseExportPagedDataSource
     {
         private readonly IPricingSearchService _searchService;
         private readonly IPricingService _pricingService;
 
-        public PricelistExportPagedDataSource(IPricingSearchService searchService, IPricingService pricingService, IAuthorizationPolicyProvider authorizationPolicyProvider, IAuthorizationService authorizationService, IUserClaimsPrincipalFactory<ApplicationUser> userClaimsPrincipalFactory, UserManager<ApplicationUser> userManager)
-            : base(authorizationPolicyProvider, authorizationService, userClaimsPrincipalFactory, userManager)
+        public PricelistExportPagedDataSource(IPricingSearchService searchService, IPricingService pricingService)
+
         {
             _searchService = searchService;
             _pricingService = pricingService;

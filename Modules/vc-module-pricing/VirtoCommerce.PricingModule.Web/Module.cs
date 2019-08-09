@@ -3,6 +3,7 @@ using System.Collections.Generic;
 using System.IO;
 using System.Linq;
 using System.Threading.Tasks;
+using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Builder;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.EntityFrameworkCore;
@@ -23,6 +24,7 @@ using VirtoCommerce.Platform.Core.Modularity;
 using VirtoCommerce.Platform.Core.Security;
 using VirtoCommerce.Platform.Core.Settings;
 using VirtoCommerce.Platform.Data.Extensions;
+using VirtoCommerce.Platform.Security.Authorization;
 using VirtoCommerce.PricingModule.Core;
 using VirtoCommerce.PricingModule.Core.Events;
 using VirtoCommerce.PricingModule.Core.Model;
@@ -70,13 +72,34 @@ namespace VirtoCommerce.PricingModule.Web
             serviceCollection.AddSingleton<LogChangesChangedEventHandler>();
 
             serviceCollection.AddScoped<PriceExportPagedDataSource>(); // Adding as scoped, because of used services (UserManager, PrincipalFactory) scoped too
-            serviceCollection.AddSingleton<Func<ExportDataQuery, PriceExportPagedDataSource>>(provider => (exportDataQuery) => CreateExportPagedDataSource<PriceExportPagedDataSource>(provider, exportDataQuery));
+            serviceCollection.AddSingleton<Func<ExportDataQuery, PriceExportPagedDataSource>>(provider =>
+                (exportDataQuery) => CreateExportPagedDataSource<PriceExportPagedDataSource>(provider, exportDataQuery));
 
             serviceCollection.AddScoped<PricelistExportPagedDataSource>();
-            serviceCollection.AddSingleton<Func<ExportDataQuery, PricelistExportPagedDataSource>>(provider => (exportDataQuery) => CreateExportPagedDataSource<PricelistExportPagedDataSource>(provider, exportDataQuery));
+            serviceCollection.AddSingleton<Func<ExportDataQuery, PricelistExportPagedDataSource>>(provider =>
+                (exportDataQuery) => CreateExportPagedDataSource<PricelistExportPagedDataSource>(provider, exportDataQuery));
 
             serviceCollection.AddScoped<PricelistAssignmentExportPagedDataSource>();
-            serviceCollection.AddSingleton<Func<ExportDataQuery, PricelistAssignmentExportPagedDataSource>>(provider => (exportDataQuery) => CreateExportPagedDataSource<PricelistAssignmentExportPagedDataSource>(provider, exportDataQuery));
+            serviceCollection.AddSingleton<Func<ExportDataQuery, PricelistAssignmentExportPagedDataSource>>(provider =>
+                (exportDataQuery) => CreateExportPagedDataSource<PricelistAssignmentExportPagedDataSource>(provider, exportDataQuery));
+
+            var requirements = new IAuthorizationRequirement[]
+            {
+                new PermissionAuthorizationRequirement(ModuleConstants.Security.Permissions.Export), new PermissionAuthorizationRequirement(ModuleConstants.Security.Permissions.Read)
+            };
+
+            var exportPolicy = new AuthorizationPolicyBuilder()
+                .AddRequirements(requirements)
+                .Build();
+
+            serviceCollection.Configure<Microsoft.AspNetCore.Authorization.AuthorizationOptions>(configure =>
+            {
+                configure.AddPolicy(typeof(Pricelist).FullName + "FullDataExportDataPolicy", exportPolicy);
+                configure.AddPolicy(typeof(Pricelist).FullName + "ExportDataPolicy", exportPolicy);
+                configure.AddPolicy(typeof(Price).FullName + "ExportDataPolicy", exportPolicy);
+                configure.AddPolicy(typeof(PricelistAssignment).FullName + "ExportDataPolicy", exportPolicy);
+            });
+
         }
 
         public void PostInitialize(IApplicationBuilder appBuilder)

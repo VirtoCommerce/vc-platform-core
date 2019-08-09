@@ -13,8 +13,6 @@ namespace VirtoCommerce.ExportModule.Core.Model
         public string[] ObjectIds { get; set; } = new string[] { };
         public string Sort { get; set; }
         public ExportedTypeColumnInfo[] IncludedColumns { get; set; } = Array.Empty<ExportedTypeColumnInfo>();
-        public string UserName { get; set; }
-
         public int? Skip { get; set; }
         public int? Take { get; set; }
 

@@ -16,7 +16,6 @@ using VirtoCommerce.ExportModule.Core.Services;
 using VirtoCommerce.ExportModule.Data.Extensions;
 using VirtoCommerce.ExportModule.Data.Model;
 using VirtoCommerce.ExportModule.Data.Services;
-using VirtoCommerce.ExportModule.Test.MockHelpers;
 using VirtoCommerce.Platform.Core.Common;
 using VirtoCommerce.PricingModule.Core.Model;
 using VirtoCommerce.PricingModule.Core.Model.Search;
@@ -36,8 +35,6 @@ namespace VirtoCommerce.PricingModule.Test
             //Arrange
             IKnownExportTypesRegistrar registrar = new KnownExportTypesService();
 
-            var authorizationServicesMock = AuthMockHelper.AuthServicesMock(true);
-
             var searchServiceMock = new Mock<IPricingSearchService>();
             searchServiceMock.Setup(x => x.SearchPricesAsync(It.IsAny<PricesSearchCriteria>())).ReturnsAsync(GetTestPriceResult());
 
@@ -53,11 +50,7 @@ namespace VirtoCommerce.PricingModule.Test
                     dataQuery => new PriceExportPagedDataSource(
                         searchServiceMock.Object,
                         priceServiceMock.Object,
-                        itemServiceMock.Object,
-                        authorizationServicesMock.AuthorizationPolicyProvider,
-                        authorizationServicesMock.AuthorizationService,
-                        authorizationServicesMock.UserClaimsPrincipalFactory,
-                        authorizationServicesMock.UserManager)
+                        itemServiceMock.Object)
                     {
                         DataQuery = dataQuery
                     })
@@ -118,8 +111,6 @@ namespace VirtoCommerce.PricingModule.Test
             //Arrange
             IKnownExportTypesRegistrar registrar = new KnownExportTypesService();
 
-            var authorizationServicesMock = AuthMockHelper.AuthServicesMock(true);
-
             var searchServiceMock = new Mock<IPricingSearchService>();
             searchServiceMock.Setup(x => x.SearchPricelistsAsync(It.IsAny<PricelistSearchCriteria>())).ReturnsAsync(GetTestPricelistResult());
             searchServiceMock.Setup(x => x.SearchPricesAsync(It.IsAny<PricesSearchCriteria>())).ReturnsAsync(new PriceSearchResult()
@@ -136,11 +127,7 @@ namespace VirtoCommerce.PricingModule.Test
                 .WithDataSourceFactory(
                     dataQuery => new PricelistExportPagedDataSource(
                         searchServiceMock.Object,
-                        priceServiceMock.Object,
-                        authorizationServicesMock.AuthorizationPolicyProvider,
-                        authorizationServicesMock.AuthorizationService,
-                        authorizationServicesMock.UserClaimsPrincipalFactory,
-                        authorizationServicesMock.UserManager)
+                        priceServiceMock.Object)
                     {
                         DataQuery = dataQuery
                     })
@@ -197,83 +184,9 @@ namespace VirtoCommerce.PricingModule.Test
 
         [Fact]
         [SuppressMessage("Sonar", "S3966:Objects should not be disposed more than once")]
-        public Task PricelistJsonExportFailsUnauthorized()
-        {
-            //Arrange
-            IKnownExportTypesRegistrar registrar = new KnownExportTypesService();
-
-            var authorizationServicesMock = AuthMockHelper.AuthServicesMock(false);
-
-            var searchServiceMock = new Mock<IPricingSearchService>();
-            searchServiceMock.Setup(x => x.SearchPricelistsAsync(It.IsAny<PricelistSearchCriteria>())).ReturnsAsync(GetTestPricelistResult());
-            searchServiceMock.Setup(x => x.SearchPricesAsync(It.IsAny<PricesSearchCriteria>())).ReturnsAsync(new PriceSearchResult()
-            {
-                TotalCount = 0,
-                Results = new List<Price>(),
-            });
-
-            var priceServiceMock = new Mock<IPricingService>();
-
-            var metadata = typeof(Pricelist).GetPropertyNames(true);
-            var resolver = (IKnownExportTypesResolver)registrar;
-            registrar.RegisterType(ExportedTypeDefinitionBuilder.Build<Pricelist, PricelistExportDataQuery>()
-                .WithDataSourceFactory(
-                    dataQuery => new PricelistExportPagedDataSource(
-                        searchServiceMock.Object,
-                        priceServiceMock.Object,
-                        authorizationServicesMock.AuthorizationPolicyProvider,
-                        authorizationServicesMock.AuthorizationService,
-                        authorizationServicesMock.UserClaimsPrincipalFactory,
-                        authorizationServicesMock.UserManager)
-                    {
-                        DataQuery = dataQuery
-                    })
-                .WithMetadata(metadata)
-                .ExportedTypeDefinition);
-
-            var exportProviderFactories = new[] {
-                new Func<IExportProviderConfiguration, ExportedTypeColumnInfo[], IExportProvider>((config, includedColumns) => new JsonExportProvider(config, includedColumns)),
-            };
-
-            var dataExporter = new DataExporter(resolver, new ExportProviderFactory(exportProviderFactories));
-            var includedColumnNames = new string[] { "Currency", "Id", "Name" };
-            var IncludedColumns = metadata.PropertyInfos.Where(x => includedColumnNames.Contains(x.Name, StringComparer.OrdinalIgnoreCase)).ToArray();
-
-            //Act
-            Action act = () =>
-            {
-                using (var stream = new MemoryStream())
-                using (var writer = new StreamWriter(stream, Encoding.UTF8) { AutoFlush = true })
-                {
-                    dataExporter.Export(
-                        stream,
-                        new ExportDataRequest()
-                        {
-                            DataQuery = new PricelistExportDataQuery()
-                            {
-                                IncludedColumns = IncludedColumns
-                            },
-                            ExportTypeName = typeof(Pricelist).FullName,
-                            ProviderName = nameof(JsonExportProvider)
-                        },
-                        new Action<ExportProgressInfo>(x => Console.WriteLine(x.Description)),
-                        new CancellationTokenWrapper(CancellationToken.None));
-                }
-            };
-
-            //Assert
-            Assert.Throws<UnauthorizedAccessException>(act);
-
-            return Task.CompletedTask;
-        }
-
-        [Fact]
-        [SuppressMessage("Sonar", "S3966:Objects should not be disposed more than once")]
         public Task PricelistAssignmentJsonExport()
         {
             IKnownExportTypesRegistrar registrar = new KnownExportTypesService();
-
-            var authorizationServicesMock = AuthMockHelper.AuthServicesMock(true);
 
             var searchServiceMock = new Mock<IPricingSearchService>();
             searchServiceMock.Setup(x => x.SearchPricelistAssignmentsAsync(It.IsAny<PricelistAssignmentsSearchCriteria>())).ReturnsAsync(GetPricelistAssignmentSearchResult());
@@ -288,11 +201,7 @@ namespace VirtoCommerce.PricingModule.Test
                     dataQuery => new PricelistAssignmentExportPagedDataSource(
                         searchServiceMock.Object,
                         priceServiceMock.Object,
-                        catalogServiceMock.Object,
-                        authorizationServicesMock.AuthorizationPolicyProvider,
-                        authorizationServicesMock.AuthorizationService,
-                        authorizationServicesMock.UserClaimsPrincipalFactory,
-                        authorizationServicesMock.UserManager)
+                        catalogServiceMock.Object)
                     {
                         DataQuery = dataQuery
                     })
@@ -356,8 +265,6 @@ namespace VirtoCommerce.PricingModule.Test
         {
             IKnownExportTypesRegistrar registrar = new KnownExportTypesService();
 
-            var authorizationServicesMock = AuthMockHelper.AuthServicesMock(true);
-
             var resolver = (IKnownExportTypesResolver)registrar;
 
             var searchServiceMock = new Mock<IPricingSearchService>();
@@ -373,11 +280,7 @@ namespace VirtoCommerce.PricingModule.Test
                     dataQuery => new PriceExportPagedDataSource(
                         searchServiceMock.Object,
                         priceServiceMock.Object,
-                        itemServiceMock.Object,
-                        authorizationServicesMock.AuthorizationPolicyProvider,
-                        authorizationServicesMock.AuthorizationService,
-                        authorizationServicesMock.UserClaimsPrincipalFactory,
-                        authorizationServicesMock.UserManager)
+                        itemServiceMock.Object)
                     {
                         DataQuery = dataQuery
                     })

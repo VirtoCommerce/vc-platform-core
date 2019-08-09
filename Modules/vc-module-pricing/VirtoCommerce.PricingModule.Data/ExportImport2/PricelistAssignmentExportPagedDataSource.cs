@@ -1,23 +1,16 @@
 using System;
 using System.Collections.Generic;
 using System.Linq;
-using Microsoft.AspNetCore.Authorization;
-using Microsoft.AspNetCore.Identity;
 using VirtoCommerce.CatalogModule.Core.Model;
 using VirtoCommerce.CatalogModule.Core.Services;
 using VirtoCommerce.ExportModule.Core.Model;
 using VirtoCommerce.Platform.Core.Common;
-using VirtoCommerce.Platform.Core.Security;
-using VirtoCommerce.PricingModule.Core;
 using VirtoCommerce.PricingModule.Core.Model;
 using VirtoCommerce.PricingModule.Core.Model.Search;
 using VirtoCommerce.PricingModule.Core.Services;
 
 namespace VirtoCommerce.PricingModule.Data.ExportImport
 {
-    // These permissions required to fetch data
-    [Authorize(ModuleConstants.Security.Permissions.Export)]
-    [Authorize(ModuleConstants.Security.Permissions.Read)]
     public class PricelistAssignmentExportPagedDataSource : BaseExportPagedDataSource
     {
         private readonly IPricingSearchService _searchService;
@@ -27,16 +20,13 @@ namespace VirtoCommerce.PricingModule.Data.ExportImport
         public PricelistAssignmentExportPagedDataSource(
             IPricingSearchService searchService,
             IPricingService pricingService,
-            ICatalogService catalogService,
-            IAuthorizationPolicyProvider authorizationPolicyProvider,
-            IAuthorizationService authorizationService,
-            IUserClaimsPrincipalFactory<ApplicationUser> userClaimsPrincipalFactory,
-            UserManager<ApplicationUser> userManager)
-            : base(authorizationPolicyProvider, authorizationService, userClaimsPrincipalFactory, userManager)
+            ICatalogService catalogService)
+
         {
             _searchService = searchService;
             _pricingService = pricingService;
             _catalogService = catalogService;
+
         }
 
         protected override FetchResult FetchData(SearchCriteriaBase searchCriteria)
