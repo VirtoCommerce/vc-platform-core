@@ -70,7 +70,7 @@ angular.module(moduleName, ['ui.grid.cellNav', 'ui.grid.edit', 'ui.grid.validate
       });
 
       //
-      metaFormsService.registerMetaFields('VirtoCommerce.PricingModule.Core.Model.Price' + 'ExportFilter', [
+      metaFormsService.registerMetaFields('VirtoCommerce.PricingModule.Data.ExportImport.ExportablePrice' + 'ExportFilter', [
           {
               name: 'pricelistSelector',
               title: "pricing.selectors.titles.price-lists",
@@ -87,14 +87,14 @@ angular.module(moduleName, ['ui.grid.cellNav', 'ui.grid.edit', 'ui.grid.validate
               valueType: "DateTime"
           }]);
 
-      metaFormsService.registerMetaFields('VirtoCommerce.PricingModule.Core.Model.Pricelist' + 'ExportFilter', [
+      metaFormsService.registerMetaFields('VirtoCommerce.PricingModule.Data.ExportImport.ExportablePricelist' + 'ExportFilter', [
           {
               name: 'currencySelector',
               title: "pricing.selectors.titles.currencies",
               templateUrl: 'Modules/$(VirtoCommerce.Pricing)/Scripts/selectors/currency-selector.tpl.html',
           }]);
 
-      metaFormsService.registerMetaFields('VirtoCommerce.PricingModule.Core.Model.PricelistAssignment' + 'ExportFilter', [
+      metaFormsService.registerMetaFields('VirtoCommerce.PricingModule.Data.ExportImport.ExportablePricelistAssignment' + 'ExportFilter', [
           {
               name: 'pricelistAssignmentSelector',
               title: "pricing.selectors.titles.price-lists",
