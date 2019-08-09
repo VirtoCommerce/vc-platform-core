@@ -14,18 +14,20 @@ namespace VirtoCommerce.ExportModule.Core.Model
     {
         protected class FetchResult
         {
-            public IEnumerable<ICloneable> Results { get; set; }
+            public IEnumerable<IExportViewable> Results { get; set; }
             public int TotalCount { get; set; }
 
-            public FetchResult(IEnumerable<ICloneable> results, int totalCount)
+            public FetchResult(IEnumerable<IExportViewable> results, int totalCount)
             {
                 Results = results;
                 TotalCount = totalCount;
             }
         }
 
-        public int PageSize { get; set; } = 50;
+
+        //public int PageSize { get; set; } = 50;
         public int CurrentPageNumber { get; private set; }
+
         public ExportDataQuery DataQuery { get; set; }
         private int _totalCount = -1;
         private SearchCriteriaBase _searchCriteria;
@@ -44,8 +46,6 @@ namespace VirtoCommerce.ExportModule.Core.Model
         }
 
         protected abstract FetchResult FetchData(SearchCriteriaBase searchCriteria);
-
-        protected abstract ViewableEntity ToViewableEntity(object obj);
 
 
         /// <summary>
@@ -69,34 +69,19 @@ namespace VirtoCommerce.ExportModule.Core.Model
             }
         }
 
-        public virtual IEnumerable<ICloneable> FetchNextPage()
+        public virtual IEnumerable<IExportViewable> FetchNextPage()
         {
             EnsureSearchCriteriaInitialized();
 
-            _searchCriteria.Skip = PageSize * CurrentPageNumber;
-            _searchCriteria.Take = PageSize;
+            _searchCriteria.Skip = _searchCriteria.Take * CurrentPageNumber;
+            //_searchCriteria.Take = PageSize;
 
             var result = FetchData(_searchCriteria);
             _totalCount = result.TotalCount;
             CurrentPageNumber++;
             return result.Results;
         }
-
-        public virtual ViewableSearchResult GetData()
-        {
-            EnsureSearchCriteriaInitialized();
-
-            var queryResult = FetchData(_searchCriteria);
-            var result = new ViewableSearchResult()
-            {
-                TotalCount = queryResult.TotalCount,
-            };
-
-            result.Results = ToViewableEntities(queryResult.Results).ToList();
-
-            return result;
-        }
-
+        
         public virtual int GetTotalCount()
         {
             if (_totalCount < 0)
@@ -122,11 +107,6 @@ namespace VirtoCommerce.ExportModule.Core.Model
                 // Checking permission authorization only once
                 Authorize().GetAwaiter().GetResult();
             }
-        }
-
-        protected virtual IEnumerable<ViewableEntity> ToViewableEntities(IEnumerable<ICloneable> objects)
-        {
-            return objects.Select(x => ToViewableEntity(x));
         }
     }
 }

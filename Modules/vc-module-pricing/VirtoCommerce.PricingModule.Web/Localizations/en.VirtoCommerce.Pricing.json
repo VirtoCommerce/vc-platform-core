@@ -252,19 +252,19 @@
     },
     "export": {
         "types": {
-            "VirtoCommerce.PricingModule.Core.Model.PricelistFullData": {
+            "VirtoCommerce.PricingModule.Data.ExportImport.ExportablePricelistFullData": {
                 "name": "Pricelist full data",
                 "description": "Pricelist data with related objects. Supports JSON export provider only"
             },
-            "VirtoCommerce.PricingModule.Core.Model.Price": {
+            "VirtoCommerce.PricingModule.Data.ExportImport.ExportablePrice": {
                 "name": "Price",
                 "description": "Prices without related objects"
             },
-            "VirtoCommerce.PricingModule.Core.Model.Pricelist": {
+            "VirtoCommerce.PricingModule.Data.ExportImport.ExportablePricelist": {
                 "name": "Pricelist",
                 "description": "Pricelists only"
             },
-            "VirtoCommerce.PricingModule.Core.Model.PricelistAssignment": {
+            "VirtoCommerce.PricingModule.Data.ExportImport.ExportablePricelistAssignment": {
                 "name": "Pricelist assignment",
                 "description": "Export pricelist assignments"
             }

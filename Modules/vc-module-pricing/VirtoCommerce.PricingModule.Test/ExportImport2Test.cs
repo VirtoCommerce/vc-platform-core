@@ -35,6 +35,7 @@ namespace VirtoCommerce.PricingModule.Test
         {
             //Arrange
             IKnownExportTypesRegistrar registrar = new KnownExportTypesService();
+            registrar.RegisterType(typeof(ExportablePrice).Name, "Pricing", typeof(PriceExportDataQuery).Name);
 
             var authorizationServicesMock = AuthMockHelper.AuthServicesMock(true);
 
@@ -45,10 +46,10 @@ namespace VirtoCommerce.PricingModule.Test
 
             var itemServiceMock = new Mock<IItemService>();
 
-            var metadata = typeof(Price).GetPropertyNames(true);
+            var metadata = typeof(ExportablePrice).GetPropertyNames(true);
             var resolver = (IKnownExportTypesResolver)registrar;
 
-            registrar.RegisterType(ExportedTypeDefinitionBuilder.Build<Price, PriceExportDataQuery>()
+            resolver.ResolveExportedTypeDefinition(typeof(ExportablePrice).Name)
                 .WithDataSourceFactory(
                     dataQuery => new PriceExportPagedDataSource(
                         searchServiceMock.Object,
@@ -87,7 +88,7 @@ namespace VirtoCommerce.PricingModule.Test
                         {
                             IncludedColumns = IncludedColumns
                         },
-                        ExportTypeName = typeof(Price).FullName,
+                        ExportTypeName = typeof(ExportablePrice).Name,
                         ProviderName = nameof(JsonExportProvider)
                     },
                     new Action<ExportProgressInfo>(x => Console.WriteLine(x.Description)),
@@ -100,7 +101,7 @@ namespace VirtoCommerce.PricingModule.Test
             }
 
             //Assert
-            var prices = JsonConvert.DeserializeObject<Price[]>(result);
+            var prices = JsonConvert.DeserializeObject<ExportablePrice[]>(result);
 
             Assert.NotNull(prices);
             Assert.Equal(3, prices.Length);
@@ -117,6 +118,7 @@ namespace VirtoCommerce.PricingModule.Test
         {
             //Arrange
             IKnownExportTypesRegistrar registrar = new KnownExportTypesService();
+            registrar.RegisterType(typeof(ExportablePricelist).Name, "Pricing", typeof(PricelistExportDataQuery).Name);
 
             var authorizationServicesMock = AuthMockHelper.AuthServicesMock(true);
 
@@ -130,9 +132,9 @@ namespace VirtoCommerce.PricingModule.Test
 
             var priceServiceMock = new Mock<IPricingService>();
 
-            var metadata = typeof(Pricelist).GetPropertyNames(true);
+            var metadata = typeof(ExportablePricelist).GetPropertyNames(true);
             var resolver = (IKnownExportTypesResolver)registrar;
-            registrar.RegisterType(ExportedTypeDefinitionBuilder.Build<Pricelist, PricelistExportDataQuery>()
+            resolver.ResolveExportedTypeDefinition(typeof(ExportablePricelist).Name)
                 .WithDataSourceFactory(
                     dataQuery => new PricelistExportPagedDataSource(
                         searchServiceMock.Object,
@@ -168,7 +170,7 @@ namespace VirtoCommerce.PricingModule.Test
                         {
                             IncludedColumns = IncludedColumns
                         },
-                        ExportTypeName = typeof(Pricelist).FullName,
+                        ExportTypeName = typeof(ExportablePricelist).Name,
                         ProviderName = nameof(JsonExportProvider)
                     },
                     new Action<ExportProgressInfo>(x => Console.WriteLine(x.Description)),
@@ -181,7 +183,7 @@ namespace VirtoCommerce.PricingModule.Test
             }
 
             //Assert
-            var pricelists = JsonConvert.DeserializeObject<Pricelist[]>(result);
+            var pricelists = JsonConvert.DeserializeObject<ExportablePricelist[]>(result);
 
             Assert.NotNull(pricelists);
             Assert.NotEmpty(pricelists);
@@ -201,6 +203,7 @@ namespace VirtoCommerce.PricingModule.Test
         {
             //Arrange
             IKnownExportTypesRegistrar registrar = new KnownExportTypesService();
+            registrar.RegisterType(typeof(ExportablePricelist).Name, "Pricing", typeof(PricelistExportDataQuery).Name);
 
             var authorizationServicesMock = AuthMockHelper.AuthServicesMock(false);
 
@@ -214,9 +217,9 @@ namespace VirtoCommerce.PricingModule.Test
 
             var priceServiceMock = new Mock<IPricingService>();
 
-            var metadata = typeof(Pricelist).GetPropertyNames(true);
+            var metadata = typeof(ExportablePricelist).GetPropertyNames(true);
             var resolver = (IKnownExportTypesResolver)registrar;
-            registrar.RegisterType(ExportedTypeDefinitionBuilder.Build<Pricelist, PricelistExportDataQuery>()
+            resolver.ResolveExportedTypeDefinition(typeof(ExportablePricelist).Name)
                 .WithDataSourceFactory(
                     dataQuery => new PricelistExportPagedDataSource(
                         searchServiceMock.Object,
@@ -253,7 +256,7 @@ namespace VirtoCommerce.PricingModule.Test
                             {
                                 IncludedColumns = IncludedColumns
                             },
-                            ExportTypeName = typeof(Pricelist).FullName,
+                            ExportTypeName = typeof(ExportablePricelist).Name,
                             ProviderName = nameof(JsonExportProvider)
                         },
                         new Action<ExportProgressInfo>(x => Console.WriteLine(x.Description)),
@@ -272,6 +275,7 @@ namespace VirtoCommerce.PricingModule.Test
         public Task PricelistAssignmentJsonExport()
         {
             IKnownExportTypesRegistrar registrar = new KnownExportTypesService();
+            registrar.RegisterType(typeof(ExportablePricelistAssignment).Name, "Pricing", typeof(PricelistAssignmentExportDataQuery).Name);
 
             var authorizationServicesMock = AuthMockHelper.AuthServicesMock(true);
 
@@ -281,9 +285,9 @@ namespace VirtoCommerce.PricingModule.Test
             var priceServiceMock = new Mock<IPricingService>();
             var catalogServiceMock = new Mock<ICatalogService>();
 
-            var metadata = typeof(PricelistAssignment).GetPropertyNames(true);
+            var metadata = typeof(ExportablePricelistAssignment).GetPropertyNames(true);
             var resolver = (IKnownExportTypesResolver)registrar;
-            registrar.RegisterType(ExportedTypeDefinitionBuilder.Build<PricelistAssignment, PricelistAssignmentExportDataQuery>()
+            resolver.ResolveExportedTypeDefinition(typeof(ExportablePricelistAssignment).Name)
                 .WithDataSourceFactory(
                     dataQuery => new PricelistAssignmentExportPagedDataSource(
                         searchServiceMock.Object,
@@ -320,7 +324,7 @@ namespace VirtoCommerce.PricingModule.Test
                         {
                             IncludedColumns = IncludedColumns
                         },
-                        ExportTypeName = typeof(PricelistAssignment).FullName,
+                        ExportTypeName = typeof(ExportablePricelistAssignment).Name,
                         ProviderName = nameof(JsonExportProvider)
                     },
                     new Action<ExportProgressInfo>(x => Console.WriteLine(x.Description)),
@@ -333,7 +337,7 @@ namespace VirtoCommerce.PricingModule.Test
             }
 
             //Assert
-            var pricelistsAssigments = JsonConvert.DeserializeObject<PricelistAssignment[]>(result);
+            var pricelistsAssigments = JsonConvert.DeserializeObject<ExportablePricelistAssignment[]>(result);
 
             Assert.NotNull(pricelistsAssigments);
             Assert.NotEmpty(pricelistsAssigments);
@@ -355,6 +359,7 @@ namespace VirtoCommerce.PricingModule.Test
         public Task PriceCsvExport()
         {
             IKnownExportTypesRegistrar registrar = new KnownExportTypesService();
+            registrar.RegisterType(typeof(ExportablePrice).Name, "Pricing", typeof(PriceExportDataQuery).Name);
 
             var authorizationServicesMock = AuthMockHelper.AuthServicesMock(true);
 
@@ -367,8 +372,8 @@ namespace VirtoCommerce.PricingModule.Test
 
             var itemServiceMock = new Mock<IItemService>();
 
-            var metadata = typeof(Price).GetPropertyNames(true);
-            registrar.RegisterType(ExportedTypeDefinitionBuilder.Build<Price, PriceExportDataQuery>()
+            var metadata = typeof(ExportablePrice).GetPropertyNames(true);
+            resolver.ResolveExportedTypeDefinition(typeof(ExportablePrice).Name)
                 .WithDataSourceFactory(
                     dataQuery => new PriceExportPagedDataSource(
                         searchServiceMock.Object,
@@ -408,7 +413,7 @@ namespace VirtoCommerce.PricingModule.Test
                         {
                             IncludedColumns = IncludedColumns,
                         },
-                        ExportTypeName = typeof(Price).FullName,
+                        ExportTypeName = typeof(ExportablePrice).Name,
                         ProviderName = nameof(CsvExportProvider)
                     },
                     new Action<ExportProgressInfo>(x => Console.WriteLine(x.Description)),
