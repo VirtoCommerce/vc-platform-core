@@ -15,19 +15,15 @@ namespace VirtoCommerce.ExportModule.Data.Services
             return _knownExportTypes.Values.ToArray();
         }
 
-        public ExportedTypeDefinition RegisterType(string exportedTypeName, string group, string exportQueryType)
+        public ExportedTypeDefinition RegisterType(ExportedTypeDefinition exportedTypeDefinition)
         {
-            if (!_knownExportTypes.TryGetValue(exportedTypeName, out var result))
+            var exportedTypeName = exportedTypeDefinition.TypeName;
+
+            if (!_knownExportTypes.ContainsKey(exportedTypeName))
             {
-                _knownExportTypes.TryAdd(exportedTypeName,
-                    new ExportedTypeDefinition()
-                    {
-                        TypeName = exportedTypeName,
-                        Group = group,
-                        ExportDataQueryType = exportQueryType,
-                    }
-                );
+                _knownExportTypes.TryAdd(exportedTypeName, exportedTypeDefinition);
             }
+
             return _knownExportTypes[exportedTypeName];
         }
 

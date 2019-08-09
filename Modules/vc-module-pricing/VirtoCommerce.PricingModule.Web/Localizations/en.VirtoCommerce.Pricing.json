@@ -270,7 +270,7 @@
             }
         },
         "groups": {
-            "Pricing": {
+            "VirtoCommerce.PricingModule.Core.Model": {
                 "name": "Pricing",
                 "description": "Prices, pricelists & assignments"
             }
