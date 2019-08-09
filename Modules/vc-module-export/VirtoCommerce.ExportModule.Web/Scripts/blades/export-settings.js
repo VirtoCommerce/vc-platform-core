@@ -11,20 +11,24 @@ angular.module('virtoCommerce.exportModule')
         blade.columnTotal = 0;
         blade.defaultProvider = $localStorage.defaultExportProvider || 'JsonExportProvider';
         blade.isExportedTypeSelected = typeof (blade.exportDataRequest.exportTypeName) !== 'undefined';
-
+        blade.isTabularExportSupported = blade.exportDataRequest.isTabularExportSupported || false;
+        
         function initializeBlade() {
-            if (blade.isExportedTypeSelected) {
-                getKnownTypes();
-                blade.dataSelected = blade.totalItemsCount || 0;
-            }
-             
             exportApi.getProviders(function (result) {
                 if (result && result.length) {
                     blade.allProviders = result;
                     fillProviders();
                     blade.selectedProvider = _.find(blade.providers,
                         function (item) { return item.id === blade.defaultProvider });
+
+                    if (blade.isExportedTypeSelected) {
+                        getKnownTypes();
+                        blade.dataSelected = blade.totalItemsCount || 0;
+                    }
+
                 }
+
+
             });
 
             blade.isLoading = false;

@@ -1,6 +1,6 @@
 using System.Linq;
 using System.Threading.Tasks;
-using VirtoCommerce.ExportModule.Core.Model;
+using VirtoCommerce.ExportModule.Data.Extensions;
 using Xunit;
 
 namespace VirtoCommerce.ExportModule.Tests
@@ -10,7 +10,7 @@ namespace VirtoCommerce.ExportModule.Tests
         [Fact]
         public Task GetFromType_Pricelist_NameBuiltCorrectly()
         {
-            var metadata = ExportedTypeMetadata.GetFromType<Pricelist>(true);
+            var metadata = typeof(Pricelist).GetPropertyNames(true);
             var props = metadata.PropertyInfos.Select(x => x.Name);
 
             // Check if all own property detected
@@ -41,7 +41,7 @@ namespace VirtoCommerce.ExportModule.Tests
         [Fact]
         public Task GetFromType_Pricelist_ExportNameBuiltCorrectly()
         {
-            var metadata = ExportedTypeMetadata.GetFromType<Pricelist>(true);
+            var metadata = typeof(Pricelist).GetPropertyNames(true);
             var props = metadata.PropertyInfos.Select(x => x.ExportName);
 
             // Check if all own property detected
@@ -73,7 +73,7 @@ namespace VirtoCommerce.ExportModule.Tests
         [Fact]
         public Task GetFromType_Pricelist_WithoutReferences_BuiltCorrectly()
         {
-            var metadata = ExportedTypeMetadata.GetFromType<Pricelist>(false);
+            var metadata = typeof(Pricelist).GetPropertyNames(false);
             var props = metadata.PropertyInfos.Select(x => x.Name);
 
             // Check if all own property detected
