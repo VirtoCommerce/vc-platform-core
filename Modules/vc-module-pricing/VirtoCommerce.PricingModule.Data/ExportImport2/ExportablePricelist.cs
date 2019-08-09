@@ -5,7 +5,7 @@ using VirtoCommerce.PricingModule.Core.Model;
 
 namespace VirtoCommerce.PricingModule.Data.ExportImport
 {
-    public class ExportablePricelist : Entity, IExportViewable
+    public class ExportablePricelist : ExportableEntity<ExportablePricelist>
     {
         #region Pricelist properties
         public string Description { get; set; }
@@ -13,14 +13,6 @@ namespace VirtoCommerce.PricingModule.Data.ExportImport
         public string OuterId { get; set; }
         public ICollection<Price> Prices { get; set; }
         public ICollection<PricelistAssignment> Assignments { get; set; }
-        #endregion
-
-        #region IExportViewable implementation
-        public string Name { get; set; }
-        public string Code { get; set; }
-        public string ImageUrl { get; set; }
-        public string Parent { get; set; }
-        public string Type { get; set; }
         #endregion
 
         public static ExportablePricelist FromModel(Pricelist source)
@@ -40,11 +32,6 @@ namespace VirtoCommerce.PricingModule.Data.ExportImport
             result.Parent = null;
 
             return result;
-        }
-
-        public object Clone()
-        {
-            return MemberwiseClone() as ExportablePricelist;
         }
     }
 }

@@ -1,11 +1,10 @@
-using System;
 using VirtoCommerce.ExportModule.Core.Model;
 using VirtoCommerce.Platform.Core.Common;
 using VirtoCommerce.PricingModule.Core.Model;
 
 namespace VirtoCommerce.PricingModule.Data.ExportImport
 {
-    public class ExportablePrice : Entity, IExportViewable
+    public class ExportablePrice : ExportableEntity<ExportablePrice>
     {
         #region Price properties
         public string PricelistId { get; set; }
@@ -22,14 +21,6 @@ namespace VirtoCommerce.PricingModule.Data.ExportImport
         #region Properties specific to universal viewer
         public string PricelistName { get; set; }
         public string ProductName { get; set; }
-        #endregion
-
-        #region IExportViewable implementation
-        public string Name { get; set; }
-        public string Code { get; set; }
-        public string ImageUrl { get; set; }
-        public string Parent { get; set; }
-        public string Type { get; set; }
         #endregion
 
         public static ExportablePrice FromModel(Price source)
@@ -49,11 +40,6 @@ namespace VirtoCommerce.PricingModule.Data.ExportImport
             result.EffectiveValue = source.EffectiveValue;
 
             return result;
-        }
-
-        public object Clone()
-        {
-            return MemberwiseClone() as ExportablePrice;
         }
     }
 }
