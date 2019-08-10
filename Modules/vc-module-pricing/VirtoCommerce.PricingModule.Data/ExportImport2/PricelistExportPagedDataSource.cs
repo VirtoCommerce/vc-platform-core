@@ -53,7 +53,7 @@ namespace VirtoCommerce.PricingModule.Data.ExportImport
                 }
             }
 
-            return new FetchResult(result.Select(x => ExportablePricelist.FromModel(x)), totalCount);
+            return new FetchResult(result.Select(x => AbstractTypeFactory<ExportablePricelist>.TryCreateInstance().FromModel(x)), totalCount);
         }
     }
 }

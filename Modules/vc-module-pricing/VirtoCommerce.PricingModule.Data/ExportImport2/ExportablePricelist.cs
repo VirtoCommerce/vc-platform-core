@@ -1,6 +1,5 @@
 using System.Collections.Generic;
 using VirtoCommerce.ExportModule.Core.Model;
-using VirtoCommerce.Platform.Core.Common;
 using VirtoCommerce.PricingModule.Core.Model;
 
 namespace VirtoCommerce.PricingModule.Data.ExportImport
@@ -15,23 +14,21 @@ namespace VirtoCommerce.PricingModule.Data.ExportImport
         public ICollection<PricelistAssignment> Assignments { get; set; }
         #endregion
 
-        public static ExportablePricelist FromModel(Pricelist source)
+        public ExportablePricelist FromModel(Pricelist source)
         {
-            var result = AbstractTypeFactory<ExportablePricelist>.TryCreateInstance();
+            Type = nameof(Pricelist);
+            Description = source.Description;
+            Currency = source.Currency;
+            Id = source.Id;
+            OuterId = source.OuterId;
+            Prices = source.Prices;
+            Assignments = source.Assignments;
+            Name = source.Name;
+            Code = null;
+            ImageUrl = null;
+            Parent = null;
 
-            result.Type = nameof(Pricelist);
-            result.Description = source.Description;
-            result.Currency = source.Currency;
-            result.Id = source.Id;
-            result.OuterId = source.OuterId;
-            result.Prices = source.Prices;
-            result.Assignments = source.Assignments;
-            result.Name = source.Name;
-            result.Code = null;
-            result.ImageUrl = null;
-            result.Parent = null;
-
-            return result;
+            return this;
         }
     }
 }

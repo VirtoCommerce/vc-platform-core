@@ -62,7 +62,7 @@ namespace VirtoCommerce.PricingModule.Data.ExportImport
         protected virtual IEnumerable<IExportViewable> ToExportable(IEnumerable<ICloneable> objects)
         {
             var models = objects.Cast<PricelistAssignment>();
-            var viewableMap = models.ToDictionary(x => x, x => ExportablePricelistAssignment.FromModel(x));
+            var viewableMap = models.ToDictionary(x => x, x => AbstractTypeFactory<ExportablePricelistAssignment>.TryCreateInstance().FromModel(x));
 
             FillViewableEntitiesReferenceFields(viewableMap);
 
