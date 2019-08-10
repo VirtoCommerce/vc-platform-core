@@ -78,6 +78,7 @@ namespace VirtoCommerce.ExportModule.Core.Model
 
             var result = FetchData(_searchCriteria);
             _totalCount = result.TotalCount;
+            _searchCriteria.Skip += _searchCriteria.Take;
             //CurrentPageNumber++;
             return result.Results;
         }
@@ -86,12 +87,12 @@ namespace VirtoCommerce.ExportModule.Core.Model
         {
             if (_totalCount < 0)
             {
-                EnsureSearchCriteriaInitialized();
+                var searchCriteria = DataQuery.ToSearchCriteria();
 
-                _searchCriteria.Skip = 0;
-                _searchCriteria.Take = 0;
+                searchCriteria.Skip = 0;
+                searchCriteria.Take = 0;
 
-                var result = FetchData(_searchCriteria);
+                var result = FetchData(searchCriteria);
                 _totalCount = result.TotalCount;
             }
             return _totalCount;
