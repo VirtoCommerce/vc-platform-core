@@ -48,7 +48,7 @@ namespace VirtoCommerce.PricingModule.Data.Services
                         var query = BuildQuery(repository, criteria);
                         var sortInfos = BuildSortExpression(criteria);
                         //Try to replace sorting columns names
-                        TryTransformSortingInfoColumnNames(_pricesSortingAliases, sortInfos);             
+                        TryTransformSortingInfoColumnNames(_pricesSortingAliases, sortInfos);
 
                         // TODO: add checks for criteria.Take being greater than 0
                         if (criteria.GroupByProducts)
@@ -90,7 +90,7 @@ namespace VirtoCommerce.PricingModule.Data.Services
                 {
                     var query = BuildQuery(repository, criteria);
                     var sortInfos = BuildSortExpression(criteria);
-                    
+
                     result.TotalCount = await query.CountAsync();
 
                     if (criteria.Take > 0)
@@ -126,8 +126,8 @@ namespace VirtoCommerce.PricingModule.Data.Services
 
                     if (criteria.Take > 0)
                     {
-                        var pricelistAssignmentsIds = await query.OrderBySortInfos(sortInfos).ThenBy(x=>x.Id)
-                                                                 .Select(x=>x.Id)
+                        var pricelistAssignmentsIds = await query.OrderBySortInfos(sortInfos).ThenBy(x => x.Id)
+                                                                 .Select(x => x.Id)
                                                                 .Skip(criteria.Skip).Take(criteria.Take)
                                                                 .ToArrayAsync();
                         var unorderedResults = await _pricingService.GetPricelistAssignmentsByIdAsync(pricelistAssignmentsIds);
@@ -142,11 +142,6 @@ namespace VirtoCommerce.PricingModule.Data.Services
         {
             var query = repository.Prices;
 
-            if (!string.IsNullOrEmpty(criteria.Keyword))
-            {
-                query = query.Where(x => x.Name.Contains(criteria.Keyword) || x.Description.Contains(criteria.Keyword));
-            }
-
             if (!criteria.PriceListIds.IsNullOrEmpty())
             {
                 query = query.Where(x => criteria.PriceListIds.Contains(x.PricelistId));
@@ -157,21 +152,11 @@ namespace VirtoCommerce.PricingModule.Data.Services
                 query = query.Where(x => criteria.ProductIds.Contains(x.ProductId));
             }
 
-            if (!criteria.CatalogIds.IsNullOrEmpty())
-            {
-                query = query.Where(x => criteria.CatalogIds.Contains(x.CatalogId));
-            }
-
-            if (!criteria.Currencies.IsNullOrEmpty())
-            {
-                query = query.Where(x => criteria.Currencies.Contains(x.Currency));
-            }
-
             if (criteria.ModifiedSince.HasValue)
             {
                 query = query.Where(x => x.ModifiedDate >= criteria.ModifiedSince);
             }
-            
+
             return query;
         }
 
@@ -194,10 +179,17 @@ namespace VirtoCommerce.PricingModule.Data.Services
         protected virtual IQueryable<PricelistEntity> BuildQuery(IPricingRepository repository, PricelistSearchCriteria criteria)
         {
             var query = repository.Pricelists;
+
             if (!string.IsNullOrEmpty(criteria.Keyword))
             {
                 query = query.Where(x => x.Name.Contains(criteria.Keyword) || x.Description.Contains(criteria.Keyword));
             }
+
+            if (!criteria.Currencies.IsNullOrEmpty())
+            {
+                query = query.Where(x => criteria.Currencies.Contains(x.Currency));
+            }
+
             return query;
         }
 
@@ -228,8 +220,14 @@ namespace VirtoCommerce.PricingModule.Data.Services
 
             if (!string.IsNullOrEmpty(criteria.Keyword))
             {
-                query.Where(x => x.Name.Contains(criteria.Keyword) || x.Description.Contains(criteria.Keyword));
+                query = query.Where(x => x.Name.Contains(criteria.Keyword) || x.Description.Contains(criteria.Keyword));
             }
+
+            if (!criteria.CatalogIds.IsNullOrEmpty())
+            {
+                query = query.Where(x => criteria.CatalogIds.Contains(x.CatalogId));
+            }
+
             return query;
         }
 
