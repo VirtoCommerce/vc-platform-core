@@ -4,7 +4,7 @@ namespace VirtoCommerce.ExportModule.Core.Model
 {
     public class ExportableEntity<T> : Entity, IExportable where T : Entity
     {
-        #region IExportViewable implementation
+        #region IExportable implementation
         public string Name { get; set; }
         public string Code { get; set; }
         public string ImageUrl { get; set; }
