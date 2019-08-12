@@ -1,3 +1,4 @@
+using System.Collections.Generic;
 using System.Linq;
 using VirtoCommerce.ExportModule.Core.Model;
 using VirtoCommerce.Platform.Core.Common;
@@ -7,8 +8,20 @@ using VirtoCommerce.PricingModule.Core.Services;
 
 namespace VirtoCommerce.PricingModule.Data.ExportImport
 {
-    public class PricelistExportPagedDataSource : BaseExportPagedDataSource
+    public class PricelistExportPagedDataSource : IPagedDataSource
     {
+        protected class FetchResult
+        {
+            public IEnumerable<IExportable> Results { get; set; }
+            public int TotalCount { get; set; }
+
+            public FetchResult(IEnumerable<IExportable> results, int totalCount)
+            {
+                Results = results;
+                TotalCount = totalCount;
+            }
+        }
+
         private readonly IPricingSearchService _searchService;
         private readonly IPricingService _pricingService;
 
@@ -19,7 +32,11 @@ namespace VirtoCommerce.PricingModule.Data.ExportImport
             _pricingService = pricingService;
         }
 
-        protected override FetchResult FetchData(SearchCriteriaBase searchCriteria)
+        public ExportDataQuery DataQuery { get; set; }
+        private int _totalCount = -1;
+        private SearchCriteriaBase _searchCriteria;
+
+        protected FetchResult FetchData(SearchCriteriaBase searchCriteria)
         {
             Pricelist[] result;
             int totalCount;
@@ -46,29 +63,53 @@ namespace VirtoCommerce.PricingModule.Data.ExportImport
                 }
             }
 
-            return new FetchResult(result, totalCount);
+            return new FetchResult(result.Select(x => AbstractTypeFactory<ExportablePricelist>.TryCreateInstance().FromModel(x)), totalCount);
         }
 
-        protected override ViewableEntity ToViewableEntity(object obj)
+        public IEnumerable<IExportable> FetchNextPage()
         {
-            if (!(obj is Pricelist model))
+            EnsureSearchCriteriaInitialized();
+            var result = FetchData(_searchCriteria);
+            _totalCount = result.TotalCount;
+            _searchCriteria.Skip += _searchCriteria.Take;
+            return result.Results;
+        }
+
+        private void EnsureSearchCriteriaInitialized()
+        {
+            if (_searchCriteria == null)
             {
-                throw new System.InvalidCastException(nameof(Pricelist));
+                _searchCriteria = MakeSearchCriteria(DataQuery);
             }
+        }
 
-            var result = AbstractTypeFactory<PricelistViewableEntity>.TryCreateInstance();
+        public int GetTotalCount()
+        {
+            if (_totalCount < 0)
+            {
+                var searchCriteria = MakeSearchCriteria(DataQuery);
 
-            result.FromEntity(model);
+                searchCriteria.Skip = 0;
+                searchCriteria.Take = 0;
 
-            result.Code = null;
-            result.ImageUrl = null;
-            result.Name = model.Name;
-            result.Parent = null;
+                var result = FetchData(searchCriteria);
+                _totalCount = result.TotalCount;
+            }
+            return _totalCount;
+        }
 
-            result.Currency = model.Currency;
-            result.Description = model.Description;
-            result.OuterId = model.OuterId;
-
+        private PricelistSearchCriteria MakeSearchCriteria(ExportDataQuery dataQuery)
+        {
+            var result = AbstractTypeFactory<PricelistSearchCriteria>.TryCreateInstance();
+            result.ObjectIds = dataQuery.ObjectIds;
+            result.Keyword = dataQuery.Keyword;
+            result.Sort = dataQuery.Sort;
+            result.Skip = dataQuery.Skip ?? result.Skip;
+            result.Take = dataQuery.Take ?? result.Take;
+            if (DataQuery is PricelistExportDataQuery)
+            {
+                result.Currencies = ((PricelistExportDataQuery)dataQuery).Currencies;
+            }
             return result;
         }
     }
