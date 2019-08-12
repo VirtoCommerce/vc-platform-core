@@ -83,6 +83,11 @@ namespace VirtoCommerce.PricingModule.Web
             serviceCollection.AddSingleton<Func<ExportDataQuery, PricelistAssignmentExportPagedDataSource>>(provider =>
                 (exportDataQuery) => CreateExportPagedDataSource<PricelistAssignmentExportPagedDataSource>(provider, exportDataQuery));
 
+            serviceCollection.AddScoped<PricingFullPagedDataSource>();
+            serviceCollection.AddSingleton<Func<ExportDataQuery, PricingFullPagedDataSource>>(provider =>
+                (exportDataQuery) => provider.CreateScope().ServiceProvider.GetRequiredService<PricingFullPagedDataSource>());
+
+
             var requirements = new IAuthorizationRequirement[]
             {
                 new PermissionAuthorizationRequirement(ModuleConstants.Security.Permissions.Export), new PermissionAuthorizationRequirement(ModuleConstants.Security.Permissions.Read)
