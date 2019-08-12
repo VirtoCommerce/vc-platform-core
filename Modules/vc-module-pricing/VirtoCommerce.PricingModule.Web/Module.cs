@@ -94,10 +94,10 @@ namespace VirtoCommerce.PricingModule.Web
 
             serviceCollection.Configure<Microsoft.AspNetCore.Authorization.AuthorizationOptions>(configure =>
             {
-                configure.AddPolicy(typeof(Pricelist).FullName + "FullDataExportDataPolicy", exportPolicy);
-                configure.AddPolicy(typeof(Pricelist).FullName + "ExportDataPolicy", exportPolicy);
-                configure.AddPolicy(typeof(Price).FullName + "ExportDataPolicy", exportPolicy);
-                configure.AddPolicy(typeof(PricelistAssignment).FullName + "ExportDataPolicy", exportPolicy);
+                configure.AddPolicy(typeof(ExportablePricelist).FullName + "FullDataExportDataPolicy", exportPolicy);
+                configure.AddPolicy(typeof(ExportablePricelist).FullName + "ExportDataPolicy", exportPolicy);
+                configure.AddPolicy(typeof(ExportablePrice).FullName + "ExportDataPolicy", exportPolicy);
+                configure.AddPolicy(typeof(ExportablePricelistAssignment).FullName + "ExportDataPolicy", exportPolicy);
             });
 
         }
@@ -260,7 +260,7 @@ namespace VirtoCommerce.PricingModule.Web
         /// <param name="provider"></param>
         /// <param name="exportDataQuery"></param>
         /// <returns></returns>
-        private static T CreateExportPagedDataSource<T>(IServiceProvider provider, ExportDataQuery exportDataQuery) where T : BaseExportPagedDataSource
+        private static T CreateExportPagedDataSource<T>(IServiceProvider provider, ExportDataQuery exportDataQuery) where T : IPagedDataSource
         {
             var result = provider.CreateScope().ServiceProvider.GetRequiredService<T>();
             result.DataQuery = exportDataQuery;

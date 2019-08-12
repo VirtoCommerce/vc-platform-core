@@ -2,7 +2,7 @@ using VirtoCommerce.Platform.Core.Common;
 
 namespace VirtoCommerce.ExportModule.Core.Model
 {
-    public class ExportableEntity<T> : Entity, IExportViewable where T : Entity
+    public class ExportableEntity<T> : Entity, IExportable where T : Entity
     {
         #region IExportViewable implementation
         public string Name { get; set; }

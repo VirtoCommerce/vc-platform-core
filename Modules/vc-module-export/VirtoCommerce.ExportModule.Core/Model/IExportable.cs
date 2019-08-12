@@ -2,7 +2,7 @@ using System;
 
 namespace VirtoCommerce.ExportModule.Core.Model
 {
-    public interface IExportViewable : ICloneable
+    public interface IExportable : ICloneable
     {
         string Name { get; set; }
         string Code { get; set; }
