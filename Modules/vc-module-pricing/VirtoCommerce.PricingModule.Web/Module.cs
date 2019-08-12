@@ -71,30 +71,30 @@ namespace VirtoCommerce.PricingModule.Web
             serviceCollection.AddTransient<ProductPriceDocumentBuilder>();
             serviceCollection.AddSingleton<LogChangesChangedEventHandler>();
 
-            serviceCollection.AddScoped<PriceExportPagedDataSource>(); // Adding as scoped, because of used services (UserManager, PrincipalFactory) scoped too
-            serviceCollection.AddSingleton<Func<ExportDataQuery, PriceExportPagedDataSource>>(provider =>
+            serviceCollection.AddTransient<PriceExportPagedDataSource>(); // Adding as scoped, because of used services (UserManager, PrincipalFactory) scoped too
+            serviceCollection.AddTransient<Func<ExportDataQuery, PriceExportPagedDataSource>>(provider =>
                 (exportDataQuery) =>
                 {
                     var datasource = provider.CreateScope().ServiceProvider.GetRequiredService<PriceExportPagedDataSource>();
-                    datasource.DataQuery = exportDataQuery;
+                    datasource.DataQuery = (PriceExportDataQuery)exportDataQuery;
                     return datasource;
                 });
 
-            serviceCollection.AddScoped<PricelistExportPagedDataSource>();
-            serviceCollection.AddSingleton<Func<ExportDataQuery, PricelistExportPagedDataSource>>(provider =>
+            serviceCollection.AddTransient<PricelistExportPagedDataSource>();
+            serviceCollection.AddTransient<Func<ExportDataQuery, PricelistExportPagedDataSource>>(provider =>
                 (exportDataQuery) =>
                 {
                     var datasource = provider.CreateScope().ServiceProvider.GetRequiredService<PricelistExportPagedDataSource>();
-                    datasource.DataQuery = exportDataQuery;
+                    datasource.DataQuery = (PricelistExportDataQuery)exportDataQuery;
                     return datasource;
                 });
 
-            serviceCollection.AddScoped<PricelistAssignmentExportPagedDataSource>();
-            serviceCollection.AddSingleton<Func<ExportDataQuery, PricelistAssignmentExportPagedDataSource>>(provider =>
+            serviceCollection.AddTransient<PricelistAssignmentExportPagedDataSource>();
+            serviceCollection.AddTransient<Func<ExportDataQuery, PricelistAssignmentExportPagedDataSource>>(provider =>
                 (exportDataQuery) =>
                 {
                     var datasource = provider.CreateScope().ServiceProvider.GetRequiredService<PricelistAssignmentExportPagedDataSource>();
-                    datasource.DataQuery = exportDataQuery;
+                    datasource.DataQuery = (PricelistAssignmentExportDataQuery)exportDataQuery;
                     return datasource;
                 });
             var requirements = new IAuthorizationRequirement[]

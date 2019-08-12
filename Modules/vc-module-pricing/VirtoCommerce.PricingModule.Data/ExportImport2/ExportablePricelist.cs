@@ -1,3 +1,4 @@
+using System.Linq;
 using VirtoCommerce.ExportModule.Core.Model;
 using VirtoCommerce.PricingModule.Core.Model;
 
@@ -21,12 +22,13 @@ namespace VirtoCommerce.PricingModule.Data.ExportImport
             Currency = source.Currency;
             Id = source.Id;
             OuterId = source.OuterId;
-            Prices = source.Prices;
-            Assignments = source.Assignments;
             Name = source.Name;
             Code = null;
             ImageUrl = null;
             Parent = null;
+
+            Assignments = source.Assignments?.Select(x => x.Clone() as PricelistAssignment).ToList();
+            Prices = source.Prices?.Select(x => x.Clone() as Price).ToList();
 
             return this;
         }

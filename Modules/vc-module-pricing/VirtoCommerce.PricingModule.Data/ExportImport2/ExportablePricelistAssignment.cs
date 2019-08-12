@@ -29,7 +29,6 @@ namespace VirtoCommerce.PricingModule.Data.ExportImport
             Id = source.Id;
             PricelistId = source.PricelistId;
             Description = source.Description;
-            Pricelist = source.Pricelist;
             Priority = source.Priority;
             StartDate = source.StartDate;
             OuterId = source.OuterId;

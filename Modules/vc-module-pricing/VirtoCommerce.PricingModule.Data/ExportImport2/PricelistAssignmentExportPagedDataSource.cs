@@ -4,6 +4,7 @@ using System.Linq;
 using VirtoCommerce.CatalogModule.Core.Model;
 using VirtoCommerce.CatalogModule.Core.Services;
 using VirtoCommerce.ExportModule.Core.Model;
+using VirtoCommerce.ExportModule.Data.Services;
 using VirtoCommerce.Platform.Core.Common;
 using VirtoCommerce.PricingModule.Core.Model;
 using VirtoCommerce.PricingModule.Core.Model.Search;
@@ -11,84 +12,29 @@ using VirtoCommerce.PricingModule.Core.Services;
 
 namespace VirtoCommerce.PricingModule.Data.ExportImport
 {
-    public class PricelistAssignmentExportPagedDataSource : IPagedDataSource
+    public class PricelistAssignmentExportPagedDataSource : SingleTypeExportPagedDataSource<PricelistAssignmentExportDataQuery, PricelistAssignmentsSearchCriteria>
     {
         private readonly IPricingSearchService _searchService;
         private readonly IPricingService _pricingService;
         private readonly ICatalogService _catalogService;
 
-        private ExportDataQuery _dataQuery;
-        private int _totalCount = -1;
-
-        public int CurrentPageNumber { get; protected set; }
-        public int PageSize { get; set; } = 50;
-
-        public ExportDataQuery DataQuery
-        {
-            set
-            {
-                _dataQuery = value;
-                CurrentPageNumber = 0;
-                _totalCount = -1;
-            }
-        }
-
         public PricelistAssignmentExportPagedDataSource(
-            IPricingSearchService searchService,
-            IPricingService pricingService,
-            ICatalogService catalogService)
+           IPricingSearchService searchService,
+           IPricingService pricingService,
+           ICatalogService catalogService)
         {
             _searchService = searchService;
             _pricingService = pricingService;
             _catalogService = catalogService;
         }
 
-        public IEnumerable<IExportable> FetchNextPage()
+        protected override void FillSearchCriteria(PricelistAssignmentExportDataQuery dataQuery, PricelistAssignmentsSearchCriteria searchCriteria)
         {
-            var searchCriteria = BuildSearchCriteria(_dataQuery);
-            var result = FetchData(searchCriteria);
-
-            _totalCount = result.TotalCount;
-            CurrentPageNumber++;
-
-            return result.Results;
+            searchCriteria.PriceListIds = dataQuery.PriceListIds;
+            searchCriteria.CatalogIds = dataQuery.CatalogIds;
         }
 
-        public int GetTotalCount()
-        {
-            if (_totalCount < 0)
-            {
-                var searchCriteria = BuildSearchCriteria(_dataQuery);
-
-                searchCriteria.Skip = 0;
-                searchCriteria.Take = 0;
-
-                _totalCount = FetchData(searchCriteria).TotalCount;
-            }
-
-            return _totalCount;
-        }
-
-        protected virtual PricelistAssignmentsSearchCriteria BuildSearchCriteria(ExportDataQuery exportDataQuery)
-        {
-            var dataQuery = exportDataQuery as PricelistAssignmentExportDataQuery ?? throw new InvalidCastException($"Cannot cast {nameof(exportDataQuery)} to {nameof(PricelistAssignmentExportDataQuery)}");
-
-            var result = AbstractTypeFactory<PricelistAssignmentsSearchCriteria>.TryCreateInstance();
-
-            result.ObjectIds = dataQuery.ObjectIds;
-            result.Keyword = dataQuery.Keyword;
-            result.Sort = dataQuery.Sort;
-            result.PriceListIds = dataQuery.PriceListIds;
-            result.CatalogIds = dataQuery.CatalogIds;
-
-            // It is for proper pagination - client side for viewer (dataQuery.Skip/Take) should work together with iterating through pages when getting data for export
-            result.Skip = dataQuery.Skip ?? CurrentPageNumber * PageSize;
-            result.Take = dataQuery.Take ?? PageSize;
-
-            return result;
-        }
-
-        protected virtual GenericSearchResult<ExportablePricelistAssignment> FetchData(SearchCriteriaBase searchCriteria)
+        protected override GenericSearchResult<IExportable> FetchData(PricelistAssignmentsSearchCriteria searchCriteria)
         {
             PricelistAssignment[] result;
             int totalCount;
@@ -105,14 +51,14 @@ namespace VirtoCommerce.PricingModule.Data.ExportImport
                 totalCount = pricelistAssignmentSearchResult.TotalCount;
             }
 
-            return new GenericSearchResult<ExportablePricelistAssignment>()
+            return new GenericSearchResult<IExportable>()
             {
                 Results = ToExportable(result).ToList(),
                 TotalCount = totalCount,
             };
         }
 
-        protected virtual IEnumerable<ExportablePricelistAssignment> ToExportable(IEnumerable<ICloneable> objects)
+        protected virtual IEnumerable<IExportable> ToExportable(IEnumerable<ICloneable> objects)
         {
             var models = objects.Cast<PricelistAssignment>();
             var viewableMap = models.ToDictionary(x => x, x => AbstractTypeFactory<ExportablePricelistAssignment>.TryCreateInstance().FromModel(x));

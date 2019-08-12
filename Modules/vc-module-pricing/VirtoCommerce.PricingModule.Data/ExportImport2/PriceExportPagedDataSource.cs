@@ -4,6 +4,7 @@ using System.Linq;
 using VirtoCommerce.CatalogModule.Core.Model;
 using VirtoCommerce.CatalogModule.Core.Services;
 using VirtoCommerce.ExportModule.Core.Model;
+using VirtoCommerce.ExportModule.Data.Services;
 using VirtoCommerce.Platform.Core.Common;
 using VirtoCommerce.PricingModule.Core.Model;
 using VirtoCommerce.PricingModule.Core.Model.Search;
@@ -11,27 +12,11 @@ using VirtoCommerce.PricingModule.Core.Services;
 
 namespace VirtoCommerce.PricingModule.Data.ExportImport
 {
-    public class PriceExportPagedDataSource : IPagedDataSource
+    public class PriceExportPagedDataSource : SingleTypeExportPagedDataSource<PriceExportDataQuery, PricesSearchCriteria>
     {
         private readonly IPricingSearchService _searchService;
         private readonly IPricingService _pricingService;
         private readonly IItemService _itemService;
-
-        private ExportDataQuery _dataQuery;
-        private int _totalCount = -1;
-
-        public int CurrentPageNumber { get; protected set; }
-        public int PageSize { get; set; } = 50;
-
-        public ExportDataQuery DataQuery
-        {
-            set
-            {
-                _dataQuery = value;
-                CurrentPageNumber = 0;
-                _totalCount = -1;
-            }
-        }
 
         public PriceExportPagedDataSource(IPricingSearchService searchService,
             IPricingService pricingService,
@@ -42,53 +27,14 @@ namespace VirtoCommerce.PricingModule.Data.ExportImport
             _itemService = itemService;
         }
 
-        public IEnumerable<IExportable> FetchNextPage()
+        protected override void FillSearchCriteria(PriceExportDataQuery dataQuery, PricesSearchCriteria searchCriteria)
         {
-            var searchCriteria = BuildSearchCriteria(_dataQuery);
-            var result = FetchData(searchCriteria);
-
-            _totalCount = result.TotalCount;
-            CurrentPageNumber++;
-
-            return result.Results;
+            searchCriteria.PriceListIds = dataQuery.PriceListIds;
+            searchCriteria.ProductIds = dataQuery.ProductIds;
+            searchCriteria.ModifiedSince = dataQuery.ModifiedSince;
         }
 
-        public int GetTotalCount()
-        {
-            if (_totalCount < 0)
-            {
-                var searchCriteria = BuildSearchCriteria(_dataQuery);
-
-                searchCriteria.Skip = 0;
-                searchCriteria.Take = 0;
-
-                _totalCount = FetchData(searchCriteria).TotalCount;
-            }
-
-            return _totalCount;
-        }
-
-        protected virtual PricesSearchCriteria BuildSearchCriteria(ExportDataQuery exportDataQuery)
-        {
-            var dataQuery = exportDataQuery as PriceExportDataQuery ?? throw new InvalidCastException($"Cannot cast {nameof(exportDataQuery)} to {nameof(PriceExportDataQuery)}");
-
-            var result = AbstractTypeFactory<PricesSearchCriteria>.TryCreateInstance();
-
-            result.ObjectIds = dataQuery.ObjectIds;
-            result.Keyword = dataQuery.Keyword;
-            result.Sort = dataQuery.Sort;
-            result.PriceListIds = dataQuery.PriceListIds;
-            result.ProductIds = dataQuery.ProductIds;
-            result.ModifiedSince = dataQuery.ModifiedSince;
-
-            // It is for proper pagination - client side for viewer (dataQuery.Skip/Take) should work together with iterating through pages when getting data for export
-            result.Skip = dataQuery.Skip ?? CurrentPageNumber * PageSize;
-            result.Take = dataQuery.Take ?? PageSize;
-
-            return result;
-        }
-
-        protected virtual GenericSearchResult<ExportablePrice> FetchData(PricesSearchCriteria searchCriteria)
+        protected override GenericSearchResult<IExportable> FetchData(PricesSearchCriteria searchCriteria)
         {
             Price[] result;
             int totalCount;
@@ -105,14 +51,14 @@ namespace VirtoCommerce.PricingModule.Data.ExportImport
                 totalCount = priceSearchResult.TotalCount;
             }
 
-            return new GenericSearchResult<ExportablePrice>()
+            return new GenericSearchResult<IExportable>()
             {
-                Results = ToExportable(result),
+                Results = ToExportable(result).ToList(),
                 TotalCount = totalCount,
             };
         }
 
-        protected virtual List<ExportablePrice> ToExportable(IEnumerable<ICloneable> objects)
+        protected virtual IEnumerable<IExportable> ToExportable(IEnumerable<ICloneable> objects)
         {
             var models = objects.Cast<Price>();
             var viewableMap = models.ToDictionary(x => x, x => AbstractTypeFactory<ExportablePrice>.TryCreateInstance().FromModel(x));
@@ -121,7 +67,7 @@ namespace VirtoCommerce.PricingModule.Data.ExportImport
 
             var modelIds = models.Select(x => x.Id).ToList();
 
-            return viewableMap.Values.OrderBy(x => modelIds.IndexOf(x.Id)).ToList();
+            return viewableMap.Values.OrderBy(x => modelIds.IndexOf(x.Id));
         }
 
         protected virtual void FillAdditionalProperties(Dictionary<Price, ExportablePrice> viewableMap)
