@@ -1,6 +1,6 @@
-using System.Collections.Generic;
 using System.Linq;
 using VirtoCommerce.ExportModule.Core.Model;
+using VirtoCommerce.ExportModule.Data.Services;
 using VirtoCommerce.Platform.Core.Common;
 using VirtoCommerce.PricingModule.Core.Model;
 using VirtoCommerce.PricingModule.Core.Model.Search;
@@ -8,35 +8,23 @@ using VirtoCommerce.PricingModule.Core.Services;
 
 namespace VirtoCommerce.PricingModule.Data.ExportImport
 {
-    public class PricelistExportPagedDataSource : IPagedDataSource
+    public class PricelistExportPagedDataSource : SingleTypeExportPagedDataSource<PricelistExportDataQuery, PricelistSearchCriteria>
     {
-        protected class FetchResult
-        {
-            public IEnumerable<IExportable> Results { get; set; }
-            public int TotalCount { get; set; }
-
-            public FetchResult(IEnumerable<IExportable> results, int totalCount)
-            {
-                Results = results;
-                TotalCount = totalCount;
-            }
-        }
-
         private readonly IPricingSearchService _searchService;
         private readonly IPricingService _pricingService;
 
         public PricelistExportPagedDataSource(IPricingSearchService searchService, IPricingService pricingService)
-
         {
             _searchService = searchService;
             _pricingService = pricingService;
         }
 
-        public ExportDataQuery DataQuery { get; set; }
-        private int _totalCount = -1;
-        private SearchCriteriaBase _searchCriteria;
+        protected override void FillSearchCriteria(PricelistExportDataQuery dataQuery, PricelistSearchCriteria searchCriteria)
+        {
+            searchCriteria.Currencies = dataQuery.Currencies;
+        }
 
-        protected FetchResult FetchData(SearchCriteriaBase searchCriteria)
+        protected override GenericSearchResult<IExportable> FetchData(PricelistSearchCriteria searchCriteria)
         {
             Pricelist[] result;
             int totalCount;
@@ -48,7 +36,7 @@ namespace VirtoCommerce.PricingModule.Data.ExportImport
             }
             else
             {
-                var pricelistSearchResult = _searchService.SearchPricelistsAsync((PricelistSearchCriteria)searchCriteria).GetAwaiter().GetResult();
+                var pricelistSearchResult = _searchService.SearchPricelistsAsync(searchCriteria).GetAwaiter().GetResult();
                 result = pricelistSearchResult.Results.ToArray();
                 totalCount = pricelistSearchResult.TotalCount;
             }
@@ -63,54 +51,11 @@ namespace VirtoCommerce.PricingModule.Data.ExportImport
                 }
             }
 
-            return new FetchResult(result.Select(x => AbstractTypeFactory<ExportablePricelist>.TryCreateInstance().FromModel(x)), totalCount);
-        }
-
-        public IEnumerable<IExportable> FetchNextPage()
-        {
-            EnsureSearchCriteriaInitialized();
-            var result = FetchData(_searchCriteria);
-            _totalCount = result.TotalCount;
-            _searchCriteria.Skip += _searchCriteria.Take;
-            return result.Results;
-        }
-
-        private void EnsureSearchCriteriaInitialized()
-        {
-            if (_searchCriteria == null)
+            return new GenericSearchResult<IExportable>()
             {
-                _searchCriteria = MakeSearchCriteria(DataQuery);
-            }
-        }
-
-        public int GetTotalCount()
-        {
-            if (_totalCount < 0)
-            {
-                var searchCriteria = MakeSearchCriteria(DataQuery);
-
-                searchCriteria.Skip = 0;
-                searchCriteria.Take = 0;
-
-                var result = FetchData(searchCriteria);
-                _totalCount = result.TotalCount;
-            }
-            return _totalCount;
-        }
-
-        private PricelistSearchCriteria MakeSearchCriteria(ExportDataQuery dataQuery)
-        {
-            var result = AbstractTypeFactory<PricelistSearchCriteria>.TryCreateInstance();
-            result.ObjectIds = dataQuery.ObjectIds;
-            result.Keyword = dataQuery.Keyword;
-            result.Sort = dataQuery.Sort;
-            result.Skip = dataQuery.Skip ?? result.Skip;
-            result.Take = dataQuery.Take ?? result.Take;
-            if (DataQuery is PricelistExportDataQuery)
-            {
-                result.Currencies = ((PricelistExportDataQuery)dataQuery).Currencies;
-            }
-            return result;
+                Results = result.Select(x => (IExportable)AbstractTypeFactory<ExportablePricelist>.TryCreateInstance().FromModel(x)).ToList(),
+                TotalCount = totalCount,
+            };
         }
     }
 }

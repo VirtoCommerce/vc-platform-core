@@ -1,18 +1,19 @@
-using System.Collections.Generic;
+using System.Linq;
 using VirtoCommerce.ExportModule.Core.Model;
 using VirtoCommerce.PricingModule.Core.Model;
 
 namespace VirtoCommerce.PricingModule.Data.ExportImport
 {
-    public class ExportablePricelist : ExportableEntity<ExportablePricelist>
+    public class ExportablePricelist : Pricelist, IExportable
     {
-        #region Pricelist properties
-        public string Description { get; set; }
-        public string Currency { get; set; }
-        public string OuterId { get; set; }
-        public ICollection<Price> Prices { get; set; }
-        public ICollection<PricelistAssignment> Assignments { get; set; }
-        #endregion
+        #region IExportable properties
+
+        public string Code { get; set; }
+        public string ImageUrl { get; set; }
+        public string Parent { get; set; }
+        public string Type { get; set; }
+
+        #endregion IExportable properties
 
         public ExportablePricelist FromModel(Pricelist source)
         {
@@ -21,12 +22,13 @@ namespace VirtoCommerce.PricingModule.Data.ExportImport
             Currency = source.Currency;
             Id = source.Id;
             OuterId = source.OuterId;
-            Prices = source.Prices;
-            Assignments = source.Assignments;
             Name = source.Name;
             Code = null;
             ImageUrl = null;
             Parent = null;
+
+            Assignments = source.Assignments?.Select(x => x.Clone() as PricelistAssignment).ToList();
+            Prices = source.Prices?.Select(x => x.Clone() as Price).ToList();
 
             return this;
         }

@@ -1,25 +1,24 @@
-using System;
 using VirtoCommerce.ExportModule.Core.Model;
 using VirtoCommerce.PricingModule.Core.Model;
 
 namespace VirtoCommerce.PricingModule.Data.ExportImport
 {
-    public class ExportablePricelistAssignment : ExportableEntity<ExportablePricelistAssignment>
+    public class ExportablePricelistAssignment : PricelistAssignment, IExportable
     {
-        #region PricelistAssignment properties
-        public string CatalogId { get; set; }
-        public string PricelistId { get; set; }
-        public Pricelist Pricelist { get; set; }
-        public string Description { get; set; }
-        public int Priority { get; set; }
-        public DateTime? StartDate { get; set; }
-        public DateTime? EndDate { get; set; }
-        public string OuterId { get; set; }
-        #endregion
+        #region IExportable properties
+
+        public string Code { get; set; }
+        public string ImageUrl { get; set; }
+        public string Parent { get; set; }
+        public string Type { get; set; }
+
+        #endregion IExportable properties
 
         #region Properties specific to universal viewer
+
         public string CatalogName { get; set; }
         public string PricelistName { get; set; }
+
         #endregion
 
         public ExportablePricelistAssignment FromModel(PricelistAssignment source)
@@ -30,7 +29,6 @@ namespace VirtoCommerce.PricingModule.Data.ExportImport
             Id = source.Id;
             PricelistId = source.PricelistId;
             Description = source.Description;
-            Pricelist = source.Pricelist;
             Priority = source.Priority;
             StartDate = source.StartDate;
             OuterId = source.OuterId;
