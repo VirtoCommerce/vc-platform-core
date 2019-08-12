@@ -58,18 +58,18 @@ namespace VirtoCommerce.PricingModule.Web
             var connectionString = configuration.GetConnectionString("VirtoCommerce.Pricing") ?? configuration.GetConnectionString("VirtoCommerce");
             serviceCollection.AddDbContext<PricingDbContext>(options => options.UseSqlServer(connectionString));
             serviceCollection.AddTransient<IPricingRepository, PricingRepositoryImpl>();
-            serviceCollection.AddSingleton<Func<IPricingRepository>>(provider => () => provider.CreateScope().ServiceProvider.GetRequiredService<IPricingRepository>());
+            serviceCollection.AddTransient<Func<IPricingRepository>>(provider => () => provider.CreateScope().ServiceProvider.GetRequiredService<IPricingRepository>());
 
             serviceCollection.AddTransient<IPricingService, PricingServiceImpl>();
             serviceCollection.AddSingleton<Func<IPricingService>>(provider => () => provider.CreateScope().ServiceProvider.GetRequiredService<IPricingService>());
             serviceCollection.AddTransient<IPricingSearchService, PricingSearchServiceImpl>();
-            serviceCollection.AddSingleton<Func<IPricingSearchService>>(provider => () => provider.CreateScope().ServiceProvider.GetRequiredService<IPricingSearchService>());
-            serviceCollection.AddSingleton<IPricingExtensionManager, DefaultPricingExtensionManagerImpl>();
-            serviceCollection.AddSingleton<PricingExportImport>();
-            serviceCollection.AddSingleton<PolymorphicPricingJsonConverter>();
+            serviceCollection.AddTransient<PricingExportImport>();
+            serviceCollection.AddTransient<PolymorphicPricingJsonConverter>();
             serviceCollection.AddTransient<ProductPriceDocumentChangesProvider>();
             serviceCollection.AddTransient<ProductPriceDocumentBuilder>();
-            serviceCollection.AddSingleton<LogChangesChangedEventHandler>();
+            serviceCollection.AddTransient<LogChangesChangedEventHandler>();
+
+            serviceCollection.AddSingleton<IPricingExtensionManager, DefaultPricingExtensionManagerImpl>();
 
             serviceCollection.AddTransient<PriceExportPagedDataSource>(); // Adding as scoped, because of used services (UserManager, PrincipalFactory) scoped too
             serviceCollection.AddTransient<Func<ExportDataQuery, PriceExportPagedDataSource>>(provider =>
@@ -113,7 +113,6 @@ namespace VirtoCommerce.PricingModule.Web
                 configure.AddPolicy(typeof(ExportablePrice).FullName + "ExportDataPolicy", exportPolicy);
                 configure.AddPolicy(typeof(ExportablePricelistAssignment).FullName + "ExportDataPolicy", exportPolicy);
             });
-
         }
 
         public void PostInitialize(IApplicationBuilder appBuilder)

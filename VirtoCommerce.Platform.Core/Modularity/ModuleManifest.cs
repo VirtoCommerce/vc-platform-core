@@ -2,6 +2,9 @@ using System.Xml.Serialization;
 
 namespace VirtoCommerce.Platform.Core.Modularity
 {
+    /// <summary>
+    /// Represents the type into which a module.manifest file will be deserialized.
+    /// </summary>
     [XmlType("module")]
     public class ModuleManifest
     {

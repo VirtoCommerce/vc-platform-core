@@ -1,5 +1,6 @@
 using System;
 using System.Threading.Tasks;
+using Hangfire;
 using Microsoft.Extensions.Logging;
 using Polly;
 using VirtoCommerce.NotificationsModule.Core.Exceptions;
@@ -26,6 +27,11 @@ namespace VirtoCommerce.NotificationsModule.Data.Senders
             _notificationMessageService = notificationMessageService;
             _notificationMessageAccessor = notificationMessageAccessor;
             _logger = logger;
+        }
+
+        public void ScheduleSendNotification(Notification notification, string language)
+        {
+            BackgroundJob.Enqueue(() => SendNotificationAsync(notification, language));
         }
 
         public async Task<NotificationSendResult> SendNotificationAsync(Notification notification, string language)

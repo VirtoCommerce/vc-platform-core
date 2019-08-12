@@ -3,6 +3,7 @@ using Microsoft.AspNetCore.Builder;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.DependencyInjection;
+using VirtoCommerce.NotificationsModule.Core.Model;
 using VirtoCommerce.NotificationsModule.Core.Services;
 using VirtoCommerce.NotificationsModule.Core.Types;
 using VirtoCommerce.NotificationsModule.Data.Model;
@@ -25,7 +26,7 @@ namespace VirtoCommerce.NotificationsSampleModule.Web
             var configuration = snapshot.GetService<IConfiguration>();
             serviceCollection.AddDbContext<TwitterNotificationDbContext>(options => options.UseSqlServer(configuration.GetConnectionString("VirtoCommerce")));
             serviceCollection.AddTransient<INotificationRepository, TwitterNotificationRepository>();
-            serviceCollection.AddSingleton<Func<INotificationRepository>>(provider => () => provider.CreateScope().ServiceProvider.GetService<INotificationRepository>());
+            serviceCollection.AddTransient<Func<INotificationRepository>>(provider => () => provider.CreateScope().ServiceProvider.GetService<INotificationRepository>());
         }
 
         public void PostInitialize(IApplicationBuilder appBuilder)
@@ -33,7 +34,11 @@ namespace VirtoCommerce.NotificationsSampleModule.Web
             AbstractTypeFactory<NotificationEntity>.RegisterType<TwitterNotificationEntity>();
             var registrar = appBuilder.ApplicationServices.GetService<INotificationRegistrar>();
             registrar.RegisterNotification<PostTwitterNotification>();
-            registrar.RegisterNotification<RegistrationEmailNotification>();
+            registrar.RegisterNotification<RegistrationEmailNotification>().WithTemplates(new EmailNotificationTemplate()
+            {
+                Subject = "Registration test",
+                Body = "Registration body test",
+            });
 
             using (var serviceScope = appBuilder.ApplicationServices.CreateScope())
             {

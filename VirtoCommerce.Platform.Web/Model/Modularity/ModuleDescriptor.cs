@@ -2,8 +2,9 @@ using System.Collections.Generic;
 using System.Linq;
 using Newtonsoft.Json;
 using VirtoCommerce.Platform.Core.Common;
+using VirtoCommerce.Platform.Core.Modularity;
 
-namespace VirtoCommerce.Platform.Core.Modularity
+namespace VirtoCommerce.Platform.Web.Modularity
 {
     public class ModuleDescriptor : Entity
     {
@@ -43,7 +44,7 @@ namespace VirtoCommerce.Platform.Core.Modularity
         {
             get
             {
-                return new ModuleIdentity(Id, Version);
+                return new ModuleIdentity(Id, SemanticVersion.Parse(Version));
             }
         }
         public string Version { get; set; }

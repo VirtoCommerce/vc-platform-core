@@ -8,11 +8,11 @@ using VirtoCommerce.Platform.Core.Events;
 
 namespace VirtoCommerce.CustomerModule.Data.Handlers
 {
-    public class LogChangesChangedEventHandler : IEventHandler<MemberChangedEvent>
+    public class LogChangesEventHandler : IEventHandler<MemberChangedEvent>
     {
         private readonly IChangeLogService _changeLogService;
 
-        public LogChangesChangedEventHandler(IChangeLogService changeLogService)
+        public LogChangesEventHandler(IChangeLogService changeLogService)
         {
             _changeLogService = changeLogService;
         }

@@ -431,7 +431,7 @@ namespace VirtoCommerce.Platform.Data.ExportImport
                             //TODO: Add JsonConverter which will be materialized concrete ExportImport option type
                             //ToDo: Added check ExportImportOptions for modules (DefaultIfEmpty)
                             var options = manifest.Options
-                                .DefaultIfEmpty(new ExportImportOptions { HandleBinaryData = manifest.HandleBinaryData, ModuleIdentity = new ModuleIdentity(module.Id, module.Version) })
+                                .DefaultIfEmpty(new ExportImportOptions { HandleBinaryData = manifest.HandleBinaryData, ModuleIdentity = new ModuleIdentity(module.Id, SemanticVersion.Parse(module.Version)) })
                                 .FirstOrDefault(x => x.ModuleIdentity.Id == moduleDescriptor.Identity.Id);
                             await exporter.ExportAsync(zipEntry.Open(), options, ModuleProgressCallback, cancellationToken);
                         }

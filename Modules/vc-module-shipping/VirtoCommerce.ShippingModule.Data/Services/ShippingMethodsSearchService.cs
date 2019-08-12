@@ -38,7 +38,7 @@ namespace VirtoCommerce.ShippingModule.Data.Services
 
         public async Task<ShippingMethodsSearchResult> SearchShippingMethodsAsync(ShippingMethodsSearchCriteria criteria)
         {
-            var cacheKey = CacheKey.With(GetType(), "SearchShippingMethodsAsync", criteria.GetCacheKey());
+            var cacheKey = CacheKey.With(GetType(), nameof(SearchShippingMethodsAsync), criteria.GetCacheKey());
             return await _memCache.GetOrCreateExclusiveAsync(cacheKey, async (cacheEntry) =>
             {
                 cacheEntry.AddExpirationToken(ShippingCacheRegion.CreateChangeToken());
@@ -47,33 +47,31 @@ namespace VirtoCommerce.ShippingModule.Data.Services
                 var tmpSkip = 0;
                 var tmpTake = 0;
 
-                var sortInfos = GetSortInfos(criteria);
+                var sortInfos = BuildSortExpression(criteria);
 
                 using (var repository = _repositoryFactory())
                 {
                     repository.DisableChangesTracking();
-                    var query = GetQuery(repository, criteria, sortInfos);
+                    var query = BuildQuery(repository, criteria);
 
                     result.TotalCount = await query.CountAsync();
                     if (criteria.Take > 0)
                     {
-                        var shippingMethodsIds = await query.Select(x => x.Id)
-                                                           .Skip(criteria.Skip)
-                                                           .Take(criteria.Take)
+                        var shippingMethodsIds = await query.OrderBySortInfos(sortInfos).ThenBy(x => x.Id)
+                                                           .Select(x => x.Id)
+                                                           .Skip(criteria.Skip).Take(criteria.Take)
                                                            .ToArrayAsync();
 
-                        result.Results = (await _shippingMethodsService.GetByIdsAsync(shippingMethodsIds, criteria.ResponseGroup))
-                                                                      .AsQueryable()
-                                                                      .OrderBySortInfos(sortInfos)
-                                                                      .ToArray();
+                        var unorderedResults = await _shippingMethodsService.GetByIdsAsync(shippingMethodsIds, criteria.ResponseGroup);
+                        result.Results = unorderedResults.OrderBy(x => Array.IndexOf(shippingMethodsIds, x.Id)).ToArray();
                     }
                 }
 
                 //Need to concatenate persistent methods with registered types and still not persisted
                 tmpSkip = Math.Min(result.TotalCount, criteria.Skip);
                 tmpTake = Math.Min(criteria.Take, Math.Max(0, result.TotalCount - criteria.Skip));
-                criteria.Skip = criteria.Skip - tmpSkip;
-                criteria.Take = criteria.Take - tmpTake;
+                criteria.Skip -= tmpSkip;
+                criteria.Take -= tmpTake;
                 if (criteria.Take > 0 && !criteria.WithoutTransient)
                 {
                     var transientMethodsQuery = AbstractTypeFactory<ShippingMethod>.AllTypeInfos.Select(x => AbstractTypeFactory<ShippingMethod>.TryCreateInstance(x.Type.Name))
@@ -100,10 +98,7 @@ namespace VirtoCommerce.ShippingModule.Data.Services
             });
         }
 
-        protected virtual IQueryable<StoreShippingMethodEntity> GetQuery(
-            IShippingRepository repository,
-            ShippingMethodsSearchCriteria criteria,
-            IEnumerable<SortInfo> sortInfos)
+        protected virtual IQueryable<StoreShippingMethodEntity> BuildQuery(IShippingRepository repository, ShippingMethodsSearchCriteria criteria)
         {
             var query = repository.StoreShippingMethods;
 
@@ -131,19 +126,17 @@ namespace VirtoCommerce.ShippingModule.Data.Services
             {
                 query = query.Where(x => x.IsActive == criteria.IsActive.Value);
             }
-
-            query = query.OrderBySortInfos(sortInfos);
             return query;
         }
 
-        protected virtual IList<SortInfo> GetSortInfos(ShippingMethodsSearchCriteria criteria)
+        protected virtual IList<SortInfo> BuildSortExpression(ShippingMethodsSearchCriteria criteria)
         {
             var sortInfos = criteria.SortInfos;
             if (sortInfos.IsNullOrEmpty())
             {
                 sortInfos = new[]
                 {
-                    new SortInfo{ SortColumn = "Name" }
+                    new SortInfo{ SortColumn = nameof(StoreShippingMethodEntity.Code) }
                 };
             }
 

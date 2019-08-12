@@ -16,7 +16,7 @@ namespace VirtoCommerce.CustomerModule.Data.Migrations
 	                    END
 	                    
 	                    BEGIN
-		                    ALTER TABLE [Member] ADD [Discriminator] nvarchar(max) NOT NULL DEFAULT ('Member')
+		                    ALTER TABLE [Member] ADD [Discriminator] nvarchar(128) NOT NULL DEFAULT ('Member')
                             ALTER TABLE [Member] ADD [FirstName] nvarchar(128) NULL
                             ALTER TABLE [Member] ADD [MiddleName] nvarchar(128) NULL
                             ALTER TABLE [Member] ADD [LastName] nvarchar(128) NULL
@@ -111,7 +111,7 @@ namespace VirtoCommerce.CustomerModule.Data.Migrations
                     BEGIN
                         INSERT INTO [MemberSeoInfo] ([Id], [CreatedDate], [ModifiedDate], [CreatedBy], [ModifiedBy], [Keyword], [StoreId], [IsActive], [Language], [Title], [MetaDescription], [MetaKeywords], [ImageAltDescription], [MemberId])
                               SELECT [Id], [CreatedDate], [ModifiedDate], [CreatedBy], [ModifiedBy], [Keyword], [StoreId], [IsActive], [Language], [Title], [MetaDescription], [MetaKeywords], [ImageAltDescription], [ObjectId] as [MemberId]  FROM [SeoUrlKeyword] WHERE ObjectType = 'Vendor'
-				    END");      
+				    END");
 
         }
 

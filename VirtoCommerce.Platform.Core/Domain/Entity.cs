@@ -1,13 +1,9 @@
 using System;
-using System.ComponentModel.DataAnnotations;
-using System.Text.RegularExpressions;
 
 namespace VirtoCommerce.Platform.Core.Common
 {
     public abstract class Entity : IEntity
     {
-        private int? _requestedHashCode;
-
         public string Id { get; set; }
 
         public bool IsTransient()
@@ -17,58 +13,37 @@ namespace VirtoCommerce.Platform.Core.Common
 
         #region Overrides Methods
 
-        /// <summary>
-        /// <see cref="M:System.Object.Equals"/>
-        /// </summary>
-        /// <param name="obj"><see cref="M:System.Object.Equals"/></param>
-        /// <returns><see cref="M:System.Object.Equals"/></returns>
         public override bool Equals(object obj)
         {
-            var entity = obj as Entity;
-            if (entity == null)
-                return false;
- 
-            if (Object.ReferenceEquals(this, obj))
+            if (ReferenceEquals(this, obj))
                 return true;
+
+            if (ReferenceEquals(null, obj))
+                return false;
 
             if (GetRealObjectType(this) != GetRealObjectType(obj))
                 return false;
 
-			if (IsTransient())
-				return false;
-
-           return entity.Id == Id;
-       
+          
+            var other = obj as Entity;
+            return other != null && Id == other.Id;
         }
 
-        /// <summary>
-        /// <see cref="M:System.Object.GetHashCode"/>
-        /// </summary>
-        /// <returns><see cref="M:System.Object.GetHashCode"/></returns>
         public override int GetHashCode()
         {
-            if (!IsTransient())
+            unchecked
             {
-                if (!_requestedHashCode.HasValue)
-                    _requestedHashCode = Id.GetHashCode() ^ 31; // XOR for random distribution (http://blogs.msdn.com/b/ericlippert/archive/2011/02/28/guidelines-and-rules-for-gethashcode.aspx)
-
-                return _requestedHashCode.Value;
+                return IsTransient() ?  base.GetHashCode() : Id.GetHashCode();
             }
-            else
-                return base.GetHashCode();
         }
-
         public static bool operator ==(Entity left, Entity right)
         {
-            if (Object.Equals(left, null))
-                return (Object.Equals(right, null)) ? true : false;
-            else
-                return left.Equals(right);
+            return Equals(left, right);
         }
 
         public static bool operator !=(Entity left, Entity right)
         {
-            return !(left == right);
+            return !Equals(left, right);
         }
 
         #endregion

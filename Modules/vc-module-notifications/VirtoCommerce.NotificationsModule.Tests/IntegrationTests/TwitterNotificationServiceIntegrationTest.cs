@@ -32,7 +32,7 @@ namespace VirtoCommerce.NotificationsModule.Tests.IntegrationTests
             container.AddScoped<INotificationService, NotificationService>();
             container.AddScoped<Func<INotificationRepository>>(provider => () => provider.CreateScope().ServiceProvider.GetService<INotificationRepository>());
             container.AddScoped<IEventPublisher, InProcessBus>();
-            container.AddScoped<INotificationRegistrar, NotificationService>();
+            container.AddScoped<INotificationRegistrar, NotificationRegistrar>();
             container.AddScoped<INotificationSearchService, NotificationSearchService>();
 
             var serviceProvider = container.BuildServiceProvider();

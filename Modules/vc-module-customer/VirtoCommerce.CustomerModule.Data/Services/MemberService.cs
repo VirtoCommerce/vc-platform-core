@@ -12,6 +12,8 @@ using VirtoCommerce.CustomerModule.Data.Repositories;
 using VirtoCommerce.Platform.Core.Caching;
 using VirtoCommerce.Platform.Core.Common;
 using VirtoCommerce.Platform.Core.Events;
+using VirtoCommerce.Platform.Core.Security;
+using VirtoCommerce.Platform.Core.Security.Search;
 using VirtoCommerce.Platform.Data.Infrastructure;
 
 namespace VirtoCommerce.CustomerModule.Data.Services
@@ -19,19 +21,24 @@ namespace VirtoCommerce.CustomerModule.Data.Services
     /// <summary>
     /// Abstract base class for all derived custom members services used IMemberRepository for persistent
     /// </summary>
-    public abstract class MemberServiceBase : IMemberService
+    public class MemberService : IMemberService
     {
         private readonly Func<IMemberRepository> _repositoryFactory;
         private readonly IEventPublisher _eventPublisher;
         private readonly IPlatformMemoryCache _platformMemoryCache;
+        private readonly IUserSearchService _userSearchService;
 
-        protected MemberServiceBase(Func<IMemberRepository> repositoryFactory, IEventPublisher eventPublisher, IPlatformMemoryCache platformMemoryCache)
+        public MemberService(
+            Func<IMemberRepository> repositoryFactory
+            , IUserSearchService userSearchService
+            , IEventPublisher eventPublisher
+            , IPlatformMemoryCache platformMemoryCache)
         {
             _repositoryFactory = repositoryFactory;
             _eventPublisher = eventPublisher;
             _platformMemoryCache = platformMemoryCache;
+            _userSearchService = userSearchService;
         }
-
 
         #region IMemberService Members
 
@@ -44,7 +51,7 @@ namespace VirtoCommerce.CustomerModule.Data.Services
         /// <returns></returns>
         public virtual async Task<Member[]> GetByIdsAsync(string[] memberIds, string responseGroup = null, string[] memberTypes = null)
         {
-            var cacheKey = CacheKey.With(GetType(), "GetByIdsAsync", string.Join("-", memberIds), responseGroup, memberTypes == null ? null : string.Join("-", memberTypes));
+            var cacheKey = CacheKey.With(GetType(), nameof(GetByIdsAsync), string.Join("-", memberIds), responseGroup, memberTypes == null ? null : string.Join("-", memberTypes));
             return await _platformMemoryCache.GetOrCreateExclusiveAsync(cacheKey, async (cacheEntry) =>
             {
                 var retVal = new List<Member>();
@@ -67,10 +74,25 @@ namespace VirtoCommerce.CustomerModule.Data.Services
                         if (member != null)
                         {
                             dataMember.ToModel(member);
+
                             member.ReduceDetails(responseGroup);
 
                             retVal.Add(member);
                             cacheEntry.AddExpirationToken(CustomerCacheRegion.CreateChangeToken(member));
+                        }
+                    }
+                }
+                var memberRespGroup = EnumUtility.SafeParseFlags(responseGroup, MemberResponseGroup.Full);
+                //Load member security accounts by separate request
+                if (memberRespGroup.HasFlag(MemberResponseGroup.WithSecurityAccounts))
+                {
+                    var hasSecurityAccountMembers = retVal.OfType<IHasSecurityAccounts>().ToArray();
+                    if (hasSecurityAccountMembers.Any())
+                    {
+                        var usersSearchResult = await _userSearchService.SearchUsersAsync(new UserSearchCriteria { MemberIds = hasSecurityAccountMembers.Select(x => x.Id).ToList(), Take = int.MaxValue });
+                        foreach (var hasAccountMember in hasSecurityAccountMembers)
+                        {
+                            hasAccountMember.SecurityAccounts = usersSearchResult.Results.Where(x => x.MemberId.EqualsInvariant(hasAccountMember.Id)).ToList();
                         }
                     }
                 }
@@ -151,13 +173,13 @@ namespace VirtoCommerce.CustomerModule.Data.Services
             }
         }
 
-        protected virtual void ClearCache(IEnumerable<Member> entities)
+        protected virtual void ClearCache(IEnumerable<Member> members)
         {
             CustomerSearchCacheRegion.ExpireRegion();
 
-            foreach (var entity in entities)
+            foreach (var member in members.Where(x => !x.IsTransient()))
             {
-                CustomerCacheRegion.ExpireInventory(entity);
+                CustomerCacheRegion.ExpireMemberById(member.Id);
             }
         }
         #endregion

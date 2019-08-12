@@ -44,14 +44,14 @@ namespace VirtoCommerce.StoreModule.Web
             var connectionString = configuration.GetConnectionString("VirtoCommerce.Store") ?? configuration.GetConnectionString("VirtoCommerce");
             serviceCollection.AddDbContext<StoreDbContext>(options => options.UseSqlServer(connectionString));
             serviceCollection.AddTransient<IStoreRepository, StoreRepository>();
-            serviceCollection.AddSingleton<Func<IStoreRepository>>(provider => () => provider.CreateScope().ServiceProvider.GetService<IStoreRepository>());
-            serviceCollection.AddSingleton<IStoreService, StoreService>();
-            serviceCollection.AddSingleton<IStoreSearchService, StoreSearchService>();
-            serviceCollection.AddSingleton<StoreExportImport>();
-            serviceCollection.AddSingleton<StoreChangedEventHandler>();
-            serviceCollection.AddSingleton<ISeoBySlugResolver, SeoBySlugResolver>();
+            serviceCollection.AddTransient<Func<IStoreRepository>>(provider => () => provider.CreateScope().ServiceProvider.GetService<IStoreRepository>());
+            serviceCollection.AddTransient<IStoreService, StoreService>();
+            serviceCollection.AddTransient<IStoreSearchService, StoreSearchService>();
+            serviceCollection.AddTransient<StoreExportImport>();
+            serviceCollection.AddTransient<StoreChangedEventHandler>();
+            serviceCollection.AddTransient<ISeoBySlugResolver, SeoBySlugResolver>();
 
-            serviceCollection.AddSingleton<IAuthorizationHandler, StoreAuthorizationHandler>();
+            serviceCollection.AddTransient<IAuthorizationHandler, StoreAuthorizationHandler>();
         }
 
         public void PostInitialize(IApplicationBuilder appBuilder)
@@ -66,7 +66,7 @@ namespace VirtoCommerce.StoreModule.Web
             //Register settings for type Store
             settingsRegistrar.RegisterSettingsForType(ModuleConstants.Settings.AllSettings, typeof(Store).Name);
 
-            var permissionsProvider = appBuilder.ApplicationServices.GetRequiredService<IPermissionsRegistrar>();            
+            var permissionsProvider = appBuilder.ApplicationServices.GetRequiredService<IPermissionsRegistrar>();
             permissionsProvider.RegisterPermissions(ModuleConstants.Security.Permissions.AllPermissions.Select(x =>
                 new Permission()
                 {

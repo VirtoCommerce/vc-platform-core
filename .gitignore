@@ -280,3 +280,7 @@ __pycache__/
 .vscode
 /_build/module/Modules
 /_build/Platform
+
+#exclude hot-modules
+/Modules/hot-*
+

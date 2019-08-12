@@ -49,7 +49,7 @@ namespace VirtoCommerce.NotificationsModule.Web.Controllers
         [HttpPost]
         [Route("")]
         [Authorize(ModuleConstants.Security.Permissions.Read)]
-        public async Task<ActionResult<NotificationSearchResult>> GetNotifications(NotificationSearchCriteria searchCriteria)
+        public async Task<ActionResult<NotificationSearchResult>> GetNotifications([FromBody]NotificationSearchCriteria searchCriteria)
         {
             var notifications = await _notificationSearchService.SearchNotificationsAsync(searchCriteria);
 
@@ -72,7 +72,6 @@ namespace VirtoCommerce.NotificationsModule.Web.Controllers
         [Authorize(ModuleConstants.Security.Permissions.Access)]
         public async Task<ActionResult<Notification>> GetNotificationByTypeId(string type, string tenantId = null, string tenantType = null)
         {
-            var responseGroup = NotificationResponseGroup.Full.ToString();
             var notification = await _notificationSearchService.GetNotificationAsync(type, new TenantIdentity(tenantId, tenantType));
 
             return Ok(notification);
@@ -97,14 +96,16 @@ namespace VirtoCommerce.NotificationsModule.Web.Controllers
         /// <summary>
         /// Render content
         /// </summary>
+        /// <param name="language"></param>
         /// <param name="request">request of Notification Template with text and data</param>
         /// <returns></returns>
         [HttpPost]
         [Route("{type}/templates/{language}/rendercontent")]
         [Authorize(ModuleConstants.Security.Permissions.ReadTemplates)]
-        public ActionResult RenderingTemplate([FromBody]NotificationTemplateRequest request)
+        public async Task<ActionResult> RenderingTemplate([FromBody]NotificationTemplateRequest request, string language)
         {
-            var result = _notificationTemplateRender.Render(request.Text, request.Data);
+            var template = request.Data.Templates.FindWithLanguage(language);
+            var result = await _notificationTemplateRender.RenderAsync(request.Text, request.Data, template.LanguageCode);
 
             return Ok(new { html = result });
         }
@@ -114,8 +115,9 @@ namespace VirtoCommerce.NotificationsModule.Web.Controllers
         /// </summary>
         [HttpPost]
         [Route("send")]
-        public async Task<ActionResult<NotificationSendResult>> SendNotification([FromBody]Notification notification, string language)
+        public async Task<ActionResult<NotificationSendResult>> SendNotification([FromBody]Notification notificationRequest, string language)
         {
+            var notification = await _notificationSearchService.GetNotificationAsync(notificationRequest.Type, notificationRequest.TenantIdentity);
             var result = await _notificationSender.SendNotificationAsync(notification, language);
 
             return Ok(result);

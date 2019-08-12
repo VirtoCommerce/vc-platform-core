@@ -10,6 +10,7 @@ using VirtoCommerce.PricingModule.Core.Model;
 using VirtoCommerce.PricingModule.Core.Model.Search;
 using VirtoCommerce.PricingModule.Core.Services;
 using VirtoCommerce.PricingModule.Data.Caching;
+using VirtoCommerce.PricingModule.Data.Model;
 using VirtoCommerce.PricingModule.Data.Repositories;
 
 namespace VirtoCommerce.PricingModule.Data.Services
@@ -40,60 +41,40 @@ namespace VirtoCommerce.PricingModule.Data.Services
                     cacheEntry.AddExpirationToken(PricesCacheRegion.CreateChangeToken());
                     cacheEntry.AddExpirationToken(PricingSearchCacheRegion.CreateChangeToken());
 
-                    var retVal = AbstractTypeFactory<PriceSearchResult>.TryCreateInstance();
+                    var result = AbstractTypeFactory<PriceSearchResult>.TryCreateInstance();
 
                     using (var repository = _repositoryFactory())
                     {
-                        var query = repository.Prices;
-
-                        if (!criteria.PriceListIds.IsNullOrEmpty())
-                        {
-                            query = query.Where(x => criteria.PriceListIds.Contains(x.PricelistId));
-                        }
-
-                        if (!criteria.ProductIds.IsNullOrEmpty())
-                        {
-                            query = query.Where(x => criteria.ProductIds.Contains(x.ProductId));
-                        }
-
-                        if (criteria.ModifiedSince.HasValue)
-                        {
-                            query = query.Where(x => x.ModifiedDate >= criteria.ModifiedSince);
-                        }
-
-                        var sortInfos = criteria.SortInfos.ToArray();
-                        if (sortInfos.IsNullOrEmpty())
-                        {
-                            sortInfos = new[] { new SortInfo { SortColumn = ReflectionUtility.GetPropertyName<Price>(x => x.List) } };
-                        }
+                        var query = BuildQuery(repository, criteria);
+                        var sortInfos = BuildSortExpression(criteria);
                         //Try to replace sorting columns names
-                        TryTransformSortingInfoColumnNames(_pricesSortingAliases, sortInfos);
-
-
-                        query = query.OrderBySortInfos(sortInfos);
+                        TryTransformSortingInfoColumnNames(_pricesSortingAliases, sortInfos);             
 
                         // TODO: add checks for criteria.Take being greater than 0
                         if (criteria.GroupByProducts)
                         {
                             var groupedQuery = query.GroupBy(x => x.ProductId).OrderBy(x => 1);
-                            retVal.TotalCount = await groupedQuery.CountAsync();
+                            result.TotalCount = await groupedQuery.CountAsync();
                             query = groupedQuery.Skip(criteria.Skip).Take(criteria.Take).SelectMany(x => x);
                         }
                         else
                         {
-                            retVal.TotalCount = await query.CountAsync();
+                            result.TotalCount = await query.CountAsync();
                             query = query.Skip(criteria.Skip).Take(criteria.Take);
                         }
 
                         if (criteria.Take > 0)
                         {
-                            var pricesIds = await query.Select(x => x.Id).ToListAsync();
-                            retVal.Results = (await _pricingService.GetPricesByIdAsync(pricesIds.ToArray()))
-                                .OrderBy(x => pricesIds.IndexOf(x.Id))
-                                .ToList();
+                            var priceIds = await query.OrderBySortInfos(sortInfos).ThenBy(x => x.Id)
+                                                                .Select(x => x.Id)
+                                                                .Skip(criteria.Skip).Take(criteria.Take)
+                                                                .ToArrayAsync();
+
+                            var unorderedResults = await _pricingService.GetPricesByIdAsync(priceIds);
+                            result.Results = unorderedResults.OrderBy(x => Array.IndexOf(priceIds, x.Id)).ToList();
                         }
                     }
-                    return retVal;
+                    return result;
                 });
         }
 
@@ -104,46 +85,26 @@ namespace VirtoCommerce.PricingModule.Data.Services
             {
                 cacheEntry.AddExpirationToken(PricingSearchCacheRegion.CreateChangeToken());
 
-                var retVal = AbstractTypeFactory<PricelistSearchResult>.TryCreateInstance();
+                var result = AbstractTypeFactory<PricelistSearchResult>.TryCreateInstance();
                 using (var repository = _repositoryFactory())
                 {
-                    var query = repository.Pricelists;
-                    if (!string.IsNullOrEmpty(criteria.Keyword))
-                    {
-                        query = query.Where(x => x.Name.Contains(criteria.Keyword) || x.Description.Contains(criteria.Keyword));
-                    }
-
-                    if (!criteria.Currencies.IsNullOrEmpty())
-                    {
-                        query = query.Where(x => criteria.Currencies.Contains(x.Currency));
-                    }
-
-                    var sortInfos = criteria.SortInfos;
-                    if (sortInfos.IsNullOrEmpty())
-                    {
-                        sortInfos = new[]
-                        {
-                            new SortInfo
-                            {
-                                SortColumn = ReflectionUtility.GetPropertyName<Pricelist>(x => x.Name)
-                            }
-                        };
-                    }
-
-                    query = query.OrderBySortInfos(sortInfos);
-
-                    retVal.TotalCount = await query.CountAsync();
+                    var query = BuildQuery(repository, criteria);
+                    var sortInfos = BuildSortExpression(criteria);
+                    
+                    result.TotalCount = await query.CountAsync();
 
                     if (criteria.Take > 0)
                     {
-                        query = query.Skip(criteria.Skip).Take(criteria.Take);
-                        var pricelistsIds = await query.Select(x => x.Id).ToListAsync();
-                        retVal.Results = (await _pricingService.GetPricelistsByIdAsync(pricelistsIds.ToArray()))
-                            .OrderBy(x => pricelistsIds.IndexOf(x.Id)).ToList();
+                        var pricelistIds = await query.OrderBySortInfos(sortInfos).ThenBy(x => x.Id)
+                                                                .Select(x => x.Id)
+                                                                .Skip(criteria.Skip).Take(criteria.Take)
+                                                                .ToArrayAsync();
+                        var unorderedResults = await _pricingService.GetPricelistsByIdAsync(pricelistIds);
+                        result.Results = unorderedResults.OrderBy(x => Array.IndexOf(pricelistIds, x.Id)).ToList();
                     }
                 }
 
-                return retVal;
+                return result;
             });
         }
 
@@ -155,53 +116,140 @@ namespace VirtoCommerce.PricingModule.Data.Services
                 cacheEntry.AddExpirationToken(PricingSearchCacheRegion.CreateChangeToken());
                 cacheEntry.AddExpirationToken(PricingCacheRegion.CreateChangeToken());
 
-                var retVal = AbstractTypeFactory<PricelistAssignmentSearchResult>.TryCreateInstance();
+                var result = AbstractTypeFactory<PricelistAssignmentSearchResult>.TryCreateInstance();
                 using (var repository = _repositoryFactory())
                 {
-                    var query = repository.PricelistAssignments;
+                    var query = BuildQuery(repository, criteria);
+                    var sortInfos = BuildSortExpression(criteria);
 
-                    if (!criteria.PriceListIds.IsNullOrEmpty())
-                    {
-                        query = query.Where(x => criteria.PriceListIds.Contains(x.PricelistId));
-                    }
-
-                    if (!criteria.CatalogIds.IsNullOrEmpty())
-                    {
-                        query = query.Where(x => criteria.CatalogIds.Contains(x.CatalogId));
-                    }
-
-                    if (!string.IsNullOrEmpty(criteria.Keyword))
-                    {
-                        query = query.Where(x => x.Name.Contains(criteria.Keyword) || x.Description.Contains(criteria.Keyword));
-                    }
-
-                    var sortInfos = criteria.SortInfos;
-                    if (sortInfos.IsNullOrEmpty())
-                    {
-                        sortInfos = new[] { new SortInfo { SortColumn = ReflectionUtility.GetPropertyName<PricelistAssignment>(x => x.Priority) } };
-                    }
-
-                    query = query.OrderBySortInfos(sortInfos);
-
-                    retVal.TotalCount = await query.CountAsync();
+                    result.TotalCount = await query.CountAsync();
 
                     if (criteria.Take > 0)
                     {
-                        query = query.Skip(criteria.Skip).Take(criteria.Take);
-
-                        var pricelistAssignmentsIds = await query.Select(x => x.Id).ToListAsync();
-                        retVal.Results =
-                            (await _pricingService.GetPricelistAssignmentsByIdAsync(pricelistAssignmentsIds.ToArray()))
-                            .OrderBy(x => pricelistAssignmentsIds.IndexOf(x.Id))
-                            .ToList();
+                        var pricelistAssignmentsIds = await query.OrderBySortInfos(sortInfos).ThenBy(x=>x.Id)
+                                                                 .Select(x=>x.Id)
+                                                                .Skip(criteria.Skip).Take(criteria.Take)
+                                                                .ToArrayAsync();
+                        var unorderedResults = await _pricingService.GetPricelistAssignmentsByIdAsync(pricelistAssignmentsIds);
+                        result.Results = unorderedResults.OrderBy(x => Array.IndexOf(pricelistAssignmentsIds, x.Id)).ToList();
                     }
                 }
-                return retVal;
+                return result;
             });
         }
         #endregion
+        protected virtual IQueryable<PriceEntity> BuildQuery(IPricingRepository repository, PricesSearchCriteria criteria)
+        {
+            var query = repository.Prices;
 
-        private static void TryTransformSortingInfoColumnNames(IDictionary<string, string> transformationMap, SortInfo[] sortingInfos)
+            if (!string.IsNullOrEmpty(criteria.Keyword))
+            {
+                query = query.Where(x => x.Name.Contains(criteria.Keyword) || x.Description.Contains(criteria.Keyword));
+            }
+
+            if (!criteria.PriceListIds.IsNullOrEmpty())
+            {
+                query = query.Where(x => criteria.PriceListIds.Contains(x.PricelistId));
+            }
+
+            if (!criteria.ProductIds.IsNullOrEmpty())
+            {
+                query = query.Where(x => criteria.ProductIds.Contains(x.ProductId));
+            }
+
+            if (!criteria.CatalogIds.IsNullOrEmpty())
+            {
+                query = query.Where(x => criteria.CatalogIds.Contains(x.CatalogId));
+            }
+
+            if (!criteria.Currencies.IsNullOrEmpty())
+            {
+                query = query.Where(x => criteria.Currencies.Contains(x.Currency));
+            }
+
+            if (criteria.ModifiedSince.HasValue)
+            {
+                query = query.Where(x => x.ModifiedDate >= criteria.ModifiedSince);
+            }
+            
+            return query;
+        }
+
+        protected virtual IList<SortInfo> BuildSortExpression(PricesSearchCriteria criteria)
+        {
+            var sortInfos = criteria.SortInfos;
+            if (sortInfos.IsNullOrEmpty())
+            {
+                sortInfos = new[]
+                {
+                    new SortInfo
+                    {
+                        SortColumn = nameof(PriceEntity.List)
+                    }
+                };
+            }
+            return sortInfos;
+        }
+
+        protected virtual IQueryable<PricelistEntity> BuildQuery(IPricingRepository repository, PricelistSearchCriteria criteria)
+        {
+            var query = repository.Pricelists;
+            if (!string.IsNullOrEmpty(criteria.Keyword))
+            {
+                query = query.Where(x => x.Name.Contains(criteria.Keyword) || x.Description.Contains(criteria.Keyword));
+            }
+            return query;
+        }
+
+        protected virtual IList<SortInfo> BuildSortExpression(PricelistSearchCriteria criteria)
+        {
+            var sortInfos = criteria.SortInfos;
+            if (sortInfos.IsNullOrEmpty())
+            {
+                sortInfos = new[]
+                {
+                    new SortInfo
+                    {
+                        SortColumn = nameof(PricelistEntity.Name)
+                    }
+                };
+            }
+            return sortInfos;
+        }
+
+        protected virtual IQueryable<PricelistAssignmentEntity> BuildQuery(IPricingRepository repository, PricelistAssignmentsSearchCriteria criteria)
+        {
+            var query = repository.PricelistAssignments;
+
+            if (!criteria.PriceListIds.IsNullOrEmpty())
+            {
+                query = query.Where(x => criteria.PriceListIds.Contains(x.PricelistId));
+            }
+
+            if (!string.IsNullOrEmpty(criteria.Keyword))
+            {
+                query.Where(x => x.Name.Contains(criteria.Keyword) || x.Description.Contains(criteria.Keyword));
+            }
+            return query;
+        }
+
+        protected virtual IList<SortInfo> BuildSortExpression(PricelistAssignmentsSearchCriteria criteria)
+        {
+            var sortInfos = criteria.SortInfos;
+            if (sortInfos.IsNullOrEmpty())
+            {
+                sortInfos = new[]
+                {
+                    new SortInfo
+                    {
+                        SortColumn = nameof(PricelistAssignment.Priority)
+                    }
+                };
+            }
+            return sortInfos;
+        }
+
+        private static void TryTransformSortingInfoColumnNames(IDictionary<string, string> transformationMap, IEnumerable<SortInfo> sortingInfos)
         {
             //Try to replace sorting columns names
             foreach (var sortInfo in sortingInfos)
