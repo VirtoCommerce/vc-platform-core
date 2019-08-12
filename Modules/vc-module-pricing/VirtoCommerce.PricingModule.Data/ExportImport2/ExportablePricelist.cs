@@ -1,18 +1,18 @@
-using System.Collections.Generic;
 using VirtoCommerce.ExportModule.Core.Model;
 using VirtoCommerce.PricingModule.Core.Model;
 
 namespace VirtoCommerce.PricingModule.Data.ExportImport
 {
-    public class ExportablePricelist : ExportableEntity<ExportablePricelist>
+    public class ExportablePricelist : Pricelist, IExportable
     {
-        #region Pricelist properties
-        public string Description { get; set; }
-        public string Currency { get; set; }
-        public string OuterId { get; set; }
-        public ICollection<Price> Prices { get; set; }
-        public ICollection<PricelistAssignment> Assignments { get; set; }
-        #endregion
+        #region IExportable properties
+
+        public string Code { get; set; }
+        public string ImageUrl { get; set; }
+        public string Parent { get; set; }
+        public string Type { get; set; }
+
+        #endregion IExportable properties
 
         public ExportablePricelist FromModel(Pricelist source)
         {

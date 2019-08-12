@@ -1,3 +1,4 @@
+using System;
 using System.Collections.Generic;
 using System.Linq;
 using VirtoCommerce.ExportModule.Core.Model;
@@ -10,33 +11,75 @@ namespace VirtoCommerce.PricingModule.Data.ExportImport
 {
     public class PricelistExportPagedDataSource : IPagedDataSource
     {
-        protected class FetchResult
-        {
-            public IEnumerable<IExportable> Results { get; set; }
-            public int TotalCount { get; set; }
-
-            public FetchResult(IEnumerable<IExportable> results, int totalCount)
-            {
-                Results = results;
-                TotalCount = totalCount;
-            }
-        }
-
         private readonly IPricingSearchService _searchService;
         private readonly IPricingService _pricingService;
 
-        public PricelistExportPagedDataSource(IPricingSearchService searchService, IPricingService pricingService)
+        private ExportDataQuery _dataQuery;
+        private int _totalCount = -1;
 
+        public int CurrentPageNumber { get; protected set; }
+        public int PageSize { get; set; } = 50;
+
+        public ExportDataQuery DataQuery
+        {
+            set
+            {
+                _dataQuery = value;
+                CurrentPageNumber = 0;
+                _totalCount = -1;
+            }
+        }
+
+        public PricelistExportPagedDataSource(IPricingSearchService searchService, IPricingService pricingService)
         {
             _searchService = searchService;
             _pricingService = pricingService;
         }
 
-        public ExportDataQuery DataQuery { get; set; }
-        private int _totalCount = -1;
-        private SearchCriteriaBase _searchCriteria;
+        public IEnumerable<IExportable> FetchNextPage()
+        {
+            var searchCriteria = BuildSearchCriteria(_dataQuery);
+            var result = FetchData(searchCriteria);
 
-        protected FetchResult FetchData(SearchCriteriaBase searchCriteria)
+            _totalCount = result.TotalCount;
+            CurrentPageNumber++;
+
+            return result.Results;
+        }
+
+        public int GetTotalCount()
+        {
+            if (_totalCount < 0)
+            {
+                var searchCriteria = BuildSearchCriteria(_dataQuery);
+
+                searchCriteria.Skip = 0;
+                searchCriteria.Take = 0;
+
+                _totalCount = FetchData(searchCriteria).TotalCount;
+            }
+
+            return _totalCount;
+        }
+
+        protected virtual PricelistSearchCriteria BuildSearchCriteria(ExportDataQuery exportDataQuery)
+        {
+            var dataQuery = exportDataQuery as PricelistExportDataQuery ?? throw new InvalidCastException($"Cannot cast {nameof(exportDataQuery)} to {nameof(PricelistExportDataQuery)}");
+            var result = AbstractTypeFactory<PricelistSearchCriteria>.TryCreateInstance();
+
+            result.ObjectIds = dataQuery.ObjectIds;
+            result.Keyword = dataQuery.Keyword;
+            result.Sort = dataQuery.Sort;
+            result.Currencies = dataQuery.Currencies;
+
+            // It is for proper pagination - client side for viewer (dataQuery.Skip/Take) should work together with iterating through pages when getting data for export
+            result.Skip = dataQuery.Skip ?? CurrentPageNumber * PageSize;
+            result.Take = dataQuery.Take ?? PageSize;
+
+            return result;
+        }
+
+        protected virtual GenericSearchResult<ExportablePricelist> FetchData(PricelistSearchCriteria searchCriteria)
         {
             Pricelist[] result;
             int totalCount;
@@ -48,7 +91,7 @@ namespace VirtoCommerce.PricingModule.Data.ExportImport
             }
             else
             {
-                var pricelistSearchResult = _searchService.SearchPricelistsAsync((PricelistSearchCriteria)searchCriteria).GetAwaiter().GetResult();
+                var pricelistSearchResult = _searchService.SearchPricelistsAsync(searchCriteria).GetAwaiter().GetResult();
                 result = pricelistSearchResult.Results.ToArray();
                 totalCount = pricelistSearchResult.TotalCount;
             }
@@ -63,54 +106,11 @@ namespace VirtoCommerce.PricingModule.Data.ExportImport
                 }
             }
 
-            return new FetchResult(result.Select(x => AbstractTypeFactory<ExportablePricelist>.TryCreateInstance().FromModel(x)), totalCount);
-        }
-
-        public IEnumerable<IExportable> FetchNextPage()
-        {
-            EnsureSearchCriteriaInitialized();
-            var result = FetchData(_searchCriteria);
-            _totalCount = result.TotalCount;
-            _searchCriteria.Skip += _searchCriteria.Take;
-            return result.Results;
-        }
-
-        private void EnsureSearchCriteriaInitialized()
-        {
-            if (_searchCriteria == null)
+            return new GenericSearchResult<ExportablePricelist>()
             {
-                _searchCriteria = MakeSearchCriteria(DataQuery);
-            }
-        }
-
-        public int GetTotalCount()
-        {
-            if (_totalCount < 0)
-            {
-                var searchCriteria = MakeSearchCriteria(DataQuery);
-
-                searchCriteria.Skip = 0;
-                searchCriteria.Take = 0;
-
-                var result = FetchData(searchCriteria);
-                _totalCount = result.TotalCount;
-            }
-            return _totalCount;
-        }
-
-        private PricelistSearchCriteria MakeSearchCriteria(ExportDataQuery dataQuery)
-        {
-            var result = AbstractTypeFactory<PricelistSearchCriteria>.TryCreateInstance();
-            result.ObjectIds = dataQuery.ObjectIds;
-            result.Keyword = dataQuery.Keyword;
-            result.Sort = dataQuery.Sort;
-            result.Skip = dataQuery.Skip ?? result.Skip;
-            result.Take = dataQuery.Take ?? result.Take;
-            if (DataQuery is PricelistExportDataQuery)
-            {
-                result.Currencies = ((PricelistExportDataQuery)dataQuery).Currencies;
-            }
-            return result;
+                Results = result.Select(x => AbstractTypeFactory<ExportablePricelist>.TryCreateInstance().FromModel(x)).ToList(),
+                TotalCount = totalCount,
+            };
         }
     }
 }

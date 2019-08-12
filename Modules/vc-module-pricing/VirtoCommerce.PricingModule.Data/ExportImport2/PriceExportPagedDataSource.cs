@@ -13,25 +13,25 @@ namespace VirtoCommerce.PricingModule.Data.ExportImport
 {
     public class PriceExportPagedDataSource : IPagedDataSource
     {
-        protected class FetchResult
-        {
-            public IEnumerable<IExportable> Results { get; set; }
-            public int TotalCount { get; set; }
-
-            public FetchResult(IEnumerable<IExportable> results, int totalCount)
-            {
-                Results = results;
-                TotalCount = totalCount;
-            }
-        }
-
         private readonly IPricingSearchService _searchService;
         private readonly IPricingService _pricingService;
         private readonly IItemService _itemService;
 
-        public ExportDataQuery DataQuery { get; set; }
+        private ExportDataQuery _dataQuery;
         private int _totalCount = -1;
-        private SearchCriteriaBase _searchCriteria;
+
+        public int CurrentPageNumber { get; protected set; }
+        public int PageSize { get; set; } = 50;
+
+        public ExportDataQuery DataQuery
+        {
+            set
+            {
+                _dataQuery = value;
+                CurrentPageNumber = 0;
+                _totalCount = -1;
+            }
+        }
 
         public PriceExportPagedDataSource(IPricingSearchService searchService,
             IPricingService pricingService,
@@ -40,10 +40,55 @@ namespace VirtoCommerce.PricingModule.Data.ExportImport
             _searchService = searchService;
             _pricingService = pricingService;
             _itemService = itemService;
-
         }
 
-        protected FetchResult FetchData(SearchCriteriaBase searchCriteria)
+        public IEnumerable<IExportable> FetchNextPage()
+        {
+            var searchCriteria = BuildSearchCriteria(_dataQuery);
+            var result = FetchData(searchCriteria);
+
+            _totalCount = result.TotalCount;
+            CurrentPageNumber++;
+
+            return result.Results;
+        }
+
+        public int GetTotalCount()
+        {
+            if (_totalCount < 0)
+            {
+                var searchCriteria = BuildSearchCriteria(_dataQuery);
+
+                searchCriteria.Skip = 0;
+                searchCriteria.Take = 0;
+
+                _totalCount = FetchData(searchCriteria).TotalCount;
+            }
+
+            return _totalCount;
+        }
+
+        protected virtual PricesSearchCriteria BuildSearchCriteria(ExportDataQuery exportDataQuery)
+        {
+            var dataQuery = exportDataQuery as PriceExportDataQuery ?? throw new InvalidCastException($"Cannot cast {nameof(exportDataQuery)} to {nameof(PriceExportDataQuery)}");
+
+            var result = AbstractTypeFactory<PricesSearchCriteria>.TryCreateInstance();
+
+            result.ObjectIds = dataQuery.ObjectIds;
+            result.Keyword = dataQuery.Keyword;
+            result.Sort = dataQuery.Sort;
+            result.PriceListIds = dataQuery.PriceListIds;
+            result.ProductIds = dataQuery.ProductIds;
+            result.ModifiedSince = dataQuery.ModifiedSince;
+
+            // It is for proper pagination - client side for viewer (dataQuery.Skip/Take) should work together with iterating through pages when getting data for export
+            result.Skip = dataQuery.Skip ?? CurrentPageNumber * PageSize;
+            result.Take = dataQuery.Take ?? PageSize;
+
+            return result;
+        }
+
+        protected virtual GenericSearchResult<ExportablePrice> FetchData(PricesSearchCriteria searchCriteria)
         {
             Price[] result;
             int totalCount;
@@ -55,36 +100,37 @@ namespace VirtoCommerce.PricingModule.Data.ExportImport
             }
             else
             {
-                var priceSearchResult = _searchService.SearchPricesAsync((PricesSearchCriteria)searchCriteria).GetAwaiter().GetResult();
+                var priceSearchResult = _searchService.SearchPricesAsync(searchCriteria).GetAwaiter().GetResult();
                 result = priceSearchResult.Results.ToArray();
                 totalCount = priceSearchResult.TotalCount;
             }
 
-            return new FetchResult(ToExportable(result), totalCount);
+            return new GenericSearchResult<ExportablePrice>()
+            {
+                Results = ToExportable(result),
+                TotalCount = totalCount,
+            };
         }
 
-        protected virtual IEnumerable<IExportable> ToExportable(IEnumerable<ICloneable> objects)
+        protected virtual List<ExportablePrice> ToExportable(IEnumerable<ICloneable> objects)
         {
             var models = objects.Cast<Price>();
             var viewableMap = models.ToDictionary(x => x, x => AbstractTypeFactory<ExportablePrice>.TryCreateInstance().FromModel(x));
 
-            FillViewableEntitiesReferenceFields(viewableMap);
+            FillAdditionalProperties(viewableMap);
 
             var modelIds = models.Select(x => x.Id).ToList();
-            var result = viewableMap.Values.OrderBy(x => modelIds.IndexOf(x.Id));
 
-            return result;
+            return viewableMap.Values.OrderBy(x => modelIds.IndexOf(x.Id)).ToList();
         }
 
-        protected virtual void FillViewableEntitiesReferenceFields(Dictionary<Price, ExportablePrice> viewableMap)
+        protected virtual void FillAdditionalProperties(Dictionary<Price, ExportablePrice> viewableMap)
         {
             var models = viewableMap.Keys;
-
             var productIds = models.Select(x => x.ProductId).Distinct().ToArray();
             var pricelistIds = models.Select(x => x.PricelistId).Distinct().ToArray();
             var products = _itemService.GetByIdsAsync(productIds, ItemResponseGroup.ItemInfo.ToString()).GetAwaiter().GetResult();
             var pricelists = _pricingService.GetPricelistsByIdAsync(pricelistIds).GetAwaiter().GetResult();
-
 
             foreach (var kvp in viewableMap)
             {
@@ -100,52 +146,6 @@ namespace VirtoCommerce.PricingModule.Data.ExportImport
                 viewableEntity.Parent = pricelist?.Name;
                 viewableEntity.PricelistName = pricelist?.Name;
             }
-        }
-
-        public int GetTotalCount()
-        {
-            if (_totalCount < 0)
-            {
-                var searchCriteria = MakeSearchCriteria(DataQuery as PriceExportDataQuery);
-
-                searchCriteria.Skip = 0;
-                searchCriteria.Take = 0;
-
-                var result = FetchData(searchCriteria);
-                _totalCount = result.TotalCount;
-            }
-            return _totalCount;
-        }
-
-        public IEnumerable<IExportable> FetchNextPage()
-        {
-            EnsureSearchCriteriaInitialized();
-            var result = FetchData(_searchCriteria);
-            _totalCount = result.TotalCount;
-            _searchCriteria.Skip += _searchCriteria.Take;
-            return result.Results;
-        }
-
-        private void EnsureSearchCriteriaInitialized()
-        {
-            if (_searchCriteria == null)
-            {
-                _searchCriteria = MakeSearchCriteria(DataQuery as PriceExportDataQuery);
-            }
-        }
-
-        private PricesSearchCriteria MakeSearchCriteria(PriceExportDataQuery dataQuery)
-        {
-            var result = AbstractTypeFactory<PricesSearchCriteria>.TryCreateInstance();
-            result.ObjectIds = dataQuery.ObjectIds;
-            result.Keyword = dataQuery.Keyword;
-            result.Sort = dataQuery.Sort;
-            result.Skip = dataQuery.Skip ?? result.Skip;
-            result.Take = dataQuery.Take ?? result.Take;
-            result.PriceListIds = dataQuery.PriceListIds;
-            result.ProductIds = dataQuery.ProductIds;
-            result.ModifiedSince = dataQuery.ModifiedSince;
-            return result;
         }
     }
 }
