@@ -12,8 +12,8 @@ namespace VirtoCommerce.CartModule.Data.Repositories
         }
 
         protected CartDbContext(DbContextOptions options)
+            : base(options)
         {
-
         }
 
         protected override void OnModelCreating(ModelBuilder modelBuilder)
