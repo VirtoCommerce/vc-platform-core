@@ -41,6 +41,7 @@ namespace VirtoCommerce.ExportModule.Data.Services
             {
                 jsonSettings.NullValueHandling = NullValueHandling.Ignore;
                 jsonSettings.DefaultValueHandling = DefaultValueHandling.Ignore;
+                jsonSettings.ReferenceLoopHandling = ReferenceLoopHandling.Ignore;
 #if DEBUG
                 jsonSettings.Formatting = Formatting.Indented;
 #endif

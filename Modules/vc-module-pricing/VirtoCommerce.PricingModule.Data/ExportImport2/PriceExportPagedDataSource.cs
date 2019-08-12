@@ -11,11 +11,27 @@ using VirtoCommerce.PricingModule.Core.Services;
 
 namespace VirtoCommerce.PricingModule.Data.ExportImport
 {
-    public class PriceExportPagedDataSource : BaseExportPagedDataSource
+    public class PriceExportPagedDataSource : IPagedDataSource
     {
+        protected class FetchResult
+        {
+            public IEnumerable<IExportable> Results { get; set; }
+            public int TotalCount { get; set; }
+
+            public FetchResult(IEnumerable<IExportable> results, int totalCount)
+            {
+                Results = results;
+                TotalCount = totalCount;
+            }
+        }
+
         private readonly IPricingSearchService _searchService;
         private readonly IPricingService _pricingService;
         private readonly IItemService _itemService;
+
+        public ExportDataQuery DataQuery { get; set; }
+        private int _totalCount = -1;
+        private SearchCriteriaBase _searchCriteria;
 
         public PriceExportPagedDataSource(IPricingSearchService searchService,
             IPricingService pricingService,
@@ -27,7 +43,7 @@ namespace VirtoCommerce.PricingModule.Data.ExportImport
 
         }
 
-        protected override FetchResult FetchData(SearchCriteriaBase searchCriteria)
+        protected FetchResult FetchData(SearchCriteriaBase searchCriteria)
         {
             Price[] result;
             int totalCount;
@@ -44,13 +60,13 @@ namespace VirtoCommerce.PricingModule.Data.ExportImport
                 totalCount = priceSearchResult.TotalCount;
             }
 
-            return new FetchResult(result, totalCount);
+            return new FetchResult(ToExportable(result), totalCount);
         }
 
-        protected override IEnumerable<ViewableEntity> ToViewableEntities(IEnumerable<ICloneable> objects)
+        protected virtual IEnumerable<IExportable> ToExportable(IEnumerable<ICloneable> objects)
         {
             var models = objects.Cast<Price>();
-            var viewableMap = models.ToDictionary(x => x, x => ToViewableEntity(x) as PriceViewableEntity);
+            var viewableMap = models.ToDictionary(x => x, x => AbstractTypeFactory<ExportablePrice>.TryCreateInstance().FromModel(x));
 
             FillViewableEntitiesReferenceFields(viewableMap);
 
@@ -60,7 +76,7 @@ namespace VirtoCommerce.PricingModule.Data.ExportImport
             return result;
         }
 
-        protected virtual void FillViewableEntitiesReferenceFields(Dictionary<Price, PriceViewableEntity> viewableMap)
+        protected virtual void FillViewableEntitiesReferenceFields(Dictionary<Price, ExportablePrice> viewableMap)
         {
             var models = viewableMap.Keys;
 
@@ -86,27 +102,49 @@ namespace VirtoCommerce.PricingModule.Data.ExportImport
             }
         }
 
-        protected override ViewableEntity ToViewableEntity(object obj)
+        public int GetTotalCount()
         {
-            if (!(obj is Price model))
+            if (_totalCount < 0)
             {
-                throw new System.InvalidCastException(nameof(Price));
+                var searchCriteria = MakeSearchCriteria(DataQuery as PriceExportDataQuery);
+
+                searchCriteria.Skip = 0;
+                searchCriteria.Take = 0;
+
+                var result = FetchData(searchCriteria);
+                _totalCount = result.TotalCount;
             }
+            return _totalCount;
+        }
 
-            var result = AbstractTypeFactory<PriceViewableEntity>.TryCreateInstance();
+        public IEnumerable<IExportable> FetchNextPage()
+        {
+            EnsureSearchCriteriaInitialized();
+            var result = FetchData(_searchCriteria);
+            _totalCount = result.TotalCount;
+            _searchCriteria.Skip += _searchCriteria.Take;
+            return result.Results;
+        }
 
-            result.FromEntity(model);
+        private void EnsureSearchCriteriaInitialized()
+        {
+            if (_searchCriteria == null)
+            {
+                _searchCriteria = MakeSearchCriteria(DataQuery as PriceExportDataQuery);
+            }
+        }
 
-            result.Currency = model.Currency;
-            result.EndDate = model.EndDate;
-            result.List = model.List;
-            result.MinQuantity = model.MinQuantity;
-            result.OuterId = model.OuterId;
-            result.PricelistId = model.PricelistId;
-            result.ProductId = model.ProductId;
-            result.Sale = model.Sale;
-            result.StartDate = model.StartDate;
-
+        private PricesSearchCriteria MakeSearchCriteria(PriceExportDataQuery dataQuery)
+        {
+            var result = AbstractTypeFactory<PricesSearchCriteria>.TryCreateInstance();
+            result.ObjectIds = dataQuery.ObjectIds;
+            result.Keyword = dataQuery.Keyword;
+            result.Sort = dataQuery.Sort;
+            result.Skip = dataQuery.Skip ?? result.Skip;
+            result.Take = dataQuery.Take ?? result.Take;
+            result.PriceListIds = dataQuery.PriceListIds;
+            result.ProductIds = dataQuery.ProductIds;
+            result.ModifiedSince = dataQuery.ModifiedSince;
             return result;
         }
     }
