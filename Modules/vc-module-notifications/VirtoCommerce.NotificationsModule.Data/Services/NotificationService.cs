@@ -32,7 +32,9 @@ namespace VirtoCommerce.NotificationsModule.Data.Services
             using (var repository = _repositoryFactory())
             {
                 var notifications = await repository.GetByIdsAsync(ids, responseGroup);
-                return notifications.Select(n => n.ToModel(AbstractTypeFactory<Notification>.TryCreateInstance(n.Type))).ToArray();
+                return notifications.Select(n => {
+                    return n.ToModel(AbstractTypeFactory<Notification>.TryCreateInstance(n.Type));
+                    }).ToArray();
             }
         }
 

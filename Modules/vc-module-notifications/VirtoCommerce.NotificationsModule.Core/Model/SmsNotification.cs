@@ -33,5 +33,10 @@ namespace VirtoCommerce.NotificationsModule.Core.Model
             smsNotificationMessage.Number = Number;
             return base.ToMessage(message, render);
         }
+
+        public override void SetFromToMembers(string from, string to)
+        {
+            Number = to;
+        }
     }
 }

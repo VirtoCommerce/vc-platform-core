@@ -37,45 +37,44 @@ namespace VirtoCommerce.PricingModule.Data.Services
         {
             var cacheKey = CacheKey.With(GetType(), nameof(SearchPricesAsync), criteria.GetCacheKey());
             return _platformMemoryCache.GetOrCreateExclusiveAsync(cacheKey, async cacheEntry =>
+            {
+                cacheEntry.AddExpirationToken(PricesCacheRegion.CreateChangeToken());
+                cacheEntry.AddExpirationToken(PricingSearchCacheRegion.CreateChangeToken());
+
+                var result = AbstractTypeFactory<PriceSearchResult>.TryCreateInstance();
+
+                using (var repository = _repositoryFactory())
                 {
-                    cacheEntry.AddExpirationToken(PricesCacheRegion.CreateChangeToken());
-                    cacheEntry.AddExpirationToken(PricingSearchCacheRegion.CreateChangeToken());
+                    var query = BuildQuery(repository, criteria);
+                    var sortInfos = BuildSortExpression(criteria);
+                    //Try to replace sorting columns names
+                    TryTransformSortingInfoColumnNames(_pricesSortingAliases, sortInfos);
 
-                    var result = AbstractTypeFactory<PriceSearchResult>.TryCreateInstance();
-
-                    using (var repository = _repositoryFactory())
+                    // TODO: add checks for criteria.Take being greater than 0
+                    if (criteria.GroupByProducts)
                     {
-                        var query = BuildQuery(repository, criteria);
-                        var sortInfos = BuildSortExpression(criteria);
-                        //Try to replace sorting columns names
-                        TryTransformSortingInfoColumnNames(_pricesSortingAliases, sortInfos);             
-
-                        // TODO: add checks for criteria.Take being greater than 0
-                        if (criteria.GroupByProducts)
-                        {
-                            var groupedQuery = query.GroupBy(x => x.ProductId).OrderBy(x => 1);
-                            result.TotalCount = await groupedQuery.CountAsync();
-                            query = groupedQuery.Skip(criteria.Skip).Take(criteria.Take).SelectMany(x => x);
-                        }
-                        else
-                        {
-                            result.TotalCount = await query.CountAsync();
-                            query = query.Skip(criteria.Skip).Take(criteria.Take);
-                        }
-
-                        if (criteria.Take > 0)
-                        {
-                            var priceIds = await query.OrderBySortInfos(sortInfos).ThenBy(x => x.Id)
-                                                                .Select(x => x.Id)
-                                                                .Skip(criteria.Skip).Take(criteria.Take)
-                                                                .ToArrayAsync();
-
-                            var unorderedResults = await _pricingService.GetPricesByIdAsync(priceIds);
-                            result.Results = unorderedResults.OrderBy(x => Array.IndexOf(priceIds, x.Id)).ToList();
-                        }
+                        var groupedQuery = query.GroupBy(x => x.ProductId).OrderBy(x => 1);
+                        result.TotalCount = await groupedQuery.CountAsync();
+                        query = groupedQuery.Skip(criteria.Skip).Take(criteria.Take).SelectMany(x => x);
                     }
-                    return result;
-                });
+                    else
+                    {
+                        result.TotalCount = await query.CountAsync();
+                        query = query.Skip(criteria.Skip).Take(criteria.Take);
+                    }
+
+                    if (criteria.Take > 0)
+                    {
+                        var priceIds = await query.OrderBySortInfos(sortInfos).ThenBy(x => x.Id)
+                                                            .Select(x => x.Id)
+                                                            .ToArrayAsync();
+
+                        var unorderedResults = await _pricingService.GetPricesByIdAsync(priceIds);
+                        result.Results = unorderedResults.OrderBy(x => Array.IndexOf(priceIds, x.Id)).ToList();
+                    }
+                }
+                return result;
+            });
         }
 
         public virtual async Task<PricelistSearchResult> SearchPricelistsAsync(PricelistSearchCriteria criteria)
@@ -90,7 +89,7 @@ namespace VirtoCommerce.PricingModule.Data.Services
                 {
                     var query = BuildQuery(repository, criteria);
                     var sortInfos = BuildSortExpression(criteria);
-                    
+
                     result.TotalCount = await query.CountAsync();
 
                     if (criteria.Take > 0)
@@ -126,8 +125,8 @@ namespace VirtoCommerce.PricingModule.Data.Services
 
                     if (criteria.Take > 0)
                     {
-                        var pricelistAssignmentsIds = await query.OrderBySortInfos(sortInfos).ThenBy(x=>x.Id)
-                                                                 .Select(x=>x.Id)
+                        var pricelistAssignmentsIds = await query.OrderBySortInfos(sortInfos).ThenBy(x => x.Id)
+                                                                 .Select(x => x.Id)
                                                                 .Skip(criteria.Skip).Take(criteria.Take)
                                                                 .ToArrayAsync();
                         var unorderedResults = await _pricingService.GetPricelistAssignmentsByIdAsync(pricelistAssignmentsIds);

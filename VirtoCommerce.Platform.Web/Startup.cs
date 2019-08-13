@@ -321,8 +321,7 @@ namespace VirtoCommerce.Platform.Web
                 services.AddHangfire(config => config.UseMemoryStorage());
             }
 
-            var mvcJsonOptions = services.BuildServiceProvider().GetService<IOptions<MvcJsonOptions>>();
-            JobHelper.SetSerializerSettings(mvcJsonOptions.Value.SerializerSettings);
+            
         }
 
         // This method gets called by the runtime. Use this method to configure the HTTP request pipeline.
@@ -414,6 +413,9 @@ namespace VirtoCommerce.Platform.Web
 
             //Seed default users
             app.UseDefaultUsersAsync().GetAwaiter().GetResult();
+
+            var mvcJsonOptions = app.ApplicationServices.GetService<IOptions<MvcJsonOptions>>();
+            JobHelper.SetSerializerSettings(mvcJsonOptions.Value.SerializerSettings);
         }
     }
 }

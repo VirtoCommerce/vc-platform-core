@@ -58,5 +58,11 @@ namespace VirtoCommerce.NotificationsModule.Core.Model
 
             return base.ToMessage(message, render);
         }
+
+        public override void SetFromToMembers(string from, string to)
+        {
+            From = from;
+            To = to;
+        }
     }
 }

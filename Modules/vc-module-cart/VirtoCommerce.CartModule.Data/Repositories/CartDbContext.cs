@@ -11,7 +11,7 @@ namespace VirtoCommerce.CartModule.Data.Repositories
         {
         }
 
-        public CartDbContext(DbContextOptions options)
+        protected CartDbContext(DbContextOptions options)
             : base(options)
         {
         }

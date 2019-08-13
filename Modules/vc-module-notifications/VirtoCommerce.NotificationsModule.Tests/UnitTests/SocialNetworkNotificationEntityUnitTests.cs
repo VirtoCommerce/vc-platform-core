@@ -62,6 +62,10 @@ namespace VirtoCommerce.NotificationsModule.Tests.UnitTests
     {
         public string Token { get; set; }
         public override string Kind => nameof(SocialNetworkNotification);
+        public override void SetFromToMembers(string from, string to)
+        {
+            
+        }
     }
 
     public class SocialNetworkTemplate : NotificationTemplate
