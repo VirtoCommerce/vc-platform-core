@@ -23,7 +23,6 @@ namespace VirtoCommerce.OrdersModule.Data.Repositories
 
             modelBuilder.Entity<CustomerOrderEntity>().ToTable("CustomerOrder").HasKey(x => x.Id);
             modelBuilder.Entity<CustomerOrderEntity>().Property(x => x.Id).HasMaxLength(128);
-            modelBuilder.Entity<CustomerOrderEntity>().ToTable("CustomerOrder");
             modelBuilder.Entity<CustomerOrderEntity>().Property(x => x.TaxPercentRate).HasColumnType("decimal(18,4)");
 
             #endregion
