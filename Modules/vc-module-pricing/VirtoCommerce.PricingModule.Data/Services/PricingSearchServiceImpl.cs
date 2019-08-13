@@ -1,14 +1,3 @@
-using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Threading.Tasks;
-using Microsoft.EntityFrameworkCore;
-using Microsoft.Extensions.Caching.Memory;
-using VirtoCommerce.Platform.Core.Caching;
-using VirtoCommerce.Platform.Core.Common;
-using VirtoCommerce.PricingModule.Core.Model;
-using VirtoCommerce.PricingModule.Core.Model.Search;
-using VirtoCommerce.PricingModule.Core.Services;
 using VirtoCommerce.PricingModule.Data.Caching;
 using VirtoCommerce.PricingModule.Data.Model;
 using VirtoCommerce.PricingModule.Data.Repositories;
@@ -48,7 +37,7 @@ namespace VirtoCommerce.PricingModule.Data.Services
                         var query = BuildQuery(repository, criteria);
                         var sortInfos = BuildSortExpression(criteria);
                         //Try to replace sorting columns names
-                        TryTransformSortingInfoColumnNames(_pricesSortingAliases, sortInfos);             
+                        TryTransformSortingInfoColumnNames(_pricesSortingAliases, sortInfos);
 
                         // TODO: add checks for criteria.Take being greater than 0
                         if (criteria.GroupByProducts)
@@ -67,7 +56,6 @@ namespace VirtoCommerce.PricingModule.Data.Services
                         {
                             var priceIds = await query.OrderBySortInfos(sortInfos).ThenBy(x => x.Id)
                                                                 .Select(x => x.Id)
-                                                                .Skip(criteria.Skip).Take(criteria.Take)
                                                                 .ToArrayAsync();
 
                             var unorderedResults = await _pricingService.GetPricesByIdAsync(priceIds);
@@ -90,7 +78,7 @@ namespace VirtoCommerce.PricingModule.Data.Services
                 {
                     var query = BuildQuery(repository, criteria);
                     var sortInfos = BuildSortExpression(criteria);
-                    
+
                     result.TotalCount = await query.CountAsync();
 
                     if (criteria.Take > 0)
@@ -126,8 +114,8 @@ namespace VirtoCommerce.PricingModule.Data.Services
 
                     if (criteria.Take > 0)
                     {
-                        var pricelistAssignmentsIds = await query.OrderBySortInfos(sortInfos).ThenBy(x=>x.Id)
-                                                                 .Select(x=>x.Id)
+                        var pricelistAssignmentsIds = await query.OrderBySortInfos(sortInfos).ThenBy(x => x.Id)
+                                                                 .Select(x => x.Id)
                                                                 .Skip(criteria.Skip).Take(criteria.Take)
                                                                 .ToArrayAsync();
                         var unorderedResults = await _pricingService.GetPricelistAssignmentsByIdAsync(pricelistAssignmentsIds);
