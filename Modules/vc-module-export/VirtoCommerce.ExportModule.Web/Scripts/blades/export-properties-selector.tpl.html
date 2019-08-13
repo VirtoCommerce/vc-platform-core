@@ -10,9 +10,9 @@
                     <a class="btn-ico fa fa-check-circle" ng-click="selectAllInGroup(key)"></a>
                     <a class="btn-ico fa fa-times-circle" ng-click="clearAllInGroup(key)"></a>
                     <ui-select multiple ng-model="blade.selectedEntities[key]" on-select="sortSelected(key)">
-                        <ui-select-match placeholder="{{'export.blades.export-settings.labels.exported-columns-group' | translate}}">{{$item.name}}</ui-select-match>
-                        <ui-select-choices repeat="x as x in values | orderBy: 'name' | filter: { name: $select.search }">
-                            <span ng-bind-html="x.name | highlight: $select.search"></span>
+                        <ui-select-match placeholder="{{'export.blades.export-settings.labels.exported-properties-group' | translate}}">{{$item.displayName}}</ui-select-match>
+                        <ui-select-choices repeat="x as x in values | orderBy: 'displayName' | filter: { displayName: $select.search }">
+                            <span ng-bind-html="x.displayName | highlight: $select.search"></span>
                         </ui-select-choices>
                     </ui-select>
                 </div>

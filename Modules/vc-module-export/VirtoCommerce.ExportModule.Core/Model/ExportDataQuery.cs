@@ -1,14 +1,17 @@
 using System;
+using Newtonsoft.Json;
 using VirtoCommerce.Platform.Core.Common;
 
 namespace VirtoCommerce.ExportModule.Core.Model
 {
     /// <summary>
-    /// Basic query information for data sources to retrieve exported data: included columns, paging, sorting, etc...
+    /// Basic query information for data sources to retrieve exported data: included properties, paging, sorting, etc...
     /// Applied data sources expand it by adding certain criteria (for example, additional information for searching)
     /// </summary>
     public abstract class ExportDataQuery : ValueObject
     {
+        [JsonProperty("exportTypeName")]
+        public string ExportTypeName => GetType().Name;
         /// <summary>
         /// Keyword to search data
         /// </summary>
@@ -22,9 +25,9 @@ namespace VirtoCommerce.ExportModule.Core.Model
         /// </summary>
         public string Sort { get; set; }
         /// <summary>
-        /// User selected columns to export 
+        /// User selected properties to export 
         /// </summary>
-        public ExportedTypeColumnInfo[] IncludedColumns { get; set; } = Array.Empty<ExportedTypeColumnInfo>();
+        public ExportedTypePropertyInfo[] IncludedProperties { get; set; } = Array.Empty<ExportedTypePropertyInfo>();
         /// <summary>
         /// Paging: skip records
         /// </summary>

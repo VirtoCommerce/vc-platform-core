@@ -11,6 +11,6 @@ namespace VirtoCommerce.ExportModule.Core.Model
         /// <summary>
         /// Set of columns to export
         /// </summary>
-        public ExportedTypeColumnInfo[] PropertyInfos { get; set; }
+        public ExportedTypePropertyInfo[] PropertyInfos { get; set; }
     }
 }
