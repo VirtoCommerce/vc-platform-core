@@ -107,6 +107,8 @@ angular.module('virtoCommerce.exportModule')
             }
 
             blade.exportDataRequest.providerName = blade.selectedProvider.id;
+            blade.exportDataRequest.dataQuery.skip = undefined;
+            blade.exportDataRequest.dataQuery.take = undefined;
             blade.isExporting = true;
 
             var progressBlade = {

@@ -38,6 +38,6 @@ namespace VirtoCommerce.ExportModule.Core.Model
         /// <summary>
         /// Paging: records in one page
         /// </summary>
-        public int? Take { get; set; } = 50;
+        public int? Take { get; set; }
     }
 }
