@@ -13,7 +13,7 @@ namespace VirtoCommerce.ExportModule.Data.Services
     public sealed class JsonExportProvider : IExportProvider
     {
         public string TypeName => nameof(JsonExportProvider);
-        public ExportedTypePropertyInfo[] IncludedColumns { get; private set; }
+        public ExportedTypePropertyInfo[] IncludedProperties { get; private set; }
         public string ExportedFileExtension => "json";
         public bool IsTabular => false;
         public IExportProviderConfiguration Configuration { get; }
@@ -26,10 +26,10 @@ namespace VirtoCommerce.ExportModule.Data.Services
         {
         }
 
-        public JsonExportProvider(IExportProviderConfiguration exportProviderConfiguration, ExportedTypePropertyInfo[] includedColumns)
+        public JsonExportProvider(IExportProviderConfiguration exportProviderConfiguration, ExportedTypePropertyInfo[] includedProperties)
         {
             Configuration = exportProviderConfiguration;
-            IncludedColumns = includedColumns;
+            IncludedProperties = includedProperties;
 
             var jsonSettings = new JsonSerializerSettings();
 

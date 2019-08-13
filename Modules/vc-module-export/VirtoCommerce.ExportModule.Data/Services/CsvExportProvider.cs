@@ -17,17 +17,17 @@ namespace VirtoCommerce.ExportModule.Data.Services
     public sealed class CsvExportProvider : IExportProvider
     {
         public string TypeName => nameof(CsvExportProvider);
-        public ExportedTypePropertyInfo[] IncludedColumns { get; private set; }
+        public ExportedTypePropertyInfo[] IncludedProperties { get; private set; }
         public string ExportedFileExtension => "csv";
         public bool IsTabular => true;
         public IExportProviderConfiguration Configuration { get; }
 
         private CsvWriter _csvWriter;
 
-        public CsvExportProvider(IExportProviderConfiguration exportProviderConfiguration, ExportedTypePropertyInfo[] includedColumns)
+        public CsvExportProvider(IExportProviderConfiguration exportProviderConfiguration, ExportedTypePropertyInfo[] includedProperties)
         {
             Configuration = exportProviderConfiguration;
-            IncludedColumns = includedColumns;
+            IncludedProperties = includedProperties;
         }
 
         public void WriteRecord(TextWriter writer, object objectToRecord)
@@ -63,10 +63,10 @@ namespace VirtoCommerce.ExportModule.Data.Services
 
             if (mapForType == null)
             {
-                var constructor = typeof(MetadataFilteredMap<>).MakeGenericType(objectType).GetConstructor(IncludedColumns != null
+                var constructor = typeof(MetadataFilteredMap<>).MakeGenericType(objectType).GetConstructor(IncludedProperties != null
                     ? new[] { typeof(ExportedTypePropertyInfo[]) }
                     : Array.Empty<Type>());
-                var classMap = (ClassMap)constructor.Invoke(IncludedColumns != null ? new[] { IncludedColumns } : null);
+                var classMap = (ClassMap)constructor.Invoke(IncludedProperties != null ? new[] { IncludedProperties } : null);
 
                 csvConfiguration.RegisterClassMap(classMap);
             }
@@ -83,10 +83,10 @@ namespace VirtoCommerce.ExportModule.Data.Services
         public MetadataFilteredMap() : this(null)
         { }
 
-        public MetadataFilteredMap(ExportedTypePropertyInfo[] includedColumns)
+        public MetadataFilteredMap(ExportedTypePropertyInfo[] includedProperties)
         {
             var exportedType = typeof(T);
-            var includedPropertiesInfo = includedColumns ?? exportedType.GetPropertyNames(true).PropertyInfos;
+            var includedPropertiesInfo = includedProperties ?? exportedType.GetPropertyNames(true).PropertyInfos;
             var columnIndex = 0;
 
             foreach (var includedPropertyInfo in includedPropertiesInfo)
