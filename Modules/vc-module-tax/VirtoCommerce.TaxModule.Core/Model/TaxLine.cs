@@ -9,6 +9,11 @@ namespace VirtoCommerce.TaxModule.Core.Model
     {
         public string Code { get; set; }
         public string Name { get; set; }
+
+        /// <summary>
+        /// Item type name (shipment, lineItem, car etc)
+        /// </summary>
+        public string TypeName { get; set; }
         /// <summary>
         /// Total sum  
         /// </summary>

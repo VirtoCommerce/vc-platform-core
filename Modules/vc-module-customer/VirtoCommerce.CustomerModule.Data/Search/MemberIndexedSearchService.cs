@@ -5,26 +5,30 @@ using System.Threading.Tasks;
 using VirtoCommerce.CustomerModule.Core.Model;
 using VirtoCommerce.CustomerModule.Core.Model.Search;
 using VirtoCommerce.CustomerModule.Core.Services;
+using VirtoCommerce.CustomerModule.Core.Services.Indexed;
 using VirtoCommerce.Platform.Core.Common;
 using VirtoCommerce.SearchModule.Core.Model;
 using VirtoCommerce.SearchModule.Core.Services;
 
 namespace VirtoCommerce.CustomerModule.Data.Search
 {
-    public class MemberIndexedSearchService
+    public class MemberIndexedSearchService : IIndexedMemberSearchService
     {
         private readonly IEnumerable<ISearchRequestBuilder> _searchRequestBuilders;
         private readonly ISearchProvider _searchProvider;
         private readonly IMemberService _memberService;
 
-        public MemberIndexedSearchService(IEnumerable<ISearchRequestBuilder> searchRequestBuilders, ISearchProvider searchProvider, IMemberService memberService)
+        public MemberIndexedSearchService(
+            IEnumerable<ISearchRequestBuilder> searchRequestBuilders
+            , ISearchProvider searchProvider
+            , IMemberService memberService)
         {
             _searchRequestBuilders = searchRequestBuilders;
             _searchProvider = searchProvider;
             _memberService = memberService;
         }
 
-        public virtual async Task<MemberSearchResult> SearchAsync(MembersSearchCriteria criteria)
+        public virtual async Task<MemberSearchResult> SearchMembersAsync(MembersSearchCriteria criteria)
         {
             var requestBuilder = GetRequestBuilder(criteria);
             var request = await requestBuilder?.BuildRequestAsync(criteria);

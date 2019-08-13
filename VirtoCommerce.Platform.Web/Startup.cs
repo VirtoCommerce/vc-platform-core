@@ -28,6 +28,7 @@ using VirtoCommerce.Platform.Assets.FileSystem.Extensions;
 using VirtoCommerce.Platform.Core;
 using VirtoCommerce.Platform.Core.Common;
 using VirtoCommerce.Platform.Core.Jobs;
+using VirtoCommerce.Platform.Core.Localizations;
 using VirtoCommerce.Platform.Core.Modularity;
 using VirtoCommerce.Platform.Core.Security;
 using VirtoCommerce.Platform.Data.Extensions;
@@ -71,7 +72,11 @@ namespace VirtoCommerce.Platform.Web
 
             services.AddOptions<PlatformOptions>().Bind(Configuration.GetSection("VirtoCommerce")).ValidateDataAnnotations();
             services.AddOptions<HangfireOptions>().Bind(Configuration.GetSection("VirtoCommerce:Jobs")).ValidateDataAnnotations();
-
+            services.AddOptions<TranslationOptions>().Configure(options =>
+            {
+                options.PlatformTranslationFolderPath = HostingEnvironment.MapPath(options.PlatformTranslationFolderPath);
+            });
+                       
             PlatformVersion.CurrentVersion = SemanticVersion.Parse(Microsoft.Extensions.PlatformAbstractions.PlatformServices.Default.Application.ApplicationVersion);
 
             services.AddPlatformServices(Configuration);
@@ -316,8 +321,7 @@ namespace VirtoCommerce.Platform.Web
                 services.AddHangfire(config => config.UseMemoryStorage());
             }
 
-            var mvcJsonOptions = services.BuildServiceProvider().GetService<IOptions<MvcJsonOptions>>();
-            JobHelper.SetSerializerSettings(mvcJsonOptions.Value.SerializerSettings);
+            
         }
 
         // This method gets called by the runtime. Use this method to configure the HTTP request pipeline.
@@ -409,6 +413,9 @@ namespace VirtoCommerce.Platform.Web
 
             //Seed default users
             app.UseDefaultUsersAsync().GetAwaiter().GetResult();
+
+            var mvcJsonOptions = app.ApplicationServices.GetService<IOptions<MvcJsonOptions>>();
+            JobHelper.SetSerializerSettings(mvcJsonOptions.Value.SerializerSettings);
         }
     }
 }

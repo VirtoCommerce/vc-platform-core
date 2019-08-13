@@ -32,21 +32,25 @@ namespace VirtoCommerce.MarketingModule.Data.Search
 
         public async Task<DynamicContentPublicationSearchResult> SearchContentPublicationsAsync(DynamicContentPublicationSearchCriteria criteria)
         {
-            var cacheKey = CacheKey.With(GetType(), "SearchContentPublicationsAsync", criteria.GetCacheKey());
+            var cacheKey = CacheKey.With(GetType(), nameof(SearchContentPublicationsAsync), criteria.GetCacheKey());
             return await _platformMemoryCache.GetOrCreateExclusiveAsync(cacheKey, async (cacheEntry) =>
             {
                 cacheEntry.AddExpirationToken(DynamicContentPublicationCacheRegion.CreateChangeToken());
                 var retVal = AbstractTypeFactory<DynamicContentPublicationSearchResult>.TryCreateInstance();
                 using (var repository = _repositoryFactory())
                 {
-                    var sortInfos = BuildSortInfos(criteria);
-                    var query = BuildSearchQuery(criteria, repository, sortInfos);
+                    var sortInfos = BuildSortExpression(criteria);
+                    var query = BuildQuery(criteria, repository);
 
                     retVal.TotalCount = await query.CountAsync();
 
                     if (criteria.Take > 0)
                     {
-                        var ids = await query.Select(x => x.Id).Skip(criteria.Skip).Take(criteria.Take).ToArrayAsync();
+                        var ids = await query.OrderBySortInfos(sortInfos).ThenBy(x => x.Id)
+                                             .Select(x => x.Id)
+                                             .Skip(criteria.Skip).Take(criteria.Take)
+                                             .ToArrayAsync();
+
                         retVal.Results = (await _dynamicContentService.GetPublicationsByIdsAsync(ids))
                             .OrderBy(x => Array.IndexOf(ids, x.Id)).ToList();
                     }
@@ -55,7 +59,7 @@ namespace VirtoCommerce.MarketingModule.Data.Search
             });
         }
 
-        protected virtual IList<SortInfo> BuildSortInfos(DynamicContentPublicationSearchCriteria criteria)
+        protected virtual IList<SortInfo> BuildSortExpression(DynamicContentPublicationSearchCriteria criteria)
         {
             var sortInfos = criteria.SortInfos;
             if (sortInfos.IsNullOrEmpty())
@@ -73,8 +77,7 @@ namespace VirtoCommerce.MarketingModule.Data.Search
             return sortInfos;
         }
 
-        protected virtual IQueryable<DynamicContentPublishingGroupEntity> BuildSearchQuery(DynamicContentPublicationSearchCriteria criteria,
-            IMarketingRepository repository, IList<SortInfo> sortInfos)
+        protected virtual IQueryable<DynamicContentPublishingGroupEntity> BuildQuery(DynamicContentPublicationSearchCriteria criteria, IMarketingRepository repository)
         {
             var query = repository.PublishingGroups;
             if (!string.IsNullOrEmpty(criteria.Store))
@@ -106,8 +109,6 @@ namespace VirtoCommerce.MarketingModule.Data.Search
             {
                 query = query.Where(q => q.Name.Contains(criteria.Keyword));
             }
-
-            query = query.OrderBySortInfos(sortInfos);
             return query;
         }
     }

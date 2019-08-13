@@ -124,7 +124,7 @@ namespace VirtoCommerce.CatalogModule.Data.Repositories
 
             if (!itemIds.IsNullOrEmpty())
             {
-                // Use breaking query EF performance concept https://msdn.microsoft.com/en-us/data/hh949853.aspx#8
+                // Use breaking query EF performance concept https://docs.microsoft.com/en-us/ef/ef6/fundamentals/performance/perf-whitepaper#8-loading-related-entities
                 result = await Items.Include(x => x.Images).Where(x => itemIds.Contains(x.Id)).ToArrayAsync();
 
                 if (result.Any())

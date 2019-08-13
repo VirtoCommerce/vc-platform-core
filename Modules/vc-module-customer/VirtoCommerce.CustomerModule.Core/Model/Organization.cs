@@ -6,5 +6,7 @@ namespace VirtoCommerce.CustomerModule.Core.Model
         public string BusinessCategory { get; set; }
         public string OwnerId { get; set; }
         public string ParentId { get; set; }
+
+        public override string ObjectType => typeof(Organization).FullName;
     }
 }

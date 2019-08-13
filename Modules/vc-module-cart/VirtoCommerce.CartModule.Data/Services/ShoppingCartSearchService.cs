@@ -11,6 +11,7 @@ using VirtoCommerce.CartModule.Data.Model;
 using VirtoCommerce.CartModule.Data.Repositories;
 using VirtoCommerce.Platform.Core.Caching;
 using VirtoCommerce.Platform.Core.Common;
+using VirtoCommerce.Platform.Data.Infrastructure;
 
 namespace VirtoCommerce.CartModule.Data.Services
 {
@@ -27,34 +28,40 @@ namespace VirtoCommerce.CartModule.Data.Services
             _cartService = cartService;
         }
 
-
         public async Task<ShoppingCartSearchResult> SearchCartAsync(ShoppingCartSearchCriteria criteria)
         {
-            var retVal = AbstractTypeFactory<ShoppingCartSearchResult>.TryCreateInstance();
-            var cacheKey = CacheKey.With(GetType(), "SearchCartAsync", criteria.GetCacheKey());
+            var result = AbstractTypeFactory<ShoppingCartSearchResult>.TryCreateInstance();
+            var cacheKey = CacheKey.With(GetType(), nameof(SearchCartAsync), criteria.GetCacheKey());
             return await _platformMemoryCache.GetOrCreateExclusiveAsync(cacheKey, async cacheEntry =>
             {
                 cacheEntry.AddExpirationToken(CartSearchCacheRegion.CreateChangeToken());
                 using (var repository = _repositoryFactory())
                 {
-                    var sortInfos = GetSortInfos(criteria);
-                    var query = GetQuery(repository, criteria, sortInfos);
+                    //Optimize performance and CPU usage
+                    repository.DisableChangesTracking();
 
-                    retVal.TotalCount = await query.CountAsync();
+                    var sortInfos = BuildSortExpression(criteria);
+                    var query = BuildQuery(repository, criteria);
+
+                    result.TotalCount = await query.CountAsync();
                     if (criteria.Take > 0)
                     {
-                        var cartIds = await query.Select(x => x.Id).Skip(criteria.Skip).Take(criteria.Take).ToArrayAsync();
-                        retVal.Results = (await _cartService.GetByIdsAsync(cartIds, criteria.ResponseGroup)).AsQueryable().OrderBySortInfos(sortInfos).ToArray();
+                        var ids = await query.OrderBySortInfos(sortInfos).ThenBy(x => x.Id)
+                                         .Select(x => x.Id)
+                                         .Skip(criteria.Skip).Take(criteria.Take)
+                                         .ToArrayAsync();
+
+                        result.Results = (await _cartService.GetByIdsAsync(ids, criteria.ResponseGroup)).OrderBy(x => Array.IndexOf(ids, x.Id)).ToList();
                     }
 
-                    return retVal;
+                    return result;
                 }
             });
         }
 
-        protected virtual IQueryable<ShoppingCartEntity> GetQuery(ICartRepository repository, ShoppingCartSearchCriteria criteria, IEnumerable<SortInfo> sortInfos)
+        protected virtual IQueryable<ShoppingCartEntity> BuildQuery(ICartRepository repository, ShoppingCartSearchCriteria criteria)
         {
-            var query = GetQueryableShoppingCarts(repository);
+            var query = repository.ShoppingCarts;
 
             if (!string.IsNullOrEmpty(criteria.Status))
             {
@@ -96,17 +103,10 @@ namespace VirtoCommerce.CartModule.Data.Services
                 query = query.Where(x => criteria.CustomerIds.Contains(x.CustomerId));
             }
 
-            query.OrderBySortInfos(sortInfos);
-
             return query;
         }
-
-        protected virtual IQueryable<ShoppingCartEntity> GetQueryableShoppingCarts(ICartRepository repository)
-        {
-            return repository.ShoppingCarts;
-        }
-
-        protected virtual IList<SortInfo> GetSortInfos(ShoppingCartSearchCriteria criteria)
+    
+        protected virtual IList<SortInfo> BuildSortExpression(ShoppingCartSearchCriteria criteria)
         {
             var sortInfos = criteria.SortInfos;
             if (sortInfos.IsNullOrEmpty())

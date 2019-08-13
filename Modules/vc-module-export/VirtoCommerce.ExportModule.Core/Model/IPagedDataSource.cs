@@ -4,7 +4,8 @@ namespace VirtoCommerce.ExportModule.Core.Model
 {
     public interface IPagedDataSource
     {
-        ExportDataQuery DataQuery { get; set; }
+        int CurrentPageNumber { get; }
+        int PageSize { get; set; }
         int GetTotalCount();
         IEnumerable<IExportable> FetchNextPage();
     }

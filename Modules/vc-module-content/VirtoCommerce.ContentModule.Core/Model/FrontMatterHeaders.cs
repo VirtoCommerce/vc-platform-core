@@ -8,7 +8,7 @@ namespace VirtoCommerce.ContentModule.Core.Model
     {
         #region IHasDynamicProperties Members
 
-        public string ObjectType => GetType().FullName;
+        public string ObjectType => typeof(FrontMatterHeaders).FullName;
         public ICollection<DynamicObjectProperty> DynamicProperties { get; set; }
 
         #endregion
@@ -17,7 +17,7 @@ namespace VirtoCommerce.ContentModule.Core.Model
 
         //https://jekyllrb.com/docs/frontmatter/
         //Register special ContentItem.FrontMatterHeaders type which will be used to define YAML headers for pages, blogs and posts
-        static string frontMatterHeaderType = typeof(FrontMatterHeaders).FullName;
+        private static string frontMatterHeaderType = typeof(FrontMatterHeaders).FullName;
 
         //Title
         public static DynamicProperty titleHeader = new DynamicProperty

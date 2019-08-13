@@ -49,9 +49,10 @@ namespace VirtoCommerce.Platform.Modules
                 var modulePath = Path.GetDirectoryName(manifestPath);
 
                 CopyAssemblies(modulePath, _options.ProbingPath);
-
-                var moduleInfo = new ManifestModuleInfo(manifest) { FullPhysicalPath = Path.GetDirectoryName(manifestPath) };
-
+                var moduleInfo = AbstractTypeFactory<ManifestModuleInfo>.TryCreateInstance();
+                moduleInfo.LoadFromManifest(manifest);
+                moduleInfo.FullPhysicalPath = Path.GetDirectoryName(manifestPath);
+             
                 // Modules without assembly file don't need initialization
                 if (string.IsNullOrEmpty(manifest.AssemblyFile))
                 {
@@ -101,7 +102,11 @@ namespace VirtoCommerce.Platform.Modules
                 {
                     if (exception.MissedDependenciesMatrix.Keys.Contains(module.ModuleName))
                     {
-                        module.Errors.Add($"A module declared a dependency on another module which is not declared to be loaded. Missing module(s): {string.Join(", ", exception.MissedDependenciesMatrix[module.ModuleName])}");
+                        var errorMessage = $"A module declared a dependency on another module which is not declared to be loaded. Missing module(s): {string.Join(", ", exception.MissedDependenciesMatrix[module.ModuleName])}";
+                        if (!module.Errors.Any(x => x.Contains(errorMessage)))
+                        {
+                            module.Errors.Add(errorMessage);
+                        }
                     }
                 }
             }

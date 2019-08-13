@@ -103,7 +103,7 @@ namespace VirtoCommerce.CatalogModule.Web.Controllers.Api
         [Route("~/api/catalog/listentrylinks")]
         public async Task<ActionResult> CreateLinks([FromBody] CategoryLink[] links)
         {
-           
+
             var entryIds = links.Select(x => x.EntryId).ToArray();
             var hasLinkEntries = await LoadCatalogEntriesAsync<IHasLinks>(entryIds);
 
@@ -137,19 +137,16 @@ namespace VirtoCommerce.CatalogModule.Web.Controllers.Api
         [Route("~/api/catalog/listentrylinks/bulkcreate")]
         public async Task<ActionResult> BulkCreateLinks([FromBody]BulkLinkCreationRequest creationRequest)
         {
-            if (creationRequest.CatalogId.IsNullOrEmpty() || creationRequest.CategoryId.IsNullOrEmpty())
+            if (creationRequest.CatalogId.IsNullOrEmpty())
             {
-                return BadRequest("Target catalog and category identifiers should be specified.");
+                return BadRequest("Target catalog identifier should be specified.");
             }
 
             var searchCriteria = creationRequest.SearchCriteria;
-
             bool haveProducts;
 
             do
             {
-                var links = new List<IHasLinks>();
-
                 var searchResult = await _listEntrySearchService.SearchAsync(searchCriteria);
                 var hasLinkEntries = await LoadCatalogEntriesAsync<IHasLinks>(searchResult.ListEntries.Select(x => x.Id).ToArray());
                 haveProducts = hasLinkEntries.Any();
@@ -160,6 +157,14 @@ namespace VirtoCommerce.CatalogModule.Web.Controllers.Api
                 if (!authorizationResult.Succeeded)
                 {
                     return Unauthorized();
+                }
+
+                foreach (var hasLinkEntry in hasLinkEntries)
+                {
+                    var link = AbstractTypeFactory<CategoryLink>.TryCreateInstance();
+                    link.CategoryId = creationRequest.CategoryId;
+                    link.CatalogId = creationRequest.CatalogId;
+                    hasLinkEntry.Links.Add(link);
                 }
 
                 if (haveProducts)
@@ -187,7 +192,7 @@ namespace VirtoCommerce.CatalogModule.Web.Controllers.Api
         [HttpPost]
         [Route("~/api/catalog/listentrylinks/delete")]
         public async Task<ActionResult> DeleteLinks([FromBody]CategoryLink[] links)
-        {           
+        {
             var entryIds = links.Select(x => x.EntryId).ToArray();
             var hasLinkEntries = await LoadCatalogEntriesAsync<IHasLinks>(entryIds);
 

@@ -21,6 +21,7 @@ namespace VirtoCommerce.Platform.Data.TransactionFileManager.Operations
             if (File.Exists(path))
             {
                 string temp = TransactionFileUtils.GetTempFileName(Path.GetExtension(path));
+                TransactionFileUtils.EnsureTempFolderExists();
                 File.Copy(path, temp);
                 backupPath = temp;
             }

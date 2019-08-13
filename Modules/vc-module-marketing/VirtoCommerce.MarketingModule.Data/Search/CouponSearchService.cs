@@ -11,7 +11,6 @@ using VirtoCommerce.MarketingModule.Core.Services;
 using VirtoCommerce.MarketingModule.Data.Caching;
 using VirtoCommerce.MarketingModule.Data.Model;
 using VirtoCommerce.MarketingModule.Data.Repositories;
-using VirtoCommerce.MarketingModule.Data.Services;
 using VirtoCommerce.Platform.Core.Caching;
 using VirtoCommerce.Platform.Core.Common;
 
@@ -37,15 +36,15 @@ namespace VirtoCommerce.MarketingModule.Data.Search
                 throw new ArgumentNullException(nameof(criteria));
             }
 
-            var cacheKey = CacheKey.With(GetType(), "SearchCouponsAsync", criteria.GetCacheKey());
+            var cacheKey = CacheKey.With(GetType(), nameof(SearchCouponsAsync), criteria.GetCacheKey());
             return await _platformMemoryCache.GetOrCreateExclusiveAsync(cacheKey, async (cacheEntry) =>
             {
                 cacheEntry.AddExpirationToken(CouponCacheRegion.CreateChangeToken());
 
                 using (var repository = _repositoryFactory())
                 {
-                    var sortInfos = BuildSortInfos(criteria);
-                    var query = BuildSearchQuery(criteria, repository, sortInfos);
+                    var sortInfos = BuildSearchExpression(criteria);
+                    var query = BuildQuery(criteria, repository);
 
                     var totalCount = await query.CountAsync();
                     var searchResult = AbstractTypeFactory<CouponSearchResult>.TryCreateInstance();
@@ -53,7 +52,11 @@ namespace VirtoCommerce.MarketingModule.Data.Search
 
                     if (criteria.Take > 0)
                     {
-                        var ids = await query.Select(x => x.Id).Skip(criteria.Skip).Take(criteria.Take).ToArrayAsync();
+                        var ids = await query.OrderBySortInfos(sortInfos).ThenBy(x => x.Id)
+                                             .Select(x => x.Id)
+                                             .Skip(criteria.Skip).Take(criteria.Take)
+                                             .ToArrayAsync();
+
                         searchResult.Results = (await _couponService.GetByIdsAsync(ids)).OrderBy(x => Array.IndexOf(ids, x.Id)).ToList();
                     }
 
@@ -62,7 +65,7 @@ namespace VirtoCommerce.MarketingModule.Data.Search
             });
         }
 
-        protected virtual IQueryable<CouponEntity> BuildSearchQuery(CouponSearchCriteria criteria, IMarketingRepository repository, IList<SortInfo> sortInfos)
+        protected virtual IQueryable<CouponEntity> BuildQuery(CouponSearchCriteria criteria, IMarketingRepository repository)
         {
             var query = repository.Coupons;
 
@@ -81,12 +84,10 @@ namespace VirtoCommerce.MarketingModule.Data.Search
                 query = query.Where(c => criteria.Codes.Contains(c.Code));
             }
 
-            query = query.OrderBySortInfos(sortInfos);
-
             return query;
         }
 
-        protected virtual IList<SortInfo> BuildSortInfos(CouponSearchCriteria criteria)
+        protected virtual IList<SortInfo> BuildSearchExpression(CouponSearchCriteria criteria)
         {
             var sortInfos = criteria.SortInfos;
             //TODO: Sort by TotalUsesCount 

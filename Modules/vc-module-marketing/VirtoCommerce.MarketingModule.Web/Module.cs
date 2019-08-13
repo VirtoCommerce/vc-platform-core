@@ -53,7 +53,7 @@ namespace VirtoCommerce.MarketingModule.Web
 
             serviceCollection.AddTransient<IMarketingRepository, MarketingRepository>();
             serviceCollection.AddDbContext<MarketingDbContext>(options => options.UseSqlServer(connectionString));
-            serviceCollection.AddSingleton<Func<IMarketingRepository>>(provider => () => provider.CreateScope().ServiceProvider.GetRequiredService<IMarketingRepository>());
+            serviceCollection.AddTransient<Func<IMarketingRepository>>(provider => () => provider.CreateScope().ServiceProvider.GetRequiredService<IMarketingRepository>());
 
             var promotionExtensionManager = new DefaultMarketingExtensionManager();
 
@@ -61,28 +61,28 @@ namespace VirtoCommerce.MarketingModule.Web
             #region Services
 
             serviceCollection.AddSingleton<IMarketingExtensionManager>(promotionExtensionManager);
-            serviceCollection.AddSingleton<IPromotionService, PromotionService>();
-            serviceCollection.AddSingleton<ICouponService, CouponService>();
-            serviceCollection.AddSingleton<IPromotionUsageService, PromotionUsageService>();
-            serviceCollection.AddSingleton<IMarketingDynamicContentEvaluator, DefaultDynamicContentEvaluator>();
-            serviceCollection.AddSingleton<IDynamicContentService, DynamicContentService>();
-            serviceCollection.AddSingleton<ICouponService, CouponService>();
+            serviceCollection.AddTransient<IPromotionService, PromotionService>();
+            serviceCollection.AddTransient<ICouponService, CouponService>();
+            serviceCollection.AddTransient<IPromotionUsageService, PromotionUsageService>();
+            serviceCollection.AddTransient<IMarketingDynamicContentEvaluator, DefaultDynamicContentEvaluator>();
+            serviceCollection.AddTransient<IDynamicContentService, DynamicContentService>();
+            serviceCollection.AddTransient<ICouponService, CouponService>();
 
             #endregion
 
             #region Search
 
-            serviceCollection.AddSingleton<IContentItemsSearchService, ContentItemsSearchService>();
-            serviceCollection.AddSingleton<IContentPlacesSearchService, ContentPlacesSearchService>();
-            serviceCollection.AddSingleton<IContentPublicationsSearchService, ContentPublicationsSearchService>();
-            serviceCollection.AddSingleton<ICouponSearchService, CouponSearchService>();
-            serviceCollection.AddSingleton<IFolderSearchService, FolderSearchService>();
-            serviceCollection.AddSingleton<IPromotionSearchService, PromotionSearchService>();
-            serviceCollection.AddSingleton<IPromotionUsageSearchService, PromotionUsageSearchService>();
+            serviceCollection.AddTransient<IContentItemsSearchService, ContentItemsSearchService>();
+            serviceCollection.AddTransient<IContentPlacesSearchService, ContentPlacesSearchService>();
+            serviceCollection.AddTransient<IContentPublicationsSearchService, ContentPublicationsSearchService>();
+            serviceCollection.AddTransient<ICouponSearchService, CouponSearchService>();
+            serviceCollection.AddTransient<IFolderSearchService, FolderSearchService>();
+            serviceCollection.AddTransient<IPromotionSearchService, PromotionSearchService>();
+            serviceCollection.AddTransient<IPromotionUsageSearchService, PromotionUsageSearchService>();
 
             #endregion
 
-            serviceCollection.AddSingleton<CsvCouponImporter>();
+            serviceCollection.AddTransient<CsvCouponImporter>();
 
             serviceCollection.AddSingleton<IMarketingPromoEvaluator>(provider =>
             {
@@ -103,8 +103,8 @@ namespace VirtoCommerce.MarketingModule.Web
                 return new DynamicPromotion(couponSearchService, promotionUsagesSearchService);
             });
 
-            serviceCollection.AddSingleton<DynamicContentItemEventHandlers>();
-            serviceCollection.AddSingleton<MarketingExportImport>();
+            serviceCollection.AddTransient<DynamicContentItemEventHandlers>();
+            serviceCollection.AddTransient<MarketingExportImport>();
 
             serviceCollection.AddTransient<IAuthorizationHandler, MarketingAuthorizationHandler>();
         }

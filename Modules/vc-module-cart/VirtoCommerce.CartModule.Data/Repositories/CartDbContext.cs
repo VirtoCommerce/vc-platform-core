@@ -11,6 +11,11 @@ namespace VirtoCommerce.CartModule.Data.Repositories
         {
         }
 
+        protected CartDbContext(DbContextOptions options)
+        {
+
+        }
+
         protected override void OnModelCreating(ModelBuilder modelBuilder)
         {
             #region ShoppingCart

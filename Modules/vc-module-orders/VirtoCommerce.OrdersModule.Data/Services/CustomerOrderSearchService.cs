@@ -1,4 +1,5 @@
 using System;
+using System.Collections.Generic;
 using System.Linq;
 using System.Linq.Expressions;
 using System.Threading.Tasks;
@@ -31,7 +32,7 @@ namespace VirtoCommerce.OrdersModule.Data.Services
 
         public virtual async Task<CustomerOrderSearchResult> SearchCustomerOrdersAsync(CustomerOrderSearchCriteria criteria)
         {
-            var cacheKey = CacheKey.With(GetType(), "SearchCustomerOrdersAsync", criteria.GetCacheKey());
+            var cacheKey = CacheKey.With(GetType(), nameof(SearchCustomerOrdersAsync), criteria.GetCacheKey());
             return await _platformMemoryCache.GetOrCreateExclusiveAsync(cacheKey, async (cacheEntry) =>
             {
                 cacheEntry.AddExpirationToken(OrderSearchCacheRegion.CreateChangeToken());
@@ -41,34 +42,25 @@ namespace VirtoCommerce.OrdersModule.Data.Services
                     var result = AbstractTypeFactory<CustomerOrderSearchResult>.TryCreateInstance();
                     var orderResponseGroup = EnumUtility.SafeParseFlags(criteria.ResponseGroup, CustomerOrderResponseGroup.Full);
 
-                    var query = GetOrdersQuery(repository, criteria);
-
-                    var sortInfos = criteria.SortInfos;
-                    if (sortInfos.IsNullOrEmpty())
-                    {
-                        sortInfos = new[]
-                        {
-                            new SortInfo
-                            {
-                                SortColumn = ReflectionUtility.GetPropertyName<CustomerOrderEntity>(x => x.CreatedDate),
-                                SortDirection = SortDirection.Descending
-                            }
-                        };
-                    }
-                    query = query.OrderBySortInfos(sortInfos);
+                    var query = BuildQuery(repository, criteria);
+                    var sortInfos = BuildSortExpression(criteria);
 
                     result.TotalCount = await query.CountAsync();
-                    var orderIds = await query.Select(x => x.Id).Skip(criteria.Skip).Take(criteria.Take).ToArrayAsync();
-
-                    result.Results = (await _customerOrderService.GetByIdsAsync(orderIds, criteria.ResponseGroup)).AsQueryable()
-                                                   .OrderBySortInfos(sortInfos)
-                                                   .ToList();
+                    if (criteria.Take > 0)
+                    {
+                        var orderIds = await query.OrderBySortInfos(sortInfos).ThenBy(x => x.Id)
+                                                         .Select(x => x.Id)
+                                                         .Skip(criteria.Skip).Take(criteria.Take)
+                                                         .ToArrayAsync();
+                        var unorderedResults = await _customerOrderService.GetByIdsAsync(orderIds, criteria.ResponseGroup);
+                        result.Results = unorderedResults.OrderBy(x => Array.IndexOf(orderIds, x.Id)).ToList();
+                    }                  
                     return result;
                 }
             });
         }
 
-        protected virtual IQueryable<CustomerOrderEntity> GetOrdersQuery(IOrderRepository repository, CustomerOrderSearchCriteria criteria)
+        protected virtual IQueryable<CustomerOrderEntity> BuildQuery(IOrderRepository repository, CustomerOrderSearchCriteria criteria)
         {
             var query = repository.CustomerOrders;
 
@@ -133,6 +125,23 @@ namespace VirtoCommerce.OrdersModule.Data.Services
             }
 
             return query;
+        }
+
+        protected virtual IList<SortInfo> BuildSortExpression(CustomerOrderSearchCriteria criteria)
+        {
+            var sortInfos = criteria.SortInfos;
+            if (sortInfos.IsNullOrEmpty())
+            {
+                sortInfos = new[]
+                {
+                    new SortInfo
+                    {
+                        SortColumn = nameof(CustomerOrderEntity.CreatedDate),
+                        SortDirection = SortDirection.Descending
+                    }
+                };
+            }
+            return sortInfos;
         }
 
         protected virtual Expression<Func<CustomerOrderEntity, bool>> GetKeywordPredicate(CustomerOrderSearchCriteria criteria)

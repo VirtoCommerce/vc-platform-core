@@ -42,21 +42,20 @@ namespace VirtoCommerce.OrdersModule.Web
             serviceCollection.AddTransient<IOrderRepository, OrderRepository>();
             var connectionString = configuration.GetConnectionString("VirtoCommerce.Orders") ?? configuration.GetConnectionString("VirtoCommerce");
             serviceCollection.AddDbContext<OrderDbContext>(options => options.UseSqlServer(connectionString));
-            serviceCollection.AddSingleton<Func<IOrderRepository>>(provider => () => provider.CreateScope().ServiceProvider.GetRequiredService<IOrderRepository>());
-            serviceCollection.AddSingleton<ICustomerOrderSearchService, CustomerOrderSearchService>();
-            serviceCollection.AddSingleton<ICustomerOrderService, CustomerOrderService>();
-            serviceCollection.AddSingleton<ICustomerOrderBuilder, CustomerOrderBuilder>();
-            serviceCollection.AddSingleton<ICustomerOrderTotalsCalculator, DefaultCustomerOrderTotalsCalculator>();
-            serviceCollection.AddSingleton<OrderExportImport>();
-            serviceCollection.AddSingleton<OrderChangedEvent>();
-            serviceCollection.AddSingleton<AdjustInventoryOrderChangedEventHandler>();
-            serviceCollection.AddSingleton<CancelPaymentOrderChangedEventHandler>();
-            serviceCollection.AddSingleton<LogChangesOrderChangedEventHandler>();
+            serviceCollection.AddTransient<Func<IOrderRepository>>(provider => () => provider.CreateScope().ServiceProvider.GetRequiredService<IOrderRepository>());
+            serviceCollection.AddTransient<ICustomerOrderSearchService, CustomerOrderSearchService>();
+            serviceCollection.AddTransient<ICustomerOrderService, CustomerOrderService>();
+            serviceCollection.AddTransient<ICustomerOrderBuilder, CustomerOrderBuilder>();
+            serviceCollection.AddTransient<ICustomerOrderTotalsCalculator, DefaultCustomerOrderTotalsCalculator>();
+            serviceCollection.AddTransient<OrderExportImport>();
+            serviceCollection.AddTransient<AdjustInventoryOrderChangedEventHandler>();
+            serviceCollection.AddTransient<CancelPaymentOrderChangedEventHandler>();
+            serviceCollection.AddTransient<LogChangesOrderChangedEventHandler>();
             //Register as scoped because we use UserManager<> as dependency in this implementation
             serviceCollection.AddScoped<SendNotificationsOrderChangedEventHandler>();
-            serviceCollection.AddSingleton<PolymorphicOperationJsonConverter>();
+            serviceCollection.AddTransient<PolymorphicOperationJsonConverter>();
 
-            serviceCollection.AddSingleton<IAuthorizationHandler, OrderAuthorizationHandler>();
+            serviceCollection.AddTransient<IAuthorizationHandler, OrderAuthorizationHandler>();
         }
 
         public void PostInitialize(IApplicationBuilder appBuilder)

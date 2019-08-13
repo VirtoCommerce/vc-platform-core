@@ -52,7 +52,7 @@ namespace VirtoCommerce.PricingModule.Test
                         priceServiceMock.Object,
                         itemServiceMock.Object)
                     {
-                        DataQuery = dataQuery
+                        DataQuery = (PriceExportDataQuery)dataQuery
                     })
                 .WithMetadata(metadata)
                 .ExportedTypeDefinition);
@@ -129,7 +129,7 @@ namespace VirtoCommerce.PricingModule.Test
                         searchServiceMock.Object,
                         priceServiceMock.Object)
                     {
-                        DataQuery = dataQuery
+                        DataQuery = (PricelistExportDataQuery)dataQuery
                     })
                 .WithMetadata(metadata)
                 .ExportedTypeDefinition);
@@ -196,14 +196,14 @@ namespace VirtoCommerce.PricingModule.Test
 
             var metadata = typeof(ExportablePricelistAssignment).GetPropertyNames(true);
             var resolver = (IKnownExportTypesResolver)registrar;
-            registrar.RegisterType(ExportedTypeDefinitionBuilder.Build<ExportablePricelistAssignment, PricelistExportDataQuery>()
+            registrar.RegisterType(ExportedTypeDefinitionBuilder.Build<ExportablePricelistAssignment, PricelistAssignmentExportDataQuery>()
                 .WithDataSourceFactory(
                     dataQuery => new PricelistAssignmentExportPagedDataSource(
                         searchServiceMock.Object,
                         priceServiceMock.Object,
                         catalogServiceMock.Object)
                     {
-                        DataQuery = dataQuery
+                        DataQuery = (PricelistAssignmentExportDataQuery)dataQuery
                     })
                 .WithMetadata(metadata)
                 .ExportedTypeDefinition);
@@ -275,14 +275,14 @@ namespace VirtoCommerce.PricingModule.Test
             var itemServiceMock = new Mock<IItemService>();
 
             var metadata = typeof(ExportablePrice).GetPropertyNames(true);
-            registrar.RegisterType(ExportedTypeDefinitionBuilder.Build<ExportablePrice, PricelistExportDataQuery>()
+            registrar.RegisterType(ExportedTypeDefinitionBuilder.Build<ExportablePrice, PriceExportDataQuery>()
                 .WithDataSourceFactory(
                     dataQuery => new PriceExportPagedDataSource(
                         searchServiceMock.Object,
                         priceServiceMock.Object,
                         itemServiceMock.Object)
                     {
-                        DataQuery = dataQuery
+                        DataQuery = (PriceExportDataQuery)dataQuery
                     })
                 .WithMetadata(metadata)
                 .WithTabularDataConverter(new TabularPriceDataConverter())
