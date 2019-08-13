@@ -11,7 +11,7 @@ namespace VirtoCommerce.ExportModule.Data.Extensions
     {
         private class ExportTypePropertyInfoEx
         {
-            public ExportedTypePropertyInfo ColumnInfo { get; set; }
+            public ExportedTypePropertyInfo ExportedPropertyInfo { get; set; }
             public bool IsReference { get; set; }
             public PropertyInfo PropertyInfo { get; set; }
         }
@@ -29,7 +29,7 @@ namespace VirtoCommerce.ExportModule.Data.Extensions
 
             result.PropertyInfos = GetPropertyNames(type, type.Name, string.Empty, passedNodes, extractReferenceProperties)
                 .Where(x => !x.IsReference)
-                .Select(x => x.ColumnInfo)
+                .Select(x => x.ExportedPropertyInfo)
                 .ToArray();
 
             return result;
@@ -62,7 +62,7 @@ namespace VirtoCommerce.ExportModule.Data.Extensions
                     {
                         result.Add(new ExportTypePropertyInfoEx()
                         {
-                            ColumnInfo = new ExportedTypePropertyInfo
+                            ExportedPropertyInfo = new ExportedTypePropertyInfo
                             {
                                 FullName = memberName,
                                 DisplayName = memberName,
