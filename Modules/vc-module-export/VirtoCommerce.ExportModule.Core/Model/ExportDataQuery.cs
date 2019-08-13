@@ -10,6 +10,9 @@ namespace VirtoCommerce.ExportModule.Core.Model
     /// </summary>
     public abstract class ExportDataQuery : ValueObject
     {
+        /// <summary>
+        /// This used to instantiate data query of this type at export start.
+        /// </summary>
         [JsonProperty("exportTypeName")]
         public string ExportTypeName => GetType().Name;
         /// <summary>
