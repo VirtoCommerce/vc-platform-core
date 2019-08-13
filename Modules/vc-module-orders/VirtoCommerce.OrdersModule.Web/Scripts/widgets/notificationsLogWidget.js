@@ -11,8 +11,8 @@
                 objectTypeId: objectTypeId,
                 title: 'orders.widgets.notifications.title',
                 subtitle: 'orders.widgets.notifications.subtitle',
-                controller: 'platformWebApp.notificationsJournalController',
-                template: '$(Platform)/Scripts/app/notifications/blades/notifications-journal.tpl.html'
+                controller: 'virtoCommerce.notificationsModule.notificationsJournalController',
+                template: 'Modules/$(VirtoCommerce.Notifications)/Scripts/blades/notifications-journal.tpl.html'
             };
             bladeNavigationService.showBlade(newBlade, blade);
         };
