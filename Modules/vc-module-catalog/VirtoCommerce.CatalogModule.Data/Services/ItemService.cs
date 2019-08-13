@@ -56,28 +56,28 @@ namespace VirtoCommerce.CatalogModule.Data.Services
 
         #region IItemService Members
 
-        public virtual async Task<CatalogProduct[]> GetByIdsAsync(string[] itemIds, string responseGroup, string catalogId = null)
+        public virtual async Task<CatalogProduct[]> GetByIdsAsync(string[] itemIds, string respGroup, string catalogId = null)
         {
-            var itemResponseGroup = EnumUtility.SafeParseFlags(responseGroup, ItemResponseGroup.ItemLarge);
+            var itemResponseGroup = EnumUtility.SafeParseFlags(respGroup, ItemResponseGroup.ItemLarge);
 
             var cacheKey = CacheKey.With(GetType(), "GetByIdsAsync", string.Join("-", itemIds), itemResponseGroup.ToString(), catalogId);
-            return await _platformMemoryCache.GetOrCreateExclusiveAsync(cacheKey, async (cacheEntry) =>
+            var result = await _platformMemoryCache.GetOrCreateExclusiveAsync(cacheKey, async (cacheEntry) =>
             {
-                CatalogProduct[] result;
+                CatalogProduct[] products;
 
                 using (var repository = _repositoryFactory())
                 {
                     //Optimize performance and CPU usage
                     repository.DisableChangesTracking();
 
-                    result = (await repository.GetItemByIdsAsync(itemIds, responseGroup))
+                    products = (await repository.GetItemByIdsAsync(itemIds, respGroup))
                                        .Select(x => x.ToModel(AbstractTypeFactory<CatalogProduct>.TryCreateInstance()))
                                        .ToArray();
                 }
 
-                await LoadDependenciesAsync(result);
+                await LoadDependenciesAsync(products);
 
-                var productsWithVariationsList = result.Concat(result.Where(p => p.Variations != null)
+                var productsWithVariationsList = products.Concat(products.Where(p => p.Variations != null)
                                            .SelectMany(p => p.Variations)).ToArray();
                 ApplyInheritanceRules(productsWithVariationsList);
 
@@ -96,8 +96,9 @@ namespace VirtoCommerce.CatalogModule.Data.Services
                     cacheEntry.AddExpirationToken(CatalogCacheRegion.CreateChangeToken());
                 }
 
-                return result;
+                return products;
             });
+            return result.Select(x => x.Clone() as CatalogProduct).ToArray();
         }
 
         public virtual async Task<CatalogProduct> GetByIdAsync(string itemId, string responseGroup, string catalogId = null)
