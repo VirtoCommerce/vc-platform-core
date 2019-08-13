@@ -16,7 +16,6 @@ namespace VirtoCommerce.OrdersModule.Data.Repositories
         {
         }
 
-
         protected override void OnModelCreating(ModelBuilder modelBuilder)
         {
             #region CustomerOrder
