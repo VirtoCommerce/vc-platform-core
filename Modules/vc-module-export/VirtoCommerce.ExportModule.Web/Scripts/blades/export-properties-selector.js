@@ -1,19 +1,19 @@
 angular.module('virtoCommerce.exportModule')
-    .controller('virtoCommerce.exportModule.exportColumnsSelectorController', ['$scope', 'platformWebApp.bladeNavigationService', function ($scope, bladeNavigationService) {
+    .controller('virtoCommerce.exportModule.exportPropertiesSelectorController', ['$scope', 'platformWebApp.bladeNavigationService', function ($scope, bladeNavigationService) {
         var blade = $scope.blade;
 
         blade.isLoading = true;
 
         function initializeBlade() {
-            blade.title = 'export.blades.export-settings.labels.exported-columns';
+            blade.title = 'export.blades.export-settings.labels.exported-properties';
             blade.headIcon = 'fa-folder';
 
-            var allColumns = angular.copy(blade.allColumnsOfType);
-            allColumns = _.sortBy(allColumns, 'group', 'name');
-            var selectedColumns = angular.copy(blade.exportDataRequest.dataQuery.includedColumns);
-            selectedColumns = _.sortBy(selectedColumns, 'name');
-            blade.allEntities = _.groupBy(allColumns, 'group');
-            blade.selectedEntities = _.groupBy(selectedColumns, 'group');
+            var allProperties = angular.copy(blade.allPropertiesOfType);
+            allProperties = _.sortBy(allProperties, 'group', 'name');
+            var selectedProperties = angular.copy(blade.exportDataRequest.dataQuery.includedProperties);
+            selectedProperties = _.sortBy(selectedProperties, 'name');
+            blade.allEntities = _.groupBy(allProperties, 'group');
+            blade.selectedEntities = _.groupBy(selectedProperties, 'group');
             blade.isLoading = false;
         }
 
@@ -38,9 +38,9 @@ angular.module('virtoCommerce.exportModule')
         }
 
         $scope.saveChanges = function () {
-            var includedColumns = _.flatten(_.map(blade.selectedEntities, _.values));
+            var includedProperties = _.flatten(_.map(blade.selectedEntities, _.values));
             if (blade.onSelected) {
-                blade.onSelected(includedColumns);
+                blade.onSelected(includedProperties);
                 bladeNavigationService.closeBlade(blade);
             }
         };
