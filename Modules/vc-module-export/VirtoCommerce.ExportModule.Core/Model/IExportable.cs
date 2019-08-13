@@ -2,6 +2,9 @@ using System;
 
 namespace VirtoCommerce.ExportModule.Core.Model
 {
+    /// <summary>
+    /// Basic interface to implement exportаble entities
+    /// </summary>
     public interface IExportable : ICloneable
     {
         string Name { get; set; }

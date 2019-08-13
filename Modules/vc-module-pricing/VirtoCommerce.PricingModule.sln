@@ -1,6 +1,6 @@
 Microsoft Visual Studio Solution File, Format Version 12.00
-# Visual Studio Version 16
-VisualStudioVersion = 16.0.29123.88
+# Visual Studio 15
+VisualStudioVersion = 15.0.28307.489
 MinimumVisualStudioVersion = 10.0.40219.1
 Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "VirtoCommerce.PricingModule.Core", "VirtoCommerce.PricingModule.Core\VirtoCommerce.PricingModule.Core.csproj", "{EA833691-97E4-44A3-966F-AA933A73CB3D}"
 EndProject
@@ -26,7 +26,7 @@ Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "VirtoCommerce.ExportModule.
 EndProject
 Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "VirtoCommerce.ExportModule.Data", "..\vc-module-export\VirtoCommerce.ExportModule.Data\VirtoCommerce.ExportModule.Data.csproj", "{29EE63CC-6A6E-4B57-94FE-F0908B65C542}"
 EndProject
-Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "VirtoCommerce.Platform.Security", "..\..\VirtoCommerce.Platform.Security\VirtoCommerce.Platform.Security.csproj", "{EB5B6811-14EF-4D88-BAD4-67454C475EF0}"
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "VirtoCommerce.Platform.Security", "..\..\VirtoCommerce.Platform.Security\VirtoCommerce.Platform.Security.csproj", "{30F06542-F7F8-4B66-90B8-F953B581F153}"
 EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
@@ -82,10 +82,10 @@ Global
 		{29EE63CC-6A6E-4B57-94FE-F0908B65C542}.Debug|Any CPU.Build.0 = Debug|Any CPU
 		{29EE63CC-6A6E-4B57-94FE-F0908B65C542}.Release|Any CPU.ActiveCfg = Release|Any CPU
 		{29EE63CC-6A6E-4B57-94FE-F0908B65C542}.Release|Any CPU.Build.0 = Release|Any CPU
-		{EB5B6811-14EF-4D88-BAD4-67454C475EF0}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
-		{EB5B6811-14EF-4D88-BAD4-67454C475EF0}.Debug|Any CPU.Build.0 = Debug|Any CPU
-		{EB5B6811-14EF-4D88-BAD4-67454C475EF0}.Release|Any CPU.ActiveCfg = Release|Any CPU
-		{EB5B6811-14EF-4D88-BAD4-67454C475EF0}.Release|Any CPU.Build.0 = Release|Any CPU
+		{30F06542-F7F8-4B66-90B8-F953B581F153}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{30F06542-F7F8-4B66-90B8-F953B581F153}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{30F06542-F7F8-4B66-90B8-F953B581F153}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{30F06542-F7F8-4B66-90B8-F953B581F153}.Release|Any CPU.Build.0 = Release|Any CPU
 	EndGlobalSection
 	GlobalSection(SolutionProperties) = preSolution
 		HideSolutionNode = FALSE
