@@ -12,7 +12,7 @@ namespace VirtoCommerce.CustomerModule.Data.Repositories
 {
     public abstract class MemberRepositoryBase : DbContextRepositoryBase<CustomerDbContext>, IMemberRepository
     {
-        public MemberRepositoryBase(CustomerDbContext dbContext) : base(dbContext)
+        protected MemberRepositoryBase(CustomerDbContext dbContext) : base(dbContext)
         {
         }
 
