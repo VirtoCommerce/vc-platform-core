@@ -71,6 +71,6 @@ namespace VirtoCommerce.ExportModule.Data.Services
 
         protected abstract void FillSearchCriteria(TDataQuery dataQuery, TSearchCriteria searchCriteria);
 
-        protected abstract GenericSearchResult<IExportable> FetchData(TSearchCriteria searchCriteria);
+        protected abstract ExportableSearchResult FetchData(TSearchCriteria searchCriteria);
     }
 }
