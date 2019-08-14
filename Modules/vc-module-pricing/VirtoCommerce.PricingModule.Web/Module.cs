@@ -226,11 +226,11 @@ namespace VirtoCommerce.PricingModule.Web
                     .WithTabularMetadata(typeof(TabularPricelistAssignment).GetPropertyNames(false))
                     .ExportedTypeDefinition);
 
-            registrar.RegisterType(
-                new ExportedTypeDefinitionBuilder($@"{typeof(ExportablePricelist).FullName}FullData", typeof(ExportablePricelist).Namespace, typeof(PricelistExportDataQuery).Name)
-                    .WithDataSourceFactory(dataQuery => pricelistExportPagedDataSourceFactory(dataQuery))
-                    .WithMetadata(typeof(ExportablePricelist).GetPropertyNames(true))
-                    .ExportedTypeDefinition);
+            //registrar.RegisterType(
+            //    new ExportedTypeDefinitionBuilder($@"{typeof(ExportablePricelist).FullName}FullData", typeof(ExportablePricelist).Namespace, typeof(PricelistExportDataQuery).Name)
+            //        .WithDataSourceFactory(dataQuery => pricelistExportPagedDataSourceFactory(dataQuery))
+            //        .WithMetadata(typeof(ExportablePricelist).GetPropertyNames(true))
+            //        .ExportedTypeDefinition);
 
             registrar.RegisterType(
                 new ExportedTypeDefinitionBuilder($@"{typeof(ExportablePricingFull).FullName}", typeof(ExportablePricingFull).Namespace, typeof(PricingFullExportDataQuery).Name)

@@ -30,10 +30,10 @@
                             <span class="list-t">{{ 'export.blades.export-settings.labels.exported-data' | translate }}</span>
                             <span class="list-descr">{{ 'export.blades.export-settings.labels.selected' | translate: {count: blade.dataSelected, total: blade.dataTotal} }}</span>
                         </li>
-                        <li class="list-item" ng-click="selectExportedColumns()" ng-class="{'__disabled': !blade.selectedProvider || !blade.isExportedTypeSelected}">
+                        <li class="list-item" ng-click="selectExportedProperties()" ng-class="{'__disabled': !blade.selectedProvider || !blade.isExportedTypeSelected}">
                             <i class="list-ico fa fa-cogs"></i>
-                            <span class="list-t">{{ 'export.blades.export-settings.labels.exported-columns' | translate }}</span>
-                            <span class="list-descr">{{ 'export.blades.export-settings.labels.selected' | translate: {count: blade.columnSelected, total: blade.columnTotal} }}</span>
+                            <span class="list-t">{{ 'export.blades.export-settings.labels.exported-properties' | translate }}</span>
+                            <span class="list-descr">{{ 'export.blades.export-settings.labels.selected' | translate: {count: blade.propertySelected, total: blade.propertyTotal} }}</span>
                         </li>
                     </ul>
                 </div>

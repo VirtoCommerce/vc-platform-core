@@ -17,17 +17,17 @@ namespace VirtoCommerce.ExportModule.Data.Services
     public sealed class CsvExportProvider : IExportProvider
     {
         public string TypeName => nameof(CsvExportProvider);
-        public ExportedTypeColumnInfo[] IncludedColumns { get; private set; }
+        public ExportedTypePropertyInfo[] IncludedProperties { get; private set; }
         public string ExportedFileExtension => "csv";
         public bool IsTabular => true;
         public IExportProviderConfiguration Configuration { get; }
 
         private CsvWriter _csvWriter;
 
-        public CsvExportProvider(IExportProviderConfiguration exportProviderConfiguration, ExportedTypeColumnInfo[] includedColumns)
+        public CsvExportProvider(IExportProviderConfiguration exportProviderConfiguration, ExportedTypePropertyInfo[] includedProperties)
         {
             Configuration = exportProviderConfiguration;
-            IncludedColumns = includedColumns;
+            IncludedProperties = includedProperties;
         }
 
         public void WriteRecord(TextWriter writer, object objectToRecord)
@@ -63,10 +63,10 @@ namespace VirtoCommerce.ExportModule.Data.Services
 
             if (mapForType == null)
             {
-                var constructor = typeof(MetadataFilteredMap<>).MakeGenericType(objectType).GetConstructor(IncludedColumns != null
-                    ? new[] { typeof(ExportedTypeColumnInfo[]) }
+                var constructor = typeof(MetadataFilteredMap<>).MakeGenericType(objectType).GetConstructor(IncludedProperties != null
+                    ? new[] { typeof(ExportedTypePropertyInfo[]) }
                     : Array.Empty<Type>());
-                var classMap = (ClassMap)constructor.Invoke(IncludedColumns != null ? new[] { IncludedColumns } : null);
+                var classMap = (ClassMap)constructor.Invoke(IncludedProperties != null ? new[] { IncludedProperties } : null);
 
                 csvConfiguration.RegisterClassMap(classMap);
             }
@@ -83,15 +83,15 @@ namespace VirtoCommerce.ExportModule.Data.Services
         public MetadataFilteredMap() : this(null)
         { }
 
-        public MetadataFilteredMap(ExportedTypeColumnInfo[] includedColumns)
+        public MetadataFilteredMap(ExportedTypePropertyInfo[] includedProperties)
         {
             var exportedType = typeof(T);
-            var includedPropertiesInfo = includedColumns ?? exportedType.GetPropertyNames(true).PropertyInfos;
+            var includedPropertiesInfo = includedProperties ?? exportedType.GetPropertyNames(true).PropertyInfos;
             var columnIndex = 0;
 
             foreach (var includedPropertyInfo in includedPropertiesInfo)
             {
-                var propertyNames = includedPropertyInfo.Name.Split('.');
+                var propertyNames = includedPropertyInfo.FullName.Split('.');
                 var currentType = exportedType;
                 ClassMap currentClassMap = this;
 
@@ -114,7 +114,7 @@ namespace VirtoCommerce.ExportModule.Data.Services
                     // Add memberMap
                     if (i == propertyNames.Length - 1)
                     {
-                        var memberMap = CreateMemberMap(currentType, propertyInfo, includedPropertyInfo.ExportName, ref columnIndex);
+                        var memberMap = CreateMemberMap(currentType, propertyInfo, includedPropertyInfo.DisplayName, ref columnIndex);
 
                         currentClassMap.MemberMaps.Add(memberMap);
                         currentClassMap = this;

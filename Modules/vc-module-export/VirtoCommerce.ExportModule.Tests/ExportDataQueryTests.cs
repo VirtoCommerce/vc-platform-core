@@ -21,12 +21,12 @@ namespace VirtoCommerce.ExportModule.Tests
 
             var dataQuery = new PricelistExportDataQuery()
             {
-                IncludedColumns = new[]
+                IncludedProperties = new[]
                 {
-                    new ExportedTypeColumnInfo() { Name = "Name"} ,
-                    new ExportedTypeColumnInfo() { Name = "Prices.Id"} ,
-                    new ExportedTypeColumnInfo() { Name = "Id"},
-                    new ExportedTypeColumnInfo() { Name = "Assignments.Id"} ,
+                    new ExportedTypePropertyInfo() { FullName = "Name"} ,
+                    new ExportedTypePropertyInfo() { FullName = "Prices.Id"} ,
+                    new ExportedTypePropertyInfo() { FullName = "Id"},
+                    new ExportedTypePropertyInfo() { FullName = "Assignments.Id"} ,
                 },
             };
 
@@ -48,16 +48,16 @@ namespace VirtoCommerce.ExportModule.Tests
 
             var dataQuery = new PricelistExportDataQuery()
             {
-                IncludedColumns = new[]
+                IncludedProperties = new[]
                 {
-                    new ExportedTypeColumnInfo() { Name = "Id"},
-                    new ExportedTypeColumnInfo() { Name = "Name"},
-                    new ExportedTypeColumnInfo() { Name = "Prices.Id"} ,
-                    new ExportedTypeColumnInfo() { Name = "Prices.PricelistId"} ,
-                    new ExportedTypeColumnInfo() { Name = "Prices.List"} ,
-                    new ExportedTypeColumnInfo() { Name = "Prices.CreatedDate"} ,
-                    new ExportedTypeColumnInfo() { Name = "Assignments.Id"} ,
-                    new ExportedTypeColumnInfo() { Name = "Assignments.PricelistId"} ,
+                    new ExportedTypePropertyInfo() { FullName = "Id"},
+                    new ExportedTypePropertyInfo() { FullName = "Name"},
+                    new ExportedTypePropertyInfo() { FullName = "Prices.Id"} ,
+                    new ExportedTypePropertyInfo() { FullName = "Prices.PricelistId"} ,
+                    new ExportedTypePropertyInfo() { FullName = "Prices.List"} ,
+                    new ExportedTypePropertyInfo() { FullName = "Prices.CreatedDate"} ,
+                    new ExportedTypePropertyInfo() { FullName = "Assignments.Id"} ,
+                    new ExportedTypePropertyInfo() { FullName = "Assignments.PricelistId"} ,
                 }
             };
 
@@ -93,9 +93,9 @@ namespace VirtoCommerce.ExportModule.Tests
 
             var dataQuery = new PricelistExportDataQuery()
             {
-                IncludedColumns = new[]
+                IncludedProperties = new[]
                 {
-                    new ExportedTypeColumnInfo() { Name = "Id"},
+                    new ExportedTypePropertyInfo() { FullName = "Id"},
                 }
             };
 
@@ -117,12 +117,12 @@ namespace VirtoCommerce.ExportModule.Tests
 
             var dataQuery = new PricelistExportDataQuery()
             {
-                IncludedColumns = new[]
+                IncludedProperties = new[]
                 {
-                    new ExportedTypeColumnInfo() { Name = "Id"},
-                    new ExportedTypeColumnInfo() { Name = "Name"},
-                    new ExportedTypeColumnInfo() { Name = "Assignments.Id"} ,
-                    new ExportedTypeColumnInfo() { Name = "Assignments.PricelistId"} ,
+                    new ExportedTypePropertyInfo() { FullName = "Id"},
+                    new ExportedTypePropertyInfo() { FullName = "Name"},
+                    new ExportedTypePropertyInfo() { FullName = "Assignments.Id"} ,
+                    new ExportedTypePropertyInfo() { FullName = "Assignments.PricelistId"} ,
                 }
             };
 
@@ -151,12 +151,12 @@ namespace VirtoCommerce.ExportModule.Tests
 
             var dataQuery = new PricelistExportDataQuery()
             {
-                IncludedColumns = new[]
+                IncludedProperties = new[]
                 {
-                    new ExportedTypeColumnInfo() { Name = "Id"},
-                    new ExportedTypeColumnInfo() { Name = "Name"},
-                    new ExportedTypeColumnInfo() { Name = "Prices.List"} ,
-                    new ExportedTypeColumnInfo() { Name = "Assignments.Id"} ,
+                    new ExportedTypePropertyInfo() { FullName = "Id"},
+                    new ExportedTypePropertyInfo() { FullName = "Name"},
+                    new ExportedTypePropertyInfo() { FullName = "Prices.List"} ,
+                    new ExportedTypePropertyInfo() { FullName = "Assignments.Id"} ,
                 }
             };
 

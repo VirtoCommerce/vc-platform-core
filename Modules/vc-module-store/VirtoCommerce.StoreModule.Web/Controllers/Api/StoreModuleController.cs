@@ -11,6 +11,7 @@ using VirtoCommerce.StoreModule.Core.Model;
 using VirtoCommerce.StoreModule.Core.Model.Search;
 using VirtoCommerce.StoreModule.Core.Notifications;
 using VirtoCommerce.StoreModule.Core.Services;
+using VirtoCommerce.StoreModule.Data.Authorization;
 using VirtoCommerce.StoreModule.Web.Authorization;
 using VirtoCommerce.StoreModule.Web.Model;
 

@@ -8,60 +8,53 @@ namespace VirtoCommerce.PricingModule.Data.ExportImport
 {
     public class PricingFullExportPagedDataSource : IPagedDataSource
     {
+        private class ExportDataSourceState
+        {
+            public ExportDataSourceState()
+            {
+                Result = Array.Empty<IExportable>();
+            }
+
+            public int TotalCount;
+            public int ReceivedCount;
+            public ExportDataQuery DataQuery;
+            public IEnumerable<IExportable> Result;
+            public Func<ExportDataQuery, IPagedDataSource> DataSourceFactory;
+            public int GetNextTake(int pageSize)
+            {
+                return pageSize - TotalCount - ReceivedCount < 0 ? pageSize : pageSize - TotalCount - ReceivedCount;
+            }
+        }
+
+        public int TotalCount { get; set; }
+        public int CurrentPageNumber { get; protected set; }
+        public int PageSize { get; set; } = 50;
+
         private readonly Func<ExportDataQuery, PricelistExportPagedDataSource> _pricelistDataSourceFactory;
         private readonly Func<ExportDataQuery, PricelistAssignmentExportPagedDataSource> _assignmentsDataSourceFactory;
         private readonly Func<ExportDataQuery, PriceExportPagedDataSource> _pricesDataSourceFactory;
 
-        private PricelistExportPagedDataSource _pricelistDataSource;
-        private PricelistAssignmentExportPagedDataSource _assignmentsDataSource;
-        private PriceExportPagedDataSource _pricesDataSource;
-
-        private PricelistExportDataQuery _pricelistExportDataQuery;
-        private PricelistAssignmentExportDataQuery _pricelistAssignmentExportDataQuery;
-        private PriceExportDataQuery _priceExportDataQuery;
-
-        private T BuildExportDataQuery<T>() where T : ExportDataQuery, new()
-        {
-            var newExportDataQuery = new T();
-            newExportDataQuery.Skip = DataQuery.Skip;
-            newExportDataQuery.Take = DataQuery.Take;
-            newExportDataQuery.ObjectIds = DataQuery.ObjectIds;
-            newExportDataQuery.Sort = DataQuery.Sort;
-            newExportDataQuery.IncludedColumns = DataQuery.IncludedColumns.Where(x => x.ExportName.StartsWith("Pricelist.")).ToArray();
-            return newExportDataQuery;
-        }
-        public ExportDataQuery DataQuery
+        private List<ExportDataSourceState> _exportDataSourceStates;
+        private ExportDataQuery DataQuery
         {
             get => _dataQuery;
             set
             {
                 _dataQuery = value;
-
-                //Reset datasource state when DataQuery is changed
                 CurrentPageNumber = 0;
                 TotalCount = -1;
-                _pricelistExportDataQuery = BuildExportDataQuery<PricelistExportDataQuery>();
-                _priceExportDataQuery = BuildExportDataQuery<PriceExportDataQuery>();
-                _pricelistAssignmentExportDataQuery = BuildExportDataQuery<PricelistAssignmentExportDataQuery>();
 
-                _pricelistDataSource = _pricelistDataSourceFactory(_pricelistExportDataQuery);
-                _assignmentsDataSource = _assignmentsDataSourceFactory(_pricelistAssignmentExportDataQuery);
-                _pricesDataSource = _pricesDataSourceFactory(_priceExportDataQuery);
+                _exportDataSourceStates = new List<ExportDataSourceState>()
+                {
+                    new ExportDataSourceState() {DataQuery = BuildExportDataQuery<PricelistExportDataQuery>(), DataSourceFactory = query =>  _pricelistDataSourceFactory(query)  },
+                    new ExportDataSourceState() {DataQuery = BuildExportDataQuery<PricelistAssignmentExportDataQuery>(), DataSourceFactory =  query => _assignmentsDataSourceFactory(query)},
+                    new ExportDataSourceState() {DataQuery = BuildExportDataQuery<PriceExportDataQuery>(), DataSourceFactory =  query =>_pricesDataSourceFactory(query)},
+                };
                 CalculateCounts();
-
             }
         }
 
-
-        public int PricesTotalCount { get; set; }
-        public int AssignmentsTotalCount { get; set; }
-        public int PricelistsTotalCount { get; set; }
-
-
         private ExportDataQuery _dataQuery;
-
-
-        public int TotalCount { get; set; }
 
         public PricingFullExportPagedDataSource(Func<ExportDataQuery, PricelistExportPagedDataSource> pricelistDataSourceFactory,
             Func<ExportDataQuery, PricelistAssignmentExportPagedDataSource> assignmentsDataSourceFactory,
@@ -72,34 +65,6 @@ namespace VirtoCommerce.PricingModule.Data.ExportImport
             _pricesDataSourceFactory = pricesDataSourceFactory;
         }
 
-        public int CurrentPageNumber { get; protected set; }
-        public int PageSize { get; set; } = 50;
-
-        private void CalculateCounts()
-        {
-            int totalCount = 0;
-            var dataQuery1 = _pricelistExportDataQuery.Clone() as PricelistExportDataQuery;
-            dataQuery1.Skip = 0;
-            dataQuery1.Take = 0;
-
-            var dataQuery2 = _priceExportDataQuery.Clone() as PriceExportDataQuery;
-            dataQuery2.Skip = 0;
-            dataQuery2.Take = 0;
-
-            var dataQuery3 = _pricelistAssignmentExportDataQuery.Clone() as PricelistAssignmentExportDataQuery;
-            dataQuery3.Skip = 0;
-            dataQuery3.Take = 0;
-            var taskList = new List<Task>();
-            taskList.Add(Task.Factory.StartNew(() => { PricelistsTotalCount = _pricelistDataSourceFactory(dataQuery1).GetTotalCount(); }));
-            taskList.Add(Task.Factory.StartNew(() => { AssignmentsTotalCount = _assignmentsDataSourceFactory(dataQuery3).GetTotalCount(); }));
-            taskList.Add(Task.Factory.StartNew(() => { PricesTotalCount = _pricesDataSourceFactory(dataQuery2).GetTotalCount(); }));
-
-            Task.WhenAll(taskList).GetAwaiter().GetResult();
-
-            TotalCount = PricelistsTotalCount + AssignmentsTotalCount + PricesTotalCount;
-
-        }
-
         public int GetTotalCount()
         {
             CalculateCounts();
@@ -108,25 +73,64 @@ namespace VirtoCommerce.PricingModule.Data.ExportImport
 
         public virtual IEnumerable<IExportable> FetchNextPage()
         {
+            int takeNext = PageSize;
+            var taskList = new List<Task>();
 
-
-            var result = _pricelistDataSource.FetchNextPage();
-            if (result.Count() == 0)
+            foreach (var state in _exportDataSourceStates)
             {
-                _pricelistAssignmentExportDataQuery.Take -= PricelistsTotalCount;
-                _assignmentsDataSource.DataQuery = _pricelistAssignmentExportDataQuery;
-                result = _assignmentsDataSource.FetchNextPage();
+                state.Result = Array.Empty<IExportable>();
+                if (state.ReceivedCount < state.TotalCount)
+                {
+                    taskList.Add(Task.Factory.StartNew(() =>
+                    {
+                        state.DataQuery.Take = takeNext;
+                        state.DataQuery.Skip = CurrentPageNumber * PageSize;
+
+                        state.Result = state.DataSourceFactory(state.DataQuery).FetchNextPage().ToArray();
+                    }));
+                    takeNext = state.GetNextTake(PageSize);
+                }
             }
-            if (result.Count() == 0)
+
+            Task.WhenAll(taskList).GetAwaiter().GetResult();
+            var result = new List<IExportable>();
+
+            foreach (var state in _exportDataSourceStates)
             {
-                DataQuery.Skip = 0;
-                DataQuery.Take = DataQuery.Take - AssignmentsTotalCount;
-                result = _pricesDataSource.FetchNextPage();
+
+                result.AddRange(state.Result);
+                state.ReceivedCount = state.Result.Count();
             }
             CurrentPageNumber++;
 
             return result;
         }
 
+
+        private void CalculateCounts()
+        {
+            var taskList = new List<Task>();
+            foreach (var state in _exportDataSourceStates)
+            {
+                state.DataQuery.Skip = 0;
+                state.DataQuery.Take = 0;
+
+                taskList.Add(Task.Factory.StartNew(() => { state.TotalCount = state.DataSourceFactory(state.DataQuery).GetTotalCount(); }));
+            }
+
+            Task.WhenAll(taskList).GetAwaiter().GetResult();
+
+            TotalCount = _exportDataSourceStates.Sum(x => x.TotalCount);
+
+        }
+        private T BuildExportDataQuery<T>() where T : ExportDataQuery, new()
+        {
+            var newExportDataQuery = new T();
+            newExportDataQuery.Skip = DataQuery.Skip;
+            newExportDataQuery.Take = DataQuery.Take;
+            newExportDataQuery.ObjectIds = DataQuery.ObjectIds;
+            newExportDataQuery.Sort = DataQuery.Sort;
+            return newExportDataQuery;
+        }
     }
 }

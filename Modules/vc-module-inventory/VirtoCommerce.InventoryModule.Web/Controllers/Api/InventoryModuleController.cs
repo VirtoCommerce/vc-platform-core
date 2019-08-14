@@ -78,7 +78,6 @@ namespace VirtoCommerce.InventoryModule.Web.Controllers.Api
             return NoContent();
         }
 
-
         /// <summary>
         /// Get inventories of products
         /// </summary>

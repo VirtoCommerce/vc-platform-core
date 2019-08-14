@@ -57,11 +57,11 @@ namespace VirtoCommerce.PricingModule.Test
                 .WithMetadata(metadata)
                 .ExportedTypeDefinition);
 
-            var includedColumnNames = new string[] { "Currency", "ProductId", "Sale", "List", "MinQuantity", "StartDate", "EndDate", "EffectiveValue" };
-            var IncludedColumns = metadata.PropertyInfos.Where(x => includedColumnNames.Contains(x.Name, StringComparer.OrdinalIgnoreCase)).ToArray();
+            var includedPropertyNames = new string[] { "Currency", "ProductId", "Sale", "List", "MinQuantity", "StartDate", "EndDate", "EffectiveValue" };
+            var IncludedProperties = metadata.PropertyInfos.Where(x => includedPropertyNames.Contains(x.FullName, StringComparer.OrdinalIgnoreCase)).ToArray();
 
             var exportProviderFactories = new[] {
-                new Func<IExportProviderConfiguration, ExportedTypeColumnInfo[], IExportProvider>((config, includedColumns) => new JsonExportProvider(config, includedColumns)),
+                new Func<IExportProviderConfiguration, ExportedTypePropertyInfo[], IExportProvider>((config, includedProperties) => new JsonExportProvider(config, includedProperties)),
             };
 
 
@@ -78,7 +78,7 @@ namespace VirtoCommerce.PricingModule.Test
                     {
                         DataQuery = new PriceExportDataQuery()
                         {
-                            IncludedColumns = IncludedColumns
+                            IncludedProperties = IncludedProperties
                         },
                         ExportTypeName = typeof(ExportablePrice).FullName,
                         ProviderName = nameof(JsonExportProvider)
@@ -135,12 +135,12 @@ namespace VirtoCommerce.PricingModule.Test
                 .ExportedTypeDefinition);
 
             var exportProviderFactories = new[] {
-                new Func<IExportProviderConfiguration, ExportedTypeColumnInfo[], IExportProvider>((config, includedColumns) => new JsonExportProvider(config, includedColumns)),
+                new Func<IExportProviderConfiguration, ExportedTypePropertyInfo[], IExportProvider>((config, includedProperties) => new JsonExportProvider(config, includedProperties)),
             };
 
             var dataExporter = new DataExporter(resolver, new ExportProviderFactory(exportProviderFactories));
-            var includedColumnNames = new string[] { "Currency", "Id", "Name" };
-            var IncludedColumns = metadata.PropertyInfos.Where(x => includedColumnNames.Contains(x.Name, StringComparer.OrdinalIgnoreCase)).ToArray();
+            var includedPropertyNames = new string[] { "Currency", "Id", "Name" };
+            var IncludedProperties = metadata.PropertyInfos.Where(x => includedPropertyNames.Contains(x.FullName, StringComparer.OrdinalIgnoreCase)).ToArray();
 
             //Act
             var result = string.Empty;
@@ -153,7 +153,7 @@ namespace VirtoCommerce.PricingModule.Test
                     {
                         DataQuery = new PricelistExportDataQuery()
                         {
-                            IncludedColumns = IncludedColumns
+                            IncludedProperties = IncludedProperties
                         },
                         ExportTypeName = typeof(ExportablePricelist).FullName,
                         ProviderName = nameof(JsonExportProvider)
@@ -209,12 +209,12 @@ namespace VirtoCommerce.PricingModule.Test
                 .ExportedTypeDefinition);
 
             var exportProviderFactories = new[] {
-                new Func<IExportProviderConfiguration, ExportedTypeColumnInfo[], IExportProvider>((config, includedColumns) => new JsonExportProvider(config, includedColumns)),
+                new Func<IExportProviderConfiguration, ExportedTypePropertyInfo[], IExportProvider>((config, includedProperties) => new JsonExportProvider(config, includedProperties)),
             };
 
             var dataExporter = new DataExporter(resolver, new ExportProviderFactory(exportProviderFactories));
-            var includedColumnNames = new string[] { "CatalogId", "PricelistId", "Priority", "Id" };
-            var IncludedColumns = metadata.PropertyInfos.Where(x => includedColumnNames.Contains(x.Name, StringComparer.OrdinalIgnoreCase)).ToArray();
+            var includedPropertyNames = new string[] { "CatalogId", "PricelistId", "Priority", "Id" };
+            var IncludedProperties = metadata.PropertyInfos.Where(x => includedPropertyNames.Contains(x.FullName, StringComparer.OrdinalIgnoreCase)).ToArray();
 
             //Act
             var result = string.Empty;
@@ -227,7 +227,7 @@ namespace VirtoCommerce.PricingModule.Test
                     {
                         DataQuery = new PricelistAssignmentExportDataQuery()
                         {
-                            IncludedColumns = IncludedColumns
+                            IncludedProperties = IncludedProperties
                         },
                         ExportTypeName = typeof(ExportablePricelistAssignment).FullName,
                         ProviderName = nameof(JsonExportProvider)
@@ -291,12 +291,12 @@ namespace VirtoCommerce.PricingModule.Test
 
             var exportProviderFactories = new[]
             {
-                new Func<IExportProviderConfiguration, ExportedTypeColumnInfo[], IExportProvider>((config, includedColumns) => new JsonExportProvider(config, includedColumns)),
-                new Func<IExportProviderConfiguration, ExportedTypeColumnInfo[], IExportProvider>((config, includedColumns) => new CsvExportProvider(new CsvProviderConfiguration(){Configuration = new CsvHelper.Configuration.Configuration(cultureInfo: CultureInfo.InvariantCulture) }, includedColumns)),
+                new Func<IExportProviderConfiguration, ExportedTypePropertyInfo[], IExportProvider>((config, includedProperties) => new JsonExportProvider(config, includedProperties)),
+                new Func<IExportProviderConfiguration, ExportedTypePropertyInfo[], IExportProvider>((config, includedProperties) => new CsvExportProvider(new CsvProviderConfiguration(){Configuration = new CsvHelper.Configuration.Configuration(cultureInfo: CultureInfo.InvariantCulture) }, includedProperties)),
             };
 
-            var includedColumnNames = new string[] { "Currency", "ProductId" };
-            var IncludedColumns = metadata.PropertyInfos.Where(x => includedColumnNames.Contains(x.Name, StringComparer.OrdinalIgnoreCase)).ToArray();
+            var includedPropertyNames = new string[] { "Currency", "ProductId" };
+            var IncludedProperties = metadata.PropertyInfos.Where(x => includedPropertyNames.Contains(x.FullName, StringComparer.OrdinalIgnoreCase)).ToArray();
             var dataExporter = new DataExporter(resolver, new ExportProviderFactory(exportProviderFactories));
 
             var result = string.Empty;
@@ -309,7 +309,7 @@ namespace VirtoCommerce.PricingModule.Test
                     {
                         DataQuery = new PriceExportDataQuery()
                         {
-                            IncludedColumns = IncludedColumns,
+                            IncludedProperties = IncludedProperties,
                         },
                         ExportTypeName = typeof(ExportablePrice).FullName,
                         ProviderName = nameof(CsvExportProvider)
