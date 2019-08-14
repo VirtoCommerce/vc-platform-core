@@ -5,6 +5,9 @@ using VirtoCommerce.Platform.Core.PushNotifications;
 
 namespace VirtoCommerce.ExportModule.Core.Model
 {
+    /// <summary>
+    /// Push notification about export
+    /// </summary>
     public class ExportPushNotification : PushNotification
     {
         public ExportPushNotification(string creator)

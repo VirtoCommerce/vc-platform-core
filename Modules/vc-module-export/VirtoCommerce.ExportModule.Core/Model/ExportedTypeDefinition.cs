@@ -5,28 +5,28 @@ using VirtoCommerce.ExportModule.Core.Services;
 namespace VirtoCommerce.ExportModule.Core.Model
 {
     /// <summary>
-    /// Definition of single exported entity type
+    /// Definition of exported entity type
     /// </summary>
     public class ExportedTypeDefinition
     {
         /// <summary>
-        /// Logical type name, given during registration. Commonly non-equal to <see cref="ExportableEntity{T}"/> descendants type names.
-        /// Users can see it in type selector blade.
+        /// Logical type name, given during registration. It could be non-equal to exportable type name.
+        /// Users can see it in a type selector blade.
         /// </summary>
         public string TypeName { get; set; }
 
         /// <summary>
-        /// Logical group name. Definitions with the same group names fall into the folder in type selector blade.
+        /// Logical group name. Definitions with the same group names fall into one folder in type selector blade.
         /// </summary>
         public string Group { get; set; }
 
         /// <summary>
-        /// Metadata for this definition (set of columns, version)
+        /// Metadata for this definition (set of properties, version)
         /// </summary>
         public ExportedTypeMetadata MetaData { get; set; }
 
         /// <summary>
-        /// Metadata for this definition in the case of supported tabular export (flat files, like *.csv).
+        /// Metadata for this definition in case of supported tabular export (flat files, like *.csv).
         /// </summary>
         public ExportedTypeMetadata TabularMetaData { get; set; }
 
@@ -41,7 +41,7 @@ namespace VirtoCommerce.ExportModule.Core.Model
         public bool IsTabularExportSupported { get => TabularDataConverter != null; }
 
         /// <summary>
-        /// Converter for transforming <see cref="ExportableEntity{T}"/> to tabular form
+        /// Converter for transforming exportable entity to tabular representation
         /// </summary>
         [JsonIgnore]
         public ITabularDataConverter TabularDataConverter { get; set; }
