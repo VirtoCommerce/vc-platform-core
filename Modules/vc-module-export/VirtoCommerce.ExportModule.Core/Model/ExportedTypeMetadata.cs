@@ -9,7 +9,7 @@ namespace VirtoCommerce.ExportModule.Core.Model
     {
         public string Version { get; set; }
         /// <summary>
-        /// Information about potentially exported properties
+        /// Exportable property infos array
         /// </summary>
         public ExportedTypePropertyInfo[] PropertyInfos { get; set; }
     }

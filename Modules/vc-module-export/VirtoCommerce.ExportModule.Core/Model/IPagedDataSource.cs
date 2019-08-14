@@ -16,12 +16,12 @@ namespace VirtoCommerce.ExportModule.Core.Model
         /// </summary>
         int PageSize { get; set; }
         /// <summary>
-        /// Get total count of records for this data source
+        /// Gets total count of records for this data source
         /// </summary>
         /// <returns></returns>
         int GetTotalCount();
         /// <summary>
-        /// Get the data page from the source according to currently set <see cref = "CurrentPageNumber" /> and <see cref = "PageSize" />.
+        /// Gets the data page from the source according to currently set <see cref = "CurrentPageNumber" /> and <see cref = "PageSize" />.
         /// Implementations should increment <see cref="CurrentPageNumber"/> after fetch.
         /// </summary>
         /// <returns>Exportable entities</returns>

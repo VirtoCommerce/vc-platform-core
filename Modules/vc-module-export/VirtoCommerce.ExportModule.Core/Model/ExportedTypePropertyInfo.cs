@@ -6,12 +6,12 @@ namespace VirtoCommerce.ExportModule.Core.Model
     public class ExportedTypePropertyInfo
     {
         /// <summary>
-        /// Full property name of the exportable entity (i.e. "PropertyA.PropertyB.PropertyC").
+        /// Property name with the path from the exportable entity (e.g. for entity containing PropertyA with nested properties it could be "PropertyA.PropertyB.PropertyC").
         /// </summary>
         public string FullName { get; set; }
         /// <summary>
-        /// Property group. Properties can be divided into different groups to simplify selection by user on the properties selector blade.
-        /// Properties within a group come together on the blade.
+        /// Property group. Properties can be divided into different groups to simplify selection.
+        /// Group could be used for grouping property infos.
         /// </summary>
         public string Group { get; set; }
         /// <summary>

@@ -18,7 +18,7 @@ namespace VirtoCommerce.ExportModule.Core.Model
         /// </summary>
         public IExportProviderConfiguration ProviderConfig { get; set; }
         /// <summary>
-        /// Type name of provider that records the data
+        /// Selected export provider name
         /// </summary>
         public string ProviderName { get; set; }
     }

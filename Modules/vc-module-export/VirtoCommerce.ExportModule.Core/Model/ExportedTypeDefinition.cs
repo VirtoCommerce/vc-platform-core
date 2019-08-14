@@ -11,12 +11,11 @@ namespace VirtoCommerce.ExportModule.Core.Model
     {
         /// <summary>
         /// Logical type name, given during registration. It could be non-equal to exportable type name.
-        /// Users can see it in a type selector blade.
         /// </summary>
         public string TypeName { get; set; }
 
         /// <summary>
-        /// Logical group name. Definitions with the same group names fall into one folder in type selector blade.
+        /// Logical group name. Entity types can be divided into different groups to simplify selection.
         /// </summary>
         public string Group { get; set; }
 
@@ -36,7 +35,7 @@ namespace VirtoCommerce.ExportModule.Core.Model
         public string ExportDataQueryType { get; set; }
 
         /// <summary>
-        /// Returns <see cref="true"/> if tabular export supported, <see cref="TabularDataConverter"/> is set. 
+        /// Specific type name with which we could query exported type data. 
         /// </summary>
         public bool IsTabularExportSupported { get => TabularDataConverter != null; }
 
