@@ -11,7 +11,7 @@ namespace VirtoCommerce.ExportModule.Core.Model
     public abstract class ExportDataQuery : ValueObject
     {
         /// <summary>
-        /// This used to instantiate a data query of this type at export start.
+        /// This used to instantiate data query of this type at export start.
         /// </summary>
         [JsonProperty("exportTypeName")]
         public string ExportTypeName => GetType().Name;
@@ -24,7 +24,7 @@ namespace VirtoCommerce.ExportModule.Core.Model
         /// </summary>
         public string[] ObjectIds { get; set; } = new string[] { };
         /// <summary>
-        /// How to sort the dataset matching a query
+        /// How to sort a data set matching a query
         /// </summary>
         public string Sort { get; set; }
         /// <summary>
