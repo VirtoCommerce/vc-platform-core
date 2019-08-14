@@ -6,7 +6,7 @@ using VirtoCommerce.Platform.Core.Common;
 namespace VirtoCommerce.ExportModule.Core.Services
 {
     /// <summary>
-    /// Interface for data exporter implementation
+    /// Interface for data exporter implementation.
     /// </summary>
     public interface IDataExporter
     {
