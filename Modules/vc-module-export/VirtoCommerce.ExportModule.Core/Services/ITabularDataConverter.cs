@@ -6,7 +6,7 @@ namespace VirtoCommerce.ExportModule.Core.Services
     public interface ITabularDataConverter
     {
         /// <summary>
-        /// Convert exportable to tabular representation
+        /// Converts exportable to tabular representation
         /// </summary>
         /// <param name="obj">exportable entity</param>
         /// <returns>tabular representation</returns>
