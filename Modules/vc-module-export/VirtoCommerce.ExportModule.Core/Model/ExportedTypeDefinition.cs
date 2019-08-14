@@ -30,12 +30,12 @@ namespace VirtoCommerce.ExportModule.Core.Model
         public ExportedTypeMetadata TabularMetaData { get; set; }
 
         /// <summary>
-        /// Type name for <see cref="ExportDataQuery"/> descendand. This used to instantiate data query of this type at export start.
+        /// Specific type name with which we could query exported type data.
         /// </summary>
         public string ExportDataQueryType { get; set; }
 
         /// <summary>
-        /// Specific type name with which we could query exported type data. 
+        /// Returns <see cref="true"/> if tabular export supported, <see cref="TabularDataConverter"/> is set        
         /// </summary>
         public bool IsTabularExportSupported { get => TabularDataConverter != null; }
 
