@@ -82,7 +82,7 @@ namespace VirtoCommerce.ExportModule.Web.Controllers
         [HttpPost]
         [Route("data")]
         [Authorize(ModuleConstants.Security.Permissions.Access)]
-        public async Task<ActionResult<ViewableSearchResult>> GetData([FromBody]ExportDataRequest request)
+        public async Task<ActionResult<ExportableSearchResult>> GetData([FromBody]ExportDataRequest request)
         {
 
             var authorizationResult = await _authorizationService.AuthorizeAsync(User, request, request.ExportTypeName + "ExportDataPolicy");
@@ -95,7 +95,7 @@ namespace VirtoCommerce.ExportModule.Web.Controllers
             var pagedDataSource = exportedTypeDefinition.ExportedDataSourceFactory(request.DataQuery);
 
             var queryResult = pagedDataSource.FetchNextPage();
-            var result = new ViewableSearchResult()
+            var result = new ExportableSearchResult()
             {
                 TotalCount = pagedDataSource.GetTotalCount(),
                 Results = queryResult.ToList()

@@ -1,15 +1,15 @@
 namespace VirtoCommerce.ExportModule.Core.Services
 {
     /// <summary>
-    /// Interface to convert ExportableEntity to tabular entity form (without included objects)
+    /// Interface to convert exportable entity to tabular representation.
     /// </summary>
     public interface ITabularDataConverter
     {
         /// <summary>
-        /// Convert ExportableEntity to tabular entity form
+        /// Converts exportable entity to tabular representation.
         /// </summary>
-        /// <param name="obj"></param>
-        /// <returns></returns>
+        /// <param name="obj">Exportable entity.</param>
+        /// <returns>Tabular (plain) representation.</returns>
         object ToTabular(object obj);
     }
 }

@@ -35,9 +35,8 @@ namespace VirtoCommerce.PricingModule.Data.ExportImport
         private readonly Func<ExportDataQuery, PriceExportPagedDataSource> _pricesDataSourceFactory;
 
         private List<ExportDataSourceState> _exportDataSourceStates;
-        private ExportDataQuery DataQuery
+        public ExportDataQuery DataQuery
         {
-            get => _dataQuery;
             set
             {
                 _dataQuery = value;
@@ -81,13 +80,9 @@ namespace VirtoCommerce.PricingModule.Data.ExportImport
                 state.Result = Array.Empty<IExportable>();
                 if (state.ReceivedCount < state.TotalCount)
                 {
-                    taskList.Add(Task.Factory.StartNew(() =>
-                    {
-                        state.DataQuery.Take = takeNext;
-                        state.DataQuery.Skip = CurrentPageNumber * PageSize;
-
-                        state.Result = state.DataSourceFactory(state.DataQuery).FetchNextPage().ToArray();
-                    }));
+                    state.DataQuery.Take = takeNext;
+                    state.DataQuery.Skip = CurrentPageNumber * PageSize;
+                    taskList.Add(Task.Factory.StartNew(() => { state.Result = state.DataSourceFactory(state.DataQuery).FetchNextPage().ToArray(); }));
                     takeNext = state.GetNextTake(PageSize);
                 }
             }
@@ -97,7 +92,6 @@ namespace VirtoCommerce.PricingModule.Data.ExportImport
 
             foreach (var state in _exportDataSourceStates)
             {
-
                 result.AddRange(state.Result);
                 state.ReceivedCount = state.Result.Count();
             }
@@ -126,10 +120,10 @@ namespace VirtoCommerce.PricingModule.Data.ExportImport
         private T BuildExportDataQuery<T>() where T : ExportDataQuery, new()
         {
             var newExportDataQuery = new T();
-            newExportDataQuery.Skip = DataQuery.Skip;
-            newExportDataQuery.Take = DataQuery.Take;
-            newExportDataQuery.ObjectIds = DataQuery.ObjectIds;
-            newExportDataQuery.Sort = DataQuery.Sort;
+            newExportDataQuery.Skip = _dataQuery.Skip;
+            newExportDataQuery.Take = _dataQuery.Take;
+            newExportDataQuery.ObjectIds = _dataQuery.ObjectIds;
+            newExportDataQuery.Sort = _dataQuery.Sort;
             return newExportDataQuery;
         }
     }

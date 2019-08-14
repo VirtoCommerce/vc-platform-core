@@ -267,7 +267,12 @@
             "VirtoCommerce.PricingModule.Data.ExportImport.ExportablePricelistAssignment": {
                 "name": "Pricelist assignment",
                 "description": "Export pricelist assignments"
+            },
+            "VirtoCommerce.PricingModule.Data.ExportImport.ExportablePricingFull": {
+                "name": "Pricing Full",
+                "description": "Export all data from Pricing module"
             }
+
         },
         "groups": {
             "VirtoCommerce.PricingModule.Data.ExportImport": {

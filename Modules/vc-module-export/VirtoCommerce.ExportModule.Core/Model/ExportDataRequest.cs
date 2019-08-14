@@ -13,9 +13,12 @@ namespace VirtoCommerce.ExportModule.Core.Model
         /// Query information to retrive exported data
         /// </summary>
         public ExportDataQuery DataQuery { get; set; }
+        /// <summary>
+        /// Export provider configuration
+        /// </summary>
         public IExportProviderConfiguration ProviderConfig { get; set; }
         /// <summary>
-        /// Type name of recording data provider
+        /// Selected export provider name
         /// </summary>
         public string ProviderName { get; set; }
     }

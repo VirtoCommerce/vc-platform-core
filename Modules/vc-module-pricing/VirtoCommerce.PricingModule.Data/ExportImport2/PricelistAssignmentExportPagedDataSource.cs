@@ -34,7 +34,7 @@ namespace VirtoCommerce.PricingModule.Data.ExportImport
             searchCriteria.CatalogIds = dataQuery.CatalogIds;
         }
 
-        protected override GenericSearchResult<IExportable> FetchData(PricelistAssignmentsSearchCriteria searchCriteria)
+        protected override ExportableSearchResult FetchData(PricelistAssignmentsSearchCriteria searchCriteria)
         {
             PricelistAssignment[] result;
             int totalCount;
@@ -51,7 +51,7 @@ namespace VirtoCommerce.PricingModule.Data.ExportImport
                 totalCount = pricelistAssignmentSearchResult.TotalCount;
             }
 
-            return new GenericSearchResult<IExportable>()
+            return new ExportableSearchResult()
             {
                 Results = ToExportable(result).ToList(),
                 TotalCount = totalCount,
