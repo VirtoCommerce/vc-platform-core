@@ -3,7 +3,8 @@ using System;
 namespace VirtoCommerce.ExportModule.Core.Model
 {
     /// <summary>
-    /// Basic interface to implement exportаble entities
+    /// Interface to implement exportаble entities.
+    /// Common (default) set of properties for universal viewing.
     /// </summary>
     public interface IExportable : ICloneable
     {
