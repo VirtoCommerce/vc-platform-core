@@ -20,9 +20,9 @@ namespace VirtoCommerce.PricingModule.Data.ExportImport
             public ExportDataQuery DataQuery;
             public IEnumerable<IExportable> Result;
             public Func<ExportDataQuery, IPagedDataSource> DataSourceFactory;
-            public int GetNextTake(int pageSize)
+            public int GetNextTake(int take, int pageSize)
             {
-                return pageSize - TotalCount - ReceivedCount < 0 ? pageSize : pageSize - TotalCount - ReceivedCount;
+                return take - TotalCount - ReceivedCount < 0 ? pageSize : take - TotalCount - ReceivedCount;
             }
         }
 
@@ -83,17 +83,21 @@ namespace VirtoCommerce.PricingModule.Data.ExportImport
                     state.DataQuery.Take = takeNext;
                     state.DataQuery.Skip = CurrentPageNumber * PageSize;
                     taskList.Add(Task.Factory.StartNew(() => { state.Result = state.DataSourceFactory(state.DataQuery).FetchNextPage().ToArray(); }));
-                    takeNext = state.GetNextTake(PageSize);
+                    takeNext = state.GetNextTake(takeNext, PageSize);
                 }
             }
 
             Task.WhenAll(taskList).GetAwaiter().GetResult();
-            var result = new List<IExportable>();
+            List<IExportable> result = null;
 
             foreach (var state in _exportDataSourceStates)
             {
-                result.AddRange(state.Result);
-                state.ReceivedCount = state.Result.Count();
+                if (result == null && state.Result.Any())
+                {
+                    result = new List<IExportable>();
+                }
+                result?.AddRange(state.Result);
+                state.ReceivedCount += state.Result.Count();
             }
             CurrentPageNumber++;
 

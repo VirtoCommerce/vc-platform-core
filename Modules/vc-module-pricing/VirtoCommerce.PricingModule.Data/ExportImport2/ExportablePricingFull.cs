@@ -1,7 +1,6 @@
 using System.Collections.Generic;
 using System.Linq;
 using VirtoCommerce.ExportModule.Core.Model;
-using VirtoCommerce.PricingModule.Core.Model;
 
 namespace VirtoCommerce.PricingModule.Data.ExportImport
 {
@@ -13,9 +12,9 @@ namespace VirtoCommerce.PricingModule.Data.ExportImport
         public string Parent { get; set; }
         public string Type { get; set; }
 
-        public ICollection<Pricelist> Pricelists { get; set; }
-        public ICollection<Price> Prices { get; set; }
-        public ICollection<PricelistAssignment> Assignments { get; set; }
+        public ICollection<ExportablePricelist> Pricelists { get; set; }
+        public ICollection<ExportablePrice> Prices { get; set; }
+        public ICollection<ExportablePricelistAssignment> Assignments { get; set; }
 
 
         public object Clone()
@@ -23,15 +22,15 @@ namespace VirtoCommerce.PricingModule.Data.ExportImport
             var result = MemberwiseClone() as ExportablePricingFull;
             if (Pricelists != null)
             {
-                result.Pricelists = new List<Pricelist>(Pricelists.Select(x => x.Clone() as Pricelist));
+                result.Pricelists = new List<ExportablePricelist>(Pricelists.Select(x => x.Clone() as ExportablePricelist));
             }
             if (Prices != null)
             {
-                result.Prices = new List<Price>(Prices.Select(x => x.Clone() as Price));
+                result.Prices = new List<ExportablePrice>(Prices.Select(x => x.Clone() as ExportablePrice));
             }
             if (Assignments != null)
             {
-                result.Assignments = new List<PricelistAssignment>(Assignments.Select(x => x.Clone() as PricelistAssignment));
+                result.Assignments = new List<ExportablePricelistAssignment>(Assignments.Select(x => x.Clone() as ExportablePricelistAssignment));
             }
             return result;
 

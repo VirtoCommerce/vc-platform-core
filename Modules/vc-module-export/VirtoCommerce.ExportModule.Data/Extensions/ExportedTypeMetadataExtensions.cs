@@ -9,44 +9,51 @@ namespace VirtoCommerce.ExportModule.Data.Extensions
 {
     public static class ExportedTypeMetadataExtensions
     {
-        private class ExportTypePropertyInfoEx
-        {
-            public ExportedTypePropertyInfo ExportedPropertyInfo { get; set; }
-            public bool IsReference { get; set; }
-            public PropertyInfo PropertyInfo { get; set; }
-        }
-
         /// <summary>
-        /// Returns metadata about exportable entity type.
+        /// Returns metadata for type plain (all except: Entity, IEnumerable &lt;Entity&gt;) properties.
         /// </summary>
-        /// <typeparam name="T">Type for getting metadata.</typeparam>
-        /// <param name="propertyPathsToInclude">Property full paths to include to metadata</param>
-        /// <returns>Metadata for the T type, including all non-reference properties of types: T and corresponding to the passed properties.</returns>
-        public static ExportedTypeMetadata GetPropertyNames(this Type type, params string[] propertyPathsToInclude)
+        /// <param name="type">Type for getting metadata.</param>
+        /// <returns>Metadata for the T type, including all non-reference properties of type.</returns>
+        public static ExportedTypeMetadata GetPropertyNames(this Type type)
         {
             var result = new ExportedTypeMetadata
             {
-                PropertyInfos = GetPropertyNames(type, type.Name, string.Empty, propertyPathsToInclude)
-                .Where(x => !x.IsReference)
-                .Select(x => x.ExportedPropertyInfo)
-                .ToArray()
+                PropertyInfos = type.GetPropertyNames(type.Name, string.Empty).ToArray()
             };
 
             return result;
         }
 
-        private static Type GetPropertyType(Type type, string propertyName)
+        /// <summary>
+        /// Returns metadata for type nested properties.
+        /// </summary>
+        /// <param name="type">Type for getting metadata.</param>
+        /// <param name="propertyPaths">Property paths, e.g. PropertyB.PropertyC </param>
+        /// <returns>Metadata with the nested property's property paths, e.g. [{ FullName: Id,  Group : 'PropertyB.PropertyC' }, ...] </returns>
+        public static ExportedTypeMetadata GetNestedPropertyNames(this Type type, params string[] propertyPaths)
         {
-            return GetPropertyType(type, propertyName.Split('.'));
+            var result = new ExportedTypeMetadata
+            {
+                PropertyInfos = propertyPaths.SelectMany(x =>
+                    type.GetPropertyType(x).GetPropertyNames(x, string.Empty))
+                    .ToArray()
+            };
+
+            return result;
         }
 
-        private static Type GetPropertyType(Type type, IEnumerable<string> propertyNames)
+        private static Type GetPropertyType(this Type type, string propertyPath)
+        {
+            return type.GetPropertyType(propertyPath.Split('.'));
+        }
+
+        private static Type GetPropertyType(this Type type, IEnumerable<string> propertyNames)
         {
             Type result;
             var nestedType = GetNestedType(type);
             if (propertyNames.Any())
             {
-                result = GetPropertyType(nestedType.GetProperty(propertyNames.First()).PropertyType, propertyNames.Skip(1));
+                result = nestedType.GetProperty(propertyNames.First()).PropertyType.GetPropertyType(propertyNames.Skip(1));
             }
             else
             {
@@ -55,9 +62,9 @@ namespace VirtoCommerce.ExportModule.Data.Extensions
             return result;
         }
 
-        private static ExportTypePropertyInfoEx[] GetPropertyNames(Type type, string groupName, string baseMemberName, string[] propertyPathsToInclude)
+        private static ExportedTypePropertyInfo[] GetPropertyNames(this Type type, string groupName, string baseMemberName)
         {
-            var result = new List<ExportTypePropertyInfoEx>();
+            var result = new List<ExportedTypePropertyInfo>();
             var properties = type.GetProperties(BindingFlags.Instance | BindingFlags.Public).Where(x => x.CanRead && x.CanWrite);
 
             foreach (var propertyInfo in properties)
@@ -68,34 +75,20 @@ namespace VirtoCommerce.ExportModule.Data.Extensions
 
                 if (!isNested)
                 {
-                    result.Add(new ExportTypePropertyInfoEx()
+                    result.Add(new ExportedTypePropertyInfo()
                     {
-                        ExportedPropertyInfo = new ExportedTypePropertyInfo
-                        {
-                            FullName = memberName,
-                            DisplayName = memberName,
-                            Group = groupName,
-                        },
-                        PropertyInfo = propertyInfo,
-                        IsReference = isNested,
+                        FullName = memberName,
+                        DisplayName = memberName,
+                        Group = groupName,
                     });
                 }
-            }
-            //Continue searching for members in every property path
-            foreach (var propertyPathToInclude in propertyPathsToInclude)
-            {
-                result.AddRange(GetPropertyNames(
-                    GetPropertyType(type, propertyPathToInclude),
-                    string.Format($@"{groupName}.{propertyPathToInclude}"),
-                    propertyPathToInclude,
-                    new string[] { }));
             }
 
             return result.ToArray();
         }
 
         /// <summary>
-        /// Adds baseName as a prefixe to the property name (i.e. "{baseName}.{Name}")
+        /// Adds baseName as a prefix to the property name (i.e. "{baseName}.{Name}")
         /// </summary>
         /// <param name="pi"></param>
         /// <param name="baseName"></param>

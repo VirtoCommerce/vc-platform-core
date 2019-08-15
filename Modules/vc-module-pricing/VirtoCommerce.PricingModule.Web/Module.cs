@@ -229,9 +229,8 @@ namespace VirtoCommerce.PricingModule.Web
             registrar.RegisterType(
                 new ExportedTypeDefinitionBuilder($@"{typeof(ExportablePricingFull).FullName}", typeof(ExportablePricingFull).Namespace, typeof(PricingFullExportDataQuery).Name)
                     .WithDataSourceFactory(dataQuery => pricingFullExportPagedDataSourceFactory(dataQuery))
-                    .WithMetadata(typeof(ExportablePricingFull).GetPropertyNames(true))
+                    .WithMetadata(typeof(ExportablePricingFull).GetNestedPropertyNames(nameof(ExportablePricingFull.Prices), nameof(ExportablePricingFull.Pricelists), nameof(ExportablePricingFull.Assignments)))
                     .ExportedTypeDefinition);
-
 
             AbstractTypeFactory<ExportDataQuery>.RegisterType<PriceExportDataQuery>();
             AbstractTypeFactory<ExportDataQuery>.RegisterType<PricelistAssignmentExportDataQuery>();
