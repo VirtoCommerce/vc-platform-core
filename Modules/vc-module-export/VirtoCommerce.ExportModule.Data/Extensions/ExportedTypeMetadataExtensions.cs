@@ -18,7 +18,7 @@ namespace VirtoCommerce.ExportModule.Data.Extensions
         {
             var result = new ExportedTypeMetadata
             {
-                PropertyInfos = type.GetPropertyNames(type.Name, string.Empty).ToArray()
+                PropertyInfos = type.GetPropertyNames(type.Name).ToArray()
             };
 
             return result;
@@ -35,7 +35,7 @@ namespace VirtoCommerce.ExportModule.Data.Extensions
             var result = new ExportedTypeMetadata
             {
                 PropertyInfos = propertyPaths.SelectMany(x =>
-                    type.GetPropertyType(x).GetPropertyNames(x, string.Empty))
+                    type.GetPropertyType(x).GetPropertyNames(x))
                     .ToArray()
             };
 
@@ -62,7 +62,7 @@ namespace VirtoCommerce.ExportModule.Data.Extensions
             return result;
         }
 
-        private static ExportedTypePropertyInfo[] GetPropertyNames(this Type type, string groupName, string baseMemberName)
+        private static ExportedTypePropertyInfo[] GetPropertyNames(this Type type, string groupName)
         {
             var result = new List<ExportedTypePropertyInfo>();
             var properties = type.GetProperties(BindingFlags.Instance | BindingFlags.Public).Where(x => x.CanRead && x.CanWrite);
@@ -71,7 +71,7 @@ namespace VirtoCommerce.ExportModule.Data.Extensions
             {
                 var nestedType = GetNestedType(propertyInfo.PropertyType);
                 var isNested = nestedType.IsSubclassOf(typeof(Entity));
-                var memberName = propertyInfo.GetDerivedName(baseMemberName);
+                var memberName = propertyInfo.Name;
 
                 if (!isNested)
                 {
