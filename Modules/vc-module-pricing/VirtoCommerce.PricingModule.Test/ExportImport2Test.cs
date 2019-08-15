@@ -42,7 +42,7 @@ namespace VirtoCommerce.PricingModule.Test
 
             var itemServiceMock = new Mock<IItemService>();
 
-            var metadata = typeof(ExportablePrice).GetPropertyNames(true);
+            var metadata = typeof(ExportablePrice).GetPropertyNames();
             var resolver = (IKnownExportTypesResolver)registrar;
 
             registrar.RegisterType(ExportedTypeDefinitionBuilder.Build<ExportablePrice, PriceExportDataQuery>()
@@ -121,7 +121,7 @@ namespace VirtoCommerce.PricingModule.Test
 
             var priceServiceMock = new Mock<IPricingService>();
 
-            var metadata = typeof(ExportablePricelist).GetPropertyNames(true);
+            var metadata = typeof(ExportablePricelist).GetPropertyNames();
             var resolver = (IKnownExportTypesResolver)registrar;
             registrar.RegisterType(ExportedTypeDefinitionBuilder.Build<ExportablePricelist, PricelistExportDataQuery>()
                 .WithDataSourceFactory(
@@ -194,7 +194,7 @@ namespace VirtoCommerce.PricingModule.Test
             var priceServiceMock = new Mock<IPricingService>();
             var catalogServiceMock = new Mock<ICatalogService>();
 
-            var metadata = typeof(ExportablePricelistAssignment).GetPropertyNames(true);
+            var metadata = typeof(ExportablePricelistAssignment).GetPropertyNames();
             var resolver = (IKnownExportTypesResolver)registrar;
             registrar.RegisterType(ExportedTypeDefinitionBuilder.Build<ExportablePricelistAssignment, PricelistAssignmentExportDataQuery>()
                 .WithDataSourceFactory(
@@ -274,7 +274,7 @@ namespace VirtoCommerce.PricingModule.Test
 
             var itemServiceMock = new Mock<IItemService>();
 
-            var metadata = typeof(ExportablePrice).GetPropertyNames(true);
+            var metadata = typeof(ExportablePrice).GetPropertyNames();
             registrar.RegisterType(ExportedTypeDefinitionBuilder.Build<ExportablePrice, PriceExportDataQuery>()
                 .WithDataSourceFactory(
                     dataQuery => new PriceExportPagedDataSource(
@@ -286,7 +286,7 @@ namespace VirtoCommerce.PricingModule.Test
                     })
                 .WithMetadata(metadata)
                 .WithTabularDataConverter(new TabularPriceDataConverter())
-                .WithTabularMetadata(typeof(TabularPrice).GetPropertyNames(false))
+                .WithTabularMetadata(typeof(TabularPrice).GetPropertyNames())
                 .ExportedTypeDefinition);
 
             var exportProviderFactories = new[]

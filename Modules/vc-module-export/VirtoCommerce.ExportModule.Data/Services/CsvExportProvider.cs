@@ -86,7 +86,7 @@ namespace VirtoCommerce.ExportModule.Data.Services
         public MetadataFilteredMap(ExportedTypePropertyInfo[] includedProperties)
         {
             var exportedType = typeof(T);
-            var includedPropertiesInfo = includedProperties ?? exportedType.GetPropertyNames(true).PropertyInfos;
+            var includedPropertiesInfo = includedProperties ?? exportedType.GetPropertyNames().PropertyInfos;
             var columnIndex = 0;
 
             foreach (var includedPropertyInfo in includedPropertiesInfo)

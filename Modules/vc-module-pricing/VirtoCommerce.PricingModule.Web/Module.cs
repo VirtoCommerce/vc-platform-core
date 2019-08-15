@@ -192,25 +192,25 @@ namespace VirtoCommerce.PricingModule.Web
             registrar.RegisterType(
                  ExportedTypeDefinitionBuilder.Build<ExportablePrice, PriceExportDataQuery>()
                     .WithDataSourceFactory(dataQuery => priceExportPagedDataSourceFactory(dataQuery))
-                    .WithMetadata(typeof(ExportablePrice).GetPropertyNames(false))
+                    .WithMetadata(typeof(ExportablePrice).GetPropertyNames())
                     .WithTabularDataConverter(new TabularPriceDataConverter())
-                    .WithTabularMetadata(typeof(TabularPrice).GetPropertyNames(false))
+                    .WithTabularMetadata(typeof(TabularPrice).GetPropertyNames())
                     .ExportedTypeDefinition);
 
             registrar.RegisterType(
                  ExportedTypeDefinitionBuilder.Build<ExportablePricelist, PricelistExportDataQuery>()
                     .WithDataSourceFactory(dataQuery => pricelistExportPagedDataSourceFactory(dataQuery))
-                    .WithMetadata(typeof(ExportablePricelist).GetPropertyNames(false))
+                    .WithMetadata(typeof(ExportablePricelist).GetPropertyNames())
                     .WithTabularDataConverter(new TabularPricelistDataConverter())
-                    .WithTabularMetadata(typeof(TabularPricelist).GetPropertyNames(false))
+                    .WithTabularMetadata(typeof(TabularPricelist).GetPropertyNames())
                     .ExportedTypeDefinition);
 
             registrar.RegisterType(
                  ExportedTypeDefinitionBuilder.Build<ExportablePricelistAssignment, PricelistAssignmentExportDataQuery>()
                     .WithDataSourceFactory(dataQuery => pricelistAssignmentExportPagedDataSourceFactory(dataQuery))
-                    .WithMetadata(typeof(ExportablePricelistAssignment).GetPropertyNames(false))
+                    .WithMetadata(typeof(ExportablePricelistAssignment).GetPropertyNames())
                     .WithTabularDataConverter(new TabularPricelistAssignmentDataConverter())
-                    .WithTabularMetadata(typeof(TabularPricelistAssignment).GetPropertyNames(false))
+                    .WithTabularMetadata(typeof(TabularPricelistAssignment).GetPropertyNames())
                     .ExportedTypeDefinition);
 
             //registrar.RegisterType(

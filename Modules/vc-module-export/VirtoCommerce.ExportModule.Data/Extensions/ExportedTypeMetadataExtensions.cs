@@ -17,73 +17,78 @@ namespace VirtoCommerce.ExportModule.Data.Extensions
         }
 
         /// <summary>
-        /// Returns basic info about potentially exported fields of entity.
+        /// Returns metadata about exportable entity type.
         /// </summary>
         /// <typeparam name="T">Type for getting metadata.</typeparam>
-        /// <param name="extractReferenceProperties">If true, reference properties properties (<see cref="Enitity"/> and collection of <see cref="Enitity"/>) will be extracted recursively.</param>
-        /// <returns>Metadata for the T type.</returns>
-        public static ExportedTypeMetadata GetPropertyNames(this Type type, bool extractReferenceProperties)
+        /// <param name="propertyPathsToInclude">Property full paths to include to metadata</param>
+        /// <returns>Metadata for the T type, including all non-reference properties of types: T and corresponding to the passed properties.</returns>
+        public static ExportedTypeMetadata GetPropertyNames(this Type type, params string[] propertyPathsToInclude)
         {
-            var result = new ExportedTypeMetadata();
-            var passedNodes = new List<MemberInfo>();
-
-            result.PropertyInfos = GetPropertyNames(type, type.Name, string.Empty, passedNodes, extractReferenceProperties)
+            var result = new ExportedTypeMetadata
+            {
+                PropertyInfos = GetPropertyNames(type, type.Name, string.Empty, propertyPathsToInclude)
                 .Where(x => !x.IsReference)
                 .Select(x => x.ExportedPropertyInfo)
-                .ToArray();
+                .ToArray()
+            };
 
             return result;
         }
 
-        private static ExportTypePropertyInfoEx[] GetPropertyNames(Type type, string groupName, string baseMemberName, List<MemberInfo> passedNodes, bool extractNestedProperties)
+        private static Type GetPropertyType(Type type, string propertyName)
+        {
+            return GetPropertyType(type, propertyName.Split('.'));
+        }
+
+        private static Type GetPropertyType(Type type, IEnumerable<string> propertyNames)
+        {
+            Type result;
+            var nestedType = GetNestedType(type);
+            if (propertyNames.Any())
+            {
+                result = GetPropertyType(nestedType.GetProperty(propertyNames.First()).PropertyType, propertyNames.Skip(1));
+            }
+            else
+            {
+                result = nestedType;
+            }
+            return result;
+        }
+
+        private static ExportTypePropertyInfoEx[] GetPropertyNames(Type type, string groupName, string baseMemberName, string[] propertyPathsToInclude)
         {
             var result = new List<ExportTypePropertyInfoEx>();
-            var nestedMemberInfos = new List<(MemberInfo MemberInfo, Type NestedType)>();
             var properties = type.GetProperties(BindingFlags.Instance | BindingFlags.Public).Where(x => x.CanRead && x.CanWrite);
 
             foreach (var propertyInfo in properties)
             {
-                if (!passedNodes.Contains(propertyInfo))
+                var nestedType = GetNestedType(propertyInfo.PropertyType);
+                var isNested = nestedType.IsSubclassOf(typeof(Entity));
+                var memberName = propertyInfo.GetDerivedName(baseMemberName);
+
+                if (!isNested)
                 {
-                    var nestedType = GetNestedType(propertyInfo.PropertyType);
-                    var isNested = nestedType.IsSubclassOf(typeof(Entity));
-
-                    // Collect nested members for later inspection after all properties in this type
-                    if (extractNestedProperties && isNested)
+                    result.Add(new ExportTypePropertyInfoEx()
                     {
-                        nestedMemberInfos.Add((propertyInfo, nestedType));
-                    }
-
-                    passedNodes.Add(propertyInfo);
-
-                    var memberName = propertyInfo.GetDerivedName(baseMemberName);
-
-                    if (extractNestedProperties || !isNested)
-                    {
-                        result.Add(new ExportTypePropertyInfoEx()
+                        ExportedPropertyInfo = new ExportedTypePropertyInfo
                         {
-                            ExportedPropertyInfo = new ExportedTypePropertyInfo
-                            {
-                                FullName = memberName,
-                                DisplayName = memberName,
-                                Group = groupName,
-                            },
-                            PropertyInfo = propertyInfo,
-                            IsReference = isNested,
-                        });
-                    }
+                            FullName = memberName,
+                            DisplayName = memberName,
+                            Group = groupName,
+                        },
+                        PropertyInfo = propertyInfo,
+                        IsReference = isNested,
+                    });
                 }
             }
-
-            foreach (var nestedMemberInfo in nestedMemberInfos)
+            //Continue searching for members in every property path
+            foreach (var propertyPathToInclude in propertyPathsToInclude)
             {
-                //Continue searching for nested members
                 result.AddRange(GetPropertyNames(
-                    nestedMemberInfo.NestedType,
-                    string.Format($@"{groupName}.{nestedMemberInfo.MemberInfo.Name}"),
-                    ((PropertyInfo)nestedMemberInfo.MemberInfo).GetDerivedName(baseMemberName),
-                    passedNodes,
-                    extractNestedProperties));
+                    GetPropertyType(type, propertyPathToInclude),
+                    string.Format($@"{groupName}.{propertyPathToInclude}"),
+                    propertyPathToInclude,
+                    new string[] { }));
             }
 
             return result.ToArray();
