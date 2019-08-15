@@ -7,27 +7,34 @@ namespace VirtoCommerce.ExportModule.Data.Services
     {
         public ExportedTypeDefinition ExportedTypeDefinition { get; }
 
-        public ExportedTypeDefinitionBuilder(string exportedTypeName, string group, string exportQueryType)
-        {
-            ExportedTypeDefinition = new ExportedTypeDefinition()
-            {
-                TypeName = exportedTypeName,
-                Group = group,
-                ExportDataQueryType = exportQueryType,
-            };
-        }
 
+        /// <summary>
+        /// Creates <see cref="ExportedTypeDefinitionBuilder"/> with ExportedTypeDefinition instance.
+        /// </summary>
+        /// <param name="exportedTypeDefinition">Definition to build.</param>
         public ExportedTypeDefinitionBuilder(ExportedTypeDefinition exportedTypeDefinition)
         {
             ExportedTypeDefinition = exportedTypeDefinition ?? throw new ArgumentNullException(nameof(exportedTypeDefinition));
         }
 
-        public static ExportedTypeDefinitionBuilder Build<TExport, TDataQuery>()
+        /// <summary>
+        /// Creates <see cref="ExportedTypeDefinitionBuilder"/> with definition with <typeparamref name="TExportable"/> type <see cref="Type.FullName"/> as <see cref="ExportedTypeDefinition.TypeName"/>,
+        /// <see cref="Type.Namespace"/> as <see cref="ExportedTypeDefinition.Group"/> and ExportDataQuery type name as <see cref="ExportedTypeDefinition.ExportDataQueryType"/>.
+        /// </summary>
+        /// <typeparam name="TExportable">Exportable entity type.</typeparam>
+        /// <typeparam name="TDataQuery">Type to query entities.</typeparam>
+        /// <returns></returns>
+        public static ExportedTypeDefinitionBuilder Build<TExportable, TDataQuery>() where TDataQuery : ExportDataQuery
         {
-            var exportedType = typeof(TExport);
+            var exportedType = typeof(TExportable);
             var dataQueryType = typeof(TDataQuery);
 
-            return new ExportedTypeDefinitionBuilder(exportedType.FullName, exportedType.Namespace, dataQueryType.Name);
+            return new ExportedTypeDefinitionBuilder(new ExportedTypeDefinition()
+            {
+                TypeName = exportedType.FullName,
+                Group = exportedType.Namespace,
+                ExportDataQueryType = dataQueryType.Name,
+            });
         }
     }
 }
