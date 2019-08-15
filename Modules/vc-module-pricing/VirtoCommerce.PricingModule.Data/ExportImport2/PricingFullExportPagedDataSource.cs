@@ -20,10 +20,6 @@ namespace VirtoCommerce.PricingModule.Data.ExportImport
             public ExportDataQuery DataQuery;
             public IEnumerable<IExportable> Result;
             public Func<ExportDataQuery, IPagedDataSource> DataSourceFactory;
-            public int GetNextTake(int take, int pageSize)
-            {
-                return take - TotalCount - ReceivedCount < 0 ? pageSize : take - TotalCount - ReceivedCount;
-            }
         }
 
         public int TotalCount { get; set; }
@@ -83,7 +79,7 @@ namespace VirtoCommerce.PricingModule.Data.ExportImport
                     state.DataQuery.Take = takeNext;
                     state.DataQuery.Skip = CurrentPageNumber * PageSize;
                     taskList.Add(Task.Factory.StartNew(() => { state.Result = state.DataSourceFactory(state.DataQuery).FetchNextPage().ToArray(); }));
-                    takeNext = state.GetNextTake(takeNext, PageSize);
+                    takeNext = takeNext - state.TotalCount - state.ReceivedCount < 0 ? PageSize : takeNext - state.TotalCount - state.ReceivedCount;
                 }
             }
 
