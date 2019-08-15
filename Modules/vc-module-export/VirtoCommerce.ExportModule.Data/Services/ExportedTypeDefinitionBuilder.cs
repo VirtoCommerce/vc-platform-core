@@ -5,17 +5,7 @@ namespace VirtoCommerce.ExportModule.Data.Services
 {
     public class ExportedTypeDefinitionBuilder
     {
-        public ExportedTypeDefinition ExportedTypeDefinition { get; }
-
-
-        /// <summary>
-        /// Creates <see cref="ExportedTypeDefinitionBuilder"/> with ExportedTypeDefinition instance.
-        /// </summary>
-        /// <param name="exportedTypeDefinition">Definition to build.</param>
-        public ExportedTypeDefinitionBuilder(ExportedTypeDefinition exportedTypeDefinition)
-        {
-            ExportedTypeDefinition = exportedTypeDefinition ?? throw new ArgumentNullException(nameof(exportedTypeDefinition));
-        }
+        public ExportedTypeDefinition ExportedTypeDefinition { get; private set; }
 
         /// <summary>
         /// Creates <see cref="ExportedTypeDefinitionBuilder"/> with definition with <typeparamref name="TExportable"/> type <see cref="Type.FullName"/> as <see cref="ExportedTypeDefinition.TypeName"/>,
@@ -29,12 +19,20 @@ namespace VirtoCommerce.ExportModule.Data.Services
             var exportedType = typeof(TExportable);
             var dataQueryType = typeof(TDataQuery);
 
-            return new ExportedTypeDefinitionBuilder(new ExportedTypeDefinition()
+            return new ExportedTypeDefinitionBuilder()
             {
-                TypeName = exportedType.FullName,
-                Group = exportedType.Namespace,
-                ExportDataQueryType = dataQueryType.Name,
-            });
+                ExportedTypeDefinition = new ExportedTypeDefinition()
+                {
+                    TypeName = exportedType.FullName,
+                    Group = exportedType.Namespace,
+                    ExportDataQueryType = dataQueryType.Name,
+                }
+            };
+        }
+
+        public static implicit operator ExportedTypeDefinition(ExportedTypeDefinitionBuilder builder)
+        {
+            return builder.ExportedTypeDefinition;
         }
     }
 }

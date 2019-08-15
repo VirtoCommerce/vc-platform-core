@@ -54,8 +54,7 @@ namespace VirtoCommerce.PricingModule.Test
                     {
                         DataQuery = (PriceExportDataQuery)dataQuery
                     })
-                .WithMetadata(metadata)
-                .ExportedTypeDefinition);
+                .WithMetadata(metadata));
 
             var includedPropertyNames = new string[] { "Currency", "ProductId", "Sale", "List", "MinQuantity", "StartDate", "EndDate", "EffectiveValue" };
             var IncludedProperties = metadata.PropertyInfos.Where(x => includedPropertyNames.Contains(x.FullName, StringComparer.OrdinalIgnoreCase)).ToArray();
@@ -131,8 +130,7 @@ namespace VirtoCommerce.PricingModule.Test
                     {
                         DataQuery = (PricelistExportDataQuery)dataQuery
                     })
-                .WithMetadata(metadata)
-                .ExportedTypeDefinition);
+                .WithMetadata(metadata));
 
             var exportProviderFactories = new[] {
                 new Func<IExportProviderConfiguration, ExportedTypePropertyInfo[], IExportProvider>((config, includedProperties) => new JsonExportProvider(config, includedProperties)),
@@ -205,8 +203,7 @@ namespace VirtoCommerce.PricingModule.Test
                     {
                         DataQuery = (PricelistAssignmentExportDataQuery)dataQuery
                     })
-                .WithMetadata(metadata)
-                .ExportedTypeDefinition);
+                .WithMetadata(metadata));
 
             var exportProviderFactories = new[] {
                 new Func<IExportProviderConfiguration, ExportedTypePropertyInfo[], IExportProvider>((config, includedProperties) => new JsonExportProvider(config, includedProperties)),
@@ -286,8 +283,7 @@ namespace VirtoCommerce.PricingModule.Test
                     })
                 .WithMetadata(metadata)
                 .WithTabularDataConverter(new TabularPriceDataConverter())
-                .WithTabularMetadata(typeof(TabularPrice).GetPropertyNames())
-                .ExportedTypeDefinition);
+                .WithTabularMetadata(typeof(TabularPrice).GetPropertyNames()));
 
             var exportProviderFactories = new[]
             {

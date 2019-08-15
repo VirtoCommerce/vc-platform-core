@@ -194,24 +194,21 @@ namespace VirtoCommerce.PricingModule.Web
                     .WithDataSourceFactory(dataQuery => priceExportPagedDataSourceFactory(dataQuery))
                     .WithMetadata(typeof(ExportablePrice).GetPropertyNames())
                     .WithTabularDataConverter(new TabularPriceDataConverter())
-                    .WithTabularMetadata(typeof(TabularPrice).GetPropertyNames())
-                    .ExportedTypeDefinition);
+                    .WithTabularMetadata(typeof(TabularPrice).GetPropertyNames()));
 
             registrar.RegisterType(
                  ExportedTypeDefinitionBuilder.Build<ExportablePricelist, PricelistExportDataQuery>()
                     .WithDataSourceFactory(dataQuery => pricelistExportPagedDataSourceFactory(dataQuery))
                     .WithMetadata(typeof(ExportablePricelist).GetPropertyNames())
                     .WithTabularDataConverter(new TabularPricelistDataConverter())
-                    .WithTabularMetadata(typeof(TabularPricelist).GetPropertyNames())
-                    .ExportedTypeDefinition);
+                    .WithTabularMetadata(typeof(TabularPricelist).GetPropertyNames()));
 
             registrar.RegisterType(
                  ExportedTypeDefinitionBuilder.Build<ExportablePricelistAssignment, PricelistAssignmentExportDataQuery>()
                     .WithDataSourceFactory(dataQuery => pricelistAssignmentExportPagedDataSourceFactory(dataQuery))
                     .WithMetadata(typeof(ExportablePricelistAssignment).GetPropertyNames())
                     .WithTabularDataConverter(new TabularPricelistAssignmentDataConverter())
-                    .WithTabularMetadata(typeof(TabularPricelistAssignment).GetPropertyNames())
-                    .ExportedTypeDefinition);
+                    .WithTabularMetadata(typeof(TabularPricelistAssignment).GetPropertyNames()));
 
             //registrar.RegisterType(
             //    new ExportedTypeDefinitionBuilder($@"{typeof(ExportablePricelist).FullName}FullData", typeof(ExportablePricelist).Namespace, typeof(PricelistExportDataQuery).Name)
