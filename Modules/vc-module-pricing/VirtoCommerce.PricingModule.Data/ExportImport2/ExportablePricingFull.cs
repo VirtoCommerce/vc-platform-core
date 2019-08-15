@@ -20,21 +20,11 @@ namespace VirtoCommerce.PricingModule.Data.ExportImport
         public object Clone()
         {
             var result = MemberwiseClone() as ExportablePricingFull;
-            if (Pricelists != null)
-            {
-                result.Pricelists = new List<ExportablePricelist>(Pricelists.Select(x => x.Clone() as ExportablePricelist));
-            }
-            if (Prices != null)
-            {
-                result.Prices = new List<ExportablePrice>(Prices.Select(x => x.Clone() as ExportablePrice));
-            }
-            if (Assignments != null)
-            {
-                result.Assignments = new List<ExportablePricelistAssignment>(Assignments.Select(x => x.Clone() as ExportablePricelistAssignment));
-            }
+            result.Pricelists = Pricelists?.Select(x => x.Clone() as ExportablePricelist).ToList();
+            result.Prices = Prices?.Select(x => x.Clone() as ExportablePrice).ToList();
+            result.Assignments = Assignments?.Select(x => x.Clone() as ExportablePricelistAssignment).ToList();
+
             return result;
-
         }
-
     }
 }
