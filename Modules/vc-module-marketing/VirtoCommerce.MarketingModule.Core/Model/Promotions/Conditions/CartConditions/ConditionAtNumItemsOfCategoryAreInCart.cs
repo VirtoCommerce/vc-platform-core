@@ -21,7 +21,7 @@ namespace VirtoCommerce.MarketingModule.Core.Model.Promotions.Conditions
         /// <summary>
         /// ((PromotionEvaluationContext)x).GetCartItemsOfCategoryQuantity(CategoryId, ExcludingCategoryIds, ExcludingProductIds) > NumItem
         /// </summary>
-        public override bool Evaluate(IEvaluationContext context)
+        public override bool IsSatisfiedBy(IEvaluationContext context)
         {
             var result = false;
             if (context is PromotionEvaluationContext promotionEvaluationContext)

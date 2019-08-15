@@ -35,7 +35,7 @@ namespace VirtoCommerce.MarketingModule.Data.Services
             {
                 throw new ArgumentException("The context must be a DynamicContentEvaluationContext.");
             }
-            if (dynamicContext.ToDate == default(DateTime))
+            if (dynamicContext.ToDate == default)
             {
                 dynamicContext.ToDate = DateTime.UtcNow;
             }
@@ -50,14 +50,9 @@ namespace VirtoCommerce.MarketingModule.Data.Services
                 try
                 {
                     //Next step need filter assignments contains dynamicexpression
-                    if (!string.IsNullOrEmpty(publishing.PredicateVisualTreeSerialized))
+                    if (publishing.DynamicExpression != null && publishing.DynamicExpression.IsSatisfiedBy(context))
                     {
-                        var dynamicContentConditionTree = JsonConvert.DeserializeObject<DynamicContentConditionTree>(publishing.PredicateVisualTreeSerialized, new ConditionJsonConverter());
-                        var conditions = dynamicContentConditionTree.GetConditions();
-                        if (conditions.All(c => c.Evaluate(context)))
-                        {
-                            result.AddRange(publishing.ContentItems);
-                        }
+                        result.AddRange(publishing.ContentItems);
                     }
 
                 }

@@ -189,8 +189,6 @@ namespace VirtoCommerce.MarketingModule.Data.Services
                 var existEntities = await repository.GetContentPublicationsByIdsAsync(publications.Where(x => !x.IsTransient()).Select(x => x.Id).ToArray());
                 foreach (var publication in publications)
                 {
-                    SerializeDynamicContentPublicationConditions(publication);
-
                     var sourceEntity = AbstractTypeFactory<DynamicContentPublishingGroupEntity>.TryCreateInstance();
                     if (sourceEntity != null)
                     {
@@ -226,23 +224,7 @@ namespace VirtoCommerce.MarketingModule.Data.Services
 
             DynamicContentPublicationCacheRegion.ExpireRegion();
         }
-
-        private void SerializeDynamicContentPublicationConditions(DynamicContentPublication publication)
-        {
-            //Serialize condition expression 
-            if (publication.DynamicExpression?.Children != null)
-            {
-                //Clear availableElements in expression (for decrease size)
-                publication.DynamicExpression.AvailableChildren = null;
-                var allBlocks = publication.DynamicExpression.Traverse(x => x.Children);
-                foreach (var block in allBlocks)
-                {
-                    block.AvailableChildren = null;
-                }
-                publication.PredicateVisualTreeSerialized = JsonConvert.SerializeObject(publication.DynamicExpression);
-            }
-        }
-
+      
         #endregion
 
         #region DynamicContentFolder methods

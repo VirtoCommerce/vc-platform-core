@@ -22,7 +22,6 @@ namespace VirtoCommerce.CoreModule.Core.Conditions
 
         public override object ReadJson(JsonReader reader, Type objectType, object existingValue, JsonSerializer serializer)
         {
-            object retVal = null;
             var obj = JObject.Load(reader);
             var type = objectType.Name;
             var pt = obj.GetValue("Id", StringComparison.InvariantCultureIgnoreCase);
@@ -31,7 +30,7 @@ namespace VirtoCommerce.CoreModule.Core.Conditions
                 type = pt.Value<string>();
             }
 
-            retVal = AbstractTypeFactory<IConditionTree>.TryCreateInstance(type);
+            object retVal = AbstractTypeFactory<IConditionTree>.TryCreateInstance(type);
 
             if (retVal == null)
             {

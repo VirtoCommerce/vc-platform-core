@@ -1,5 +1,6 @@
 using System;
 using System.Collections.Generic;
+using System.Threading.Tasks;
 using VirtoCommerce.CoreModule.Core.Common;
 using VirtoCommerce.Platform.Core.Common;
 
@@ -20,6 +21,10 @@ namespace VirtoCommerce.MarketingModule.Core.Model.Promotions
         /// Promotion name
         /// </summary>
         public string Name { get; set; }
+        /// <summary>
+        /// Required for UI. TODO: remove later
+        /// </summary>
+        public string Type { get; set; }
 
         public bool IsActive { get; set; }
 
@@ -57,9 +62,13 @@ namespace VirtoCommerce.MarketingModule.Core.Model.Promotions
 
         public string OuterId { get; set; }
 
-        public virtual PromotionReward[] EvaluatePromotion(IEvaluationContext context)
+        public virtual void ReduceDetails(string responseGroup)
         {
-            return new PromotionReward[] { };
+            //Nothing todo
+        }
+        public virtual Task<PromotionReward[]> EvaluatePromotionAsync(IEvaluationContext context)
+        {
+            return Task.FromResult(Array.Empty<PromotionReward>());
         }
     }
 }

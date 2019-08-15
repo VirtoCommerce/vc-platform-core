@@ -2,8 +2,15 @@
     <PropertyGroup>
         <TargetFramework>netcoreapp2.2</TargetFramework>
         <AssemblyVersion>3.0.0.0</AssemblyVersion>
-        <Version>3.0.0</Version>
+        <Version>3.0.0-beta.1</Version>
         <noWarn>1591</noWarn>
+        <GeneratePackageOnBuild>true</GeneratePackageOnBuild>
+        <Copyright>Copyright © VirtoCommerce 2011-2019</Copyright>
+        <PackageIconUrl>https://github.com/VirtoCommerce/vc-community/raw/master/NuGet/icon.png</PackageIconUrl>
+        <Company>VirtoCommerce</Company>
+        <Authors>VirtoCommerce</Authors>
+        <PackageProjectUrl>https://github.com/VirtoCommerce/vc-platform-core</PackageProjectUrl>
+        <RepositoryUrl>https://github.com/VirtoCommerce/vc-platform-core</RepositoryUrl>
     </PropertyGroup>
     <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Debug|AnyCPU'">
         <NoWarn>1701;1702;1705;1591</NoWarn>

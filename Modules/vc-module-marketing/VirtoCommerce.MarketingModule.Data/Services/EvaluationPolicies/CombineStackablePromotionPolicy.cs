@@ -42,19 +42,24 @@ namespace VirtoCommerce.MarketingModule.Data.Services
 
             var result = new PromotionResult();
 
-            Func<PromotionEvaluationContext, IEnumerable<PromotionReward>> evalFunc = (evalContext) => promotions.Results.SelectMany(x => x.EvaluatePromotion(evalContext))
-                                    .OrderByDescending(x => x.Promotion.IsExclusive)
+            async Task<IEnumerable<PromotionReward>> evalFunc(PromotionEvaluationContext evalContext)
+            {
+                var evalPromtionTasks = promotions.Results.Select(x => x.EvaluatePromotionAsync(evalContext)).ToArray();
+                await Task.WhenAll(evalPromtionTasks);
+                return evalPromtionTasks.SelectMany(x => x.Result).OrderByDescending(x => x.Promotion.IsExclusive)
                                     .ThenByDescending(x => x.Promotion.Priority)
                                     .Where(x => x.IsValid)
                                     .ToList();
-            EvalAndCombineRewardsRecursively(promoContext, evalFunc, result.Rewards, new List<PromotionReward>());
+            }        
+
+            await EvalAndCombineRewardsRecursivelyAsync(promoContext, evalFunc, result.Rewards, new List<PromotionReward>());
             return result;
         }
 
-        protected virtual void EvalAndCombineRewardsRecursively(PromotionEvaluationContext context, Func<PromotionEvaluationContext, IEnumerable<PromotionReward>> evalFunc, ICollection<PromotionReward> resultRewards, ICollection<PromotionReward> skippedRewards)
+        protected virtual async Task EvalAndCombineRewardsRecursivelyAsync(PromotionEvaluationContext context, Func<PromotionEvaluationContext, Task<IEnumerable<PromotionReward>>> evalFunc, ICollection<PromotionReward> resultRewards, ICollection<PromotionReward> skippedRewards)
         {
             //Evaluate rewards with passed context and exclude already applied rewards from result
-            var rewards = evalFunc(context).Except(resultRewards).Except(skippedRewards).ToList();
+            var rewards = (await evalFunc(context)).Except(resultRewards).Except(skippedRewards).ToList();
 
             var firstOrderExlusiveReward = rewards.FirstOrDefault(x => x.Promotion.IsExclusive);
             if (firstOrderExlusiveReward != null)
@@ -115,7 +120,7 @@ namespace VirtoCommerce.MarketingModule.Data.Services
                 if (rewards.Any())
                 {
                     //Call recursively
-                    EvalAndCombineRewardsRecursively(context, evalFunc, resultRewards, skippedRewards);
+                    await EvalAndCombineRewardsRecursivelyAsync(context, evalFunc, resultRewards, skippedRewards);
                 }
             }
         }

@@ -5,22 +5,7 @@ using VirtoCommerce.CoreModule.Core.Extensions;
 namespace VirtoCommerce.MarketingModule.Core.Model.Promotions
 {
     public abstract class AmountBasedReward : PromotionReward
-    {
-        public AmountBasedReward()
-        {
-        }
-
-        protected AmountBasedReward(AmountBasedReward other)
-            : base(other)
-        {
-            AmountType = other.AmountType;
-            Amount = other.Amount;
-            Quantity = other.Quantity;
-            MaxLimit = other.MaxLimit;
-            ForNthQuantity = other.ForNthQuantity;
-            InEveryNthQuantity = other.InEveryNthQuantity;
-        }
-
+    {        
         public RewardAmountType AmountType { get; set; }
         /// <summary>
         /// Reward amount

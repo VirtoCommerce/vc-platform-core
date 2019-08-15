@@ -4,14 +4,15 @@ using VirtoCommerce.Platform.Core.Common;
 
 namespace VirtoCommerce.CoreModule.Core.Conditions
 {
-    public class BlockConditionAndOr : Condition
+    public abstract class BlockConditionAndOr : ConditionTree
     {
         public bool All { get; set; }
 
         // Logical inverse of expression
         public bool Not { get; set; } = false;
 
-        public override bool Evaluate(IEvaluationContext context)
+
+        public override bool IsSatisfiedBy(IEvaluationContext context)
         {
             var result = false;
 
@@ -24,21 +25,16 @@ namespace VirtoCommerce.CoreModule.Core.Conditions
             {
                 if (!Not)
                 {
-                    result = All ? Children.All(ch => ch.Evaluate(context)) : Children.Any(ch => ch.Evaluate(context));
+                    result = All ? Children.All(ch => ch.IsSatisfiedBy(context)) : Children.Any(ch => ch.IsSatisfiedBy(context));
                 }
                 else
                 {
-                    result = All ? !Children.All(ch => ch.Evaluate(context)) : !Children.Any(ch => ch.Evaluate(context));
+                    result = All ? !Children.All(ch => ch.IsSatisfiedBy(context)) : !Children.Any(ch => ch.IsSatisfiedBy(context));
                 }
 
             }
 
             return result;
-        }
-
-        public override Condition[] GetConditions()
-        {
-            return Children.OfType<Condition>().ToArray();
         }
     }
 }

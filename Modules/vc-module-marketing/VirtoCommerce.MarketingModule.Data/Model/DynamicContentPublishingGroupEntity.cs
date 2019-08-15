@@ -2,7 +2,10 @@ using System;
 using System.Collections.ObjectModel;
 using System.ComponentModel.DataAnnotations;
 using System.Linq;
+using Newtonsoft.Json;
+using VirtoCommerce.CoreModule.Core.Conditions;
 using VirtoCommerce.MarketingModule.Core.Model;
+using VirtoCommerce.MarketingModule.Core.Model.DynamicContent;
 using VirtoCommerce.Platform.Core.Common;
 
 namespace VirtoCommerce.MarketingModule.Data.Model
@@ -50,7 +53,9 @@ namespace VirtoCommerce.MarketingModule.Data.Model
         public virtual DynamicContentPublication ToModel(DynamicContentPublication publication)
         {
             if (publication == null)
-                throw new NullReferenceException(nameof(publication));
+            {
+                throw new ArgumentNullException(nameof(publication));
+            }
 
             publication.Id = Id;
             publication.CreatedBy = CreatedBy;
@@ -65,7 +70,6 @@ namespace VirtoCommerce.MarketingModule.Data.Model
             publication.StoreId = StoreId;
             publication.StartDate = StartDate;
             publication.EndDate = EndDate;
-            publication.PredicateVisualTreeSerialized = PredicateVisualTreeSerialized;
             publication.Description = Description;
 
             if (ContentItems != null)
@@ -79,13 +83,20 @@ namespace VirtoCommerce.MarketingModule.Data.Model
                 publication.ContentPlaces = ContentPlaces.Where(ci => ci.ContentPlace != null).Select(x => x.ContentPlace.ToModel(AbstractTypeFactory<DynamicContentPlace>.TryCreateInstance())).ToList();
             }
 
+            if (PredicateVisualTreeSerialized != null)
+            {
+                publication.DynamicExpression = JsonConvert.DeserializeObject<DynamicContentConditionTree>(PredicateVisualTreeSerialized, new ConditionJsonConverter());
+            }
+
             return publication;
         }
 
         public virtual DynamicContentPublishingGroupEntity FromModel(DynamicContentPublication publication, PrimaryKeyResolvingMap pkMap)
         {
             if (publication == null)
-                throw new NullReferenceException(nameof(publication));
+            {
+                throw new ArgumentNullException(nameof(publication));
+            }
 
             pkMap.AddPair(publication, this);
 
@@ -102,7 +113,7 @@ namespace VirtoCommerce.MarketingModule.Data.Model
             StoreId = publication.StoreId;
             StartDate = publication.StartDate;
             EndDate = publication.EndDate;
-            PredicateVisualTreeSerialized = publication.PredicateVisualTreeSerialized;
+ 
             Description = publication.Description;
 
             if (publication.ContentItems != null)
@@ -113,13 +124,19 @@ namespace VirtoCommerce.MarketingModule.Data.Model
             {
                 ContentPlaces = new ObservableCollection<PublishingGroupContentPlaceEntity>(publication.ContentPlaces.Select(x => new PublishingGroupContentPlaceEntity { DynamicContentPublishingGroupId = Id, DynamicContentPlaceId = x.Id }));
             }
+            if (publication.DynamicExpression != null)
+            {
+                PredicateVisualTreeSerialized = JsonConvert.SerializeObject(publication.DynamicExpression);
+            }
             return this;
         }
 
         public virtual void Patch(DynamicContentPublishingGroupEntity target)
         {
             if (target == null)
-                throw new NullReferenceException(nameof(target));
+            {
+                throw new ArgumentNullException(nameof(target));
+            }
 
             target.Description = Description;
             target.Name = Name;
@@ -128,7 +145,6 @@ namespace VirtoCommerce.MarketingModule.Data.Model
             target.StoreId = StoreId;
             target.StartDate = StartDate;
             target.EndDate = EndDate;
-            target.ConditionExpression = ConditionExpression;
             target.PredicateVisualTreeSerialized = PredicateVisualTreeSerialized;
 
             if (!ContentItems.IsNullCollection())

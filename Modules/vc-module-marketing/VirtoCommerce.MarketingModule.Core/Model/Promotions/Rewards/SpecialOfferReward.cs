@@ -5,14 +5,6 @@ namespace VirtoCommerce.MarketingModule.Core.Model.Promotions
     /// </summary>
     public class SpecialOfferReward : PromotionReward
     {
-        public SpecialOfferReward()
-        {
-        }
-        //Copy constructor
-        protected SpecialOfferReward(SpecialOfferReward other)
-            : base(other)
-        {
-        }
-
+      
     }
 }
