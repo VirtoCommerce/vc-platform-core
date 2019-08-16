@@ -69,8 +69,6 @@ namespace VirtoCommerce.PricingModule.Web
             serviceCollection.AddTransient<ProductPriceDocumentBuilder>();
             serviceCollection.AddTransient<LogChangesChangedEventHandler>();
 
-            serviceCollection.AddSingleton<IPricingExtensionManager, DefaultPricingExtensionManagerImpl>();
-
             serviceCollection.AddTransient<PriceExportPagedDataSource>(); // Adding as scoped, because of used services (UserManager, PrincipalFactory) scoped too
             serviceCollection.AddTransient<Func<ExportDataQuery, PriceExportPagedDataSource>>(provider =>
                 (exportDataQuery) =>
@@ -176,13 +174,10 @@ namespace VirtoCommerce.PricingModule.Web
 
             //Pricing expression
             AbstractTypeFactory<IConditionTree>.RegisterType<PriceConditionTree>();
-            AbstractTypeFactory<IConditionTree>.RegisterType<BlockPricingCondition>();
-
-            var pricingExtensionManager = appBuilder.ApplicationServices.GetRequiredService<IPricingExtensionManager>();
-            pricingExtensionManager.PriceConditionTree = new PriceConditionTree
+            foreach (var conditionTree in ((IConditionTree)AbstractTypeFactory<PriceConditionTree>.TryCreateInstance()).Traverse(x => x.AvailableChildren))
             {
-                Children = new List<IConditionTree>() { GetPricingDynamicExpression() }
-            };
+                AbstractTypeFactory<IConditionTree>.RegisterType(conditionTree.GetType(), noThrowIfExists: true);
+            }
 
             var registrar = appBuilder.ApplicationServices.GetService<IKnownExportTypesRegistrar>();
             var priceExportPagedDataSourceFactory = appBuilder.ApplicationServices.GetService<Func<ExportDataQuery, PriceExportPagedDataSource>>();
@@ -244,18 +239,6 @@ namespace VirtoCommerce.PricingModule.Web
             await importJob.DoImportAsync(inputStream, progressCallback, cancellationToken);
         }
 
-        #endregion
-
-        private static IConditionTree GetPricingDynamicExpression()
-        {
-            var conditions = new List<IConditionTree>
-            {
-                new ConditionGeoTimeZone(), new ConditionGeoZipCode(), new ConditionStoreSearchedPhrase(), new ConditionAgeIs(), new ConditionGenderIs(),
-                new ConditionGeoCity(), new ConditionGeoCountry(), new ConditionGeoState(), new ConditionLanguageIs(), new UserGroupsContainsCondition()
-            };
-            var rootBlock = new BlockPricingCondition { AvailableChildren = conditions };
-
-            return rootBlock;
-        }
+        #endregion       
     }
 }

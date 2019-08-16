@@ -5,7 +5,7 @@ using VirtoCommerce.CoreModule.Core.Conditions;
 namespace VirtoCommerce.MarketingModule.Core.Model.Promotions.Conditions
 {
     //Product is []
-    public class ConditionEntryIs : Condition
+    public class ConditionEntryIs : ConditionTree
     {
 
         public string ProductId { get; set; }
@@ -16,7 +16,7 @@ namespace VirtoCommerce.MarketingModule.Core.Model.Promotions.Conditions
         /// <summary>
         /// ((PromotionEvaluationContext)x).IsItemInProduct(ProductId)
         /// </summary>
-        public override bool Evaluate(IEvaluationContext context)
+        public override bool IsSatisfiedBy(IEvaluationContext context)
         {
 
             if (ProductId == null && ProductIds == null)

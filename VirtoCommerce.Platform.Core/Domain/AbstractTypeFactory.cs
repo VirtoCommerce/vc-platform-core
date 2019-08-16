@@ -29,13 +29,28 @@ namespace VirtoCommerce.Platform.Core.Common
         /// <returns>TypeInfo instance to continue configuration through fluent syntax</returns>
         public static TypeInfo<BaseType> RegisterType<T>() where T : BaseType
         {
-            var kowTypes = _typeInfos.SelectMany(x => x.AllSubclasses);
-            if (kowTypes.Contains(typeof(T)))
+            return RegisterType(typeof(T));
+        }
+
+        public static TypeInfo<BaseType> RegisterType(Type type, bool noThrowIfExists = false)
+        {
+            if(type == null)
             {
-                throw new ArgumentException(string.Format("Type {0} already registered", typeof(T).Name));
+                throw new ArgumentNullException(nameof(type));
             }
-            var result = new TypeInfo<BaseType>(typeof(T));
-            _typeInfos.Add(result);
+
+            var result = _typeInfos.FirstOrDefault(x=> x.AllSubclasses.Contains(type));
+
+            if (result != null && !noThrowIfExists)
+            {
+                throw new ArgumentException(string.Format("Type {0} already registered", type.Name));
+            }
+
+            if (result == null)
+            {
+                result = new TypeInfo<BaseType>(type);
+                _typeInfos.Add(result);
+            }
             return result;
         }
 
@@ -84,7 +99,7 @@ namespace VirtoCommerce.Platform.Core.Common
             //Then need to find in inheritance chain from registered types
             if (typeInfo == null)
             {                
-                typeInfo = _typeInfos.Where(x => x.IsAssignableTo(typeName)).FirstOrDefault();
+                typeInfo = _typeInfos.FirstOrDefault(x => x.IsAssignableTo(typeName));
             }          
             if (typeInfo != null)
             {
