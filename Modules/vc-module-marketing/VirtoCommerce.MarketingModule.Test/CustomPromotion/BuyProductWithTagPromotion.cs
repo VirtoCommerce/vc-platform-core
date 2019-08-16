@@ -1,5 +1,6 @@
 using System.Collections.Generic;
 using System.Linq;
+using System.Threading.Tasks;
 using VirtoCommerce.CoreModule.Core.Common;
 using VirtoCommerce.MarketingModule.Core.Model.Promotions;
 
@@ -16,7 +17,7 @@ namespace VirtoCommerce.MarketingModule.Test.CustomPromotion
             _discountAmount = discountAmount;
         }
 
-        public override PromotionReward[] EvaluatePromotion(IEvaluationContext context)
+        public override Task<PromotionReward[]> EvaluatePromotionAsync(IEvaluationContext context)
         {
             var retVal = new List<PromotionReward>();
             if (context is PromotionEvaluationContext promoContext)
@@ -35,7 +36,7 @@ namespace VirtoCommerce.MarketingModule.Test.CustomPromotion
                     retVal.Add(reward);
                 }
             }
-            return retVal.ToArray();
+            return Task.FromResult(retVal.ToArray());
         }
     }
 }

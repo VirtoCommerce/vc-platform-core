@@ -1,7 +1,6 @@
 using System;
 using Newtonsoft.Json;
 using Newtonsoft.Json.Linq;
-using VirtoCommerce.CoreModule.Core.Conditions;
 using VirtoCommerce.MarketingModule.Core.Model.Promotions;
 using VirtoCommerce.Platform.Core.Common;
 
@@ -24,7 +23,6 @@ namespace VirtoCommerce.MarketingModule.Data.Promotions
 
         public override object ReadJson(JsonReader reader, Type objectType, object existingValue, JsonSerializer serializer)
         {
-            object retVal = null;
             var obj = JObject.Load(reader);
             var type = objectType.Name;
             var pt = obj["Id"] ?? obj["id"];
@@ -33,7 +31,7 @@ namespace VirtoCommerce.MarketingModule.Data.Promotions
                 type = pt.Value<string>();
             }
 
-            retVal = AbstractTypeFactory<PromotionReward>.TryCreateInstance(type);
+            object retVal = AbstractTypeFactory<PromotionReward>.TryCreateInstance(type);
 
             if (retVal == null)
             {

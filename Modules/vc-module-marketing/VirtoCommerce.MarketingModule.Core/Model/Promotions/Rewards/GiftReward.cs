@@ -5,22 +5,7 @@ namespace VirtoCommerce.MarketingModule.Core.Model.Promotions
     /// </summary>
     public class GiftReward : PromotionReward
     {
-        public GiftReward()
-        {
-        }
-
-        //Copy constructor
-        protected GiftReward(GiftReward other)
-            : base(other)
-        {
-            Name = other.Name;
-            CategoryId = other.CategoryId;
-            ProductId = other.ProductId;
-            Quantity = other.Quantity;
-            MeasureUnit = other.MeasureUnit;
-            ImageUrl = other.ImageUrl;
-        }
-
+    
         public string Name { get; set; }
 
         public string CategoryId { get; set; }

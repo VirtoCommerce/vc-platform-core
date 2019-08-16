@@ -3,6 +3,8 @@ using System.Collections.ObjectModel;
 using System.ComponentModel.DataAnnotations;
 using System.ComponentModel.DataAnnotations.Schema;
 using System.Linq;
+using Newtonsoft.Json;
+using VirtoCommerce.CoreModule.Core.Conditions;
 using VirtoCommerce.MarketingModule.Core.Model.Promotions;
 using VirtoCommerce.MarketingModule.Data.Promotions;
 using VirtoCommerce.Platform.Core.Common;
@@ -57,7 +59,9 @@ namespace VirtoCommerce.MarketingModule.Data.Model
         public virtual Promotion ToModel(DynamicPromotion promotion)
         {
             if (promotion == null)
-                throw new NullReferenceException(nameof(promotion));
+            {
+                throw new ArgumentNullException(nameof(promotion));
+            }
 
             promotion.Id = Id;
             promotion.CreatedBy = CreatedBy;
@@ -76,7 +80,6 @@ namespace VirtoCommerce.MarketingModule.Data.Model
             promotion.Priority = Priority;
             promotion.IsExclusive = IsExclusive;
             promotion.IsAllowCombiningWithSelf = IsAllowCombiningWithSelf;
-            promotion.PredicateVisualTreeSerialized = PredicateVisualTreeSerialized;
             promotion.MaxPersonalUsageCount = PerCustomerLimit;
             promotion.MaxUsageCount = TotalLimit;
             promotion.MaxPersonalUsageCount = PerCustomerLimit;
@@ -87,13 +90,19 @@ namespace VirtoCommerce.MarketingModule.Data.Model
                 promotion.StoreIds = Stores.Select(x => x.StoreId).ToList();
             }
 
+            if (PredicateVisualTreeSerialized != null)
+            {
+                promotion.DynamicExpression = JsonConvert.DeserializeObject<PromotionConditionAndRewardTree>(PredicateVisualTreeSerialized, new ConditionJsonConverter(), new RewardJsonConverter());
+            }
             return promotion;
         }
 
         public virtual PromotionEntity FromModel(DynamicPromotion promotion, PrimaryKeyResolvingMap pkMap)
         {
             if (promotion == null)
-                throw new NullReferenceException(nameof(promotion));
+            {
+                throw new ArgumentNullException(nameof(promotion));
+            }
 
             pkMap.AddPair(promotion, this);
 
@@ -114,7 +123,6 @@ namespace VirtoCommerce.MarketingModule.Data.Model
             Priority = promotion.Priority;
             IsExclusive = promotion.IsExclusive;
             IsAllowCombiningWithSelf = promotion.IsAllowCombiningWithSelf;
-            PredicateVisualTreeSerialized = promotion.PredicateVisualTreeSerialized;
             PerCustomerLimit = promotion.MaxPersonalUsageCount;
             TotalLimit = promotion.MaxUsageCount;
             PerCustomerLimit = promotion.MaxPersonalUsageCount;
@@ -123,6 +131,10 @@ namespace VirtoCommerce.MarketingModule.Data.Model
             {
                 Stores = new ObservableCollection<PromotionStoreEntity>(promotion.StoreIds.Select(x => new PromotionStoreEntity { StoreId = x, PromotionId = promotion.Id }));
             }
+            if (promotion.DynamicExpression != null)
+            {
+                PredicateVisualTreeSerialized = JsonConvert.SerializeObject(promotion.DynamicExpression);
+            }
 
             return this;
         }
@@ -130,7 +142,9 @@ namespace VirtoCommerce.MarketingModule.Data.Model
         public virtual void Patch(PromotionEntity target)
         {
             if (target == null)
-                throw new NullReferenceException(nameof(target));
+            {
+                throw new ArgumentNullException(nameof(target));
+            }
 
             target.StartDate = StartDate;
             target.EndDate = EndDate;

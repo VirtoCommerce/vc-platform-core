@@ -1,14 +1,15 @@
+using System;
 using System.Collections.Generic;
 using VirtoCommerce.CoreModule.Core.Common;
+using VirtoCommerce.Platform.Core.Common;
 
 namespace VirtoCommerce.CoreModule.Core.Conditions
 {
-    public interface IConditionTree
+    public interface IConditionTree : IEntity, ICloneable
     {
-        ICollection<IConditionTree> AvailableChildren { get; set; }
-        ICollection<IConditionTree> Children { get; set; }
-        string Id { get; set; }
+        IEnumerable<IConditionTree> AvailableChildren { get; }
+        IList<IConditionTree> Children { get; set; }
 
-        bool Evaluate(IEvaluationContext context);
+        bool IsSatisfiedBy(IEvaluationContext context);
     }
 }

@@ -1,7 +1,10 @@
 using System;
 using System.ComponentModel.DataAnnotations;
+using Newtonsoft.Json;
+using VirtoCommerce.CoreModule.Core.Conditions;
 using VirtoCommerce.Platform.Core.Common;
 using VirtoCommerce.PricingModule.Core.Model;
+using VirtoCommerce.PricingModule.Core.Model.Conditions;
 
 namespace VirtoCommerce.PricingModule.Data.Model
 {
@@ -55,7 +58,6 @@ namespace VirtoCommerce.PricingModule.Data.Model
             assignment.Description = Description;
             assignment.EndDate = EndDate;
             assignment.Name = Name;
-            assignment.PredicateVisualTreeSerialized = PredicateVisualTreeSerialized;
             assignment.PricelistId = PricelistId;
             assignment.Priority = Priority;
             assignment.StartDate = StartDate;
@@ -70,7 +72,10 @@ namespace VirtoCommerce.PricingModule.Data.Model
                 assignment.Pricelist.Name = Pricelist.Name;
 
             }
-
+            if (PredicateVisualTreeSerialized != null)
+            {
+                assignment.DynamicExpression = JsonConvert.DeserializeObject<PriceConditionTree>(PredicateVisualTreeSerialized, new ConditionJsonConverter());
+            }
             return assignment;
         }
 
@@ -92,10 +97,14 @@ namespace VirtoCommerce.PricingModule.Data.Model
             Description = assignment.Description;
             EndDate = assignment.EndDate;
             Name = assignment.Name;
-            PredicateVisualTreeSerialized = assignment.PredicateVisualTreeSerialized;
             PricelistId = assignment.PricelistId;
             Priority = assignment.Priority;
             StartDate = assignment.StartDate;
+
+            if (assignment.DynamicExpression != null)
+            {
+                PredicateVisualTreeSerialized = JsonConvert.SerializeObject(assignment.DynamicExpression);
+            }
 
             return this;
         }

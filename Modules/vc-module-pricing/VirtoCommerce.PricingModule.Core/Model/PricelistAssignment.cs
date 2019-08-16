@@ -1,6 +1,4 @@
 using System;
-using Newtonsoft.Json;
-using VirtoCommerce.CoreModule.Core.Conditions;
 using VirtoCommerce.Platform.Core.Common;
 using VirtoCommerce.PricingModule.Core.Model.Conditions;
 
@@ -28,23 +26,11 @@ namespace VirtoCommerce.PricingModule.Core.Model
         /// End of period when Prices Assignment is valid. Null value means no limit
         /// </summary>
 		public DateTime? EndDate { get; set; }
-        /// <summary>
-        /// Serialized condition expression visual tree used in UI
-        /// </summary>
-		public string PredicateVisualTreeSerialized { get; set; }
-        /// <summary>
-        /// Deserialized conditional expression  used to evaluate current assignment availability 
-        /// </summary>
-        // TECHDEBT: [JsonIgnore] attribute here is a workaround to exclude this property from Swagger documentation.
-        //           This property causes NSwag to include lots of types including MethodImplAttributes, which leads to the invalid Swagger JSON.
-        private Condition[] _conditions;
-        [JsonIgnore]
-        public Condition[] Conditions => _conditions ?? (DynamicExpression != null ? _conditions = ((PriceConditionTree)DynamicExpression).GetConditions() : null);
 
         /// <summary>
         /// List of conditions and rules to define Prices Assignment is valid
         /// </summary>
-        public IConditionTree DynamicExpression { get; set; }
+        public PriceConditionTree DynamicExpression { get; set; }
 
         public string OuterId { get; set; }
 

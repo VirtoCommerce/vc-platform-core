@@ -4,16 +4,16 @@ using VirtoCommerce.CoreModule.Core.Common;
 using VirtoCommerce.CoreModule.Core.Conditions;
 using VirtoCommerce.Platform.Core.Common;
 
-namespace VirtoCommerce.PricingModule.Core.Model.Conditions
+namespace VirtoCommerce.MarketingModule.Core.Model.DynamicContent
 {
-    public class PriceConditionTree : ConditionTree
+    public class DynamicContentConditionTree : ConditionTree
     {
         public override bool IsSatisfiedBy(IEvaluationContext context)
         {
             var result = false;
-            if (context is PriceEvaluationContext priceEvaluationContext)
+            if (context is DynamicContentEvaluationContext dynContentEvaluationContext)
             {
-                result = Children.All(c => c.IsSatisfiedBy(priceEvaluationContext));
+                result = Children.All(c => c.IsSatisfiedBy(dynContentEvaluationContext));
             }
             return result;
         }
@@ -22,7 +22,7 @@ namespace VirtoCommerce.PricingModule.Core.Model.Conditions
         {
             get
             {
-                yield return AbstractTypeFactory<BlockPricingCondition>.TryCreateInstance();
+                yield return AbstractTypeFactory<BlockContentCondition>.TryCreateInstance();             
             }
         }
     }

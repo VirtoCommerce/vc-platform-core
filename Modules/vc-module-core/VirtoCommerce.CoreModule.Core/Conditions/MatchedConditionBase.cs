@@ -2,20 +2,19 @@ using VirtoCommerce.Platform.Core.Common;
 
 namespace VirtoCommerce.CoreModule.Core.Conditions
 {
-    public abstract class MatchedConditionBase : Condition
+    public abstract class MatchedConditionBase : ConditionTree
     {
         public string Value { get; set; }
         public string MatchCondition { get; set; } = ConditionOperation.Contains;
 
         public virtual bool UseMatchedCondition(string leftOperand)
         {
-            var result = false;
-
             if (string.IsNullOrEmpty(leftOperand))
             {
                 return false;
             }
 
+            bool result;
             if (MatchCondition.EqualsInvariant(ConditionOperation.Contains))
             {
                 result = leftOperand.ToLowerInvariant().Contains(Value.ToLowerInvariant());

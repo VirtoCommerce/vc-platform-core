@@ -2,9 +2,7 @@ using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Threading.Tasks;
-using Newtonsoft.Json;
 using VirtoCommerce.CoreModule.Core.Common;
-using VirtoCommerce.CoreModule.Core.Conditions;
 using VirtoCommerce.MarketingModule.Core.Model.Promotions;
 using VirtoCommerce.MarketingModule.Core.Model.Promotions.Search;
 using VirtoCommerce.MarketingModule.Core.Search;
@@ -14,17 +12,10 @@ namespace VirtoCommerce.MarketingModule.Data.Promotions
 {
     public class DynamicPromotion : Promotion
     {
-        private readonly ICouponSearchService _couponSearchService;
-        private readonly IPromotionUsageSearchService _promotionUsageSearchService;
-
-        private Condition[] _conditions;
-        private PromotionReward[] _rewards;
-        private PromotionConditionAndRewardTree _promotionConditionAndRewardTree;
-
-        public DynamicPromotion(ICouponSearchService couponSearchService, IPromotionUsageSearchService promotionUsageSearchService)
+        public DynamicPromotion()
         {
-            _couponSearchService = couponSearchService;
-            _promotionUsageSearchService = promotionUsageSearchService;
+            //TODO: Required  for UI remove later
+            Type = nameof(DynamicPromotion); 
         }
 
         /// <summary>
@@ -33,27 +24,12 @@ namespace VirtoCommerce.MarketingModule.Data.Promotions
         /// </summary>
         public bool IsAllowCombiningWithSelf { get; set; }
 
-        public string PredicateVisualTreeSerialized { get; set; }
+        public  ICouponSearchService CouponSearchService { get; set; }
+        public IPromotionUsageSearchService PromotionUsageSearchService { get; set; }
 
-        protected PromotionConditionAndRewardTree PromotionConditionAndRewardTree
-        {
-            get
-            {
-                if (_promotionConditionAndRewardTree == null && !string.IsNullOrEmpty(PredicateVisualTreeSerialized))
-                {
-                    _promotionConditionAndRewardTree = JsonConvert.DeserializeObject<PromotionConditionAndRewardTree>(PredicateVisualTreeSerialized
-                        , new ConditionJsonConverter(), new RewardJsonConverter());
-                }
+        public PromotionConditionAndRewardTree DynamicExpression { get; set; }
 
-                return _promotionConditionAndRewardTree;
-            }
-        }
-
-        protected Condition[] Conditions => _conditions ?? (_conditions = PromotionConditionAndRewardTree.GetConditions());
-
-        protected PromotionReward[] Rewards => _rewards ?? (_rewards = PromotionConditionAndRewardTree.GetRewards());
-
-        public override PromotionReward[] EvaluatePromotion(IEvaluationContext context)
+        public override async Task<PromotionReward[]> EvaluatePromotionAsync(IEvaluationContext context)
         {
             var result = new List<PromotionReward>();
 
@@ -65,7 +41,7 @@ namespace VirtoCommerce.MarketingModule.Data.Promotions
             IEnumerable<Coupon> validCoupons = null;
             if (HasCoupons)
             {
-                validCoupons = FindValidCouponsAsync(promoContext.Coupons, promoContext.CustomerId).GetAwaiter().GetResult();
+                validCoupons = await FindValidCouponsAsync(promoContext.Coupons, promoContext.CustomerId);
             }
             //Check coupon
             var couponIsValid = !HasCoupons || validCoupons.Any();
@@ -75,7 +51,8 @@ namespace VirtoCommerce.MarketingModule.Data.Promotions
             {
                 //Set current context promo entry for evaluation
                 promoContext.PromoEntry = promoEntry;
-                foreach (var reward in Rewards)
+
+                foreach (var reward in DynamicExpression?.GetRewards() ?? Array.Empty<PromotionReward>())
                 {
                     var clonedReward = reward.Clone() as PromotionReward;
                     EvaluateReward(promoContext, couponIsValid, clonedReward);
@@ -104,7 +81,7 @@ namespace VirtoCommerce.MarketingModule.Data.Promotions
         protected virtual void EvaluateReward(PromotionEvaluationContext promoContext, bool couponIsValid, PromotionReward reward)
         {
             reward.Promotion = this;
-            reward.IsValid = couponIsValid && Conditions.All(c => c.Evaluate(promoContext));
+            reward.IsValid = couponIsValid && (DynamicExpression?.IsSatisfiedBy(promoContext) ?? false);
 
             //Set productId for catalog item reward
             if (reward is CatalogItemAmountReward catalogItemReward && catalogItemReward.ProductId == null)
@@ -122,7 +99,7 @@ namespace VirtoCommerce.MarketingModule.Data.Promotions
                 couponCodes = couponCodes.Where(x => !string.IsNullOrEmpty(x)).ToList();
                 if (!couponCodes.IsNullOrEmpty())
                 {
-                    var coupons = await _couponSearchService.SearchCouponsAsync(new CouponSearchCriteria { Codes = couponCodes, PromotionId = Id });
+                    var coupons = await CouponSearchService.SearchCouponsAsync(new CouponSearchCriteria { Codes = couponCodes, PromotionId = Id });
                     foreach (var coupon in coupons.Results.OrderBy(x => x.TotalUsesCount))
                     {
                         var couponIsValid = true;
@@ -132,12 +109,12 @@ namespace VirtoCommerce.MarketingModule.Data.Promotions
                         }
                         if (couponIsValid && coupon.MaxUsesNumber > 0)
                         {
-                            var usage = await _promotionUsageSearchService.SearchUsagesAsync(new PromotionUsageSearchCriteria { PromotionId = Id, CouponCode = coupon.Code, Take = 0 });
+                            var usage = await PromotionUsageSearchService.SearchUsagesAsync(new PromotionUsageSearchCriteria { PromotionId = Id, CouponCode = coupon.Code, Take = 0 });
                             couponIsValid = usage.TotalCount < coupon.MaxUsesNumber;
                         }
                         if (couponIsValid && coupon.MaxUsesPerUser > 0 && !string.IsNullOrWhiteSpace(userId))
                         {
-                            var usage = await _promotionUsageSearchService.SearchUsagesAsync(new PromotionUsageSearchCriteria { PromotionId = Id, CouponCode = coupon.Code, UserId = userId, Take = int.MaxValue });
+                            var usage = await PromotionUsageSearchService.SearchUsagesAsync(new PromotionUsageSearchCriteria { PromotionId = Id, CouponCode = coupon.Code, UserId = userId, Take = int.MaxValue });
                             couponIsValid = usage.TotalCount < coupon.MaxUsesPerUser;
                         }
                         if (couponIsValid)

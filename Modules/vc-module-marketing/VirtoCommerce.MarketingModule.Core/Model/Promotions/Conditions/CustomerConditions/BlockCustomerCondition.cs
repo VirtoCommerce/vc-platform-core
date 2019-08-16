@@ -1,13 +1,20 @@
-using System.Linq;
+using System.Collections.Generic;
 using VirtoCommerce.CoreModule.Core.Conditions;
+using VirtoCommerce.Platform.Core.Common;
 
 namespace VirtoCommerce.MarketingModule.Core.Model.Promotions.Conditions
 {
     public class BlockCustomerCondition : BlockConditionAndOr
     {
-        public override Condition[] GetConditions()
+        public override IEnumerable<IConditionTree> AvailableChildren
         {
-            return Children.OfType<Condition>().ToArray();
+            get
+            {
+                yield return AbstractTypeFactory<ConditionIsRegisteredUser>.TryCreateInstance();
+                yield return AbstractTypeFactory<ConditionIsEveryone>.TryCreateInstance();
+                yield return AbstractTypeFactory<ConditionIsFirstTimeBuyer>.TryCreateInstance();
+                yield return AbstractTypeFactory<UserGroupsContainsCondition>.TryCreateInstance();
+            }
         }
     }
 }
