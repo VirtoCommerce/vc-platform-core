@@ -3,6 +3,7 @@ using System.Collections.Generic;
 using System.Linq;
 using System.Threading.Tasks;
 using VirtoCommerce.ExportModule.Core.Model;
+using VirtoCommerce.Platform.Core.Common;
 
 namespace VirtoCommerce.PricingModule.Data.ExportImport
 {
@@ -18,7 +19,7 @@ namespace VirtoCommerce.PricingModule.Data.ExportImport
             public int TotalCount;
             public int ReceivedCount;
             public ExportDataQuery DataQuery;
-            public IEnumerable<IExportable> Result;
+            public IExportable[] Result;
             public Func<ExportDataQuery, IPagedDataSource> DataSourceFactory;
         }
 
@@ -66,10 +67,39 @@ namespace VirtoCommerce.PricingModule.Data.ExportImport
             return TotalCount;
         }
 
+        private void EnsureHaveTotals()
+        {
+            if (TotalCount < 0)
+            {
+                CalculateCounts();
+            }
+        }
+
         public virtual IEnumerable<IExportable> FetchNextPage()
         {
-            int batchSize = PageSize;
+            EnsureHaveTotals();
+            var result = new List<IExportable>();
+
+            int batchSize = _dataQuery.Take ?? PageSize;
             var taskList = new List<Task>();
+            int skip = _dataQuery.Skip ?? CurrentPageNumber * PageSize;
+
+            if (skip > 0)
+            {
+                foreach (var state in _exportDataSourceStates)
+                {
+                    if (state.TotalCount < skip)
+                    {
+                        state.ReceivedCount = state.TotalCount;
+                        skip -= state.TotalCount;
+                    }
+                    else
+                    {
+                        state.ReceivedCount = skip;
+                        skip = 0;
+                    }
+                }
+            }
 
             foreach (var state in _exportDataSourceStates)
             {
@@ -77,25 +107,20 @@ namespace VirtoCommerce.PricingModule.Data.ExportImport
 
                 if (state.ReceivedCount < state.TotalCount && batchSize > 0)
                 {
-                    var portion = state.TotalCount - state.ReceivedCount > batchSize ? batchSize : state.TotalCount - state.ReceivedCount;
-                    state.DataQuery.Take = portion;
+                    var portionCount = state.TotalCount - state.ReceivedCount > batchSize ? batchSize : state.TotalCount - state.ReceivedCount;
+                    state.DataQuery.Take = portionCount;
                     state.DataQuery.Skip = state.ReceivedCount;
                     taskList.Add(Task.Factory.StartNew(() => { state.Result = state.DataSourceFactory(state.DataQuery).FetchNextPage().ToArray(); }));
-                    batchSize = batchSize - portion;
+                    batchSize = batchSize - portionCount;
                 }
             }
 
             Task.WhenAll(taskList).GetAwaiter().GetResult();
-            List<IExportable> result = null;
 
             foreach (var state in _exportDataSourceStates)
             {
-                if (result == null && state.Result.Any())
-                {
-                    result = new List<IExportable>();
-                }
-                result?.AddRange(state.Result);
-                state.ReceivedCount += state.Result.Count();
+                result.AddRange(state.Result);
+                state.ReceivedCount += state.Result.Length;
             }
             CurrentPageNumber++;
 
@@ -121,12 +146,11 @@ namespace VirtoCommerce.PricingModule.Data.ExportImport
         }
         private T BuildExportDataQuery<T>() where T : ExportDataQuery, new()
         {
-            var newExportDataQuery = new T();
-            newExportDataQuery.Skip = _dataQuery.Skip;
-            newExportDataQuery.Take = _dataQuery.Take;
-            newExportDataQuery.ObjectIds = _dataQuery.ObjectIds;
-            newExportDataQuery.Sort = _dataQuery.Sort;
-            return newExportDataQuery;
+            var result = AbstractTypeFactory<T>.TryCreateInstance();
+
+            result.ObjectIds = _dataQuery.ObjectIds;
+            result.Sort = _dataQuery.Sort;
+            return result;
         }
     }
 }
