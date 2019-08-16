@@ -67,7 +67,7 @@ namespace VirtoCommerce.ExportModule.Data.Services
 
                         var objectBatch = pagedDataSource.FetchNextPage();
 
-                        if (objectBatch == null)
+                        if (objectBatch.IsNullOrEmpty())
                         {
                             break;
                         }
