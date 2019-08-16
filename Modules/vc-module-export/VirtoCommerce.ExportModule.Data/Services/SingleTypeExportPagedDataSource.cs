@@ -4,6 +4,13 @@ using VirtoCommerce.Platform.Core.Common;
 
 namespace VirtoCommerce.ExportModule.Data.Services
 {
+    /// <summary>
+    /// Base <see cref="IPagedDataSource"/> implementation for paginated homogenous data retrieving.
+    /// <para/>
+    /// Homogenous means only one search criteria is used by data source to query data.
+    /// </summary>
+    /// <typeparam name="TDataQuery">Specific <see cref="ExportDataQuery"/> type that is used to query this data source.</typeparam>
+    /// <typeparam name="TSearchCriteria">Specific <see cref="SearchCriteriaBase"/> type that is used by this data source to query data.</typeparam>
     public abstract class SingleTypeExportPagedDataSource<TDataQuery, TSearchCriteria> : IPagedDataSource
         where TDataQuery : ExportDataQuery
         where TSearchCriteria : SearchCriteriaBase
@@ -69,8 +76,19 @@ namespace VirtoCommerce.ExportModule.Data.Services
             return result;
         }
 
+        /// <summary>
+        /// Fill <paramref name="searchCriteria"/> with <paramref name="dataQuery"/> data specific fields here.
+        /// Some common <see cref="SearchCriteriaBase"/> fields are already filled.
+        /// </summary>
+        /// <param name="dataQuery"></param>
+        /// <param name="searchCriteria"></param>
         protected abstract void FillSearchCriteria(TDataQuery dataQuery, TSearchCriteria searchCriteria);
 
+        /// <summary>
+        /// Prepare exported data based on the <typeparamref name="TSearchCriteria"/> search criteria in this method.
+        /// </summary>
+        /// <param name="searchCriteria"></param>
+        /// <returns></returns>
         protected abstract ExportableSearchResult FetchData(TSearchCriteria searchCriteria);
     }
 }

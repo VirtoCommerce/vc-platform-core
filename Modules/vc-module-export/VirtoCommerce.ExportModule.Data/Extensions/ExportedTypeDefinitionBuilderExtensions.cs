@@ -30,5 +30,23 @@ namespace VirtoCommerce.ExportModule.Data.Extensions
             builder.ExportedTypeDefinition.TabularDataConverter = tabularDataConverter;
             return builder;
         }
+
+        public static ExportedTypeDefinitionBuilder WithTypeName(this ExportedTypeDefinitionBuilder builder, string typeName)
+        {
+            builder.ExportedTypeDefinition.TypeName = typeName;
+            return builder;
+        }
+
+        public static ExportedTypeDefinitionBuilder WithGroup(this ExportedTypeDefinitionBuilder builder, string group)
+        {
+            builder.ExportedTypeDefinition.Group = group;
+            return builder;
+        }
+
+        public static ExportedTypeDefinitionBuilder WithExportDataQueryType(this ExportedTypeDefinitionBuilder builder, string exportDataQueryType)
+        {
+            builder.ExportedTypeDefinition.ExportDataQueryType = exportDataQueryType;
+            return builder;
+        }
     }
 }

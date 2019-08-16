@@ -5,29 +5,34 @@ namespace VirtoCommerce.ExportModule.Data.Services
 {
     public class ExportedTypeDefinitionBuilder
     {
-        public ExportedTypeDefinition ExportedTypeDefinition { get; }
+        public ExportedTypeDefinition ExportedTypeDefinition { get; private set; }
 
-        public ExportedTypeDefinitionBuilder(string exportedTypeName, string group, string exportQueryType)
+        /// <summary>
+        /// Creates <see cref="ExportedTypeDefinitionBuilder"/> with definition with <typeparamref name="TExportable"/> type <see cref="Type.FullName"/> as <see cref="ExportedTypeDefinition.TypeName"/>,
+        /// <see cref="Type.Namespace"/> as <see cref="ExportedTypeDefinition.Group"/> and ExportDataQuery type name as <see cref="ExportedTypeDefinition.ExportDataQueryType"/>.
+        /// </summary>
+        /// <typeparam name="TExportable">Exportable entity type.</typeparam>
+        /// <typeparam name="TDataQuery">Type to query entities.</typeparam>
+        /// <returns></returns>
+        public static ExportedTypeDefinitionBuilder Build<TExportable, TDataQuery>() where TDataQuery : ExportDataQuery
         {
-            ExportedTypeDefinition = new ExportedTypeDefinition()
+            var exportedType = typeof(TExportable);
+            var dataQueryType = typeof(TDataQuery);
+
+            return new ExportedTypeDefinitionBuilder()
             {
-                TypeName = exportedTypeName,
-                Group = group,
-                ExportDataQueryType = exportQueryType,
+                ExportedTypeDefinition = new ExportedTypeDefinition()
+                {
+                    TypeName = exportedType.FullName,
+                    Group = exportedType.Namespace,
+                    ExportDataQueryType = dataQueryType.Name,
+                }
             };
         }
 
-        public ExportedTypeDefinitionBuilder(ExportedTypeDefinition exportedTypeDefinition)
+        public static implicit operator ExportedTypeDefinition(ExportedTypeDefinitionBuilder builder)
         {
-            ExportedTypeDefinition = exportedTypeDefinition ?? throw new ArgumentNullException(nameof(exportedTypeDefinition));
-        }
-
-        public static ExportedTypeDefinitionBuilder Build<TExport, TDataQuery>()
-        {
-            var exportedType = typeof(TExport);
-            var dataQueryType = typeof(TDataQuery);
-
-            return new ExportedTypeDefinitionBuilder(exportedType.FullName, exportedType.Namespace, dataQueryType.Name);
+            return builder.ExportedTypeDefinition;
         }
     }
 }

@@ -24,6 +24,7 @@ angular.module('virtoCommerce.pricingModule')
             id: "CatalogItemsSelect",
             controller: 'virtoCommerce.catalogModule.catalogItemSelectController',
             template: 'Modules/$(VirtoCommerce.Catalog)/Scripts/blades/common/catalog-items-select.tpl.html',
+            title: 'pricing.selectors.blades.titles.select-products',
             options: options,
             breadcrumbs: [],
             toolbarCommands: [
