@@ -68,18 +68,20 @@ namespace VirtoCommerce.PricingModule.Data.ExportImport
 
         public virtual IEnumerable<IExportable> FetchNextPage()
         {
-            int takeNext = PageSize;
+            int batchSize = PageSize;
             var taskList = new List<Task>();
 
             foreach (var state in _exportDataSourceStates)
             {
                 state.Result = Array.Empty<IExportable>();
-                if (state.ReceivedCount < state.TotalCount)
+
+                if (state.ReceivedCount < state.TotalCount && batchSize > 0)
                 {
-                    state.DataQuery.Take = takeNext;
-                    state.DataQuery.Skip = CurrentPageNumber * PageSize;
+                    var portion = state.TotalCount - state.ReceivedCount > batchSize ? batchSize : state.TotalCount - state.ReceivedCount;
+                    state.DataQuery.Take = portion;
+                    state.DataQuery.Skip = state.ReceivedCount;
                     taskList.Add(Task.Factory.StartNew(() => { state.Result = state.DataSourceFactory(state.DataQuery).FetchNextPage().ToArray(); }));
-                    takeNext = takeNext - state.TotalCount - state.ReceivedCount < 0 ? PageSize : takeNext - state.TotalCount - state.ReceivedCount;
+                    batchSize = batchSize - portion;
                 }
             }
 
