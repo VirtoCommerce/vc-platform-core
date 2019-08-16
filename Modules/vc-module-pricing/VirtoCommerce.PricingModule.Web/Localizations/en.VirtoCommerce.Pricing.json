@@ -205,6 +205,11 @@
             "placeholders": {
                 "price-lists": "Select price lists…",
                 "catalog-lists": "Select catalog…"
+            },
+            "blades": {
+                "titles": {
+                    "select-products": "Select Catalog products…"
+                }
             }
         }
     },
