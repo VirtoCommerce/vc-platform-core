@@ -24,6 +24,9 @@
         <ProjectReference Include="..\..\vc-module-customer\VirtoCommerce.CustomerModule.Core\VirtoCommerce.CustomerModule.Core.csproj" />
         <ProjectReference Include="..\..\vc-module-store\VirtoCommerce.StoreModule.Core\VirtoCommerce.StoreModule.Core.csproj" />
         <ProjectReference Include="..\VirtoCommerce.SitemapsModule.Core\VirtoCommerce.SitemapsModule.Core.csproj" />
+        <PackageReference Include="Microsoft.AspNetCore" Version="2.2.0" />	
+        <PackageReference Include="Microsoft.AspNetCore.App" />	
+        <PackageReference Include="Microsoft.AspNetCore.Mvc.ViewFeatures" Version="2.2.0" />
     </ItemGroup>
 
 </Project>
