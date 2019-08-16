@@ -19,6 +19,7 @@ using VirtoCommerce.Platform.Core.PushNotifications;
 using VirtoCommerce.Platform.Core.Security;
 using VirtoCommerce.Platform.Core.Settings;
 using VirtoCommerce.Platform.Data.Helpers;
+using VirtoCommerce.Platform.Web.Modularity;
 
 namespace VirtoCommerce.Platform.Web.Controllers.Api
 {
@@ -181,7 +182,8 @@ namespace VirtoCommerce.Platform.Web.Controllers.Api
                         using (var manifestStream = entry.Open())
                         {
                             var manifest = ManifestReader.Read(manifestStream);
-                            var module = new ManifestModuleInfo(manifest);
+                            var module = AbstractTypeFactory<ManifestModuleInfo>.TryCreateInstance();
+                            module.LoadFromManifest(manifest);
                             var alreadyExistModule = _externalModuleCatalog.Modules.OfType<ManifestModuleInfo>().FirstOrDefault(x => x.Equals(module));
                             if (alreadyExistModule != null)
                             {

@@ -5,7 +5,7 @@ namespace VirtoCommerce.CoreModule.Core.Conditions.Browse
     //Shopper searched for phrase [] in store
     public class ConditionStoreSearchedPhrase : MatchedConditionBase
     {
-        public override bool Evaluate(IEvaluationContext context)
+        public override bool IsSatisfiedBy(IEvaluationContext context)
         {
             var result = false;
             if (context is EvaluationContextBase evaluationContext)

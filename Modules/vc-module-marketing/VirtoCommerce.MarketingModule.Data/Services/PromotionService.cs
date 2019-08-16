@@ -85,6 +85,15 @@ namespace VirtoCommerce.MarketingModule.Data.Services
             {
                 await repository.RemovePromotionsAsync(ids);
                 await repository.UnitOfWork.CommitAsync();
+                var changedEntries = new List<GenericChangedEntry<Promotion>>();
+                foreach(var id in ids)
+                {
+                    var emptyPromotion = AbstractTypeFactory<Promotion>.TryCreateInstance();
+                    emptyPromotion.Id = id;
+                    changedEntries.Add(new GenericChangedEntry<Promotion>(emptyPromotion, EntryState.Deleted));
+                }
+                //Raise domain events after deletion
+                await _eventPublisher.Publish(new PromotionChangedEvent(changedEntries));
             }
 
             PromotionCacheRegion.ExpireRegion();

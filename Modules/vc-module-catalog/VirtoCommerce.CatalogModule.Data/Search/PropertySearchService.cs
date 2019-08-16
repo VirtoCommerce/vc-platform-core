@@ -32,31 +32,25 @@ namespace VirtoCommerce.CatalogModule.Data.Search
                 //Optimize performance and CPU usage
                 repository.DisableChangesTracking();
 
-                var sortInfos = criteria.SortInfos;
-                if (sortInfos.IsNullOrEmpty())
-                {
-                    sortInfos = new[]
-                    {
-                            new SortInfo
-                            {
-                                SortColumn = "Name"
-                            }
-                        };
-                }
-                var query = BuildSearchQuery(repository, criteria, sortInfos);
+                var sortInfos = BuildSortExpression(criteria);
+                var query = BuildQuery(repository, criteria);
+
                 result.TotalCount = await query.CountAsync();
                 if (criteria.Take > 0)
                 {
-                    var ids = await query.Skip(criteria.Skip).Take(criteria.Take).Select(x => x.Id).ToListAsync();
-                    var properties = await _propertyService.GetByIdsAsync(ids);
-                    result.Results = properties.OrderBy(x => ids.IndexOf(x.Id)).ToList();
+                    var ids = await query.OrderBySortInfos(sortInfos).ThenBy(x => x.Id)
+                                        .Select(x => x.Id)
+                                        .Skip(criteria.Skip).Take(criteria.Take)
+                                        .ToArrayAsync();
+
+                    result.Results = (await _propertyService.GetByIdsAsync(ids)).OrderBy(x => Array.IndexOf(ids, x.Id)).ToList();
                 }
             }
             return result;
         }
 
 
-        protected virtual IQueryable<PropertyEntity> BuildSearchQuery(ICatalogRepository repository, PropertySearchCriteria criteria, IEnumerable<SortInfo> sortInfos)
+        protected virtual IQueryable<PropertyEntity> BuildQuery(ICatalogRepository repository, PropertySearchCriteria criteria)
         {
             var query = repository.Properties;
             if (!string.IsNullOrEmpty(criteria.CatalogId))
@@ -71,9 +65,20 @@ namespace VirtoCommerce.CatalogModule.Data.Search
             {
                 query = query.Where(x => criteria.PropertyNames.Contains(x.Name));
             }
-
-            query = query.OrderBySortInfos(sortInfos).ThenBy(x => x.Id);
             return query;
+        }
+
+        protected virtual IList<SortInfo> BuildSortExpression(PropertySearchCriteria criteria)
+        {
+            var sortInfos = criteria.SortInfos;
+            if (sortInfos.IsNullOrEmpty())
+            {
+                sortInfos = new[]
+                {
+                    new SortInfo { SortColumn = nameof(PropertyEntity.Name) }
+                };
+            }
+            return sortInfos;
         }
     }
 }

@@ -32,21 +32,25 @@ namespace VirtoCommerce.MarketingModule.Data.Search
 
         public async Task<DynamicContentFolderSearchResult> SearchFoldersAsync(DynamicContentFolderSearchCriteria criteria)
         {
-            var cacheKey = CacheKey.With(GetType(), "SearchFoldersAsync", criteria.GetCacheKey());
+            var cacheKey = CacheKey.With(GetType(), nameof(SearchFoldersAsync), criteria.GetCacheKey());
             return await _platformMemoryCache.GetOrCreateExclusiveAsync(cacheKey, async (cacheEntry) =>
             {
                 cacheEntry.AddExpirationToken(DynamicContentFolderCacheRegion.CreateChangeToken());
                 var retVal = AbstractTypeFactory<DynamicContentFolderSearchResult>.TryCreateInstance();
                 using (var repository = _repositoryFactory())
                 {
-                    var sortInfos = BuildSortInfos(criteria);
-                    var query = BuildSearchQuery(criteria, repository, sortInfos);
+                    var sortInfos = BuildSortExpression(criteria);
+                    var query = BuildQuery(criteria, repository);
 
                     retVal.TotalCount = await query.CountAsync();
 
                     if (criteria.Take > 0)
                     {
-                        var ids = await query.Select(x => x.Id).ToArrayAsync();
+                        var ids = await query.OrderBySortInfos(sortInfos).ThenBy(x => x.Id)
+                                         .Select(x => x.Id)
+                                         .Skip(criteria.Skip).Take(criteria.Take)
+                                         .ToArrayAsync();
+
                         retVal.Results = (await _dynamicContentService.GetFoldersByIdsAsync(ids))
                             .OrderBy(x => Array.IndexOf(ids, x.Id)).ToList();
                     }
@@ -56,7 +60,7 @@ namespace VirtoCommerce.MarketingModule.Data.Search
             });
         }
 
-        protected virtual IList<SortInfo> BuildSortInfos(DynamicContentFolderSearchCriteria criteria)
+        protected virtual IList<SortInfo> BuildSortExpression(DynamicContentFolderSearchCriteria criteria)
         {
             var sortInfos = criteria.SortInfos;
             if (sortInfos.IsNullOrEmpty())
@@ -74,7 +78,7 @@ namespace VirtoCommerce.MarketingModule.Data.Search
             return sortInfos;
         }
 
-        protected virtual IQueryable<DynamicContentFolderEntity> BuildSearchQuery(DynamicContentFolderSearchCriteria criteria, IMarketingRepository repository, IList<SortInfo> sortInfos)
+        protected virtual IQueryable<DynamicContentFolderEntity> BuildQuery(DynamicContentFolderSearchCriteria criteria, IMarketingRepository repository)
         {
             var query = repository.Folders.Where(x => x.ParentFolderId == criteria.FolderId);
             if (!string.IsNullOrEmpty(criteria.Keyword))
@@ -82,7 +86,6 @@ namespace VirtoCommerce.MarketingModule.Data.Search
                 query = query.Where(q => q.Name.Contains(criteria.Keyword));
             }
 
-            query = query.OrderBySortInfos(sortInfos);
             return query;
         }
     }

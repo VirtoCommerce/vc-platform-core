@@ -109,7 +109,7 @@ angular.module('virtoCommerce.exportModule')
 
             var dataQuery = {
                 exportTypeName: blade.exportDataRequest.dataQuery.exportTypeName,
-                includedColumns: blade.exportDataRequest.dataQuery.includedColumns,
+                includedProperties: blade.exportDataRequest.dataQuery.includedProperties,
                 sort: uiGridHelper.getSortExpression($scope),
                 skip: ($scope.pageSettings.currentPage - 1) * $scope.pageSettings.itemsPerPageCount,
                 take: $scope.pageSettings.itemsPerPageCount,
@@ -199,20 +199,20 @@ angular.module('virtoCommerce.exportModule')
 
         filter.edit = function () {
             var metafieldsId = blade.exportDataRequest.exportTypeName  + 'ExportFilter';
-            var filterDetailsPerams = { 
+            var filterDetailsParams = { 
                 data: filter.current, 
                 metafieldsId: metafieldsId, 
                 exportTypeName: blade.exportDataRequest.exportTypeName 
             };
 
             if (filter.current) {
-                angular.extend(filterDetailsPerams, { data: filter.current }); 
+                angular.extend(filterDetailsParams, { data: filter.current }); 
             }
             else {
-                angular.extend(filterDetailsPerams, { isNew: true });
+                angular.extend(filterDetailsParams, { isNew: true });
             }
 
-            showFilterDetailBlade(filterDetailsPerams);
+            showFilterDetailBlade(filterDetailsParams);
         };
 
         function showFilterDetailBlade(bladeData) {
@@ -283,13 +283,14 @@ angular.module('virtoCommerce.exportModule')
             var isAllSelected = $scope.gridApi.selection.getSelectAllState();
             var selectedIds = _.map($scope.gridApi.selection.getSelectedRows(), function(item) { return item.id; });
 
-            if (blade.exportDataRequest.dataQuery.objectIds || !isAllSelected) {
+            dataQuery.isAllSelected = isAllSelected;
+            
+            if ((blade.exportDataRequest.dataQuery.objectIds && blade.exportDataRequest.dataQuery.objectIds.length) 
+                || (!isAllSelected && selectedIds.length) 
+                || (selectedIds.length == 0)) {
                 dataQuery.objectIds = selectedIds;
                 selectedItemsCount = selectedIds.length;
             }
-            else {
-                dataQuery.isAllSelected = true;
-            } 
 
             if (blade.onCompleted) {
                 blade.onCompleted(dataQuery, selectedItemsCount);

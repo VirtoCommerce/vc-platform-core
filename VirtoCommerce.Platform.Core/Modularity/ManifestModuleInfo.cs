@@ -1,4 +1,6 @@
+using System;
 using System.Collections.Generic;
+using System.Collections.ObjectModel;
 using System.Linq;
 using VirtoCommerce.Platform.Core.Common;
 
@@ -6,50 +8,10 @@ namespace VirtoCommerce.Platform.Core.Modularity
 {
     public class ManifestModuleInfo : ModuleInfo
     {
-        public ManifestModuleInfo(ModuleManifest manifest)
-            : base(manifest.Id, manifest.ModuleType, (manifest.Dependencies ?? new ManifestDependency[0]).Select(d => d.Id).ToArray())
+        public ManifestModuleInfo()
         {
-            Id = manifest.Id;
-            Version = new SemanticVersion(new System.Version(manifest.Version));
-            PlatformVersion = new SemanticVersion(new System.Version(manifest.PlatformVersion));
-            Title = manifest.Title;
-            Description = manifest.Description;
-            Authors = manifest.Authors;
-            Owners = manifest.Owners;
-            LicenseUrl = manifest.LicenseUrl;
-            ProjectUrl = manifest.ProjectUrl;
-            IconUrl = manifest.IconUrl;
-            RequireLicenseAcceptance = manifest.RequireLicenseAcceptance;
-            ReleaseNotes = manifest.ReleaseNotes;
-            Copyright = manifest.Copyright;
-            Tags = manifest.Tags;
-            UseFullTypeNameInSwagger = manifest.UseFullTypeNameInSwagger;
-
-            Ref = manifest.PackageUrl;
-            Identity = new ModuleIdentity(Id, Version);
-
-            Errors = new List<string>();
-
-
-            Dependencies = new List<ModuleIdentity>();
-            if (manifest.Dependencies != null)
-            {
-                Dependencies.AddRange(manifest.Dependencies.Select(x => new ModuleIdentity(x.Id, x.Version)));
-            }
-
-
-            Groups = new List<string>();
-            if (manifest.Groups != null)
-            {
-                Groups.AddRange(manifest.Groups);
-            }
-            Incompatibilities = new List<ModuleIdentity>();
-            if (manifest.Incompatibilities != null)
-            {
-                Incompatibilities.AddRange(manifest.Incompatibilities.Select(x => new ModuleIdentity(x.Id, x.Version)));
-            }
-
             InitializationMode = InitializationMode.OnDemand;
+            DependsOn = new Collection<string>();
         }
 
         public ModuleIdentity Identity { get; private set; }
@@ -68,17 +30,116 @@ namespace VirtoCommerce.Platform.Core.Modularity
         public string ReleaseNotes { get; private set; }
         public string Copyright { get; private set; }
         public string Tags { get; private set; }
-        public ICollection<ModuleIdentity> Dependencies { get; private set; }
+        public ICollection<ModuleIdentity> Dependencies { get; } = new List<ModuleIdentity>();
         /// <summary>
         /// List of incompatible modules
         /// </summary>
-        public ICollection<ModuleIdentity> Incompatibilities { get; private set; }
+        public ICollection<ModuleIdentity> Incompatibilities { get; } = new List<ModuleIdentity>();
         public bool IsRemovable { get; set; }
         public bool IsInstalled { get; set; }
-        public ICollection<string> Groups { get; private set; }
+        public ICollection<string> Groups { get; } = new List<string>();
         public string FullPhysicalPath { get; set; }
-        public ICollection<string> Errors { get; set; }
+        public ICollection<string> Errors { get; } = new List<string>();
         public bool UseFullTypeNameInSwagger { get; set; }
+
+        public virtual ManifestModuleInfo LoadFromManifest(ModuleManifest manifest)
+        {
+            if (manifest == null)
+            {
+                throw new ArgumentNullException(nameof(manifest));
+            }
+
+            ModuleName = manifest.Id;         
+
+            if (manifest.Dependencies != null)
+            {
+                foreach (var dependency in manifest.Dependencies)
+                {
+                    DependsOn.Add(dependency.Id);
+                }
+            }
+
+            Id = manifest.Id;
+            Version = SemanticVersion.Parse(manifest.Version);
+            PlatformVersion = SemanticVersion.Parse(manifest.PlatformVersion);
+            ReleaseNotes = manifest.ReleaseNotes;
+            Ref = manifest.PackageUrl;
+            if (manifest.Dependencies != null)
+            {
+                Dependencies.AddRange(manifest.Dependencies.Select(x => new ModuleIdentity(x.Id, SemanticVersion.Parse(x.Version))));
+            }
+            if (manifest.Incompatibilities != null)
+            {
+                Incompatibilities.AddRange(manifest.Incompatibilities.Select(x => new ModuleIdentity(x.Id, SemanticVersion.Parse(x.Version))));
+            }
+
+            Title = manifest.Title;
+            Description = manifest.Description;
+            Authors = manifest.Authors;
+            Owners = manifest.Owners;
+            LicenseUrl = manifest.LicenseUrl;
+            ProjectUrl = manifest.ProjectUrl;
+            IconUrl = manifest.IconUrl;
+            RequireLicenseAcceptance = manifest.RequireLicenseAcceptance;
+            Copyright = manifest.Copyright;
+            Tags = manifest.Tags;
+            Identity = new ModuleIdentity(Id, Version);
+            if (manifest.Groups != null)
+            {
+                Groups.AddRange(manifest.Groups);
+            }
+            return this;
+        }
+
+
+        public virtual ManifestModuleInfo LoadFromExternalManifest(ExternalModuleManifest manifest, ExternalModuleManifestVersion version)
+        {
+            if(manifest == null)
+            {
+                throw new ArgumentNullException(nameof(manifest));
+            }
+
+            ModuleName = manifest.Id;         
+            if (version.Dependencies != null)
+            {
+                foreach (var dependency in version.Dependencies)
+                {
+                    DependsOn.Add(dependency.Id);
+                }
+            }
+
+            Id = manifest.Id;
+            Version = version.SemanticVersion;
+            PlatformVersion = version.PlatformSemanticVersion;
+            ReleaseNotes = version.ReleaseNotes;
+            Ref = version.PackageUrl;
+
+            if (version.Dependencies != null)
+            {
+                Dependencies.AddRange(version.Dependencies.Select(x => new ModuleIdentity(x.Id, SemanticVersion.Parse(x.Version))));
+            }
+            if (version.Incompatibilities != null)
+            {
+                Incompatibilities.AddRange(version.Incompatibilities.Select(x => new ModuleIdentity(x.Id, SemanticVersion.Parse(x.Version))));
+            }
+
+            Title = manifest.Title;
+            Description = manifest.Description;
+            Authors = manifest.Authors;
+            Owners = manifest.Owners;
+            LicenseUrl = manifest.LicenseUrl;
+            ProjectUrl = manifest.ProjectUrl;
+            IconUrl = manifest.IconUrl;
+            RequireLicenseAcceptance = manifest.RequireLicenseAcceptance;         
+            Copyright = manifest.Copyright;
+            Tags = manifest.Tags;
+            Identity = new ModuleIdentity(Id, Version);
+            if (manifest.Groups != null)
+            {
+                Groups.AddRange(manifest.Groups);
+            }
+            return this;
+        }
 
         public override string ToString()
         {

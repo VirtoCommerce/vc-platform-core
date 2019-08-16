@@ -1,5 +1,6 @@
 using System.Collections.Generic;
 using System.Linq;
+using System.Threading.Tasks;
 using Moq;
 using VirtoCommerce.CoreModule.Core.Common;
 using VirtoCommerce.CoreModule.Core.Conditions;
@@ -133,7 +134,7 @@ namespace VirtoCommerce.MarketingModule.Test
 
             var evalPolicy = GetPromotionEvaluationPolicy(new List<Promotion> { new DynamicPromotion(couponSearchMockServiceMock.Object, promotionUsageSearchMock.Object)
             {
-                PredicateVisualTreeSerialized = "{\"AvailableChildren\":null,\"Children\":[{\"All\":false,\"Not\":false,\"AvailableChildren\":null,\"Children\":[{\"AvailableChildren\":null,\"Children\":[],\"Id\":\"ConditionIsRegisteredUser\"}],\"Id\":\"BlockCustomerCondition\"},{\"All\":false,\"Not\":false,\"AvailableChildren\":null,\"Children\":[],\"Id\":\"BlockCatalogCondition\"},{\"All\":false,\"Not\":false,\"AvailableChildren\":null,\"Children\":[{\"NumItem\":10,\"NumItemSecond\":13,\"ProductId\":null,\"ProductName\":null,\"CompareCondition\":\"Between\",\"AvailableChildren\":null,\"Children\":[],\"Id\":\"ConditionAtNumItemsInCart\"},{\"SubTotal\":0.0,\"SubTotalSecond\":100.0,\"ExcludingCategoryIds\":[],\"ExcludingProductIds\":[],\"CompareCondition\":\"AtLeast\",\"AvailableChildren\":null,\"Children\":[],\"Id\":\"ConditionCartSubtotalLeast\"}],\"Id\":\"BlockCartCondition\"},{\"AvailableChildren\":null,\"Children\":[{\"Amount\":15.0,\"AvailableChildren\":null,\"Children\":[],\"Id\":\"RewardCartGetOfAbsSubtotal\"}],\"Id\":\"BlockReward\"}],\"Id\":\"PromotionConditionAndRewardTree\"}"
+                DynamicExpression = "{\"AvailableChildren\":null,\"Children\":[{\"All\":false,\"Not\":false,\"AvailableChildren\":null,\"Children\":[{\"AvailableChildren\":null,\"Children\":[],\"Id\":\"ConditionIsRegisteredUser\"}],\"Id\":\"BlockCustomerCondition\"},{\"All\":false,\"Not\":false,\"AvailableChildren\":null,\"Children\":[],\"Id\":\"BlockCatalogCondition\"},{\"All\":false,\"Not\":false,\"AvailableChildren\":null,\"Children\":[{\"NumItem\":10,\"NumItemSecond\":13,\"ProductId\":null,\"ProductName\":null,\"CompareCondition\":\"Between\",\"AvailableChildren\":null,\"Children\":[],\"Id\":\"ConditionAtNumItemsInCart\"},{\"SubTotal\":0.0,\"SubTotalSecond\":100.0,\"ExcludingCategoryIds\":[],\"ExcludingProductIds\":[],\"CompareCondition\":\"AtLeast\",\"AvailableChildren\":null,\"Children\":[],\"Id\":\"ConditionCartSubtotalLeast\"}],\"Id\":\"BlockCartCondition\"},{\"AvailableChildren\":null,\"Children\":[{\"Amount\":15.0,\"AvailableChildren\":null,\"Children\":[],\"Id\":\"RewardCartGetOfAbsSubtotal\"}],\"Id\":\"BlockReward\"}],\"Id\":\"PromotionConditionAndRewardTree\"}"
             } });
             var context = new PromotionEvaluationContext()
             {
@@ -321,13 +322,13 @@ namespace VirtoCommerce.MarketingModule.Test
     {
         public IEnumerable<PromotionReward> Rewards { get; set; }
 
-        public override PromotionReward[] EvaluatePromotion(IEvaluationContext context)
+        public override Task<PromotionReward[]> EvaluatePromotionAsync(IEvaluationContext context)
         {
             foreach (var reward in Rewards)
             {
                 reward.Promotion = this;
             }
-            return Rewards.ToArray();
+            return Task.FromResult(Rewards.ToArray());
         }
     }
 }

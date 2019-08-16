@@ -4,31 +4,31 @@ angular.module('virtoCommerce.exportModule')
         blade.canStartProcess = false;
         blade.isLoading = true;
         blade.exportDataRequest = blade.exportDataRequest || {};
-        blade.allColumnsOfType = [];
+        blade.allPropertiesOfType = [];
         blade.dataSelected = 0;
         blade.dataTotal = 0;
-        blade.columnSelected = 0;
-        blade.columnTotal = 0;
+        blade.propertySelected = 0;
+        blade.propertyTotal = 0;
         blade.defaultProvider = $localStorage.defaultExportProvider || 'JsonExportProvider';
-
+        blade.isExportedTypeSelected = typeof (blade.exportDataRequest.exportTypeName) !== 'undefined';
+        blade.isTabularExportSupported = blade.exportDataRequest.isTabularExportSupported || false;
+        
         function initializeBlade() {
-            if (blade.isExportedTypeSelected) {
-                getKnownTypes();
-            }
-
-            if (blade.exportDataRequest.dataQuery &&
-                blade.exportDataRequest.dataQuery.objectIds &&
-                blade.exportDataRequest.dataQuery.objectIds.length) {
-                blade.dataSelected = blade.exportDataRequest.dataQuery.objectIds.length;
-            }
-
             exportApi.getProviders(function (result) {
                 if (result && result.length) {
                     blade.allProviders = result;
                     fillProviders();
                     blade.selectedProvider = _.find(blade.providers,
                         function (item) { return item.id === blade.defaultProvider });
+
+                    if (blade.isExportedTypeSelected) {
+                        getKnownTypes();
+                        blade.dataSelected = blade.totalItemsCount || 0;
+                    }
+
                 }
+
+
             });
 
             blade.isLoading = false;
@@ -41,19 +41,20 @@ angular.module('virtoCommerce.exportModule')
                     function (x) { return x.typeName === blade.exportDataRequest.exportTypeName; });
                 if (selectedType) {
                     blade.selectedType = selectedType;
-                    resetColumnInfo();
+                    blade.selectedType.localizedName = $translate.instant('export.types.' + blade.exportDataRequest.exportTypeName + '.name');
+                    resetPropertyInfo();
                     getDataTotalCount();
                 }
             });
         }
 
-        function resetColumnInfo() {
-            blade.allColumnsOfType = blade.selectedProvider.isTabular ? blade.selectedType.tabularMetaData.propertyInfos : blade.selectedType.metaData.propertyInfos;
-            blade.exportDataRequest.dataQuery.includedColumns = blade.allColumnsOfType;
+        function resetPropertyInfo() {
+            blade.allPropertiesOfType = blade.selectedProvider.isTabular ? blade.selectedType.tabularMetaData.propertyInfos : blade.selectedType.metaData.propertyInfos;
+            blade.exportDataRequest.dataQuery.includedProperties = blade.allPropertiesOfType;
             blade.isTabularExportSupported = blade.selectedType.isTabularExportSupported;
             blade.isExportedTypeSelected = typeof (blade.exportDataRequest.exportTypeName) !== 'undefined';
-            blade.columnSelected = blade.allColumnsOfType.length;
-            blade.columnTotal = blade.columnSelected;
+            blade.propertySelected = blade.allPropertiesOfType.length;
+            blade.propertyTotal = blade.propertySelected;
         }
 
         function fillProviders() {
@@ -73,7 +74,7 @@ angular.module('virtoCommerce.exportModule')
         function getDataTotalCount() {
             var dataQuery = {
                 exportTypeName: blade.exportDataRequest.dataQuery.exportTypeName,
-                includedColumns: [],
+                includedProperties: [],
                 skip: 0,
                 take: 0
             };
@@ -96,7 +97,7 @@ angular.module('virtoCommerce.exportModule')
         $scope.providerChanged = function () {
             $localStorage.defaultExportProvider = blade.selectedProvider.id;
             if (blade.isExportedTypeSelected) {
-                resetColumnInfo(); // Beacuse tabular->nontabular or vice-versa
+                resetPropertyInfo(); // Beacuse tabular->nontabular or vice-versa
             }
         };
 
@@ -106,13 +107,20 @@ angular.module('virtoCommerce.exportModule')
             }
 
             blade.exportDataRequest.providerName = blade.selectedProvider.id;
+            blade.exportDataRequest.dataQuery.skip = undefined;
+            blade.exportDataRequest.dataQuery.take = undefined;
+            blade.isExporting = true;
+
             var progressBlade = {
                 id: 'exportProgress',
                 title: 'export.blades.export-progress.title',
                 controller: 'virtoCommerce.exportModule.exportProgressController',
                 template: 'Modules/$(VirtoCommerce.Export)/Scripts/blades/export-progress.tpl.html',
                 exportDataRequest: blade.exportDataRequest,
-                isClosingDisabled: false
+                isClosingDisabled: true,
+                onCompleted: function () {
+                    blade.isExporting = false;
+                }
             };
 
             bladeNavigationService.showBlade(progressBlade, blade);
@@ -134,7 +142,7 @@ angular.module('virtoCommerce.exportModule')
                         blade.exportDataRequest = angular.extend(blade.exportDataRequest, selectedTypeData.exportDataRequest);
                         blade.exportDataRequest.dataQuery = angular.copy(selectedTypeData.exportDataRequest.dataQuery);
                         blade.selectedType = selectedTypeData.selectedType;
-                        resetColumnInfo(); // Column set changed due to changing export type
+                        resetPropertyInfo(); // Property set changed due to changing export type
                         fillProviders(); // Refill providers combo for new type
                         blade.dataSelected = 0; // Drop data selection
                         getDataTotalCount(); // Recalc total available records
@@ -145,21 +153,21 @@ angular.module('virtoCommerce.exportModule')
             bladeNavigationService.showBlade(exportedTypeblade, blade);
         };
 
-        $scope.selectExportedColumns = function () {
-            var exportedColumnsblade = {
-                id: 'exportedColumnsSelector',
-                controller: 'virtoCommerce.exportModule.exportColumnsSelectorController',
-                template: 'Modules/$(VirtoCommerce.Export)/Scripts/blades/export-columns-selector.tpl.html',
+        $scope.selectExportedProperties = function () {
+            var exportedPropertiesblade = {
+                id: 'exportedPropertiesSelector',
+                controller: 'virtoCommerce.exportModule.exportPropertiesSelectorController',
+                template: 'Modules/$(VirtoCommerce.Export)/Scripts/blades/export-properties-selector.tpl.html',
                 isClosingDisabled: false,
                 exportDataRequest: blade.exportDataRequest,
-                allColumnsOfType: blade.allColumnsOfType,
-                onSelected: function (includedColumns) {
-                    blade.exportDataRequest.dataQuery.includedColumns = includedColumns;
-                    blade.columnSelected = includedColumns.length;
+                allPropertiesOfType: blade.allPropertiesOfType,
+                onSelected: function (includedProperties) {
+                    blade.exportDataRequest.dataQuery.includedProperties = includedProperties;
+                    blade.propertySelected = includedProperties.length;
                 }
             };
 
-            bladeNavigationService.showBlade(exportedColumnsblade, blade);
+            bladeNavigationService.showBlade(exportedPropertiesblade, blade);
         };
 
         $scope.selectExportedData = function () {
@@ -181,7 +189,12 @@ angular.module('virtoCommerce.exportModule')
         };
 
         $scope.validateExportParameters = function () {
-            return blade.exportDataRequest && blade.exportDataRequest.exportTypeName && blade.selectedProvider && blade.exportDataRequest.dataQuery;
+            return !blade.isExporting && 
+                blade.exportDataRequest && 
+                blade.exportDataRequest.exportTypeName && 
+                blade.selectedProvider && 
+                blade.exportDataRequest.dataQuery && 
+                blade.dataSelected;
         };
 
         $scope.blade.headIcon = 'fa-upload';

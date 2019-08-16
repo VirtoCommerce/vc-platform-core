@@ -3,7 +3,7 @@ using VirtoCommerce.Platform.Core.Common;
 
 namespace VirtoCommerce.CoreModule.Core.Conditions
 {
-    public abstract class CompareConditionBase : Condition
+    public abstract class CompareConditionBase : ConditionTree
     {
         public virtual string CompareCondition { get; set; } = ConditionOperation.AtLeast;
 

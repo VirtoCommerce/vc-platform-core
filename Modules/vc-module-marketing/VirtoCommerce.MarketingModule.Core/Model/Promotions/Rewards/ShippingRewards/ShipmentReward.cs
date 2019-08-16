@@ -5,20 +5,7 @@ namespace VirtoCommerce.MarketingModule.Core.Model.Promotions
     /// </summary>
     public class ShipmentReward : AmountBasedReward
     {
-        public ShipmentReward()
-        {
-        }
-        //Copy constructor
-        protected ShipmentReward(ShipmentReward other)
-            : base(other)
-        {
-            ShippingMethod = other.ShippingMethod;
-            ShippingMethodOption = other.ShippingMethodOption;
-
-        }
         public string ShippingMethod { get; set; }
         public string ShippingMethodOption { get; set; }
-
-
     }
 }

@@ -10,6 +10,7 @@ using VirtoCommerce.Platform.Core.Caching;
 using VirtoCommerce.Platform.Core.ChangeLog;
 using VirtoCommerce.Platform.Core.Events;
 using VirtoCommerce.Platform.Core.ExportImport;
+using VirtoCommerce.Platform.Core.Localizations;
 using VirtoCommerce.Platform.Core.Notifications;
 using VirtoCommerce.Platform.Core.PushNotifications;
 using VirtoCommerce.Platform.Core.TransactionFileManager;
@@ -17,6 +18,7 @@ using VirtoCommerce.Platform.Data.Caching;
 using VirtoCommerce.Platform.Data.ChangeLog;
 using VirtoCommerce.Platform.Data.DynamicProperties;
 using VirtoCommerce.Platform.Data.ExportImport;
+using VirtoCommerce.Platform.Data.Localizations;
 using VirtoCommerce.Platform.Data.PushNotifications;
 using VirtoCommerce.Platform.Data.Repositories;
 using VirtoCommerce.Platform.Data.Settings;
@@ -30,7 +32,7 @@ namespace VirtoCommerce.Platform.Data.Extensions
         {
             services.AddDbContext<PlatformDbContext>(options => options.UseSqlServer(configuration.GetConnectionString("VirtoCommerce")));
             services.AddTransient<IPlatformRepository, PlatformRepository>();
-            services.AddSingleton<Func<IPlatformRepository>>(provider => () => provider.CreateScope().ServiceProvider.GetService<IPlatformRepository>());
+            services.AddTransient<Func<IPlatformRepository>>(provider => () => provider.CreateScope().ServiceProvider.GetService<IPlatformRepository>());
 
             services.AddSettings();
 
@@ -41,8 +43,8 @@ namespace VirtoCommerce.Platform.Data.Extensions
             var inProcessBus = new InProcessBus();
             services.AddSingleton<IHandlerRegistrar>(inProcessBus);
             services.AddSingleton<IEventPublisher>(inProcessBus);
-            services.AddSingleton<IChangeLogService, ChangeLogService>();
-            services.AddSingleton<IChangeLogSearchService, ChangeLogSearchService>();
+            services.AddTransient<IChangeLogService, ChangeLogService>();
+            services.AddTransient<IChangeLogSearchService, ChangeLogSearchService>();
             //Use MemoryCache decorator to use global platform cache settings
             services.AddSingleton<IPlatformMemoryCache, PlatformMemoryCache>();
             services.AddScoped<IPlatformExportImportManager, PlatformExportImportManager>();
@@ -54,6 +56,11 @@ namespace VirtoCommerce.Platform.Data.Extensions
                 var serv = js.GetService<IOptions<MvcJsonOptions>>();
                 return JsonSerializer.Create(serv.Value.SerializerSettings);
             });
+
+            //Register dependencies for translation
+            services.AddSingleton<ITranslationDataProvider, PlatformTranslationDataProvider>();
+            services.AddSingleton<ITranslationDataProvider, ModulesTranslationDataProvider>();
+            services.AddSingleton<ITranslationService, TranslationService>();
 
             return services;
 

@@ -1,32 +1,30 @@
 using System.Linq;
-using Microsoft.AspNetCore.Authorization;
-using Microsoft.AspNetCore.Identity;
 using VirtoCommerce.ExportModule.Core.Model;
+using VirtoCommerce.ExportModule.Data.Services;
 using VirtoCommerce.Platform.Core.Common;
-using VirtoCommerce.Platform.Core.Security;
-using VirtoCommerce.PricingModule.Core;
 using VirtoCommerce.PricingModule.Core.Model;
 using VirtoCommerce.PricingModule.Core.Model.Search;
 using VirtoCommerce.PricingModule.Core.Services;
 
 namespace VirtoCommerce.PricingModule.Data.ExportImport
 {
-    // These permissions required to fetch data
-    [Authorize(ModuleConstants.Security.Permissions.Export)]
-    [Authorize(ModuleConstants.Security.Permissions.Read)]
-    public class PricelistExportPagedDataSource : BaseExportPagedDataSource
+    public class PricelistExportPagedDataSource : SingleTypeExportPagedDataSource<PricelistExportDataQuery, PricelistSearchCriteria>
     {
         private readonly IPricingSearchService _searchService;
         private readonly IPricingService _pricingService;
 
-        public PricelistExportPagedDataSource(IPricingSearchService searchService, IPricingService pricingService, IAuthorizationPolicyProvider authorizationPolicyProvider, IAuthorizationService authorizationService, IUserClaimsPrincipalFactory<ApplicationUser> userClaimsPrincipalFactory, UserManager<ApplicationUser> userManager)
-            : base(authorizationPolicyProvider, authorizationService, userClaimsPrincipalFactory, userManager)
+        public PricelistExportPagedDataSource(IPricingSearchService searchService, IPricingService pricingService)
         {
             _searchService = searchService;
             _pricingService = pricingService;
         }
 
-        protected override FetchResult FetchData(SearchCriteriaBase searchCriteria)
+        protected override void FillSearchCriteria(PricelistExportDataQuery dataQuery, PricelistSearchCriteria searchCriteria)
+        {
+            searchCriteria.Currencies = dataQuery.Currencies;
+        }
+
+        protected override ExportableSearchResult FetchData(PricelistSearchCriteria searchCriteria)
         {
             Pricelist[] result;
             int totalCount;
@@ -38,7 +36,7 @@ namespace VirtoCommerce.PricingModule.Data.ExportImport
             }
             else
             {
-                var pricelistSearchResult = _searchService.SearchPricelistsAsync((PricelistSearchCriteria)searchCriteria).GetAwaiter().GetResult();
+                var pricelistSearchResult = _searchService.SearchPricelistsAsync(searchCriteria).GetAwaiter().GetResult();
                 result = pricelistSearchResult.Results.ToArray();
                 totalCount = pricelistSearchResult.TotalCount;
             }
@@ -53,30 +51,11 @@ namespace VirtoCommerce.PricingModule.Data.ExportImport
                 }
             }
 
-            return new FetchResult(result, totalCount);
-        }
-
-        protected override ViewableEntity ToViewableEntity(object obj)
-        {
-            if (!(obj is Pricelist model))
+            return new ExportableSearchResult()
             {
-                throw new System.InvalidCastException(nameof(Pricelist));
-            }
-
-            var result = AbstractTypeFactory<PricelistViewableEntity>.TryCreateInstance();
-
-            result.FromEntity(model);
-
-            result.Code = null;
-            result.ImageUrl = null;
-            result.Name = model.Name;
-            result.Parent = null;
-
-            result.Currency = model.Currency;
-            result.Description = model.Description;
-            result.OuterId = model.OuterId;
-
-            return result;
+                Results = result.Select(x => (IExportable)AbstractTypeFactory<ExportablePricelist>.TryCreateInstance().FromModel(x)).ToList(),
+                TotalCount = totalCount,
+            };
         }
     }
 }

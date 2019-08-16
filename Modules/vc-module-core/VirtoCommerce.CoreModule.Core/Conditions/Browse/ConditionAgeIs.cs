@@ -8,7 +8,7 @@ namespace VirtoCommerce.CoreModule.Core.Conditions.Browse
         public int Value { get; set; }
         public int SecondValue { get; set; }
 
-        public override bool Evaluate(IEvaluationContext context)
+        public override bool IsSatisfiedBy(IEvaluationContext context)
         {
             var result = false;
             if (context is EvaluationContextBase evaluationContext)

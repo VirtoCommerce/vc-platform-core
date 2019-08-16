@@ -35,7 +35,8 @@ namespace VirtoCommerce.Platform.Data.TransactionFileManager.Operations
         {
             if (Directory.Exists(path))
             {
-                string temp = TransactionFileUtils.GetTempFileName(String.Empty);
+                var temp = TransactionFileUtils.GetTempFileName(string.Empty);
+                TransactionFileUtils.EnsureTempFolderExists();
                 MoveDirectory(path, temp);
                 backupPath = temp;
             }

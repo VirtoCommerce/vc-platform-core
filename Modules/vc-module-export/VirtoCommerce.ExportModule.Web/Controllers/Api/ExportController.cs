@@ -2,6 +2,7 @@ using System;
 using System.Collections.Generic;
 using System.IO;
 using System.Linq;
+using System.Threading.Tasks;
 using Hangfire;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
@@ -23,20 +24,22 @@ namespace VirtoCommerce.ExportModule.Web.Controllers
     [Route("api/export")]
     public class ExportController : Controller
     {
-        private readonly IEnumerable<Func<IExportProviderConfiguration, ExportedTypeColumnInfo[], IExportProvider>> _exportProviderFactories;
+        private readonly IEnumerable<Func<IExportProviderConfiguration, ExportedTypePropertyInfo[], IExportProvider>> _exportProviderFactories;
         private readonly IKnownExportTypesRegistrar _knownExportTypesRegistrar;
         private readonly IUserNameResolver _userNameResolver;
         private readonly IPushNotificationManager _pushNotificationManager;
         private readonly PlatformOptions _platformOptions;
         private readonly IKnownExportTypesResolver _knownExportTypesResolver;
+        private readonly IAuthorizationService _authorizationService;
 
         public ExportController(
-            IEnumerable<Func<IExportProviderConfiguration, ExportedTypeColumnInfo[], IExportProvider>> exportProviderFactories,
+            IEnumerable<Func<IExportProviderConfiguration, ExportedTypePropertyInfo[], IExportProvider>> exportProviderFactories,
             IKnownExportTypesRegistrar knownExportTypesRegistrar,
             IUserNameResolver userNameResolver,
             IPushNotificationManager pushNotificationManager,
             IOptions<PlatformOptions> platformOptions,
-            IKnownExportTypesResolver knownExportTypesResolver)
+            IKnownExportTypesResolver knownExportTypesResolver,
+            IAuthorizationService authorizationService)
         {
             _exportProviderFactories = exportProviderFactories;
             _knownExportTypesRegistrar = knownExportTypesRegistrar;
@@ -44,6 +47,7 @@ namespace VirtoCommerce.ExportModule.Web.Controllers
             _pushNotificationManager = pushNotificationManager;
             _platformOptions = platformOptions.Value;
             _knownExportTypesResolver = knownExportTypesResolver;
+            _authorizationService = authorizationService;
         }
 
         /// <summary>
@@ -78,15 +82,26 @@ namespace VirtoCommerce.ExportModule.Web.Controllers
         [HttpPost]
         [Route("data")]
         [Authorize(ModuleConstants.Security.Permissions.Access)]
-        public ActionResult<ViewableSearchResult> GetData([FromBody]ExportDataRequest request)
+        public async Task<ActionResult<ExportableSearchResult>> GetData([FromBody]ExportDataRequest request)
         {
-            var currentUserName = _userNameResolver.GetCurrentUserName();
-            request.DataQuery.UserName = currentUserName;
+
+            var authorizationResult = await _authorizationService.AuthorizeAsync(User, request, request.ExportTypeName + "ExportDataPolicy");
+            if (!authorizationResult.Succeeded)
+            {
+                return Unauthorized();
+            }
 
             var exportedTypeDefinition = _knownExportTypesResolver.ResolveExportedTypeDefinition(request.ExportTypeName);
             var pagedDataSource = exportedTypeDefinition.ExportedDataSourceFactory(request.DataQuery);
 
-            return Ok(pagedDataSource.GetData());
+            var queryResult = pagedDataSource.FetchNextPage();
+            var result = new ExportableSearchResult()
+            {
+                TotalCount = pagedDataSource.GetTotalCount(),
+                Results = queryResult.ToList()
+            };
+
+            return Ok(result);
         }
 
         /// <summary>
@@ -97,11 +112,15 @@ namespace VirtoCommerce.ExportModule.Web.Controllers
         [HttpPost]
         [Route("run")]
         [Authorize(ModuleConstants.Security.Permissions.Access)]
-        public ActionResult<PlatformExportPushNotification> RunExport([FromBody]ExportDataRequest request)
+        public async Task<ActionResult<PlatformExportPushNotification>> RunExport([FromBody]ExportDataRequest request)
         {
-            var currentUserName = _userNameResolver.GetCurrentUserName();
-            request.DataQuery.UserName = currentUserName;
-            var notification = new ExportPushNotification(currentUserName)
+            var authorizationResult = await _authorizationService.AuthorizeAsync(User, request, request.ExportTypeName + "ExportDataPolicy");
+            if (!authorizationResult.Succeeded)
+            {
+                return Unauthorized();
+            }
+
+            var notification = new ExportPushNotification(_userNameResolver.GetCurrentUserName())
             {
                 Title = $"{request.ExportTypeName} export task",
                 Description = "starting export...."

@@ -89,7 +89,7 @@ namespace VirtoCommerce.PricingModule.Test
             cacheEntry.SetupGet(c => c.ExpirationTokens).Returns(new List<IChangeToken>());
             var cacheKey = CacheKey.With(typeof(PricingServiceImpl), "EvaluatePriceListsAsync");
             platformMemoryCache.Setup(pmc => pmc.CreateEntry(cacheKey)).Returns(cacheEntry.Object);
-            return new PricingServiceImpl(repositoryFactory, null, logger.Object, platformMemoryCache.Object, null, null);
+            return new PricingServiceImpl(repositoryFactory, null, logger.Object, platformMemoryCache.Object,  null);
         }
 
         private IPricingRepository GetPricingRepository()

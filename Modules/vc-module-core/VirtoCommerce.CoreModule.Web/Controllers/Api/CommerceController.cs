@@ -76,6 +76,7 @@ namespace VirtoCommerce.CoreModule.Web.Controllers.Api
         /// </summary>
         /// <param name="currency">currency</param>
         [HttpPut]
+        [HttpPost]
         [Route("currencies")]
         [Authorize(ModuleConstants.Security.Permissions.CurrencyUpdate)]
         public async Task<ActionResult> UpdateCurrency([FromBody]Currency currency)
@@ -84,19 +85,7 @@ namespace VirtoCommerce.CoreModule.Web.Controllers.Api
             return NoContent();
         }
 
-        /// <summary>
-        ///  Create new currency 
-        /// </summary>
-        /// <param name="currency">currency</param>
-        [HttpPost]
-        [Route("currencies")]
-        [Authorize(ModuleConstants.Security.Permissions.CurrencyCreate)]
-        public async Task<ActionResult> CreateCurrency([FromBody]Currency currency)
-        {
-            await _currencyService.SaveChangesAsync(new[] { currency });
-            return NoContent();
-        }
-
+ 
         /// <summary>
         ///  Delete currencies 
         /// </summary>

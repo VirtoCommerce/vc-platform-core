@@ -1,3 +1,4 @@
+using System;
 using System.Collections.Generic;
 using VirtoCommerce.NotificationsModule.Core.Services;
 using VirtoCommerce.Platform.Core.Common;
@@ -39,5 +40,18 @@ namespace VirtoCommerce.NotificationsModule.Core.Model
 
             return message;
         }
+
+        public virtual void ReduceDetails(string responseGroup)
+        {
+            //Reduce details according to response group
+            var notificationResponseGroup = EnumUtility.SafeParseFlags(responseGroup, NotificationResponseGroup.Full);
+
+            if (!notificationResponseGroup.HasFlag(NotificationResponseGroup.WithTemplates))
+            {
+                Templates = null;
+            }
+        }
+
+        public abstract void SetFromToMembers(string from, string to);
     }
 }

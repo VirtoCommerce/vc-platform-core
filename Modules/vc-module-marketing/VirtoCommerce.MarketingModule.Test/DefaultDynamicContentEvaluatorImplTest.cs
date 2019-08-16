@@ -32,7 +32,6 @@ namespace VirtoCommerce.MarketingModule.Test
 
             _dynamicContentSearchServiceMock = new Mock<IContentPublicationsSearchService>();
             _dynamicContentServiceMock = new Mock<IDynamicContentService>();
-            //_expressionSerializerMock = new Mock<IExpressionSerializer>();
             _loggerMock = new Mock<ILogger<DefaultDynamicContentEvaluator>>();
             _mockUnitOfWork = new Mock<IUnitOfWork>();
             _repositoryMock.Setup(ss => ss.UnitOfWork).Returns(_mockUnitOfWork.Object);
@@ -67,10 +66,10 @@ namespace VirtoCommerce.MarketingModule.Test
             {
                 new DynamicContentPublication
                 {
-                    PredicateVisualTreeSerialized = GetConditionJson(),
+                    DynamicExpression = GetConditionJson(),
                     IsActive = true,
                     ContentItems = new ObservableCollection<DynamicContentItem> { dynamicContentItem },
-                    DynamicExpression = new DynamicContentConditionTree()
+                    DynamicContentConditionTree = new DynamicContentConditionTree()
                 }
             };
             _dynamicContentSearchServiceMock.Setup(dcs => dcs.SearchContentPublicationsAsync(It.IsAny<DynamicContentPublicationSearchCriteria>()))

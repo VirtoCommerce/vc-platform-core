@@ -1,4 +1,5 @@
 using System;
+using System.Collections.Generic;
 using System.Linq;
 using System.Threading.Tasks;
 using Microsoft.EntityFrameworkCore;
@@ -7,7 +8,6 @@ using VirtoCommerce.OrdersModule.Core.Services;
 using VirtoCommerce.Platform.Core.Caching;
 using VirtoCommerce.Platform.Core.Common;
 using VirtoCommerce.Platform.Data.Infrastructure;
-using VirtoCommerce.SubscriptionModule.Core.Model;
 using VirtoCommerce.SubscriptionModule.Core.Model.Search;
 using VirtoCommerce.SubscriptionModule.Core.Services;
 using VirtoCommerce.SubscriptionModule.Data.Caching;
@@ -23,7 +23,12 @@ namespace VirtoCommerce.SubscriptionModule.Data.Services
         private readonly ISubscriptionService _subscriptionService;
         private readonly ICustomerOrderService _customerOrderService;
 
-        public SubscriptionSearchService(Func<ISubscriptionRepository> subscriptionRepositoryFactory, IPlatformMemoryCache platformMemoryCache, ISubscriptionService subscriptionService, ICustomerOrderService customerOrderService)
+        public SubscriptionSearchService(
+            Func<ISubscriptionRepository> subscriptionRepositoryFactory
+            , IPlatformMemoryCache platformMemoryCache
+            , ISubscriptionService subscriptionService
+            , ICustomerOrderService customerOrderService
+            )
         {
             _subscriptionRepositoryFactory = subscriptionRepositoryFactory;
             _platformMemoryCache = platformMemoryCache;
@@ -43,14 +48,17 @@ namespace VirtoCommerce.SubscriptionModule.Data.Services
                 {
                     repository.DisableChangesTracking();
 
-                    var query = await GetSubscriptionsQueryForCriteria(repository, criteria);
+                    var query = BuildQuery(repository, criteria);
+                    var sortInfos = BuildSortExpression(criteria);
 
                     retVal.TotalCount = await query.CountAsync();
 
                     if (criteria.Take > 0)
                     {
-                        var subscriptionEntities = await query.Skip(criteria.Skip).Take(criteria.Take).ToArrayAsync();
-                        var subscriptionsIds = subscriptionEntities.Select(x => x.Id).ToArray();
+                        var subscriptionsIds = await query.OrderBySortInfos(sortInfos).ThenBy(x=>x.Id)
+                                                              .Select(x=> x.Id)
+                                                              .Skip(criteria.Skip).Take(criteria.Take)
+                                                              .ToArrayAsync();
 
                         //Load subscriptions with preserving sorting order
                         var unorderedResults = await _subscriptionService.GetByIdsAsync(subscriptionsIds, criteria.ResponseGroup);
@@ -62,8 +70,7 @@ namespace VirtoCommerce.SubscriptionModule.Data.Services
             });
         }
 
-        protected virtual async Task<IQueryable<SubscriptionEntity>> GetSubscriptionsQueryForCriteria(
-            ISubscriptionRepository repository, SubscriptionSearchCriteria criteria)
+        protected virtual IQueryable<SubscriptionEntity> BuildQuery(ISubscriptionRepository repository, SubscriptionSearchCriteria criteria)
         {
             var query = repository.Subscriptions;
 
@@ -106,7 +113,7 @@ namespace VirtoCommerce.SubscriptionModule.Data.Services
 
             if (!string.IsNullOrEmpty(criteria.CustomerOrderId))
             {
-                var order = (await _customerOrderService.GetByIdsAsync(new[] { criteria.CustomerOrderId })).FirstOrDefault();
+                var order = _customerOrderService.GetByIdsAsync(new[] { criteria.CustomerOrderId }).GetAwaiter().GetResult().FirstOrDefault();
                 if (order != null && !string.IsNullOrEmpty(order.SubscriptionId))
                 {
                     query = query.Where(x => x.Id == order.SubscriptionId);
@@ -121,15 +128,25 @@ namespace VirtoCommerce.SubscriptionModule.Data.Services
             {
                 query = query.Where(x => x.OuterId == criteria.OuterId);
             }
+            return query;
+        }
 
+        protected virtual IList<SortInfo> BuildSortExpression(SubscriptionSearchCriteria criteria)
+        {
             var sortInfos = criteria.SortInfos;
             if (sortInfos.IsNullOrEmpty())
             {
-                sortInfos = new[] { new SortInfo { SortColumn = ReflectionUtility.GetPropertyName<Subscription>(x => x.CreatedDate), SortDirection = SortDirection.Descending } };
+                sortInfos = new[]
+                {
+                    new SortInfo
+                    {
+                        SortColumn = nameof(SubscriptionEntity.CreatedDate),
+                        SortDirection = SortDirection.Descending
+                    }
+                };
             }
-            query = query.OrderBySortInfos(sortInfos);
-
-            return query;
+            return sortInfos;
         }
+
     }
 }

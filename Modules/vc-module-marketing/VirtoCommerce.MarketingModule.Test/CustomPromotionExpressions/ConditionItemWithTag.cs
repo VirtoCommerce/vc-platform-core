@@ -15,7 +15,7 @@ namespace VirtoCommerce.MarketingModule.Test.CustomPromotionExpressions
         /// ((PromotionEvaluationContext)x).CheckItemTags() > NumItem
         /// </summary>
         /// <returns></returns>
-        public override bool Evaluate(IEvaluationContext context)
+        public override bool IsSatisfiedBy(IEvaluationContext context)
         {
             if (context is PromotionEvaluationContext promotionEvaluationContext)
             {

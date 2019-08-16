@@ -23,7 +23,6 @@ using VirtoCommerce.CoreModule.Data.Seo;
 using VirtoCommerce.CoreModule.Data.Services;
 using VirtoCommerce.CoreModule.Web.ExportImport;
 using VirtoCommerce.CoreModule.Web.JsonConverters;
-using VirtoCommerce.Platform.Core.Bus;
 using VirtoCommerce.Platform.Core.Common;
 using VirtoCommerce.Platform.Core.ExportImport;
 using VirtoCommerce.Platform.Core.Modularity;
@@ -44,15 +43,15 @@ namespace VirtoCommerce.CoreModule.Web
             serviceCollection.AddTransient<ICoreRepository, CoreRepositoryImpl>();
             var connectionString = configuration.GetConnectionString("VirtoCommerce.Core") ?? configuration.GetConnectionString("VirtoCommerce");
             serviceCollection.AddDbContext<CoreDbContext>(options => options.UseSqlServer(connectionString));
-            serviceCollection.AddSingleton<Func<ICoreRepository>>(provider => () => provider.CreateScope().ServiceProvider.GetRequiredService<ICoreRepository>());
-            serviceCollection.AddSingleton<ICurrencyService, CurrencyService>();
-            serviceCollection.AddSingleton<IPackageTypesService, PackageTypesService>();
+            serviceCollection.AddTransient<Func<ICoreRepository>>(provider => () => provider.CreateScope().ServiceProvider.GetRequiredService<ICoreRepository>());
+            serviceCollection.AddTransient<ICurrencyService, CurrencyService>();
+            serviceCollection.AddTransient<IPackageTypesService, PackageTypesService>();
             //Can be overrided
-            serviceCollection.AddSingleton<ISeoDuplicatesDetector, NullSeoDuplicateDetector>();
-            serviceCollection.AddSingleton<CoreExportImport>();
-            serviceCollection.AddSingleton<IUniqueNumberGenerator, SequenceUniqueNumberGeneratorService>();
+            serviceCollection.AddTransient<ISeoDuplicatesDetector, NullSeoDuplicateDetector>();
+            serviceCollection.AddTransient<CoreExportImport>();
+            serviceCollection.AddTransient<IUniqueNumberGenerator, SequenceUniqueNumberGeneratorService>();
 
-            serviceCollection.AddSingleton<CompositeSeoBySlugResolver>();
+            serviceCollection.AddTransient<CompositeSeoBySlugResolver>();
         }
 
         public void PostInitialize(IApplicationBuilder appBuilder)

@@ -1,45 +1,40 @@
 using System;
 using System.Collections.Generic;
 using System.Linq;
-using Microsoft.AspNetCore.Authorization;
-using Microsoft.AspNetCore.Identity;
 using VirtoCommerce.CatalogModule.Core.Model;
 using VirtoCommerce.CatalogModule.Core.Services;
 using VirtoCommerce.ExportModule.Core.Model;
+using VirtoCommerce.ExportModule.Data.Services;
 using VirtoCommerce.Platform.Core.Common;
-using VirtoCommerce.Platform.Core.Security;
-using VirtoCommerce.PricingModule.Core;
 using VirtoCommerce.PricingModule.Core.Model;
 using VirtoCommerce.PricingModule.Core.Model.Search;
 using VirtoCommerce.PricingModule.Core.Services;
 
 namespace VirtoCommerce.PricingModule.Data.ExportImport
 {
-    // These permissions required to fetch data
-    [Authorize(ModuleConstants.Security.Permissions.Export)]
-    [Authorize(ModuleConstants.Security.Permissions.Read)]
-    public class PricelistAssignmentExportPagedDataSource : BaseExportPagedDataSource
+    public class PricelistAssignmentExportPagedDataSource : SingleTypeExportPagedDataSource<PricelistAssignmentExportDataQuery, PricelistAssignmentsSearchCriteria>
     {
         private readonly IPricingSearchService _searchService;
         private readonly IPricingService _pricingService;
         private readonly ICatalogService _catalogService;
 
         public PricelistAssignmentExportPagedDataSource(
-            IPricingSearchService searchService,
-            IPricingService pricingService,
-            ICatalogService catalogService,
-            IAuthorizationPolicyProvider authorizationPolicyProvider,
-            IAuthorizationService authorizationService,
-            IUserClaimsPrincipalFactory<ApplicationUser> userClaimsPrincipalFactory,
-            UserManager<ApplicationUser> userManager)
-            : base(authorizationPolicyProvider, authorizationService, userClaimsPrincipalFactory, userManager)
+           IPricingSearchService searchService,
+           IPricingService pricingService,
+           ICatalogService catalogService)
         {
             _searchService = searchService;
             _pricingService = pricingService;
             _catalogService = catalogService;
         }
 
-        protected override FetchResult FetchData(SearchCriteriaBase searchCriteria)
+        protected override void FillSearchCriteria(PricelistAssignmentExportDataQuery dataQuery, PricelistAssignmentsSearchCriteria searchCriteria)
+        {
+            searchCriteria.PriceListIds = dataQuery.PriceListIds;
+            searchCriteria.CatalogIds = dataQuery.CatalogIds;
+        }
+
+        protected override ExportableSearchResult FetchData(PricelistAssignmentsSearchCriteria searchCriteria)
         {
             PricelistAssignment[] result;
             int totalCount;
@@ -56,41 +51,19 @@ namespace VirtoCommerce.PricingModule.Data.ExportImport
                 totalCount = pricelistAssignmentSearchResult.TotalCount;
             }
 
-            return new FetchResult(result, totalCount);
-        }
-
-        protected override ViewableEntity ToViewableEntity(object obj)
-        {
-            if (!(obj is PricelistAssignment model))
+            return new ExportableSearchResult()
             {
-                throw new System.InvalidCastException(nameof(PricelistAssignment));
-            }
-
-            var result = AbstractTypeFactory<PricelistAssignmentViewableEntity>.TryCreateInstance();
-
-            result.FromEntity(model);
-
-            result.Code = null;
-            result.ImageUrl = null;
-            result.Name = model.Name;
-            result.Parent = null;
-
-            result.CatalogId = model.CatalogId;
-            result.Description = model.Description;
-            result.EndDate = model.EndDate;
-            result.PricelistId = model.PricelistId;
-            result.Priority = model.Priority;
-            result.StartDate = model.StartDate;
-
-            return result;
+                Results = ToExportable(result).ToList(),
+                TotalCount = totalCount,
+            };
         }
 
-        protected override IEnumerable<ViewableEntity> ToViewableEntities(IEnumerable<ICloneable> objects)
+        protected virtual IEnumerable<IExportable> ToExportable(IEnumerable<ICloneable> objects)
         {
             var models = objects.Cast<PricelistAssignment>();
-            var viewableMap = models.ToDictionary(x => x, x => ToViewableEntity(x) as PricelistAssignmentViewableEntity);
+            var viewableMap = models.ToDictionary(x => x, x => AbstractTypeFactory<ExportablePricelistAssignment>.TryCreateInstance().FromModel(x));
 
-            FillViewableEntitiesReferenceFields(viewableMap);
+            FillAdditionalProperties(viewableMap);
 
             var modelIds = models.Select(x => x.Id).ToList();
             var result = viewableMap.Values.OrderBy(x => modelIds.IndexOf(x.Id));
@@ -98,15 +71,13 @@ namespace VirtoCommerce.PricingModule.Data.ExportImport
             return result;
         }
 
-        protected virtual void FillViewableEntitiesReferenceFields(Dictionary<PricelistAssignment, PricelistAssignmentViewableEntity> viewableMap)
+        protected virtual void FillAdditionalProperties(Dictionary<PricelistAssignment, ExportablePricelistAssignment> viewableMap)
         {
             var models = viewableMap.Keys;
-
             var catalogIds = models.Select(x => x.CatalogId).Distinct().ToArray();
             var pricelistIds = models.Select(x => x.PricelistId).Distinct().ToArray();
             var catalogs = _catalogService.GetByIdsAsync(catalogIds, CatalogResponseGroup.Info.ToString()).GetAwaiter().GetResult();
             var pricelists = _pricingService.GetPricelistsByIdAsync(pricelistIds).GetAwaiter().GetResult();
-
 
             foreach (var kvp in viewableMap)
             {

@@ -1,5 +1,4 @@
 using System.Collections.Generic;
-using VirtoCommerce.Platform.Core.Modularity;
 using VirtoCommerce.Platform.Core.Settings;
 
 namespace VirtoCommerce.InventoryModule.Core
@@ -42,6 +41,7 @@ namespace VirtoCommerce.InventoryModule.Core
                     }
                 }
             }
+
             public static IEnumerable<SettingDescriptor> AllSettings
             {
                 get

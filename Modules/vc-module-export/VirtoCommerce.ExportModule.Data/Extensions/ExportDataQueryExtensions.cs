@@ -11,18 +11,18 @@ namespace VirtoCommerce.ExportModule.Data.Extensions
         public static void FilterProperties(this ExportDataQuery dataQuery, object obj, string baseMemberName = null)
         {
             var type = obj.GetType();
-            var includedColumns = dataQuery.IncludedColumns;
+            var includedProperties = dataQuery.IncludedProperties;
 
-            if (!includedColumns.IsNullOrEmpty())
+            if (!includedProperties.IsNullOrEmpty())
             {
                 foreach (var property in type.GetProperties().Where(x => x.CanRead && x.CanWrite))
                 {
-                    var propertyName = ExportedTypeMetadata.GetDerivedName(baseMemberName, property);
-                    var nestedType = ExportedTypeMetadata.GetNestedType(property.PropertyType);
+                    var propertyName = property.GetDerivedName(baseMemberName);
+                    var nestedType = property.PropertyType.GetNestedType();
 
                     if (nestedType.IsSubclassOf(typeof(Entity)))
                     {
-                        if (!includedColumns.Any(x => x.Name.StartsWith($"{propertyName}.", StringComparison.InvariantCultureIgnoreCase)))
+                        if (!includedProperties.Any(x => x.FullName.StartsWith($"{propertyName}.", StringComparison.InvariantCultureIgnoreCase)))
                         {
                             property.SetValue(obj, null);
                         }
@@ -49,7 +49,7 @@ namespace VirtoCommerce.ExportModule.Data.Extensions
                             }
                         }
                     }
-                    else if (!includedColumns.Any(x => x.Name.Equals(propertyName, StringComparison.InvariantCultureIgnoreCase)))
+                    else if (!includedProperties.Any(x => x.FullName.Equals(propertyName, StringComparison.InvariantCultureIgnoreCase)))
                     {
                         property.SetValue(obj, null);
                     }

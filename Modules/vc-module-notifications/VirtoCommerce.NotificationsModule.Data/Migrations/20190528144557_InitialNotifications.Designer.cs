@@ -91,7 +91,7 @@ namespace VirtoCommerce.NotificationsModule.Data.Migrations
 
                     b.Property<DateTime>("CreatedDate");
 
-                    b.Property<string>("Discriminator")
+                    b.Property<string>("Discriminator").HasMaxLength(128)
                         .IsRequired();
 
                     b.Property<bool>("IsActive");
@@ -131,7 +131,7 @@ namespace VirtoCommerce.NotificationsModule.Data.Migrations
 
                     b.Property<DateTime>("CreatedDate");
 
-                    b.Property<string>("Discriminator")
+                    b.Property<string>("Discriminator").HasMaxLength(128)
                         .IsRequired();
 
                     b.Property<string>("LanguageCode")
@@ -183,7 +183,7 @@ namespace VirtoCommerce.NotificationsModule.Data.Migrations
 
                     b.Property<DateTime>("CreatedDate");
 
-                    b.Property<string>("Discriminator")
+                    b.Property<string>("Discriminator").HasMaxLength(128)
                         .IsRequired();
 
                     b.Property<string>("LanguageCode")

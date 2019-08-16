@@ -1,6 +1,6 @@
 using System.Linq;
 using System.Threading.Tasks;
-using VirtoCommerce.ExportModule.Core.Model;
+using VirtoCommerce.ExportModule.Data.Extensions;
 using Xunit;
 
 namespace VirtoCommerce.ExportModule.Tests
@@ -10,8 +10,8 @@ namespace VirtoCommerce.ExportModule.Tests
         [Fact]
         public Task GetFromType_Pricelist_NameBuiltCorrectly()
         {
-            var metadata = ExportedTypeMetadata.GetFromType<Pricelist>(true);
-            var props = metadata.PropertyInfos.Select(x => x.Name);
+            var metadata = typeof(Pricelist).GetPropertyNames(nameof(Pricelist.Prices), nameof(Pricelist.Assignments));
+            var props = metadata.PropertyInfos.Select(x => x.FullName);
 
             // Check if all own property detected
             Assert.Contains("Name", props);
@@ -41,8 +41,8 @@ namespace VirtoCommerce.ExportModule.Tests
         [Fact]
         public Task GetFromType_Pricelist_ExportNameBuiltCorrectly()
         {
-            var metadata = ExportedTypeMetadata.GetFromType<Pricelist>(true);
-            var props = metadata.PropertyInfos.Select(x => x.ExportName);
+            var metadata = typeof(Pricelist).GetPropertyNames(nameof(Pricelist.Prices), nameof(Pricelist.Assignments));
+            var props = metadata.PropertyInfos.Select(x => x.DisplayName);
 
             // Check if all own property detected
             Assert.Contains("Name", props);
@@ -73,8 +73,8 @@ namespace VirtoCommerce.ExportModule.Tests
         [Fact]
         public Task GetFromType_Pricelist_WithoutReferences_BuiltCorrectly()
         {
-            var metadata = ExportedTypeMetadata.GetFromType<Pricelist>(false);
-            var props = metadata.PropertyInfos.Select(x => x.Name);
+            var metadata = typeof(Pricelist).GetPropertyNames();
+            var props = metadata.PropertyInfos.Select(x => x.FullName);
 
             // Check if all own property detected
             Assert.Contains("Name", props);

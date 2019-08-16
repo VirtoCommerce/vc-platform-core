@@ -4,7 +4,6 @@ using System.Threading.Tasks;
 using Hangfire;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
-using Newtonsoft.Json;
 using VirtoCommerce.CoreModule.Core.Conditions;
 using VirtoCommerce.MarketingModule.Core;
 using VirtoCommerce.MarketingModule.Core.Model;
@@ -37,7 +36,6 @@ namespace VirtoCommerce.MarketingModule.Web.Controllers.Api
         private readonly IBlobStorageProvider _blobStorageProvider;
         private readonly CsvCouponImporter _csvCouponImporter;
         private readonly Func<IMarketingRepository> _repositoryFactory;
-        private readonly IMarketingExtensionManager _marketingExtensionManager;
         private readonly ICouponSearchService _couponSearchService;
         private readonly IAuthorizationService _authorizationService;
         public MarketingModulePromotionController(
@@ -50,7 +48,6 @@ namespace VirtoCommerce.MarketingModule.Web.Controllers.Api
             IBlobStorageProvider blobStorageProvider,
             CsvCouponImporter csvCouponImporter,
             Func<IMarketingRepository> repositoryFactory,
-            IMarketingExtensionManager marketingExtensionManager,
             ICouponSearchService couponSearchService,
             IAuthorizationService authorizationService)
         {
@@ -63,7 +60,6 @@ namespace VirtoCommerce.MarketingModule.Web.Controllers.Api
             _blobStorageProvider = blobStorageProvider;
             _csvCouponImporter = csvCouponImporter;
             _repositoryFactory = repositoryFactory;
-            _marketingExtensionManager = marketingExtensionManager;
             _couponSearchService = couponSearchService;
             _authorizationService = authorizationService;
         }
@@ -112,13 +108,15 @@ namespace VirtoCommerce.MarketingModule.Web.Controllers.Api
             var result = promotions.FirstOrDefault();
             if (result != null)
             {
-                FillConditions(result);
                 var authorizationResult = await _authorizationService.AuthorizeAsync(User, result, new MarketingAuthorizationRequirement(ModuleConstants.Security.Permissions.Read));
                 if (!authorizationResult.Succeeded)
                 {
                     return Unauthorized();
                 }
-
+                if (result is DynamicPromotion dynamicPromotion)
+                {
+                    dynamicPromotion.DynamicExpression?.EnableAvailableChildrenSerialization();
+                }
                 return Ok(result);
             }
             return NotFound();
@@ -134,6 +132,7 @@ namespace VirtoCommerce.MarketingModule.Web.Controllers.Api
         public ActionResult<Promotion> GetNewDynamicPromotion()
         {
             var retVal = AbstractTypeFactory<DynamicPromotion>.TryCreateInstance();
+            retVal.DynamicExpression?.EnableAvailableChildrenSerialization();
             retVal.IsActive = true;
             return Ok(retVal);
         }
@@ -274,37 +273,6 @@ namespace VirtoCommerce.MarketingModule.Web.Controllers.Api
                     await _notifier.SendAsync(notification);
                 }
             }
-        }   
-
-        private void FillConditions(Promotion promotion)
-        {
-            if (promotion is DynamicPromotion dynamicPromotion)
-            {
-                var etalonEpressionTree = _marketingExtensionManager.PromotionCondition;
-
-                var promotionConditionAndRewardTree = !string.IsNullOrEmpty(dynamicPromotion.PredicateVisualTreeSerialized) ? JsonConvert.DeserializeObject<PromotionConditionAndRewardTree>(
-                    dynamicPromotion.PredicateVisualTreeSerialized,
-                    new ConditionJsonConverter(), new RewardJsonConverter())
-                    : (PromotionConditionAndRewardTree)etalonEpressionTree;
-
-                //// Copy available elements from etalon because they not persisted
-                var sourceBlocks = etalonEpressionTree.Traverse(x => x.Children);
-                var targetBlocks = ((IConditionTree)promotionConditionAndRewardTree).Traverse(x => x.Children).ToList();
-
-                foreach (var sourceBlock in sourceBlocks)
-                {
-                    foreach (var targetBlock in targetBlocks.Where(x => x.Id == sourceBlock.Id))
-                    {
-                        targetBlock.AvailableChildren = sourceBlock.AvailableChildren;
-                    }
-                }
-
-                // Copy available elements from etalon
-                promotionConditionAndRewardTree.AvailableChildren = etalonEpressionTree.AvailableChildren;
-
-                dynamicPromotion.PredicateVisualTreeSerialized = JsonConvert.SerializeObject(promotionConditionAndRewardTree);
-            }
-
         }
     }
 }

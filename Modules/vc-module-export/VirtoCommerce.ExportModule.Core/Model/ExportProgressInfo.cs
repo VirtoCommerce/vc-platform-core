@@ -3,8 +3,14 @@ using VirtoCommerce.Platform.Core.Common;
 
 namespace VirtoCommerce.ExportModule.Core.Model
 {
+    /// <summary>
+    /// Export progress information
+    /// </summary>
     public class ExportProgressInfo : ValueObject
     {
+        /// <summary>
+        /// Export progress information
+        /// </summary>
         public ExportProgressInfo()
         {
             Errors = new List<string>();

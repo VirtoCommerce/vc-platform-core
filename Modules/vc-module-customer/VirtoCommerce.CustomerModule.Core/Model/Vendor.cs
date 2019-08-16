@@ -1,4 +1,3 @@
-using System.Collections.Generic;
 using VirtoCommerce.CoreModule.Core.Seo;
 
 namespace VirtoCommerce.CustomerModule.Core.Model
@@ -24,6 +23,8 @@ namespace VirtoCommerce.CustomerModule.Core.Model
         /// Vendor group
         /// </summary>
         public string GroupName { get; set; }
+
+        public override string ObjectType => typeof(Vendor).FullName;
 
     }
 }

@@ -41,15 +41,15 @@ namespace VirtoCommerce.InventoryModule.Web
             serviceCollection.AddTransient<IInventoryRepository, InventoryRepositoryImpl>();
             var connectionString = configuration.GetConnectionString("VirtoCommerce.Inventory") ?? configuration.GetConnectionString("VirtoCommerce");
             serviceCollection.AddDbContext<InventoryDbContext>(options => options.UseSqlServer(connectionString));
-            serviceCollection.AddSingleton<Func<IInventoryRepository>>(provider => () => provider.CreateScope().ServiceProvider.GetRequiredService<IInventoryRepository>());
-            serviceCollection.AddSingleton<IInventoryService, InventoryServiceImpl>();
-            serviceCollection.AddSingleton<IInventorySearchService, InventorySearchService>();
-            serviceCollection.AddSingleton<IFulfillmentCenterSearchService, FulfillmentCenterSearchService>();
-            serviceCollection.AddSingleton<IFulfillmentCenterService, FulfillmentCenterService>();
-            serviceCollection.AddSingleton<InventoryExportImport>();
+            serviceCollection.AddTransient<Func<IInventoryRepository>>(provider => () => provider.CreateScope().ServiceProvider.GetRequiredService<IInventoryRepository>());
+            serviceCollection.AddTransient<IInventoryService, InventoryServiceImpl>();
+            serviceCollection.AddTransient<IInventorySearchService, InventorySearchService>();
+            serviceCollection.AddTransient<IFulfillmentCenterSearchService, FulfillmentCenterSearchService>();
+            serviceCollection.AddTransient<IFulfillmentCenterService, FulfillmentCenterService>();
+            serviceCollection.AddTransient<InventoryExportImport>();
             serviceCollection.AddTransient<ProductAvailabilityChangesProvider>();
             serviceCollection.AddTransient<ProductAvailabilityDocumentBuilder>();
-            serviceCollection.AddSingleton<LogChangesChangedEventHandler>();
+            serviceCollection.AddTransient<LogChangesChangedEventHandler>();
         }
 
         public void PostInitialize(IApplicationBuilder appBuilder)

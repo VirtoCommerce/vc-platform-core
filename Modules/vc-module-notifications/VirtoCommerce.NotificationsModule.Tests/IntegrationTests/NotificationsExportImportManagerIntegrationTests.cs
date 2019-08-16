@@ -37,7 +37,6 @@ namespace VirtoCommerce.NotificationsModule.Tests.IntegrationTests
         {
             _repositoryMock = new Mock<INotificationRepository>();
             _eventPulisherMock = new Mock<IEventPublisher>();
-            INotificationRepository RepositoryFactory() => _repositoryMock.Object;
             _mockUnitOfWork = new Mock<IUnitOfWork>();
             _repositoryMock.Setup(ss => ss.UnitOfWork).Returns(_mockUnitOfWork.Object);
             _notificationSearchServiceMock = new Mock<INotificationSearchService>();
@@ -51,7 +50,7 @@ namespace VirtoCommerce.NotificationsModule.Tests.IntegrationTests
             if (!AbstractTypeFactory<NotificationMessage>.AllTypeInfos.SelectMany(x => x.AllSubclasses).Contains(typeof(EmailNotificationMessage)))
                 AbstractTypeFactory<NotificationMessage>.RegisterType<EmailNotificationMessage>().MapToType<NotificationMessageEntity>();
 
-            _notificationRegistrar = new NotificationService(RepositoryFactory, _eventPulisherMock.Object);
+            _notificationRegistrar = new NotificationRegistrar();
             _notificationRegistrar.RegisterNotification<RegistrationEmailNotification>();
         }
 

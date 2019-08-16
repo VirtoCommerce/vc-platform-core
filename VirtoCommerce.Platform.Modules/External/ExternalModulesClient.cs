@@ -19,14 +19,16 @@ namespace VirtoCommerce.Platform.Modules.External
 
         public Stream OpenRead(Uri address)
         {
-            var webClient = new WebClient();
-            if (!string.IsNullOrEmpty(_options.AuthorizationToken))
+            using (var webClient = new WebClient())
             {
-                webClient.Headers["User-Agent"] = "Virto Commerce Manager";
-                webClient.Headers["Accept"] = "application/octet-stream";
-                webClient.Headers["Authorization"] = "token " + _options.AuthorizationToken;
+                if (!string.IsNullOrEmpty(_options.AuthorizationToken))
+                {
+                    webClient.Headers["User-Agent"] = "Virto Commerce Manager";
+                    webClient.Headers["Accept"] = "application/octet-stream";
+                    webClient.Headers["Authorization"] = "token " + _options.AuthorizationToken;
+                }
+                return webClient.OpenRead(address);
             }
-            return webClient.OpenRead(address);
         }
     }
 }

@@ -5,7 +5,7 @@ namespace VirtoCommerce.CoreModule.Core.Conditions.GeoConditions
     //Country is []
     public class ConditionGeoCountry : MatchedConditionBase
     {
-        public override bool Evaluate(IEvaluationContext context)
+        public override bool IsSatisfiedBy(IEvaluationContext context)
         {
             var result = false;
             if (context is EvaluationContextBase evaluationContext)

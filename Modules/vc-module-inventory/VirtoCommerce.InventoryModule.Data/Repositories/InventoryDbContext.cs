@@ -11,6 +11,11 @@ namespace VirtoCommerce.InventoryModule.Data.Repositories
         {
         }
 
+        protected InventoryDbContext(DbContextOptions options)
+            : base(options)
+        {
+        }
+
         protected override void OnModelCreating(ModelBuilder modelBuilder)
         {
             modelBuilder.Entity<InventoryEntity>().ToTable("Inventory").HasKey(x => x.Id);

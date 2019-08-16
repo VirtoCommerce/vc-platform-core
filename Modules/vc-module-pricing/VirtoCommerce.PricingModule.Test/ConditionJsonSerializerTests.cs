@@ -92,24 +92,24 @@ namespace VirtoCommerce.PricingModule.Test
                 ShopperGender = "female",
                 ShopperAge = 17
             };
-            Assert.False(result.Evaluate(context));
+            Assert.False(result.IsSatisfiedBy(context));
 
             // 2. ShopperSearchedPhraseInStore contains "test", so the result must be true.
             context.ShopperSearchedPhraseInStore = "test";
-            Assert.True(result.Evaluate(context));
+            Assert.True(result.IsSatisfiedBy(context));
 
             // 3. ShopperGender is male, so the result must be true again.
             context.ShopperSearchedPhraseInStore = "some query";
             context.ShopperGender = "male";
-            Assert.True(result.Evaluate(context));
+            Assert.True(result.IsSatisfiedBy(context));
 
             // 4. ShopperAge exceeds 18, so the result must be true again.
             context.ShopperGender = "female";
             context.ShopperAge = 18;
-            Assert.True(result.Evaluate(context));
+            Assert.True(result.IsSatisfiedBy(context));
 
             context.ShopperAge = 21;
-            Assert.True(result.Evaluate(context));
+            Assert.True(result.IsSatisfiedBy(context));
         }
 
 

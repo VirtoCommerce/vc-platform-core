@@ -1,6 +1,5 @@
-angular.module('virtoCommerce.orderModule')
-    .controller('virtoCommerce.orderModule.shipmentDetailController', ['$scope', 'platformWebApp.bladeNavigationService', 'platformWebApp.dialogService', 'platformWebApp.settings', 'virtoCommerce.orderModule.order_res_customerOrders', 'virtoCommerce.orderModule.order_res_fulfilmentCenters', 'virtoCommerce.orderModule.statusTranslationService', 'platformWebApp.authService',
-        function ($scope, bladeNavigationService, dialogService, settings, customerOrders, order_res_fulfilmentCenters, statusTranslationService, authService) {
+angular.module('virtoCommerce.orderModule').controller('virtoCommerce.orderModule.shipmentDetailController', ['$scope', 'platformWebApp.bladeNavigationService', 'platformWebApp.dialogService', 'platformWebApp.settings', 'virtoCommerce.orderModule.order_res_customerOrders', 'virtoCommerce.inventoryModule.fulfillments', 'virtoCommerce.orderModule.statusTranslationService', 'platformWebApp.authService',
+    function ($scope, bladeNavigationService, dialogService, settings, customerOrders, fulfillments, statusTranslationService, authService) {
         var blade = $scope.blade;
         blade.isVisiblePrices = authService.checkPermission('order:read_prices');
 
@@ -36,12 +35,12 @@ angular.module('virtoCommerce.orderModule')
         // load employees
         blade.employees = blade.parentBlade.employees;
 
-        blade.fulfillmentCenters = order_res_fulfilmentCenters.query();
+        getFulfillmentCenters();
         blade.openFulfillmentCentersList = function () {
             var newBlade = {
                 id: 'fulfillmentCenterList',
-                controller: 'virtoCommerce.coreModule.fulfillment.fulfillmentListController',
-                template: 'Modules/$(VirtoCommerce.Core)/Scripts/fulfillment/blades/fulfillment-center-list.tpl.html'
+                controller: 'virtoCommerce.inventoryModule.fulfillmentListController',
+                template: 'Modules/$(VirtoCommerce.Inventory)/Scripts/blades/fulfillment-center-list.tpl.html'
             };
             bladeNavigationService.showBlade(newBlade, blade);
         };
@@ -53,4 +52,11 @@ angular.module('virtoCommerce.orderModule')
         blade.updateRecalculationFlag = function () {
             blade.isTotalsRecalculationNeeded = blade.origEntity.price != blade.currentEntity.price || blade.origEntity.priceWithTax != blade.currentEntity.priceWithTax;
         }
+
+        function getFulfillmentCenters() {
+            fulfillments.search({ take: 100 }, function (response) {
+                blade.fulfillmentCenters = response.results;
+            });
+        }
+
     }]);

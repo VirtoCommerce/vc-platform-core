@@ -3,7 +3,7 @@ namespace VirtoCommerce.PricingModule.Core.Model.Search
     public class PricelistAssignmentsSearchCriteria : PricingSearchCriteria
     {
         public string PriceListId { get; set; }
-
+        public string[] CatalogIds { get; set; }
         private string[] _priceListIds;
         public string[] PriceListIds
         {
@@ -15,10 +15,8 @@ namespace VirtoCommerce.PricingModule.Core.Model.Search
                 }
                 return _priceListIds;
             }
-            set
-            {
-                _priceListIds = value;
-            }
+            set => _priceListIds = value;
         }
+
     }
 }
