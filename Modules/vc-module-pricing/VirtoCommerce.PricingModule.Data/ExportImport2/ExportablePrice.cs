@@ -1,9 +1,10 @@
 using VirtoCommerce.ExportModule.Core.Model;
+using VirtoCommerce.Platform.Core.Common;
 using VirtoCommerce.PricingModule.Core.Model;
 
 namespace VirtoCommerce.PricingModule.Data.ExportImport
 {
-    public class ExportablePrice : Price, IExportable
+    public class ExportablePrice : Price, IExportable, IExportViewable, ITabularConvertible
     {
         #region IExportable properties
 
@@ -36,5 +37,26 @@ namespace VirtoCommerce.PricingModule.Data.ExportImport
 
             return this;
         }
+
+        #region ITabularConvertible implementation
+
+        public virtual IExportable ToTabular()
+        {
+            var result = AbstractTypeFactory<TabularPrice>.TryCreateInstance();
+
+            result.Currency = Currency;
+            result.Id = Id;
+            result.List = List;
+            result.MinQuantity = MinQuantity;
+            result.PricelistId = PricelistId;
+            result.PricelistName = PricelistName;
+            result.ProductId = ProductId;
+            result.ProductName = ProductName;
+            result.Sale = Sale;
+
+            return result;
+        }
+
+        #endregion ITabularConvertible implementation
     }
 }

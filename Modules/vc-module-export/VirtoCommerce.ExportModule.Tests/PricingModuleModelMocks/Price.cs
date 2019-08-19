@@ -1,10 +1,11 @@
 using System;
 using Newtonsoft.Json.Linq;
+using VirtoCommerce.ExportModule.Core.Model;
 using VirtoCommerce.Platform.Core.Common;
 
 namespace VirtoCommerce.ExportModule.Tests
 {
-    public class Price : AuditableEntity, ICloneable
+    public class Price : AuditableEntity, IExportable
     {
         public string PricelistId { get; set; }
         public Pricelist Pricelist { get; set; }

@@ -1,17 +1,12 @@
 using System;
+using VirtoCommerce.Platform.Core.Common;
 
 namespace VirtoCommerce.ExportModule.Core.Model
 {
     /// <summary>
     /// Interface to implement exportаble entities.
-    /// Common (default) set of properties for universal viewing.
     /// </summary>
-    public interface IExportable : ICloneable
+    public interface IExportable : ICloneable, IEntity
     {
-        string Name { get; set; }
-        string Code { get; set; }
-        string ImageUrl { get; set; }
-        string Parent { get; set; }
-        string Type { get; set; }
     }
 }

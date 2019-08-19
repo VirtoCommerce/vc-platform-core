@@ -1,3 +1,5 @@
+using VirtoCommerce.ExportModule.Core.Model;
+
 namespace VirtoCommerce.ExportModule.Core.Services
 {
     /// <summary>
@@ -10,6 +12,6 @@ namespace VirtoCommerce.ExportModule.Core.Services
         /// </summary>
         /// <param name="obj">Exportable entity.</param>
         /// <returns>Tabular (plain) representation.</returns>
-        object ToTabular(object obj);
+        IExportable ToTabular(IExportable obj);
     }
 }
