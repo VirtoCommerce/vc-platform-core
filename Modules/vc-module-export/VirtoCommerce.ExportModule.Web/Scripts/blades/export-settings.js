@@ -71,7 +71,7 @@ angular.module('virtoCommerce.exportModule')
             }
         }
 
-        function getDataTotalCount(fnSuccess) {
+        function getDataTotalCount(fnSuccessCallback) {
             var dataQuery = {
                 exportTypeName: blade.exportDataRequest.dataQuery.exportTypeName,
                 includedProperties: [],
@@ -86,11 +86,13 @@ angular.module('virtoCommerce.exportModule')
                 }
                 , function (data) {
                     blade.dataTotal = data.totalCount;
-                    if (fnSuccess) fnSuccess(data);
+                    if (fnSuccessCallback) {
+                        fnSuccessCallback(data);
+                    }
                 });
         }
 
-        function getDataSelectedCount(fnSuccess) {
+        function getDataSelectedCount() {
             var dataQuery = angular.copy(blade.exportDataRequest.dataQuery);
             dataQuery.includedProperties = [];
 
@@ -100,8 +102,7 @@ angular.module('virtoCommerce.exportModule')
                 dataQuery: dataQuery
             }
             , function (data) {
-                blade.dataSelected = data.totalCount;
-                if (fnSuccess) fnSuccess(data);
+                blade.dataSelected = data.totalCount;                
             });
         }
 
