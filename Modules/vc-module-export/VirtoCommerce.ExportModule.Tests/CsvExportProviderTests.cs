@@ -1,5 +1,4 @@
 using System;
-using System.Collections;
 using System.Collections.Generic;
 using System.Globalization;
 using System.IO;
@@ -458,7 +457,7 @@ namespace VirtoCommerce.ExportModule.Tests
 
         }
 
-        private string SerializeAndRead(ExportedTypeMetadata metadata, IEnumerable items, Configuration configuration = null)
+        private string SerializeAndRead<T>(ExportedTypeMetadata metadata, IEnumerable<T> items, Configuration configuration = null) where T : IExportable
         {
             var csvConfiguration = new CsvProviderConfiguration() { Configuration = configuration ?? new Configuration(cultureInfo: CultureInfo.InvariantCulture) };
 

@@ -30,13 +30,13 @@ namespace VirtoCommerce.ExportModule.Data.Services
             IncludedProperties = includedProperties;
         }
 
-        public void WriteRecord(TextWriter writer, object objectToRecord)
+        public void WriteRecord(TextWriter writer, IExportable objectToRecord)
         {
             EnsureWriterCreated(writer);
 
             AddClassMap(objectToRecord.GetType());
 
-            _csvWriter.WriteRecords(new[] { objectToRecord });
+            _csvWriter.WriteRecords(new object[] { objectToRecord });
         }
 
         public void Dispose()

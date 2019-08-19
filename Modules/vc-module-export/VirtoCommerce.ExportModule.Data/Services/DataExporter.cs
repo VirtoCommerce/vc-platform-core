@@ -76,7 +76,7 @@ namespace VirtoCommerce.ExportModule.Data.Services
                         {
                             try
                             {
-                                var preparedObject = obj.Clone();
+                                var preparedObject = obj.Clone() as IExportable;
 
                                 request.DataQuery.FilterProperties(preparedObject);
 

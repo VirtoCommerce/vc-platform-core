@@ -1,8 +1,8 @@
-using System;
+using VirtoCommerce.ExportModule.Core.Model;
 
 namespace VirtoCommerce.PricingModule.Data.ExportImport
 {
-    public class TabularPrice
+    public class TabularPrice : IExportable
     {
         public string Id { get; set; }
         public string PricelistId { get; set; }
@@ -11,5 +11,10 @@ namespace VirtoCommerce.PricingModule.Data.ExportImport
         public decimal? Sale { get; set; }
         public decimal List { get; set; }
         public int MinQuantity { get; set; }
+
+        public object Clone()
+        {
+            return MemberwiseClone() as TabularPrice;
+        }
     }
 }

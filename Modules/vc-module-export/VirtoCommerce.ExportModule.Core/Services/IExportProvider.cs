@@ -32,6 +32,6 @@ namespace VirtoCommerce.ExportModule.Core.Services
         /// </summary>
         /// <param name="writer">TextWriter to write to.</param>
         /// <param name="objectToRecord">Object to write.</param>
-        void WriteRecord(TextWriter writer, object objectToRecord);
+        void WriteRecord(TextWriter writer, IExportable objectToRecord);
     }
 }

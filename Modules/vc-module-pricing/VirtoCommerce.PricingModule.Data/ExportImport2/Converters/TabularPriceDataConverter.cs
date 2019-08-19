@@ -1,4 +1,5 @@
 using System;
+using VirtoCommerce.ExportModule.Core.Model;
 using VirtoCommerce.ExportModule.Core.Services;
 using VirtoCommerce.Platform.Core.Common;
 
@@ -6,7 +7,7 @@ namespace VirtoCommerce.PricingModule.Data.ExportImport.Converters
 {
     public class TabularPriceDataConverter : ITabularDataConverter
     {
-        public object ToTabular(object obj)
+        public IExportable ToTabular(IExportable obj)
         {
             var source = obj as ExportablePrice ?? throw new ArgumentException(nameof(obj));
             var result = AbstractTypeFactory<TabularPrice>.TryCreateInstance();

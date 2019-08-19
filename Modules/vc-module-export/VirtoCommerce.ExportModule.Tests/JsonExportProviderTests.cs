@@ -6,6 +6,7 @@ using System.Text;
 using System.Threading.Tasks;
 using Newtonsoft.Json;
 using Newtonsoft.Json.Linq;
+using VirtoCommerce.ExportModule.Core.Model;
 using VirtoCommerce.ExportModule.Data.Model;
 using VirtoCommerce.ExportModule.Data.Services;
 using Xunit;
@@ -107,12 +108,12 @@ namespace VirtoCommerce.ExportModule.Tests
         }
 
 
-        private T[] SerializeAndDeserialize<T>(T obj)
+        private T[] SerializeAndDeserialize<T>(T obj) where T : IExportable
         {
             return JsonConvert.DeserializeObject<T[]>(SerializeToString(obj));
         }
 
-        private object[] SerializeAndDeserializeMixedObjects(params object[] objects)
+        private object[] SerializeAndDeserializeMixedObjects(params IExportable[] objects)
         {
             var deserializedString = SerializeToString(objects);
 
@@ -122,7 +123,7 @@ namespace VirtoCommerce.ExportModule.Tests
                 .ToArray();
         }
 
-        private static string SerializeToString(params object[] objects)
+        private static string SerializeToString(params IExportable[] objects)
         {
             var jsonConfiguration = new JsonProviderConfiguration() { Settings = new JsonSerializerSettings() { NullValueHandling = NullValueHandling.Ignore } };
 

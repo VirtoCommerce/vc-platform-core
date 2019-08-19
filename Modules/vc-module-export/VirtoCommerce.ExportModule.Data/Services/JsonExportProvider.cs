@@ -52,7 +52,7 @@ namespace VirtoCommerce.ExportModule.Data.Services
             _serializer.Converters.Add(new ObjectDiscriminatorJsonConverter(jsonSettings, typeof(Entity)));
         }
 
-        public void WriteRecord(TextWriter writer, object objectToRecord)
+        public void WriteRecord(TextWriter writer, IExportable objectToRecord)
         {
             if (objectToRecord == null)
             {

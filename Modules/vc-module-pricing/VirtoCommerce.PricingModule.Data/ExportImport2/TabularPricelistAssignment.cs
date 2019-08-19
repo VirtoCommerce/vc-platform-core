@@ -1,8 +1,9 @@
 using System;
+using VirtoCommerce.ExportModule.Core.Model;
 
 namespace VirtoCommerce.PricingModule.Data.ExportImport
 {
-    public class TabularPricelistAssignment
+    public class TabularPricelistAssignment : IExportable
     {
         public string Id { get; set; }
         public string CatalogId { get; set; }
@@ -12,5 +13,10 @@ namespace VirtoCommerce.PricingModule.Data.ExportImport
         public int Priority { get; set; }
         public DateTime? StartDate { get; set; }
         public DateTime? EndDate { get; set; }
+
+        public object Clone()
+        {
+            return MemberwiseClone() as TabularPricelistAssignment;
+        }
     }
 }
