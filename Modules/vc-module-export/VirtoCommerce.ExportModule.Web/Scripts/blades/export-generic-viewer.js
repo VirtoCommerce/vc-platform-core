@@ -180,6 +180,13 @@ angular.module('virtoCommerce.exportModule')
             filter.current = _.findWhere($scope.exportSearchFilters, { id: $scope.exportSearchFilterId });
         }
 
+        if (blade.exportDataRequest.dataQuery) {
+            if (!filter.current) {
+                filter.current = {};
+            }
+            angular.extend(filter.current, blade.exportDataRequest.dataQuery);
+        }
+
         filter.change = function () {
             $localStorage.exportSearchFilterId = filter.current ? filter.current.id : null;
             var metafieldsId = blade.exportDataRequest.exportTypeName + 'ExportFilter';
@@ -279,7 +286,6 @@ angular.module('virtoCommerce.exportModule')
     
         $scope.saveChanges = function () {
             var dataQuery = buildDataQuery();
-            var selectedItemsCount = $scope.pageSettings.totalItems;
             var isAllSelected = $scope.gridApi.selection.getSelectAllState();
             var selectedIds = _.map($scope.gridApi.selection.getSelectedRows(), function(item) { return item.id; });
 
@@ -289,11 +295,10 @@ angular.module('virtoCommerce.exportModule')
                 || (!isAllSelected && selectedIds.length) 
                 || (selectedIds.length == 0)) {
                 dataQuery.objectIds = selectedIds;
-                selectedItemsCount = selectedIds.length;
             }
 
             if (blade.onCompleted) {
-                blade.onCompleted(dataQuery, selectedItemsCount);
+                blade.onCompleted(dataQuery);
             }
 
             bladeNavigationService.closeBlade(blade);
