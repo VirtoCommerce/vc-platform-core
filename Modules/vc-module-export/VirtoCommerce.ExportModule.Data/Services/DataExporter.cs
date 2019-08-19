@@ -65,35 +65,34 @@ namespace VirtoCommerce.ExportModule.Data.Services
                     {
                         token.ThrowIfCancellationRequested();
 
-                        var objectBatch = pagedDataSource.FetchNextPage();
-
-                        if (objectBatch == null)
+                        while (pagedDataSource.Fetch())
                         {
-                            break;
-                        }
+                            var objectBatch = pagedDataSource.Items;
 
-                        foreach (var obj in objectBatch)
-                        {
-                            try
+                            foreach (var obj in objectBatch)
                             {
-                                var preparedObject = obj.Clone() as IExportable;
-
-                                request.DataQuery.FilterProperties(preparedObject);
-
-                                if (needTabularData)
+                                try
                                 {
-                                    preparedObject = (preparedObject as ITabularConvertible)?.ToTabular() ??
-                                        throw new NotSupportedException($"Object should be {nameof(ITabularConvertible)} to be exported using tabular provider.");
-                                }
+                                    var preparedObject = obj.Clone() as IExportable;
 
-                                exportProvider.WriteRecord(writer, preparedObject);
+                                    request.DataQuery.FilterProperties(preparedObject);
+
+                                    if (needTabularData)
+                                    {
+                                        preparedObject = (preparedObject as ITabularConvertible)?.ToTabular() ??
+                                                         throw new NotSupportedException($"Object should be {nameof(ITabularConvertible)} to be exported using tabular provider.");
+                                    }
+
+                                    exportProvider.WriteRecord(writer, preparedObject);
+                                }
+                                catch (Exception e)
+                                {
+                                    exportProgress.Errors.Add(e.Message);
+                                    progressCallback(exportProgress);
+                                }
+                                exportedCount++;
                             }
-                            catch (Exception e)
-                            {
-                                exportProgress.Errors.Add(e.Message);
-                                progressCallback(exportProgress);
-                            }
-                            exportedCount++;
+
                         }
 
                         exportProgress.ProcessedCount = exportedCount;

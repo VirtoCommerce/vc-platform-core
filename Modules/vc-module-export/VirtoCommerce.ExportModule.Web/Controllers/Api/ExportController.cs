@@ -93,7 +93,8 @@ namespace VirtoCommerce.ExportModule.Web.Controllers
             var exportedTypeDefinition = _knownExportTypesResolver.ResolveExportedTypeDefinition(request.ExportTypeName);
             var pagedDataSource = exportedTypeDefinition.ExportedDataSourceFactory(request.DataQuery);
 
-            var queryResult = pagedDataSource.FetchNextPage();
+            pagedDataSource.Fetch();
+            var queryResult = pagedDataSource.Items;
             var result = new ExportableSearchResult()
             {
                 TotalCount = pagedDataSource.GetTotalCount(),
