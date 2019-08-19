@@ -16,17 +16,14 @@ namespace VirtoCommerce.ExportModule.Data.Services
         where TSearchCriteria : SearchCriteriaBase
     {
         private readonly TDataQuery _dataQuery;
-        protected int TotalCount;
+        protected int TotalCount = -1;
 
         protected ExportPagedDataSource(TDataQuery dataQuery)
         {
             _dataQuery = dataQuery;
-            CurrentPageNumber = 0;
-            TotalCount = -1;
-
         }
 
-        public int CurrentPageNumber { get; protected set; }
+        public int CurrentPageNumber { get; protected set; } = 0;
         public int PageSize { get; set; } = 50;
         public virtual IEnumerable<IExportable> FetchNextPage()
         {
