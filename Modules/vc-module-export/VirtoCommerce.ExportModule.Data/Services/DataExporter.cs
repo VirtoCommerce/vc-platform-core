@@ -82,7 +82,8 @@ namespace VirtoCommerce.ExportModule.Data.Services
 
                                 if (needTabularData)
                                 {
-                                    preparedObject = exportedTypeDefinition.TabularDataConverter.ToTabular(preparedObject);
+                                    preparedObject = (preparedObject as ITabularConvertible)?.ToTabular() ??
+                                        throw new NotSupportedException($"Object should be {nameof(ITabularConvertible)} to be exported using tabular provider.");
                                 }
 
                                 exportProvider.WriteRecord(writer, preparedObject);

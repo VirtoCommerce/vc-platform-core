@@ -21,7 +21,6 @@ using VirtoCommerce.PricingModule.Core.Model;
 using VirtoCommerce.PricingModule.Core.Model.Search;
 using VirtoCommerce.PricingModule.Core.Services;
 using VirtoCommerce.PricingModule.Data.ExportImport;
-using VirtoCommerce.PricingModule.Data.ExportImport.Converters;
 using Xunit;
 
 namespace VirtoCommerce.PricingModule.Test
@@ -282,7 +281,6 @@ namespace VirtoCommerce.PricingModule.Test
                         DataQuery = (PriceExportDataQuery)dataQuery
                     })
                 .WithMetadata(metadata)
-                .WithTabularDataConverter(new TabularPriceDataConverter())
                 .WithTabularMetadata(typeof(TabularPrice).GetPropertyNames()));
 
             var exportProviderFactories = new[]

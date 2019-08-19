@@ -1,6 +1,5 @@
 using System;
 using VirtoCommerce.ExportModule.Core.Model;
-using VirtoCommerce.ExportModule.Core.Services;
 using VirtoCommerce.ExportModule.Data.Services;
 
 namespace VirtoCommerce.ExportModule.Data.Extensions
@@ -22,12 +21,6 @@ namespace VirtoCommerce.ExportModule.Data.Extensions
         public static ExportedTypeDefinitionBuilder WithTabularMetadata(this ExportedTypeDefinitionBuilder builder, ExportedTypeMetadata tabularMetadata)
         {
             builder.ExportedTypeDefinition.TabularMetaData = tabularMetadata;
-            return builder;
-        }
-
-        public static ExportedTypeDefinitionBuilder WithTabularDataConverter(this ExportedTypeDefinitionBuilder builder, ITabularDataConverter tabularDataConverter)
-        {
-            builder.ExportedTypeDefinition.TabularDataConverter = tabularDataConverter;
             return builder;
         }
 
