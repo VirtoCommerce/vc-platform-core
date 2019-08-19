@@ -21,31 +21,19 @@ namespace VirtoCommerce.ExportModule.Data.Services
         private readonly JsonSerializer _serializer;
         private JsonTextWriter _jsonTextWriter;
 
-        public JsonExportProvider(IExportProviderConfiguration exportProviderConfiguration)
-            : this(exportProviderConfiguration, null)
+        public JsonExportProvider(ExportDataRequest exportDataRequest)
         {
-        }
-
-        public JsonExportProvider(IExportProviderConfiguration exportProviderConfiguration, ExportedTypePropertyInfo[] includedProperties)
-        {
-            Configuration = exportProviderConfiguration;
-            IncludedProperties = includedProperties;
-
-            var jsonSettings = new JsonSerializerSettings();
-
-            if (exportProviderConfiguration is JsonProviderConfiguration jsonProviderConfiguration)
+            if (exportDataRequest == null)
             {
-                jsonSettings = jsonProviderConfiguration.Settings;
+                throw new ArgumentNullException(nameof(exportDataRequest));
             }
-            else
-            {
-                jsonSettings.NullValueHandling = NullValueHandling.Ignore;
-                jsonSettings.DefaultValueHandling = DefaultValueHandling.Ignore;
-                jsonSettings.ReferenceLoopHandling = ReferenceLoopHandling.Ignore;
-#if DEBUG
-                jsonSettings.Formatting = Formatting.Indented;
-#endif
-            }
+
+            var jsonProviderConfiguration = exportDataRequest.ProviderConfig as JsonProviderConfiguration ?? new JsonProviderConfiguration();
+
+            Configuration = jsonProviderConfiguration;
+            IncludedProperties = exportDataRequest.DataQuery?.IncludedProperties;
+
+            var jsonSettings = jsonProviderConfiguration.Settings;
 
             _serializer = JsonSerializer.Create(jsonSettings);
 

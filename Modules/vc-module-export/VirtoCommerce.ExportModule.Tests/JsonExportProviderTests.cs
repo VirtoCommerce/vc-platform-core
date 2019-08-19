@@ -125,12 +125,16 @@ namespace VirtoCommerce.ExportModule.Tests
 
         private static string SerializeToString(params IExportable[] objects)
         {
-            var jsonConfiguration = new JsonProviderConfiguration() { Settings = new JsonSerializerSettings() { NullValueHandling = NullValueHandling.Ignore } };
+            var exportDataRequest = new ExportDataRequest()
+            {
+                ProviderName = nameof(JsonExportProvider),
+                ProviderConfig = new JsonProviderConfiguration() { Settings = new JsonSerializerSettings() { NullValueHandling = NullValueHandling.Ignore } },
+            };
 
             using (var stream = new MemoryStream())
             using (var writer = new StreamWriter(stream, Encoding.UTF8) { AutoFlush = true })
             {
-                using (var jsonExportProvider = new JsonExportProvider(jsonConfiguration))
+                using (var jsonExportProvider = new JsonExportProvider(exportDataRequest))
                 {
                     foreach (var obj in objects)
                     {

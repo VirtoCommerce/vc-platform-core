@@ -9,6 +9,7 @@ using CsvHelper.Configuration;
 using VirtoCommerce.ExportModule.Core.Model;
 using VirtoCommerce.ExportModule.Data.Model;
 using VirtoCommerce.ExportModule.Data.Services;
+using VirtoCommerce.ExportModule.Tests.PricingModuleModelMocks;
 using Xunit;
 
 namespace VirtoCommerce.ExportModule.Tests
@@ -40,40 +41,39 @@ namespace VirtoCommerce.ExportModule.Tests
                 },
             };
 
-            var metadata = new ExportedTypeMetadata()
+            var propertyInfos = new[]
             {
-                PropertyInfos = new[]
+                new ExportedTypePropertyInfo()
                 {
-                    new ExportedTypePropertyInfo()
-                    {
-                        FullName = nameof(Price.Id),
-                        DisplayName = nameof(Price.Id),
-                    },
-                    new ExportedTypePropertyInfo()
-                    {
-                        FullName = nameof(Price.PricelistId),
-                        DisplayName = nameof(Price.PricelistId),
-                    },
-                    new ExportedTypePropertyInfo()
-                    {
-                        FullName = nameof(Price.List),
-                        DisplayName = nameof(Price.List),
-                    },
-                    new ExportedTypePropertyInfo()
-                    {
-                        FullName = nameof(Price.CreatedDate),
-                        DisplayName = nameof(Price.CreatedDate),
-                    },
-                    new ExportedTypePropertyInfo()
-                    {
-                        FullName = nameof(Price.EndDate),
-                        DisplayName = nameof(Price.EndDate),
-                    },
-                }
+                    FullName = nameof(Price.Id),
+                    DisplayName = nameof(Price.Id),
+                },
+                new ExportedTypePropertyInfo()
+                {
+                    FullName = nameof(Price.PricelistId),
+                    DisplayName = nameof(Price.PricelistId),
+                },
+                new ExportedTypePropertyInfo()
+                {
+                    FullName = nameof(Price.List),
+                    DisplayName = nameof(Price.List),
+                },
+                new ExportedTypePropertyInfo()
+                {
+                    FullName = nameof(Price.CreatedDate),
+                    DisplayName = nameof(Price.CreatedDate),
+                },
+                new ExportedTypePropertyInfo()
+                {
+                    FullName = nameof(Price.EndDate),
+                    DisplayName = nameof(Price.EndDate),
+                },
             };
+            var dataQuery = new PricelistExportDataQuery() { IncludedProperties = propertyInfos };
+            var exportedDataRequest = CreatExportDataRequest(dataQuery);
 
             //Act
-            var filteredPricesString = SerializeAndRead(metadata, prices);
+            var filteredPricesString = SerializeAndRead(exportedDataRequest, prices);
 
             //Assets
             Assert.Equal("Id,PricelistId,List,CreatedDate,EndDate\r\nP1,1,25,10/20/2020 00:00:00,\r\nP2,1,26,01/01/0001 00:00:00,10/20/2020 00:00:00\r\n", filteredPricesString);
@@ -106,25 +106,24 @@ namespace VirtoCommerce.ExportModule.Tests
                 },
             };
 
-            var metadata = new ExportedTypeMetadata()
+            var propertyInfos = new[]
             {
-                PropertyInfos = new[]
+                new ExportedTypePropertyInfo()
                 {
-                    new ExportedTypePropertyInfo()
-                    {
-                        FullName = nameof(Price.Id),
-                        DisplayName = $"{nameof(Price)}.{nameof(Price.Id)}",
-                    },
-                    new ExportedTypePropertyInfo()
-                    {
-                        FullName = nameof(Price.PricelistId),
-                        DisplayName = $"{nameof(Price)}.{nameof(Price.PricelistId)}",
-                    },
-                }
+                    FullName = nameof(Price.Id),
+                    DisplayName = $"{nameof(Price)}.{nameof(Price.Id)}",
+                },
+                new ExportedTypePropertyInfo()
+                {
+                    FullName = nameof(Price.PricelistId),
+                    DisplayName = $"{nameof(Price)}.{nameof(Price.PricelistId)}",
+                },
             };
+            var dataQuery = new PricelistExportDataQuery() { IncludedProperties = propertyInfos };
+            var exportedDataRequest = CreatExportDataRequest(dataQuery);
 
             //Act
-            var filteredPricesString = SerializeAndRead(metadata, prices);
+            var filteredPricesString = SerializeAndRead(exportedDataRequest, prices);
 
             //Assets
             Assert.Equal("Price.Id,Price.PricelistId\r\nP1,1\r\nP2,1\r\n", filteredPricesString);
@@ -156,40 +155,39 @@ namespace VirtoCommerce.ExportModule.Tests
                 },
             };
 
-            var metadata = new ExportedTypeMetadata()
+            var propertyInfos = new[]
             {
-                PropertyInfos = new[]
+                new ExportedTypePropertyInfo()
                 {
-                    new ExportedTypePropertyInfo()
-                    {
-                        FullName = nameof(PricelistAssignment.Id),
-                        DisplayName = nameof(PricelistAssignment.Id),
-                    },
-                    new ExportedTypePropertyInfo()
-                    {
-                        FullName = nameof(PricelistAssignment.Description),
-                        DisplayName = nameof(PricelistAssignment.Description),
-                    },
-                    new ExportedTypePropertyInfo()
-                    {
-                        FullName = nameof(PricelistAssignment.EndDate),
-                        DisplayName = nameof(PricelistAssignment.EndDate),
-                    },
-                    new ExportedTypePropertyInfo()
-                    {
-                        FullName = nameof(PricelistAssignment.Priority),
-                        DisplayName = nameof(PricelistAssignment.Priority),
-                    },
-                    new ExportedTypePropertyInfo()
-                    {
-                        FullName = nameof(PricelistAssignment.ConditionExpression),
-                        DisplayName = nameof(PricelistAssignment.ConditionExpression),
-                    },
-                }
+                    FullName = nameof(PricelistAssignment.Id),
+                    DisplayName = nameof(PricelistAssignment.Id),
+                },
+                new ExportedTypePropertyInfo()
+                {
+                    FullName = nameof(PricelistAssignment.Description),
+                    DisplayName = nameof(PricelistAssignment.Description),
+                },
+                new ExportedTypePropertyInfo()
+                {
+                    FullName = nameof(PricelistAssignment.EndDate),
+                    DisplayName = nameof(PricelistAssignment.EndDate),
+                },
+                new ExportedTypePropertyInfo()
+                {
+                    FullName = nameof(PricelistAssignment.Priority),
+                    DisplayName = nameof(PricelistAssignment.Priority),
+                },
+                new ExportedTypePropertyInfo()
+                {
+                    FullName = nameof(PricelistAssignment.ConditionExpression),
+                    DisplayName = nameof(PricelistAssignment.ConditionExpression),
+                },
             };
+            var dataQuery = new PricelistExportDataQuery() { IncludedProperties = propertyInfos };
+            var exportedDataRequest = CreatExportDataRequest(dataQuery);
 
             //Act
-            var filteredPricesString = SerializeAndRead(metadata, assignments);
+            var filteredPricesString = SerializeAndRead(exportedDataRequest, assignments);
 
             //Assets
             Assert.Equal("Id,Description,EndDate,Priority,ConditionExpression\r\nPA1,PA1 Description,,1,\r\nPA2,PA2 Description,10/20/2020 00:00:00,0,<expression/>\r\n", filteredPricesString);
@@ -202,30 +200,29 @@ namespace VirtoCommerce.ExportModule.Tests
         {
             var pricelists = CreatePricelists();
 
-            var metadata = new ExportedTypeMetadata()
+            var propertyInfos = new[]
             {
-                PropertyInfos = new[]
+                new ExportedTypePropertyInfo()
                 {
-                    new ExportedTypePropertyInfo()
-                    {
-                        FullName = nameof(Pricelist.Id),
-                        DisplayName = nameof(Pricelist.Id),
-                    },
-                    new ExportedTypePropertyInfo()
-                    {
-                        FullName = nameof(Pricelist.Name),
-                        DisplayName = nameof(Pricelist.Name),
-                    },
-                    new ExportedTypePropertyInfo()
-                    {
-                        FullName = nameof(Pricelist.Currency),
-                        DisplayName = nameof(Pricelist.Currency),
-                    },
-                }
+                    FullName = nameof(Pricelist.Id),
+                    DisplayName = nameof(Pricelist.Id),
+                },
+                new ExportedTypePropertyInfo()
+                {
+                    FullName = nameof(Pricelist.Name),
+                    DisplayName = nameof(Pricelist.Name),
+                },
+                new ExportedTypePropertyInfo()
+                {
+                    FullName = nameof(Pricelist.Currency),
+                    DisplayName = nameof(Pricelist.Currency),
+                },
             };
+            var dataQuery = new PricelistExportDataQuery() { IncludedProperties = propertyInfos };
+            var exportedDataRequest = CreatExportDataRequest(dataQuery);
 
             //Act
-            var filteredPricesString = SerializeAndRead(metadata, pricelists);
+            var filteredPricesString = SerializeAndRead(exportedDataRequest, pricelists);
 
             //Assets
             Assert.Equal("Id,Name,Currency\r\nPL1,Pricelist 1,USD\r\nPL2,Pricelist 2,EUR\r\n", filteredPricesString);
@@ -238,45 +235,44 @@ namespace VirtoCommerce.ExportModule.Tests
         {
             var pricelists = CreatePricelists();
 
-            var metadata = new ExportedTypeMetadata()
+            var propertyInfos = new[]
             {
-                PropertyInfos = new[]
+                new ExportedTypePropertyInfo()
                 {
-                    new ExportedTypePropertyInfo()
-                    {
-                        FullName = nameof(Pricelist.Id),
-                        DisplayName = nameof(Pricelist.Id),
-                    },
-                    new ExportedTypePropertyInfo()
-                    {
-                        FullName = nameof(Pricelist.Name),
-                        DisplayName = nameof(Pricelist.Name),
-                    },
-                    new ExportedTypePropertyInfo()
-                    {
-                        FullName = nameof(Pricelist.Currency),
-                        DisplayName = nameof(Pricelist.Currency),
-                    },
-                    new ExportedTypePropertyInfo()
-                    {
-                        FullName = $"{nameof(Pricelist.ActiveAssignment)}.{nameof(PricelistAssignment.Id)}",
-                        DisplayName = $"{nameof(Pricelist.ActiveAssignment)}.{nameof(PricelistAssignment.Id)}",
-                    },
-                    new ExportedTypePropertyInfo()
-                    {
-                        FullName = $"{nameof(Pricelist.ActiveAssignment)}.{nameof(PricelistAssignment.Name)}",
-                        DisplayName = $"{nameof(Pricelist.ActiveAssignment)}.{nameof(PricelistAssignment.Name)}",
-                    },
-                    new ExportedTypePropertyInfo()
-                    {
-                        FullName = $"{nameof(Pricelist.ActiveAssignment)}.{nameof(PricelistAssignment.Priority)}",
-                        DisplayName = $"{nameof(Pricelist.ActiveAssignment)}.{nameof(PricelistAssignment.Priority)}",
-                    },
-                }
+                    FullName = nameof(Pricelist.Id),
+                    DisplayName = nameof(Pricelist.Id),
+                },
+                new ExportedTypePropertyInfo()
+                {
+                    FullName = nameof(Pricelist.Name),
+                    DisplayName = nameof(Pricelist.Name),
+                },
+                new ExportedTypePropertyInfo()
+                {
+                    FullName = nameof(Pricelist.Currency),
+                    DisplayName = nameof(Pricelist.Currency),
+                },
+                new ExportedTypePropertyInfo()
+                {
+                    FullName = $"{nameof(Pricelist.ActiveAssignment)}.{nameof(PricelistAssignment.Id)}",
+                    DisplayName = $"{nameof(Pricelist.ActiveAssignment)}.{nameof(PricelistAssignment.Id)}",
+                },
+                new ExportedTypePropertyInfo()
+                {
+                    FullName = $"{nameof(Pricelist.ActiveAssignment)}.{nameof(PricelistAssignment.Name)}",
+                    DisplayName = $"{nameof(Pricelist.ActiveAssignment)}.{nameof(PricelistAssignment.Name)}",
+                },
+                new ExportedTypePropertyInfo()
+                {
+                    FullName = $"{nameof(Pricelist.ActiveAssignment)}.{nameof(PricelistAssignment.Priority)}",
+                    DisplayName = $"{nameof(Pricelist.ActiveAssignment)}.{nameof(PricelistAssignment.Priority)}",
+                },
             };
+            var dataQuery = new PricelistExportDataQuery() { IncludedProperties = propertyInfos };
+            var exportedDataRequest = CreatExportDataRequest(dataQuery);
 
             //Act
-            var filteredPricesString = SerializeAndRead(metadata, pricelists);
+            var filteredPricesString = SerializeAndRead(exportedDataRequest, pricelists);
 
             //Assets
             Assert.Equal("Id,Name,Currency,ActiveAssignment.Id,ActiveAssignment.Name,ActiveAssignment.Priority\r\nPL1,Pricelist 1,USD,PA1_1,PA1_1 Name,1\r\nPL2,Pricelist 2,EUR,PA2_1,PA2_1 Name,11\r\n", filteredPricesString);
@@ -289,40 +285,39 @@ namespace VirtoCommerce.ExportModule.Tests
         {
             var pricelists = CreatePricelists();
 
-            var metadata = new ExportedTypeMetadata()
+            var propertyInfos = new[]
             {
-                PropertyInfos = new[]
+                new ExportedTypePropertyInfo()
                 {
-                    new ExportedTypePropertyInfo()
-                    {
-                        FullName = nameof(Pricelist.Id),
-                        DisplayName = nameof(Pricelist.Id),
-                    },
-                    new ExportedTypePropertyInfo()
-                    {
-                        FullName = nameof(Pricelist.Name),
-                        DisplayName = nameof(Pricelist.Name),
-                    },
-                    new ExportedTypePropertyInfo()
-                    {
-                        FullName = nameof(Pricelist.Currency),
-                        DisplayName = nameof(Pricelist.Currency),
-                    },
-                    new ExportedTypePropertyInfo()
-                    {
-                        FullName = $"{nameof(Pricelist.Prices)}.{nameof(Price.Id)}",
-                        DisplayName = $"{nameof(Pricelist.Prices)}.{nameof(Price.Id)}",
-                    },
-                    new ExportedTypePropertyInfo()
-                    {
-                        FullName = $"{nameof(Pricelist.Prices)}.{nameof(Price.List)}",
-                        DisplayName = $"{nameof(Pricelist.Prices)}.{nameof(Price.List)}",
-                    },
-                }
+                    FullName = nameof(Pricelist.Id),
+                    DisplayName = nameof(Pricelist.Id),
+                },
+                new ExportedTypePropertyInfo()
+                {
+                    FullName = nameof(Pricelist.Name),
+                    DisplayName = nameof(Pricelist.Name),
+                },
+                new ExportedTypePropertyInfo()
+                {
+                    FullName = nameof(Pricelist.Currency),
+                    DisplayName = nameof(Pricelist.Currency),
+                },
+                new ExportedTypePropertyInfo()
+                {
+                    FullName = $"{nameof(Pricelist.Prices)}.{nameof(Price.Id)}",
+                    DisplayName = $"{nameof(Pricelist.Prices)}.{nameof(Price.Id)}",
+                },
+                new ExportedTypePropertyInfo()
+                {
+                    FullName = $"{nameof(Pricelist.Prices)}.{nameof(Price.List)}",
+                    DisplayName = $"{nameof(Pricelist.Prices)}.{nameof(Price.List)}",
+                },
             };
+            var dataQuery = new PricelistExportDataQuery() { IncludedProperties = propertyInfos };
+            var exportedDataRequest = CreatExportDataRequest(dataQuery);
 
             //Act
-            var filteredPricesString = SerializeAndRead(metadata, pricelists);
+            var filteredPricesString = SerializeAndRead(exportedDataRequest, pricelists);
 
             //Assets
             Assert.Equal("Id,Name,Currency\r\nPL1,Pricelist 1,USD\r\nPL2,Pricelist 2,EUR\r\n", filteredPricesString);
@@ -336,58 +331,58 @@ namespace VirtoCommerce.ExportModule.Tests
         {
             var pricelists = CreatePricelists();
 
-            var metadata = new ExportedTypeMetadata()
+            var propertyInfos = new[]
             {
-                PropertyInfos = new[]
+                new ExportedTypePropertyInfo()
                 {
-                    new ExportedTypePropertyInfo()
-                    {
-                        FullName = nameof(Pricelist.Id),
-                        DisplayName = nameof(Pricelist.Id),
-                    },
-                    new ExportedTypePropertyInfo()
-                    {
-                        FullName = nameof(Pricelist.Name),
-                        DisplayName = nameof(Pricelist.Name),
-                    },
-                    new ExportedTypePropertyInfo()
-                    {
-                        FullName = nameof(Pricelist.Currency),
-                        DisplayName = nameof(Pricelist.Name),
-                    },
-                    new ExportedTypePropertyInfo()
-                    {
-                        FullName = $"{nameof(Pricelist.ActiveAssignment)}.{nameof(PricelistAssignment.Id)}",
-                        DisplayName = $"{nameof(Pricelist.ActiveAssignment)}.{nameof(PricelistAssignment.Id)}",
-                    },
-                    new ExportedTypePropertyInfo()
-                    {
-                        FullName = $"{nameof(Pricelist.ActiveAssignment)}.{nameof(PricelistAssignment.Name)}",
-                        DisplayName = $"{nameof(Pricelist.ActiveAssignment)}.{nameof(PricelistAssignment.Name)}",
-                    },
-                    new ExportedTypePropertyInfo()
-                    {
-                        FullName = $"{nameof(Pricelist.ActiveAssignment)}.{nameof(PricelistAssignment.Priority)}",
-                        DisplayName = $"{nameof(Pricelist.ActiveAssignment)}.{nameof(PricelistAssignment.Priority)}",
-                    },
-                    new ExportedTypePropertyInfo()
-                    {
-                        FullName = $"{nameof(Pricelist.Prices)}.{nameof(Price.Id)}",
-                        DisplayName = $"{nameof(Pricelist.Prices)}.{nameof(Price.Id)}",
-                    },
-                    new ExportedTypePropertyInfo()
-                    {
-                        FullName = $"{nameof(Pricelist.Prices)}.{nameof(Price.List)}",
-                        DisplayName = $"{nameof(Pricelist.Prices)}.{nameof(Price.List)}",
-                    },
-                }
+                    FullName = nameof(Pricelist.Id),
+                    DisplayName = nameof(Pricelist.Id),
+                },
+                new ExportedTypePropertyInfo()
+                {
+                    FullName = nameof(Pricelist.Name),
+                    DisplayName = nameof(Pricelist.Name),
+                },
+                new ExportedTypePropertyInfo()
+                {
+                    FullName = nameof(Pricelist.Currency),
+                    DisplayName = nameof(Pricelist.Name),
+                },
+                new ExportedTypePropertyInfo()
+                {
+                    FullName = $"{nameof(Pricelist.ActiveAssignment)}.{nameof(PricelistAssignment.Id)}",
+                    DisplayName = $"{nameof(Pricelist.ActiveAssignment)}.{nameof(PricelistAssignment.Id)}",
+                },
+                new ExportedTypePropertyInfo()
+                {
+                    FullName = $"{nameof(Pricelist.ActiveAssignment)}.{nameof(PricelistAssignment.Name)}",
+                    DisplayName = $"{nameof(Pricelist.ActiveAssignment)}.{nameof(PricelistAssignment.Name)}",
+                },
+                new ExportedTypePropertyInfo()
+                {
+                    FullName = $"{nameof(Pricelist.ActiveAssignment)}.{nameof(PricelistAssignment.Priority)}",
+                    DisplayName = $"{nameof(Pricelist.ActiveAssignment)}.{nameof(PricelistAssignment.Priority)}",
+                },
+                new ExportedTypePropertyInfo()
+                {
+                    FullName = $"{nameof(Pricelist.Prices)}.{nameof(Price.Id)}",
+                    DisplayName = $"{nameof(Pricelist.Prices)}.{nameof(Price.Id)}",
+                },
+                new ExportedTypePropertyInfo()
+                {
+                    FullName = $"{nameof(Pricelist.Prices)}.{nameof(Price.List)}",
+                    DisplayName = $"{nameof(Pricelist.Prices)}.{nameof(Price.List)}",
+                },
             };
+            var dataQuery = new PricelistExportDataQuery() { IncludedProperties = propertyInfos };
 
             var configuration = new Configuration(cultureInfo: CultureInfo.InvariantCulture);
             configuration.RegisterClassMap<PricelistTestMapping>();
 
+            var exportDataRequest = CreatExportDataRequest(dataQuery, new CsvProviderConfiguration() { Configuration = configuration });
+
             //Act
-            var filteredPricesString = SerializeAndRead(metadata, pricelists, configuration);
+            var filteredPricesString = SerializeAndRead(exportDataRequest, pricelists);
 
             //Assets
             Assert.Equal("Id,Name,Currency,ActiveAssignment.Id,ActiveAssignment.Name\r\nPL1,Pricelist 1,USD,PA1_1,PA1_1 Name\r\nPL2,Pricelist 2,EUR,PA2_1,PA2_1 Name\r\n", filteredPricesString);
@@ -399,56 +394,55 @@ namespace VirtoCommerce.ExportModule.Tests
         public Task ExportPricelists_SameTypePropertiesMapping()
         {
             var pricelists = CreatePricelists();
-
-            var metadata = new ExportedTypeMetadata()
+            var propertyInfos = new[]
             {
-                PropertyInfos = new[]
+                new ExportedTypePropertyInfo()
                 {
-                    new ExportedTypePropertyInfo()
-                    {
-                        FullName = nameof(Pricelist.Id),
-                        DisplayName = nameof(Pricelist.Id),
-                    },
-                    new ExportedTypePropertyInfo()
-                    {
-                        FullName = nameof(Pricelist.Name),
-                        DisplayName = nameof(Pricelist.Name),
-                    },
-                    new ExportedTypePropertyInfo()
-                    {
-                        FullName = $"{nameof(Pricelist.ActiveAssignment)}.{nameof(PricelistAssignment.Id)}",
-                        DisplayName = $"{nameof(Pricelist.ActiveAssignment)}.{nameof(PricelistAssignment.Id)}",
-                    },
-                    new ExportedTypePropertyInfo()
-                    {
-                        FullName = $"{nameof(Pricelist.ActiveAssignment)}.{nameof(PricelistAssignment.Name)}",
-                        DisplayName = $"{nameof(Pricelist.ActiveAssignment)}.{nameof(PricelistAssignment.Name)}",
-                    },
-                    new ExportedTypePropertyInfo()
-                    {
-                        FullName = $"{nameof(Pricelist.ActiveAssignment)}.{nameof(PricelistAssignment.Priority)}",
-                        DisplayName = $"{nameof(Pricelist.ActiveAssignment)}.{nameof(PricelistAssignment.Priority)}",
-                    },
-                    new ExportedTypePropertyInfo()
-                    {
-                        FullName = $"{nameof(Pricelist.InactiveAssignment)}.{nameof(PricelistAssignment.Id)}",
-                        DisplayName = $"{nameof(Pricelist.InactiveAssignment)}.{nameof(PricelistAssignment.Id)}",
-                    },
-                    new ExportedTypePropertyInfo()
-                    {
-                        FullName = $"{nameof(Pricelist.InactiveAssignment)}.{nameof(PricelistAssignment.Name)}",
-                        DisplayName = $"{nameof(Pricelist.InactiveAssignment)}.{nameof(PricelistAssignment.Name)}",
-                    },
-                    new ExportedTypePropertyInfo()
-                    {
-                        FullName = $"{nameof(Pricelist.InactiveAssignment)}.{nameof(PricelistAssignment.Priority)}",
-                        DisplayName = $"{nameof(Pricelist.InactiveAssignment)}.{nameof(PricelistAssignment.Priority)}",
-                    },
-                }
+                    FullName = nameof(Pricelist.Id),
+                    DisplayName = nameof(Pricelist.Id),
+                },
+                new ExportedTypePropertyInfo()
+                {
+                    FullName = nameof(Pricelist.Name),
+                    DisplayName = nameof(Pricelist.Name),
+                },
+                new ExportedTypePropertyInfo()
+                {
+                    FullName = $"{nameof(Pricelist.ActiveAssignment)}.{nameof(PricelistAssignment.Id)}",
+                    DisplayName = $"{nameof(Pricelist.ActiveAssignment)}.{nameof(PricelistAssignment.Id)}",
+                },
+                new ExportedTypePropertyInfo()
+                {
+                    FullName = $"{nameof(Pricelist.ActiveAssignment)}.{nameof(PricelistAssignment.Name)}",
+                    DisplayName = $"{nameof(Pricelist.ActiveAssignment)}.{nameof(PricelistAssignment.Name)}",
+                },
+                new ExportedTypePropertyInfo()
+                {
+                    FullName = $"{nameof(Pricelist.ActiveAssignment)}.{nameof(PricelistAssignment.Priority)}",
+                    DisplayName = $"{nameof(Pricelist.ActiveAssignment)}.{nameof(PricelistAssignment.Priority)}",
+                },
+                new ExportedTypePropertyInfo()
+                {
+                    FullName = $"{nameof(Pricelist.InactiveAssignment)}.{nameof(PricelistAssignment.Id)}",
+                    DisplayName = $"{nameof(Pricelist.InactiveAssignment)}.{nameof(PricelistAssignment.Id)}",
+                },
+                new ExportedTypePropertyInfo()
+                {
+                    FullName = $"{nameof(Pricelist.InactiveAssignment)}.{nameof(PricelistAssignment.Name)}",
+                    DisplayName = $"{nameof(Pricelist.InactiveAssignment)}.{nameof(PricelistAssignment.Name)}",
+                },
+                new ExportedTypePropertyInfo()
+                {
+                    FullName = $"{nameof(Pricelist.InactiveAssignment)}.{nameof(PricelistAssignment.Priority)}",
+                    DisplayName = $"{nameof(Pricelist.InactiveAssignment)}.{nameof(PricelistAssignment.Priority)}",
+                },
             };
+            var dataQuery = new PricelistExportDataQuery() { IncludedProperties = propertyInfos };
+
+            var exportDataRequest = CreatExportDataRequest(dataQuery);
 
             //Act
-            var filteredPricesString = SerializeAndRead(metadata, pricelists);
+            var filteredPricesString = SerializeAndRead(exportDataRequest, pricelists);
 
             //Assets
             Assert.Equal("Id,Name,ActiveAssignment.Id,ActiveAssignment.Name,ActiveAssignment.Priority,InactiveAssignment.Id,InactiveAssignment.Name,InactiveAssignment.Priority\r\nPL1,Pricelist 1,PA1_1,PA1_1 Name,1,PA1_2,PA1_2 Name,2\r\nPL2,Pricelist 2,PA2_1,PA2_1 Name,11,PA2_2,PA2_2 Name,12\r\n", filteredPricesString);
@@ -457,14 +451,14 @@ namespace VirtoCommerce.ExportModule.Tests
 
         }
 
-        private string SerializeAndRead<T>(ExportedTypeMetadata metadata, IEnumerable<T> items, Configuration configuration = null) where T : IExportable
+        private string SerializeAndRead<T>(ExportDataRequest exportDataRequest, IEnumerable<T> items) where T : IExportable
         {
-            var csvConfiguration = new CsvProviderConfiguration() { Configuration = configuration ?? new Configuration(cultureInfo: CultureInfo.InvariantCulture) };
+            exportDataRequest.ProviderConfig = exportDataRequest.ProviderConfig ?? new CsvProviderConfiguration() { };
 
             using (var stream = new MemoryStream())
             using (var writer = new StreamWriter(stream, Encoding.UTF8) { AutoFlush = true })
             {
-                using (var csvExportProvider = new CsvExportProvider(csvConfiguration, metadata.PropertyInfos))
+                using (var csvExportProvider = new CsvExportProvider(exportDataRequest))
                 {
                     foreach (var item in items)
                     {
@@ -582,6 +576,18 @@ namespace VirtoCommerce.ExportModule.Tests
                 pricelist.ActiveAssignment = pricelist?.Assignments?.FirstOrDefault();
                 pricelist.InactiveAssignment = pricelist?.Assignments?.Skip(1).First();
             }
+
+            return result;
+        }
+
+        private ExportDataRequest CreatExportDataRequest(ExportDataQuery dataQuery, IExportProviderConfiguration providerConfig = null)
+        {
+            var result = new ExportDataRequest()
+            {
+                ProviderName = nameof(CsvExportProvider),
+                DataQuery = dataQuery,
+                ProviderConfig = providerConfig,
+            };
 
             return result;
         }

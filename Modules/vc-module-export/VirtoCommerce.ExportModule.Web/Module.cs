@@ -23,8 +23,8 @@ namespace VirtoCommerce.ExportModule.Web
             serviceCollection.AddSingleton<IKnownExportTypesRegistrar>(serviceProvider => serviceProvider.GetRequiredService<KnownExportTypesService>());
             serviceCollection.AddSingleton<IKnownExportTypesResolver>(serviceProvider => serviceProvider.GetRequiredService<KnownExportTypesService>());
 
-            serviceCollection.AddTransient<Func<IExportProviderConfiguration, ExportedTypePropertyInfo[], IExportProvider>>(serviceProvider => (config, includedColumns) => new JsonExportProvider(config, includedColumns));
-            serviceCollection.AddTransient<Func<IExportProviderConfiguration, ExportedTypePropertyInfo[], IExportProvider>>(serviceProvider => (config, includedColumns) => new CsvExportProvider(config, includedColumns));
+            serviceCollection.AddTransient<Func<ExportDataRequest, IExportProvider>>(serviceProvider => (request) => new JsonExportProvider(request));
+            serviceCollection.AddTransient<Func<ExportDataRequest, IExportProvider>>(serviceProvider => (request) => new CsvExportProvider(request));
             serviceCollection.AddTransient<IExportProviderFactory, ExportProviderFactory>();
 
             serviceCollection.AddTransient<IDataExporter, DataExporter>();

@@ -24,10 +24,15 @@ namespace VirtoCommerce.ExportModule.Data.Services
 
         private CsvWriter _csvWriter;
 
-        public CsvExportProvider(IExportProviderConfiguration exportProviderConfiguration, ExportedTypePropertyInfo[] includedProperties)
+        public CsvExportProvider(ExportDataRequest exportDataRequest)
         {
-            Configuration = exportProviderConfiguration;
-            IncludedProperties = includedProperties;
+            if (exportDataRequest == null)
+            {
+                throw new ArgumentNullException(nameof(exportDataRequest));
+            }
+
+            Configuration = exportDataRequest.ProviderConfig;
+            IncludedProperties = exportDataRequest.DataQuery?.IncludedProperties;
         }
 
         public void WriteRecord(TextWriter writer, IExportable objectToRecord)
