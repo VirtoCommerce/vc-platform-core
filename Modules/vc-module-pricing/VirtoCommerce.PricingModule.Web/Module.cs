@@ -92,6 +92,17 @@ namespace VirtoCommerce.PricingModule.Web
                     datasource.DataQuery = (PricelistAssignmentExportDataQuery)exportDataQuery;
                     return datasource;
                 });
+
+            serviceCollection.AddTransient<PricingFullExportPagedDataSource>();
+            serviceCollection.AddTransient<Func<ExportDataQuery, PricingFullExportPagedDataSource>>(provider =>
+                (exportDataQuery) =>
+                {
+                    var datasource = provider.CreateScope().ServiceProvider.GetRequiredService<PricingFullExportPagedDataSource>();
+                    datasource.DataQuery = (PricingFullExportDataQuery)exportDataQuery;
+                    return datasource;
+                });
+
+
             var requirements = new IAuthorizationRequirement[]
             {
                 new PermissionAuthorizationRequirement(ModuleConstants.Security.Permissions.Export), new PermissionAuthorizationRequirement(ModuleConstants.Security.Permissions.Read)
@@ -107,6 +118,7 @@ namespace VirtoCommerce.PricingModule.Web
                 configure.AddPolicy(typeof(ExportablePricelist).FullName + "ExportDataPolicy", exportPolicy);
                 configure.AddPolicy(typeof(ExportablePrice).FullName + "ExportDataPolicy", exportPolicy);
                 configure.AddPolicy(typeof(ExportablePricelistAssignment).FullName + "ExportDataPolicy", exportPolicy);
+                configure.AddPolicy(typeof(ExportablePricingFull).FullName + "ExportDataPolicy", exportPolicy);
             });
         }
 
@@ -180,6 +192,7 @@ namespace VirtoCommerce.PricingModule.Web
             var priceExportPagedDataSourceFactory = appBuilder.ApplicationServices.GetService<Func<ExportDataQuery, PriceExportPagedDataSource>>();
             var pricelistExportPagedDataSourceFactory = appBuilder.ApplicationServices.GetService<Func<ExportDataQuery, PricelistExportPagedDataSource>>();
             var pricelistAssignmentExportPagedDataSourceFactory = appBuilder.ApplicationServices.GetService<Func<ExportDataQuery, PricelistAssignmentExportPagedDataSource>>();
+            var pricingFullExportPagedDataSourceFactory = appBuilder.ApplicationServices.GetService<Func<ExportDataQuery, PricingFullExportPagedDataSource>>();
 
             registrar.RegisterType(
                  ExportedTypeDefinitionBuilder.Build<ExportablePrice, PriceExportDataQuery>()
@@ -202,15 +215,15 @@ namespace VirtoCommerce.PricingModule.Web
                     .WithTabularDataConverter(new TabularPricelistAssignmentDataConverter())
                     .WithTabularMetadata(typeof(TabularPricelistAssignment).GetPropertyNames()));
 
-            //registrar.RegisterType(
-            //    new ExportedTypeDefinitionBuilder($@"{typeof(ExportablePricelist).FullName}FullData", typeof(ExportablePricelist).Namespace, typeof(PricelistExportDataQuery).Name)
-            //        .WithDataSourceFactory(dataQuery => pricelistExportPagedDataSourceFactory(dataQuery))
-            //        .WithMetadata(typeof(ExportablePricelist).GetPropertyNames(true))
-            //        .ExportedTypeDefinition);
+            registrar.RegisterType(
+                ExportedTypeDefinitionBuilder.Build<ExportablePricingFull, PricingFullExportDataQuery>()
+                    .WithDataSourceFactory(dataQuery => pricingFullExportPagedDataSourceFactory(dataQuery))
+                    .WithMetadata(typeof(ExportablePricingFull).GetNestedPropertyNames(nameof(ExportablePricingFull.Prices), nameof(ExportablePricingFull.Pricelists), nameof(ExportablePricingFull.Assignments))));
 
             AbstractTypeFactory<ExportDataQuery>.RegisterType<PriceExportDataQuery>();
             AbstractTypeFactory<ExportDataQuery>.RegisterType<PricelistAssignmentExportDataQuery>();
             AbstractTypeFactory<ExportDataQuery>.RegisterType<PricelistExportDataQuery>();
+            AbstractTypeFactory<ExportDataQuery>.RegisterType<PricingFullExportDataQuery>();
         }
 
         public void Uninstall()
