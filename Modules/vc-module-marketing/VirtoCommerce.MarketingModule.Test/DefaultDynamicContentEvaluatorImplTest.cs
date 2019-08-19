@@ -3,13 +3,16 @@ using System.Collections.Generic;
 using System.Collections.ObjectModel;
 using Microsoft.Extensions.Logging;
 using Moq;
+using Newtonsoft.Json;
 using VirtoCommerce.CoreModule.Core.Conditions;
 using VirtoCommerce.CoreModule.Core.Conditions.Browse;
 using VirtoCommerce.CoreModule.Core.Conditions.GeoConditions;
 using VirtoCommerce.MarketingModule.Core.Model;
 using VirtoCommerce.MarketingModule.Core.Model.DynamicContent;
+using VirtoCommerce.MarketingModule.Core.Model.Promotions;
 using VirtoCommerce.MarketingModule.Core.Search;
 using VirtoCommerce.MarketingModule.Core.Services;
+using VirtoCommerce.MarketingModule.Data.Promotions;
 using VirtoCommerce.MarketingModule.Data.Repositories;
 using VirtoCommerce.MarketingModule.Data.Services;
 using VirtoCommerce.Platform.Core.Common;
@@ -37,16 +40,10 @@ namespace VirtoCommerce.MarketingModule.Test
             _repositoryMock.Setup(ss => ss.UnitOfWork).Returns(_mockUnitOfWork.Object);
 
             AbstractTypeFactory<IConditionTree>.RegisterType<DynamicContentConditionTree>();
-            AbstractTypeFactory<IConditionTree>.RegisterType<BlockContentCondition>();
-            AbstractTypeFactory<IConditionTree>.RegisterType<ConditionGeoTimeZone>();
-            AbstractTypeFactory<IConditionTree>.RegisterType<ConditionGeoZipCode>();
-            AbstractTypeFactory<IConditionTree>.RegisterType<ConditionStoreSearchedPhrase>();
-            AbstractTypeFactory<IConditionTree>.RegisterType<ConditionAgeIs>();
-            AbstractTypeFactory<IConditionTree>.RegisterType<ConditionGeoCity>();
-            AbstractTypeFactory<IConditionTree>.RegisterType<ConditionGeoCountry>();
-            AbstractTypeFactory<IConditionTree>.RegisterType<ConditionGeoState>();
-            AbstractTypeFactory<IConditionTree>.RegisterType<ConditionLanguageIs>();
-            AbstractTypeFactory<IConditionTree>.RegisterType<UserGroupsContainsCondition>();
+            foreach (var conditionTree in ((IConditionTree)AbstractTypeFactory<DynamicContentConditionTree>.TryCreateInstance()).Traverse(x => x.AvailableChildren))
+            {
+                AbstractTypeFactory<IConditionTree>.RegisterType(conditionTree.GetType(), noThrowIfExists: true);
+            }
         }
 
         [Fact]
@@ -66,10 +63,9 @@ namespace VirtoCommerce.MarketingModule.Test
             {
                 new DynamicContentPublication
                 {
-                    DynamicExpression = GetConditionJson(),
+                    DynamicExpression = JsonConvert.DeserializeObject<DynamicContentConditionTree>(GetConditionJson(), new ConditionJsonConverter(), new RewardJsonConverter()),
                     IsActive = true,
                     ContentItems = new ObservableCollection<DynamicContentItem> { dynamicContentItem },
-                    DynamicContentConditionTree = new DynamicContentConditionTree()
                 }
             };
             _dynamicContentSearchServiceMock.Setup(dcs => dcs.SearchContentPublicationsAsync(It.IsAny<DynamicContentPublicationSearchCriteria>()))
