@@ -49,7 +49,7 @@ namespace VirtoCommerce.ExportModule.Data.Services
                 progressCallback(exportProgress);
 
                 using (var writer = new StreamWriter(stream, Encoding.UTF8, 1024, true) { AutoFlush = true })
-                using (var exportProvider = _exportProviderFactory.CreateProvider(request.ProviderName, request.ProviderConfig, request.DataQuery.IncludedProperties))
+                using (var exportProvider = _exportProviderFactory.CreateProvider(request))
                 {
                     var needTabularData = exportProvider.IsTabular;
 
@@ -76,13 +76,14 @@ namespace VirtoCommerce.ExportModule.Data.Services
                         {
                             try
                             {
-                                var preparedObject = obj.Clone();
+                                var preparedObject = obj.Clone() as IExportable;
 
                                 request.DataQuery.FilterProperties(preparedObject);
 
                                 if (needTabularData)
                                 {
-                                    preparedObject = exportedTypeDefinition.TabularDataConverter.ToTabular(preparedObject);
+                                    preparedObject = (preparedObject as ITabularConvertible)?.ToTabular() ??
+                                        throw new NotSupportedException($"Object should be {nameof(ITabularConvertible)} to be exported using tabular provider.");
                                 }
 
                                 exportProvider.WriteRecord(writer, preparedObject);

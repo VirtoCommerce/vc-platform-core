@@ -7,6 +7,6 @@ namespace VirtoCommerce.ExportModule.Core.Services
     /// </summary>
     public interface IExportProviderFactory
     {
-        IExportProvider CreateProvider(string name, IExportProviderConfiguration config, ExportedTypePropertyInfo[] includedProperties);
+        IExportProvider CreateProvider(ExportDataRequest exportDataRequest);
     }
 }

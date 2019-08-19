@@ -1,6 +1,5 @@
 using System;
 using Newtonsoft.Json;
-using VirtoCommerce.ExportModule.Core.Services;
 
 namespace VirtoCommerce.ExportModule.Core.Model
 {
@@ -35,15 +34,9 @@ namespace VirtoCommerce.ExportModule.Core.Model
         public string ExportDataQueryType { get; set; }
 
         /// <summary>
-        /// Returns <see cref="true"/> if tabular export supported, <see cref="TabularDataConverter"/> is set        
+        /// Returns <see cref="true"/> if tabular export supported, <see cref="TabularMetaData"/> is set .       
         /// </summary>
-        public bool IsTabularExportSupported { get => TabularDataConverter != null; }
-
-        /// <summary>
-        /// Converter for transforming exportable entity to tabular representation
-        /// </summary>
-        [JsonIgnore]
-        public ITabularDataConverter TabularDataConverter { get; set; }
+        public bool IsTabularExportSupported { get => TabularMetaData != null; }
 
         /// <summary>
         /// Factory function to create a data source for this type

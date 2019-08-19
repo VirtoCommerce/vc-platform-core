@@ -1,7 +1,6 @@
 using System;
 using System.Collections.Generic;
 using System.Diagnostics.CodeAnalysis;
-using System.Globalization;
 using System.IO;
 using System.Linq;
 using System.Text;
@@ -14,14 +13,12 @@ using VirtoCommerce.CoreModule.Core.Conditions;
 using VirtoCommerce.ExportModule.Core.Model;
 using VirtoCommerce.ExportModule.Core.Services;
 using VirtoCommerce.ExportModule.Data.Extensions;
-using VirtoCommerce.ExportModule.Data.Model;
 using VirtoCommerce.ExportModule.Data.Services;
 using VirtoCommerce.Platform.Core.Common;
 using VirtoCommerce.PricingModule.Core.Model;
 using VirtoCommerce.PricingModule.Core.Model.Search;
 using VirtoCommerce.PricingModule.Core.Services;
 using VirtoCommerce.PricingModule.Data.ExportImport;
-using VirtoCommerce.PricingModule.Data.ExportImport.Converters;
 using Xunit;
 
 namespace VirtoCommerce.PricingModule.Test
@@ -58,9 +55,8 @@ namespace VirtoCommerce.PricingModule.Test
             var IncludedProperties = metadata.PropertyInfos.Where(x => includedPropertyNames.Contains(x.FullName, StringComparer.OrdinalIgnoreCase)).ToArray();
 
             var exportProviderFactories = new[] {
-                new Func<IExportProviderConfiguration, ExportedTypePropertyInfo[], IExportProvider>((config, includedProperties) => new JsonExportProvider(config, includedProperties)),
+                new Func<ExportDataRequest, IExportProvider>((request) => new JsonExportProvider(request)),
             };
-
 
             var dataExporter = new DataExporter(resolver, new ExportProviderFactory(exportProviderFactories));
 
@@ -129,7 +125,7 @@ namespace VirtoCommerce.PricingModule.Test
                 .WithMetadata(metadata));
 
             var exportProviderFactories = new[] {
-                new Func<IExportProviderConfiguration, ExportedTypePropertyInfo[], IExportProvider>((config, includedProperties) => new JsonExportProvider(config, includedProperties)),
+                new Func<ExportDataRequest, IExportProvider>((request) => new JsonExportProvider(request)),
             };
 
             var dataExporter = new DataExporter(resolver, new ExportProviderFactory(exportProviderFactories));
@@ -200,7 +196,7 @@ namespace VirtoCommerce.PricingModule.Test
                 .WithMetadata(metadata));
 
             var exportProviderFactories = new[] {
-                new Func<IExportProviderConfiguration, ExportedTypePropertyInfo[], IExportProvider>((config, includedProperties) => new JsonExportProvider(config, includedProperties)),
+                new Func<ExportDataRequest, IExportProvider>((request) => new JsonExportProvider(request)),
             };
 
             var dataExporter = new DataExporter(resolver, new ExportProviderFactory(exportProviderFactories));
@@ -274,13 +270,12 @@ namespace VirtoCommerce.PricingModule.Test
                         itemServiceMock.Object,
                         (PriceExportDataQuery)dataQuery))
                 .WithMetadata(metadata)
-                .WithTabularDataConverter(new TabularPriceDataConverter())
                 .WithTabularMetadata(typeof(TabularPrice).GetPropertyNames()));
 
             var exportProviderFactories = new[]
             {
-                new Func<IExportProviderConfiguration, ExportedTypePropertyInfo[], IExportProvider>((config, includedProperties) => new JsonExportProvider(config, includedProperties)),
-                new Func<IExportProviderConfiguration, ExportedTypePropertyInfo[], IExportProvider>((config, includedProperties) => new CsvExportProvider(new CsvProviderConfiguration(){Configuration = new CsvHelper.Configuration.Configuration(cultureInfo: CultureInfo.InvariantCulture) }, includedProperties)),
+                new Func<ExportDataRequest, IExportProvider>((request) => new JsonExportProvider(request)),
+                new Func<ExportDataRequest, IExportProvider>((request) => new CsvExportProvider(request)),
             };
 
             var includedPropertyNames = new string[] { "Currency", "ProductId" };
