@@ -47,10 +47,8 @@ namespace VirtoCommerce.PricingModule.Test
                     dataQuery => new PriceExportPagedDataSource(
                         searchServiceMock.Object,
                         priceServiceMock.Object,
-                        itemServiceMock.Object)
-                    {
-                        DataQuery = (PriceExportDataQuery)dataQuery
-                    })
+                        itemServiceMock.Object,
+                        (PriceExportDataQuery)dataQuery))
                 .WithMetadata(metadata));
 
             var includedPropertyNames = new string[] { "Currency", "ProductId", "Sale", "List", "MinQuantity", "StartDate", "EndDate", "EffectiveValue" };
@@ -122,10 +120,8 @@ namespace VirtoCommerce.PricingModule.Test
                 .WithDataSourceFactory(
                     dataQuery => new PricelistExportPagedDataSource(
                         searchServiceMock.Object,
-                        priceServiceMock.Object)
-                    {
-                        DataQuery = (PricelistExportDataQuery)dataQuery
-                    })
+                        priceServiceMock.Object,
+                        (PricelistExportDataQuery)dataQuery))
                 .WithMetadata(metadata));
 
             var exportProviderFactories = new[] {
@@ -195,10 +191,8 @@ namespace VirtoCommerce.PricingModule.Test
                     dataQuery => new PricelistAssignmentExportPagedDataSource(
                         searchServiceMock.Object,
                         priceServiceMock.Object,
-                        catalogServiceMock.Object)
-                    {
-                        DataQuery = (PricelistAssignmentExportDataQuery)dataQuery
-                    })
+                        catalogServiceMock.Object,
+                        (PricelistAssignmentExportDataQuery)dataQuery))
                 .WithMetadata(metadata));
 
             var exportProviderFactories = new[] {
@@ -273,10 +267,8 @@ namespace VirtoCommerce.PricingModule.Test
                     dataQuery => new PriceExportPagedDataSource(
                         searchServiceMock.Object,
                         priceServiceMock.Object,
-                        itemServiceMock.Object)
-                    {
-                        DataQuery = (PriceExportDataQuery)dataQuery
-                    })
+                        itemServiceMock.Object,
+                        (PriceExportDataQuery)dataQuery))
                 .WithMetadata(metadata)
                 .WithTabularMetadata(typeof(TabularPrice).GetPropertyNames()));
 
