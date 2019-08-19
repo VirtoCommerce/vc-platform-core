@@ -38,8 +38,7 @@ angular.module('virtoCommerce.exportModule')
                             exportTypeName: selectedType.typeName,
                             dataQuery: {
                                 exportTypeName: selectedType.exportDataQueryType,
-                                isAllSelected: true,
-                                take: 10000
+                                isAllSelected: true
                             }
                         },
                         selectedType:selectedType

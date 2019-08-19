@@ -23,7 +23,6 @@ angular.module('virtoCommerce.exportModule')
 
                     if (blade.isExportedTypeSelected) {
                         getKnownTypes();
-                        blade.dataSelected = blade.totalItemsCount || 0;
                     }
 
                 }
@@ -72,7 +71,7 @@ angular.module('virtoCommerce.exportModule')
             }
         }
 
-        function getDataTotalCount() {
+        function getDataTotalCount(fnSuccess) {
             var dataQuery = {
                 exportTypeName: blade.exportDataRequest.dataQuery.exportTypeName,
                 includedProperties: [],
@@ -87,14 +86,13 @@ angular.module('virtoCommerce.exportModule')
                 }
                 , function (data) {
                     blade.dataTotal = data.totalCount;
+                    if (fnSuccess) fnSuccess(data);
                 });
         }
 
-        function getDataSelectedCount() {
+        function getDataSelectedCount(fnSuccess) {
             var dataQuery = angular.copy(blade.exportDataRequest.dataQuery);
             dataQuery.includedProperties = [];
-            dataQuery.skip = 0;
-            dataQuery.take = 0;
 
             exportApi.getData(
             {
@@ -103,6 +101,7 @@ angular.module('virtoCommerce.exportModule')
             }
             , function (data) {
                 blade.dataSelected = data.totalCount;
+                if (fnSuccess) fnSuccess(data);
             });
         }
 
@@ -119,8 +118,6 @@ angular.module('virtoCommerce.exportModule')
             }
 
             blade.exportDataRequest.providerName = blade.selectedProvider.id;
-            blade.exportDataRequest.dataQuery.skip = undefined;
-            blade.exportDataRequest.dataQuery.take = undefined;
             blade.isExporting = true;
 
             var progressBlade = {
@@ -156,8 +153,12 @@ angular.module('virtoCommerce.exportModule')
                         blade.selectedType = selectedTypeData.selectedType;
                         resetPropertyInfo(); // Property set changed due to changing export type
                         fillProviders(); // Refill providers combo for new type
-                        getDataTotalCount(); // Recalc total available records
-                        blade.dataSelected = blade.dataTotal; // Drop data selection (selected all immediately after exported type selection)
+                        getDataTotalCount(
+                            function (data) {
+                                blade.dataSelected = data.totalCount; // Drop data selection (selected all immediately after exported type selection)
+                            }
+                            ); // Recalc total available records
+
                     }
                 }
             };
