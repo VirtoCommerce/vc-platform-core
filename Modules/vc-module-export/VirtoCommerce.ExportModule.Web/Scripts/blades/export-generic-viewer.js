@@ -41,9 +41,20 @@ angular.module('virtoCommerce.exportModule')
 
             angular.extend(blade.exportDataRequest.dataQuery, buildDataQuery());
             var dataQuery = blade.exportDataRequest.dataQuery;
+            var pagedDataQuery = {
+                skip: ($scope.pageSettings.currentPage - 1) * $scope.pageSettings.itemsPerPageCount,
+                take: $scope.pageSettings.itemsPerPageCount
+            }
+            var exportDataRequest = {
+                dataQuery: pagedDataQuery,
+                exportTypeName: blade.exportDataRequest.exportTypeName
+            }
+            delete dataQuery.skip;
+            delete dataQuery.take;
+            angular.extend(pagedDataQuery, dataQuery);
 
             exportModuleApi.getData(
-                blade.exportDataRequest,
+                exportDataRequest,
                 function (data) {
                     blade.isLoading = false;
                     $scope.pageSettings.totalItems = data.totalCount;
@@ -52,13 +63,13 @@ angular.module('virtoCommerce.exportModule')
 
                     $timeout(function() {
                         if ($scope.gridApi) {
-                            if (dataQuery.objectIds && dataQuery.objectIds.length) {
-                                _.each(dataQuery.objectIds, function(objectId) {
+                            if (pagedDataQuery.objectIds && pagedDataQuery.objectIds.length) {
+                                _.each(pagedDataQuery.objectIds, function (objectId) {
                                     var dataItem = _.findWhere($scope.items, {id: objectId});
                                     $scope.gridApi.selection.selectRow(dataItem);
                                 });
                             } 
-                            else if (dataQuery.isAllSelected) {
+                            else if (pagedDataQuery.isAllSelected) {
                                 $scope.gridApi.selection.selectAllRows();
                             } 
                         }
@@ -110,9 +121,7 @@ angular.module('virtoCommerce.exportModule')
             var dataQuery = {
                 exportTypeName: blade.exportDataRequest.dataQuery.exportTypeName,
                 includedProperties: blade.exportDataRequest.dataQuery.includedProperties,
-                sort: uiGridHelper.getSortExpression($scope),
-                skip: ($scope.pageSettings.currentPage - 1) * $scope.pageSettings.itemsPerPageCount,
-                take: $scope.pageSettings.itemsPerPageCount,
+                sort: uiGridHelper.getSortExpression($scope)
             };
             return dataQuery;
         }
@@ -178,6 +187,13 @@ angular.module('virtoCommerce.exportModule')
 
         if ($scope.exportSearchFilterId) {
             filter.current = _.findWhere($scope.exportSearchFilters, { id: $scope.exportSearchFilterId });
+        }
+
+        if (blade.exportDataRequest.dataQuery) {
+            if (!filter.current) {
+                filter.current = {};
+            }
+            angular.extend(filter.current, blade.exportDataRequest.dataQuery);
         }
 
         filter.change = function () {
@@ -279,7 +295,6 @@ angular.module('virtoCommerce.exportModule')
     
         $scope.saveChanges = function () {
             var dataQuery = buildDataQuery();
-            var selectedItemsCount = $scope.pageSettings.totalItems;
             var isAllSelected = $scope.gridApi.selection.getSelectAllState();
             var selectedIds = _.map($scope.gridApi.selection.getSelectedRows(), function(item) { return item.id; });
 
@@ -289,11 +304,10 @@ angular.module('virtoCommerce.exportModule')
                 || (!isAllSelected && selectedIds.length) 
                 || (selectedIds.length == 0)) {
                 dataQuery.objectIds = selectedIds;
-                selectedItemsCount = selectedIds.length;
             }
 
             if (blade.onCompleted) {
-                blade.onCompleted(dataQuery, selectedItemsCount);
+                blade.onCompleted(dataQuery);
             }
 
             bladeNavigationService.closeBlade(blade);

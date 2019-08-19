@@ -12,7 +12,7 @@ angular.module('virtoCommerce.exportModule')
         blade.defaultProvider = $localStorage.defaultExportProvider || 'JsonExportProvider';
         blade.isExportedTypeSelected = typeof (blade.exportDataRequest.exportTypeName) !== 'undefined';
         blade.isTabularExportSupported = blade.exportDataRequest.isTabularExportSupported || false;
-        
+
         function initializeBlade() {
             exportApi.getProviders(function (result) {
                 if (result && result.length) {
@@ -23,7 +23,6 @@ angular.module('virtoCommerce.exportModule')
 
                     if (blade.isExportedTypeSelected) {
                         getKnownTypes();
-                        blade.dataSelected = blade.totalItemsCount || 0;
                     }
 
                 }
@@ -44,6 +43,7 @@ angular.module('virtoCommerce.exportModule')
                     blade.selectedType.localizedName = $translate.instant('export.types.' + blade.exportDataRequest.exportTypeName + '.name');
                     resetPropertyInfo();
                     getDataTotalCount();
+                    getDataSelectedCount();
                 }
             });
         }
@@ -71,7 +71,7 @@ angular.module('virtoCommerce.exportModule')
             }
         }
 
-        function getDataTotalCount() {
+        function getDataTotalCount(fnSuccessCallback) {
             var dataQuery = {
                 exportTypeName: blade.exportDataRequest.dataQuery.exportTypeName,
                 includedProperties: [],
@@ -86,12 +86,24 @@ angular.module('virtoCommerce.exportModule')
                 }
                 , function (data) {
                     blade.dataTotal = data.totalCount;
-                    if (blade.dataSelected === 0) {
-                        blade.dataSelected = blade.dataTotal;
+                    if (fnSuccessCallback) {
+                        fnSuccessCallback(data);
                     }
                 });
+        }
 
+        function getDataSelectedCount() {
+            var dataQuery = angular.copy(blade.exportDataRequest.dataQuery);
+            dataQuery.includedProperties = [];
 
+            exportApi.getData(
+            {
+                exportTypeName: blade.exportDataRequest.exportTypeName,
+                dataQuery: dataQuery
+            }
+            , function (data) {
+                blade.dataSelected = data.totalCount;                
+            });
         }
 
         $scope.providerChanged = function () {
@@ -107,8 +119,6 @@ angular.module('virtoCommerce.exportModule')
             }
 
             blade.exportDataRequest.providerName = blade.selectedProvider.id;
-            blade.exportDataRequest.dataQuery.skip = undefined;
-            blade.exportDataRequest.dataQuery.take = undefined;
             blade.isExporting = true;
 
             var progressBlade = {
@@ -144,8 +154,12 @@ angular.module('virtoCommerce.exportModule')
                         blade.selectedType = selectedTypeData.selectedType;
                         resetPropertyInfo(); // Property set changed due to changing export type
                         fillProviders(); // Refill providers combo for new type
-                        blade.dataSelected = 0; // Drop data selection
-                        getDataTotalCount(); // Recalc total available records
+                        getDataTotalCount(
+                            function (data) {
+                                blade.dataSelected = data.totalCount; // Drop data selection (selected all immediately after exported type selection)
+                            }
+                            ); // Recalc total available records
+
                     }
                 }
             };
@@ -179,9 +193,9 @@ angular.module('virtoCommerce.exportModule')
                 template: 'Modules/$(VirtoCommerce.Export)/Scripts/blades/export-generic-viewer.tpl.html',
                 isClosingDisabled: false,
                 exportDataRequest: blade.exportDataRequest,
-                onCompleted: function (dataQuery, selectedItemsCount) {
+                onCompleted: function (dataQuery) {
                     blade.exportDataRequest.dataQuery = dataQuery;
-                    blade.dataSelected = selectedItemsCount;
+                    getDataSelectedCount();
                 }
             };
 
@@ -189,11 +203,11 @@ angular.module('virtoCommerce.exportModule')
         };
 
         $scope.validateExportParameters = function () {
-            return !blade.isExporting && 
-                blade.exportDataRequest && 
-                blade.exportDataRequest.exportTypeName && 
-                blade.selectedProvider && 
-                blade.exportDataRequest.dataQuery && 
+            return !blade.isExporting &&
+                blade.exportDataRequest &&
+                blade.exportDataRequest.exportTypeName &&
+                blade.selectedProvider &&
+                blade.exportDataRequest.dataQuery &&
                 blade.dataSelected;
         };
 

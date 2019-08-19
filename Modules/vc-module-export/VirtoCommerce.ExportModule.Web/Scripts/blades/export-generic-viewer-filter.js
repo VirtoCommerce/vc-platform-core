@@ -29,6 +29,7 @@ angular.module('virtoCommerce.exportModule')
             }
 
             initializeBlade(blade.origEntity);
+            blade.parentBlade.filter.current.objectIds = []; // Reset object ids
             blade.parentBlade.filter.criteriaChanged();
             // $scope.bladeClose();
         };
