@@ -53,7 +53,6 @@ namespace VirtoCommerce.TaxModule.Web
             taxProviderRegistrar.RegisterTaxProvider<FixedRateTaxProvider>();
             settingsRegistrar.RegisterSettingsForType(Core.ModuleConstants.Settings.FixedTaxProviderSettings.AllSettings, typeof(FixedRateTaxProvider).Name);
 
-
             var mvcJsonOptions = applicationBuilder.ApplicationServices.GetService<IOptions<MvcJsonOptions>>();
             mvcJsonOptions.Value.SerializerSettings.Converters.Add(new PolymorphicJsonConverter());
 
@@ -70,7 +69,6 @@ namespace VirtoCommerce.TaxModule.Web
         {
         }
 
-
         public async Task ExportAsync(Stream outStream, ExportImportOptions options, Action<ExportImportProgressInfo> progressCallback,
             ICancellationToken cancellationToken)
         {
@@ -82,6 +80,5 @@ namespace VirtoCommerce.TaxModule.Web
         {
             await _appBuilder.ApplicationServices.GetRequiredService<TaxExportImport>().DoImportAsync(inputStream, progressCallback, cancellationToken);
         }
-
     }
 }
