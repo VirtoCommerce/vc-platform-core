@@ -42,7 +42,7 @@ namespace VirtoCommerce.MarketingModule.Test
             AbstractTypeFactory<IConditionTree>.RegisterType<DynamicContentConditionTree>();
             foreach (var conditionTree in ((IConditionTree)AbstractTypeFactory<DynamicContentConditionTree>.TryCreateInstance()).Traverse(x => x.AvailableChildren))
             {
-                AbstractTypeFactory<IConditionTree>.RegisterType(conditionTree.GetType(), noThrowIfExists: true);
+                AbstractTypeFactory<IConditionTree>.RegisterType(conditionTree.GetType(), throwIfExists: false);
             }
         }
 

@@ -14,7 +14,6 @@ namespace VirtoCommerce.MarketingModule.Core.Promotions
     {
         public DynamicPromotion()
         {
-            //TODO: Required  for UI remove later
             Type = nameof(DynamicPromotion); 
         }
 

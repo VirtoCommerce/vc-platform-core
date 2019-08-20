@@ -34,10 +34,10 @@ namespace VirtoCommerce.MarketingModule.Core.Model.Promotions
         {
             get
             {
-                yield return AbstractTypeFactory<BlockCustomerCondition>.TryCreateInstance();
-                yield return AbstractTypeFactory<BlockCatalogCondition>.TryCreateInstance();
-                yield return AbstractTypeFactory<BlockCartCondition>.TryCreateInstance();
-                yield return AbstractTypeFactory<BlockReward>.TryCreateInstance();
+                yield return AbstractTypeFactory<IConditionTree>.TryCreateInstance(nameof(BlockCustomerCondition));
+                yield return AbstractTypeFactory<IConditionTree>.TryCreateInstance(nameof(BlockCatalogCondition));
+                yield return AbstractTypeFactory<IConditionTree>.TryCreateInstance(nameof(BlockCartCondition));
+                yield return AbstractTypeFactory<IConditionTree>.TryCreateInstance(nameof(BlockReward));
             }
         }      
     }
