@@ -25,7 +25,7 @@ namespace VirtoCommerce.ExportModule.CsvProvider
                 throw new ArgumentNullException(nameof(exportDataRequest));
             }
 
-            Configuration = exportDataRequest.ProviderConfig;
+            Configuration = exportDataRequest.ProviderConfig as CsvProviderConfiguration ?? new CsvProviderConfiguration();
             IncludedProperties = exportDataRequest.DataQuery?.IncludedProperties;
         }
 
@@ -49,9 +49,7 @@ namespace VirtoCommerce.ExportModule.CsvProvider
         {
             if (_csvWriter == null)
             {
-                var csvConfiguration = (Configuration as CsvProviderConfiguration)?.Configuration ?? new Configuration();
-
-                _csvWriter = new CsvWriter(textWriter, csvConfiguration, true);
+                _csvWriter = new CsvWriter(textWriter, ((CsvProviderConfiguration)Configuration).Configuration, true);
             }
         }
 

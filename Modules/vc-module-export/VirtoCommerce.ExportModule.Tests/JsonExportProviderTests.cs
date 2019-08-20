@@ -119,7 +119,7 @@ namespace VirtoCommerce.ExportModule.Tests
 
             var resultArray = JArray.Parse(deserializedString);
 
-            return resultArray.Select(x => x.ToObject(Type.GetType(x["$discriminator"]?.ToString())))
+            return resultArray.Select(x => x.ToObject(Type.GetType($@"VirtoCommerce.ExportModule.Tests.{x["$discriminator"]?.ToString()}")))
                 .ToArray();
         }
 
