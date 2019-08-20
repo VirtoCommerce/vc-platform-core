@@ -1,4 +1,4 @@
-﻿<div class="blade-content __medium-wide">
+<div class="blade-content __medium-wide">
     <div class="blade-inner">
         <div class="inner-block">
             <form name="detailForm" class="form">
@@ -45,6 +45,12 @@
                                     </ui-select>
                                 </div>
                             </div>
+                        </div>
+                    </div>
+                    <div class="form-group">
+                        <label class="form-label">{{ 'catalog.blades.category-detail.labels.priority' | translate }}</label>
+                        <div class="form-input">
+                            <input focus-on="" required class="form-control" ng-model="blade.currentEntity.priority" placeholder="{{'catalog.blades.category-detail.placeholders.priority' | translate}}" />
                         </div>
                     </div>
                 </fieldset>
