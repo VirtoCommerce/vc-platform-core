@@ -66,8 +66,16 @@ namespace VirtoCommerce.PricingModule.Web
             serviceCollection.AddTransient<ProductPriceDocumentBuilder>();
             serviceCollection.AddTransient<LogChangesChangedEventHandler>();
 
+            AbstractTypeFactory<PricelistAssignment>.RegisterType<PricelistAssignment>().WithSetupAction((assignment) =>
+            {
+                assignment.DynamicExpression = AbstractTypeFactory<IConditionTree>.TryCreateInstance(nameof(PriceConditionTree)) as PriceConditionTree;
+                assignment.DynamicExpression.Children = assignment.DynamicExpression.AvailableChildren.ToList();
+            });
 
-
+            //Register in the  AbstractTypeFactory<IConditionTree> the  tree and blocks expressions
+            AbstractTypeFactory<IConditionTree>.RegisterType<PriceConditionTree>();
+            AbstractTypeFactory<IConditionTree>.RegisterType<BlockPricingCondition>();
+            
             serviceCollection.AddTransient<Func<ExportDataQuery, PriceExportPagedDataSource>>(provider =>
                 (exportDataQuery) =>
                 {
@@ -77,7 +85,6 @@ namespace VirtoCommerce.PricingModule.Web
                     var result = new PriceExportPagedDataSource(pricingSearchService, pricingService, itemService, (PriceExportDataQuery)exportDataQuery);
                     return result;
                 });
-
 
             serviceCollection.AddTransient<Func<ExportDataQuery, PricelistExportPagedDataSource>>(provider =>
                 (exportDataQuery) =>
@@ -97,6 +104,7 @@ namespace VirtoCommerce.PricingModule.Web
                     var result = new PricelistAssignmentExportPagedDataSource(pricingSearchService, pricingService, catalogService, (PricelistAssignmentExportDataQuery)exportDataQuery);
                     return result;
                 });
+            
             var requirements = new IAuthorizationRequirement[]
             {
                 new PermissionAuthorizationRequirement(ModuleConstants.Security.Permissions.Export), new PermissionAuthorizationRequirement(ModuleConstants.Security.Permissions.Read)
@@ -174,11 +182,9 @@ namespace VirtoCommerce.PricingModule.Web
             var inProcessBus = appBuilder.ApplicationServices.GetService<IHandlerRegistrar>();
             inProcessBus.RegisterHandler<PriceChangedEvent>(async (message, token) => await appBuilder.ApplicationServices.GetService<LogChangesChangedEventHandler>().Handle(message));
 
-            //Pricing expression
-            AbstractTypeFactory<IConditionTree>.RegisterType<PriceConditionTree>();
-            foreach (var conditionTree in ((IConditionTree)AbstractTypeFactory<PriceConditionTree>.TryCreateInstance()).Traverse(x => x.AvailableChildren))
+            foreach (var conditionTree in (AbstractTypeFactory<IConditionTree>.TryCreateInstance(nameof(PriceConditionTree))).Traverse(x => x.AvailableChildren))
             {
-                AbstractTypeFactory<IConditionTree>.RegisterType(conditionTree.GetType(), noThrowIfExists: true);
+                AbstractTypeFactory<IConditionTree>.RegisterType(conditionTree.GetType(), throwIfExists: false);
             }
 
             var registrar = appBuilder.ApplicationServices.GetService<IKnownExportTypesRegistrar>();

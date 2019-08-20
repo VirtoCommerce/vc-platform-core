@@ -26,7 +26,10 @@ namespace VirtoCommerce.Platform.Modules.Extensions
         private static IEnumerable<ManifestModuleInfo> GetInstalledModules(IServiceProvider serviceProvider)
         {
             var moduleCatalog = serviceProvider.GetRequiredService<ILocalModuleCatalog>();
-            var allModules = moduleCatalog.Modules.OfType<ManifestModuleInfo>().ToArray();
+            var allModules = moduleCatalog.Modules.OfType<ManifestModuleInfo>()
+                                          .Where(x => x.State == ModuleState.Initialized && !x.Errors.Any())
+                                          .ToArray();
+
             return moduleCatalog.CompleteListWithDependencies(allModules)
                 .OfType<ManifestModuleInfo>()
                 .Where(x => x.State == ModuleState.Initialized && !x.Errors.Any())

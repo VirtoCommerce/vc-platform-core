@@ -10,10 +10,10 @@ namespace VirtoCommerce.MarketingModule.Core.Model.Promotions.Conditions
         {
             get
             {
-                yield return AbstractTypeFactory<ConditionAtNumItemsInCart>.TryCreateInstance();
-                yield return AbstractTypeFactory<ConditionAtNumItemsInCategoryAreInCart>.TryCreateInstance();
-                yield return AbstractTypeFactory<ConditionAtNumItemsOfEntryAreInCart>.TryCreateInstance();
-                yield return AbstractTypeFactory<ConditionCartSubtotalLeast>.TryCreateInstance();             
+                yield return new ConditionAtNumItemsInCart();
+                yield return new ConditionAtNumItemsInCategoryAreInCart();
+                yield return new ConditionAtNumItemsOfEntryAreInCart();
+                yield return new ConditionCartSubtotalLeast();             
             }
         }
     }

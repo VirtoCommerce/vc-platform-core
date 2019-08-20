@@ -6,6 +6,7 @@ using System.Linq;
 using Newtonsoft.Json;
 using VirtoCommerce.CoreModule.Core.Conditions;
 using VirtoCommerce.MarketingModule.Core.Model.Promotions;
+using VirtoCommerce.MarketingModule.Core.Promotions;
 using VirtoCommerce.MarketingModule.Data.Promotions;
 using VirtoCommerce.Platform.Core.Common;
 
@@ -56,7 +57,7 @@ namespace VirtoCommerce.MarketingModule.Data.Model
 
         public virtual ObservableCollection<PromotionStoreEntity> Stores { get; set; } = new NullCollection<PromotionStoreEntity>();
 
-        public virtual Promotion ToModel(DynamicPromotion promotion)
+        public virtual Promotion ToModel(Promotion promotion)
         {
             if (promotion == null)
             {
@@ -79,7 +80,6 @@ namespace VirtoCommerce.MarketingModule.Data.Model
             promotion.EndDate = EndDate;
             promotion.Priority = Priority;
             promotion.IsExclusive = IsExclusive;
-            promotion.IsAllowCombiningWithSelf = IsAllowCombiningWithSelf;
             promotion.MaxPersonalUsageCount = PerCustomerLimit;
             promotion.MaxUsageCount = TotalLimit;
             promotion.MaxPersonalUsageCount = PerCustomerLimit;
@@ -89,15 +89,18 @@ namespace VirtoCommerce.MarketingModule.Data.Model
             {
                 promotion.StoreIds = Stores.Select(x => x.StoreId).ToList();
             }
-
-            if (PredicateVisualTreeSerialized != null)
+            if (promotion is DynamicPromotion dynamicPromotion)
             {
-                promotion.DynamicExpression = JsonConvert.DeserializeObject<PromotionConditionAndRewardTree>(PredicateVisualTreeSerialized, new ConditionJsonConverter(), new RewardJsonConverter());
+                dynamicPromotion.IsAllowCombiningWithSelf = IsAllowCombiningWithSelf;
+                if (PredicateVisualTreeSerialized != null)
+                {
+                    dynamicPromotion.DynamicExpression = JsonConvert.DeserializeObject<PromotionConditionAndRewardTree>(PredicateVisualTreeSerialized, new ConditionJsonConverter(), new RewardJsonConverter());
+                }
             }
             return promotion;
         }
 
-        public virtual PromotionEntity FromModel(DynamicPromotion promotion, PrimaryKeyResolvingMap pkMap)
+        public virtual PromotionEntity FromModel(Promotion promotion, PrimaryKeyResolvingMap pkMap)
         {
             if (promotion == null)
             {
@@ -122,7 +125,7 @@ namespace VirtoCommerce.MarketingModule.Data.Model
             EndDate = promotion.EndDate;
             Priority = promotion.Priority;
             IsExclusive = promotion.IsExclusive;
-            IsAllowCombiningWithSelf = promotion.IsAllowCombiningWithSelf;
+        
             PerCustomerLimit = promotion.MaxPersonalUsageCount;
             TotalLimit = promotion.MaxUsageCount;
             PerCustomerLimit = promotion.MaxPersonalUsageCount;
@@ -131,11 +134,16 @@ namespace VirtoCommerce.MarketingModule.Data.Model
             {
                 Stores = new ObservableCollection<PromotionStoreEntity>(promotion.StoreIds.Select(x => new PromotionStoreEntity { StoreId = x, PromotionId = promotion.Id }));
             }
-            if (promotion.DynamicExpression != null)
-            {
-                PredicateVisualTreeSerialized = JsonConvert.SerializeObject(promotion.DynamicExpression);
-            }
 
+            if (promotion is DynamicPromotion dynamicPromotion)
+            {
+                IsAllowCombiningWithSelf = dynamicPromotion.IsAllowCombiningWithSelf;
+
+                if (dynamicPromotion.DynamicExpression != null)
+                {
+                    PredicateVisualTreeSerialized = JsonConvert.SerializeObject(dynamicPromotion.DynamicExpression);
+                }
+            }
             return this;
         }
 

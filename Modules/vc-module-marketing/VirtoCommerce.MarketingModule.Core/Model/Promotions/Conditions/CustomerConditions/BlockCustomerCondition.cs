@@ -10,10 +10,10 @@ namespace VirtoCommerce.MarketingModule.Core.Model.Promotions.Conditions
         {
             get
             {
-                yield return AbstractTypeFactory<ConditionIsRegisteredUser>.TryCreateInstance();
-                yield return AbstractTypeFactory<ConditionIsEveryone>.TryCreateInstance();
-                yield return AbstractTypeFactory<ConditionIsFirstTimeBuyer>.TryCreateInstance();
-                yield return AbstractTypeFactory<UserGroupsContainsCondition>.TryCreateInstance();
+                yield return new ConditionIsRegisteredUser();
+                yield return new ConditionIsEveryone();
+                yield return new ConditionIsFirstTimeBuyer();
+                yield return new UserGroupsContainsCondition();
             }
         }
     }

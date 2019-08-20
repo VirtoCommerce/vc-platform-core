@@ -280,13 +280,10 @@ namespace VirtoCommerce.MarketingModule.Web.Controllers.Api
         [Authorize(ModuleConstants.Security.Permissions.Create)]
         public ActionResult<coreModel.DynamicContentPublication> GetNewDynamicPublication()
         {
-            var result = new coreModel.DynamicContentPublication
-            {
-                ContentItems = new coreModel.DynamicContentItem[] { },
-                ContentPlaces = new coreModel.DynamicContentPlace[] { },
-                DynamicExpression = AbstractTypeFactory<DynamicContentConditionTree>.TryCreateInstance(),
-                IsActive = true
-            };
+            var result = AbstractTypeFactory<coreModel.DynamicContentPublication>.TryCreateInstance();
+            result.IsActive = true;
+            result.ContentItems = new List<coreModel.DynamicContentItem>();
+            result.ContentPlaces = new List<coreModel.DynamicContentPlace>();
             result.DynamicExpression.EnableAvailableChildrenSerialization();
             return Ok(result);
         }

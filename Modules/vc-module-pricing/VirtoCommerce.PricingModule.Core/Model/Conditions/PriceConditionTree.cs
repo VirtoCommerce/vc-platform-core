@@ -22,7 +22,7 @@ namespace VirtoCommerce.PricingModule.Core.Model.Conditions
         {
             get
             {
-                yield return AbstractTypeFactory<BlockPricingCondition>.TryCreateInstance();
+                yield return AbstractTypeFactory<IConditionTree>.TryCreateInstance(nameof(BlockPricingCondition));
             }
         }
     }

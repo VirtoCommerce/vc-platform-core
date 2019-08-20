@@ -40,8 +40,9 @@ namespace VirtoCommerce.MarketingModule.Data.Search
                 {
                     var sortInfos = BuildSortExpression(criteria);
                     var query = BuildQuery(repository, criteria);
-
-                    retVal.TotalCount = await query.CountAsync();
+                    //https://github.com/zzzprojects/EntityFramework-Plus/issues/293
+                    //Workaround ArgumentException with CountAsync have no predicate when query has a Cast or OfType expression
+                    retVal.TotalCount = await query.CountAsync(x=> true);
 
                     if (criteria.Take > 0)
                     {

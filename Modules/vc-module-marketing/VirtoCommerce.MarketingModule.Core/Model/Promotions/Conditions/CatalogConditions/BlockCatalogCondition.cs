@@ -1,6 +1,5 @@
 using System.Collections.Generic;
 using VirtoCommerce.CoreModule.Core.Conditions;
-using VirtoCommerce.Platform.Core.Common;
 
 namespace VirtoCommerce.MarketingModule.Core.Model.Promotions.Conditions
 {
@@ -10,11 +9,11 @@ namespace VirtoCommerce.MarketingModule.Core.Model.Promotions.Conditions
         {
             get
             {
-                yield return AbstractTypeFactory<ConditionCategoryIs>.TryCreateInstance();
-                yield return AbstractTypeFactory<ConditionCodeContains>.TryCreateInstance();
-                yield return AbstractTypeFactory<ConditionCurrencyIs>.TryCreateInstance();
-                yield return AbstractTypeFactory<ConditionEntryIs>.TryCreateInstance();
-                yield return AbstractTypeFactory<ConditionInStockQuantity>.TryCreateInstance();
+                yield return new ConditionCategoryIs();
+                yield return new ConditionCodeContains();
+                yield return new ConditionCurrencyIs();
+                yield return new ConditionEntryIs();
+                yield return new ConditionInStockQuantity();
             }
         }
     }

@@ -10,6 +10,7 @@ using VirtoCommerce.MarketingModule.Core.Model;
 using VirtoCommerce.MarketingModule.Core.Model.Promotions;
 using VirtoCommerce.MarketingModule.Core.Model.Promotions.Search;
 using VirtoCommerce.MarketingModule.Core.Model.PushNotifications;
+using VirtoCommerce.MarketingModule.Core.Promotions;
 using VirtoCommerce.MarketingModule.Core.Search;
 using VirtoCommerce.MarketingModule.Core.Services;
 using VirtoCommerce.MarketingModule.Data.Promotions;
@@ -131,8 +132,11 @@ namespace VirtoCommerce.MarketingModule.Web.Controllers.Api
         [Authorize(ModuleConstants.Security.Permissions.Create)]
         public ActionResult<Promotion> GetNewDynamicPromotion()
         {
-            var retVal = AbstractTypeFactory<DynamicPromotion>.TryCreateInstance();
-            retVal.DynamicExpression?.EnableAvailableChildrenSerialization();
+            var retVal = AbstractTypeFactory<Promotion>.TryCreateInstance();
+            if (retVal is DynamicPromotion dynamicPromotion)
+            {
+                dynamicPromotion.DynamicExpression?.EnableAvailableChildrenSerialization();
+            }
             retVal.IsActive = true;
             return Ok(retVal);
         }

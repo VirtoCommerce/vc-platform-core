@@ -22,7 +22,7 @@ namespace VirtoCommerce.MarketingModule.Core.Model.DynamicContent
         {
             get
             {
-                yield return AbstractTypeFactory<BlockContentCondition>.TryCreateInstance();             
+                yield return AbstractTypeFactory<IConditionTree>.TryCreateInstance(nameof(BlockContentCondition));             
             }
         }
     }
