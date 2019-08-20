@@ -1,7 +1,7 @@
 ﻿
 Microsoft Visual Studio Solution File, Format Version 12.00
-# Visual Studio Version 16
-VisualStudioVersion = 16.0.29123.88
+# Visual Studio 15
+VisualStudioVersion = 15.0.28307.757
 MinimumVisualStudioVersion = 10.0.40219.1
 Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "VirtoCommerce.Platform.Web", "VirtoCommerce.Platform.Web\VirtoCommerce.Platform.Web.csproj", "{63AE8D85-091F-4F6D-99FC-1BF8F96494F7}"
 EndProject
@@ -264,6 +264,10 @@ EndProject
 Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "VirtoCommerce.NotificationsSampleModule.Web", "Modules\vc-module-notifications\sample\VirtoCommerce.NotificationsSampleModule.Web\VirtoCommerce.NotificationsSampleModule.Web.csproj", "{6657DCBC-CB0A-4FB6-A7C8-F4211D68E9AD}"
 EndProject
 Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "VirtoCommerce.NotificationsModule.Web", "Modules\vc-module-notifications\VirtoCommerce.NotificationsModule.Web\VirtoCommerce.NotificationsModule.Web.csproj", "{3A02A0EE-47EF-451C-A9B8-7E9754B7F3FB}"
+EndProject
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "VirtoCommerce.ExportModule.CsvProvider", "Modules\vc-module-export\VirtoCommerce.ExportModule.CsvProvider\VirtoCommerce.ExportModule.CsvProvider.csproj", "{E964F190-8807-4351-B1D5-AA7305B6DAFF}"
+EndProject
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "VirtoCommerce.ExportModule.JsonProvider", "Modules\vc-module-export\VirtoCommerce.ExportModule.JsonProvider\VirtoCommerce.ExportModule.JsonProvider.csproj", "{BA4E55AF-F75A-4E9F-BD3C-37F4844085BD}"
 EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
@@ -683,6 +687,14 @@ Global
 		{3A02A0EE-47EF-451C-A9B8-7E9754B7F3FB}.Debug|Any CPU.Build.0 = Debug|Any CPU
 		{3A02A0EE-47EF-451C-A9B8-7E9754B7F3FB}.Release|Any CPU.ActiveCfg = Release|Any CPU
 		{3A02A0EE-47EF-451C-A9B8-7E9754B7F3FB}.Release|Any CPU.Build.0 = Release|Any CPU
+		{E964F190-8807-4351-B1D5-AA7305B6DAFF}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{E964F190-8807-4351-B1D5-AA7305B6DAFF}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{E964F190-8807-4351-B1D5-AA7305B6DAFF}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{E964F190-8807-4351-B1D5-AA7305B6DAFF}.Release|Any CPU.Build.0 = Release|Any CPU
+		{BA4E55AF-F75A-4E9F-BD3C-37F4844085BD}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{BA4E55AF-F75A-4E9F-BD3C-37F4844085BD}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{BA4E55AF-F75A-4E9F-BD3C-37F4844085BD}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{BA4E55AF-F75A-4E9F-BD3C-37F4844085BD}.Release|Any CPU.Build.0 = Release|Any CPU
 	EndGlobalSection
 	GlobalSection(SolutionProperties) = preSolution
 		HideSolutionNode = FALSE
@@ -810,6 +822,8 @@ Global
 		{25E31CE4-773E-441B-8B0A-9D6E586699CE} = {AFB12010-1866-4A31-865E-5D2DF65FB521}
 		{6657DCBC-CB0A-4FB6-A7C8-F4211D68E9AD} = {25E31CE4-773E-441B-8B0A-9D6E586699CE}
 		{3A02A0EE-47EF-451C-A9B8-7E9754B7F3FB} = {AFB12010-1866-4A31-865E-5D2DF65FB521}
+		{E964F190-8807-4351-B1D5-AA7305B6DAFF} = {0F7730F4-8AF7-4E42-AF0B-4D8F68FC0EBE}
+		{BA4E55AF-F75A-4E9F-BD3C-37F4844085BD} = {0F7730F4-8AF7-4E42-AF0B-4D8F68FC0EBE}
 	EndGlobalSection
 	GlobalSection(ExtensibilityGlobals) = postSolution
 		SolutionGuid = {80F99D88-A3B2-4ED2-9148-43D43EBFFFC3}
