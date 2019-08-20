@@ -132,8 +132,11 @@ namespace VirtoCommerce.MarketingModule.Web.Controllers.Api
         [Authorize(ModuleConstants.Security.Permissions.Create)]
         public ActionResult<Promotion> GetNewDynamicPromotion()
         {
-            var retVal = AbstractTypeFactory<DynamicPromotion>.TryCreateInstance();
-            retVal.DynamicExpression?.EnableAvailableChildrenSerialization();
+            var retVal = AbstractTypeFactory<Promotion>.TryCreateInstance();
+            if (retVal is DynamicPromotion dynamicPromotion)
+            {
+                dynamicPromotion.DynamicExpression?.EnableAvailableChildrenSerialization();
+            }
             retVal.IsActive = true;
             return Ok(retVal);
         }

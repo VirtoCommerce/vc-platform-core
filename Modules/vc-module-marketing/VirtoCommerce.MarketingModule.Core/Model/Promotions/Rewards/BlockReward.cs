@@ -1,7 +1,6 @@
 using System.Collections.Generic;
 using System.Linq;
 using VirtoCommerce.CoreModule.Core.Conditions;
-using VirtoCommerce.Platform.Core.Common;
 
 namespace VirtoCommerce.MarketingModule.Core.Model.Promotions
 {
@@ -25,20 +24,20 @@ namespace VirtoCommerce.MarketingModule.Core.Model.Promotions
         {
             get
             {
-                yield return AbstractTypeFactory<RewardCartGetOfAbsSubtotal>.TryCreateInstance();
-                yield return AbstractTypeFactory<RewardCartGetOfRelSubtotal>.TryCreateInstance();
-                yield return AbstractTypeFactory<RewardItemGetFreeNumItemOfProduct>.TryCreateInstance();
-                yield return AbstractTypeFactory<RewardItemGetOfAbs>.TryCreateInstance();
-                yield return AbstractTypeFactory<RewardItemGetOfAbsForNum>.TryCreateInstance();
-                yield return AbstractTypeFactory<RewardItemGetOfRel>.TryCreateInstance();
-                yield return AbstractTypeFactory<RewardItemGetOfRelForNum>.TryCreateInstance();
-                yield return AbstractTypeFactory<RewardItemGiftNumItem>.TryCreateInstance();
-                yield return AbstractTypeFactory<RewardShippingGetOfAbsShippingMethod>.TryCreateInstance();
-                yield return AbstractTypeFactory<RewardShippingGetOfRelShippingMethod>.TryCreateInstance();
-                yield return AbstractTypeFactory<RewardPaymentGetOfAbs>.TryCreateInstance();
-                yield return AbstractTypeFactory<RewardPaymentGetOfRel>.TryCreateInstance();
-                yield return AbstractTypeFactory<RewardItemForEveryNumInGetOfRel>.TryCreateInstance();
-                yield return AbstractTypeFactory<RewardItemForEveryNumOtherItemInGetOfRel>.TryCreateInstance();
+                yield return new RewardCartGetOfAbsSubtotal();
+                yield return new RewardCartGetOfRelSubtotal();
+                yield return new RewardItemGetFreeNumItemOfProduct();
+                yield return new RewardItemGetOfAbs();
+                yield return new RewardItemGetOfAbsForNum();
+                yield return new RewardItemGetOfRel();
+                yield return new RewardItemGetOfRelForNum();
+                yield return new RewardItemGiftNumItem();
+                yield return new RewardShippingGetOfAbsShippingMethod();
+                yield return new RewardShippingGetOfRelShippingMethod();
+                yield return new RewardPaymentGetOfAbs();
+                yield return new RewardPaymentGetOfRel();
+                yield return new RewardItemForEveryNumInGetOfRel();
+                yield return new RewardItemForEveryNumOtherItemInGetOfRel();
             }
         }
     }

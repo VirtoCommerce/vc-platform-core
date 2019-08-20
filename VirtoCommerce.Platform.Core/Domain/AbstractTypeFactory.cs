@@ -32,7 +32,7 @@ namespace VirtoCommerce.Platform.Core.Common
             return RegisterType(typeof(T));
         }
 
-        public static TypeInfo<BaseType> RegisterType(Type type, bool noThrowIfExists = false)
+        public static TypeInfo<BaseType> RegisterType(Type type, bool throwIfExists = true)
         {
             if(type == null)
             {
@@ -41,7 +41,7 @@ namespace VirtoCommerce.Platform.Core.Common
 
             var result = _typeInfos.FirstOrDefault(x=> x.AllSubclasses.Contains(type));
 
-            if (result != null && !noThrowIfExists)
+            if (result != null && throwIfExists)
             {
                 throw new ArgumentException(string.Format("Type {0} already registered", type.Name));
             }

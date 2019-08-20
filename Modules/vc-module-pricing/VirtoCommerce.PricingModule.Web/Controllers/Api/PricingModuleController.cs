@@ -91,9 +91,7 @@ namespace VirtoCommerce.PricingModule.Web.Controllers.Api
         {
             var result = AbstractTypeFactory<PricelistAssignment>.TryCreateInstance();
             result.Priority = 1;
-            result.DynamicExpression = AbstractTypeFactory<PriceConditionTree>.TryCreateInstance();
             //Required for UI
-            result.DynamicExpression.Children = result.DynamicExpression.AvailableChildren.ToList();
             result.DynamicExpression?.EnableAvailableChildrenSerialization();
             return Ok(result);
         }

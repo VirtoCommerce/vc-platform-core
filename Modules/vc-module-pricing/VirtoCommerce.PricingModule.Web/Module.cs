@@ -60,6 +60,16 @@ namespace VirtoCommerce.PricingModule.Web
             serviceCollection.AddTransient<ProductPriceDocumentChangesProvider>();
             serviceCollection.AddTransient<ProductPriceDocumentBuilder>();
             serviceCollection.AddTransient<LogChangesChangedEventHandler>();
+
+            AbstractTypeFactory<PricelistAssignment>.RegisterType<PricelistAssignment>().WithSetupAction((assignment) =>
+            {
+                assignment.DynamicExpression = AbstractTypeFactory<IConditionTree>.TryCreateInstance(nameof(PriceConditionTree)) as PriceConditionTree;
+                assignment.DynamicExpression.Children = assignment.DynamicExpression.AvailableChildren.ToList();
+            });
+
+            //Register in the  AbstractTypeFactory<IConditionTree> the  tree and blocks expressions
+            AbstractTypeFactory<IConditionTree>.RegisterType<PriceConditionTree>();
+            AbstractTypeFactory<IConditionTree>.RegisterType<BlockPricingCondition>();
         }
 
         public void PostInitialize(IApplicationBuilder appBuilder)
@@ -121,11 +131,9 @@ namespace VirtoCommerce.PricingModule.Web
             var inProcessBus = appBuilder.ApplicationServices.GetService<IHandlerRegistrar>();
             inProcessBus.RegisterHandler<PriceChangedEvent>(async (message, token) => await appBuilder.ApplicationServices.GetService<LogChangesChangedEventHandler>().Handle(message));
 
-            //Pricing expression
-            AbstractTypeFactory<IConditionTree>.RegisterType<PriceConditionTree>();
-            foreach (var conditionTree in ((IConditionTree)AbstractTypeFactory<PriceConditionTree>.TryCreateInstance()).Traverse(x => x.AvailableChildren))
+            foreach (var conditionTree in (AbstractTypeFactory<IConditionTree>.TryCreateInstance(nameof(PriceConditionTree))).Traverse(x => x.AvailableChildren))
             {
-                AbstractTypeFactory<IConditionTree>.RegisterType(conditionTree.GetType(), noThrowIfExists: true);
+                AbstractTypeFactory<IConditionTree>.RegisterType(conditionTree.GetType(), throwIfExists: false);
             }
         }
 
