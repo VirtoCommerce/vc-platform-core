@@ -8,7 +8,7 @@ using VirtoCommerce.MarketingModule.Core.Model.Promotions.Search;
 using VirtoCommerce.MarketingModule.Core.Search;
 using VirtoCommerce.Platform.Core.Common;
 
-namespace VirtoCommerce.MarketingModule.Data.Promotions
+namespace VirtoCommerce.MarketingModule.Core.Promotions
 {
     public class DynamicPromotion : Promotion
     {

@@ -6,7 +6,6 @@ using VirtoCommerce.CatalogModule.Core.Serialization;
 using VirtoCommerce.CoreModule.Core.Common;
 using VirtoCommerce.CoreModule.Core.Outlines;
 using VirtoCommerce.CoreModule.Core.Seo;
-using VirtoCommerce.InventoryModule.Core.Model;
 using VirtoCommerce.Platform.Core.Common;
 
 namespace VirtoCommerce.CatalogModule.Core.Model
@@ -150,9 +149,7 @@ namespace VirtoCommerce.CatalogModule.Core.Model
         #endregion
 
         public IList<ProductAssociation> ReferencedAssociations { get; set; }
-
-        public IList<InventoryInfo> Inventories { get; set; }
-
+        
         #region IHasOutlines members
         public IList<Outline> Outlines { get; set; }
         #endregion

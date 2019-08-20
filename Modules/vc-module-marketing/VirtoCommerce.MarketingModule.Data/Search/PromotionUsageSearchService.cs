@@ -20,7 +20,7 @@ namespace VirtoCommerce.MarketingModule.Data.Search
         private readonly IPlatformMemoryCache _platformMemoryCache;
         private readonly Func<IMarketingRepository> _repositoryFactory;
 
-        public PromotionUsageSearchService(IPlatformMemoryCache platformMemoryCache, Func<IMarketingRepository> repositoryFactory)
+        public PromotionUsageSearchService(Func<IMarketingRepository> repositoryFactory, IPlatformMemoryCache platformMemoryCache)
         {
             _platformMemoryCache = platformMemoryCache;
             _repositoryFactory = repositoryFactory;
@@ -37,8 +37,7 @@ namespace VirtoCommerce.MarketingModule.Data.Search
             return await _platformMemoryCache.GetOrCreateExclusiveAsync(cacheKey, async (cacheEntry) =>
             {
                 var result = AbstractTypeFactory<PromotionUsageSearchResult>.TryCreateInstance();
-                cacheEntry.AddExpirationToken(PromotionUsageCacheRegion.CreateChangeToken());
-
+              
                 using (var repository = _repositoryFactory())
                 {
                     var sortInfos = BuildSortExpression(criteria);
@@ -48,10 +47,14 @@ namespace VirtoCommerce.MarketingModule.Data.Search
 
                     if (criteria.Take > 0)
                     {
-                        var coupons = await query.OrderBySortInfos(sortInfos).ThenBy(x => x.Id)
+                        var usages = await query.OrderBySortInfos(sortInfos).ThenBy(x => x.Id)
                                          .Skip(criteria.Skip).Take(criteria.Take)
                                          .ToArrayAsync();
-                        result.Results = coupons.Select(x => x.ToModel(AbstractTypeFactory<PromotionUsage>.TryCreateInstance())).ToList();
+                        result.Results = usages.Select(x => x.ToModel(AbstractTypeFactory<PromotionUsage>.TryCreateInstance())).ToList();
+                        foreach(var usage in result.Results)
+                        {
+                            cacheEntry.AddExpirationToken(PromotionUsageCacheRegion.CreateChangeToken(usage));
+                        }
                     }
                     return result;
                 }

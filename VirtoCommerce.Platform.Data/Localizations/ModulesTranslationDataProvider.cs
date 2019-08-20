@@ -23,7 +23,7 @@ namespace VirtoCommerce.Platform.Data.Localizations
             get
             {
                 // Get modules localization files ordered by dependency.
-                var allModules = _moduleCatalog.Modules.OfType<ManifestModuleInfo>().ToArray();
+                var allModules = _moduleCatalog.Modules.OfType<ManifestModuleInfo>().Where(x => x.State == ModuleState.Initialized && !x.Errors.Any()).ToArray();
                 var manifestModules = _moduleCatalog.CompleteListWithDependencies(allModules).Where(x => x.State == ModuleState.Initialized)
                     .OfType<ManifestModuleInfo>();
 

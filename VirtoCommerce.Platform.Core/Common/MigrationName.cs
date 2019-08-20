@@ -1,6 +1,6 @@
 namespace VirtoCommerce.Platform.Core.Common
 {
-    public class MigrationName
+    public static class MigrationName
     {
         public static string GetUpdateV2MigrationName(string moduleName)
         {
