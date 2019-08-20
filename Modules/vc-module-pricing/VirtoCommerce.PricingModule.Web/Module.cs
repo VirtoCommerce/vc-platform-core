@@ -10,6 +10,7 @@ using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Options;
+using VirtoCommerce.CatalogModule.Core.Services;
 using VirtoCommerce.CoreModule.Core.Conditions;
 using VirtoCommerce.ExportModule.Core.Model;
 using VirtoCommerce.ExportModule.Core.Services;
@@ -28,7 +29,6 @@ using VirtoCommerce.PricingModule.Core.Events;
 using VirtoCommerce.PricingModule.Core.Model.Conditions;
 using VirtoCommerce.PricingModule.Core.Services;
 using VirtoCommerce.PricingModule.Data.ExportImport;
-using VirtoCommerce.PricingModule.Data.ExportImport.Converters;
 using VirtoCommerce.PricingModule.Data.Handlers;
 using VirtoCommerce.PricingModule.Data.Repositories;
 using VirtoCommerce.PricingModule.Data.Search;
@@ -66,31 +66,36 @@ namespace VirtoCommerce.PricingModule.Web
             serviceCollection.AddTransient<ProductPriceDocumentBuilder>();
             serviceCollection.AddTransient<LogChangesChangedEventHandler>();
 
-            serviceCollection.AddTransient<PriceExportPagedDataSource>();
+
+
             serviceCollection.AddTransient<Func<ExportDataQuery, PriceExportPagedDataSource>>(provider =>
                 (exportDataQuery) =>
                 {
-                    var datasource = provider.CreateScope().ServiceProvider.GetRequiredService<PriceExportPagedDataSource>();
-                    datasource.DataQuery = (PriceExportDataQuery)exportDataQuery;
-                    return datasource;
+                    var pricingSearchService = provider.CreateScope().ServiceProvider.GetRequiredService<IPricingSearchService>();
+                    var pricingService = provider.CreateScope().ServiceProvider.GetRequiredService<IPricingService>();
+                    var itemService = provider.CreateScope().ServiceProvider.GetRequiredService<IItemService>();
+                    var result = new PriceExportPagedDataSource(pricingSearchService, pricingService, itemService, (PriceExportDataQuery)exportDataQuery);
+                    return result;
                 });
 
-            serviceCollection.AddTransient<PricelistExportPagedDataSource>();
+
             serviceCollection.AddTransient<Func<ExportDataQuery, PricelistExportPagedDataSource>>(provider =>
                 (exportDataQuery) =>
                 {
-                    var datasource = provider.CreateScope().ServiceProvider.GetRequiredService<PricelistExportPagedDataSource>();
-                    datasource.DataQuery = (PricelistExportDataQuery)exportDataQuery;
-                    return datasource;
+                    var pricingSearchService = provider.CreateScope().ServiceProvider.GetRequiredService<IPricingSearchService>();
+                    var pricingService = provider.CreateScope().ServiceProvider.GetRequiredService<IPricingService>();
+                    var result = new PricelistExportPagedDataSource(pricingSearchService, pricingService, (PricelistExportDataQuery)exportDataQuery);
+                    return result;
                 });
 
-            serviceCollection.AddTransient<PricelistAssignmentExportPagedDataSource>();
             serviceCollection.AddTransient<Func<ExportDataQuery, PricelistAssignmentExportPagedDataSource>>(provider =>
                 (exportDataQuery) =>
                 {
-                    var datasource = provider.CreateScope().ServiceProvider.GetRequiredService<PricelistAssignmentExportPagedDataSource>();
-                    datasource.DataQuery = (PricelistAssignmentExportDataQuery)exportDataQuery;
-                    return datasource;
+                    var pricingSearchService = provider.CreateScope().ServiceProvider.GetRequiredService<IPricingSearchService>();
+                    var pricingService = provider.CreateScope().ServiceProvider.GetRequiredService<IPricingService>();
+                    var catalogService = provider.CreateScope().ServiceProvider.GetRequiredService<ICatalogService>();
+                    var result = new PricelistAssignmentExportPagedDataSource(pricingSearchService, pricingService, catalogService, (PricelistAssignmentExportDataQuery)exportDataQuery);
+                    return result;
                 });
             var requirements = new IAuthorizationRequirement[]
             {
@@ -185,21 +190,18 @@ namespace VirtoCommerce.PricingModule.Web
                  ExportedTypeDefinitionBuilder.Build<ExportablePrice, PriceExportDataQuery>()
                     .WithDataSourceFactory(dataQuery => priceExportPagedDataSourceFactory(dataQuery))
                     .WithMetadata(typeof(ExportablePrice).GetPropertyNames())
-                    .WithTabularDataConverter(new TabularPriceDataConverter())
                     .WithTabularMetadata(typeof(TabularPrice).GetPropertyNames()));
 
             registrar.RegisterType(
                  ExportedTypeDefinitionBuilder.Build<ExportablePricelist, PricelistExportDataQuery>()
                     .WithDataSourceFactory(dataQuery => pricelistExportPagedDataSourceFactory(dataQuery))
                     .WithMetadata(typeof(ExportablePricelist).GetPropertyNames())
-                    .WithTabularDataConverter(new TabularPricelistDataConverter())
                     .WithTabularMetadata(typeof(TabularPricelist).GetPropertyNames()));
 
             registrar.RegisterType(
                  ExportedTypeDefinitionBuilder.Build<ExportablePricelistAssignment, PricelistAssignmentExportDataQuery>()
                     .WithDataSourceFactory(dataQuery => pricelistAssignmentExportPagedDataSourceFactory(dataQuery))
                     .WithMetadata(typeof(ExportablePricelistAssignment).GetPropertyNames())
-                    .WithTabularDataConverter(new TabularPricelistAssignmentDataConverter())
                     .WithTabularMetadata(typeof(TabularPricelistAssignment).GetPropertyNames()));
 
             //registrar.RegisterType(

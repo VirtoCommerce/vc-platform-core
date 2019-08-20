@@ -11,7 +11,6 @@ using Microsoft.Extensions.Options;
 using VirtoCommerce.ExportModule.Core;
 using VirtoCommerce.ExportModule.Core.Model;
 using VirtoCommerce.ExportModule.Core.Services;
-using VirtoCommerce.ExportModule.Data.Model;
 using VirtoCommerce.ExportModule.Web.BackgroundJobs;
 using VirtoCommerce.ExportModule.Web.Model;
 using VirtoCommerce.Platform.Core;
@@ -24,7 +23,7 @@ namespace VirtoCommerce.ExportModule.Web.Controllers
     [Route("api/export")]
     public class ExportController : Controller
     {
-        private readonly IEnumerable<Func<IExportProviderConfiguration, ExportedTypePropertyInfo[], IExportProvider>> _exportProviderFactories;
+        private readonly IEnumerable<Func<ExportDataRequest, IExportProvider>> _exportProviderFactories;
         private readonly IKnownExportTypesRegistrar _knownExportTypesRegistrar;
         private readonly IUserNameResolver _userNameResolver;
         private readonly IPushNotificationManager _pushNotificationManager;
@@ -33,7 +32,7 @@ namespace VirtoCommerce.ExportModule.Web.Controllers
         private readonly IAuthorizationService _authorizationService;
 
         public ExportController(
-            IEnumerable<Func<IExportProviderConfiguration, ExportedTypePropertyInfo[], IExportProvider>> exportProviderFactories,
+            IEnumerable<Func<ExportDataRequest, IExportProvider>> exportProviderFactories,
             IKnownExportTypesRegistrar knownExportTypesRegistrar,
             IUserNameResolver userNameResolver,
             IPushNotificationManager pushNotificationManager,
@@ -71,7 +70,7 @@ namespace VirtoCommerce.ExportModule.Web.Controllers
         [Authorize(ModuleConstants.Security.Permissions.Access)]
         public ActionResult<IExportProvider[]> GetExportProviders()
         {
-            return Ok(_exportProviderFactories.Select(x => x(new EmptyProviderConfiguration(), null)).ToArray());
+            return Ok(_exportProviderFactories.Select(x => x(new ExportDataRequest())).ToArray());
         }
 
         /// <summary>
@@ -94,7 +93,8 @@ namespace VirtoCommerce.ExportModule.Web.Controllers
             var exportedTypeDefinition = _knownExportTypesResolver.ResolveExportedTypeDefinition(request.ExportTypeName);
             var pagedDataSource = exportedTypeDefinition.ExportedDataSourceFactory(request.DataQuery);
 
-            var queryResult = pagedDataSource.FetchNextPage();
+            pagedDataSource.Fetch();
+            var queryResult = pagedDataSource.Items;
             var result = new ExportableSearchResult()
             {
                 TotalCount = pagedDataSource.GetTotalCount(),

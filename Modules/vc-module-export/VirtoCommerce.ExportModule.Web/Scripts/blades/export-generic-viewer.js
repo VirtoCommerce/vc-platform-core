@@ -304,7 +304,7 @@ angular.module('virtoCommerce.exportModule')
                     dataQuery.objectIds = selectedIds;
                 }
                 else {
-                    dataQuery.objectIds=[];
+                    dataQuery.objectIds = [];
                 }
             }
 

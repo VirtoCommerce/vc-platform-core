@@ -8,7 +8,7 @@ namespace VirtoCommerce.ExportModule.Core.Model
     public interface IPagedDataSource
     {
         /// <summary>
-        /// The number of the page that will returned by <see cref = "FetchNextPage" />
+        /// The number of the page that will returned by <see cref = "Fetch" />
         /// </summary>
         int CurrentPageNumber { get; }
         /// <summary>
@@ -24,7 +24,12 @@ namespace VirtoCommerce.ExportModule.Core.Model
         /// Gets the data page from the source according to currently set <see cref = "CurrentPageNumber" /> and <see cref = "PageSize" />.
         /// Implementations should increment <see cref="CurrentPageNumber"/> after fetch.
         /// </summary>
-        /// <returns>Exportable entities</returns>
-        IEnumerable<IExportable> FetchNextPage();
+        /// <returns>Is some data received</returns>
+        bool Fetch();
+        /// <summary>
+        /// Property to get received data
+        /// </summary>
+        /// <returns>Exportable entities received after Fetch() </returns>
+        IEnumerable<IExportable> Items { get; }
     }
 }
