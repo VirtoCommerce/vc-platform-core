@@ -2,11 +2,13 @@ using System.Collections.Generic;
 using System.Linq;
 using System.Threading.Tasks;
 using Moq;
+using Newtonsoft.Json;
 using VirtoCommerce.CoreModule.Core.Common;
 using VirtoCommerce.CoreModule.Core.Conditions;
 using VirtoCommerce.MarketingModule.Core.Model.Promotions;
 using VirtoCommerce.MarketingModule.Core.Model.Promotions.Conditions;
 using VirtoCommerce.MarketingModule.Core.Model.Promotions.Search;
+using VirtoCommerce.MarketingModule.Core.Promotions;
 using VirtoCommerce.MarketingModule.Core.Search;
 using VirtoCommerce.MarketingModule.Core.Services;
 using VirtoCommerce.MarketingModule.Data.Promotions;
@@ -128,30 +130,51 @@ namespace VirtoCommerce.MarketingModule.Test
         [Fact]
         public void EvaluateRewards_DynamicPromotions()
         {
-            ////Arrange 
-            //var couponSearchMockServiceMock = new Mock<ICouponSearchService>();
-            //var promotionUsageSearchMock = new Mock<IPromotionUsageSearchService>();
+            //Arrange 
+            var couponSearchMockServiceMock = new Mock<ICouponSearchService>();
+            var promotionUsageSearchMock = new Mock<IPromotionUsageSearchService>();
+            var promoConditionTree = "{\"AvailableChildren\":null,\"Children\":[{\"All\":false,\"Not\":false,\"AvailableChildren\":null,\"Children\":[{\"AvailableChildren\":null,\"Children\":[],\"Id\":\"ConditionIsRegisteredUser\"}],\"Id\":\"BlockCustomerCondition\"},{\"All\":false,\"Not\":false,\"AvailableChildren\":null,\"Children\":[],\"Id\":\"BlockCatalogCondition\"},{\"All\":false,\"Not\":false,\"AvailableChildren\":null,\"Children\":[{\"NumItem\":10,\"NumItemSecond\":13,\"ProductId\":null,\"ProductName\":null,\"CompareCondition\":\"Between\",\"AvailableChildren\":null,\"Children\":[],\"Id\":\"ConditionAtNumItemsInCart\"},{\"SubTotal\":0.0,\"SubTotalSecond\":100.0,\"ExcludingCategoryIds\":[],\"ExcludingProductIds\":[],\"CompareCondition\":\"AtLeast\",\"AvailableChildren\":null,\"Children\":[],\"Id\":\"ConditionCartSubtotalLeast\"}],\"Id\":\"BlockCartCondition\"},{\"AvailableChildren\":null,\"Children\":[{\"Amount\":15.0,\"AvailableChildren\":null,\"Children\":[],\"Id\":\"RewardCartGetOfAbsSubtotal\"}],\"Id\":\"BlockReward\"}],\"Id\":\"PromotionConditionAndRewardTree\"}";
 
-            //var evalPolicy = GetPromotionEvaluationPolicy(new List<Promotion> { new DynamicPromotion(couponSearchMockServiceMock.Object, promotionUsageSearchMock.Object)
-            //{
-            //    DynamicExpression = "{\"AvailableChildren\":null,\"Children\":[{\"All\":false,\"Not\":false,\"AvailableChildren\":null,\"Children\":[{\"AvailableChildren\":null,\"Children\":[],\"Id\":\"ConditionIsRegisteredUser\"}],\"Id\":\"BlockCustomerCondition\"},{\"All\":false,\"Not\":false,\"AvailableChildren\":null,\"Children\":[],\"Id\":\"BlockCatalogCondition\"},{\"All\":false,\"Not\":false,\"AvailableChildren\":null,\"Children\":[{\"NumItem\":10,\"NumItemSecond\":13,\"ProductId\":null,\"ProductName\":null,\"CompareCondition\":\"Between\",\"AvailableChildren\":null,\"Children\":[],\"Id\":\"ConditionAtNumItemsInCart\"},{\"SubTotal\":0.0,\"SubTotalSecond\":100.0,\"ExcludingCategoryIds\":[],\"ExcludingProductIds\":[],\"CompareCondition\":\"AtLeast\",\"AvailableChildren\":null,\"Children\":[],\"Id\":\"ConditionCartSubtotalLeast\"}],\"Id\":\"BlockCartCondition\"},{\"AvailableChildren\":null,\"Children\":[{\"Amount\":15.0,\"AvailableChildren\":null,\"Children\":[],\"Id\":\"RewardCartGetOfAbsSubtotal\"}],\"Id\":\"BlockReward\"}],\"Id\":\"PromotionConditionAndRewardTree\"}"
-            //} });
-            //var context = new PromotionEvaluationContext()
-            //{
-            //    IsRegisteredUser = true,
-            //    IsEveryone = true,
-            //    Currency = "usd",
-            //    PromoEntries = new List<ProductPromoEntry> { new ProductPromoEntry() { ProductId = "1" } },
-            //    CartPromoEntries = new List<ProductPromoEntry> { new ProductPromoEntry { Quantity = 11, Price = 5 } }
-            //};
+            AbstractTypeFactory<Promotion>.RegisterType<DynamicPromotion>().WithSetupAction((promotion) =>
+            {
+                var dynamicPromotion = promotion as DynamicPromotion;
+                dynamicPromotion.CouponSearchService = couponSearchMockServiceMock.Object;
+                dynamicPromotion.PromotionUsageSearchService = promotionUsageSearchMock.Object;
+                dynamicPromotion.DynamicExpression = AbstractTypeFactory<PromotionConditionAndRewardTree>.TryCreateInstance();
+                dynamicPromotion.DynamicExpression.Children = dynamicPromotion.DynamicExpression.AvailableChildren.ToList();
+            });
+
+            AbstractTypeFactory<IConditionTree>.RegisterType<PromotionConditionAndRewardTree>();
+            foreach (var conditionTree in ((IConditionTree)AbstractTypeFactory<PromotionConditionAndRewardTree>.TryCreateInstance()).Traverse(x => x.AvailableChildren))
+            {
+                AbstractTypeFactory<IConditionTree>.RegisterType(conditionTree.GetType(), noThrowIfExists: true);
+            }
+            
+            var evalPolicy = GetPromotionEvaluationPolicy(new List<Promotion> { new DynamicPromotion
+            {
+                CouponSearchService = couponSearchMockServiceMock.Object,
+                PromotionUsageSearchService = promotionUsageSearchMock.Object,
+                DynamicExpression = JsonConvert.DeserializeObject<PromotionConditionAndRewardTree>(promoConditionTree, new ConditionJsonConverter(), new RewardJsonConverter())
+            } });
+
+            var context = new PromotionEvaluationContext()
+            {
+                IsRegisteredUser = true,
+                IsEveryone = true,
+                Currency = "usd",
+                PromoEntries = new List<ProductPromoEntry> { new ProductPromoEntry() { ProductId = "1" } },
+                CartPromoEntries = new List<ProductPromoEntry> { new ProductPromoEntry { Quantity = 11, Price = 5 } }
+            };
+
+            
 
             //RegisterConditionRewards();
 
-            ////Act
-            //var rewards = evalPolicy.EvaluatePromotionAsync(context).GetAwaiter().GetResult().Rewards;
+            //Act
+            var rewards = evalPolicy.EvaluatePromotionAsync(context).GetAwaiter().GetResult().Rewards;
 
-            ////Assert
-            //Assert.Equal(1, rewards.Count);
+            //Assert
+            Assert.Equal(1, rewards.Count);
         }
 
         private static IMarketingPromoEvaluator GetPromotionEvaluationPolicy(IEnumerable<Promotion> promotions)
