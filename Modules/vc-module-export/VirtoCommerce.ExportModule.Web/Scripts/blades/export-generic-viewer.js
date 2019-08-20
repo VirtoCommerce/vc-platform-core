@@ -2,7 +2,6 @@ angular.module('virtoCommerce.exportModule')
     .controller('virtoCommerce.exportModule.exportGenericViewerController',
     ['$localStorage', '$timeout', '$scope', 'platformWebApp.bladeUtils', 'platformWebApp.uiGridHelper', 'virtoCommerce.exportModule.exportModuleApi', 'virtoCommerce.exportModule.genericViewerItemService',
     function ($localStorage, $timeout, $scope, bladeUtils, uiGridHelper, exportModuleApi, genericViewerItemService) {
-        const idOfNothing = 'id of nothing';
         $scope.uiGridConstants = uiGridHelper.uiGridConstants;
         $scope.hasMore = true;
         $scope.items = [];
@@ -17,12 +16,6 @@ angular.module('virtoCommerce.exportModule')
 
         var filter = blade.filter = $scope.filter = {};
         blade.exportDataRequest = blade.exportDataRequest ? angular.copy(blade.exportDataRequest) : { exportTypeName: "NotSpecified" };
-
-        if (blade.exportDataRequest.dataQuery.objectIds &&
-            blade.exportDataRequest.dataQuery.objectIds.length == 1 &&
-            blade.exportDataRequest.dataQuery.objectIds[0] === idOfNothing) {
-            delete blade.exportDataRequest.dataQuery.objectIds; // Removing fake ids limitation, otherwise universal viewer will stuck in empty
-        }
 
         if (blade.exportDataRequest.dataQuery && blade.exportDataRequest.dataQuery.keyword) {
             filter.keyword = blade.exportDataRequest.dataQuery.keyword;
@@ -311,7 +304,7 @@ angular.module('virtoCommerce.exportModule')
                     dataQuery.objectIds = selectedIds;
                 }
                 else {
-                    dataQuery.objectIds = [idOfNothing];
+                    dataQuery.objectIds=[];
                 }
             }
 

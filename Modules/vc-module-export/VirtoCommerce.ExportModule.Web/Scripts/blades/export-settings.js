@@ -96,14 +96,19 @@ angular.module('virtoCommerce.exportModule')
             var dataQuery = angular.copy(blade.exportDataRequest.dataQuery);
             dataQuery.includedProperties = [];
 
-            exportApi.getData(
-            {
-                exportTypeName: blade.exportDataRequest.exportTypeName,
-                dataQuery: dataQuery
+            if (!dataQuery.isAllSelected && !(dataQuery.objectIds && dataQuery.objectIds.length)) {
+                blade.dataSelected = 0;
             }
-            , function (data) {
-                blade.dataSelected = data.totalCount;                
-            });
+            else {
+                exportApi.getData(
+                {
+                    exportTypeName: blade.exportDataRequest.exportTypeName,
+                    dataQuery: dataQuery
+                }
+                , function (data) {
+                    blade.dataSelected = data.totalCount;
+                });
+            }
         }
 
         $scope.providerChanged = function () {
