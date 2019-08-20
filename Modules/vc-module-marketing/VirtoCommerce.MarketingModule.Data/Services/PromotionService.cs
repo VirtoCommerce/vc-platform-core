@@ -5,11 +5,9 @@ using System.Threading.Tasks;
 using Microsoft.Extensions.Caching.Memory;
 using VirtoCommerce.MarketingModule.Core.Events;
 using VirtoCommerce.MarketingModule.Core.Model.Promotions;
-using VirtoCommerce.MarketingModule.Core.Promotions;
 using VirtoCommerce.MarketingModule.Core.Services;
 using VirtoCommerce.MarketingModule.Data.Caching;
 using VirtoCommerce.MarketingModule.Data.Model;
-using VirtoCommerce.MarketingModule.Data.Promotions;
 using VirtoCommerce.MarketingModule.Data.Repositories;
 using VirtoCommerce.Platform.Core.Caching;
 using VirtoCommerce.Platform.Core.Common;
@@ -41,7 +39,7 @@ namespace VirtoCommerce.MarketingModule.Data.Services
                 using (var repository = _repositoryFactory())
                 {
                     var promotionEntities = await repository.GetPromotionsByIdsAsync(ids);
-                    return promotionEntities.Select(x => x.ToModel(AbstractTypeFactory<DynamicPromotion>.TryCreateInstance())).ToArray();
+                    return promotionEntities.Select(x => x.ToModel(AbstractTypeFactory<Promotion>.TryCreateInstance())).ToArray();
                 }
             });
         }
@@ -53,7 +51,7 @@ namespace VirtoCommerce.MarketingModule.Data.Services
             using (var repository = _repositoryFactory())
             {
                 var existEntities = await repository.GetPromotionsByIdsAsync(promotions.Where(x => !x.IsTransient()).Select(x => x.Id).ToArray());
-                foreach (var promotion in promotions.OfType<DynamicPromotion>())
+                foreach (var promotion in promotions)
                 {
                     var sourceEntity = AbstractTypeFactory<PromotionEntity>.TryCreateInstance();
                     if (sourceEntity != null)
@@ -62,7 +60,7 @@ namespace VirtoCommerce.MarketingModule.Data.Services
                         var targetEntity = existEntities.FirstOrDefault(x => x.Id == promotion.Id);
                         if (targetEntity != null)
                         {
-                            changedEntries.Add(new GenericChangedEntry<Promotion>(promotion, sourceEntity.ToModel(AbstractTypeFactory<DynamicPromotion>.TryCreateInstance()), EntryState.Modified));
+                            changedEntries.Add(new GenericChangedEntry<Promotion>(promotion, sourceEntity.ToModel(AbstractTypeFactory<Promotion>.TryCreateInstance()), EntryState.Modified));
                             sourceEntity.Patch(targetEntity);
                         }
                         else
