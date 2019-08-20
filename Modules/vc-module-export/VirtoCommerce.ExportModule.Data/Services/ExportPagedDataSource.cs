@@ -24,6 +24,8 @@ namespace VirtoCommerce.ExportModule.Data.Services
         protected ExportPagedDataSource(TDataQuery dataQuery)
         {
             _dataQuery = dataQuery;
+
+            PageSize = _dataQuery.Take - _dataQuery.Skip ?? PageSize;
         }
 
         public int CurrentPageNumber { get; protected set; } = 0;
@@ -66,7 +68,7 @@ namespace VirtoCommerce.ExportModule.Data.Services
             result.Sort = exportDataQuery.Sort;
 
             // It is for proper pagination - client side for viewer (dataQuery.Skip/Take) should work together with iterating through pages when getting data for export
-            result.Skip = exportDataQuery.Skip ?? CurrentPageNumber * PageSize;
+            result.Skip = (exportDataQuery.Skip ?? 0) + CurrentPageNumber * PageSize;
             result.Take = exportDataQuery.Take ?? PageSize;
 
             return result;
