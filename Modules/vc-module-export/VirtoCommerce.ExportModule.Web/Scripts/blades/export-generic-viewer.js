@@ -1,6 +1,6 @@
 angular.module('virtoCommerce.exportModule')
-    .controller('virtoCommerce.exportModule.exportGenericViewerController', 
-    ['$localStorage', '$timeout', '$scope', 'platformWebApp.bladeUtils', 'platformWebApp.uiGridHelper','virtoCommerce.exportModule.exportModuleApi', 'virtoCommerce.exportModule.genericViewerItemService',
+    .controller('virtoCommerce.exportModule.exportGenericViewerController',
+    ['$localStorage', '$timeout', '$scope', 'platformWebApp.bladeUtils', 'platformWebApp.uiGridHelper', 'virtoCommerce.exportModule.exportModuleApi', 'virtoCommerce.exportModule.genericViewerItemService',
     function ($localStorage, $timeout, $scope, bladeUtils, uiGridHelper, exportModuleApi, genericViewerItemService) {
         $scope.uiGridConstants = uiGridHelper.uiGridConstants;
         $scope.hasMore = true;
@@ -8,14 +8,13 @@ angular.module('virtoCommerce.exportModule')
         $scope.blade.headIcon = 'fa-upload';
         $scope.exportSearchFilters = [];
         $scope.exportSearchFilterIds = [];
-        
+
         var blade = $scope.blade;
         var bladeNavigationService = bladeUtils.bladeNavigationService;
         blade.isLoading = true;
         blade.isExpanded = true;
 
         var filter = blade.filter = $scope.filter = {};
-        blade.originalExportDataRequest = blade.exportDataRequest;
         blade.exportDataRequest = blade.exportDataRequest ? angular.copy(blade.exportDataRequest) : { exportTypeName: "NotSpecified" };
 
         if (blade.exportDataRequest.dataQuery && blade.exportDataRequest.dataQuery.keyword) {
@@ -26,7 +25,7 @@ angular.module('virtoCommerce.exportModule')
 
         blade.refresh = function () {
             $scope.items = [];
-            
+
             if ($scope.pageSettings.currentPage !== 1) {
                 $scope.pageSettings.currentPage = 1;
             }
@@ -61,24 +60,24 @@ angular.module('virtoCommerce.exportModule')
                     $scope.items = $scope.items.concat(data.results);
                     $scope.hasMore = data.results.length === $scope.pageSettings.itemsPerPageCount;
 
-                    $timeout(function() {
+                    $timeout(function () {
                         if ($scope.gridApi) {
                             if (pagedDataQuery.objectIds && pagedDataQuery.objectIds.length) {
                                 _.each(pagedDataQuery.objectIds, function (objectId) {
-                                    var dataItem = _.findWhere($scope.items, {id: objectId});
+                                    var dataItem = _.findWhere($scope.items, { id: objectId });
                                     $scope.gridApi.selection.selectRow(dataItem);
                                 });
-                            } 
+                            }
                             else if (pagedDataQuery.isAllSelected) {
                                 $scope.gridApi.selection.selectAllRows();
-                            } 
+                            }
                         }
                     });
 
                     if (callback) {
                         callback();
                     }
-            });
+                });
         }
 
         function showMore() {
@@ -98,19 +97,18 @@ angular.module('virtoCommerce.exportModule')
             }
         }
 
-        blade.resetFiltering = function() {
-            filter.resetKeyword();    
-            blade.resetRequestCustomFilter();        
+        blade.resetFiltering = function () {
+            filter.resetKeyword();
+            blade.resetRequestCustomFilter();
         };
 
         blade.resetRequestCustomFilter = function () {
             blade.exportDataRequest.dataQuery = getEmptyDataQuery();
         }
 
-        function buildDataQuery()
-        {
+        function buildDataQuery() {
             var dataQuery = getEmptyDataQuery();
-            
+
             angular.extend(dataQuery, getFilterConditions());
 
             return dataQuery;
@@ -135,7 +133,7 @@ angular.module('virtoCommerce.exportModule')
 
             var dataQuery = blade.exportDataRequest.dataQuery;
             if (dataQuery.objectIds && dataQuery.length) {
-                angular.extend(result, {objectIds: dataQuery.objectIds});
+                angular.extend(result, { objectIds: dataQuery.objectIds });
             }
 
             if (filter.keyword) {
@@ -160,9 +158,9 @@ angular.module('virtoCommerce.exportModule')
 
         $scope.selectItem = function (e, listItem) {
             blade.setSelectedItem(listItem);
-            
+
             var viewerFunc = genericViewerItemService.getViewer(listItem.type);
-            
+
             if (viewerFunc) {
                 bladeNavigationService.showBlade(viewerFunc(listItem), blade);
             }
@@ -204,7 +202,7 @@ angular.module('virtoCommerce.exportModule')
                 showFilterDetailBlade({ isNew: true, metafieldsId: metafieldsId, exportTypeName: blade.exportDataRequest.exportTypeName });
             } else {
                 bladeNavigationService.closeBlade({ id: 'exportGenericViewerFilter' });
-                
+
                 if (!filter.current) {
                     blade.resetRequestCustomFilter();
                 }
@@ -214,15 +212,15 @@ angular.module('virtoCommerce.exportModule')
         };
 
         filter.edit = function () {
-            var metafieldsId = blade.exportDataRequest.exportTypeName  + 'ExportFilter';
-            var filterDetailsParams = { 
-                data: filter.current, 
-                metafieldsId: metafieldsId, 
-                exportTypeName: blade.exportDataRequest.exportTypeName 
+            var metafieldsId = blade.exportDataRequest.exportTypeName + 'ExportFilter';
+            var filterDetailsParams = {
+                data: filter.current,
+                metafieldsId: metafieldsId,
+                exportTypeName: blade.exportDataRequest.exportTypeName
             };
 
             if (filter.current) {
-                angular.extend(filterDetailsParams, { data: filter.current }); 
+                angular.extend(filterDetailsParams, { data: filter.current });
             }
             else {
                 angular.extend(filterDetailsParams, { isNew: true });
@@ -257,7 +255,7 @@ angular.module('virtoCommerce.exportModule')
         blade.toolbarCommands = [{
             name: "platform.commands.refresh",
             icon: 'fa fa-refresh',
-            executeMethod: function() {
+            executeMethod: function () {
                 blade.resetFiltering();
                 blade.refresh();
             },
@@ -280,7 +278,7 @@ angular.module('virtoCommerce.exportModule')
             });
 
             // need to call refresh after digest cycle as we do not "$watch" for $scope.pageSettings.currentPage
-            $timeout(function() {
+            $timeout(function () {
                 blade.refresh();
             });
         };
@@ -288,22 +286,26 @@ angular.module('virtoCommerce.exportModule')
         $scope.cancelChanges = function () {
             bladeNavigationService.closeBlade(blade);
         };
-    
+
         $scope.isValid = function () {
             return ($scope.items && $scope.items.length);
         };
-    
+
         $scope.saveChanges = function () {
             var dataQuery = buildDataQuery();
             var isAllSelected = $scope.gridApi.selection.getSelectAllState();
-            var selectedIds = _.map($scope.gridApi.selection.getSelectedRows(), function(item) { return item.id; });
+            var selectedIds = _.map($scope.gridApi.selection.getSelectedRows(), function (item) { return item.id; });
 
             dataQuery.isAllSelected = isAllSelected;
-            
-            if ((blade.exportDataRequest.dataQuery.objectIds && blade.exportDataRequest.dataQuery.objectIds.length) 
-                || (!isAllSelected && selectedIds.length) 
-                || (selectedIds.length == 0)) {
-                dataQuery.objectIds = selectedIds;
+
+            if ((blade.exportDataRequest.dataQuery.objectIds && blade.exportDataRequest.dataQuery.objectIds.length)
+                || (!isAllSelected)) {
+                if (selectedIds.length) {
+                    dataQuery.objectIds = selectedIds;
+                }
+                else {
+                    dataQuery.objectIds = [];
+                }
             }
 
             if (blade.onCompleted) {
