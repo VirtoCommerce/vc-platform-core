@@ -12,62 +12,49 @@ namespace VirtoCommerce.ExportModule.Data.Services
     /// </summary>
     /// <typeparam name="TDataQuery">Specific <see cref="ExportDataQuery"/> type that is used to query this data source.</typeparam>
     /// <typeparam name="TSearchCriteria">Specific <see cref="SearchCriteriaBase"/> type that is used by this data source to query data.</typeparam>
-    public abstract class SingleTypeExportPagedDataSource<TDataQuery, TSearchCriteria> : IPagedDataSource
+    public abstract class ExportPagedDataSource<TDataQuery, TSearchCriteria> : IPagedDataSource
         where TDataQuery : ExportDataQuery
         where TSearchCriteria : SearchCriteriaBase
     {
-        protected TDataQuery _dataQuery;
-        public IEnumerable<IExportable> Items { get; private set; }
+        private readonly TDataQuery _dataQuery;
+        protected int TotalCount = -1;
 
-        protected int _totalCount = -1;
-        public int CurrentPageNumber { get; protected set; }
-        public int PageSize { get; set; } = 50;
-
-        public TDataQuery DataQuery
+        protected ExportPagedDataSource(TDataQuery dataQuery)
         {
-            set
-            {
-                _dataQuery = value;
-
-                //Reset datasource state when DataQuery is changed
-                CurrentPageNumber = 0;
-                _totalCount = -1;
-            }
+            _dataQuery = dataQuery;
         }
 
-        public virtual bool Fetch()
+        public int CurrentPageNumber { get; protected set; } = 0;
+        public int PageSize { get; set; } = 50;
+        public virtual IEnumerable<IExportable> FetchNextPage()
         {
             var searchCriteria = BuildSearchCriteria(_dataQuery);
-            var data = FetchData(searchCriteria);
+            var result = FetchData(searchCriteria);
 
-            _totalCount = data.TotalCount;
+            TotalCount = result.TotalCount;
             CurrentPageNumber++;
 
-            Items = data.Results;
-
-            return data.Results.Any();
+            return result.Results;
         }
 
         public virtual int GetTotalCount()
         {
-            if (_totalCount < 0)
+            if (TotalCount < 0)
             {
                 var searchCriteria = BuildSearchCriteria(_dataQuery);
 
                 searchCriteria.Skip = 0;
                 searchCriteria.Take = 0;
 
-                _totalCount = FetchData(searchCriteria).TotalCount;
+                TotalCount = FetchData(searchCriteria).TotalCount;
             }
 
-            return _totalCount;
+            return TotalCount;
         }
 
         protected virtual TSearchCriteria BuildSearchCriteria(TDataQuery exportDataQuery)
         {
             var result = AbstractTypeFactory<TSearchCriteria>.TryCreateInstance();
-
-            FillSearchCriteria(exportDataQuery, result);
 
             result.ObjectIds = exportDataQuery.ObjectIds;
             result.Keyword = exportDataQuery.Keyword;
@@ -79,14 +66,6 @@ namespace VirtoCommerce.ExportModule.Data.Services
 
             return result;
         }
-
-        /// <summary>
-        /// Fill <paramref name="searchCriteria"/> with <paramref name="dataQuery"/> data specific fields here.
-        /// Some common <see cref="SearchCriteriaBase"/> fields are already filled.
-        /// </summary>
-        /// <param name="dataQuery"></param>
-        /// <param name="searchCriteria"></param>
-        protected abstract void FillSearchCriteria(TDataQuery dataQuery, TSearchCriteria searchCriteria);
 
         /// <summary>
         /// Prepare exported data based on the <typeparamref name="TSearchCriteria"/> search criteria in this method.

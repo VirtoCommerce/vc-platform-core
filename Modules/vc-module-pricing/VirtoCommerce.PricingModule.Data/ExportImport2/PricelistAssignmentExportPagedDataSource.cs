@@ -12,26 +12,33 @@ using VirtoCommerce.PricingModule.Core.Services;
 
 namespace VirtoCommerce.PricingModule.Data.ExportImport
 {
-    public class PricelistAssignmentExportPagedDataSource : SingleTypeExportPagedDataSource<PricelistAssignmentExportDataQuery, PricelistAssignmentsSearchCriteria>
+    public class PricelistAssignmentExportPagedDataSource : ExportPagedDataSource<PricelistAssignmentExportDataQuery, PricelistAssignmentsSearchCriteria>
     {
         private readonly IPricingSearchService _searchService;
         private readonly IPricingService _pricingService;
         private readonly ICatalogService _catalogService;
+        private readonly PricelistAssignmentExportDataQuery _dataQuery;
 
         public PricelistAssignmentExportPagedDataSource(
            IPricingSearchService searchService,
            IPricingService pricingService,
-           ICatalogService catalogService)
+           ICatalogService catalogService,
+           PricelistAssignmentExportDataQuery dataQuery) : base(dataQuery)
         {
             _searchService = searchService;
             _pricingService = pricingService;
             _catalogService = catalogService;
+            _dataQuery = dataQuery;
         }
 
-        protected override void FillSearchCriteria(PricelistAssignmentExportDataQuery dataQuery, PricelistAssignmentsSearchCriteria searchCriteria)
+        protected override PricelistAssignmentsSearchCriteria BuildSearchCriteria(PricelistAssignmentExportDataQuery exportDataQuery)
         {
-            searchCriteria.PriceListIds = dataQuery.PriceListIds;
-            searchCriteria.CatalogIds = dataQuery.CatalogIds;
+            var result = base.BuildSearchCriteria(exportDataQuery);
+
+            result.PriceListIds = _dataQuery.PriceListIds;
+            result.CatalogIds = _dataQuery.CatalogIds;
+
+            return result;
         }
 
         protected override ExportableSearchResult FetchData(PricelistAssignmentsSearchCriteria searchCriteria)

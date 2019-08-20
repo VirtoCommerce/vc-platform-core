@@ -12,26 +12,35 @@ using VirtoCommerce.PricingModule.Core.Services;
 
 namespace VirtoCommerce.PricingModule.Data.ExportImport
 {
-    public class PriceExportPagedDataSource : SingleTypeExportPagedDataSource<PriceExportDataQuery, PricesSearchCriteria>
+    public class PriceExportPagedDataSource : ExportPagedDataSource<PriceExportDataQuery, PricesSearchCriteria>
     {
         private readonly IPricingSearchService _searchService;
         private readonly IPricingService _pricingService;
         private readonly IItemService _itemService;
+        private readonly PriceExportDataQuery _dataQuery;
 
-        public PriceExportPagedDataSource(IPricingSearchService searchService,
+        public PriceExportPagedDataSource(
+            IPricingSearchService searchService,
             IPricingService pricingService,
-            IItemService itemService)
+            IItemService itemService,
+            PriceExportDataQuery dataQuery) : base(dataQuery)
         {
             _searchService = searchService;
             _pricingService = pricingService;
             _itemService = itemService;
+            _dataQuery = dataQuery;
         }
 
-        protected override void FillSearchCriteria(PriceExportDataQuery dataQuery, PricesSearchCriteria searchCriteria)
+
+        protected override PricesSearchCriteria BuildSearchCriteria(PriceExportDataQuery exportDataQuery)
         {
-            searchCriteria.PriceListIds = dataQuery.PriceListIds;
-            searchCriteria.ProductIds = dataQuery.ProductIds;
-            searchCriteria.ModifiedSince = dataQuery.ModifiedSince;
+            var result = base.BuildSearchCriteria(exportDataQuery);
+
+            result.PriceListIds = _dataQuery.PriceListIds;
+            result.ProductIds = _dataQuery.ProductIds;
+            result.ModifiedSince = _dataQuery.ModifiedSince;
+
+            return result;
         }
 
         protected override ExportableSearchResult FetchData(PricesSearchCriteria searchCriteria)

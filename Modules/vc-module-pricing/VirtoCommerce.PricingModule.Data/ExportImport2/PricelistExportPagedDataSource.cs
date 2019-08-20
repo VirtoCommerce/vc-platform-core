@@ -8,20 +8,29 @@ using VirtoCommerce.PricingModule.Core.Services;
 
 namespace VirtoCommerce.PricingModule.Data.ExportImport
 {
-    public class PricelistExportPagedDataSource : SingleTypeExportPagedDataSource<PricelistExportDataQuery, PricelistSearchCriteria>
+    public class PricelistExportPagedDataSource : ExportPagedDataSource<PricelistExportDataQuery, PricelistSearchCriteria>
     {
         private readonly IPricingSearchService _searchService;
         private readonly IPricingService _pricingService;
+        private readonly PricelistExportDataQuery _dataQuery;
 
-        public PricelistExportPagedDataSource(IPricingSearchService searchService, IPricingService pricingService)
+        public PricelistExportPagedDataSource(
+            IPricingSearchService searchService,
+            IPricingService pricingService,
+            PricelistExportDataQuery dataQuery) : base(dataQuery)
         {
             _searchService = searchService;
             _pricingService = pricingService;
+            _dataQuery = dataQuery;
         }
 
-        protected override void FillSearchCriteria(PricelistExportDataQuery dataQuery, PricelistSearchCriteria searchCriteria)
+        protected override PricelistSearchCriteria BuildSearchCriteria(PricelistExportDataQuery exportDataQuery)
         {
-            searchCriteria.Currencies = dataQuery.Currencies;
+            var result = base.BuildSearchCriteria(exportDataQuery);
+
+            result.Currencies = _dataQuery.Currencies;
+
+            return result;
         }
 
         protected override ExportableSearchResult FetchData(PricelistSearchCriteria searchCriteria)
