@@ -21,7 +21,7 @@ angular.module('virtoCommerce.exportModule')
         if (blade.exportDataRequest.dataQuery.objectIds &&
             blade.exportDataRequest.dataQuery.objectIds.length == 1 &&
             blade.exportDataRequest.dataQuery.objectIds[0] === idOfNothing) {
-            delete blade.exportDataRequest.dataQuery.objectIds;
+            delete blade.exportDataRequest.dataQuery.objectIds; // Removing fake ids limitation, otherwise universal viewer will stuck in empty
         }
 
         if (blade.exportDataRequest.dataQuery && blade.exportDataRequest.dataQuery.keyword) {
