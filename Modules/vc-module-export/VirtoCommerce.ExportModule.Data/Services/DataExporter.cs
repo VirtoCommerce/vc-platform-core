@@ -61,38 +61,34 @@ namespace VirtoCommerce.ExportModule.Data.Services
                     exportProgress.Description = "Fetching…";
                     progressCallback(exportProgress);
 
-                    while (exportedCount < totalCount)
+                    while (pagedDataSource.Fetch())
                     {
                         token.ThrowIfCancellationRequested();
 
-                        while (pagedDataSource.Fetch())
+                        var objectBatch = pagedDataSource.Items;
+
+                        foreach (var obj in objectBatch)
                         {
-                            var objectBatch = pagedDataSource.Items;
-
-                            foreach (var obj in objectBatch)
+                            try
                             {
-                                try
+                                var preparedObject = obj.Clone() as IExportable;
+
+                                request.DataQuery.FilterProperties(preparedObject);
+
+                                if (needTabularData)
                                 {
-                                    var preparedObject = obj.Clone() as IExportable;
-
-                                    request.DataQuery.FilterProperties(preparedObject);
-
-                                    if (needTabularData)
-                                    {
-                                        preparedObject = (preparedObject as ITabularConvertible)?.ToTabular() ??
-                                                         throw new NotSupportedException($"Object should be {nameof(ITabularConvertible)} to be exported using tabular provider.");
-                                    }
-
-                                    exportProvider.WriteRecord(writer, preparedObject);
+                                    preparedObject = (preparedObject as ITabularConvertible)?.ToTabular() ??
+                                                     throw new NotSupportedException($"Object should be {nameof(ITabularConvertible)} to be exported using tabular provider.");
                                 }
-                                catch (Exception e)
-                                {
-                                    exportProgress.Errors.Add(e.Message);
-                                    progressCallback(exportProgress);
-                                }
-                                exportedCount++;
+
+                                exportProvider.WriteRecord(writer, preparedObject);
                             }
-
+                            catch (Exception e)
+                            {
+                                exportProgress.Errors.Add(e.Message);
+                                progressCallback(exportProgress);
+                            }
+                            exportedCount++;
                         }
 
                         exportProgress.ProcessedCount = exportedCount;
