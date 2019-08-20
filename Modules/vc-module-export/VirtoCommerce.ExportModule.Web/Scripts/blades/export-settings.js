@@ -24,10 +24,7 @@ angular.module('virtoCommerce.exportModule')
                     if (blade.isExportedTypeSelected) {
                         getKnownTypes();
                     }
-
                 }
-
-
             });
 
             blade.isLoading = false;

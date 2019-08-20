@@ -26,6 +26,7 @@ using VirtoCommerce.Platform.Data.Extensions;
 using VirtoCommerce.Platform.Security.Authorization;
 using VirtoCommerce.PricingModule.Core;
 using VirtoCommerce.PricingModule.Core.Events;
+using VirtoCommerce.PricingModule.Core.Model;
 using VirtoCommerce.PricingModule.Core.Model.Conditions;
 using VirtoCommerce.PricingModule.Core.Services;
 using VirtoCommerce.PricingModule.Data.ExportImport;
@@ -75,7 +76,7 @@ namespace VirtoCommerce.PricingModule.Web
             //Register in the  AbstractTypeFactory<IConditionTree> the  tree and blocks expressions
             AbstractTypeFactory<IConditionTree>.RegisterType<PriceConditionTree>();
             AbstractTypeFactory<IConditionTree>.RegisterType<BlockPricingCondition>();
-            
+
             serviceCollection.AddTransient<Func<ExportDataQuery, PriceExportPagedDataSource>>(provider =>
                 (exportDataQuery) =>
                 {
@@ -104,7 +105,7 @@ namespace VirtoCommerce.PricingModule.Web
                     var result = new PricelistAssignmentExportPagedDataSource(pricingSearchService, pricingService, catalogService, (PricelistAssignmentExportDataQuery)exportDataQuery);
                     return result;
                 });
-            
+
             var requirements = new IAuthorizationRequirement[]
             {
                 new PermissionAuthorizationRequirement(ModuleConstants.Security.Permissions.Export), new PermissionAuthorizationRequirement(ModuleConstants.Security.Permissions.Read)
