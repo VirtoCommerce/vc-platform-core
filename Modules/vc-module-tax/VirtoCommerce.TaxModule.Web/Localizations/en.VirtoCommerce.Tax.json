@@ -23,7 +23,6 @@
                     "note": "Set the order how tax providers appear sorted in web store. Drag and drop to change the order."
                 }
             }
-
         },
         "dialogs": {
             "tax-provider-save": {
@@ -38,12 +37,11 @@
             }
         },
         "labels": {
-            "FixedTaxRateProvider": {
+            "FixedRateTaxProvider": {
                 "name": "Fixed percent tax rate",
                 "description": "Fixed percent tax rate"
             }
         }
-
     },
     "settings": {
         "VirtoCommerce.Core.FixedTaxRateProvider.Rate": {
