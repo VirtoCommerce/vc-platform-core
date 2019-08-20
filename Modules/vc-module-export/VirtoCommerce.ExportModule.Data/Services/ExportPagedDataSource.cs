@@ -1,4 +1,5 @@
 using System.Collections.Generic;
+using System.Linq;
 using VirtoCommerce.ExportModule.Core.Model;
 using VirtoCommerce.Platform.Core.Common;
 
@@ -15,6 +16,8 @@ namespace VirtoCommerce.ExportModule.Data.Services
         where TDataQuery : ExportDataQuery
         where TSearchCriteria : SearchCriteriaBase
     {
+        public IEnumerable<IExportable> Items { get; private set; }
+
         private readonly TDataQuery _dataQuery;
         protected int TotalCount = -1;
 
@@ -25,17 +28,6 @@ namespace VirtoCommerce.ExportModule.Data.Services
 
         public int CurrentPageNumber { get; protected set; } = 0;
         public int PageSize { get; set; } = 50;
-        public virtual IEnumerable<IExportable> FetchNextPage()
-        {
-            var searchCriteria = BuildSearchCriteria(_dataQuery);
-            var result = FetchData(searchCriteria);
-
-            TotalCount = result.TotalCount;
-            CurrentPageNumber++;
-
-            return result.Results;
-        }
-
         public virtual int GetTotalCount()
         {
             if (TotalCount < 0)
@@ -50,6 +42,20 @@ namespace VirtoCommerce.ExportModule.Data.Services
 
             return TotalCount;
         }
+
+        public bool Fetch()
+        {
+            var searchCriteria = BuildSearchCriteria(_dataQuery);
+            var data = FetchData(searchCriteria);
+
+            TotalCount = data.TotalCount;
+            CurrentPageNumber++;
+
+            Items = data.Results;
+
+            return data.Results.Any();
+        }
+
 
         protected virtual TSearchCriteria BuildSearchCriteria(TDataQuery exportDataQuery)
         {

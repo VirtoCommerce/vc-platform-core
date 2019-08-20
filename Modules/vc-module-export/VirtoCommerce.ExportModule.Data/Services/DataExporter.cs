@@ -61,16 +61,11 @@ namespace VirtoCommerce.ExportModule.Data.Services
                     exportProgress.Description = "Fetching…";
                     progressCallback(exportProgress);
 
-                    while (exportedCount < totalCount)
+                    while (pagedDataSource.Fetch())
                     {
                         token.ThrowIfCancellationRequested();
 
-                        var objectBatch = pagedDataSource.FetchNextPage();
-
-                        if (objectBatch == null)
-                        {
-                            break;
-                        }
+                        var objectBatch = pagedDataSource.Items;
 
                         foreach (var obj in objectBatch)
                         {
@@ -83,7 +78,7 @@ namespace VirtoCommerce.ExportModule.Data.Services
                                 if (needTabularData)
                                 {
                                     preparedObject = (preparedObject as ITabularConvertible)?.ToTabular() ??
-                                        throw new NotSupportedException($"Object should be {nameof(ITabularConvertible)} to be exported using tabular provider.");
+                                                     throw new NotSupportedException($"Object should be {nameof(ITabularConvertible)} to be exported using tabular provider.");
                                 }
 
                                 exportProvider.WriteRecord(writer, preparedObject);
