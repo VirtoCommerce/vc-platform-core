@@ -12,6 +12,7 @@ using VirtoCommerce.ExportModule.JsonProvider;
 using VirtoCommerce.ExportModule.Web.JsonConverters;
 using VirtoCommerce.Platform.Core.Modularity;
 using VirtoCommerce.Platform.Core.Security;
+using VirtoCommerce.Platform.Core.Settings;
 
 namespace VirtoCommerce.ExportModule.Web
 {
@@ -40,6 +41,9 @@ namespace VirtoCommerce.ExportModule.Web
 
         public void PostInitialize(IApplicationBuilder appBuilder)
         {
+            var settingsRegistrar = appBuilder.ApplicationServices.GetRequiredService<ISettingsRegistrar>();
+            settingsRegistrar.RegisterSettings(ModuleConstants.Settings.AllSettings, ModuleInfo.Id);
+
             //Register module permissions
             var permissionsProvider = appBuilder.ApplicationServices.GetRequiredService<IPermissionsRegistrar>();
             permissionsProvider.RegisterPermissions(ModuleConstants.Security.Permissions.AllPermissions.Select(x => new Permission() { GroupName = "Export", Name = x }).ToArray());

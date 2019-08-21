@@ -1,3 +1,6 @@
+using System.Collections.Generic;
+using VirtoCommerce.Platform.Core.Settings;
+
 namespace VirtoCommerce.ExportModule.Core
 {
     public static class ModuleConstants
@@ -11,6 +14,30 @@ namespace VirtoCommerce.ExportModule.Core
 
                 public static readonly string[] AllPermissions = { Access, Download };
             }
+        }
+
+        public static class Settings
+        {
+            public static class General
+            {
+                public static SettingDescriptor ExportFileNameTemplate = new SettingDescriptor
+                {
+                    Name = "Export.FileNameTemplate",
+                    ValueType = SettingValueType.ShortText,
+                    GroupName = "Export|General",
+                    DefaultValue = "export_{0:yyyyMMddHHmmss}"
+                };
+
+                public static IEnumerable<SettingDescriptor> AllSettings
+                {
+                    get
+                    {
+                        yield return ExportFileNameTemplate;
+                    }
+                }
+            }
+
+            public static IEnumerable<SettingDescriptor> AllSettings => General.AllSettings;
         }
     }
 }
