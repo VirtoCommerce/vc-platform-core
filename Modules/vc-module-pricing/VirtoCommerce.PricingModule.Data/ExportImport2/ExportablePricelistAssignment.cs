@@ -22,7 +22,7 @@ namespace VirtoCommerce.PricingModule.Data.ExportImport
 
         #endregion
 
-        public ExportablePricelistAssignment FromModel(PricelistAssignment source)
+        public virtual ExportablePricelistAssignment FromModel(PricelistAssignment source)
         {
             Type = nameof(PricelistAssignment);
             CatalogId = source.CatalogId;

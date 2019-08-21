@@ -23,7 +23,7 @@ namespace VirtoCommerce.PricingModule.Data.ExportImport
 
         #endregion Properties specific to universal viewer
 
-        public ExportablePrice FromModel(Price source)
+        public virtual ExportablePrice FromModel(Price source)
         {
             Type = nameof(Price);
             Currency = source.Currency;

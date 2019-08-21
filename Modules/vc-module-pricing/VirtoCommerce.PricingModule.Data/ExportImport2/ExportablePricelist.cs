@@ -16,7 +16,7 @@ namespace VirtoCommerce.PricingModule.Data.ExportImport
 
         #endregion IExportable properties
 
-        public ExportablePricelist FromModel(Pricelist source)
+        public virtual ExportablePricelist FromModel(Pricelist source)
         {
             Type = nameof(Pricelist);
             Description = source.Description;
