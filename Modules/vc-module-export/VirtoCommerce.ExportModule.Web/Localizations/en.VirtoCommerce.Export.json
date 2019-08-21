@@ -83,5 +83,13 @@
                 }
             }
         }
+    },
+    "settings": {
+        "Export": {
+            "FileNameTemplate": {
+                "description": "The template (pattern) that will be used to generate exported file name. Parameters: 0 - date (the UTC time of file generation).",
+                "title": "Export file name template"
+            }
+        }
     }
 }
