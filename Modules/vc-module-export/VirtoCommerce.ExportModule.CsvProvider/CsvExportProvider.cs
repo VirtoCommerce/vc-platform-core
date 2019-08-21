@@ -2,9 +2,9 @@ using System;
 using System.IO;
 using CsvHelper;
 using CsvHelper.Configuration;
+using Newtonsoft.Json;
 using VirtoCommerce.ExportModule.Core.Model;
 using VirtoCommerce.ExportModule.Core.Services;
-using VirtoCommerce.ExportModule.Data.Model;
 
 namespace VirtoCommerce.ExportModule.CsvProvider
 {
@@ -14,6 +14,8 @@ namespace VirtoCommerce.ExportModule.CsvProvider
         public ExportedTypePropertyInfo[] IncludedProperties { get; private set; }
         public string ExportedFileExtension => "csv";
         public bool IsTabular => true;
+        [JsonIgnore]
+        // TODO: Temporary, before config rework - need to store only specific properties, not whole huge provider specific configs
         public IExportProviderConfiguration Configuration { get; }
 
         private CsvWriter _csvWriter;

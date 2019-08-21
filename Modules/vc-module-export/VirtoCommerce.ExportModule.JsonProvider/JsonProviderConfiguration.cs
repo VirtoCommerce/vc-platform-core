@@ -1,7 +1,7 @@
 using Newtonsoft.Json;
 using VirtoCommerce.ExportModule.Core.Model;
 
-namespace VirtoCommerce.ExportModule.Data.Model
+namespace VirtoCommerce.ExportModule.JsonProvider
 {
     public class JsonProviderConfiguration : IExportProviderConfiguration
     {

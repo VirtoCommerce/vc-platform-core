@@ -3,7 +3,6 @@ using System.IO;
 using Newtonsoft.Json;
 using VirtoCommerce.ExportModule.Core.Model;
 using VirtoCommerce.ExportModule.Core.Services;
-using VirtoCommerce.ExportModule.Data.Model;
 using VirtoCommerce.Platform.Core.Common;
 
 namespace VirtoCommerce.ExportModule.JsonProvider
@@ -14,6 +13,8 @@ namespace VirtoCommerce.ExportModule.JsonProvider
         public ExportedTypePropertyInfo[] IncludedProperties { get; private set; }
         public string ExportedFileExtension => "json";
         public bool IsTabular => false;
+        [JsonIgnore]
+        // TODO: Temporary, before config rework - need to store only specific properties, not whole huge provider specific configs
         public IExportProviderConfiguration Configuration { get; }
 
         private readonly JsonSerializer _serializer;

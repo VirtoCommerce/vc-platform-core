@@ -6,7 +6,6 @@
 
   <ItemGroup>
     <ProjectReference Include="..\VirtoCommerce.ExportModule.Core\VirtoCommerce.ExportModule.Core.csproj" />
-    <ProjectReference Include="..\VirtoCommerce.ExportModule.Data\VirtoCommerce.ExportModule.Data.csproj" />
   </ItemGroup>
 
 </Project>

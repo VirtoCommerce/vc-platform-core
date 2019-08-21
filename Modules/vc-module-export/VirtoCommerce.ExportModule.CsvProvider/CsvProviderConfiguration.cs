@@ -2,7 +2,7 @@ using System.Globalization;
 using CsvHelper.Configuration;
 using VirtoCommerce.ExportModule.Core.Model;
 
-namespace VirtoCommerce.ExportModule.Data.Model
+namespace VirtoCommerce.ExportModule.CsvProvider
 {
     public class CsvProviderConfiguration : IExportProviderConfiguration
     {
