@@ -195,8 +195,9 @@ angular.module('virtoCommerce.exportModule')
         }
 
         filter.change = function () {
-            $localStorage.exportSearchFilterId = filter.current ? filter.current.id : null;
+            var exportSearchFilterId = filter.current ? filter.current.id : null;
             var metafieldsId = blade.exportDataRequest.exportTypeName + 'ExportFilter';
+            $localStorage.exportSearchFilterIds[blade.exportDataRequest.exportTypeName] = exportSearchFilterId;
             if (filter.current && !filter.current.id) {
                 filter.current = null;
                 showFilterDetailBlade({ isNew: true, metafieldsId: metafieldsId, exportTypeName: blade.exportDataRequest.exportTypeName });
