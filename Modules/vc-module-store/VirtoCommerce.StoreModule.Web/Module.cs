@@ -58,7 +58,6 @@ namespace VirtoCommerce.StoreModule.Web
         public void PostInitialize(IApplicationBuilder appBuilder)
         {
             _appBuilder = appBuilder;
-            AbstractTypeFactory<SearchCriteriaBase>.RegisterType<StoreSearchCriteria>();
 
             var dynamicPropertyRegistrar = appBuilder.ApplicationServices.GetRequiredService<IDynamicPropertyRegistrar>();
             dynamicPropertyRegistrar.RegisterType<Store>();
