@@ -83,6 +83,7 @@ namespace VirtoCommerce.MarketingModule.Data.Model
                 publication.ContentPlaces = ContentPlaces.Where(ci => ci.ContentPlace != null).Select(x => x.ContentPlace.ToModel(AbstractTypeFactory<DynamicContentPlace>.TryCreateInstance())).ToList();
             }
 
+            publication.DynamicExpression = AbstractTypeFactory<DynamicContentConditionTree>.TryCreateInstance();
             if (PredicateVisualTreeSerialized != null)
             {
                 publication.DynamicExpression = JsonConvert.DeserializeObject<DynamicContentConditionTree>(PredicateVisualTreeSerialized, new ConditionJsonConverter());
@@ -126,7 +127,7 @@ namespace VirtoCommerce.MarketingModule.Data.Model
             }
             if (publication.DynamicExpression != null)
             {
-                PredicateVisualTreeSerialized = JsonConvert.SerializeObject(publication.DynamicExpression);
+                PredicateVisualTreeSerialized = JsonConvert.SerializeObject(publication.DynamicExpression, new ConditionJsonConverter(doNotSerializeAvailCondition: true));
             }
             return this;
         }

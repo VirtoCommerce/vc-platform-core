@@ -116,7 +116,7 @@ namespace VirtoCommerce.MarketingModule.Web.Controllers.Api
                 }
                 if (result is DynamicPromotion dynamicPromotion)
                 {
-                    dynamicPromotion.DynamicExpression?.EnableAvailableChildrenSerialization();
+                    dynamicPromotion.DynamicExpression?.MergeFromPrototype(AbstractTypeFactory<PromotionConditionAndRewardTreePrototype>.TryCreateInstance());
                 }
                 return Ok(result);
             }
@@ -135,7 +135,8 @@ namespace VirtoCommerce.MarketingModule.Web.Controllers.Api
             var retVal = AbstractTypeFactory<Promotion>.TryCreateInstance();
             if (retVal is DynamicPromotion dynamicPromotion)
             {
-                dynamicPromotion.DynamicExpression?.EnableAvailableChildrenSerialization();
+                dynamicPromotion.DynamicExpression = AbstractTypeFactory<PromotionConditionAndRewardTree>.TryCreateInstance();
+                dynamicPromotion.DynamicExpression.MergeFromPrototype(AbstractTypeFactory<PromotionConditionAndRewardTreePrototype>.TryCreateInstance());
             }
             retVal.IsActive = true;
             return Ok(retVal);

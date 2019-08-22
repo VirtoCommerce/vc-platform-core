@@ -1,23 +1,14 @@
 using System;
-using System.Collections.Generic;
 using System.Linq;
-using VirtoCommerce.CoreModule.Core.Common;
 using VirtoCommerce.CoreModule.Core.Conditions;
-using VirtoCommerce.MarketingModule.Core.Model.Promotions.Conditions;
-using VirtoCommerce.Platform.Core.Common;
 
 namespace VirtoCommerce.MarketingModule.Core.Model.Promotions
 {
-    public class PromotionConditionAndRewardTree : ConditionTree, IReward
+    public class PromotionConditionAndRewardTree : BlockConditionAndOr, IReward
     {
-        public override bool IsSatisfiedBy(IEvaluationContext context)
+        public PromotionConditionAndRewardTree()
         {
-            var result = false;
-            if (context is PromotionEvaluationContext promotionEvaluationContext)
-            {
-                result = Children.All(c => c.IsSatisfiedBy(promotionEvaluationContext));
-            }
-            return result;
+            All = true;
         }
 
         public virtual PromotionReward[] GetRewards()
@@ -29,16 +20,5 @@ namespace VirtoCommerce.MarketingModule.Core.Model.Promotions
             }
             return result;
         }
-
-        public override IEnumerable<IConditionTree> AvailableChildren
-        {
-            get
-            {
-                yield return AbstractTypeFactory<IConditionTree>.TryCreateInstance(nameof(BlockCustomerCondition));
-                yield return AbstractTypeFactory<IConditionTree>.TryCreateInstance(nameof(BlockCatalogCondition));
-                yield return AbstractTypeFactory<IConditionTree>.TryCreateInstance(nameof(BlockCartCondition));
-                yield return AbstractTypeFactory<IConditionTree>.TryCreateInstance(nameof(BlockReward));
-            }
-        }      
     }
 }
