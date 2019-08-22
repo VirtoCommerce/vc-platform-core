@@ -22,6 +22,7 @@ using VirtoCommerce.Platform.Data.Extensions;
 using VirtoCommerce.StoreModule.Core;
 using VirtoCommerce.StoreModule.Core.Events;
 using VirtoCommerce.StoreModule.Core.Model;
+using VirtoCommerce.StoreModule.Core.Model.Search;
 using VirtoCommerce.StoreModule.Core.Notifications;
 using VirtoCommerce.StoreModule.Core.Services;
 using VirtoCommerce.StoreModule.Data.ExportImport;
@@ -57,6 +58,7 @@ namespace VirtoCommerce.StoreModule.Web
         public void PostInitialize(IApplicationBuilder appBuilder)
         {
             _appBuilder = appBuilder;
+            AbstractTypeFactory<SearchCriteriaBase>.RegisterType<StoreSearchCriteria>();
 
             var dynamicPropertyRegistrar = appBuilder.ApplicationServices.GetRequiredService<IDynamicPropertyRegistrar>();
             dynamicPropertyRegistrar.RegisterType<Store>();

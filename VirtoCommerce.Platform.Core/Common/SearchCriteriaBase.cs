@@ -1,5 +1,6 @@
 using System.Collections.Generic;
 using System.Linq;
+using Newtonsoft.Json;
 
 namespace VirtoCommerce.Platform.Core.Common
 {
@@ -43,6 +44,7 @@ namespace VirtoCommerce.Platform.Core.Common
 
         public string Sort { get; set; }
 
+        [JsonIgnore]
         public virtual IList<SortInfo> SortInfos => SortInfo.Parse(Sort).ToArray();
 
 

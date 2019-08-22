@@ -1,4 +1,4 @@
-﻿using Microsoft.EntityFrameworkCore.Migrations;
+using Microsoft.EntityFrameworkCore.Migrations;
 
 namespace VirtoCommerce.PricingModule.Data.Migrations
 {
@@ -23,6 +23,11 @@ namespace VirtoCommerce.PricingModule.Data.Migrations
                 table: "Price",
                 maxLength: 128,
                 nullable: true);
+
+            migrationBuilder.CreateIndex(
+                name: "IX_Pricelist_OuterId",
+                table: "Pricelist",
+                column: "OuterId");
         }
 
         protected override void Down(MigrationBuilder migrationBuilder)
