@@ -64,8 +64,9 @@ angular.module('virtoCommerce.exportModule')
                     executeMethod: function () {
                         $scope.apply(false);
                     },
+                    // Apply should not be avaailable when editing saved filter
                     canExecuteMethod: function () {
-                        return formScope;
+                        return !(blade.origEntity && $localStorage.exportSearchFilterIds[blade.exportTypeName] === blade.origEntity.id);
                     }
                 },
                 {
@@ -90,8 +91,8 @@ angular.module('virtoCommerce.exportModule')
                     canExecuteMethod: function () {
                         return !blade.isNew;
                     }
-                }];
-
+                }
+        ];
 
         function deleteEntry() {
             blade.parentBlade.filter.current = null;
