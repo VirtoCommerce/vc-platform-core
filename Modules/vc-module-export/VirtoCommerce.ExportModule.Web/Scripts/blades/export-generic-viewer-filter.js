@@ -66,7 +66,7 @@ angular.module('virtoCommerce.exportModule')
                     },
                     // Apply should not be avaailable when editing saved filter
                     canExecuteMethod: function () {
-                        return !(blade.origEntity && $localStorage.exportSearchFilterIds[blade.exportTypeName] === blade.origEntity.id);
+                        return !(blade.origEntity && blade.origEntity.id && $localStorage.exportSearchFilterIds[blade.exportTypeName] === blade.origEntity.id);
                     }
                 },
                 {
