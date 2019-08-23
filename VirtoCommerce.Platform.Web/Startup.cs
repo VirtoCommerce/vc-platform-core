@@ -177,7 +177,7 @@ namespace VirtoCommerce.Platform.Web
                 if (options.Enabled)
                 {
                     //TODO: Need to check how this influence to OpennIddict Reference tokens activated by this line below  AddValidation(options => options.UseReferenceTokens());
-                    var auth = services.AddAuthentication().AddOAuthValidation();
+                    var auth = services.AddAuthentication();
                     auth.AddOpenIdConnect(options.AuthenticationType, options.AuthenticationCaption,
                         openIdConnectOptions =>
                         {
