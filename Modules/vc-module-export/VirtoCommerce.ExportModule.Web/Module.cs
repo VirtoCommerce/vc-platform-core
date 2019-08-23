@@ -7,6 +7,7 @@ using VirtoCommerce.ExportModule.Core;
 using VirtoCommerce.ExportModule.Core.Model;
 using VirtoCommerce.ExportModule.Core.Services;
 using VirtoCommerce.ExportModule.CsvProvider;
+using VirtoCommerce.ExportModule.Data.Security;
 using VirtoCommerce.ExportModule.Data.Services;
 using VirtoCommerce.ExportModule.JsonProvider;
 using VirtoCommerce.ExportModule.Web.JsonConverters;
@@ -31,6 +32,11 @@ namespace VirtoCommerce.ExportModule.Web
             serviceCollection.AddTransient<IExportProviderFactory, ExportProviderFactory>();
 
             serviceCollection.AddTransient<IDataExporter, DataExporter>();
+
+            serviceCollection.Configure<MvcOptions>(configure =>
+            {
+                configure.Filters.Add(typeof(ExportAuthorizationFilter));
+            });
 
             serviceCollection.Configure<MvcJsonOptions>(configure =>
             {

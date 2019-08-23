@@ -11,6 +11,7 @@ using Microsoft.Extensions.Options;
 using VirtoCommerce.ExportModule.Core;
 using VirtoCommerce.ExportModule.Core.Model;
 using VirtoCommerce.ExportModule.Core.Services;
+using VirtoCommerce.ExportModule.Data.Security;
 using VirtoCommerce.ExportModule.Web.BackgroundJobs;
 using VirtoCommerce.ExportModule.Web.Model;
 using VirtoCommerce.Platform.Core;
@@ -154,7 +155,7 @@ namespace VirtoCommerce.ExportModule.Web.Controllers
         /// <returns></returns>
         [HttpGet]
         [Route("download/{fileName}")]
-        [Authorize(ModuleConstants.Security.Permissions.Download)]
+        [AuthorizeAny(PlatformConstants.Security.Permissions.PlatformExport, ModuleConstants.Security.Permissions.Download)]
         public ActionResult DownloadExportFile([FromRoute] string fileName)
         {
             var localTmpFolder = Path.GetFullPath(Path.Combine(_platformOptions.DefaultExportFolder));
