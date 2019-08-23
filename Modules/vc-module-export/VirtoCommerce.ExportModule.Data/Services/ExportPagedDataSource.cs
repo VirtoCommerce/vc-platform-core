@@ -1,3 +1,4 @@
+using System;
 using System.Collections.Generic;
 using System.Linq;
 using VirtoCommerce.ExportModule.Core.Model;
@@ -47,15 +48,35 @@ namespace VirtoCommerce.ExportModule.Data.Services
 
         public bool Fetch()
         {
+            var hasData = true;
             var searchCriteria = BuildSearchCriteria(_dataQuery);
-            var data = FetchData(searchCriteria);
+            var hasObjectIds = !searchCriteria.ObjectIds.IsNullOrEmpty();
 
-            TotalCount = data.TotalCount;
-            CurrentPageNumber++;
+            if (hasObjectIds)
+            {
+                searchCriteria.ObjectIds = searchCriteria.ObjectIds.Skip(searchCriteria.Skip).Take(searchCriteria.Take).ToArray();
+            }
 
-            Items = data.Results;
+            if (hasObjectIds && searchCriteria.ObjectIds.IsNullOrEmpty())
+            {
+                hasData = false;
+            }
 
-            return data.Results.Any();
+            if (hasData)
+            {
+                var data = FetchData(searchCriteria);
+
+                CurrentPageNumber++;
+                Items = data.Results;
+
+                hasData = data.Results.Any();
+            }
+            else
+            {
+                Items = Array.Empty<IExportable>();
+            }
+
+            return hasData;
         }
 
 
