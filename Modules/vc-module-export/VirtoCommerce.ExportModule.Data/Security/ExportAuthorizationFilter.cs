@@ -53,7 +53,7 @@ namespace VirtoCommerce.ExportModule.Data.Security
         /// <returns></returns>
         private string[] GetActionPolicies(AuthorizationFilterContext context)
         {
-            string[] result = new string[] { };
+            var result = new string[] { };
             var controllerActionDescriptor = (ControllerActionDescriptor)context.ActionDescriptor;
             var authorizeAnyAttribute = controllerActionDescriptor.MethodInfo.GetCustomAttributes(typeof(AuthorizeAnyAttribute), true).Cast<AuthorizeAnyAttribute>().FirstOrDefault();
             if (authorizeAnyAttribute != null)
