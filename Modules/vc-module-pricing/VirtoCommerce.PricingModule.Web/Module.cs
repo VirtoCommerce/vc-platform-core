@@ -183,9 +183,9 @@ namespace VirtoCommerce.PricingModule.Web
             var inProcessBus = appBuilder.ApplicationServices.GetService<IHandlerRegistrar>();
             inProcessBus.RegisterHandler<PriceChangedEvent>(async (message, token) => await appBuilder.ApplicationServices.GetService<LogChangesChangedEventHandler>().Handle(message));
 
-            foreach (var conditionTree in (AbstractTypeFactory<IConditionTree>.TryCreateInstance(nameof(PriceConditionTree))).Traverse(x => x.AvailableChildren))
+            foreach (var conditionTree in AbstractTypeFactory<PriceConditionTreePrototype>.TryCreateInstance().Traverse<IConditionTree>(x => x.AvailableChildren))
             {
-                AbstractTypeFactory<IConditionTree>.RegisterType(conditionTree.GetType(), throwIfExists: false);
+                AbstractTypeFactory<IConditionTree>.RegisterType(conditionTree.GetType());
             }
 
             var registrar = appBuilder.ApplicationServices.GetService<IKnownExportTypesRegistrar>();

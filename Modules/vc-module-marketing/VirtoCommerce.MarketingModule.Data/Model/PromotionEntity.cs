@@ -92,6 +92,7 @@ namespace VirtoCommerce.MarketingModule.Data.Model
             if (promotion is DynamicPromotion dynamicPromotion)
             {
                 dynamicPromotion.IsAllowCombiningWithSelf = IsAllowCombiningWithSelf;
+                dynamicPromotion.DynamicExpression = AbstractTypeFactory<PromotionConditionAndRewardTree>.TryCreateInstance();
                 if (PredicateVisualTreeSerialized != null)
                 {
                     dynamicPromotion.DynamicExpression = JsonConvert.DeserializeObject<PromotionConditionAndRewardTree>(PredicateVisualTreeSerialized, new ConditionJsonConverter(), new RewardJsonConverter());
@@ -141,7 +142,7 @@ namespace VirtoCommerce.MarketingModule.Data.Model
 
                 if (dynamicPromotion.DynamicExpression != null)
                 {
-                    PredicateVisualTreeSerialized = JsonConvert.SerializeObject(dynamicPromotion.DynamicExpression);
+                    PredicateVisualTreeSerialized = JsonConvert.SerializeObject(dynamicPromotion.DynamicExpression, new ConditionJsonConverter(doNotSerializeAvailCondition: true));
                 }
             }
             return this;

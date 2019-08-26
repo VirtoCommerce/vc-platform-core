@@ -72,6 +72,7 @@ namespace VirtoCommerce.PricingModule.Data.Model
                 assignment.Pricelist.Name = Pricelist.Name;
 
             }
+            assignment.DynamicExpression = AbstractTypeFactory<PriceConditionTree>.TryCreateInstance();
             if (PredicateVisualTreeSerialized != null)
             {
                 assignment.DynamicExpression = JsonConvert.DeserializeObject<PriceConditionTree>(PredicateVisualTreeSerialized, new ConditionJsonConverter());
@@ -103,7 +104,7 @@ namespace VirtoCommerce.PricingModule.Data.Model
 
             if (assignment.DynamicExpression != null)
             {
-                PredicateVisualTreeSerialized = JsonConvert.SerializeObject(assignment.DynamicExpression);
+                PredicateVisualTreeSerialized = JsonConvert.SerializeObject(assignment.DynamicExpression, new ConditionJsonConverter(doNotSerializeAvailCondition: true));
             }
 
             return this;

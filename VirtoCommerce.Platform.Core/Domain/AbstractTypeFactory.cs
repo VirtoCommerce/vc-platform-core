@@ -31,8 +31,8 @@ namespace VirtoCommerce.Platform.Core.Common
         {
             return RegisterType(typeof(T));
         }
-
-        public static TypeInfo<BaseType> RegisterType(Type type, bool throwIfExists = true)
+              
+        public static TypeInfo<BaseType> RegisterType(Type type)
         {
             if(type == null)
             {
@@ -40,12 +40,7 @@ namespace VirtoCommerce.Platform.Core.Common
             }
 
             var result = _typeInfos.FirstOrDefault(x=> x.AllSubclasses.Contains(type));
-
-            if (result != null && throwIfExists)
-            {
-                throw new ArgumentException(string.Format("Type {0} already registered", type.Name));
-            }
-
+            
             if (result == null)
             {
                 result = new TypeInfo<BaseType>(type);
@@ -94,13 +89,7 @@ namespace VirtoCommerce.Platform.Core.Common
         public static BaseType TryCreateInstance(string typeName)
         {
             BaseType result;
-            //Try find first direct type match from registered types
-            var typeInfo = _typeInfos.FirstOrDefault(x => x.TypeName.EqualsInvariant(typeName));
-            //Then need to find in inheritance chain from registered types
-            if (typeInfo == null)
-            {                
-                typeInfo = _typeInfos.FirstOrDefault(x => x.IsAssignableTo(typeName));
-            }          
+            var typeInfo = FindTypeInfoByName(typeName);
             if (typeInfo != null)
             {
                 if (typeInfo.Factory != null)
@@ -120,7 +109,19 @@ namespace VirtoCommerce.Platform.Core.Common
 
 
             return result;
-        }      
+        }
+
+        public static TypeInfo<BaseType> FindTypeInfoByName(string typeName)
+        {
+            //Try find first direct type match from registered types
+            var result = _typeInfos.FirstOrDefault(x => x.TypeName.EqualsInvariant(typeName));
+            //Then need to find in inheritance chain from registered types
+            if (result == null)
+            {
+                result = _typeInfos.FirstOrDefault(x => x.IsAssignableTo(typeName));
+            }
+            return result;
+        }
     }
 
     /// <summary>
