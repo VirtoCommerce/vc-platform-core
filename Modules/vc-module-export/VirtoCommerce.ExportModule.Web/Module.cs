@@ -35,7 +35,7 @@ namespace VirtoCommerce.ExportModule.Web
 
             serviceCollection.Configure<MvcOptions>(configure =>
             {
-                configure.Filters.Add(typeof(ExportAuthorizationFilter));
+                configure.Filters.Add(typeof(AnyPolicyAuthorizationFilter));
             });
 
             serviceCollection.Configure<MvcJsonOptions>(configure =>

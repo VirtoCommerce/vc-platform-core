@@ -11,12 +11,12 @@ namespace VirtoCommerce.ExportModule.Data.Security
     /// <summary>
     /// Implements authorization for several policies, given to action by <see cref="AuthorizeAnyAttribute"/>.
     /// </summary>
-    public class ExportAuthorizationFilter : IAuthorizationFilter, IAsyncAuthorizationFilter
+    public class AnyPolicyAuthorizationFilter : IAuthorizationFilter, IAsyncAuthorizationFilter
     {
         private readonly IHttpContextAccessor _httpContextAccessor;
         private readonly IAuthorizationService _authorizationService;
 
-        public ExportAuthorizationFilter(IAuthorizationService authorizationService, IHttpContextAccessor httpContextAccessor)
+        public AnyPolicyAuthorizationFilter(IAuthorizationService authorizationService, IHttpContextAccessor httpContextAccessor)
         {
             _authorizationService = authorizationService;
             _httpContextAccessor = httpContextAccessor;
@@ -24,17 +24,15 @@ namespace VirtoCommerce.ExportModule.Data.Security
 
         public void OnAuthorization(AuthorizationFilterContext context)
         {
-            var policies = GetActionPolicies(context);
-            var result = policies.Length == 0;
-            foreach (var policy in policies)
-            {
-                result = result || _authorizationService.AuthorizeAsync(_httpContextAccessor.HttpContext.User, policy).GetAwaiter().GetResult().Succeeded;
-                if (result) break;
-            }
-            if (!result) context.Result = new ForbidResult();
+            Authorize(context).GetAwaiter().GetResult();
         }
 
         public async Task OnAuthorizationAsync(AuthorizationFilterContext context)
+        {
+            await Authorize(context);
+        }
+
+        private async Task Authorize(AuthorizationFilterContext context)
         {
             var policies = GetActionPolicies(context);
             var result = policies.Length == 0;
