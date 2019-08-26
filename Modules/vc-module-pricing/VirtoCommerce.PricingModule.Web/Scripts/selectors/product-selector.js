@@ -2,7 +2,7 @@ angular.module('virtoCommerce.pricingModule')
 .controller('virtoCommerce.pricingModule.productSelectorController', ['$scope', 'platformWebApp.bladeNavigationService', function ($scope, bladeNavigationService) {
     var blade = $scope.blade;
 
-    $scope.selectedCount = 0;
+    $scope.selectedCount = (blade.currentEntity.productIds || []).length;
     
     $scope.selectProducts = function () {
         var selection = blade.currentEntity.productIds || [];
