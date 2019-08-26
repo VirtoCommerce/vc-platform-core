@@ -34,7 +34,7 @@ namespace VirtoCommerce.CoreModule.Web.Controllers.Api
         /// <returns></returns>
         [HttpPut]
         [Route("seoinfos/batchupdate")]
-        public Task<ActionResult> BatchUpdateSeoInfos(SeoInfo[] seoInfos)
+        public Task<ActionResult> BatchUpdateSeoInfos([FromBody]SeoInfo[] seoInfos)
         {
             throw new NotImplementedException();
         }
@@ -131,7 +131,7 @@ namespace VirtoCommerce.CoreModule.Web.Controllers.Api
         [HttpPost]
         [Route("packageTypes")]
         [Authorize(ModuleConstants.Security.Permissions.PackageTypeCreate)]
-        public async Task<ActionResult> CreatePackageType(PackageType packageType)
+        public async Task<ActionResult> CreatePackageType([FromBody]PackageType packageType)
         {
             await _packageTypesService.SaveChangesAsync(new[] { packageType });
             return NoContent();

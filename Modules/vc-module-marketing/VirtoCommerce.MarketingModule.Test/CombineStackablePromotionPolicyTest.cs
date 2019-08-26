@@ -144,12 +144,11 @@ namespace VirtoCommerce.MarketingModule.Test
                 dynamicPromotion.DynamicExpression.Children = dynamicPromotion.DynamicExpression.AvailableChildren.ToList();
             });
 
-            AbstractTypeFactory<IConditionTree>.RegisterType<PromotionConditionAndRewardTree>();
-            foreach (var conditionTree in ((IConditionTree)AbstractTypeFactory<PromotionConditionAndRewardTree>.TryCreateInstance()).Traverse(x => x.AvailableChildren))
+            foreach (var conditionTree in AbstractTypeFactory<PromotionConditionAndRewardTreePrototype>.TryCreateInstance().Traverse<IConditionTree>(x => x.AvailableChildren))
             {
                 AbstractTypeFactory<IConditionTree>.RegisterType(conditionTree.GetType());
             }
-            
+
             var evalPolicy = GetPromotionEvaluationPolicy(new List<Promotion> { new DynamicPromotion
             {
                 CouponSearchService = couponSearchMockServiceMock.Object,
