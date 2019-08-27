@@ -211,7 +211,6 @@ namespace VirtoCommerce.CatalogModule.Web
                 catalogDbContext.Database.Migrate();
             }
 
-
             #region Register types for generic Export
 
             var registrar = appBuilder.ApplicationServices.GetService<IKnownExportTypesRegistrar>();
@@ -232,12 +231,9 @@ namespace VirtoCommerce.CatalogModule.Web
                         nameof(ExportableProduct.Images)))
                     .WithTabularMetadata(typeof(ExportableProduct).GetPropertyNames()));
 
-
             AbstractTypeFactory<ExportDataQuery>.RegisterType<ProductExportDataQuery>();
 
             #endregion
-
-
         }
 
         public void Uninstall()

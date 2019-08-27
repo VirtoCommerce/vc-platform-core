@@ -25,6 +25,7 @@ namespace VirtoCommerce.CatalogModule.Data.ExportImport
             _productSearchService = productSearchService;
         }
 
+
         protected override ExportableSearchResult FetchData(ProductSearchCriteria searchCriteria)
         {
             CatalogProduct[] result;
@@ -59,6 +60,41 @@ namespace VirtoCommerce.CatalogModule.Data.ExportImport
 
         }
 
+        protected virtual IEnumerable<IExportable> ToExportable(IEnumerable<ICloneable> objects)
+        {
+            var models = objects.Cast<CatalogProduct>();
+            var viewableMap = models.ToDictionary(x => x, x => AbstractTypeFactory<ExportableProduct>.TryCreateInstance().FromModel(x));
+
+            var modelIds = models.Select(x => x.Id).ToList();
+
+            return viewableMap.Values.OrderBy(x => modelIds.IndexOf(x.Id));
+        }
+
+        protected override ProductSearchCriteria BuildSearchCriteria(ProductExportDataQuery exportDataQuery)
+        {
+            var result = base.BuildSearchCriteria(exportDataQuery);
+
+            result.CatalogId = exportDataQuery.CatalogId;
+            result.CategoryId = exportDataQuery.CategoryId;
+            result.SearchInVariations = exportDataQuery.SearchInVariations;
+            result.ProductTypes = exportDataQuery.ProductTypes;
+            result.Skus = exportDataQuery.Skus;
+
+            return result;
+        }
+
+        private void LoadImages(IHasImages[] haveImagesObjects)
+        {
+            var allImages = haveImagesObjects.SelectMany(x => x.GetFlatObjectsListWithInterface<IHasImages>())
+                .SelectMany(x => x.Images).ToArray();
+            foreach (var image in allImages)
+            {
+                using (var stream = _blobStorageProvider.OpenRead(image.Url))
+                {
+                    image.BinaryData = stream.ReadFully();
+                }
+            }
+        }
         private ItemResponseGroup BuildResponseGroup()
         {
             var result = ItemResponseGroup.ItemInfo;
@@ -107,73 +143,6 @@ namespace VirtoCommerce.CatalogModule.Data.ExportImport
             {
                 result |= ItemResponseGroup.ItemEditorialReviews;
             }
-
-            return result;
-        }
-
-        protected virtual IEnumerable<IExportable> ToExportable(IEnumerable<ICloneable> objects)
-        {
-            var models = objects.Cast<CatalogProduct>();
-            var viewableMap = models.ToDictionary(x => x, x => AbstractTypeFactory<ExportableProduct>.TryCreateInstance().FromModel(x));
-
-            //FillAdditionalProperties(viewableMap);
-
-            var modelIds = models.Select(x => x.Id).ToList();
-
-            return viewableMap.Values.OrderBy(x => modelIds.IndexOf(x.Id));
-        }
-
-
-        protected virtual void FillAdditionalProperties(Dictionary<CatalogProduct, ExportableProduct> viewableMap)
-        {
-            //var models = viewableMap.Keys;
-            //var productIds = models.Select(x => x.ProductId).Distinct().ToArray();
-            //var pricelistIds = models.Select(x => x.PricelistId).Distinct().ToArray();
-            //var products = _itemService.GetByIdsAsync(productIds, ItemResponseGroup.ItemInfo.ToString()).GetAwaiter().GetResult();
-            //var pricelists = _pricingService.GetPricelistsByIdAsync(pricelistIds).GetAwaiter().GetResult();
-
-            // foreach (var kvp in viewableMap)
-            // {
-
-
-
-            //    var model = kvp.Key;
-            //    var viewableEntity = kvp.Value;
-            //    var product = products.FirstOrDefault(x => x.Id == model.ProductId);
-            //    var pricelist = pricelists.FirstOrDefault(x => x.Id == model.PricelistId);
-
-            //    viewableEntity.Code = product?.Code;
-            //    viewableEntity.ImageUrl = product?.ImgSrc;
-            //    viewableEntity.Name = product?.Name;
-            //    viewableEntity.ProductName = product?.Name;
-            //    viewableEntity.Parent = pricelist?.Name;
-            //    viewableEntity.PricelistName = pricelist?.Name;
-            // }
-        }
-
-
-        private void LoadImages(IHasImages[] haveImagesObjects)
-        {
-            var allImages = haveImagesObjects.SelectMany(x => x.GetFlatObjectsListWithInterface<IHasImages>())
-                .SelectMany(x => x.Images).ToArray();
-            foreach (var image in allImages)
-            {
-                using (var stream = _blobStorageProvider.OpenRead(image.Url))
-                {
-                    image.BinaryData = stream.ReadFully();
-                }
-            }
-        }
-
-        protected override ProductSearchCriteria BuildSearchCriteria(ProductExportDataQuery exportDataQuery)
-        {
-            var result = base.BuildSearchCriteria(exportDataQuery);
-
-            result.CatalogId = exportDataQuery.CatalogId;
-            result.CategoryId = exportDataQuery.CategoryId;
-            result.SearchInVariations = exportDataQuery.SearchInVariations;
-            result.ProductTypes = exportDataQuery.ProductTypes;
-            result.Skus = exportDataQuery.Skus;
 
             return result;
         }

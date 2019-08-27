@@ -55,12 +55,9 @@ namespace VirtoCommerce.CatalogModule.Data.ExportImport
         public string OuterId { get; set; }
 
 
-
         public object Clone()
         {
             return MemberwiseClone() as TabularProduct;
         }
-
-
     }
 }

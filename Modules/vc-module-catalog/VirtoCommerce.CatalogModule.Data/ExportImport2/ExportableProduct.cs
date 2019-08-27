@@ -13,7 +13,6 @@ namespace VirtoCommerce.CatalogModule.Data.ExportImport
         public string Parent { get; set; }
         public string Type { get; set; }
 
-
         public virtual ExportableProduct FromModel(CatalogProduct source)
         {
             Type = nameof(CatalogProduct);
@@ -109,7 +108,6 @@ namespace VirtoCommerce.CatalogModule.Data.ExportImport
 
             return result;
         }
-
         #endregion ITabularConvertible implementation
     }
 }
