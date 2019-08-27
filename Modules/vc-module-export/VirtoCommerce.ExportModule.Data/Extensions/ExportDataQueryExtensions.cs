@@ -18,9 +18,8 @@ namespace VirtoCommerce.ExportModule.Data.Extensions
                 foreach (var property in type.GetProperties().Where(x => x.CanRead && x.CanWrite))
                 {
                     var propertyName = property.GetDerivedName(baseMemberName);
-                    var nestedType = property.PropertyType.GetNestedType();
 
-                    if (nestedType.IsSubclassOf(typeof(Entity)))
+                    if (property.PropertyType.IsNested())
                     {
                         if (!includedProperties.Any(x => x.FullName.StartsWith($"{propertyName}.", StringComparison.InvariantCultureIgnoreCase)))
                         {

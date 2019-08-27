@@ -1,4 +1,5 @@
 using System;
+using System.Collections;
 using System.Collections.Generic;
 using System.Linq;
 using System.Reflection;
@@ -29,6 +30,7 @@ namespace VirtoCommerce.ExportModule.Data.Extensions
                 PropertyInfos = GetPropertyNames(type, type.Name, string.Empty, propertyPathsToInclude)
                 .Where(x => !x.IsReference)
                 .Select(x => x.ExportedPropertyInfo)
+                .OrderBy(x => x.DisplayName)
                 .ToArray()
             };
 
@@ -62,8 +64,9 @@ namespace VirtoCommerce.ExportModule.Data.Extensions
 
             foreach (var propertyInfo in properties)
             {
-                var nestedType = GetNestedType(propertyInfo.PropertyType);
-                var isNested = nestedType.IsSubclassOf(typeof(Entity));
+                var propertyType = propertyInfo.PropertyType;
+                var isNested = propertyType.IsNested();
+
                 var memberName = propertyInfo.GetDerivedName(baseMemberName);
 
                 if (!isNested)
@@ -94,6 +97,15 @@ namespace VirtoCommerce.ExportModule.Data.Extensions
             return result.ToArray();
         }
 
+        public static bool IsNested(this Type propertyType)
+        {
+
+            return propertyType.IsSubclassOf(typeof(Entity))
+                   || propertyType.IsSubclassOf(typeof(IEnumerable))
+                   || propertyType.GetInterfaces().Any(x => x.IsGenericType && x.GetGenericTypeDefinition() == typeof(IEnumerable<>)
+                                                                            && x.GetGenericArguments().Any(y => !y.IsSubclassOf(typeof(ValueType))));
+        }
+
         /// <summary>
         /// Adds baseName as a prefixe to the property name (i.e. "{baseName}.{Name}")
         /// </summary>
@@ -107,17 +119,22 @@ namespace VirtoCommerce.ExportModule.Data.Extensions
         /// </summary>
         /// <param name="type"></param>
         /// <returns></returns>
-        public static Type GetNestedType(this Type type)
+        private static Type GetNestedType(this Type type)
         {
             var result = type;
             if (type.GetInterfaces().Any(x => x.IsGenericType && x.GetGenericTypeDefinition() == typeof(IEnumerable<>)))
             {
                 var definedGenericArgs = type.GetGenericArguments();
-                if (definedGenericArgs.Any() && definedGenericArgs[0].IsSubclassOf(typeof(Entity)))
+                if (definedGenericArgs.Any() && !definedGenericArgs[0].IsSubclassOf(typeof(ValueType)))
                 {
                     result = definedGenericArgs[0];
                 }
             }
+            else if (type.IsSubclassOf(typeof(IEnumerable)))
+            {
+                result = typeof(object);
+            }
+
             return result;
         }
     }

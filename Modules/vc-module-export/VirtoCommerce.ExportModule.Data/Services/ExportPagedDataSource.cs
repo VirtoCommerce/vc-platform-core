@@ -19,6 +19,8 @@ namespace VirtoCommerce.ExportModule.Data.Services
     {
         public IEnumerable<IExportable> Items { get; private set; }
 
+        public ExportDataQuery DataQuery => _dataQuery;
+
         private readonly TDataQuery _dataQuery;
         protected int TotalCount = -1;
 
