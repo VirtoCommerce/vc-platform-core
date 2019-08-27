@@ -147,7 +147,7 @@ namespace VirtoCommerce.MarketingModule.Test
             AbstractTypeFactory<IConditionTree>.RegisterType<PromotionConditionAndRewardTree>();
             foreach (var conditionTree in ((IConditionTree)AbstractTypeFactory<PromotionConditionAndRewardTree>.TryCreateInstance()).Traverse(x => x.AvailableChildren))
             {
-                AbstractTypeFactory<IConditionTree>.RegisterType(conditionTree.GetType(), throwIfExists: false);
+                AbstractTypeFactory<IConditionTree>.RegisterType(conditionTree.GetType());
             }
             
             var evalPolicy = GetPromotionEvaluationPolicy(new List<Promotion> { new DynamicPromotion

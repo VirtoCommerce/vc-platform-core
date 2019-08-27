@@ -6,6 +6,7 @@ using Microsoft.AspNetCore.Hosting;
 using Microsoft.AspNetCore.Mvc;
 using Newtonsoft.Json.Linq;
 using VirtoCommerce.Platform.Core.Localizations;
+using VirtoCommerce.Platform.Data.Extensions;
 using VirtoCommerce.Platform.Web.Extensions;
 
 namespace VirtoCommerce.Platform.Web.Controllers.Api

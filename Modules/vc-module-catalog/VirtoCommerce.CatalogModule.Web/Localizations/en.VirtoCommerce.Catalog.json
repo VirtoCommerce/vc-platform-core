@@ -92,7 +92,8 @@
                     "is-active": "Is active",
                     "name": "Name",
                     "code": "Code",
-                    "tax-type": "Tax type"
+                    "tax-type": "Tax type",
+                    "priority": "Priority"
                 },
                 "validations": {
                     "code": "Code can't contain $+;=%{}[]/@ ~!^*&()?'<>, characters"
@@ -100,7 +101,8 @@
                 "placeholders": {
                     "name": "Enter category name",
                     "code": "Enter category code",
-                    "select": "Select..."
+                    "select": "Select...",
+                    "priority": "Priority"
                 }
             },
             "categories-items-add": {

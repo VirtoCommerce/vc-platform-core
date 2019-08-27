@@ -26,7 +26,6 @@ using VirtoCommerce.Platform.Data.Extensions;
 using VirtoCommerce.Platform.Security.Authorization;
 using VirtoCommerce.PricingModule.Core;
 using VirtoCommerce.PricingModule.Core.Events;
-using VirtoCommerce.PricingModule.Core.Model;
 using VirtoCommerce.PricingModule.Core.Model.Conditions;
 using VirtoCommerce.PricingModule.Core.Services;
 using VirtoCommerce.PricingModule.Data.ExportImport;
@@ -59,23 +58,12 @@ namespace VirtoCommerce.PricingModule.Web
             serviceCollection.AddTransient<Func<IPricingRepository>>(provider => () => provider.CreateScope().ServiceProvider.GetRequiredService<IPricingRepository>());
 
             serviceCollection.AddTransient<IPricingService, PricingServiceImpl>();
-            serviceCollection.AddSingleton<Func<IPricingService>>(provider => () => provider.CreateScope().ServiceProvider.GetRequiredService<IPricingService>());
             serviceCollection.AddTransient<IPricingSearchService, PricingSearchServiceImpl>();
             serviceCollection.AddTransient<PricingExportImport>();
             serviceCollection.AddTransient<PolymorphicPricingJsonConverter>();
             serviceCollection.AddTransient<ProductPriceDocumentChangesProvider>();
             serviceCollection.AddTransient<ProductPriceDocumentBuilder>();
             serviceCollection.AddTransient<LogChangesChangedEventHandler>();
-
-            AbstractTypeFactory<PricelistAssignment>.RegisterType<PricelistAssignment>().WithSetupAction((assignment) =>
-            {
-                assignment.DynamicExpression = AbstractTypeFactory<IConditionTree>.TryCreateInstance(nameof(PriceConditionTree)) as PriceConditionTree;
-                assignment.DynamicExpression.Children = assignment.DynamicExpression.AvailableChildren.ToList();
-            });
-
-            //Register in the  AbstractTypeFactory<IConditionTree> the  tree and blocks expressions
-            AbstractTypeFactory<IConditionTree>.RegisterType<PriceConditionTree>();
-            AbstractTypeFactory<IConditionTree>.RegisterType<BlockPricingCondition>();
 
             serviceCollection.AddTransient<Func<ExportDataQuery, PriceExportPagedDataSource>>(provider =>
                 (exportDataQuery) =>
@@ -183,9 +171,9 @@ namespace VirtoCommerce.PricingModule.Web
             var inProcessBus = appBuilder.ApplicationServices.GetService<IHandlerRegistrar>();
             inProcessBus.RegisterHandler<PriceChangedEvent>(async (message, token) => await appBuilder.ApplicationServices.GetService<LogChangesChangedEventHandler>().Handle(message));
 
-            foreach (var conditionTree in (AbstractTypeFactory<IConditionTree>.TryCreateInstance(nameof(PriceConditionTree))).Traverse(x => x.AvailableChildren))
+            foreach (var conditionTree in AbstractTypeFactory<PriceConditionTreePrototype>.TryCreateInstance().Traverse<IConditionTree>(x => x.AvailableChildren))
             {
-                AbstractTypeFactory<IConditionTree>.RegisterType(conditionTree.GetType(), throwIfExists: false);
+                AbstractTypeFactory<IConditionTree>.RegisterType(conditionTree.GetType());
             }
 
             var registrar = appBuilder.ApplicationServices.GetService<IKnownExportTypesRegistrar>();

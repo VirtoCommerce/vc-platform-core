@@ -94,31 +94,13 @@ namespace VirtoCommerce.MarketingModule.Web
             {
                 var dynamicPromotion = promotion as DynamicPromotion;
                 dynamicPromotion.CouponSearchService = serviceCollection.BuildServiceProvider().GetService<ICouponSearchService>();
-                dynamicPromotion.PromotionUsageSearchService = serviceCollection.BuildServiceProvider().GetService<IPromotionUsageSearchService>();
-                dynamicPromotion.DynamicExpression = AbstractTypeFactory<IConditionTree>.TryCreateInstance(nameof(PromotionConditionAndRewardTree)) as PromotionConditionAndRewardTree;
-                dynamicPromotion.DynamicExpression.Children = dynamicPromotion.DynamicExpression.AvailableChildren.ToList();                
+                dynamicPromotion.PromotionUsageSearchService = serviceCollection.BuildServiceProvider().GetService<IPromotionUsageSearchService>();            
             });
-
-            AbstractTypeFactory<DynamicContentPublication>.RegisterType<DynamicContentPublication>().WithSetupAction((publication) =>
-            {
-                publication.DynamicExpression = AbstractTypeFactory<IConditionTree>.TryCreateInstance(nameof(DynamicContentConditionTree)) as DynamicContentConditionTree;
-                publication.DynamicExpression.Children = publication.DynamicExpression.AvailableChildren.ToList();
-            });
-
+          
             serviceCollection.AddTransient<LogChangesChangedEventHandler>();
             serviceCollection.AddTransient<MarketingExportImport>();
 
             serviceCollection.AddTransient<IAuthorizationHandler, MarketingAuthorizationHandler>();
-
-            //Promotions and DynamicContent expression tree and root blocks
-            AbstractTypeFactory<IConditionTree>.RegisterType<PromotionConditionAndRewardTree>();
-            AbstractTypeFactory<IConditionTree>.RegisterType<BlockCustomerCondition>();
-            AbstractTypeFactory<IConditionTree>.RegisterType<BlockCatalogCondition>();
-            AbstractTypeFactory<IConditionTree>.RegisterType<BlockCartCondition>();
-            AbstractTypeFactory<IConditionTree>.RegisterType<BlockReward>();
-
-            AbstractTypeFactory<IConditionTree>.RegisterType<DynamicContentConditionTree>();
-            AbstractTypeFactory<IConditionTree>.RegisterType<BlockContentCondition>();
         }
 
         public void PostInitialize(IApplicationBuilder appBuilder)
@@ -193,19 +175,20 @@ namespace VirtoCommerce.MarketingModule.Web
             mvcJsonOptions.Value.SerializerSettings.Converters.Add(new PolymorphicMarketingJsonConverter());
             mvcJsonOptions.Value.SerializerSettings.Converters.Add(new RewardJsonConverter());
 
-            //Register the resulting trees expressions in the AbstractFactory<IConditionTree> 
-            foreach (var conditionTree in (AbstractTypeFactory<IConditionTree>.TryCreateInstance(nameof(PromotionConditionAndRewardTree))).Traverse(x=> x.AvailableChildren))
+            //Register the resulting trees expressions into the AbstractFactory<IConditionTree> 
+            foreach (var conditionTree in AbstractTypeFactory<PromotionConditionAndRewardTreePrototype>.TryCreateInstance().Traverse<IConditionTree>(x=> x.AvailableChildren))
             {
-                AbstractTypeFactory<IConditionTree>.RegisterType(conditionTree.GetType(), throwIfExists: false);
+                AbstractTypeFactory<IConditionTree>.RegisterType(conditionTree.GetType());
             }
-            foreach (var conditionTree in (AbstractTypeFactory<IConditionTree>.TryCreateInstance(nameof(DynamicContentConditionTree))).Traverse(x => x.AvailableChildren))
+            foreach (var conditionTree in AbstractTypeFactory<DynamicContentConditionTreePrototype>.TryCreateInstance().Traverse<IConditionTree>(x => x.AvailableChildren))
             {
-                AbstractTypeFactory<IConditionTree>.RegisterType(conditionTree.GetType(), throwIfExists: false);
+                AbstractTypeFactory<IConditionTree>.RegisterType(conditionTree.GetType());
             }
         }
 
         public void Uninstall()
         {
+            // Method intentionally left empty.
         }
 
         public async Task ExportAsync(Stream outStream, ExportImportOptions options, Action<ExportImportProgressInfo> progressCallback,
