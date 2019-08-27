@@ -27,6 +27,11 @@ using VirtoCommerce.CatalogModule.Data.Validation;
 using VirtoCommerce.CatalogModule.Web.Authorization;
 using VirtoCommerce.CatalogModule.Web.JsonConverters;
 using VirtoCommerce.CoreModule.Core.Seo;
+using VirtoCommerce.ExportModule.Core.Model;
+using VirtoCommerce.ExportModule.Core.Services;
+using VirtoCommerce.ExportModule.Data.Extensions;
+using VirtoCommerce.ExportModule.Data.Services;
+using VirtoCommerce.Platform.Core.Assets;
 using VirtoCommerce.Platform.Core.Bus;
 using VirtoCommerce.Platform.Core.Common;
 using VirtoCommerce.Platform.Core.ExportImport;
@@ -34,8 +39,10 @@ using VirtoCommerce.Platform.Core.Modularity;
 using VirtoCommerce.Platform.Core.Security;
 using VirtoCommerce.Platform.Core.Settings;
 using VirtoCommerce.Platform.Data.Extensions;
+using VirtoCommerce.Platform.Security.Authorization;
 using VirtoCommerce.SearchModule.Core.Model;
 using VirtoCommerce.SearchModule.Core.Services;
+using AuthorizationOptions = Microsoft.AspNetCore.Authorization.AuthorizationOptions;
 
 namespace VirtoCommerce.CatalogModule.Web
 {
@@ -133,6 +140,38 @@ namespace VirtoCommerce.CatalogModule.Web
             });
 
             serviceCollection.AddTransient<IAuthorizationHandler, CatalogAuthorizationHandler>();
+
+
+            serviceCollection.AddTransient<Func<ExportDataQuery, ProductExportPagedDataSource>>(provider =>
+                (exportDataQuery) =>
+                {
+
+                    var blobStorageProvider = provider.CreateScope().ServiceProvider.GetRequiredService<IBlobStorageProvider>();
+                    var productSearchService = provider.CreateScope().ServiceProvider.GetRequiredService<IProductSearchService>();
+                    var itemService = provider.CreateScope().ServiceProvider.GetRequiredService<IItemService>();
+                    var result = new ProductExportPagedDataSource(blobStorageProvider, itemService, productSearchService, (ProductExportDataQuery)exportDataQuery);
+                    return result;
+                });
+
+
+
+            #region Add Authorization Policy for GenericExport
+
+            var requirements = new IAuthorizationRequirement[]
+            {
+                new PermissionAuthorizationRequirement(ModuleConstants.Security.Permissions.Export), new PermissionAuthorizationRequirement(ModuleConstants.Security.Permissions.Read)
+            };
+
+            var exportPolicy = new AuthorizationPolicyBuilder()
+                .AddRequirements(requirements)
+                .Build();
+
+            serviceCollection.Configure<AuthorizationOptions>(configure =>
+            {
+                configure.AddPolicy(typeof(ExportableProduct).FullName + "ExportDataPolicy", exportPolicy);
+            });
+
+            #endregion
         }
 
         public void PostInitialize(IApplicationBuilder appBuilder)
@@ -171,6 +210,30 @@ namespace VirtoCommerce.CatalogModule.Web
                 catalogDbContext.Database.EnsureCreated();
                 catalogDbContext.Database.Migrate();
             }
+
+            #region Register types for generic Export
+
+            var registrar = appBuilder.ApplicationServices.GetService<IKnownExportTypesRegistrar>();
+            var productExportPagedDataSourceFactory = appBuilder.ApplicationServices.GetService<Func<ExportDataQuery, ProductExportPagedDataSource>>();
+
+            registrar.RegisterType(
+                ExportedTypeDefinitionBuilder.Build<ExportableProduct, ProductExportDataQuery>()
+                    .WithDataSourceFactory(dataQuery => productExportPagedDataSourceFactory(dataQuery))
+                    .WithMetadata(typeof(ExportableProduct).GetPropertyNames(
+                        nameof(ExportableProduct.Properties),
+                        nameof(ExportableProduct.Assets),
+                        nameof(ExportableProduct.Links),
+                        nameof(ExportableProduct.SeoInfos),
+                        nameof(ExportableProduct.Reviews),
+                        nameof(ExportableProduct.Associations),
+                        nameof(ExportableProduct.ReferencedAssociations),
+                        nameof(ExportableProduct.Outlines),
+                        nameof(ExportableProduct.Images)))
+                    .WithTabularMetadata(typeof(ExportableProduct).GetPropertyNames()));
+
+            AbstractTypeFactory<ExportDataQuery>.RegisterType<ProductExportDataQuery>();
+
+            #endregion
         }
 
         public void Uninstall()

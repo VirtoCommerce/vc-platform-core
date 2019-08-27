@@ -465,8 +465,8 @@
             },
             "currency-list": {
                 "labels": {
-                    "no-currencies": "No currencies" 
-                } 
+                    "no-currencies": "No currencies"
+                }
             }
         },
         "widgets": {
@@ -769,6 +769,20 @@
     "module": {
         "VirtoCommerce.Catalog": {
             "description": "Export/Import catalogs, categories, products, properties with images binary if you check binary flag"
+        }
+    },
+    "export": {
+        "types": {
+            "VirtoCommerce.CatalogModule.Data.ExportImport.ExportableProduct": {
+                "name": "Products",
+                "description": "Catalog products data with related objects. Supports JSON and CSV"
+            }
+        },
+        "groups": {
+            "VirtoCommerce.CatalogModule.Data.ExportImport": {
+                "name": "Catalog",
+                "description": "Catalogs, Categories, Products"
+            }
         }
     }
 }
