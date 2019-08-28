@@ -10,6 +10,11 @@ namespace VirtoCommerce.ShippingModule.Data.Repositories
         {
         }
 
+        protected ShippingDbContext(DbContextOptions options)
+            : base(options)
+        {
+        }
+
         protected override void OnModelCreating(ModelBuilder modelBuilder)
         {
             modelBuilder.Entity<StoreShippingMethodEntity>().ToTable("StoreShippingMethod").HasKey(x => x.Id);

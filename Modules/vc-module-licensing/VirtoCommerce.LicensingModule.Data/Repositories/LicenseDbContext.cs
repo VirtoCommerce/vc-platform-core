@@ -11,6 +11,11 @@ namespace VirtoCommerce.LicensingModule.Data.Repositories
         {
         }
 
+        protected LicenseDbContext(DbContextOptions options)
+            : base(options)
+        {
+        }
+
         protected override void OnModelCreating(ModelBuilder modelBuilder)
         {
             modelBuilder.Entity<LicenseEntity>().HasKey(x => x.Id);

@@ -11,6 +11,11 @@ namespace VirtoCommerce.SitemapsModule.Data.Repositories
         {
         }
 
+        protected SitemapDbContext(DbContextOptions options)
+            : base(options)
+        {
+        }
+
         protected override void OnModelCreating(ModelBuilder modelBuilder)
         {
             modelBuilder.Entity<SitemapEntity>().ToTable("Sitemap").HasKey(x => x.Id);
