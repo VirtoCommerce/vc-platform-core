@@ -13,6 +13,7 @@
 
     <ItemGroup>
         <ProjectReference Include="..\..\vc-module-core\VirtoCommerce.CoreModule.Core\VirtoCommerce.CoreModule.Core.csproj" />
+        <ProjectReference Include="..\..\vc-module-export\VirtoCommerce.ExportModule.Core\VirtoCommerce.ExportModule.Core.csproj" />
         <ProjectReference Include="..\..\vc-module-search\VirtoCommerce.SearchModule.Core\VirtoCommerce.SearchModule.Core.csproj" />
     </ItemGroup>
 

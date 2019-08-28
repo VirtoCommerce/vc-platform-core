@@ -53,9 +53,9 @@ namespace VirtoCommerce.CatalogModule.Data.Search
         protected virtual IQueryable<PropertyEntity> BuildQuery(ICatalogRepository repository, PropertySearchCriteria criteria)
         {
             var query = repository.Properties;
-            if (!string.IsNullOrEmpty(criteria.CatalogId))
+            if (!criteria.CatalogIds.IsNullOrEmpty())
             {
-                query = query.Where(x => x.CatalogId == criteria.CatalogId);
+                query = query.Where(x => criteria.CatalogIds.Contains(x.CatalogId));
             }
             if (!string.IsNullOrEmpty(criteria.Keyword))
             {

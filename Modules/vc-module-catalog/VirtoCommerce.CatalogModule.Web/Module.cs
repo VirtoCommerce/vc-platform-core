@@ -156,6 +156,7 @@ namespace VirtoCommerce.CatalogModule.Web
             serviceCollection.Configure<AuthorizationOptions>(configure =>
             {
                 configure.AddPolicy(typeof(ExportableProduct).FullName + "ExportDataPolicy", exportPolicy);
+                configure.AddPolicy(typeof(ExportableCatalogFull).FullName + "ExportDataPolicy", exportPolicy);
             });
 
             #endregion
@@ -220,6 +221,13 @@ namespace VirtoCommerce.CatalogModule.Web
                         nameof(ExportableProduct.Outlines),
                         nameof(ExportableProduct.Images)))
                     .WithTabularMetadata(typeof(ExportableProduct).GetPropertyNames()));
+
+            var catalogFullExportPagedDataSourceFactory = appBuilder.ApplicationServices.GetService<Func<ExportDataQuery, CatalogFullExportPagedDataSource>>();
+            registrar.RegisterType(
+                ExportedTypeDefinitionBuilder.Build<ExportableCatalogFull, CatalogFullExportDataQuery>()
+                    .WithDataSourceFactory(dataQuery => catalogFullExportPagedDataSourceFactory(dataQuery))
+                    .WithMetadata(new ExportedTypeMetadata { PropertyInfos = new ExportedTypePropertyInfo[] { } })
+                    );
 
             #endregion
         }
