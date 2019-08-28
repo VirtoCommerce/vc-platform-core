@@ -10,6 +10,11 @@ namespace VirtoCommerce.TaxModule.Data.Repositories
         {
         }
 
+        protected TaxDbContext(DbContextOptions options)
+            : base(options)
+        {
+        }
+
         protected override void OnModelCreating(ModelBuilder modelBuilder)
         {
             #region StoreTaxProvider

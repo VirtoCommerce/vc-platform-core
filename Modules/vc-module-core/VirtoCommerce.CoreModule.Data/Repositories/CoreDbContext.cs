@@ -13,6 +13,11 @@ namespace VirtoCommerce.CoreModule.Data.Repositories
         {
         }
 
+        protected CoreDbContext(DbContextOptions options)
+            : base(options)
+        {
+        }
+
         protected override void OnModelCreating(ModelBuilder modelBuilder)
         {
             modelBuilder.Entity<SequenceEntity>().ToTable("Sequence").HasKey(x => x.ObjectType);

@@ -11,6 +11,11 @@ namespace VirtoCommerce.ContentModule.Data.Repositories
         {
         }
 
+        protected MenuDbContext(DbContextOptions options)
+            : base(options)
+        {
+        }
+
         protected override void OnModelCreating(ModelBuilder modelBuilder)
         {
             #region MenuLinkList
