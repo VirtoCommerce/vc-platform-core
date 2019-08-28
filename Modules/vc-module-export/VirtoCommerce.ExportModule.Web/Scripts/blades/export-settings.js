@@ -131,7 +131,6 @@ angular.module('virtoCommerce.exportModule')
                 controller: 'virtoCommerce.exportModule.exportProgressController',
                 template: 'Modules/$(VirtoCommerce.Export)/Scripts/blades/export-progress.tpl.html',
                 exportDataRequest: blade.exportDataRequest,
-                isClosingDisabled: true,
                 onCompleted: function () {
                     blade.isExporting = false;
                 }
