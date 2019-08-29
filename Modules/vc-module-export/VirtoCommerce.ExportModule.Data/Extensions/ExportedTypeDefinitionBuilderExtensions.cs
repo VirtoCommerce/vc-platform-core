@@ -1,14 +1,14 @@
-using System;
 using VirtoCommerce.ExportModule.Core.Model;
+using VirtoCommerce.ExportModule.Core.Services;
 using VirtoCommerce.ExportModule.Data.Services;
 
 namespace VirtoCommerce.ExportModule.Data.Extensions
 {
     public static class ExportedTypeDefinitionBuilderExtensions
     {
-        public static ExportedTypeDefinitionBuilder WithDataSourceFactory(this ExportedTypeDefinitionBuilder builder, Func<ExportDataQuery, IPagedDataSource> factory)
+        public static ExportedTypeDefinitionBuilder WithDataSourceFactory(this ExportedTypeDefinitionBuilder builder, IPagedDataSourceFactory factory)
         {
-            builder.ExportedTypeDefinition.ExportedDataSourceFactory = factory;
+            builder.ExportedTypeDefinition.DataSourceFactory = factory;
             return builder;
         }
 
