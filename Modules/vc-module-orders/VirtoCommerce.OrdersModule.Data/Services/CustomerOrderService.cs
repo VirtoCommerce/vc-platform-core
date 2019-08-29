@@ -176,7 +176,10 @@ namespace VirtoCommerce.OrdersModule.Data.Services
             {
                 foreach (var shipment in order.Shipments)
                 {
-                    shipment.ShippingMethod = shippingMethods.Results.FirstOrDefault(x => x.Code.EqualsInvariant(shipment.ShipmentMethodCode));
+                    if (shipment.ShippingMethod == null)
+                    {
+                        shipment.ShippingMethod = shippingMethods.Results.FirstOrDefault(x => x.Code.EqualsInvariant(shipment.ShipmentMethodCode));
+                    }
                 }
             }
             var paymentMethods = await _paymentMethodSearchService.SearchPaymentMethodsAsync(new PaymentMethodsSearchCriteria { StoreId = order.StoreId });
@@ -184,7 +187,10 @@ namespace VirtoCommerce.OrdersModule.Data.Services
             {
                 foreach (var payment in order.InPayments)
                 {
-                    payment.PaymentMethod = paymentMethods.Results.FirstOrDefault(x => x.Code.EqualsInvariant(payment.GatewayCode));
+                    if (payment.PaymentMethod == null)
+                    {
+                        payment.PaymentMethod = paymentMethods.Results.FirstOrDefault(x => x.Code.EqualsInvariant(payment.GatewayCode));
+                    }
                 }
             }
         }
