@@ -4,6 +4,7 @@ using System.IO;
 using System.Linq;
 using System.Threading.Tasks;
 using DinkToPdf;
+using DinkToPdf.Contracts;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.Extensions.Caching.Memory;
@@ -52,6 +53,7 @@ namespace VirtoCommerce.OrdersModule.Web.Controllers.Api
 
         private readonly INotificationTemplateRenderer _notificationTemplateRenderer;
         private readonly IChangeLogSearchService _changeLogSearchService;
+        private readonly IConverter _htmlToPdfconverter;
 
         public OrderModuleController(
               ICustomerOrderService customerOrderService
@@ -66,7 +68,8 @@ namespace VirtoCommerce.OrdersModule.Web.Controllers.Api
             , INotificationTemplateRenderer notificationTemplateRenderer
             , INotificationSearchService notificationSearchService
             , ICustomerOrderTotalsCalculator totalsCalculator
-            , IAuthorizationService authorizationService)
+            , IAuthorizationService authorizationService
+            , IConverter htmlToPdfconverter)
         {
             _customerOrderService = customerOrderService;
             _searchService = searchService;
@@ -81,6 +84,7 @@ namespace VirtoCommerce.OrdersModule.Web.Controllers.Api
             _notificationSearchService = notificationSearchService;
             _totalsCalculator = totalsCalculator;
             _authorizationService = authorizationService;
+            _htmlToPdfconverter = htmlToPdfconverter;
         }
 
         /// <summary>
@@ -485,8 +489,7 @@ namespace VirtoCommerce.OrdersModule.Web.Controllers.Api
                 GlobalSettings = { ColorMode = ColorMode.Color, Orientation = Orientation.Landscape, PaperSize = PaperKind.A4Plus },
                 Objects = { new ObjectSettings { PagesCount = true, HtmlContent = emailNotificationMessage.Body } }
             };
-            var converter = new SynchronizedConverter(new PdfTools());
-            var byteArray = converter.Convert(pdf);
+            var byteArray = _htmlToPdfconverter.Convert(pdf);
             Stream stream = new MemoryStream(byteArray);
 
             return new FileStreamResult(stream, "application/pdf");

@@ -2,6 +2,8 @@ using System;
 using System.IO;
 using System.Linq;
 using System.Threading.Tasks;
+using DinkToPdf;
+using DinkToPdf.Contracts;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Builder;
 using Microsoft.AspNetCore.Mvc;
@@ -56,6 +58,7 @@ namespace VirtoCommerce.OrdersModule.Web
             serviceCollection.AddTransient<PolymorphicOperationJsonConverter>();
 
             serviceCollection.AddTransient<IAuthorizationHandler, OrderAuthorizationHandler>();
+            serviceCollection.AddSingleton(typeof(IConverter), new SynchronizedConverter(new PdfTools()));
         }
 
         public void PostInitialize(IApplicationBuilder appBuilder)

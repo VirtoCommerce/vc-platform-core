@@ -416,6 +416,9 @@ namespace VirtoCommerce.Platform.Web
 
             var mvcJsonOptions = app.ApplicationServices.GetService<IOptions<MvcJsonOptions>>();
             JobHelper.SetSerializerSettings(mvcJsonOptions.Value.SerializerSettings);
+
+            //https://github.com/rdvojmoc/DinkToPdf#install
+            app.LoadUnmanagedLibrary("wkhtmltox\\{{architectureFolder}}\\libwkhtmltox");
         }
     }
 }
