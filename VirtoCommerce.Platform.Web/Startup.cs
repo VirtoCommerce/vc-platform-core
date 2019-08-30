@@ -416,7 +416,6 @@ namespace VirtoCommerce.Platform.Web
 
             var mvcJsonOptions = app.ApplicationServices.GetService<IOptions<MvcJsonOptions>>();
             JobHelper.SetSerializerSettings(mvcJsonOptions.Value.SerializerSettings);
-
         }
     }
 }
