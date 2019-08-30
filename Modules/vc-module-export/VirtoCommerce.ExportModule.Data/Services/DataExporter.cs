@@ -29,7 +29,7 @@ namespace VirtoCommerce.ExportModule.Data.Services
             token.ThrowIfCancellationRequested();
 
             var exportedTypeDefinition = _exportTypesResolver.ResolveExportedTypeDefinition(request.ExportTypeName);
-            var pagedDataSource = exportedTypeDefinition.ExportedDataSourceFactory(request.DataQuery);
+            var pagedDataSource = (exportedTypeDefinition.DataSourceFactory ?? throw new ArgumentNullException(nameof(ExportedTypeDefinition.DataSourceFactory))).Create(request.DataQuery);
 
             var completedMessage = $"Export completed";
             var totalCount = pagedDataSource.GetTotalCount();
