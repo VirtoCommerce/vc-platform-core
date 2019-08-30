@@ -67,4 +67,10 @@ angular.module('virtoCommerce.orderModule').controller('virtoCommerce.orderModul
             });
         }
 
+        $scope.$watch("blade.currentEntity.shippingMethod", function (shippingMethod) {
+            if (blade.isNew && shippingMethod) {
+                blade.currentEntity.shipmentMethodCode = shippingMethod.code;
+            }
+          }, true);
+
     }]);

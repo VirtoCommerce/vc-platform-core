@@ -1,7 +1,6 @@
 angular.module('virtoCommerce.orderModule')
     .controller('virtoCommerce.orderModule.paymentDetailController', ['$scope', 'platformWebApp.bladeNavigationService', 'platformWebApp.dialogService', 'platformWebApp.settings', 'virtoCommerce.orderModule.order_res_customerOrders', 'virtoCommerce.orderModule.statusTranslationService', 'platformWebApp.authService', 'virtoCommerce.paymentModule.paymentMethods',
     function ($scope, bladeNavigationService, dialogService, settings, customerOrders, statusTranslationService, authService, paymentMethods) {
-        blade.isLoading = true;
         var blade = $scope.blade;
         blade.isVisiblePrices = authService.checkPermission('order:read_prices');
         blade.paymentMethods = [];
@@ -25,7 +24,6 @@ angular.module('virtoCommerce.orderModule')
         blade.realOperationsCollection = blade.customerOrder.inPayments;
 
         paymentMethods.search({storeId: blade.customerOrder.storeId}, function (data) {
-                blade.isLoading = false;
                 blade.paymentMethods = data.results;
             }, function (error) {
                 bladeNavigationService.setError('Error ' + error.status, blade);
@@ -54,4 +52,10 @@ angular.module('virtoCommerce.orderModule')
         blade.updateRecalculationFlag = function () {
             blade.isTotalsRecalculationNeeded = blade.origEntity.price != blade.currentEntity.price || blade.origEntity.priceWithTax != blade.currentEntity.priceWithTax;
         }
+
+        $scope.$watch("blade.currentEntity.paymentMethod", function (paymentMethod) {
+            if (blade.isNew && paymentMethod) {
+                blade.currentEntity.gatewayCode = paymentMethod.code;
+            }
+          }, true);
     }]);
