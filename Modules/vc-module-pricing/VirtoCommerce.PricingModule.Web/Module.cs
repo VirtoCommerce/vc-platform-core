@@ -11,7 +11,6 @@ using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Options;
 using VirtoCommerce.CoreModule.Core.Conditions;
-using VirtoCommerce.ExportModule.Core.Model;
 using VirtoCommerce.ExportModule.Core.Services;
 using VirtoCommerce.ExportModule.Data.Extensions;
 using VirtoCommerce.ExportModule.Data.Services;
@@ -169,10 +168,6 @@ namespace VirtoCommerce.PricingModule.Web
                     .WithDataSourceFactory(appBuilder.ApplicationServices.GetService<PricelistAssignmentExportPagedDataSourceFactory>())
                     .WithMetadata(typeof(ExportablePricelistAssignment).GetPropertyNames())
                     .WithTabularMetadata(typeof(TabularPricelistAssignment).GetPropertyNames()));
-
-            AbstractTypeFactory<ExportDataQuery>.RegisterType<PriceExportDataQuery>();
-            AbstractTypeFactory<ExportDataQuery>.RegisterType<PricelistAssignmentExportDataQuery>();
-            AbstractTypeFactory<ExportDataQuery>.RegisterType<PricelistExportDataQuery>();
         }
 
         public void Uninstall()
