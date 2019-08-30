@@ -3,11 +3,10 @@ using System.Collections.Specialized;
 using System.IO;
 using System.Linq;
 using System.Threading.Tasks;
-using DinkToPdf;
-using DinkToPdf.Contracts;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.Extensions.Caching.Memory;
+using SelectPdf;
 using VirtoCommerce.CartModule.Core.Services;
 using VirtoCommerce.CoreModule.Core.Common;
 using VirtoCommerce.NotificationsModule.Core.Extensions;
@@ -53,7 +52,6 @@ namespace VirtoCommerce.OrdersModule.Web.Controllers.Api
 
         private readonly INotificationTemplateRenderer _notificationTemplateRenderer;
         private readonly IChangeLogSearchService _changeLogSearchService;
-        private readonly IConverter _htmlToPdfconverter;
 
         public OrderModuleController(
               ICustomerOrderService customerOrderService
@@ -68,8 +66,7 @@ namespace VirtoCommerce.OrdersModule.Web.Controllers.Api
             , INotificationTemplateRenderer notificationTemplateRenderer
             , INotificationSearchService notificationSearchService
             , ICustomerOrderTotalsCalculator totalsCalculator
-            , IAuthorizationService authorizationService
-            , IConverter htmlToPdfconverter)
+            , IAuthorizationService authorizationService)
         {
             _customerOrderService = customerOrderService;
             _searchService = searchService;
@@ -84,7 +81,6 @@ namespace VirtoCommerce.OrdersModule.Web.Controllers.Api
             _notificationSearchService = notificationSearchService;
             _totalsCalculator = totalsCalculator;
             _authorizationService = authorizationService;
-            _htmlToPdfconverter = htmlToPdfconverter;
         }
 
         /// <summary>
@@ -485,14 +481,18 @@ namespace VirtoCommerce.OrdersModule.Web.Controllers.Api
             message.LanguageCode = order.LanguageCode;
             var emailNotificationMessage = (EmailNotificationMessage)notification.ToMessage(message, _notificationTemplateRenderer);
 
-            var pdf = new HtmlToPdfDocument()
-            {
-                GlobalSettings = { ColorMode = ColorMode.Color, Orientation = Orientation.Portrait, PaperSize = PaperKind.A4Plus },
-                Objects = { new ObjectSettings { PagesCount = true, HtmlContent = emailNotificationMessage.Body } }
-            };
-            var byteArray = _htmlToPdfconverter.Convert(pdf);
-            MemoryStream stream = new MemoryStream(byteArray);
-            return new FileStreamResult(stream, "application/pdf");
+            //need to do https://selectpdf.com/html-to-pdf/docs/html/Deployment.htm
+            HtmlToPdf converter = new HtmlToPdf();
+            converter.Options.PdfPageSize = PdfPageSize.A4;
+            converter.Options.PdfPageOrientation = PdfPageOrientation.Portrait;
+            converter.Options.MarginLeft = 10;
+            converter.Options.MarginRight = 10;
+            converter.Options.MarginTop = 20;
+            converter.Options.MarginBottom = 20;
+
+            PdfDocument doc = converter.ConvertHtmlString(emailNotificationMessage.Body);
+            var byteArray = doc.Save();
+            return new FileContentResult(byteArray, "application/pdf");
         }
 
         [HttpGet]
