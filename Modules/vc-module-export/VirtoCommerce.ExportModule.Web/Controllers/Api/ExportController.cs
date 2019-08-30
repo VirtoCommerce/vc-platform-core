@@ -85,7 +85,7 @@ namespace VirtoCommerce.ExportModule.Web.Controllers
         public async Task<ActionResult<ExportableSearchResult>> GetData([FromBody]ExportDataRequest request)
         {
 
-            var authorizationResult = await _authorizationService.AuthorizeAsync(User, request, request.ExportTypeName + "ExportDataPolicy");
+            var authorizationResult = await _authorizationService.AuthorizeAsync(User, request.DataQuery, request.ExportTypeName + "ExportDataPolicy");
             if (!authorizationResult.Succeeded)
             {
                 return Unauthorized();
@@ -115,7 +115,7 @@ namespace VirtoCommerce.ExportModule.Web.Controllers
         [Authorize(ModuleConstants.Security.Permissions.Access)]
         public async Task<ActionResult<PlatformExportPushNotification>> RunExport([FromBody]ExportDataRequest request)
         {
-            var authorizationResult = await _authorizationService.AuthorizeAsync(User, request, request.ExportTypeName + "ExportDataPolicy");
+            var authorizationResult = await _authorizationService.AuthorizeAsync(User, request.DataQuery, request.ExportTypeName + "ExportDataPolicy");
             if (!authorizationResult.Succeeded)
             {
                 return Unauthorized();

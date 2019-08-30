@@ -312,6 +312,25 @@ angular.module(catalogsModuleName, ['ui.grid.validate', 'ui.grid.infiniteScroll'
             //metaFormsService.registerMetaFields("productDetail", metafieldsDefinitions.productMetafields);
             //metaFormsService.registerMetaFields("categoryDetail", metafieldsDefinitions.categoryMetafields);
 
+            //
+            metaFormsService.registerMetaFields('VirtoCommerce.CatalogModule.Data.ExportImport.ExportableProduct' + 'ExportFilter', [
+                {
+                    name: 'catalogSelector',
+                    title: "catalog.selectors.titles.catalogs",
+                    templateUrl: 'Modules/$(VirtoCommerce.Catalog)/Scripts/selectors/catalog-selector.tpl.html',
+                },
+                {
+                    name: 'categorySelector',
+                    title: "catalog.selectors.titles.categories",
+                    templateUrl: 'Modules/$(VirtoCommerce.Catalog)/Scripts/selectors/category-selector.tpl.html',
+                },
+                {
+                    name: 'searchInVariations',
+                    title: "catalog.selectors.titles.search-in-variations",
+                    valueType: "Boolean"
+                }
+            ]);
+
             $http.get('Modules/$(VirtoCommerce.Catalog)/Scripts/directives/itemSearch.tpl.html').then(function (response) {
                 // compile the response, which will put stuff into the cache
                 $compile(response.data);

@@ -51,7 +51,6 @@ namespace VirtoCommerce.CatalogModule.Data.ExportImport
                 LoadImages(result);
             }
 
-
             return new ExportableSearchResult()
             {
                 Results = ToExportable(result).ToList(),
@@ -65,6 +64,13 @@ namespace VirtoCommerce.CatalogModule.Data.ExportImport
             var models = objects.Cast<CatalogProduct>();
             var viewableMap = models.ToDictionary(x => x, x => AbstractTypeFactory<ExportableProduct>.TryCreateInstance().FromModel(x));
 
+            foreach (var kvp in viewableMap)
+            {
+                var model = kvp.Key;
+                var viewableEntity = kvp.Value;
+                viewableEntity.ImageUrl = model.ImgSrc;
+            }
+
             var modelIds = models.Select(x => x.Id).ToList();
 
             return viewableMap.Values.OrderBy(x => modelIds.IndexOf(x.Id));
@@ -74,14 +80,13 @@ namespace VirtoCommerce.CatalogModule.Data.ExportImport
         {
             var result = base.BuildSearchCriteria(exportDataQuery);
 
-            result.CatalogId = exportDataQuery.CatalogId;
-            result.CategoryId = exportDataQuery.CategoryId;
             result.SearchInVariations = exportDataQuery.SearchInVariations;
-            result.ProductTypes = exportDataQuery.ProductTypes;
-            result.Skus = exportDataQuery.Skus;
+            result.CatalogIds = exportDataQuery.CatalogIds;
+            result.CategoryIds = exportDataQuery.CategoryIds;
 
             return result;
         }
+
 
         private void LoadImages(IHasImages[] haveImagesObjects)
         {
@@ -95,6 +100,7 @@ namespace VirtoCommerce.CatalogModule.Data.ExportImport
                 }
             }
         }
+
         private ItemResponseGroup BuildResponseGroup()
         {
             var result = ItemResponseGroup.ItemInfo;

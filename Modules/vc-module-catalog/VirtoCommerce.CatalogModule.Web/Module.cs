@@ -145,7 +145,6 @@ namespace VirtoCommerce.CatalogModule.Web
             serviceCollection.AddTransient<Func<ExportDataQuery, ProductExportPagedDataSource>>(provider =>
                 (exportDataQuery) =>
                 {
-
                     var blobStorageProvider = provider.CreateScope().ServiceProvider.GetRequiredService<IBlobStorageProvider>();
                     var productSearchService = provider.CreateScope().ServiceProvider.GetRequiredService<IProductSearchService>();
                     var itemService = provider.CreateScope().ServiceProvider.GetRequiredService<IItemService>();
@@ -159,7 +158,8 @@ namespace VirtoCommerce.CatalogModule.Web
 
             var requirements = new IAuthorizationRequirement[]
             {
-                new PermissionAuthorizationRequirement(ModuleConstants.Security.Permissions.Export), new PermissionAuthorizationRequirement(ModuleConstants.Security.Permissions.Read)
+                new PermissionAuthorizationRequirement(ModuleConstants.Security.Permissions.Export),
+                new CatalogAuthorizationRequirement(ModuleConstants.Security.Permissions.Read)
             };
 
             var exportPolicy = new AuthorizationPolicyBuilder()
@@ -221,6 +221,10 @@ namespace VirtoCommerce.CatalogModule.Web
                     .WithDataSourceFactory(dataQuery => productExportPagedDataSourceFactory(dataQuery))
                     .WithMetadata(typeof(ExportableProduct).GetPropertyNames(
                         nameof(ExportableProduct.Properties),
+                        $"{nameof(ExportableProduct.Properties)}.{nameof(Property.Values)}",
+                        $"{nameof(ExportableProduct.Properties)}.{nameof(Property.Attributes)}",
+                        $"{nameof(ExportableProduct.Properties)}.{nameof(Property.DisplayNames)}",
+                        $"{nameof(ExportableProduct.Properties)}.{nameof(Property.ValidationRules)}",
                         nameof(ExportableProduct.Assets),
                         nameof(ExportableProduct.Links),
                         nameof(ExportableProduct.SeoInfos),

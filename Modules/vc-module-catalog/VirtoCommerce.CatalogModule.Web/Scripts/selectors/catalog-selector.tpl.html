@@ -1,0 +1,8 @@
+<div class="form-input" ng-controller="virtoCommerce.pricingModule.catalogSelectorController">
+    <ui-select multiple ng-model="blade.currentEntity.catalogIds">
+        <ui-select-match placeholder="{{'pricing.selectors.placeholders.catalog-lists' | translate}}">{{$item.name}}</ui-select-match>
+        <ui-select-choices repeat="x.id as x in catalogs | filter: { name: $select.search }">
+            <span ng-bind-html="x.name | highlight: $select.search"></span>
+        </ui-select-choices>
+    </ui-select>
+</div>

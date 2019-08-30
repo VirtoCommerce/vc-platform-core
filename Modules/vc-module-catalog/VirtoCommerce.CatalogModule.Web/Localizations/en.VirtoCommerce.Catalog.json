@@ -705,6 +705,25 @@
             "category-scope": {
                 "title": "Only for selected categories"
             }
+        },
+        "selectors": {
+            "titles": {
+                "catalogs": "Catalogs",
+                "categories": "Categories",
+                "search-in-variations": "With variations"
+            },
+            "labels": {
+                "select": "Select",
+                "selected": "Selected: "
+            },
+            "placeholders": {
+                "catalog-lists": "Select catalog…"
+            },
+            "blades": {
+                "titles": {
+                    "select-categories": "Select categories…"
+                }
+            }
         }
     },
     "permissions": {
