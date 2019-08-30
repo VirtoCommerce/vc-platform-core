@@ -480,18 +480,18 @@ namespace VirtoCommerce.OrdersModule.Web.Controllers.Api
             }
 
             var notification = await _notificationSearchService.GetNotificationAsync<InvoiceEmailNotification>(new TenantIdentity(order.StoreId, nameof(StoreModule.Core.Model.Store)));
+            notification.CustomerOrder = order;
             var message = AbstractTypeFactory<NotificationMessage>.TryCreateInstance($"{notification.Kind}Message");
             message.LanguageCode = order.LanguageCode;
             var emailNotificationMessage = (EmailNotificationMessage)notification.ToMessage(message, _notificationTemplateRenderer);
 
             var pdf = new HtmlToPdfDocument()
             {
-                GlobalSettings = { ColorMode = ColorMode.Color, Orientation = Orientation.Landscape, PaperSize = PaperKind.A4Plus },
+                GlobalSettings = { ColorMode = ColorMode.Color, Orientation = Orientation.Portrait, PaperSize = PaperKind.A4Plus },
                 Objects = { new ObjectSettings { PagesCount = true, HtmlContent = emailNotificationMessage.Body } }
             };
             var byteArray = _htmlToPdfconverter.Convert(pdf);
-            Stream stream = new MemoryStream(byteArray);
-
+            MemoryStream stream = new MemoryStream(byteArray);
             return new FileStreamResult(stream, "application/pdf");
         }
 
