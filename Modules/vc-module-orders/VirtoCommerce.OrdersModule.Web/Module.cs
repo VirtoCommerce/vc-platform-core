@@ -58,6 +58,7 @@ namespace VirtoCommerce.OrdersModule.Web
             serviceCollection.AddTransient<PolymorphicOperationJsonConverter>();
 
             serviceCollection.AddTransient<IAuthorizationHandler, OrderAuthorizationHandler>();
+            //could be help when deploy to Azure https://github.com/HakanL/DinkToPdf/issues/8#issuecomment-505550750
             serviceCollection.AddSingleton(typeof(IConverter), new SynchronizedConverter(new PdfTools()));
         }
 

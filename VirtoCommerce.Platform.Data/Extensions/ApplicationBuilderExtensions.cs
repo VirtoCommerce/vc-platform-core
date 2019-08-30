@@ -1,11 +1,9 @@
 using System;
-using System.IO;
 using EntityFrameworkCore.Triggers;
 using Microsoft.AspNetCore.Builder;
 using Microsoft.Extensions.DependencyInjection;
 using VirtoCommerce.Platform.Core.Common;
 using VirtoCommerce.Platform.Core.Security;
-using VirtoCommerce.Platform.Data.Assembly;
 
 namespace VirtoCommerce.Platform.Data.Extensions
 {
@@ -34,15 +32,6 @@ namespace VirtoCommerce.Platform.Data.Extensions
                 entry.Entity.ModifiedBy = userName;
             };
             return appBuilder;
-        }
-
-        public static void LoadUnmanagedLibrary(this IApplicationBuilder appBuilder, string path)
-        {
-            var customAssemblyLoadContext = new CustomAssemblyLoadContext();
-            var architectureFolder = (IntPtr.Size == 8) ? "64 bit" : "32 bit";
-            //var path = Path.Combine(AppContext.BaseDirectory, $"wkhtmltox\\{architectureFolder}\\libwkhtmltox");
-
-            customAssemblyLoadContext.LoadUnmanagedLibrary(Path.Combine(AppContext.BaseDirectory, path.Replace("{{architectureFolder}}", architectureFolder)));
         }
     }
 }
