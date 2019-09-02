@@ -35,7 +35,7 @@ namespace VirtoCommerce.CatalogModule.Data.ExportImport
             _propertySearchService = propertySearchService;
             _propertyDictionarySearchService = propertyDictionarySearchService;
             _catalogSearchService = catalogSearchService;
-            DataQuery = dataQuery;
+            SetDataQuery(dataQuery);
         }
 
         public int TotalCount { get; set; }
@@ -48,71 +48,73 @@ namespace VirtoCommerce.CatalogModule.Data.ExportImport
 
         private CatalogFullExportDataQuery _dataQuery;
 
-        public CatalogFullExportDataQuery DataQuery
+        protected void SetDataQuery(CatalogFullExportDataQuery dataQuery)
         {
-            set
+            _dataQuery = dataQuery;
+            CurrentPageNumber = 0;
+            TotalCount = -1;
+
+            InitSearchCriterias();
+
+            CalculateCounts();
+        }
+
+        protected virtual void InitSearchCriterias()
+        {
+            _exportDataSourceStates.Add(new ExportDataSourceState
             {
-                _dataQuery = value;
-                CurrentPageNumber = 0;
-                TotalCount = -1;
-
-                _exportDataSourceStates.Add(new ExportDataSourceState
+                SearchCriteria = new CatalogSearchCriteria { ResponseGroup = CatalogResponseGroup.Info.ToString(), CatalogIds = _dataQuery.CatalogIds },
+                FetchFunc = async (x) =>
                 {
-                    SearchCriteria = new CatalogSearchCriteria { ResponseGroup = CatalogResponseGroup.Info.ToString(), CatalogIds = _dataQuery.CatalogIds },
-                    FetchFunc = async (x) =>
-                    {
-                        var searchResult = await _catalogSearchService.SearchCatalogsAsync((CatalogSearchCriteria)x.SearchCriteria);
-                        x.TotalCount = searchResult.TotalCount;
-                        x.Result = searchResult.Results;
-                    }
-                });
+                    var searchResult = await _catalogSearchService.SearchCatalogsAsync((CatalogSearchCriteria)x.SearchCriteria);
+                    x.TotalCount = searchResult.TotalCount;
+                    x.Result = searchResult.Results;
+                }
+            });
 
-                _exportDataSourceStates.Add(new ExportDataSourceState
+            _exportDataSourceStates.Add(new ExportDataSourceState
+            {
+                SearchCriteria = new CategorySearchCriteria { CatalogIds = _dataQuery.CatalogIds },
+                FetchFunc = async (x) =>
                 {
-                    SearchCriteria = new CategorySearchCriteria { CatalogIds = _dataQuery.CatalogIds },
-                    FetchFunc = async (x) =>
-                    {
-                        var searchResult = await _categorySearchService.SearchCategoriesAsync((CategorySearchCriteria)x.SearchCriteria);
-                        x.TotalCount = searchResult.TotalCount;
-                        x.Result = searchResult.Results;
-                    }
-                });
+                    var searchResult = await _categorySearchService.SearchCategoriesAsync((CategorySearchCriteria)x.SearchCriteria);
+                    x.TotalCount = searchResult.TotalCount;
+                    x.Result = searchResult.Results;
+                }
+            });
 
-                _exportDataSourceStates.Add(new ExportDataSourceState
+            _exportDataSourceStates.Add(new ExportDataSourceState
+            {
+                SearchCriteria = new PropertySearchCriteria { CatalogIds = _dataQuery.CatalogIds },
+                FetchFunc = async (x) =>
                 {
-                    SearchCriteria = new PropertySearchCriteria { CatalogIds = _dataQuery.CatalogIds },
-                    FetchFunc = async (x) =>
-                    {
-                        var searchResult = await _propertySearchService.SearchPropertiesAsync((PropertySearchCriteria)x.SearchCriteria);
-                        x.TotalCount = searchResult.TotalCount;
-                        x.Result = searchResult.Results;
-                    }
-                });
+                    var searchResult = await _propertySearchService.SearchPropertiesAsync((PropertySearchCriteria)x.SearchCriteria);
+                    x.TotalCount = searchResult.TotalCount;
+                    x.Result = searchResult.Results;
+                }
+            });
 
-                _exportDataSourceStates.Add(new ExportDataSourceState
+            _exportDataSourceStates.Add(new ExportDataSourceState
+            {
+                SearchCriteria = new PropertyDictionaryItemSearchCriteria() { CatalogIds = _dataQuery.CatalogIds },
+                FetchFunc = async (x) =>
                 {
-                    SearchCriteria = new PropertyDictionaryItemSearchCriteria() { CatalogIds = _dataQuery.CatalogIds },
-                    FetchFunc = async (x) =>
-                    {
-                        var searchResult = await _propertyDictionarySearchService.SearchAsync((PropertyDictionaryItemSearchCriteria)x.SearchCriteria);
-                        x.TotalCount = searchResult.TotalCount;
-                        x.Result = searchResult.Results;
-                    }
-                });
+                    var searchResult = await _propertyDictionarySearchService.SearchAsync((PropertyDictionaryItemSearchCriteria)x.SearchCriteria);
+                    x.TotalCount = searchResult.TotalCount;
+                    x.Result = searchResult.Results;
+                }
+            });
 
-                _exportDataSourceStates.Add(new ExportDataSourceState
+            _exportDataSourceStates.Add(new ExportDataSourceState
+            {
+                SearchCriteria = new ProductSearchCriteria() { CatalogIds = _dataQuery.CatalogIds, SearchInVariations = true, ResponseGroup = (ItemResponseGroup.Full & ~ItemResponseGroup.Variations).ToString() },
+                FetchFunc = async (x) =>
                 {
-                    SearchCriteria = new ProductSearchCriteria() { CatalogIds = _dataQuery.CatalogIds, ResponseGroup = (ItemResponseGroup.Full & ~ItemResponseGroup.Variations).ToString() },
-                    FetchFunc = async (x) =>
-                    {
-                        var searchResult = await _productSearchService.SearchProductsAsync((ProductSearchCriteria)x.SearchCriteria);
-                        x.TotalCount = searchResult.TotalCount;
-                        x.Result = searchResult.Results;
-                    }
-                });
-
-                CalculateCounts();
-            }
+                    var searchResult = await _productSearchService.SearchProductsAsync((ProductSearchCriteria)x.SearchCriteria);
+                    x.TotalCount = searchResult.TotalCount;
+                    x.Result = searchResult.Results;
+                }
+            });
         }
 
         public int GetTotalCount()
@@ -137,11 +139,13 @@ namespace VirtoCommerce.CatalogModule.Data.ExportImport
             var skip = _dataQuery.Skip ?? CurrentPageNumber * PageSize;
             var taskList = new List<Task>();
 
-            var curStateStartPos = 0; // Starting position of current state
+            var curStateStartPos = 0; // Starting position of current state in whole set
+            var curPageTake = 0;
 
             foreach (var state in _exportDataSourceStates)
             {
                 state.Result = Array.Empty<IExportable>();
+
                 var overlap = skip - curStateStartPos; // Positive overlap should fall into skip, negative into take
                 state.SearchCriteria.Skip = overlap < 0 ? 0 : overlap;
                 state.SearchCriteria.Take = (skip + take > curStateStartPos + state.TotalCount) ? curStateStartPos + state.TotalCount - skip : take + (overlap < 0 ? overlap : 0);
@@ -149,6 +153,8 @@ namespace VirtoCommerce.CatalogModule.Data.ExportImport
                 if (state.SearchCriteria.Take > 0) // Skip running this fetch in case of nothing to take
                 {
                     taskList.Add(state.FetchFunc(state));
+                    curPageTake += state.SearchCriteria.Take;
+                    if (curPageTake == take) break; // All records in this page was taken: skip iterating thru next states
                 }
 
                 curStateStartPos += state.TotalCount;
@@ -156,7 +162,7 @@ namespace VirtoCommerce.CatalogModule.Data.ExportImport
 
             Task.WhenAll(taskList).GetAwaiter().GetResult(); // Ensures completing all fetches
 
-            Items = _exportDataSourceStates.SelectMany(x => x.Result);
+            Items = _exportDataSourceStates.SelectMany(x => x.Result).ToList();
             CurrentPageNumber++;
 
             return Items.Any();

@@ -80,8 +80,11 @@ namespace VirtoCommerce.CatalogModule.Test
             var fetchResult = new List<IEnumerable<IExportable>>();
             while (catalogDataSource.Fetch())
             {
-                fetchResult.Add(catalogDataSource.Items.ToList());
+                fetchResult.Add(catalogDataSource.Items);
             }
+
+            var result = string.Join(',', fetchResult.Select(x => string.Join(',', x.Select(y => y.Id)))); // It's for simplifying result watching 
+
             Assert.Equal("1,2,3,4,5", string.Join(',', fetchResult[0].Select(x => x.Id)));
             Assert.Equal("6,7,8,9,10", string.Join(',', fetchResult[1].Select(x => x.Id)));
             Assert.Equal("11,12,13,14,15", string.Join(',', fetchResult[2].Select(x => x.Id)));
