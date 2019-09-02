@@ -467,6 +467,13 @@
                 "labels": {
                     "no-currencies": "No currencies"
                 }
+            },
+            "exporter-list": {
+                "title": "Available export modules"
+            },
+            "exporter": {
+                "productTitle": "Export catalog products",
+                "productSubtitle": "Export catalog products to JSON or CSV"
             }
         },
         "widgets": {
