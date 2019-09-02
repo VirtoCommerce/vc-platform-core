@@ -51,7 +51,6 @@ namespace VirtoCommerce.CatalogModule.Data.ExportImport
                 LoadImages(result);
             }
 
-
             return new ExportableSearchResult()
             {
                 Results = ToExportable(result).ToList(),
@@ -63,25 +62,29 @@ namespace VirtoCommerce.CatalogModule.Data.ExportImport
         protected virtual IEnumerable<IExportable> ToExportable(IEnumerable<ICloneable> objects)
         {
             var models = objects.Cast<CatalogProduct>();
-            var viewableMap = models.ToDictionary(x => x, x => AbstractTypeFactory<ExportableProduct>.TryCreateInstance().FromModel(x));
 
-            var modelIds = models.Select(x => x.Id).ToList();
+            var exportableProducts = models.Select(x =>
+            {
+                var exportableProduct = AbstractTypeFactory<ExportableProduct>.TryCreateInstance().FromModel(x);
+                exportableProduct.ImageUrl = x.ImgSrc;
+                return exportableProduct;
+            });
 
-            return viewableMap.Values.OrderBy(x => modelIds.IndexOf(x.Id));
+            return exportableProducts;
         }
 
         protected override ProductSearchCriteria BuildSearchCriteria(ProductExportDataQuery exportDataQuery)
         {
             var result = base.BuildSearchCriteria(exportDataQuery);
 
-            result.CatalogId = exportDataQuery.CatalogId;
-            result.CategoryId = exportDataQuery.CategoryId;
             result.SearchInVariations = exportDataQuery.SearchInVariations;
-            result.ProductTypes = exportDataQuery.ProductTypes;
-            result.Skus = exportDataQuery.Skus;
+            result.CatalogIds = exportDataQuery.CatalogIds;
+            result.CategoryIds = exportDataQuery.CategoryIds;
+            result.SearchInChildren = exportDataQuery.SearchInChildren;
 
             return result;
         }
+
 
         private void LoadImages(IHasImages[] haveImagesObjects)
         {
@@ -95,6 +98,7 @@ namespace VirtoCommerce.CatalogModule.Data.ExportImport
                 }
             }
         }
+
         private ItemResponseGroup BuildResponseGroup()
         {
             var result = ItemResponseGroup.ItemInfo;

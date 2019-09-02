@@ -27,11 +27,9 @@ using VirtoCommerce.CatalogModule.Data.Validation;
 using VirtoCommerce.CatalogModule.Web.Authorization;
 using VirtoCommerce.CatalogModule.Web.JsonConverters;
 using VirtoCommerce.CoreModule.Core.Seo;
-using VirtoCommerce.ExportModule.Core.Model;
 using VirtoCommerce.ExportModule.Core.Services;
 using VirtoCommerce.ExportModule.Data.Extensions;
 using VirtoCommerce.ExportModule.Data.Services;
-using VirtoCommerce.Platform.Core.Assets;
 using VirtoCommerce.Platform.Core.Bus;
 using VirtoCommerce.Platform.Core.Common;
 using VirtoCommerce.Platform.Core.ExportImport;
@@ -141,25 +139,14 @@ namespace VirtoCommerce.CatalogModule.Web
 
             serviceCollection.AddTransient<IAuthorizationHandler, CatalogAuthorizationHandler>();
 
-
-            serviceCollection.AddTransient<Func<ExportDataQuery, ProductExportPagedDataSource>>(provider =>
-                (exportDataQuery) =>
-                {
-
-                    var blobStorageProvider = provider.CreateScope().ServiceProvider.GetRequiredService<IBlobStorageProvider>();
-                    var productSearchService = provider.CreateScope().ServiceProvider.GetRequiredService<IProductSearchService>();
-                    var itemService = provider.CreateScope().ServiceProvider.GetRequiredService<IItemService>();
-                    var result = new ProductExportPagedDataSource(blobStorageProvider, itemService, productSearchService, (ProductExportDataQuery)exportDataQuery);
-                    return result;
-                });
-
-
+            serviceCollection.AddTransient<ProductExportPagedDataSourceFactory>();
 
             #region Add Authorization Policy for GenericExport
 
             var requirements = new IAuthorizationRequirement[]
             {
-                new PermissionAuthorizationRequirement(ModuleConstants.Security.Permissions.Export), new PermissionAuthorizationRequirement(ModuleConstants.Security.Permissions.Read)
+                new PermissionAuthorizationRequirement(ModuleConstants.Security.Permissions.Export),
+                new CatalogAuthorizationRequirement(ModuleConstants.Security.Permissions.Read)
             };
 
             var exportPolicy = new AuthorizationPolicyBuilder()
@@ -214,13 +201,16 @@ namespace VirtoCommerce.CatalogModule.Web
             #region Register types for generic Export
 
             var registrar = appBuilder.ApplicationServices.GetService<IKnownExportTypesRegistrar>();
-            var productExportPagedDataSourceFactory = appBuilder.ApplicationServices.GetService<Func<ExportDataQuery, ProductExportPagedDataSource>>();
 
             registrar.RegisterType(
                 ExportedTypeDefinitionBuilder.Build<ExportableProduct, ProductExportDataQuery>()
-                    .WithDataSourceFactory(dataQuery => productExportPagedDataSourceFactory(dataQuery))
+                    .WithDataSourceFactory(appBuilder.ApplicationServices.GetService<ProductExportPagedDataSourceFactory>())
                     .WithMetadata(typeof(ExportableProduct).GetPropertyNames(
                         nameof(ExportableProduct.Properties),
+                        $"{nameof(ExportableProduct.Properties)}.{nameof(Property.Values)}",
+                        $"{nameof(ExportableProduct.Properties)}.{nameof(Property.Attributes)}",
+                        $"{nameof(ExportableProduct.Properties)}.{nameof(Property.DisplayNames)}",
+                        $"{nameof(ExportableProduct.Properties)}.{nameof(Property.ValidationRules)}",
                         nameof(ExportableProduct.Assets),
                         nameof(ExportableProduct.Links),
                         nameof(ExportableProduct.SeoInfos),
@@ -230,8 +220,6 @@ namespace VirtoCommerce.CatalogModule.Web
                         nameof(ExportableProduct.Outlines),
                         nameof(ExportableProduct.Images)))
                     .WithTabularMetadata(typeof(ExportableProduct).GetPropertyNames()));
-
-            AbstractTypeFactory<ExportDataQuery>.RegisterType<ProductExportDataQuery>();
 
             #endregion
         }
