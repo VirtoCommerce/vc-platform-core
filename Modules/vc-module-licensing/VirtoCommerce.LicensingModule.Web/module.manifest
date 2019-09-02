@@ -17,7 +17,7 @@
         <owner>Virto Commerce</owner>
     </owners>
     <projectUrl>https://virtocommerce.com/virto-licensing-module</projectUrl>
-    <iconUrl>Modules/$(VirtoCommerce.Licensing)/Content/logoVC.png</iconUrl>
+    <iconUrl>https://github.com/VirtoCommerce/vc-module-licensing/raw/master/VirtoCommerce.LicensingModule.Web/Content/logo.png</iconUrl>
     <releaseNotes>Third version.</releaseNotes>
     <copyright>Copyright © 2011-2019 Virto Commerce. All rights reserved</copyright>
     <tags>licensing</tags>
