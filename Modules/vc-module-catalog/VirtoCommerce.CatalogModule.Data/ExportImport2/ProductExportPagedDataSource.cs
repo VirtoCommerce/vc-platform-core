@@ -83,6 +83,7 @@ namespace VirtoCommerce.CatalogModule.Data.ExportImport
             result.SearchInVariations = exportDataQuery.SearchInVariations;
             result.CatalogIds = exportDataQuery.CatalogIds;
             result.CategoryIds = exportDataQuery.CategoryIds;
+            result.SearchInChildren = exportDataQuery.SearchInChildren;
 
             return result;
         }

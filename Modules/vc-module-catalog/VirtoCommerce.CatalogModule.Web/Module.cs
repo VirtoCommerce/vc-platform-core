@@ -31,7 +31,6 @@ using VirtoCommerce.ExportModule.Core.Model;
 using VirtoCommerce.ExportModule.Core.Services;
 using VirtoCommerce.ExportModule.Data.Extensions;
 using VirtoCommerce.ExportModule.Data.Services;
-using VirtoCommerce.Platform.Core.Assets;
 using VirtoCommerce.Platform.Core.Bus;
 using VirtoCommerce.Platform.Core.Common;
 using VirtoCommerce.Platform.Core.ExportImport;
@@ -141,18 +140,7 @@ namespace VirtoCommerce.CatalogModule.Web
 
             serviceCollection.AddTransient<IAuthorizationHandler, CatalogAuthorizationHandler>();
 
-
-            serviceCollection.AddTransient<Func<ExportDataQuery, ProductExportPagedDataSource>>(provider =>
-                (exportDataQuery) =>
-                {
-                    var blobStorageProvider = provider.CreateScope().ServiceProvider.GetRequiredService<IBlobStorageProvider>();
-                    var productSearchService = provider.CreateScope().ServiceProvider.GetRequiredService<IProductSearchService>();
-                    var itemService = provider.CreateScope().ServiceProvider.GetRequiredService<IItemService>();
-                    var result = new ProductExportPagedDataSource(blobStorageProvider, itemService, productSearchService, (ProductExportDataQuery)exportDataQuery);
-                    return result;
-                });
-
-
+            serviceCollection.AddTransient<ProductExportPagedDataSourceFactory>();
 
             #region Add Authorization Policy for GenericExport
 
@@ -214,11 +202,10 @@ namespace VirtoCommerce.CatalogModule.Web
             #region Register types for generic Export
 
             var registrar = appBuilder.ApplicationServices.GetService<IKnownExportTypesRegistrar>();
-            var productExportPagedDataSourceFactory = appBuilder.ApplicationServices.GetService<Func<ExportDataQuery, ProductExportPagedDataSource>>();
 
             registrar.RegisterType(
                 ExportedTypeDefinitionBuilder.Build<ExportableProduct, ProductExportDataQuery>()
-                    .WithDataSourceFactory(dataQuery => productExportPagedDataSourceFactory(dataQuery))
+                    .WithDataSourceFactory(appBuilder.ApplicationServices.GetService<ProductExportPagedDataSourceFactory>())
                     .WithMetadata(typeof(ExportableProduct).GetPropertyNames(
                         nameof(ExportableProduct.Properties),
                         $"{nameof(ExportableProduct.Properties)}.{nameof(Property.Values)}",

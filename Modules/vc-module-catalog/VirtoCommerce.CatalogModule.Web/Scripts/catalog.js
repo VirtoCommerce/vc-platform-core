@@ -317,18 +317,24 @@ angular.module(catalogsModuleName, ['ui.grid.validate', 'ui.grid.infiniteScroll'
                 {
                     name: 'catalogSelector',
                     title: "catalog.selectors.titles.catalogs",
-                    templateUrl: 'Modules/$(VirtoCommerce.Catalog)/Scripts/selectors/catalog-selector.tpl.html',
+                    templateUrl: 'Modules/$(VirtoCommerce.Catalog)/Scripts/selectors/catalog-selector.tpl.html'
                 },
                 {
                     name: 'categorySelector',
                     title: "catalog.selectors.titles.categories",
-                    templateUrl: 'Modules/$(VirtoCommerce.Catalog)/Scripts/selectors/category-selector.tpl.html',
+                    templateUrl: 'Modules/$(VirtoCommerce.Catalog)/Scripts/selectors/category-selector.tpl.html'
                 },
                 {
                     name: 'searchInVariations',
                     title: "catalog.selectors.titles.search-in-variations",
                     valueType: "Boolean"
+                },
+                {
+                    name: 'searchInChildren',
+                    title: "catalog.selectors.titles.search-in-children",
+                    valueType: "Boolean"
                 }
+
             ]);
 
             $http.get('Modules/$(VirtoCommerce.Catalog)/Scripts/directives/itemSearch.tpl.html').then(function (response) {

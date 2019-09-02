@@ -5,6 +5,7 @@ namespace VirtoCommerce.CatalogModule.Data.ExportImport
     public class ProductExportDataQuery : ExportDataQuery
     {
         public bool SearchInVariations { get; set; }
+        public bool SearchInChildren { get; set; }
         public string[] CatalogIds { get; set; }
         public string[] CategoryIds { get; set; }
     }

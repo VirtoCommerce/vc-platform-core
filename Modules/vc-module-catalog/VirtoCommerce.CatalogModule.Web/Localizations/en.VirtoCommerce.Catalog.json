@@ -710,7 +710,8 @@
             "titles": {
                 "catalogs": "Catalogs",
                 "categories": "Categories",
-                "search-in-variations": "With variations"
+                "search-in-variations": "Search in product variations",
+                "search-in-children": "Search in children categories"
             },
             "labels": {
                 "select": "Select",

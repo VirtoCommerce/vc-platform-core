@@ -61,18 +61,21 @@ namespace VirtoCommerce.CatalogModule.Data.Search
             if (!criteria.CategoryIds.IsNullOrEmpty())
             {
                 var searchCategoryIds = criteria.CategoryIds;
-                searchCategoryIds = searchCategoryIds.Concat(repository.GetAllChildrenCategoriesIdsAsync(searchCategoryIds).GetAwaiter().GetResult()).ToArray();
-                //linked categories
-                var allLinkedCategories = repository.CategoryLinks.Where(x => searchCategoryIds.Contains(x.TargetCategoryId)).Select(x => x.SourceCategoryId).ToArray();
-                searchCategoryIds = searchCategoryIds.Concat(allLinkedCategories).Distinct().ToArray();
+
+                if (criteria.SearchInChildren)
+                {
+                    searchCategoryIds = searchCategoryIds.Concat(repository.GetAllChildrenCategoriesIdsAsync(searchCategoryIds).GetAwaiter().GetResult()).ToArray();
+                    //linked categories
+                    var allLinkedCategories = repository.CategoryLinks.Where(x => searchCategoryIds.Contains(x.TargetCategoryId)).Select(x => x.SourceCategoryId).ToArray();
+                    searchCategoryIds = searchCategoryIds.Concat(allLinkedCategories).Distinct().ToArray();
+                }
 
                 query = query.Where(x => searchCategoryIds.Contains(x.CategoryId) || x.CategoryLinks.Any(link => searchCategoryIds.Contains(link.CategoryId)));
             }
 
             if (!criteria.CatalogIds.IsNullOrEmpty())
             {
-                query = query.Where(x => criteria.CatalogIds.Contains(x.CatalogId)
-                                         || x.CategoryLinks.Any(link => criteria.CatalogIds.Contains(link.CatalogId)));
+                query = query.Where(x => criteria.CatalogIds.Contains(x.CatalogId));
             }
 
             if (!criteria.Skus.IsNullOrEmpty())

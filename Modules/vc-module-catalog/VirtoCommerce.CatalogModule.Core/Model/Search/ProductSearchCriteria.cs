@@ -42,6 +42,6 @@ namespace VirtoCommerce.CatalogModule.Core.Model.Search
         /// Search product with specified types
         /// </summary>
         public string[] ProductTypes { get; set; }
-
+        public bool SearchInChildren { get; set; }
     }
 }
