@@ -6,9 +6,8 @@ namespace VirtoCommerce.Platform.Security.Migrations
     {
         protected override void Up(MigrationBuilder migrationBuilder)
         {
-            migrationBuilder.Sql(@"IF (EXISTS (SELECT * 
-                 FROM INFORMATION_SCHEMA.TABLES 
-                 WHERE TABLE_NAME = '__MigrationHistory'))
+            migrationBuilder.Sql(@"IF (EXISTS (SELECT * FROM INFORMATION_SCHEMA.TABLES WHERE TABLE_NAME = '__MigrationHistory'))
+                IF (EXISTS (SELECT * FROM __MigrationHistory WHERE ContextKey = 'VirtoCommerce.Foundation.Data.Security.Identity.SecurityDbContext'))
                     BEGIN
 
 	                    BEGIN
