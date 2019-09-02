@@ -1,4 +1,4 @@
-﻿<Project Sdk="Microsoft.NET.Sdk">
+<Project Sdk="Microsoft.NET.Sdk">
 
     <PropertyGroup>
         <TargetFramework>netcoreapp2.2</TargetFramework>
@@ -15,19 +15,10 @@
     </PropertyGroup>
 
     <ItemGroup>
-        <Compile Remove="dist\**" />
-        <Compile Remove="node_modules\**" />
-        <EmbeddedResource Remove="dist\**" />
-        <EmbeddedResource Remove="node_modules\**" />
-        <None Remove="dist\**" />
-        <None Remove="node_modules\**" />
-    </ItemGroup>
-
-    <ItemGroup>
         <PackageReference Include="AutoCompare.Core" Version="1.0.0" />
-        <PackageReference Include="DinkToPdf" Version="1.0.8" />
         <PackageReference Include="Microsoft.AspNetCore" Version="2.2.0" />
         <PackageReference Include="Microsoft.AspNetCore.App" />
+        <PackageReference Include="Select.HtmlToPdf.NetCore" Version="19.1.0" />
     </ItemGroup>
 
     <ItemGroup>

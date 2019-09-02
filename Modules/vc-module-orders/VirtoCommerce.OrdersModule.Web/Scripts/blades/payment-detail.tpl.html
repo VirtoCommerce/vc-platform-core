@@ -21,7 +21,7 @@
                         <div class="form-input">
                             <ui-select ng-model="blade.currentEntity.paymentMethod" required ng-disabled="blade.isLocked">
                                 <ui-select-match placeholder="{{ 'orders.blades.payment-detail.placeholders.payment-gateway' | translate }}">{{$select.selected.name}}</ui-select-match>
-                                <ui-select-choices repeat="x in blade.currentStore.paymentMethods | filter: { name: $select.search }">
+                                <ui-select-choices repeat="x in blade.paymentMethods | filter: { name: $select.search }">
                                     <span ng-bind-html="x.name | highlight: $select.search"></span>
                                 </ui-select-choices>
                             </ui-select>

@@ -60,14 +60,14 @@ namespace VirtoCommerce.LuceneSearchModule.Data
 
                 //https://stackoverflow.com/questions/48891716/lucene-net-4-8-search-not-returning-results
                 //and also not allowed as first character in WildcardQuery
-                if (!searchKeywords.StartsWith(WildcardQuery.WILDCARD_STRING))
-                {
-                    searchKeywords = $"{WildcardQuery.WILDCARD_STRING}{searchKeywords}";
-                }
-                if (!searchKeywords.EndsWith(WildcardQuery.WILDCARD_STRING))
-                {
-                    searchKeywords = $"{searchKeywords}{WildcardQuery.WILDCARD_STRING}";
-                }
+                //if (!searchKeywords.StartsWith(WildcardQuery.WILDCARD_STRING))
+                //{
+                //    searchKeywords = $"{WildcardQuery.WILDCARD_STRING}{searchKeywords}";
+                //}
+                //if (!searchKeywords.EndsWith(WildcardQuery.WILDCARD_STRING))
+                //{
+                //    searchKeywords = $"{searchKeywords}{WildcardQuery.WILDCARD_STRING}";
+                //}
 
                 if (request.IsFuzzySearch)
                 {

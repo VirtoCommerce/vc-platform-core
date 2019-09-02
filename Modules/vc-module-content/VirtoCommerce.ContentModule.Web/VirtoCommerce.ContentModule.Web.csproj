@@ -8,14 +8,6 @@
     </PropertyGroup>
 
     <ItemGroup>
-        <Compile Remove="dist\**" />
-        <Compile Remove="node_modules\**" />
-        <EmbeddedResource Remove="dist\**" />
-        <EmbeddedResource Remove="node_modules\**" />
-        <None Remove="dist\**" />
-        <None Remove="node_modules\**" />
-    </ItemGroup>
-    <ItemGroup>
         <PackageReference Include="Microsoft.AspNetCore" Version="2.2.0" />
         <PackageReference Include="Microsoft.AspNetCore.App" />
         <PackageReference Include="Microsoft.AspNetCore.Mvc.ViewFeatures" Version="2.2.0" />

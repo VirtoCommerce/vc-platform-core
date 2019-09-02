@@ -6,18 +6,16 @@ namespace VirtoCommerce.CatalogModule.Data.Migrations
     {
         protected override void Up(MigrationBuilder migrationBuilder)
         {
-            migrationBuilder.Sql(@"IF (EXISTS (SELECT * 
-                 FROM INFORMATION_SCHEMA.TABLES 
-                 WHERE TABLE_NAME = '__MigrationHistory'))
+            migrationBuilder.Sql(@"IF (EXISTS (SELECT * FROM INFORMATION_SCHEMA.TABLES WHERE TABLE_NAME = '__MigrationHistory'))
+                IF (EXISTS (SELECT * FROM __MigrationHistory WHERE ContextKey = 'VirtoCommerce.CatalogModule.Data.Migrations.Configuration'))
                     BEGIN
                         BEGIN
 	                        INSERT INTO [dbo].[__EFMigrationsHistory] ([MigrationId],[ProductVersion]) VALUES ('20190515064457_InitialCatalog', '2.2.3-servicing-35854')
                         END
                     END");
 
-            migrationBuilder.Sql(@"IF (EXISTS (SELECT * 
-                 FROM INFORMATION_SCHEMA.TABLES 
-                 WHERE TABLE_NAME = '__MigrationHistory'))
+            migrationBuilder.Sql(@"IF (EXISTS (SELECT * FROM INFORMATION_SCHEMA.TABLES WHERE TABLE_NAME = '__MigrationHistory'))
+                IF (EXISTS (SELECT * FROM __MigrationHistory WHERE ContextKey = 'VirtoCommerce.CatalogModule.Data.Migrations.Configuration'))
                     BEGIN
                         CREATE TABLE [dbo].[CatalogSeoInfo](
 	                        [Id] [nvarchar](128) NOT NULL,
@@ -55,9 +53,8 @@ namespace VirtoCommerce.CatalogModule.Data.Migrations
 	                    
 				    END");
 
-            migrationBuilder.Sql(@"IF (EXISTS (SELECT * 
-                 FROM INFORMATION_SCHEMA.TABLES 
-                 WHERE TABLE_NAME = '__MigrationHistory'))
+            migrationBuilder.Sql(@"IF (EXISTS (SELECT * FROM INFORMATION_SCHEMA.TABLES WHERE TABLE_NAME = '__MigrationHistory'))
+                IF (EXISTS (SELECT * FROM __MigrationHistory WHERE ContextKey = 'VirtoCommerce.CatalogModule.Data.Migrations.Configuration'))
                     BEGIN
                         INSERT INTO [CatalogSeoInfo]([Id], [CreatedDate], [ModifiedDate], [CreatedBy], [ModifiedBy], [Keyword], [StoreId], [IsActive], [Language], [Title], [MetaDescription], [MetaKeywords], [ImageAltDescription], [CategoryId])
                             SELECT[Id], [CreatedDate], [ModifiedDate], [CreatedBy], [ModifiedBy], [Keyword], [StoreId], [IsActive], [Language], [Title], [MetaDescription], [MetaKeywords], [ImageAltDescription], [ObjectId] as CategoryId FROM [SeoUrlKeyword] WHERE ObjectType = 'Category'
