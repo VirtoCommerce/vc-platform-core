@@ -62,14 +62,13 @@ namespace VirtoCommerce.CatalogModule.Data.ExportImport
         protected virtual IEnumerable<IExportable> ToExportable(IEnumerable<ICloneable> objects)
         {
             var models = objects.Cast<CatalogProduct>();
-            var modelIds = models.Select(x => x.Id).ToList();
 
             var exportableProducts = models.Select(x =>
             {
                 var exportableProduct = AbstractTypeFactory<ExportableProduct>.TryCreateInstance().FromModel(x);
                 exportableProduct.ImageUrl = x.ImgSrc;
                 return exportableProduct;
-            }).OrderBy(x => modelIds.IndexOf(x.Id));
+            });
 
             return exportableProducts;
         }
