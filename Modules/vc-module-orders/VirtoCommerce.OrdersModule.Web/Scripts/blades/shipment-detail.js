@@ -1,7 +1,8 @@
-angular.module('virtoCommerce.orderModule').controller('virtoCommerce.orderModule.shipmentDetailController', ['$scope', 'platformWebApp.bladeNavigationService', 'platformWebApp.dialogService', 'platformWebApp.settings', 'virtoCommerce.orderModule.order_res_customerOrders', 'virtoCommerce.inventoryModule.fulfillments', 'virtoCommerce.orderModule.statusTranslationService', 'platformWebApp.authService',
-    function ($scope, bladeNavigationService, dialogService, settings, customerOrders, fulfillments, statusTranslationService, authService) {
+angular.module('virtoCommerce.orderModule').controller('virtoCommerce.orderModule.shipmentDetailController', ['$scope', 'platformWebApp.bladeNavigationService', 'platformWebApp.dialogService', 'platformWebApp.settings', 'virtoCommerce.orderModule.order_res_customerOrders', 'virtoCommerce.inventoryModule.fulfillments', 'virtoCommerce.orderModule.statusTranslationService', 'platformWebApp.authService', 'virtoCommerce.shippingModule.shippingMethods',
+    function ($scope, bladeNavigationService, dialogService, settings, customerOrders, fulfillments, statusTranslationService, authService, shippingMethods) {
         var blade = $scope.blade;
         blade.isVisiblePrices = authService.checkPermission('order:read_prices');
+        blade.shippingMethods = [];
 
         if (blade.isNew) {
             blade.title = 'orders.blades.shipment-detail.title-new';
@@ -20,6 +21,13 @@ angular.module('virtoCommerce.orderModule').controller('virtoCommerce.orderModul
 
         blade.currentStore = _.findWhere(blade.parentBlade.stores, { id: blade.customerOrder.storeId });
         blade.realOperationsCollection = blade.customerOrder.shipments;
+
+        shippingMethods.search({ storeId: blade.customerOrder.storeId }, function (data) {
+                blade.isLoading = false;
+                blade.shippingMethods = data.results;
+            }, function (error) {
+                bladeNavigationService.setError('Error ' + error.status, blade);
+        });
 
         settings.getValues({ id: 'Shipment.Status' }, translateBladeStatuses);
         blade.openStatusSettingManagement = function () {
@@ -58,5 +66,11 @@ angular.module('virtoCommerce.orderModule').controller('virtoCommerce.orderModul
                 blade.fulfillmentCenters = response.results;
             });
         }
+
+        $scope.$watch("blade.currentEntity.shippingMethod", function (shippingMethod) {
+            if (blade.isNew && shippingMethod) {
+                blade.currentEntity.shipmentMethodCode = shippingMethod.code;
+            }
+          }, true);
 
     }]);
