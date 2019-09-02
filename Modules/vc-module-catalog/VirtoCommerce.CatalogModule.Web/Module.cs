@@ -27,7 +27,6 @@ using VirtoCommerce.CatalogModule.Data.Validation;
 using VirtoCommerce.CatalogModule.Web.Authorization;
 using VirtoCommerce.CatalogModule.Web.JsonConverters;
 using VirtoCommerce.CoreModule.Core.Seo;
-using VirtoCommerce.ExportModule.Core.Model;
 using VirtoCommerce.ExportModule.Core.Services;
 using VirtoCommerce.ExportModule.Data.Extensions;
 using VirtoCommerce.ExportModule.Data.Services;
@@ -221,8 +220,6 @@ namespace VirtoCommerce.CatalogModule.Web
                         nameof(ExportableProduct.Outlines),
                         nameof(ExportableProduct.Images)))
                     .WithTabularMetadata(typeof(ExportableProduct).GetPropertyNames()));
-
-            AbstractTypeFactory<ExportDataQuery>.RegisterType<ProductExportDataQuery>();
 
             #endregion
         }

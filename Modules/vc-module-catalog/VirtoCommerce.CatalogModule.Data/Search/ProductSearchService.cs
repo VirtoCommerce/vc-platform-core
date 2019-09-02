@@ -65,9 +65,6 @@ namespace VirtoCommerce.CatalogModule.Data.Search
                 if (criteria.SearchInChildren)
                 {
                     searchCategoryIds = searchCategoryIds.Concat(repository.GetAllChildrenCategoriesIdsAsync(searchCategoryIds).GetAwaiter().GetResult()).ToArray();
-                    //linked categories
-                    var allLinkedCategories = repository.CategoryLinks.Where(x => searchCategoryIds.Contains(x.TargetCategoryId)).Select(x => x.SourceCategoryId).ToArray();
-                    searchCategoryIds = searchCategoryIds.Concat(allLinkedCategories).Distinct().ToArray();
                 }
 
                 query = query.Where(x => searchCategoryIds.Contains(x.CategoryId) || x.CategoryLinks.Any(link => searchCategoryIds.Contains(link.CategoryId)));

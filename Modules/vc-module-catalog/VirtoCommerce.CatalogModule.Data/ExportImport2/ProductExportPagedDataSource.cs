@@ -62,18 +62,16 @@ namespace VirtoCommerce.CatalogModule.Data.ExportImport
         protected virtual IEnumerable<IExportable> ToExportable(IEnumerable<ICloneable> objects)
         {
             var models = objects.Cast<CatalogProduct>();
-            var viewableMap = models.ToDictionary(x => x, x => AbstractTypeFactory<ExportableProduct>.TryCreateInstance().FromModel(x));
-
-            foreach (var kvp in viewableMap)
-            {
-                var model = kvp.Key;
-                var viewableEntity = kvp.Value;
-                viewableEntity.ImageUrl = model.ImgSrc;
-            }
-
             var modelIds = models.Select(x => x.Id).ToList();
 
-            return viewableMap.Values.OrderBy(x => modelIds.IndexOf(x.Id));
+            var exportableProducts = models.Select(x =>
+            {
+                var exportableProduct = AbstractTypeFactory<ExportableProduct>.TryCreateInstance().FromModel(x);
+                exportableProduct.ImageUrl = x.ImgSrc;
+                return exportableProduct;
+            }).OrderBy(x => modelIds.IndexOf(x.Id));
+
+            return exportableProducts;
         }
 
         protected override ProductSearchCriteria BuildSearchCriteria(ProductExportDataQuery exportDataQuery)
