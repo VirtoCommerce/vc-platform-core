@@ -25,8 +25,8 @@ angular.module('virtoCommerce.catalogModule')
                     isAllSelected :true
                 }
             };
-            data.exportDataRequest = exportDataRequest;
-            data.totalItemsCount = (newBlade.selectedProducts || []).length;
+            newBlade.exportDataRequest = exportDataRequest;
+            newBlade.totalItemsCount = (newBlade.selectedProducts || []).length;
 
         } else {
             newBlade.selectedCategories = blade.selectedCategories;
