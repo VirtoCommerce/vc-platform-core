@@ -220,11 +220,11 @@ namespace VirtoCommerce.LuceneSearchModule.Data
                 case string _:
                     foreach (var value in field.Values)
                     {
-                        result.Add(new StringField(fieldName, (string)value, store));
+                        result.Add(new TextField(fieldName, (string)value, store));
 
                         if (field.IsSearchable)
                         {
-                            result.Add(new StringField(LuceneSearchHelper.SearchableFieldName, (string)value, Field.Store.NO));
+                            result.Add(new TextField(LuceneSearchHelper.SearchableFieldName, (string)value, Field.Store.NO));
                         }
                     }
                     break;
@@ -234,8 +234,8 @@ namespace VirtoCommerce.LuceneSearchModule.Data
                     foreach (var value in field.Values)
                     {
                         var stringValue = value.ToStringInvariant();
-                        result.Add(new StringField(fieldName, stringValue, store));
-                        result.Add(new StringField(booleanFieldName, stringValue, Field.Store.NO));
+                        result.Add(new TextField(fieldName, stringValue, store));
+                        result.Add(new TextField(booleanFieldName, stringValue, Field.Store.NO));
                     }
                     break;
                 case DateTime _:
@@ -245,13 +245,13 @@ namespace VirtoCommerce.LuceneSearchModule.Data
                     {
                         var numericField = new Int64Field(fieldName, ((DateTime)value).Ticks, store);
                         result.Add(numericField);
-                        result.Add(new StringField(dateTimeFieldName, value.ToStringInvariant(), Field.Store.NO));
+                        result.Add(new TextField(dateTimeFieldName, value.ToStringInvariant(), Field.Store.NO));
                     }
                     break;
                 case GeoPoint _:
                     var geoPoint = (GeoPoint)field.Value;
 
-                    result.Add(new StringField(fieldName, geoPoint.ToString(), Field.Store.YES));
+                    result.Add(new TextField(fieldName, geoPoint.ToString(), Field.Store.YES));
 
                     var shape = _spatialContext.MakePoint(geoPoint.Longitude, geoPoint.Latitude);
                     var strategy = new PointVectorStrategy(_spatialContext, fieldName);
@@ -271,12 +271,12 @@ namespace VirtoCommerce.LuceneSearchModule.Data
 
                             result.Add(doubleField);
 
-                            result.Add(new StringField(facetableFieldName, stringValue, Field.Store.NO));
+                            result.Add(new TextField(facetableFieldName, stringValue, Field.Store.NO));
                         }
                     }
                     else
                     {
-                        result.AddRange(field.Values.Select(value => new StringField(fieldName, value.ToStringInvariant(), store)));
+                        result.AddRange(field.Values.Select(value => new TextField(fieldName, value.ToStringInvariant(), store)));
                     }
                     break;
             }
