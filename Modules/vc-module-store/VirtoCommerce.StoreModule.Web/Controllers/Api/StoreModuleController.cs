@@ -179,9 +179,10 @@ namespace VirtoCommerce.StoreModule.Web.Controllers.Api
             var notification = new StoreDynamicEmailNotification()
             {
                 FormType = request.Type,
-                Fields = request.Fields
+                Fields = request.Fields,
+                LanguageCode = request.Language
             };
-            await _notificationSender.SendNotificationAsync(notification, request.Language);
+            await _notificationSender.SendNotificationAsync(notification);
 
             return NoContent();
         }

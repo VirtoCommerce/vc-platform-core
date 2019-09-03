@@ -95,7 +95,7 @@ namespace VirtoCommerce.NotificationsModule.Tests.IntegrationTests
             _notificationSender = new NotificationSender(_templateRender, _messageServiceMock.Object, _logNotificationSenderMock.Object, _notificationMessageSenderProviderFactory);
 
             //Act
-            var result = await _notificationSender.SendNotificationAsync(notification, null);
+            var result = await _notificationSender.SendNotificationAsync(notification);
 
             //Assert
             Assert.True(result.IsSuccess);
@@ -105,7 +105,6 @@ namespace VirtoCommerce.NotificationsModule.Tests.IntegrationTests
         public async Task SmtpEmailNotificationMessageSender_FailSendMessage()
         {
             //Arrange
-            string language = null;
             var number = Guid.NewGuid().ToString();
             var subject = "Order #{{customer_order.number}}";
             var body = "You have order #{{customer_order.number}}";
@@ -132,7 +131,7 @@ namespace VirtoCommerce.NotificationsModule.Tests.IntegrationTests
                 _notificationMessageSenderProviderFactory);
 
             //Act
-            var result = await _notificationSender.SendNotificationAsync(notification, language);
+            var result = await _notificationSender.SendNotificationAsync(notification);
 
             //Assert
             Assert.False(result.IsSuccess);

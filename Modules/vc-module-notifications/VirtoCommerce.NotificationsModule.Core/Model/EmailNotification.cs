@@ -39,8 +39,10 @@ namespace VirtoCommerce.NotificationsModule.Core.Model
         public string[] BCC { get; set; }
         public IList<EmailAttachment> Attachments { get; set; }
 
-        public override NotificationMessage ToMessage(NotificationMessage message, INotificationTemplateRenderer render)
+        public override void ToMessage(NotificationMessage message, INotificationTemplateRenderer render)
         {
+            base.ToMessage(message, render);
+
             var emailMessage = (EmailNotificationMessage)message;
 
             var template = (EmailNotificationTemplate)Templates.FindWithLanguage(message.LanguageCode);
@@ -55,8 +57,6 @@ namespace VirtoCommerce.NotificationsModule.Core.Model
             emailMessage.CC = CC;
             emailMessage.BCC = BCC;
             emailMessage.Attachments = Attachments;
-
-            return base.ToMessage(message, render);
         }
 
         public override void SetFromToMembers(string from, string to)

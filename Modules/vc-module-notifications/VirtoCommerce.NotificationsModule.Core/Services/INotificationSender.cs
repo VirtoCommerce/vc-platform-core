@@ -8,8 +8,8 @@ namespace VirtoCommerce.NotificationsModule.Core.Services
     /// </summary>
     public interface INotificationSender
     {
-        Task<NotificationSendResult> SendNotificationAsync(Notification notification, string language);
+        Task<NotificationSendResult> SendNotificationAsync(Notification notification);
 
-        void ScheduleSendNotification(Notification notification, string language);
+        void ScheduleSendNotification(Notification notification);
     }
 }

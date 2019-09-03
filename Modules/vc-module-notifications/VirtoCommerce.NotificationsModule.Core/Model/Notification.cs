@@ -15,6 +15,7 @@ namespace VirtoCommerce.NotificationsModule.Core.Model
         /// </summary>
         public TenantIdentity TenantIdentity { get; set; } = TenantIdentity.Empty;
         public bool IsActive { get; set; }
+        public string LanguageCode { get; set; }
 
         /// <summary>
         /// Type of notifications, like Identifier
@@ -32,13 +33,12 @@ namespace VirtoCommerce.NotificationsModule.Core.Model
         public abstract string Kind { get; }
         public IList<NotificationTemplate> Templates { get; set; }
 
-        public virtual NotificationMessage ToMessage(NotificationMessage message, INotificationTemplateRenderer render)
+        public virtual void ToMessage(NotificationMessage message, INotificationTemplateRenderer render)
         {
             message.TenantIdentity = new TenantIdentity(TenantIdentity?.Id, TenantIdentity?.Type);
             message.NotificationType = Type;
             message.NotificationId = Id;
-
-            return message;
+            message.LanguageCode = LanguageCode;
         }
 
         public virtual void ReduceDetails(string responseGroup)

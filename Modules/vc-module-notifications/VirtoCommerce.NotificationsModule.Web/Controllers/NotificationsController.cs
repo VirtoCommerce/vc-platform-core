@@ -17,7 +17,7 @@ namespace VirtoCommerce.NotificationsModule.Web.Controllers
 {
     [Route("api/notifications")]
     [Route("api/platform/notification")]
-    //[Authorize(ModuleConstants.Security.Permissions.Access)]
+    [Authorize(ModuleConstants.Security.Permissions.Access)]
     public class NotificationsController : Controller
     {
         private readonly INotificationSearchService _notificationSearchService;
@@ -115,10 +115,10 @@ namespace VirtoCommerce.NotificationsModule.Web.Controllers
         /// </summary>
         [HttpPost]
         [Route("send")]
-        public async Task<ActionResult<NotificationSendResult>> SendNotification([FromBody]Notification notificationRequest, string language)
+        public async Task<ActionResult<NotificationSendResult>> SendNotification([FromBody]Notification notificationRequest)
         {
             var notification = await _notificationSearchService.GetNotificationAsync(notificationRequest.Type, notificationRequest.TenantIdentity);
-            var result = await _notificationSender.SendNotificationAsync(notification, language);
+            var result = await _notificationSender.SendNotificationAsync(notification);
 
             return Ok(result);
         }
@@ -145,7 +145,7 @@ namespace VirtoCommerce.NotificationsModule.Web.Controllers
             }
 
             PopulateNotification(request, notification);
-            var result = await _notificationSender.SendNotificationAsync(notification, request.Language);
+            var result = await _notificationSender.SendNotificationAsync(notification);
 
             return Ok(result);
         }
@@ -180,6 +180,7 @@ namespace VirtoCommerce.NotificationsModule.Web.Controllers
         private void PopulateNotification(NotificationRequest request, Notification notification)
         {
             notification.TenantIdentity = new TenantIdentity(request.ObjectId, request.ObjectTypeId);
+            notification.LanguageCode = request.Language;
 
             foreach (var parameter in request.NotificationParameters)
             {
