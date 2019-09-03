@@ -803,6 +803,10 @@
             "VirtoCommerce.CatalogModule.Data.ExportImport.ExportableProduct": {
                 "name": "Products",
                 "description": "Catalog products data with related objects. Supports JSON and CSV"
+            },
+            "VirtoCommerce.CatalogModule.Data.ExportImport.ExportableCatalogFull": {
+                "name": "Catalog",
+                "description": "Catalog data with related objects. Supports JSON"
             }
         },
         "groups": {

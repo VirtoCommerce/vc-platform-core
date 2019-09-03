@@ -13,17 +13,12 @@ angular.module('virtoCommerce.catalogModule')
         var newBlade = {};
         angular.copy(data, newBlade);
 
-        if (!angular.isFunction(data.onInitialized)) {
-            newBlade.selectedCategories = blade.selectedCategories;
-            newBlade.selectedProducts = blade.selectedProducts;
-            newBlade.catalog = blade.catalog;
-        }
-        else {
-            data.onInitialized(newBlade, {
-                catalog: blade.catalog,
-                selectedCategories: blade.selectedCategories,
-                selectedProducts: blade.selectedProducts
-            });
+        newBlade.selectedCategories = blade.selectedCategories;
+        newBlade.selectedProducts = blade.selectedProducts;
+        newBlade.catalog = blade.catalog;
+
+        if (angular.isFunction(data.onInitialize)) {
+            data.onInitialized(newBlade);
         }
 
         bladeNavigationService.showBlade(newBlade, blade.parentBlade);

@@ -3,11 +3,12 @@ using System.Collections.Generic;
 using System.Linq;
 using Newtonsoft.Json;
 using VirtoCommerce.CoreModule.Core.Common;
+using VirtoCommerce.ExportModule.Core.Model;
 using VirtoCommerce.Platform.Core.Common;
 
 namespace VirtoCommerce.CatalogModule.Core.Model
 {
-    public class Property : AuditableEntity, IInheritable, ICloneable, IHasOuterId, IHasCatalogId
+    public class Property : AuditableEntity, IInheritable, ICloneable, IHasOuterId, IHasCatalogId, IExportable
     {
         /// <summary>
         /// Gets or sets a value indicating whether user can change property value.

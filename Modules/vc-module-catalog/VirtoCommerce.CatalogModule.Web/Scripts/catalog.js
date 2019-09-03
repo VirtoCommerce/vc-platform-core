@@ -337,6 +337,14 @@ angular.module(catalogsModuleName, ['ui.grid.validate', 'ui.grid.infiniteScroll'
 
             ]);
 
+            metaFormsService.registerMetaFields('VirtoCommerce.CatalogModule.Data.ExportImport.ExportableCatalogFull' + 'ExportFilter', [
+                {
+                    name: 'catalogSelector',
+                    title: "catalog.selectors.titles.catalogs",
+                    templateUrl: 'Modules/$(VirtoCommerce.Catalog)/Scripts/selectors/catalog-selector.tpl.html'
+                }
+            ]);
+
             $http.get('Modules/$(VirtoCommerce.Catalog)/Scripts/directives/itemSearch.tpl.html').then(function (response) {
                 // compile the response, which will put stuff into the cache
                 $compile(response.data);
@@ -352,15 +360,15 @@ angular.module(catalogsModuleName, ['ui.grid.validate', 'ui.grid.infiniteScroll'
                 title: 'catalog.blades.exporter.productTitle',
                 subtitle: 'catalog.blades.exporter.productSubtitle',
                 isNew: true,
-                onInitialized: function (newBlade, { catalog, selectedCategories, selectedProducts}) {
+                onInitialize: function (newBlade) {
                     var exportDataRequest = {
                         exportTypeName: 'VirtoCommerce.CatalogModule.Data.ExportImport.ExportableProduct',
                         isTabularExportSupported: true,
                         dataQuery: {
                             exportTypeName: 'ProductExportDataQuery',
-                            categoryIds: _.pluck(selectedCategories, 'id'),
-                            objectIds: _.pluck(selectedProducts, 'id'),
-                            catalogIds: [catalog.id],
+                            categoryIds: _.pluck(newBlade.selectedCategories, 'id'),
+                            objectIds: _.pluck(newBlade.selectedProducts, 'id'),
+                            catalogIds: [newBlade.catalog.id],
                             isAllSelected: true
                         }
                     };
