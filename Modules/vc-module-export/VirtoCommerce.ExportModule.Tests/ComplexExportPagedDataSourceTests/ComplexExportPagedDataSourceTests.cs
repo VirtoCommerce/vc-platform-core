@@ -11,7 +11,7 @@ namespace VirtoCommerce.ExportModule.Tests.ComplexExportPagedDataSourceTests
     public class ComplexExportPagedDataSourceTests
     {
         /// <summary>
-        /// Tests cross-page walking on search services for Catalog and its dependencies
+        /// Tests cross-page walking on search services for complex data source
         /// </summary>
         /// <returns></returns>
         [Fact]
