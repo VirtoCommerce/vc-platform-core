@@ -1,9 +1,8 @@
 using System.Collections.Generic;
 using System.Linq;
-using VirtoCommerce.CatalogModule.Core.Model;
 using VirtoCommerce.ExportModule.Core.Model;
 
-namespace VirtoCommerce.CatalogModule.Data.ExportImport
+namespace VirtoCommerce.CatalogModule.Core.Model.Export
 {
     public class ExportableCatalogFull : IExportable
     {

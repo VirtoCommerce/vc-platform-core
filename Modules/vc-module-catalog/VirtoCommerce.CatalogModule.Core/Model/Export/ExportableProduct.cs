@@ -1,11 +1,10 @@
 using System.Linq;
-using VirtoCommerce.CatalogModule.Core.Model;
 using VirtoCommerce.CoreModule.Core.Outlines;
 using VirtoCommerce.CoreModule.Core.Seo;
 using VirtoCommerce.ExportModule.Core.Model;
 using VirtoCommerce.Platform.Core.Common;
 
-namespace VirtoCommerce.CatalogModule.Data.ExportImport
+namespace VirtoCommerce.CatalogModule.Core.Model.Export
 {
     public class ExportableProduct : CatalogProduct, IExportable, IExportViewable, ITabularConvertible
     {

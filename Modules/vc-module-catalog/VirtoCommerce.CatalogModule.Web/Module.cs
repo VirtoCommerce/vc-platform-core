@@ -13,6 +13,7 @@ using Microsoft.Extensions.Options;
 using VirtoCommerce.CatalogModule.Core;
 using VirtoCommerce.CatalogModule.Core.Events;
 using VirtoCommerce.CatalogModule.Core.Model;
+using VirtoCommerce.CatalogModule.Core.Model.Export;
 using VirtoCommerce.CatalogModule.Core.Model.OutlinePart;
 using VirtoCommerce.CatalogModule.Core.Search;
 using VirtoCommerce.CatalogModule.Core.Services;
