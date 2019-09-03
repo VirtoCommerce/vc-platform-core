@@ -75,8 +75,8 @@ angular.module(catalogsModuleName, ['ui.grid.validate', 'ui.grid.infiniteScroll'
         };
     }])
     .run(
-    ['platformWebApp.authService', 'platformWebApp.mainMenuService', 'platformWebApp.widgetService', '$state', 'platformWebApp.pushNotificationTemplateResolver', 'platformWebApp.bladeNavigationService', 'virtoCommerce.catalogModule.catalogImportService', 'virtoCommerce.catalogModule.catalogExportService', 'platformWebApp.permissionScopeResolver', 'virtoCommerce.catalogModule.catalogs', 'virtoCommerce.catalogModule.predefinedSearchFilters', 'platformWebApp.metaFormsService', 'virtoCommerce.catalogModule.itemTypesResolverService', '$http', '$compile',
-        function (authService, mainMenuService, widgetService, $state, pushNotificationTemplateResolver, bladeNavigationService, catalogImportService, catalogExportService, scopeResolver, catalogs, predefinedSearchFilters, metaFormsService, itemTypesResolverService, $http, $compile) {
+        ['platformWebApp.authService', 'platformWebApp.mainMenuService', 'platformWebApp.widgetService', '$state', 'platformWebApp.pushNotificationTemplateResolver', 'platformWebApp.bladeNavigationService', 'virtoCommerce.catalogModule.catalogImportService', 'virtoCommerce.catalogModule.catalogExportService', 'platformWebApp.permissionScopeResolver', 'virtoCommerce.catalogModule.catalogs', 'virtoCommerce.catalogModule.predefinedSearchFilters', 'platformWebApp.metaFormsService', 'virtoCommerce.catalogModule.itemTypesResolverService', '$http', '$compile', 
+            function (authService, mainMenuService, widgetService, $state, pushNotificationTemplateResolver, bladeNavigationService, catalogImportService, catalogExportService, scopeResolver, catalogs, predefinedSearchFilters, metaFormsService, itemTypesResolverService, $http, $compile) {
 
             //Register module in main menu
             var menuItem = {
@@ -348,5 +348,31 @@ angular.module(catalogsModuleName, ['ui.grid.validate', 'ui.grid.infiniteScroll'
             $http.get('Modules/$(VirtoCommerce.Catalog)/Scripts/directives/itemSearch.tpl.html').then(function (response) {
                 // compile the response, which will put stuff into the cache
                 $compile(response.data);
+            });
+
+            catalogExportService.register({
+                name: 'Generic Export',
+                description: 'Export products filtered by catalogs or categories to JSON or CSV',
+                icon: 'fa-fw fa fa-database',
+                controller: 'virtoCommerce.exportModule.exportSettingsController',
+                template: 'Modules/$(VirtoCommerce.Export)/Scripts/blades/export-settings.tpl.html',
+                id: 'catalogGenericExport',
+                title: 'catalog.blades.exporter.productTitle',
+                subtitle: 'catalog.blades.exporter.productSubtitle',
+                isNew: true,
+                onInitialize: function (newBlade) {
+                    var exportDataRequest = {
+                        exportTypeName: 'VirtoCommerce.CatalogModule.Data.ExportImport.ExportableProduct',
+                        dataQuery: {
+                            exportTypeName: 'ProductExportDataQuery',
+                            categoryIds: _.pluck(newBlade.selectedCategories, 'id'),
+                            objectIds: _.pluck(newBlade.selectedProducts, 'id'),
+                            catalogIds: [newBlade.catalog.id],
+                            isAllSelected: true
+                        }
+                    };
+                    newBlade.exportDataRequest = exportDataRequest;
+                    newBlade.totalItemsCount = (newBlade.selectedProducts || []).length;
+                }
             });
         }]);
