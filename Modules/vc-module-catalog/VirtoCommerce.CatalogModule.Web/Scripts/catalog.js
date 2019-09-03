@@ -352,14 +352,14 @@ angular.module(catalogsModuleName, ['ui.grid.validate', 'ui.grid.infiniteScroll'
                 title: 'catalog.blades.exporter.productTitle',
                 subtitle: 'catalog.blades.exporter.productSubtitle',
                 isNew: true,
-                initializeBlade: function(catalog, categories, products, newBlade) {
+                onInitialized: function (newBlade, { catalog, selectedCategories, selectedProducts}) {
                     var exportDataRequest = {
                         exportTypeName: 'VirtoCommerce.CatalogModule.Data.ExportImport.ExportableProduct',
                         isTabularExportSupported: true,
                         dataQuery: {
                             exportTypeName: 'ProductExportDataQuery',
-                            categoryIds: _.pluck(categories, 'id'),
-                            objectIds: _.pluck(products, 'id'),
+                            categoryIds: _.pluck(selectedCategories, 'id'),
+                            objectIds: _.pluck(selectedProducts, 'id'),
                             catalogIds: [catalog.id],
                             isAllSelected: true
                         }
