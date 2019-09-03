@@ -18,7 +18,7 @@ angular.module('virtoCommerce.catalogModule')
         newBlade.catalog = blade.catalog;
 
         if (angular.isFunction(data.onInitialize)) {
-            data.onInitialized(newBlade);
+            data.onInitialize(newBlade);
         }
 
         bladeNavigationService.showBlade(newBlade, blade.parentBlade);
