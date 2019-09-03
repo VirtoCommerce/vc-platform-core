@@ -13,21 +13,8 @@ angular.module('virtoCommerce.catalogModule')
         var newBlade = {};
         angular.copy(data, newBlade);
 
-        if (data.isGenericExport) {
-            var exportDataRequest = {
-                exportTypeName: 'VirtoCommerce.CatalogModule.Data.ExportImport.ExportableProduct',
-                isTabularExportSupported: true,
-                dataQuery: {
-                    exportTypeName: 'ProductExportDataQuery',
-                    categoryIds : _.pluck(blade.selectedCategories, 'id'),
-                    objectIds: _.pluck(blade.selectedProducts, 'id'),
-                    catalogIds: [blade.catalog.id],
-                    isAllSelected :true
-                }
-            };
-            newBlade.exportDataRequest = exportDataRequest;
-            newBlade.totalItemsCount = (newBlade.selectedProducts || []).length;
-
+        if (angular.isFunction(data.initializeBlade)) {
+            data.initializeBlade(blade.catalog, blade.selectedCategories, blade.selectedProducts, newBlade);
         } else {
             newBlade.selectedCategories = blade.selectedCategories;
             newBlade.selectedProducts = blade.selectedProducts;
@@ -35,7 +22,6 @@ angular.module('virtoCommerce.catalogModule')
         }
 
         bladeNavigationService.showBlade(newBlade, blade.parentBlade);
-
     }
 
     $scope.blade.headIcon = 'fa-upload';

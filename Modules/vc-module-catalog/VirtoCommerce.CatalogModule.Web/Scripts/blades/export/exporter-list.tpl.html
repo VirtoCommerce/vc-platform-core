@@ -5,7 +5,7 @@
                 <li class="list-item" ng-click="openBlade(data)" ng-repeat="data in registrationsList track by data.name">
                     <a class="list-block">
                         <i class="list-ico {{data.icon}}"></i>
-                        <span class="list-name">{{data.name}}</span> <span ng-if="data.isNew" class="list-name" style="background-color: #ee0701; color: #ffffff; border-radius: 2px; font-size: 12px; padding: .15em 4px;">New</span>
+                        <span class="list-name">{{data.name}}</span> <span ng-if="data.isNew" class="list-name newLabel" >New</span>
                         <span class="list-descr">{{data.description}}.</span>
                     </a>
                 </li>

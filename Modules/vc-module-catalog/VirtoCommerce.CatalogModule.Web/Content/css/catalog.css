@@ -248,6 +248,15 @@
     left: 3px;
     top: auto;
 }
+
 .capitalizeText {
     text-transform: capitalize;
+}
+
+.vc-catalog .newLabel {
+    background-color: #ee0701;
+    color: #ffffff;
+    border-radius: 2px;
+    font-size: 12px;
+    padding: .15em 4px;
 }
