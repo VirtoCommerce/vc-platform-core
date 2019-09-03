@@ -6,11 +6,12 @@ using VirtoCommerce.CatalogModule.Core.Serialization;
 using VirtoCommerce.CoreModule.Core.Common;
 using VirtoCommerce.CoreModule.Core.Outlines;
 using VirtoCommerce.CoreModule.Core.Seo;
+using VirtoCommerce.ExportModule.Core.Model;
 using VirtoCommerce.Platform.Core.Common;
 
 namespace VirtoCommerce.CatalogModule.Core.Model
 {
-    public class CatalogProduct : AuditableEntity, IHasLinks, ISeoSupport, IHasOutlines, IHasDimension, IHasAssociations, IHasProperties, IHasImages, IHasAssets, IInheritable, IHasTaxType, IHasName, ICloneable, IHasOuterId, IHasCatalogId
+    public class CatalogProduct : AuditableEntity, IHasLinks, ISeoSupport, IHasOutlines, IHasDimension, IHasAssociations, IHasProperties, IHasImages, IHasAssets, IInheritable, IHasTaxType, IHasName, ICloneable, IHasOuterId, IHasCatalogId, IExportable
     {
         /// <summary>
         /// SKU code
@@ -149,7 +150,7 @@ namespace VirtoCommerce.CatalogModule.Core.Model
         #endregion
 
         public IList<ProductAssociation> ReferencedAssociations { get; set; }
-        
+
         #region IHasOutlines members
         public IList<Outline> Outlines { get; set; }
         #endregion

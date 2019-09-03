@@ -27,6 +27,7 @@ using VirtoCommerce.CatalogModule.Data.Validation;
 using VirtoCommerce.CatalogModule.Web.Authorization;
 using VirtoCommerce.CatalogModule.Web.JsonConverters;
 using VirtoCommerce.CoreModule.Core.Seo;
+using VirtoCommerce.ExportModule.Core.Model;
 using VirtoCommerce.ExportModule.Core.Services;
 using VirtoCommerce.ExportModule.Data.Extensions;
 using VirtoCommerce.ExportModule.Data.Services;
@@ -140,6 +141,7 @@ namespace VirtoCommerce.CatalogModule.Web
             serviceCollection.AddTransient<IAuthorizationHandler, CatalogAuthorizationHandler>();
 
             serviceCollection.AddTransient<ProductExportPagedDataSourceFactory>();
+            serviceCollection.AddTransient<CatalogFullExportPagedDataSourceFactory>();
 
             #region Add Authorization Policy for GenericExport
 
@@ -156,6 +158,7 @@ namespace VirtoCommerce.CatalogModule.Web
             serviceCollection.Configure<AuthorizationOptions>(configure =>
             {
                 configure.AddPolicy(typeof(ExportableProduct).FullName + "ExportDataPolicy", exportPolicy);
+                configure.AddPolicy(typeof(ExportableCatalogFull).FullName + "ExportDataPolicy", exportPolicy);
             });
 
             #endregion
@@ -220,6 +223,12 @@ namespace VirtoCommerce.CatalogModule.Web
                         nameof(ExportableProduct.Outlines),
                         nameof(ExportableProduct.Images)))
                     .WithTabularMetadata(typeof(ExportableProduct).GetPropertyNames()));
+
+            registrar.RegisterType(
+                ExportedTypeDefinitionBuilder.Build<ExportableCatalogFull, CatalogFullExportDataQuery>()
+                    .WithDataSourceFactory(appBuilder.ApplicationServices.GetService<CatalogFullExportPagedDataSourceFactory>())
+                    .WithMetadata(new ExportedTypeMetadata { PropertyInfos = new ExportedTypePropertyInfo[] { } })
+                    );
 
             #endregion
         }

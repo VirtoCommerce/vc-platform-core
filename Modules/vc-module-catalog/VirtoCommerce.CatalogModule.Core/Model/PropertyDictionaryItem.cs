@@ -1,10 +1,11 @@
 using System;
 using System.Collections.Generic;
+using VirtoCommerce.ExportModule.Core.Model;
 using VirtoCommerce.Platform.Core.Common;
 
 namespace VirtoCommerce.CatalogModule.Core.Model
 {
-    public class PropertyDictionaryItem : Entity, ICloneable
+    public class PropertyDictionaryItem : Entity, ICloneable, IExportable
     {
         public string PropertyId { get; set; }
         public string Alias { get; set; }
