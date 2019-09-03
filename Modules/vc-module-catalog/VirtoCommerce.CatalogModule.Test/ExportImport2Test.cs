@@ -41,7 +41,7 @@ namespace VirtoCommerce.CatalogModule.Test
             var propertySearchServiceMock = new Mock<IPropertySearchService>();
             propertySearchServiceMock.Setup(x => x.SearchPropertiesAsync(It.IsAny<PropertySearchCriteria>())).ReturnsAsync((PropertySearchCriteria y) =>
             {
-                var searchResult = new string[] { "7", "8", "9", "10", "11", "12", "13", "14" }.EmulateSearch<Property>(y);
+                var searchResult = new string[] { "7" }.EmulateSearch<Property>(y);
                 var propertySearchResult = new PropertySearchResult { Results = searchResult.Results, TotalCount = searchResult.TotalCount };
                 return propertySearchResult;
             }
@@ -50,7 +50,7 @@ namespace VirtoCommerce.CatalogModule.Test
             var propertyDictionaryItemSearchServiceMock = new Mock<IProperyDictionaryItemSearchService>();
             propertyDictionaryItemSearchServiceMock.Setup(x => x.SearchAsync(It.IsAny<PropertyDictionaryItemSearchCriteria>())).ReturnsAsync((PropertyDictionaryItemSearchCriteria y) =>
             {
-                var searchResult = new string[] { "15", "16", "17" }.EmulateSearch<PropertyDictionaryItem>(y);
+                var searchResult = new string[] { "8", "9", "10", "11", "12", "13", "14", "15", "16", "17", "18", "19", "20" }.EmulateSearch<PropertyDictionaryItem>(y);
                 var propertyDictionaryItemSearchResult = new PropertyDictionaryItemSearchResult { Results = searchResult.Results, TotalCount = searchResult.TotalCount };
                 return propertyDictionaryItemSearchResult;
             }
@@ -59,7 +59,7 @@ namespace VirtoCommerce.CatalogModule.Test
             var productSearchServiceMock = new Mock<IProductSearchService>();
             productSearchServiceMock.Setup(x => x.SearchProductsAsync(It.IsAny<ProductSearchCriteria>())).ReturnsAsync((ProductSearchCriteria y) =>
             {
-                var searchResult = new string[] { "18", "19", "20", "21", "22" }.EmulateSearch<CatalogProduct>(y);
+                var searchResult = new string[] { "21", "22" }.EmulateSearch<CatalogProduct>(y);
                 var productSearchResult = new ProductSearchResult { Results = searchResult.Results, TotalCount = searchResult.TotalCount };
                 return productSearchResult;
             }

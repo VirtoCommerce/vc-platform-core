@@ -1,6 +1,6 @@
 Microsoft Visual Studio Solution File, Format Version 12.00
-# Visual Studio 15
-VisualStudioVersion = 15.0.28307.489
+# Visual Studio Version 16
+VisualStudioVersion = 16.0.29209.62
 MinimumVisualStudioVersion = 10.0.40219.1
 Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "VirtoCommerce.CatalogModule.Core", "VirtoCommerce.CatalogModule.Core\VirtoCommerce.CatalogModule.Core.csproj", "{285A6A97-1ADE-489B-8A7C-B32CBD6BF8DC}"
 EndProject
@@ -27,8 +27,6 @@ EndProject
 Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "VirtoCommerce.ExportModule.Data", "..\vc-module-export\VirtoCommerce.ExportModule.Data\VirtoCommerce.ExportModule.Data.csproj", "{F86726E2-83EC-4559-9BDC-4E006FC47E2A}"
 EndProject
 Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "VirtoCommerce.Platform.Security", "..\..\VirtoCommerce.Platform.Security\VirtoCommerce.Platform.Security.csproj", "{A95360C2-B18F-449A-AAE8-2D3C39690011}"
-EndProject
-Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "VirtoCommerce.CatalogModule.Test", "VirtoCommerce.CatalogModule.Test\VirtoCommerce.CatalogModule.Test.csproj", "{BD22BCE5-B397-49AB-9992-16AEECBB8660}"
 EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
@@ -88,10 +86,6 @@ Global
 		{A95360C2-B18F-449A-AAE8-2D3C39690011}.Debug|Any CPU.Build.0 = Debug|Any CPU
 		{A95360C2-B18F-449A-AAE8-2D3C39690011}.Release|Any CPU.ActiveCfg = Release|Any CPU
 		{A95360C2-B18F-449A-AAE8-2D3C39690011}.Release|Any CPU.Build.0 = Release|Any CPU
-		{BD22BCE5-B397-49AB-9992-16AEECBB8660}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
-		{BD22BCE5-B397-49AB-9992-16AEECBB8660}.Debug|Any CPU.Build.0 = Debug|Any CPU
-		{BD22BCE5-B397-49AB-9992-16AEECBB8660}.Release|Any CPU.ActiveCfg = Release|Any CPU
-		{BD22BCE5-B397-49AB-9992-16AEECBB8660}.Release|Any CPU.Build.0 = Release|Any CPU
 	EndGlobalSection
 	GlobalSection(SolutionProperties) = preSolution
 		HideSolutionNode = FALSE
