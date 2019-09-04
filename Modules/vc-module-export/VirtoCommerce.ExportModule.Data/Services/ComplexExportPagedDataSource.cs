@@ -79,23 +79,22 @@ namespace VirtoCommerce.ExportModule.Data.Services
             {
                 state.Result = Array.Empty<IExportable>();
 
-                if (take <= 0)
+                var currentSkip = Math.Min(state.TotalCount, skip);
+                var currentTake = Math.Min(take, Math.Max(0, state.TotalCount - skip));
+
+                if (currentSkip <= 0 && currentTake <= 0)
                 {
                     break;
                 }
-                else if (state.TotalCount <= skip)
+                else if (currentSkip < state.TotalCount && currentTake > 0)
                 {
-                    skip -= state.TotalCount;
-                }
-                else
-                {
-                    var portionCount = (state.TotalCount - skip > take) ? take : state.TotalCount - skip;
-                    state.SearchCriteria.Take = portionCount;
-                    state.SearchCriteria.Skip = skip;
+                    state.SearchCriteria.Take = currentTake;
+                    state.SearchCriteria.Skip = currentSkip;
                     taskList.Add(state.FetchFunc(state));
-                    take -= portionCount;
-                    skip = 0;
                 }
+
+                skip -= currentSkip;
+                take -= currentTake;
             }
 
             Task.WhenAll(taskList).GetAwaiter().GetResult();
