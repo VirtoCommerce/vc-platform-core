@@ -10,6 +10,7 @@ using VirtoCommerce.Platform.Core.Caching;
 using VirtoCommerce.Platform.Core.ChangeLog;
 using VirtoCommerce.Platform.Core.Events;
 using VirtoCommerce.Platform.Core.ExportImport;
+using VirtoCommerce.Platform.Core.Localizations;
 using VirtoCommerce.Platform.Core.Notifications;
 using VirtoCommerce.Platform.Core.PushNotifications;
 using VirtoCommerce.Platform.Core.TransactionFileManager;
@@ -17,6 +18,7 @@ using VirtoCommerce.Platform.Data.Caching;
 using VirtoCommerce.Platform.Data.ChangeLog;
 using VirtoCommerce.Platform.Data.DynamicProperties;
 using VirtoCommerce.Platform.Data.ExportImport;
+using VirtoCommerce.Platform.Data.Localizations;
 using VirtoCommerce.Platform.Data.PushNotifications;
 using VirtoCommerce.Platform.Data.Repositories;
 using VirtoCommerce.Platform.Data.Settings;
@@ -54,6 +56,11 @@ namespace VirtoCommerce.Platform.Data.Extensions
                 var serv = js.GetService<IOptions<MvcJsonOptions>>();
                 return JsonSerializer.Create(serv.Value.SerializerSettings);
             });
+
+            //Register dependencies for translation
+            services.AddSingleton<ITranslationDataProvider, PlatformTranslationDataProvider>();
+            services.AddSingleton<ITranslationDataProvider, ModulesTranslationDataProvider>();
+            services.AddSingleton<ITranslationService, TranslationService>();
 
             return services;
 

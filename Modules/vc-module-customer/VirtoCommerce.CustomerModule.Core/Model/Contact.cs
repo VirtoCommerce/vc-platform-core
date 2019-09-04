@@ -23,6 +23,8 @@ namespace VirtoCommerce.CustomerModule.Core.Model
         public string PreferredCommunication { get; set; }
         public string PhotoUrl { get; set; }
 
+        public override string ObjectType => typeof(Contact).FullName;
+
         #region IHasSecurityAccounts Members
 
         /// <summary>

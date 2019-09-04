@@ -18,7 +18,7 @@
         <owner>Virto Commerce</owner>
     </owners>
     <projectUrl>https://virtocommerce.com/apps/extensions/virto-store-module</projectUrl>
-    <iconUrl>Modules/$(VirtoCommerce.Store)/Content/logoVC.png</iconUrl>
+    <iconUrl>https://github.com/VirtoCommerce/vc-module-store/raw/master/VirtoCommerce.StoreModule.Web/Content/logo.png</iconUrl>
     <releaseNotes></releaseNotes>
     <copyright>Copyright © 2011-2019 Virto Commerce. All rights reserved</copyright>
     <tags>stores</tags>

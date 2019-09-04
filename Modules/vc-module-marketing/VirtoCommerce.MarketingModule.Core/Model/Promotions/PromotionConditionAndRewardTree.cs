@@ -1,29 +1,24 @@
+using System;
 using System.Linq;
-using VirtoCommerce.CoreModule.Core.Common;
 using VirtoCommerce.CoreModule.Core.Conditions;
 
 namespace VirtoCommerce.MarketingModule.Core.Model.Promotions
 {
-    public class PromotionConditionAndRewardTree : ConditionTree
+    public class PromotionConditionAndRewardTree : BlockConditionAndOr, IReward
     {
-        public override bool Evaluate(IEvaluationContext context)
+        public PromotionConditionAndRewardTree()
         {
-            var result = false;
-            if (context is PromotionEvaluationContext promotionEvaluationContext)
+            All = true;
+        }
+
+        public virtual PromotionReward[] GetRewards()
+        {
+            var result = Array.Empty<PromotionReward>();
+            if (Children != null)
             {
-                result = Children.All(c => c.Evaluate(promotionEvaluationContext));
+                result = Children.OfType<IReward>().SelectMany(x => x.GetRewards()).ToArray();
             }
             return result;
-        }
-
-        public Condition[] GetConditions()
-        {
-            return Children.OfType<Condition>().ToArray();
-        }
-
-        public PromotionReward[] GetRewards()
-        {
-            return Children.OfType<IReward>().SelectMany(x => x.GetRewards()).ToArray();
         }
     }
 }

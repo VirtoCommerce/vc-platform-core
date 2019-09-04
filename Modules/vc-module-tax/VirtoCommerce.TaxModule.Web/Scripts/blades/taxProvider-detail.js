@@ -9,22 +9,21 @@ angular.module('virtoCommerce.taxModule')
         blade.isLoading = false;
     }
 
-    blade.refresh = function (parentRefresh) {
+    blade.refresh = function(parentRefresh) {
         blade.isLoading = true;
         if (blade.taxProvider.id) {
-            taxProviders.get({ id: blade.taxProvider.id }, function (data) {
-                initializeBlade(data);
-                if (parentRefresh) {
-                    blade.parentBlade.refresh();
-                }
-            },
-            function (error) { bladeNavigationService.setError('Error ' + error.status, blade); });
-        }
-        else
-        {
+            taxProviders.get({ id: blade.taxProvider.id },
+                function(data) {
+                    initializeBlade(data);
+                    if (parentRefresh) {
+                        blade.parentBlade.refresh();
+                    }
+                },
+                function(error) { bladeNavigationService.setError('Error ' + error.status, blade); });
+        } else {
             initializeBlade(blade.taxProvider);
         }
-    }
+    };
 
     function isDirty() {
         return !angular.equals(blade.currentEntity, blade.origEntity) && blade.hasUpdatePermission();
@@ -57,7 +56,6 @@ angular.module('virtoCommerce.taxModule')
         $scope.formScope = form;
     };
 
-  
     blade.headIcon = 'fa-archive';
 
     blade.toolbarCommands = [

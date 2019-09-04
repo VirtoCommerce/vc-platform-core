@@ -6,6 +6,7 @@ using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.Caching.Memory;
 using VirtoCommerce.Platform.Core.Caching;
 using VirtoCommerce.Platform.Core.Common;
+using VirtoCommerce.StoreModule.Core.Model;
 using VirtoCommerce.StoreModule.Core.Model.Search;
 using VirtoCommerce.StoreModule.Core.Services;
 using VirtoCommerce.StoreModule.Data.Caching;
@@ -20,7 +21,11 @@ namespace VirtoCommerce.StoreModule.Data.Services
         private readonly IPlatformMemoryCache _platformMemoryCache;
         private readonly IStoreService _storeService;
 
-        public StoreSearchService(Func<IStoreRepository> repositoryFactory, IPlatformMemoryCache platformMemoryCache, IStoreService storeService)
+        public StoreSearchService(
+            Func<IStoreRepository> repositoryFactory
+            , IPlatformMemoryCache platformMemoryCache
+            , IStoreService storeService
+            )
         {
             _repositoryFactory = repositoryFactory;
             _platformMemoryCache = platformMemoryCache;
@@ -36,33 +41,26 @@ namespace VirtoCommerce.StoreModule.Data.Services
                 var result = AbstractTypeFactory<StoreSearchResult>.TryCreateInstance();
                 using (var repository = _repositoryFactory())
                 {
-                    var sortInfos = criteria.SortInfos;
-                    if (sortInfos.IsNullOrEmpty())
-                    {
-                        sortInfos = new[]
-                        {
-                            new SortInfo
-                            {
-                                SortColumn = "Name"
-                            }
-                        };
-                    }
-
-                    var query = GetStoresQuery(repository, criteria, sortInfos);
+                    var query = BuildQuery(repository, criteria);
+                    var sortInfos = BuildSortExpression(criteria);
 
                     result.TotalCount = await query.CountAsync();
                     if (criteria.Take > 0)
                     {
-                        var storeIds = await query.Select(x => x.Id).Skip(criteria.Skip).Take(criteria.Take).ToArrayAsync();
-                        result.Results = (await _storeService.GetByIdsAsync(storeIds, criteria.ResponseGroup)).AsQueryable().OrderBySortInfos(sortInfos).ToList();
+                        var storeIds = await query.OrderBySortInfos(sortInfos).ThenBy(x=>x.Id)
+                                                  .Select(x => x.Id)
+                                                  .Skip(criteria.Skip).Take(criteria.Take)
+                                                  .ToArrayAsync();
+
+                        var unorderedResults = await _storeService.GetByIdsAsync(storeIds, criteria.ResponseGroup);
+                        result.Results = unorderedResults.OrderBy(x => Array.IndexOf(storeIds, x.Id)).ToArray();                        
                     }
                 }
                 return result;
             });
         }
 
-        protected virtual IQueryable<StoreEntity> GetStoresQuery(IStoreRepository repository, StoreSearchCriteria criteria,
-            IEnumerable<SortInfo> sortInfos)
+        protected virtual IQueryable<StoreEntity> BuildQuery(IStoreRepository repository, StoreSearchCriteria criteria)
         {
             var query = repository.Stores;
             if (!string.IsNullOrEmpty(criteria.Keyword))
@@ -73,9 +71,33 @@ namespace VirtoCommerce.StoreModule.Data.Services
             {
                 query = query.Where(x => criteria.StoreIds.Contains(x.Id));
             }
+            if (criteria.StoreStates?.Any() == true)
+            {
+                query = query.Where(x => criteria.StoreStates.Contains((StoreState)x.StoreState));
+            }
 
-            query = query.OrderBySortInfos(sortInfos);
+            if (criteria.FulfillmentCenterIds?.Any() == true)
+            {
+                query = query.Where(x => criteria.FulfillmentCenterIds.Contains(x.FulfillmentCenterId) ||
+                                         x.FulfillmentCenters.Any(y => criteria.FulfillmentCenterIds.Contains(y.Id)));
+            }
             return query;
+        }
+
+        protected virtual IList<SortInfo> BuildSortExpression(StoreSearchCriteria criteria)
+        {
+            var sortInfos = criteria.SortInfos;
+            if (sortInfos.IsNullOrEmpty())
+            {
+                sortInfos = new[]
+                {
+                    new SortInfo
+                    {
+                        SortColumn = nameof(StoreEntity.Name)
+                    }
+                };
+            }
+            return sortInfos;
         }
     }
 }

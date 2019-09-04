@@ -5,7 +5,8 @@ using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Hosting;
 using Microsoft.AspNetCore.Mvc;
 using Newtonsoft.Json.Linq;
-using VirtoCommerce.Platform.Core.Modularity;
+using VirtoCommerce.Platform.Core.Localizations;
+using VirtoCommerce.Platform.Data.Extensions;
 using VirtoCommerce.Platform.Web.Extensions;
 
 namespace VirtoCommerce.Platform.Web.Controllers.Api
@@ -15,18 +16,16 @@ namespace VirtoCommerce.Platform.Web.Controllers.Api
     [ApiExplorerSettings(IgnoreApi = true)]
     public class LocalizationController : Controller
     {
-        private const string LocalizationFilesFormat = ".json";
-        private const string LocalizationFilesFolder = "Localizations";
         private const string InternationalizationFilesFormat = ".js";
-        private const string InternationalizationFilesFolder = "js\\i18n\\angular";
+        private static readonly string InternationalizationFilesFolder = $"js{Path.DirectorySeparatorChar}i18n{Path.DirectorySeparatorChar}angular";
 
-        private readonly ILocalModuleCatalog _moduleCatalog;
         private readonly IHostingEnvironment _hostingEnv;
+        private readonly ITranslationService _translationService;
 
-        public LocalizationController(ILocalModuleCatalog moduleCatalog, IHostingEnvironment hostingEnv)
+        public LocalizationController(IHostingEnvironment hostingEnv, ITranslationService translationService)
         {
-            _moduleCatalog = moduleCatalog;
             _hostingEnv = hostingEnv;
+            _translationService = translationService;
         }
 
         /// <summary>
@@ -37,16 +36,10 @@ namespace VirtoCommerce.Platform.Web.Controllers.Api
         [HttpGet]
         [Route("")]
         [AllowAnonymous]
-        public ActionResult<object> GetLocalization(string lang = "en")
+        public ActionResult<JObject> GetLocalization(string lang = null)
         {
-            var searchPattern = string.Format("{0}.*{1}", lang, LocalizationFilesFormat);
-            var files = GetAllLocalizationFiles(searchPattern, LocalizationFilesFolder);
-            var result = new JObject();
-            foreach (var file in files)
-            {
-                var part = JObject.Parse(System.IO.File.ReadAllText(file));
-                result.Merge(part, new JsonMergeSettings { MergeArrayHandling = MergeArrayHandling.Merge });
-            }
+            var result = _translationService.GetTranslationDataForLanguage(lang);
+            
             return Ok(result);
         }
 
@@ -60,10 +53,7 @@ namespace VirtoCommerce.Platform.Web.Controllers.Api
         [AllowAnonymous]
         public ActionResult<string[]> GetLocales()
         {
-            var files = GetAllLocalizationFiles("*" + LocalizationFilesFormat, LocalizationFilesFolder);
-            var locales = files
-                .Select(Path.GetFileName)
-                .Select(x => x.Substring(0, x.IndexOf('.'))).Distinct().ToArray();
+            var locales = _translationService.GetListOfInstalledLanguages();
 
             return Ok(locales);
         }
@@ -89,36 +79,7 @@ namespace VirtoCommerce.Platform.Web.Controllers.Api
 
             return Ok(formats);
         }
-
-        private string[] GetAllLocalizationFiles(string searchPattern, string localizationsFolder)
-        {
-            var files = new List<string>();
-
-            // Get platform localization files
-            var platformPath = _hostingEnv.MapPath("~/");
-            var platformFileNames = GetFilesByPath(platformPath, searchPattern, localizationsFolder);
-            files.AddRange(platformFileNames);
-
-            // Get modules localization files ordered by dependency.
-            var allModules = _moduleCatalog.Modules.OfType<ManifestModuleInfo>().ToArray();
-            var manifestModules = _moduleCatalog.CompleteListWithDependencies(allModules)
-                .Where(x => x.State == ModuleState.Initialized)
-                .OfType<ManifestModuleInfo>();
-
-            foreach (var module in manifestModules)
-            {
-                if (!string.IsNullOrEmpty(module.FullPhysicalPath))
-                {
-                    var moduleFileNames = GetFilesByPath(module.FullPhysicalPath, searchPattern, localizationsFolder);
-                    files.AddRange(moduleFileNames);
-                }
-            }
-            // Get user defined localization files from App_Data/Localizations folder
-            var userLocalizationPath = _hostingEnv.MapPath("~/App_Data");
-            var userFileNames = GetFilesByPath(userLocalizationPath, searchPattern, localizationsFolder);
-            files.AddRange(userFileNames);
-            return files.ToArray();
-        }
+              
 
         private string[] GetAllInternationalizationFiles(string searchPattern, string internationalizationsFolder)
         {

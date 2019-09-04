@@ -13,6 +13,7 @@ namespace VirtoCommerce.TaxModule.Data.Repositories
         }
 
         #region IStoreRepository Members
+
         public IQueryable<StoreTaxProviderEntity> StoreTaxProviders => DbContext.Set<StoreTaxProviderEntity>();
 
         public async Task<StoreTaxProviderEntity[]> GetStoreTaxProviderByIdsAsync(string[] ids, string responseGroup = null)
@@ -20,8 +21,7 @@ namespace VirtoCommerce.TaxModule.Data.Repositories
             return await StoreTaxProviders.Where(x => ids.Contains(x.Id))
                                           .ToArrayAsync();
         }
+
         #endregion
-
-
     }
 }

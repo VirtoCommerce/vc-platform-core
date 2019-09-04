@@ -1,5 +1,4 @@
-angular.module('virtoCommerce.catalogModule')
-.directive('vaProperty2', ['$compile', '$filter', '$parse', '$templateCache', '$http', function ($compile, $filter, $parse, $templateCache, $http) {
+angular.module('virtoCommerce.catalogModule').directive('vaProperty2', ['$compile', '$filter', '$parse', '$templateCache', '$http', function ($compile, $filter, $parse, $templateCache, $http) {
 
     return {
         restrict: 'E',
@@ -67,13 +66,13 @@ angular.module('virtoCommerce.catalogModule')
                 }
                 if (newValues[0] === undefined) {
                     scope.currentEntity.values = [];
-                } 
+                }
             }, true);
 
 
             ngModelController.$render = function () {
                 scope.currentEntity = ngModelController.$modelValue;
-                
+
                 scope.context.currentPropValues = angular.copy(scope.currentEntity.values);
                 //For dictionary multilingual properties need to left only distinct dictionary items
                 if (scope.currentEntity.dictionary) {
@@ -105,7 +104,7 @@ angular.module('virtoCommerce.catalogModule')
                 });
 
                 return (elementCountIsDifferent || elementsNotEqual) &&
-                        (_.any(currentValues) || (newValues[0] && newValues[0].value)); //Prevent reflecting the change when null value was added to empty initial values
+                    (_.any(currentValues) || (newValues[0] && newValues[0].value)); //Prevent reflecting the change when null value was added to empty initial values
             };
 
             function needAddEmptyValue(property, values) {
@@ -144,12 +143,12 @@ angular.module('virtoCommerce.catalogModule')
             };
 
             scope.isLanguageVisible = function (language) {
-                if(scope.hiddenLanguages){
+                if (scope.hiddenLanguages) {
                     if (_.contains(scope.hiddenLanguages, language)) {
                         return false;
                     }
                 }
-                
+
                 return true;
             }
 
@@ -159,7 +158,7 @@ angular.module('virtoCommerce.catalogModule')
                 return scope.loadNextDictionaryValues($select);
             };
 
-            scope.loadNextDictionaryValues = function($select) {
+            scope.loadNextDictionaryValues = function ($select) {
                 var countToSkip = $select.page * scope.pageSize;
                 var countToTake = scope.pageSize;
 
@@ -179,7 +178,7 @@ angular.module('virtoCommerce.catalogModule')
             function populateDictionaryValues(dictItems, propertyName) {
                 angular.forEach(dictItems, function (dictItem) {
                     var dictValue = _.find(scope.context.currentPropValues, function (x) {
-                        return x.valueId == dictItem.id;
+                        return x && (x.valueId == dictItem.id);
                     });
                     if (!dictValue) {
                         dictValue = {
@@ -243,7 +242,7 @@ angular.module('virtoCommerce.catalogModule')
             };
 
             scope.dateOptions = {
-            	datepickerMode: 'day'
+                datepickerMode: 'day'
             };
 
             linker(function (clone) {
@@ -276,7 +275,7 @@ angular.module('virtoCommerce.catalogModule')
                 setValid(name);
             };
 
-            scope.addederror = function(tag, name, minValue, maxValue, pattern) {
+            scope.addederror = function (tag, name, minValue, maxValue, pattern) {
                 var form = scope.context.form;
                 if (minValue && tag.value.length < minValue) {
                     form[name].$setValidity('minlength', false);

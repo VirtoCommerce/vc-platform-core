@@ -11,6 +11,11 @@ namespace VirtoCommerce.ImageToolsModule.Data.Repositories
         {
         }
 
+        protected ThumbnailDbContext(DbContextOptions options)
+            : base(options)
+        {
+        }
+
         protected override void OnModelCreating(ModelBuilder modelBuilder)
         {
             #region ThumbnailTask

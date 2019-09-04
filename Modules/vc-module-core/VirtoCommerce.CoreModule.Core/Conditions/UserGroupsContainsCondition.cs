@@ -5,14 +5,14 @@ using VirtoCommerce.CoreModule.Core.Common;
 namespace VirtoCommerce.CoreModule.Core.Conditions
 {
     //User groups contains condition
-    public class UserGroupsContainsCondition : Condition
+    public class UserGroupsContainsCondition : ConditionTree
     {
         public string Group { get; set; }
 
         /// <summary>
         ///  ((EvaluationContextBase)x).UserGroupsContains
         /// </summary>
-        public override bool Evaluate(IEvaluationContext context)
+        public override bool IsSatisfiedBy(IEvaluationContext context)
         {
             var result = false;
             if (context is EvaluationContextBase evaluationContextBase)

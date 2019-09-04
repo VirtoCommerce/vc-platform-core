@@ -50,7 +50,9 @@ function ($rootScope, $scope, $timeout, $filter, notifications, bladeNavigationS
 	blade.updateNotification = function () {
 		blade.isLoading = true;
         blade.currentEntity.cc = pluckAddress(blade.currentEntity.cc);
-        blade.currentEntity.bcc = pluckAddress(blade.currentEntity.bcc);
+		blade.currentEntity.bcc = pluckAddress(blade.currentEntity.bcc);
+		blade.currentEntity.templates = _.where(blade.currentEntity.templates, {isReadonly: false}); 
+
 		notifications.updateNotification({ type: blade.type }, blade.currentEntity, function () {
 			blade.isLoading = false;
 			blade.origEntity = angular.copy(blade.currentEntity);

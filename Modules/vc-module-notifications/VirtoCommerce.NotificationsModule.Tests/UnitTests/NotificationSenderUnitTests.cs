@@ -5,6 +5,7 @@ using System.Net.Mail;
 using System.Threading.Tasks;
 using Microsoft.Extensions.Logging;
 using Moq;
+using Newtonsoft.Json.Linq;
 using VirtoCommerce.NotificationsModule.Core.Model;
 using VirtoCommerce.NotificationsModule.Core.Services;
 using VirtoCommerce.NotificationsModule.Core.Types;
@@ -15,6 +16,8 @@ using VirtoCommerce.NotificationsModule.Tests.Common;
 using VirtoCommerce.NotificationsModule.Tests.Model;
 using VirtoCommerce.NotificationsModule.Tests.NotificationTypes;
 using VirtoCommerce.Platform.Core.Common;
+using VirtoCommerce.Platform.Core.Localizations;
+using VirtoCommerce.Platform.Data.Localizations;
 using Xunit;
 
 namespace VirtoCommerce.NotificationsModule.Tests.UnitTests
@@ -28,7 +31,7 @@ namespace VirtoCommerce.NotificationsModule.Tests.UnitTests
         private readonly Mock<INotificationMessageSender> _messageSenderMock;
         private readonly Mock<ILogger<NotificationSender>> _logNotificationSenderMock;
         private readonly Mock<INotificationMessageSenderProviderFactory> _senderFactoryMock;
-
+        
         public NotificationSenderUnitTests()
         {
             _templateRender = new LiquidTemplateRenderer();

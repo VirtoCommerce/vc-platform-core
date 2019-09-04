@@ -6,9 +6,8 @@ namespace VirtoCommerce.CustomerModule.Data.Migrations
     {
         protected override void Up(MigrationBuilder migrationBuilder)
         {
-            migrationBuilder.Sql(@"IF (EXISTS (SELECT * 
-                 FROM INFORMATION_SCHEMA.TABLES 
-                 WHERE TABLE_NAME = '__MigrationHistory'))
+            migrationBuilder.Sql(@"IF (EXISTS (SELECT * FROM INFORMATION_SCHEMA.TABLES WHERE TABLE_NAME = '__MigrationHistory'))
+                IF (EXISTS (SELECT * FROM __MigrationHistory WHERE ContextKey = 'VirtoCommerce.CustomerModule.Data.Migrations.Configuration'))
                     BEGIN
 
 	                    BEGIN
@@ -16,7 +15,7 @@ namespace VirtoCommerce.CustomerModule.Data.Migrations
 	                    END
 	                    
 	                    BEGIN
-		                    ALTER TABLE [Member] ADD [Discriminator] nvarchar(max) NOT NULL DEFAULT ('Member')
+		                    ALTER TABLE [Member] ADD [Discriminator] nvarchar(128) NOT NULL DEFAULT ('Member')
                             ALTER TABLE [Member] ADD [FirstName] nvarchar(128) NULL
                             ALTER TABLE [Member] ADD [MiddleName] nvarchar(128) NULL
                             ALTER TABLE [Member] ADD [LastName] nvarchar(128) NULL
@@ -73,9 +72,8 @@ namespace VirtoCommerce.CustomerModule.Data.Migrations
                         END
             END");
 
-            migrationBuilder.Sql(@"IF (EXISTS (SELECT * 
-                 FROM INFORMATION_SCHEMA.TABLES 
-                 WHERE TABLE_NAME = '__MigrationHistory'))
+            migrationBuilder.Sql(@"IF (EXISTS (SELECT * FROM INFORMATION_SCHEMA.TABLES WHERE TABLE_NAME = '__MigrationHistory'))
+                IF (EXISTS (SELECT * FROM __MigrationHistory WHERE ContextKey = 'VirtoCommerce.CustomerModule.Data.Migrations.Configuration'))
                     BEGIN
                         CREATE TABLE [dbo].[MemberSeoInfo](
 	                        [Id] [nvarchar](128) NOT NULL,
@@ -105,13 +103,12 @@ namespace VirtoCommerce.CustomerModule.Data.Migrations
                         END
                     END");
 
-            migrationBuilder.Sql(@"IF (EXISTS (SELECT * 
-                 FROM INFORMATION_SCHEMA.TABLES 
-                 WHERE TABLE_NAME = '__MigrationHistory'))
+            migrationBuilder.Sql(@"IF (EXISTS (SELECT * FROM INFORMATION_SCHEMA.TABLES WHERE TABLE_NAME = '__MigrationHistory'))
+                IF (EXISTS (SELECT * FROM __MigrationHistory WHERE ContextKey = 'VirtoCommerce.CustomerModule.Data.Migrations.Configuration'))
                     BEGIN
                         INSERT INTO [MemberSeoInfo] ([Id], [CreatedDate], [ModifiedDate], [CreatedBy], [ModifiedBy], [Keyword], [StoreId], [IsActive], [Language], [Title], [MetaDescription], [MetaKeywords], [ImageAltDescription], [MemberId])
                               SELECT [Id], [CreatedDate], [ModifiedDate], [CreatedBy], [ModifiedBy], [Keyword], [StoreId], [IsActive], [Language], [Title], [MetaDescription], [MetaKeywords], [ImageAltDescription], [ObjectId] as [MemberId]  FROM [SeoUrlKeyword] WHERE ObjectType = 'Vendor'
-				    END");      
+				    END");
 
         }
 

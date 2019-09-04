@@ -26,10 +26,5 @@
     <ProjectReference Include="..\VirtoCommerce.ImageToolsModule.Data\VirtoCommerce.ImageToolsModule.Data.csproj" />
   </ItemGroup>
 
-  <ItemGroup>
-    <Reference Include="Moq">
-      <HintPath>..\..\..\..\..\Users\NikolaiProhorov\.nuget\packages\moq\4.8.2\lib\netstandard1.3\Moq.dll</HintPath>
-    </Reference>
-  </ItemGroup>
 
 </Project>

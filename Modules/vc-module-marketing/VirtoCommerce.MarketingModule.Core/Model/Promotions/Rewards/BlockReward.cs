@@ -17,6 +17,6 @@ namespace VirtoCommerce.MarketingModule.Core.Model.Promotions
             return retVal;
         }
 
-        #endregion
+        #endregion       
     }
 }

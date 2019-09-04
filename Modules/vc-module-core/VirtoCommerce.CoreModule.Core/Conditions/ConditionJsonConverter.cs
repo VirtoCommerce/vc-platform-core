@@ -1,4 +1,5 @@
 using System;
+using System.Linq;
 using Newtonsoft.Json;
 using Newtonsoft.Json.Linq;
 using VirtoCommerce.Platform.Core.Common;
@@ -7,7 +8,18 @@ namespace VirtoCommerce.CoreModule.Core.Conditions
 {
     public class ConditionJsonConverter : JsonConverter
     {
-        public override bool CanWrite { get; } = false;
+        private readonly bool _doNotSerializeAvailCondition;
+        public ConditionJsonConverter(bool doNotSerializeAvailCondition = false)
+        {
+            _doNotSerializeAvailCondition = doNotSerializeAvailCondition;
+        }
+        public override bool CanWrite
+        {
+            get
+            {
+                return _doNotSerializeAvailCondition;
+            }
+        }
         public override bool CanRead { get; } = true;
 
         public override bool CanConvert(Type objectType)
@@ -17,12 +29,20 @@ namespace VirtoCommerce.CoreModule.Core.Conditions
 
         public override void WriteJson(JsonWriter writer, object value, JsonSerializer serializer)
         {
-            throw new NotImplementedException();
+            //need to remove "AvailableChildren" from resulting tree Json to reduce size
+            if (value != null)
+            {
+                var result = JObject.FromObject(value);
+                if (result != null)
+                {
+                    result.Remove(nameof(IConditionTree.AvailableChildren));
+                    result.WriteTo(writer, this);
+                }
+            }
         }
 
         public override object ReadJson(JsonReader reader, Type objectType, object existingValue, JsonSerializer serializer)
         {
-            object retVal = null;
             var obj = JObject.Load(reader);
             var type = objectType.Name;
             var pt = obj.GetValue("Id", StringComparison.InvariantCultureIgnoreCase);
@@ -30,16 +50,25 @@ namespace VirtoCommerce.CoreModule.Core.Conditions
             {
                 type = pt.Value<string>();
             }
+            object result;
+            //First check what condition is registered in AbstractTypeFactory<IConditionTree> otherwise use AbstractTypeFactory<T> factory for create an instance 
+            if (AbstractTypeFactory<IConditionTree>.FindTypeInfoByName(type) != null)
+            {
+                result = AbstractTypeFactory<IConditionTree>.TryCreateInstance(type);
+            }
+            else
+            {
+                var tryCreateInstance = typeof(AbstractTypeFactory<>).MakeGenericType(objectType).GetMethods().FirstOrDefault(x => x.Name.EqualsInvariant("TryCreateInstance") && x.GetParameters().Length == 0);
+                result = tryCreateInstance?.Invoke(null, null);
+            }
 
-            retVal = AbstractTypeFactory<IConditionTree>.TryCreateInstance(type);
-
-            if (retVal == null)
+            if (result == null)
             {
                 throw new NotSupportedException("Unknown type: " + type);
             }
 
-            serializer.Populate(obj.CreateReader(), retVal);
-            return retVal;
-        }
+            serializer.Populate(obj.CreateReader(), result);
+            return result;
+        }       
     }
 }

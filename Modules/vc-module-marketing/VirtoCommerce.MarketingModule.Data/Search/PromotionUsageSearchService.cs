@@ -20,7 +20,7 @@ namespace VirtoCommerce.MarketingModule.Data.Search
         private readonly IPlatformMemoryCache _platformMemoryCache;
         private readonly Func<IMarketingRepository> _repositoryFactory;
 
-        public PromotionUsageSearchService(IPlatformMemoryCache platformMemoryCache, Func<IMarketingRepository> repositoryFactory)
+        public PromotionUsageSearchService(Func<IMarketingRepository> repositoryFactory, IPlatformMemoryCache platformMemoryCache)
         {
             _platformMemoryCache = platformMemoryCache;
             _repositoryFactory = repositoryFactory;
@@ -33,31 +33,35 @@ namespace VirtoCommerce.MarketingModule.Data.Search
                 throw new ArgumentNullException(nameof(criteria));
             }
 
-            var cacheKey = CacheKey.With(GetType(), "SearchUsagesAsync", criteria.GetCacheKey());
+            var cacheKey = CacheKey.With(GetType(), nameof(SearchUsagesAsync), criteria.GetCacheKey());
             return await _platformMemoryCache.GetOrCreateExclusiveAsync(cacheKey, async (cacheEntry) =>
             {
                 var result = AbstractTypeFactory<PromotionUsageSearchResult>.TryCreateInstance();
-                cacheEntry.AddExpirationToken(PromotionUsageCacheRegion.CreateChangeToken());
-
+              
                 using (var repository = _repositoryFactory())
                 {
-                    var sortInfos = BuildSortInfos(criteria);
-                    var query = BuildSearchQuery(repository, criteria, sortInfos);
+                    var sortInfos = BuildSortExpression(criteria);
+                    var query = BuildQuery(repository, criteria);
 
                     result.TotalCount = await query.CountAsync();
 
                     if (criteria.Take > 0)
                     {
-                        var coupons = await query.Skip(criteria.Skip).Take(criteria.Take).ToArrayAsync();
-                        result.Results = coupons.Select(x => x.ToModel(AbstractTypeFactory<PromotionUsage>.TryCreateInstance())).ToList();
+                        var usages = await query.OrderBySortInfos(sortInfos).ThenBy(x => x.Id)
+                                         .Skip(criteria.Skip).Take(criteria.Take)
+                                         .ToArrayAsync();
+                        result.Results = usages.Select(x => x.ToModel(AbstractTypeFactory<PromotionUsage>.TryCreateInstance())).ToList();
+                        foreach(var usage in result.Results)
+                        {
+                            cacheEntry.AddExpirationToken(PromotionUsageCacheRegion.CreateChangeToken(usage));
+                        }
                     }
-
                     return result;
                 }
             });
         }
 
-        protected  virtual IList<SortInfo> BuildSortInfos(PromotionUsageSearchCriteria criteria)
+        protected  virtual IList<SortInfo> BuildSortExpression(PromotionUsageSearchCriteria criteria)
         {
             var sortInfos = criteria.SortInfos;
             if (sortInfos.IsNullOrEmpty())
@@ -75,7 +79,7 @@ namespace VirtoCommerce.MarketingModule.Data.Search
             return sortInfos;
         }
 
-        protected virtual IQueryable<PromotionUsageEntity> BuildSearchQuery(IMarketingRepository repository, PromotionUsageSearchCriteria criteria, IList<SortInfo> sortInfos)
+        protected virtual IQueryable<PromotionUsageEntity> BuildQuery(IMarketingRepository repository, PromotionUsageSearchCriteria criteria)
         {
             var query = repository.PromotionUsages;
 
@@ -104,7 +108,6 @@ namespace VirtoCommerce.MarketingModule.Data.Search
                 query = query.Where(x => x.UserName == criteria.UserName);
             }
 
-            query = query.OrderBySortInfos(sortInfos);
             return query;
         }
     }

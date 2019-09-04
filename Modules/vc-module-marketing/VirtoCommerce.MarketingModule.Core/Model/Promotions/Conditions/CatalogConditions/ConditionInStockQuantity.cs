@@ -13,7 +13,7 @@ namespace VirtoCommerce.MarketingModule.Core.Model.Promotions.Conditions
         /// <summary>
         /// ((PromotionEvaluationContext)x).IsItemsInStockQuantity(Exactly, Quantity, QuantitySecond)
         /// </summary>
-        public override bool Evaluate(IEvaluationContext context)
+        public override bool IsSatisfiedBy(IEvaluationContext context)
         {
             var result = false;
             if (context is PromotionEvaluationContext promotionEvaluationContext)

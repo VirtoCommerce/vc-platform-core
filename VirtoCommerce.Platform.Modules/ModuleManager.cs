@@ -14,11 +14,10 @@ namespace VirtoCommerce.Platform.Modules
     public class ModuleManager : IModuleManager, IDisposable
     {
         private readonly IModuleInitializer _moduleInitializer;
-        private readonly IModuleCatalog _moduleCatalog;
         private readonly ILogger<ModuleManager> _loggerFacade;
         private IEnumerable<IModuleTypeLoader> _typeLoaders;
         private readonly IAssemblyResolver _assemblyResolver;
-        private HashSet<IModuleTypeLoader> subscribedToModuleTypeLoaders = new HashSet<IModuleTypeLoader>();
+        private readonly HashSet<IModuleTypeLoader> subscribedToModuleTypeLoaders = new HashSet<IModuleTypeLoader>();
 
         /// <summary>
         /// Initializes an instance of the <see cref="ModuleManager"/> class.
@@ -29,7 +28,7 @@ namespace VirtoCommerce.Platform.Modules
         public ModuleManager(IModuleInitializer moduleInitializer, IModuleCatalog moduleCatalog, IAssemblyResolver assemblyResolver, ILogger<ModuleManager> loggerFacade)
         {
             _moduleInitializer = moduleInitializer ?? throw new ArgumentNullException("moduleInitializer");
-            _moduleCatalog = moduleCatalog ?? throw new ArgumentNullException("moduleCatalog");
+            ModuleCatalog = moduleCatalog ?? throw new ArgumentNullException("moduleCatalog");
             _loggerFacade = loggerFacade ?? throw new ArgumentNullException("loggerFacade");
             _assemblyResolver = assemblyResolver;
         }
@@ -37,10 +36,7 @@ namespace VirtoCommerce.Platform.Modules
         /// <summary>
         /// The module catalog specified in the constructor.
         /// </summary>
-        protected IModuleCatalog ModuleCatalog
-        {
-            get { return this._moduleCatalog; }
-        }
+        protected IModuleCatalog ModuleCatalog { get; }
 
 
         /// <summary>
@@ -79,7 +75,7 @@ namespace VirtoCommerce.Platform.Modules
         /// </summary>
         public void Run()
         {
-            this._moduleCatalog.Initialize();
+            this.ModuleCatalog.Initialize();
 
             this.LoadModulesWhenAvailable();
         }
@@ -91,13 +87,13 @@ namespace VirtoCommerce.Platform.Modules
         /// <param name="moduleName">Name of the module requested for initialization.</param>
         public void LoadModule(string moduleName)
         {
-            IEnumerable<ModuleInfo> module = this._moduleCatalog.Modules.Where(m => m.ModuleName == moduleName);
+            IEnumerable<ModuleInfo> module = this.ModuleCatalog.Modules.Where(m => m.ModuleName == moduleName);
             if (module == null || module.Count() != 1)
             {
                 throw new ModuleNotFoundException(moduleName, $"Module { moduleName } was not found in the catalog.");
             }
 
-            IEnumerable<ModuleInfo> modulesToLoad = this._moduleCatalog.CompleteListWithDependencies(module);
+            IEnumerable<ModuleInfo> modulesToLoad = this.ModuleCatalog.CompleteListWithDependencies(module);
 
             this.LoadModuleTypes(modulesToLoad);
         }
@@ -171,8 +167,8 @@ namespace VirtoCommerce.Platform.Modules
 
         private void LoadModulesWhenAvailable()
         {
-            IEnumerable<ModuleInfo> whenAvailableModules = this._moduleCatalog.Modules.Where(m => m.InitializationMode == InitializationMode.WhenAvailable);
-            IEnumerable<ModuleInfo> modulesToLoadTypes = this._moduleCatalog.CompleteListWithDependencies(whenAvailableModules);
+            IEnumerable<ModuleInfo> whenAvailableModules = this.ModuleCatalog.Modules.Where(m => m.InitializationMode == InitializationMode.WhenAvailable);
+            IEnumerable<ModuleInfo> modulesToLoadTypes = this.ModuleCatalog.CompleteListWithDependencies(whenAvailableModules);
             if (modulesToLoadTypes != null)
             {
                 this.LoadModuleTypes(modulesToLoadTypes);
@@ -213,7 +209,7 @@ namespace VirtoCommerce.Platform.Modules
             while (keepLoading)
             {
                 keepLoading = false;
-                IEnumerable<ModuleInfo> availableModules = this._moduleCatalog.Modules.Where(m => m.State == ModuleState.ReadyForInitialization);
+                IEnumerable<ModuleInfo> availableModules = this.ModuleCatalog.Modules.Where(m => m.State == ModuleState.ReadyForInitialization);
 
                 foreach (ModuleInfo moduleInfo in availableModules)
                 {
@@ -305,7 +301,7 @@ namespace VirtoCommerce.Platform.Modules
 
         private bool AreDependenciesLoaded(ModuleInfo moduleInfo)
         {
-            IEnumerable<ModuleInfo> requiredModules = this._moduleCatalog.GetDependentModules(moduleInfo);
+            IEnumerable<ModuleInfo> requiredModules = this.ModuleCatalog.GetDependentModules(moduleInfo);
             if (requiredModules == null)
             {
                 return true;

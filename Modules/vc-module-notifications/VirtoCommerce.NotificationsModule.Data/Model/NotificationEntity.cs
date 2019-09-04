@@ -61,8 +61,8 @@ namespace VirtoCommerce.NotificationsModule.Data.Model
             notification.IsActive = IsActive;
             notification.Type = Type;
 
-            notification.Templates = Templates
-                .Select(t => t.ToModel(AbstractTypeFactory<NotificationTemplate>.TryCreateInstance($"{Kind}Template"))).ToList();
+            notification.Templates = notification.Templates.Concat(Templates
+                .Select(t => t.ToModel(AbstractTypeFactory<NotificationTemplate>.TryCreateInstance($"{Kind}Template")))).Distinct().ToList();
 
             return notification;
         }
@@ -85,9 +85,9 @@ namespace VirtoCommerce.NotificationsModule.Data.Model
             IsActive = notification.IsActive;
             Kind = notification.Kind;
 
-            if (notification.Templates != null && notification.Templates.Any())
+            if (!notification.Templates.IsNullOrEmpty())
             {
-                Templates = new ObservableCollection<NotificationTemplateEntity>(notification.Templates
+                Templates = new ObservableCollection<NotificationTemplateEntity>(notification.Templates.Where(t => !t.IsReadonly)
                         .Select(x => AbstractTypeFactory<NotificationTemplateEntity>.TryCreateInstance($"{Kind}TemplateEntity").FromModel(x, pkMap)));
             }
 

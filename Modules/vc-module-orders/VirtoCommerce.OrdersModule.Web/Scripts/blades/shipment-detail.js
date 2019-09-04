@@ -1,8 +1,8 @@
-angular.module('virtoCommerce.orderModule')
-    .controller('virtoCommerce.orderModule.shipmentDetailController', ['$scope', 'platformWebApp.bladeNavigationService', 'platformWebApp.dialogService', 'platformWebApp.settings', 'virtoCommerce.orderModule.order_res_customerOrders', 'virtoCommerce.orderModule.order_res_fulfilmentCenters', 'virtoCommerce.orderModule.statusTranslationService', 'platformWebApp.authService',
-        function ($scope, bladeNavigationService, dialogService, settings, customerOrders, order_res_fulfilmentCenters, statusTranslationService, authService) {
+angular.module('virtoCommerce.orderModule').controller('virtoCommerce.orderModule.shipmentDetailController', ['$scope', 'platformWebApp.bladeNavigationService', 'platformWebApp.dialogService', 'platformWebApp.settings', 'virtoCommerce.orderModule.order_res_customerOrders', 'virtoCommerce.inventoryModule.fulfillments', 'virtoCommerce.orderModule.statusTranslationService', 'platformWebApp.authService', 'virtoCommerce.shippingModule.shippingMethods',
+    function ($scope, bladeNavigationService, dialogService, settings, customerOrders, fulfillments, statusTranslationService, authService, shippingMethods) {
         var blade = $scope.blade;
         blade.isVisiblePrices = authService.checkPermission('order:read_prices');
+        blade.shippingMethods = [];
 
         if (blade.isNew) {
             blade.title = 'orders.blades.shipment-detail.title-new';
@@ -22,6 +22,13 @@ angular.module('virtoCommerce.orderModule')
         blade.currentStore = _.findWhere(blade.parentBlade.stores, { id: blade.customerOrder.storeId });
         blade.realOperationsCollection = blade.customerOrder.shipments;
 
+        shippingMethods.search({ storeId: blade.customerOrder.storeId }, function (data) {
+                blade.isLoading = false;
+                blade.shippingMethods = data.results;
+            }, function (error) {
+                bladeNavigationService.setError('Error ' + error.status, blade);
+        });
+
         settings.getValues({ id: 'Shipment.Status' }, translateBladeStatuses);
         blade.openStatusSettingManagement = function () {
             var newBlade = new DictionarySettingDetailBlade('Shipment.Status');
@@ -36,12 +43,12 @@ angular.module('virtoCommerce.orderModule')
         // load employees
         blade.employees = blade.parentBlade.employees;
 
-        blade.fulfillmentCenters = order_res_fulfilmentCenters.query();
+        getFulfillmentCenters();
         blade.openFulfillmentCentersList = function () {
             var newBlade = {
                 id: 'fulfillmentCenterList',
-                controller: 'virtoCommerce.coreModule.fulfillment.fulfillmentListController',
-                template: 'Modules/$(VirtoCommerce.Core)/Scripts/fulfillment/blades/fulfillment-center-list.tpl.html'
+                controller: 'virtoCommerce.inventoryModule.fulfillmentListController',
+                template: 'Modules/$(VirtoCommerce.Inventory)/Scripts/blades/fulfillment-center-list.tpl.html'
             };
             bladeNavigationService.showBlade(newBlade, blade);
         };
@@ -53,4 +60,17 @@ angular.module('virtoCommerce.orderModule')
         blade.updateRecalculationFlag = function () {
             blade.isTotalsRecalculationNeeded = blade.origEntity.price != blade.currentEntity.price || blade.origEntity.priceWithTax != blade.currentEntity.priceWithTax;
         }
+
+        function getFulfillmentCenters() {
+            fulfillments.search({ take: 100 }, function (response) {
+                blade.fulfillmentCenters = response.results;
+            });
+        }
+
+        $scope.$watch("blade.currentEntity.shippingMethod", function (shippingMethod) {
+            if (blade.isNew && shippingMethod) {
+                blade.currentEntity.shipmentMethodCode = shippingMethod.code;
+            }
+          }, true);
+
     }]);

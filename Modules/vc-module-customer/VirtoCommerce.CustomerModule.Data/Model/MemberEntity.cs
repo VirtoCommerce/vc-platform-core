@@ -43,7 +43,7 @@ namespace VirtoCommerce.CustomerModule.Data.Model
 
         public virtual Member ToModel(Member member)
         {
-            if (member == null) throw new ArgumentNullException("member");
+            if (member == null) throw new ArgumentNullException(nameof(member));
 
             member.Id = Id;
             member.CreatedBy = CreatedBy;

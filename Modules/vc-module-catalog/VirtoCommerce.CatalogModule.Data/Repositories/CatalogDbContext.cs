@@ -11,6 +11,11 @@ namespace VirtoCommerce.CatalogModule.Data.Repositories
         {
         }
 
+        protected CatalogDbContext(DbContextOptions options)
+            : base(options)
+        {
+        }
+
         protected override void OnModelCreating(ModelBuilder modelBuilder)
         {
             #region Catalog

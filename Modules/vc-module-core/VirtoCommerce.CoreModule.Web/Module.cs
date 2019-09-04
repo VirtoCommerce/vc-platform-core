@@ -66,20 +66,7 @@ namespace VirtoCommerce.CoreModule.Web
             var mvcJsonOptions = appBuilder.ApplicationServices.GetService<IOptions<MvcJsonOptions>>();
             mvcJsonOptions.Value.SerializerSettings.Converters.Add(new PolymorphicJsonConverter());
             mvcJsonOptions.Value.SerializerSettings.Converters.Add(new ConditionJsonConverter());
-
-            AbstractTypeFactory<IConditionTree>.RegisterType<BlockConditionAndOr>();
-            AbstractTypeFactory<IConditionTree>.RegisterType<ConditionAgeIs>();
-            AbstractTypeFactory<IConditionTree>.RegisterType<ConditionGenderIs>();
-            AbstractTypeFactory<IConditionTree>.RegisterType<ConditionLanguageIs>();
-            AbstractTypeFactory<IConditionTree>.RegisterType<ConditionStoreSearchedPhrase>();
-            AbstractTypeFactory<IConditionTree>.RegisterType<ConditionUrlIs>();
-            AbstractTypeFactory<IConditionTree>.RegisterType<ConditionGeoCity>();
-            AbstractTypeFactory<IConditionTree>.RegisterType<ConditionGeoCountry>();
-            AbstractTypeFactory<IConditionTree>.RegisterType<ConditionGeoState>();
-            AbstractTypeFactory<IConditionTree>.RegisterType<ConditionGeoTimeZone>();
-            AbstractTypeFactory<IConditionTree>.RegisterType<ConditionGeoZipCode>();
-            AbstractTypeFactory<IConditionTree>.RegisterType<UserGroupsContainsCondition>();
-
+            
             using (var serviceScope = appBuilder.ApplicationServices.CreateScope())
             {
                 var dbContext = serviceScope.ServiceProvider.GetRequiredService<CoreDbContext>();

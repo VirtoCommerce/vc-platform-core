@@ -1,4 +1,4 @@
-﻿using System;
+using System;
 using Microsoft.EntityFrameworkCore.Migrations;
 
 namespace VirtoCommerce.CustomerModule.Data.Migrations
@@ -18,7 +18,7 @@ namespace VirtoCommerce.CustomerModule.Data.Migrations
                     ModifiedBy = table.Column<string>(maxLength: 64, nullable: true),
                     MemberType = table.Column<string>(maxLength: 64, nullable: true),
                     Name = table.Column<string>(maxLength: 128, nullable: true),
-                    Discriminator = table.Column<string>(nullable: false),
+                    Discriminator = table.Column<string>(maxLength: 128, nullable: false),
                     FirstName = table.Column<string>(maxLength: 128, nullable: true),
                     MiddleName = table.Column<string>(maxLength: 128, nullable: true),
                     LastName = table.Column<string>(maxLength: 128, nullable: true),

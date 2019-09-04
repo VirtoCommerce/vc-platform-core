@@ -156,7 +156,7 @@ namespace VirtoCommerce.MarketingModule.Data.Migrations
                     b.HasIndex("ObjectType", "ObjectId")
                         .HasName("IX_ObjectType_ObjectId");
 
-                    b.ToTable("MarketingDynamicContentItemDynamicPropertyObjectValue");
+                    b.ToTable("DynamicContentItemDynamicPropertyObjectValue");
                 });
 
             modelBuilder.Entity("VirtoCommerce.MarketingModule.Data.Model.DynamicContentItemEntity", b =>

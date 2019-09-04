@@ -31,23 +31,25 @@ namespace VirtoCommerce.MarketingModule.Data.Search
 
         public virtual async Task<PromotionSearchResult> SearchPromotionsAsync(PromotionSearchCriteria criteria)
         {
-            var cacheKey = CacheKey.With(GetType(), "SearchPromotionsAsync", criteria.GetCacheKey());
+            var cacheKey = CacheKey.With(GetType(), nameof(SearchPromotionsAsync), criteria.GetCacheKey());
             return await _platformMemoryCache.GetOrCreateExclusiveAsync(cacheKey, async (cacheEntry) =>
             {
                 cacheEntry.AddExpirationToken(PromotionCacheRegion.CreateChangeToken());
                 var retVal = AbstractTypeFactory<PromotionSearchResult>.TryCreateInstance();
                 using (var repository = _repositoryFactory())
                 {
-                    var sortInfos = BuildSortInfos(criteria);
-                    var query = BuildSearchQuery(repository, criteria, sortInfos);
-
-                    retVal.TotalCount = await query.CountAsync();
+                    var sortInfos = BuildSortExpression(criteria);
+                    var query = BuildQuery(repository, criteria);
+                    //https://github.com/zzzprojects/EntityFramework-Plus/issues/293
+                    //Workaround ArgumentException with CountAsync have no predicate when query has a Cast or OfType expression
+                    retVal.TotalCount = await query.CountAsync(x=> true);
 
                     if (criteria.Take > 0)
                     {
-                        var ids = await query.Select(x => x.Id)
-                            .Skip(criteria.Skip)
-                            .Take(criteria.Take).ToArrayAsync();
+                        var ids = await query.OrderBySortInfos(sortInfos).ThenBy(x => x.Id)
+                                        .Select(x => x.Id)
+                                        .Skip(criteria.Skip).Take(criteria.Take)
+                                        .ToArrayAsync();
 
                         retVal.Results = (await _promotionService.GetPromotionsByIdsAsync(ids))
                             .OrderBy(x => Array.IndexOf(ids, x.Id)).ToList();
@@ -57,7 +59,7 @@ namespace VirtoCommerce.MarketingModule.Data.Search
             });
         }
 
-        protected virtual IList<SortInfo> BuildSortInfos(PromotionSearchCriteria criteria)
+        protected virtual IList<SortInfo> BuildSortExpression(PromotionSearchCriteria criteria)
         {
             var sortInfos = criteria.SortInfos;
             if (sortInfos.IsNullOrEmpty())
@@ -75,7 +77,7 @@ namespace VirtoCommerce.MarketingModule.Data.Search
             return sortInfos;
         }
 
-        protected virtual IQueryable<PromotionEntity> BuildSearchQuery(IMarketingRepository repository, PromotionSearchCriteria criteria, IList<SortInfo> sortInfos)
+        protected virtual IQueryable<PromotionEntity> BuildQuery(IMarketingRepository repository, PromotionSearchCriteria criteria)
         {
             var query = repository.Promotions;
 
@@ -99,8 +101,6 @@ namespace VirtoCommerce.MarketingModule.Data.Search
             {
                 query = query.Where(x => x.Name.Contains(criteria.Keyword) || x.Description.Contains(criteria.Keyword));
             }
-
-            query = query.OrderBySortInfos(sortInfos);
             return query;
         }
     }

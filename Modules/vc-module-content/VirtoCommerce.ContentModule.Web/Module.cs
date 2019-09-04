@@ -17,7 +17,6 @@ using VirtoCommerce.ContentModule.Data.Repositories;
 using VirtoCommerce.ContentModule.Data.Services;
 using VirtoCommerce.ContentModule.FileSystem;
 using VirtoCommerce.ContentModule.FileSystem.Extensions;
-using VirtoCommerce.ContentModule.Web.Extensions;
 using VirtoCommerce.Platform.Assets.AzureBlobStorage;
 using VirtoCommerce.Platform.Core.Common;
 using VirtoCommerce.Platform.Core.DynamicProperties;
@@ -32,7 +31,6 @@ namespace VirtoCommerce.ContentModule.Web
     {
         private IApplicationBuilder _appBuilder;
         public ManifestModuleInfo ModuleInfo { get; set; }
-
 
         public void Initialize(IServiceCollection serviceCollection)
         {
@@ -81,7 +79,6 @@ namespace VirtoCommerce.ContentModule.Web
                     Name = x
                 }).ToArray());
 
-
             //Force migrations
             using (var serviceScope = appBuilder.ApplicationServices.CreateScope())
             {
@@ -110,6 +107,5 @@ namespace VirtoCommerce.ContentModule.Web
         {
             await _appBuilder.ApplicationServices.GetRequiredService<ContentExportImport>().DoImportAsync(inputStream, options, progressCallback, cancellationToken);
         }
-
     }
 }

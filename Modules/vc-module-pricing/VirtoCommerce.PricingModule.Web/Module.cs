@@ -61,7 +61,6 @@ namespace VirtoCommerce.PricingModule.Web
             serviceCollection.AddTransient<ProductPriceDocumentBuilder>();
             serviceCollection.AddTransient<LogChangesChangedEventHandler>();
 
-            serviceCollection.AddSingleton<IPricingExtensionManager, DefaultPricingExtensionManagerImpl>();
         }
 
         public void PostInitialize(IApplicationBuilder appBuilder)
@@ -123,15 +122,10 @@ namespace VirtoCommerce.PricingModule.Web
             var inProcessBus = appBuilder.ApplicationServices.GetService<IHandlerRegistrar>();
             inProcessBus.RegisterHandler<PriceChangedEvent>(async (message, token) => await appBuilder.ApplicationServices.GetService<LogChangesChangedEventHandler>().Handle(message));
 
-            //Pricing expression
-            AbstractTypeFactory<IConditionTree>.RegisterType<PriceConditionTree>();
-            AbstractTypeFactory<IConditionTree>.RegisterType<BlockPricingCondition>();
-
-            var pricingExtensionManager = appBuilder.ApplicationServices.GetRequiredService<IPricingExtensionManager>();
-            pricingExtensionManager.PriceConditionTree = new PriceConditionTree
+            foreach (var conditionTree in AbstractTypeFactory<PriceConditionTreePrototype>.TryCreateInstance().Traverse<IConditionTree>(x => x.AvailableChildren))
             {
-                Children = new List<IConditionTree>() { GetPricingDynamicExpression() }
-            };
+                AbstractTypeFactory<IConditionTree>.RegisterType(conditionTree.GetType());
+            }
         }
 
         public void Uninstall()
@@ -156,18 +150,6 @@ namespace VirtoCommerce.PricingModule.Web
             await importJob.DoImportAsync(inputStream, progressCallback, cancellationToken);
         }
 
-        #endregion
-
-        private static IConditionTree GetPricingDynamicExpression()
-        {
-            var conditions = new List<IConditionTree>
-            {
-                new ConditionGeoTimeZone(), new ConditionGeoZipCode(), new ConditionStoreSearchedPhrase(), new ConditionAgeIs(), new ConditionGenderIs(),
-                new ConditionGeoCity(), new ConditionGeoCountry(), new ConditionGeoState(), new ConditionLanguageIs(), new UserGroupsContainsCondition()
-            };
-            var rootBlock = new BlockPricingCondition { AvailableChildren = conditions };
-
-            return rootBlock;
-        }
+        #endregion       
     }
 }

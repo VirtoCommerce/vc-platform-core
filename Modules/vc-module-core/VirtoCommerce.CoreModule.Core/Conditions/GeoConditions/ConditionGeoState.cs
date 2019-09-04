@@ -5,7 +5,7 @@ namespace VirtoCommerce.CoreModule.Core.Conditions.GeoConditions
     //State is []
     public class ConditionGeoState : MatchedConditionBase
     {
-        public override bool Evaluate(IEvaluationContext context)
+        public override bool IsSatisfiedBy(IEvaluationContext context)
         {
             var result = false;
             if (context is EvaluationContextBase evaluationContext)

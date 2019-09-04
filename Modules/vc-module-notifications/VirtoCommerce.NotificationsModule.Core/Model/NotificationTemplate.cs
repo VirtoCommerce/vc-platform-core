@@ -15,5 +15,7 @@ namespace VirtoCommerce.NotificationsModule.Core.Model
         /// For detecting kind of notifications (email, sms and etc.)
         /// </summary>
         public abstract string Kind { get; }
+
+        public bool IsReadonly { get; set; }
     }
 }

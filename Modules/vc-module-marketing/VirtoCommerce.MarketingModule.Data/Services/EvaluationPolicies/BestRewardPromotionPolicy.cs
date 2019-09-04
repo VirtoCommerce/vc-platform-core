@@ -42,8 +42,9 @@ namespace VirtoCommerce.MarketingModule.Data.Services
             var promotions = await _promotionSearchService.SearchPromotionsAsync(promotionSearchCriteria);
 
             var result = new PromotionResult();
-
-            var rewards = promotions.Results.SelectMany(x => x.EvaluatePromotion(context)).Where(x => x.IsValid).ToArray();
+            var evalPromtionTasks = promotions.Results.Select(x => x.EvaluatePromotionAsync(context)).ToArray();
+            await Task.WhenAll(evalPromtionTasks);
+            var rewards = evalPromtionTasks.SelectMany(x => x.Result).Where(x => x.IsValid).ToArray();
 
             var firstOrderExclusiveReward = rewards.FirstOrDefault(x => x.Promotion.IsExclusive);
             if (firstOrderExclusiveReward != null)

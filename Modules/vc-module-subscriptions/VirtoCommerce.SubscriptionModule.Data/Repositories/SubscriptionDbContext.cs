@@ -11,6 +11,11 @@ namespace VirtoCommerce.SubscriptionModule.Data.Repositories
         {
         }
 
+        protected SubscriptionDbContext(DbContextOptions options)
+            : base(options)
+        {
+        }
+
         protected override void OnModelCreating(ModelBuilder modelBuilder)
         {
             #region Subscription        

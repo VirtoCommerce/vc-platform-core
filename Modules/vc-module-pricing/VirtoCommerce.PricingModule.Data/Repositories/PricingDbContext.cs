@@ -11,6 +11,11 @@ namespace VirtoCommerce.PricingModule.Data.Repositories
         {
         }
 
+        protected PricingDbContext(DbContextOptions options)
+            : base(options)
+        {
+        }
+
         protected override void OnModelCreating(ModelBuilder modelBuilder)
         {
             modelBuilder.Entity<PriceEntity>().ToTable("Price").HasKey(x => x.Id);
@@ -21,6 +26,7 @@ namespace VirtoCommerce.PricingModule.Data.Repositories
 
             modelBuilder.Entity<PricelistEntity>().ToTable("Pricelist").HasKey(x => x.Id);
             modelBuilder.Entity<PricelistEntity>().Property(x => x.Id).HasMaxLength(128);
+            modelBuilder.Entity<PricelistEntity>().HasIndex(x => x.OuterId);
 
             modelBuilder.Entity<PricelistAssignmentEntity>().ToTable("PricelistAssignment").HasKey(x => x.Id);
             modelBuilder.Entity<PricelistAssignmentEntity>().HasOne(x => x.Pricelist).WithMany(x => x.Assignments).IsRequired().HasForeignKey(x => x.PricelistId);

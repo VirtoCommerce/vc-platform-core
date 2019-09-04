@@ -7,6 +7,7 @@ using Microsoft.AspNetCore.Mvc;
 using Newtonsoft.Json;
 using VirtoCommerce.CoreModule.Core.Conditions;
 using VirtoCommerce.MarketingModule.Core;
+using VirtoCommerce.MarketingModule.Core.Model.DynamicContent;
 using VirtoCommerce.MarketingModule.Core.Model.DynamicContent.Search;
 using VirtoCommerce.MarketingModule.Core.Search;
 using VirtoCommerce.MarketingModule.Core.Services;
@@ -21,7 +22,6 @@ namespace VirtoCommerce.MarketingModule.Web.Controllers.Api
         private readonly IDynamicContentService _dynamicContentService;
         private readonly IMarketingDynamicContentEvaluator _dynamicContentEvaluator;
         private readonly IContentPublicationsSearchService _contentPublicationsSearchService;
-        private readonly IMarketingExtensionManager _marketingExtensionManager;
         private readonly IFolderSearchService _folderSearchService;
         private readonly IContentPlacesSearchService _contentPlacesSearchService;
         private readonly IContentItemsSearchService _contentItemsSearchService;
@@ -30,7 +30,6 @@ namespace VirtoCommerce.MarketingModule.Web.Controllers.Api
             IDynamicContentService dynamicContentService,
             IMarketingDynamicContentEvaluator dynamicContentEvaluator,
             IContentPublicationsSearchService contentPublicationsSearchService,
-            IMarketingExtensionManager marketingExtensionManager,
             IFolderSearchService folderSearchService,
             IContentPlacesSearchService contentPlacesSearchService,
             IContentItemsSearchService contentItemsSearchService)
@@ -38,7 +37,6 @@ namespace VirtoCommerce.MarketingModule.Web.Controllers.Api
             _dynamicContentService = dynamicContentService;
             _dynamicContentEvaluator = dynamicContentEvaluator;
             _contentPublicationsSearchService = contentPublicationsSearchService;
-            _marketingExtensionManager = marketingExtensionManager;
             _folderSearchService = folderSearchService;
             _contentPlacesSearchService = contentPlacesSearchService;
             _contentItemsSearchService = contentItemsSearchService;
@@ -282,15 +280,13 @@ namespace VirtoCommerce.MarketingModule.Web.Controllers.Api
         [Authorize(ModuleConstants.Security.Permissions.Create)]
         public ActionResult<coreModel.DynamicContentPublication> GetNewDynamicPublication()
         {
-            var retVal = new coreModel.DynamicContentPublication
-            {
-                ContentItems = new coreModel.DynamicContentItem[] { },
-                ContentPlaces = new coreModel.DynamicContentPlace[] { },
-                DynamicExpression = _marketingExtensionManager.ContentCondition,
-                IsActive = true
-            };
-
-            return Ok(retVal);
+            var result = AbstractTypeFactory<coreModel.DynamicContentPublication>.TryCreateInstance();
+            result.IsActive = true;
+            result.ContentItems = new List<coreModel.DynamicContentItem>();
+            result.ContentPlaces = new List<coreModel.DynamicContentPlace>();
+            result.DynamicExpression = AbstractTypeFactory<DynamicContentConditionTree>.TryCreateInstance();
+            result.DynamicExpression.MergeFromPrototype(AbstractTypeFactory<DynamicContentConditionTreePrototype>.TryCreateInstance());
+            return Ok(result);
         }
 
         /// <summary>
@@ -304,11 +300,11 @@ namespace VirtoCommerce.MarketingModule.Web.Controllers.Api
         public async Task<ActionResult<coreModel.DynamicContentPublication>> GetDynamicContentPublicationById(string id)
         {
             var publications = await _dynamicContentService.GetPublicationsByIdsAsync(new[] { id });
-            var retVal = publications.FirstOrDefault();
-            if (retVal != null)
+            var result = publications.FirstOrDefault();
+            if (result != null)
             {
-                FillConditions(retVal);
-                return Ok(retVal);
+                result.DynamicExpression?.MergeFromPrototype(AbstractTypeFactory<DynamicContentConditionTreePrototype>.TryCreateInstance());
+                return Ok(result);
             }
             return NotFound();
         }
@@ -407,30 +403,6 @@ namespace VirtoCommerce.MarketingModule.Web.Controllers.Api
         {
             await _dynamicContentService.DeleteFoldersAsync(ids);
             return NoContent();
-        }
-
-        private void FillConditions(coreModel.DynamicContentPublication publication)
-        {
-            publication.DynamicExpression = _marketingExtensionManager.ContentCondition;
-            if (!string.IsNullOrEmpty(publication.PredicateVisualTreeSerialized))
-            {
-                publication.DynamicExpression = JsonConvert.DeserializeObject<IConditionTree>(publication.PredicateVisualTreeSerialized, new ConditionJsonConverter());
-                if (_marketingExtensionManager.ContentCondition != null)
-                {
-                    //Copy available elements from etalon because they not persisted
-                    var sourceBlocks = _marketingExtensionManager.ContentCondition.Traverse(x => x.Children);
-                    var targetBlocks = publication.DynamicExpression.Traverse(x => x.Children).ToList();
-                    foreach (var sourceBlock in sourceBlocks)
-                    {
-                        foreach (var targetBlock in targetBlocks.Where(x => x.Id == sourceBlock.Id))
-                        {
-                            targetBlock.AvailableChildren = sourceBlock.AvailableChildren;
-                        }
-                    }
-                    //copy available elements from etalon
-                    publication.DynamicExpression.AvailableChildren = _marketingExtensionManager.ContentCondition.AvailableChildren;
-                }
-            }
-        }
+        }    
     }
 }

@@ -83,7 +83,7 @@ namespace VirtoCommerce.OrdersModule.Data.Handlers
         /// </summary>
         /// <param name="changedEntry">The entry that describes changes made to order.</param>
         /// <returns>Array of required product inventory changes.</returns>
-        public virtual async Task<ProductInventoryChange[]> GetProductInventoryChangesFor(GenericChangedEntry<CustomerOrder> changedEntry)
+        public virtual Task<ProductInventoryChange[]> GetProductInventoryChangesFor(GenericChangedEntry<CustomerOrder> changedEntry)
         {
             var customerOrder = changedEntry.NewEntry;
             var customerOrderShipments = customerOrder.Shipments?.ToArray();
@@ -117,7 +117,7 @@ namespace VirtoCommerce.OrdersModule.Data.Handlers
                 }
             });
             //Do not return unchanged records
-            return itemChanges.Where(x => x.QuantityDelta != 0).ToArray();
+            return Task.FromResult(itemChanges.Where(x => x.QuantityDelta != 0).ToArray());
         }
 
 

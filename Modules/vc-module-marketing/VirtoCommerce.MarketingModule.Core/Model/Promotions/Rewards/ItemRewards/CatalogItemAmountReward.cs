@@ -2,17 +2,7 @@ namespace VirtoCommerce.MarketingModule.Core.Model.Promotions
 {
     public class CatalogItemAmountReward : AmountBasedReward
     {
-        public CatalogItemAmountReward()
-        {
-        }
-        //Copy constructor
-        protected CatalogItemAmountReward(CatalogItemAmountReward other)
-            : base(other)
-        {
-            ProductId = other.ProductId;
-            ConditionalProductId = other.ConditionalProductId;
-        }
-
+       
         /// <summary>
         /// Target reward product
         /// </summary>

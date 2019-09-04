@@ -1,8 +1,6 @@
 using System;
 using System.Collections.Generic;
 using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
 
 namespace VirtoCommerce.Platform.Core.Common
 {
@@ -12,7 +10,7 @@ namespace VirtoCommerce.Platform.Core.Common
     /// <typeparam name="BaseType"></typeparam>
     public static class AbstractTypeFactory<BaseType>
     {
-        private static List<TypeInfo<BaseType>> _typeInfos = new List<TypeInfo<BaseType>>();
+        private static readonly List<TypeInfo<BaseType>> _typeInfos = new List<TypeInfo<BaseType>>();
 
         /// <summary>
         /// All registered type mapping informations within current factory instance
@@ -31,14 +29,24 @@ namespace VirtoCommerce.Platform.Core.Common
         /// <returns>TypeInfo instance to continue configuration through fluent syntax</returns>
         public static TypeInfo<BaseType> RegisterType<T>() where T : BaseType
         {
-            var kowTypes = _typeInfos.SelectMany(x => x.AllSubclasses);
-            if (kowTypes.Contains(typeof(T)))
+            return RegisterType(typeof(T));
+        }
+              
+        public static TypeInfo<BaseType> RegisterType(Type type)
+        {
+            if(type == null)
             {
-                throw new ArgumentException(string.Format("Type {0} already registered", typeof(T).Name));
+                throw new ArgumentNullException(nameof(type));
             }
-            var retVal = new TypeInfo<BaseType>(typeof(T));
-            _typeInfos.Add(retVal);
-            return retVal;
+
+            var result = _typeInfos.FirstOrDefault(x=> x.AllSubclasses.Contains(type));
+            
+            if (result == null)
+            {
+                result = new TypeInfo<BaseType>(type);
+                _typeInfos.Add(result);
+            }
+            return result;
         }
 
         /// <summary>
@@ -80,31 +88,40 @@ namespace VirtoCommerce.Platform.Core.Common
 
         public static BaseType TryCreateInstance(string typeName)
         {
-            BaseType retVal;
-            //Try find first direct type match from registered types
-            var typeInfo = _typeInfos.FirstOrDefault(x => x.TypeName.EqualsInvariant(typeName));
-            //Then need to find in inheritance chain from registered types
-            if (typeInfo == null)
-            {                
-                typeInfo = _typeInfos.Where(x => x.IsAssignableTo(typeName)).FirstOrDefault();
-            }          
+            BaseType result;
+            var typeInfo = FindTypeInfoByName(typeName);
             if (typeInfo != null)
             {
                 if (typeInfo.Factory != null)
                 {
-                    retVal = typeInfo.Factory();
+                    result = typeInfo.Factory();
                 }
                 else
                 {
-                    retVal = (BaseType)Activator.CreateInstance(typeInfo.Type);
+                    result = (BaseType)Activator.CreateInstance(typeInfo.Type);
                 }
+                typeInfo.SetupAction?.Invoke(result);
             }
             else
             {
-                retVal = (BaseType)Activator.CreateInstance(typeof(BaseType));
+                result = (BaseType)Activator.CreateInstance(typeof(BaseType));
             }
-            return retVal;
-        }      
+
+
+            return result;
+        }
+
+        public static TypeInfo<BaseType> FindTypeInfoByName(string typeName)
+        {
+            //Try find first direct type match from registered types
+            var result = _typeInfos.FirstOrDefault(x => x.TypeName.EqualsInvariant(typeName));
+            //Then need to find in inheritance chain from registered types
+            if (result == null)
+            {
+                result = _typeInfos.FirstOrDefault(x => x.IsAssignableTo(typeName));
+            }
+            return result;
+        }
     }
 
     /// <summary>
@@ -121,6 +138,7 @@ namespace VirtoCommerce.Platform.Core.Common
 
         public string TypeName { get; private set; }
         public Func<BaseType> Factory { get; private set; }
+        public Action<BaseType> SetupAction { get; private set; }
         public Type Type { get; private set; }
         public Type MappedType { get; set; }
         public ICollection<object> Services { get; set; }
@@ -150,7 +168,13 @@ namespace VirtoCommerce.Platform.Core.Common
             Factory = factory;
             return this;
         }
-        
+
+        public TypeInfo<BaseType> WithSetupAction(Action<BaseType> setupAction)
+        {
+            SetupAction = setupAction;
+            return this;
+        }
+
         public TypeInfo<BaseType> WithTypeName(string name)
         {
             TypeName = name;

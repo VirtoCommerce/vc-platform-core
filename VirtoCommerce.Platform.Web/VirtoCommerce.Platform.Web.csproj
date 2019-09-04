@@ -1,7 +1,7 @@
 <Project Sdk="Microsoft.NET.Sdk.Web">
     <PropertyGroup>
         <TargetFramework>netcoreapp2.2</TargetFramework>
-	<AspNetCoreHostingModel>InProcess</AspNetCoreHostingModel>
+	      <AspNetCoreHostingModel>InProcess</AspNetCoreHostingModel>
         <DockerComposeProjectPath>..\docker-compose.dcproj</DockerComposeProjectPath>
         <AssemblyVersion>3.0.0.0</AssemblyVersion>
         <Version>3.0.0</Version>
@@ -13,38 +13,6 @@
     <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Debug|AnyCPU'">
         <NoWarn>1701;1702;1705;1591</NoWarn>
     </PropertyGroup>
-    <ItemGroup>
-        <Compile Remove="Modules\**" />
-       
-        <Content Remove="Modules\**" />
-        <Content Remove="App_Data\**" />
-        <Content Remove="wwwroot\lib\**" />
-        <Content Remove="wwwroot\assets\**" />
-        <Content Remove="wwwroot\cms-content\**" />
-       
-        
-        <Content Update="Modules\**" CopyToPublishDirectory="Never" />
-        <Content Update="App_Data\**" CopyToPublishDirectory="Never" />
-        <Content Update="wwwroot\lib\**" CopyToPublishDirectory="Never" />
-        <Content Update="wwwroot\assets\**" CopyToPublishDirectory="Never" />
-        <Content Update="wwwroot\cms-content\**" CopyToPublishDirectory="Never" />
-
-        <EmbeddedResource Remove="Modules\**" />
-        <EmbeddedResource Remove="App_Data\**" />
-        <EmbeddedResource Remove="wwwroot\lib\**" />
-        <EmbeddedResource Remove="wwwroot\assets\**" />
-        <EmbeddedResource Remove="wwwroot\cms-content\**" />
-
-        
-        <None Remove="Modules\**" />
-        <None Remove="App_Data\**" />
-        <None Remove="wwwroot\lib\**" />
-        <None Remove="wwwroot\assets\**" />
-        <None Remove="wwwroot\cms-content\**" />
-    </ItemGroup>
-    <ItemGroup>
-        <Content Remove="appDependencies.config.json" />
-    </ItemGroup>
 
     <ItemGroup>
         <PackageReference Include="AspNet.Security.OAuth.Validation" Version="2.0.0" />
@@ -81,8 +49,12 @@
         <ProjectReference Include="..\VirtoCommerce.Platform.Security\VirtoCommerce.Platform.Security.csproj" />
     </ItemGroup>
     <ItemGroup>
-        <Folder Include="RewriteRules\" />
+        <Compile Remove="Modules\**" />
+        <Content Update="Modules\**" CopyToPublishDirectory="Never" />
+        <EmbeddedResource Remove="Modules\**" />
+        <None Remove="Modules\**" />
     </ItemGroup>
+    
     <ItemGroup>
         <EmbeddedResource Include="wwwroot\swagger\index.html" />
         <None Include="wwwroot\swagger\logo_small.png" />

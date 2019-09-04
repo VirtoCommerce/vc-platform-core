@@ -1,14 +1,15 @@
+using Microsoft.AspNetCore.Authorization;
+using Microsoft.AspNetCore.Mvc;
 using System.Collections.Generic;
 using System.Linq;
 using System.Threading.Tasks;
-using Microsoft.AspNetCore.Authorization;
-using Microsoft.AspNetCore.Mvc;
 using VirtoCommerce.CatalogModule.Core.Model;
 using VirtoCommerce.CatalogModule.Core.Services;
 using VirtoCommerce.Platform.Core.Assets;
 using VirtoCommerce.Platform.Core.Common;
 using VirtoCommerce.PricingModule.Core;
 using VirtoCommerce.PricingModule.Core.Model;
+using VirtoCommerce.PricingModule.Core.Model.Conditions;
 using VirtoCommerce.PricingModule.Core.Model.Search;
 using VirtoCommerce.PricingModule.Core.Services;
 
@@ -21,21 +22,19 @@ namespace VirtoCommerce.PricingModule.Web.Controllers.Api
         private readonly IPricingService _pricingService;
         private readonly IPricingSearchService _pricingSearchService;
         private readonly IItemService _itemService;
-        private readonly ICatalogService _catalogService;
-        private readonly IPricingExtensionManager _extensionManager;
         private readonly IBlobUrlResolver _blobUrlResolver;
-        private readonly IPricingExtensionManager _pricingExtensionManager;
 
 
-        public PricingModuleController(IPricingService pricingService, IItemService itemService, ICatalogService catalogService, IPricingExtensionManager extensionManager, IPricingSearchService pricingSearchService, IBlobUrlResolver blobUrlResolver, IPricingExtensionManager pricingExtensionManager)
+        public PricingModuleController(
+            IPricingService pricingService
+            , IItemService itemService
+            , IPricingSearchService pricingSearchService
+            , IBlobUrlResolver blobUrlResolver)
         {
-            _extensionManager = extensionManager;
             _pricingService = pricingService;
             _itemService = itemService;
-            _catalogService = catalogService;
             _pricingSearchService = pricingSearchService;
             _blobUrlResolver = blobUrlResolver;
-            _pricingExtensionManager = pricingExtensionManager;
         }
 
         /// <summary>
@@ -73,25 +72,11 @@ namespace VirtoCommerce.PricingModule.Web.Controllers.Api
         [Route("api/pricing/assignments/{id}")]
         public async Task<ActionResult<PricelistAssignment>> GetPricelistAssignmentById(string id)
         {
-            var assignment = (await _pricingService.GetPricelistAssignmentsByIdAsync(new[] { id })).FirstOrDefault();
-            var defaultExpressionTree = _pricingExtensionManager.PriceConditionTree;
-            if (defaultExpressionTree != null)
+            var assignment = (await _pricingService.GetPricelistAssignmentsByIdAsync(new[] { id })).FirstOrDefault();        
+            if(assignment != null)
             {
-                //Copy available elements from default tree because they not persisted
-                var sourceBlocks = defaultExpressionTree.Traverse(x => x.Children);
-                var targetBlocks = assignment.DynamicExpression.Traverse(x => x.Children).ToList();
-
-                foreach (var sourceBlock in sourceBlocks)
-                {
-                    foreach (var targetBlock in targetBlocks.Where(x => x.Id == sourceBlock.Id))
-                    {
-                        targetBlock.AvailableChildren = sourceBlock.AvailableChildren;
-                    }
-                }
-                //copy available elements from default expression tree
-                assignment.DynamicExpression.AvailableChildren = defaultExpressionTree.AvailableChildren;
+                assignment.DynamicExpression?.MergeFromPrototype(AbstractTypeFactory<PriceConditionTreePrototype>.TryCreateInstance());
             }
-
             return Ok(assignment);
         }
 
@@ -105,7 +90,9 @@ namespace VirtoCommerce.PricingModule.Web.Controllers.Api
         {
             var result = AbstractTypeFactory<PricelistAssignment>.TryCreateInstance();
             result.Priority = 1;
-            result.DynamicExpression = _extensionManager.PriceConditionTree;
+            //Required for UI
+            result.DynamicExpression = AbstractTypeFactory<PriceConditionTree>.TryCreateInstance();
+            result.DynamicExpression.MergeFromPrototype(AbstractTypeFactory<PriceConditionTreePrototype>.TryCreateInstance());
             return Ok(result);
         }
 
@@ -385,12 +372,14 @@ namespace VirtoCommerce.PricingModule.Web.Controllers.Api
             const int BATCH_SIZE = 20;
             var skip = 0;
             IEnumerable<string> batch;
-            while ((batch = pricelistAssignmentsIds.Skip(skip).Take(BATCH_SIZE)).Count() > 0)
+            do
             {
+                batch = pricelistAssignmentsIds.Skip(skip).Take(BATCH_SIZE);
                 await _pricingService.DeletePricelistsAssignmentsAsync(batch.ToArray());
-
                 skip += BATCH_SIZE;
             }
+            while (batch.Any());
+
 
             return NoContent();
         }

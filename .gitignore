@@ -281,3 +281,7 @@ __pycache__/
 
 #exclude hot-modules
 /Modules/hot-*
+
+#exclude module build artifacts 
+/_build/Platform
+/_build/module/Modules

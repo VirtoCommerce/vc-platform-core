@@ -23,7 +23,7 @@ namespace VirtoCommerce.Platform.Security.Caching
 
         public static void ExpireUser(ApplicationUser user)
         {
-            if (_usersRegionTokenLookup.TryRemove(user.Id, out CancellationTokenSource token))
+            if (_usersRegionTokenLookup.TryRemove(user.Id, out var token))
             {
                 token.Cancel();
             }
