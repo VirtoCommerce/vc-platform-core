@@ -28,6 +28,7 @@ namespace VirtoCommerce.ExportModule.Data.Services
         public int TotalCount { get; set; }
         public int CurrentPageNumber { get; protected set; }
         public int PageSize { get; set; } = 50;
+        public int Skip { get; set; }
 
         public IEnumerable<IExportable> Items { get; protected set; }
 
@@ -71,7 +72,7 @@ namespace VirtoCommerce.ExportModule.Data.Services
             EnsureHaveTotals();
 
             var take = DataQuery.Take ?? PageSize;
-            var skip = DataQuery.Skip ?? CurrentPageNumber * PageSize;
+            var skip = DataQuery.Skip ?? Skip + CurrentPageNumber * PageSize;
             var taskList = new List<Task>();
             var result = new List<IExportable>();
 

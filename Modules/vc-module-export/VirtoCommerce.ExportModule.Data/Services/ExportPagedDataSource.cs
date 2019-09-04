@@ -33,6 +33,7 @@ namespace VirtoCommerce.ExportModule.Data.Services
 
         public int CurrentPageNumber { get; protected set; } = 0;
         public int PageSize { get; set; } = 50;
+        public int Skip { get; set; }
         public virtual int GetTotalCount()
         {
             if (TotalCount < 0)
@@ -91,7 +92,7 @@ namespace VirtoCommerce.ExportModule.Data.Services
             result.Sort = exportDataQuery.Sort;
 
             // It is for proper pagination - client side for viewer (dataQuery.Skip/Take) should work together with iterating through pages when getting data for export
-            result.Skip = (exportDataQuery.Skip ?? 0) + CurrentPageNumber * PageSize;
+            result.Skip = (exportDataQuery.Skip ?? Skip) + CurrentPageNumber * PageSize;
             result.Take = exportDataQuery.Take ?? PageSize;
 
             return result;

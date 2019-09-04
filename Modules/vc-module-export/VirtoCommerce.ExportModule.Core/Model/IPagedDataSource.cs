@@ -16,6 +16,10 @@ namespace VirtoCommerce.ExportModule.Core.Model
         /// </summary>
         int PageSize { get; set; }
         /// <summary>
+        /// Specifies the offset for fetching records
+        /// </summary>
+        int Skip { get; set; }
+        /// <summary>
         /// Gets total count of records for this data source
         /// </summary>
         /// <returns></returns>
