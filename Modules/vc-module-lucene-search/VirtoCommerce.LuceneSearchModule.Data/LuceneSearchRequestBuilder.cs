@@ -1,18 +1,17 @@
 using System;
 using System.Collections.Generic;
 using System.Linq;
-using Lucene.Net.Analysis.Core;
+using System.Text;
 using Lucene.Net.Analysis.Standard;
 using Lucene.Net.QueryParsers.Classic;
 using Lucene.Net.Search;
 using VirtoCommerce.SearchModule.Core.Model;
-using Version = Lucene.Net.Util.LuceneVersion;
 
 namespace VirtoCommerce.LuceneSearchModule.Data
 {
     public class LuceneSearchRequestBuilder
     {
-        private const Version _matchVersion = Version.LUCENE_48;
+        private const Lucene.Net.Util.LuceneVersion _matchVersion = Lucene.Net.Util.LuceneVersion.LUCENE_48;
         private static readonly string[] _keywordSeparator = { " " };
 
         public static LuceneSearchRequest BuildRequest(SearchRequest request, string indexName, string documentType, ICollection<string> availableFields)
@@ -56,18 +55,20 @@ namespace VirtoCommerce.LuceneSearchModule.Data
 
             if (!string.IsNullOrEmpty(request?.SearchKeywords))
             {
-                var searchKeywords = request.SearchKeywords;
+                var searchKeywords = string.Empty;
 
                 //https://stackoverflow.com/questions/48891716/lucene-net-4-8-search-not-returning-results
-                //and also not allowed as first character in WildcardQuery
-                if (!searchKeywords.StartsWith(WildcardQuery.WILDCARD_STRING))
+                var sb = new StringBuilder(request.SearchKeywords);
+                if (!request.SearchKeywords.StartsWith(WildcardQuery.WILDCARD_STRING))
                 {
-                    searchKeywords = $"{WildcardQuery.WILDCARD_STRING}{searchKeywords}";
+                    sb.Insert(0, WildcardQuery.WILDCARD_STRING);
                 }
-                if (!searchKeywords.EndsWith(WildcardQuery.WILDCARD_STRING))
+                if (!request.SearchKeywords.EndsWith(WildcardQuery.WILDCARD_STRING))
                 {
-                    searchKeywords = $"{searchKeywords}{WildcardQuery.WILDCARD_STRING}";
+                    sb.Append(WildcardQuery.WILDCARD_STRING);
                 }
+                searchKeywords = sb.ToString();
+                
 
                 if (request.IsFuzzySearch)
                 {
@@ -79,7 +80,7 @@ namespace VirtoCommerce.LuceneSearchModule.Data
                 }
                 
                 var fields = request.SearchFields?.Select(LuceneSearchHelper.ToLuceneFieldName).ToArray() ?? LuceneSearchHelper.SearchableFields;
-                var analyzer = new KeywordAnalyzer();
+                var analyzer = new StandardAnalyzer(_matchVersion);
 
                 var parser = new MultiFieldQueryParser(_matchVersion, fields, analyzer)
                 {
