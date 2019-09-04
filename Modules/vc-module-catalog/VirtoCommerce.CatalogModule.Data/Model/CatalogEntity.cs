@@ -8,7 +8,7 @@ using VirtoCommerce.Platform.Core.Common;
 
 namespace VirtoCommerce.CatalogModule.Data.Model
 {
-    public class CatalogEntity : AuditableEntity, IHasOuterId, ICloneable
+    public class CatalogEntity : AuditableEntity, IHasOuterId
     {
         public bool Virtual { get; set; }
         [Required]
@@ -146,40 +146,5 @@ namespace VirtoCommerce.CatalogModule.Data.Model
                 CatalogPropertyValues.Patch(target.CatalogPropertyValues, (sourcePropValue, targetPropValue) => sourcePropValue.Patch(targetPropValue));
             }
         }
-
-        #region ICloneable members
-
-        public virtual object Clone()
-        {
-            var result = MemberwiseClone() as CatalogEntity;
-
-            if (IncomingLinks != null)
-            {
-                result.IncomingLinks = new ObservableCollection<CategoryRelationEntity>(
-                    IncomingLinks.Select(x => x.Clone() as CategoryRelationEntity));
-            }
-
-            if (CatalogLanguages != null)
-            {
-                result.CatalogLanguages = new ObservableCollection<CatalogLanguageEntity>(
-                    CatalogLanguages.Select(x => x.Clone() as CatalogLanguageEntity));
-            }
-
-            if (CatalogPropertyValues != null)
-            {
-                result.CatalogPropertyValues = new ObservableCollection<PropertyValueEntity>(
-                    CatalogPropertyValues.Select(x => x.Clone() as PropertyValueEntity));
-            }
-
-            if (Properties != null)
-            {
-                result.Properties = new ObservableCollection<PropertyEntity>(
-                    Properties.Select(x => x.Clone() as PropertyEntity));
-            }
-
-            return result;
-        }
-
-        #endregion
     }
 }

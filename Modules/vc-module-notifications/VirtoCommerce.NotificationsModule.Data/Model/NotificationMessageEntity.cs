@@ -9,7 +9,7 @@ namespace VirtoCommerce.NotificationsModule.Data.Model
     /// <summary>
     /// Entity is message of notification
     /// </summary>
-    public abstract class NotificationMessageEntity : AuditableEntity, ICloneable
+    public abstract class NotificationMessageEntity : AuditableEntity
     {
         [NotMapped]
         public abstract string Kind { get; }
@@ -135,22 +135,6 @@ namespace VirtoCommerce.NotificationsModule.Data.Model
             message.LastSendError = LastSendError;
             message.LastSendAttemptDate = LastSendAttemptDate;
             message.SendDate = SendDate;
-        }
-
-        #region ICloneable members
-
-        public virtual object Clone()
-        {
-            var result = MemberwiseClone() as NotificationMessageEntity;
-
-            if (Notification != null)
-            {
-                result.Notification = Notification.Clone() as NotificationEntity;
-            }
-
-            return result;
-        }
-
-        #endregion
+        }        
     }
 }

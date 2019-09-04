@@ -5,7 +5,7 @@ using VirtoCommerce.Platform.Core.Common;
 
 namespace VirtoCommerce.InventoryModule.Data.Model
 {
-    public class FulfillmentCenterEntity : AuditableEntity, IHasOuterId, ICloneable
+    public class FulfillmentCenterEntity : AuditableEntity, IHasOuterId
     {
         [Required]
         [StringLength(128)]
@@ -132,15 +132,5 @@ namespace VirtoCommerce.InventoryModule.Data.Model
             target.Name = Name;
             target.GeoLocation = GeoLocation;
         }
-
-        #region ICloneable members
-
-        public virtual object Clone()
-        {
-            var result = MemberwiseClone() as FulfillmentCenterEntity;
-            return result;
-        }
-
-        #endregion
     }
 }

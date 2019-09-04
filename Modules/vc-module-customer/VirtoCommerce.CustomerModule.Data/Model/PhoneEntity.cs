@@ -4,7 +4,7 @@ using VirtoCommerce.Platform.Core.Common;
 
 namespace VirtoCommerce.CustomerModule.Data.Model
 {
-    public class PhoneEntity : Entity, ICloneable
+    public class PhoneEntity : Entity
     {
         [StringLength(64)]
         public string Number { get; set; }
@@ -16,22 +16,6 @@ namespace VirtoCommerce.CustomerModule.Data.Model
 
         public string MemberId { get; set; }
         public virtual MemberEntity Member { get; set; }
-
-        #endregion
-
-        #region ICloneable members
-
-        public virtual object Clone()
-        {
-            var result = MemberwiseClone() as PhoneEntity;
-
-            if (Member != null)
-            {
-                result.Member = Member.Clone() as MemberEntity;
-            }
-
-            return result;
-        }
 
         #endregion
     }

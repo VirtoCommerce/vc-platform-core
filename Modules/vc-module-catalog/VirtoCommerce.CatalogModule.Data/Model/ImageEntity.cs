@@ -5,7 +5,7 @@ using VirtoCommerce.Platform.Core.Common;
 
 namespace VirtoCommerce.CatalogModule.Data.Model
 {
-    public class ImageEntity : AuditableEntity, IHasOuterId, ICloneable
+    public class ImageEntity : AuditableEntity, IHasOuterId
     {
         [StringLength(2083)]
         [Required]
@@ -87,26 +87,5 @@ namespace VirtoCommerce.CatalogModule.Data.Model
             target.SortOrder = SortOrder;
             target.Url = Url;
         }
-
-        #region ICloneable members
-
-        public virtual object Clone()
-        {
-            var result = MemberwiseClone() as ImageEntity;
-
-            if (CatalogItem != null)
-            {
-                result.CatalogItem = CatalogItem.Clone() as ItemEntity;
-            }
-
-            if (Category != null)
-            {
-                result.Category = Category.Clone() as CategoryEntity;
-            }
-
-            return result;
-        }
-
-        #endregion
     }
 }

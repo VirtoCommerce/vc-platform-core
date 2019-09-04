@@ -1,4 +1,7 @@
+using System;
 using System.Collections.Generic;
+using System.Collections.ObjectModel;
+using System.Linq;
 using VirtoCommerce.CoreModule.Core.Common;
 using VirtoCommerce.CoreModule.Core.Tax;
 using VirtoCommerce.Platform.Core.Common;
@@ -6,7 +9,7 @@ using VirtoCommerce.Platform.Core.DynamicProperties;
 
 namespace VirtoCommerce.CartModule.Core.Model
 {
-    public class Payment : AuditableEntity, IHasTaxDetalization, ITaxable, IHasDiscounts, IHasDynamicProperties
+    public class Payment : AuditableEntity, IHasTaxDetalization, ITaxable, IHasDiscounts, IHasDynamicProperties, ICloneable
     {
         public string Currency { get; set; }
         public string PaymentGatewayCode { get; set; }
@@ -38,9 +41,7 @@ namespace VirtoCommerce.CartModule.Core.Model
         public decimal TaxPercentRate { get; set; }
 
         #endregion
-
-
-
+               
         #region IHasDiscounts
         public ICollection<Discount> Discounts { get; set; }
         #endregion
@@ -55,5 +56,33 @@ namespace VirtoCommerce.CartModule.Core.Model
         public string ObjectType => typeof(Payment).FullName;
         public ICollection<DynamicObjectProperty> DynamicProperties { get; set; }
         #endregion
+
+        public object Clone()
+        {
+            var result = MemberwiseClone() as Payment;
+
+            if (BillingAddress != null)
+            {
+                result.BillingAddress = BillingAddress.Clone() as Address;
+            }
+
+            if (Discounts != null)
+            {
+                result.Discounts = new ObservableCollection<Discount>(Discounts.Select(x => x.Clone() as Discount));
+            }
+
+            if (TaxDetails != null)
+            {
+                result.TaxDetails = new ObservableCollection<TaxDetail>(TaxDetails.Select(x => x.Clone() as TaxDetail));
+            }
+            
+            if (DynamicProperties != null)
+            {
+                result.DynamicProperties = new ObservableCollection<DynamicObjectProperty>(
+                    DynamicProperties.Select(x => x.Clone() as DynamicObjectProperty));
+            }
+
+            return result;
+        }
     }
 }

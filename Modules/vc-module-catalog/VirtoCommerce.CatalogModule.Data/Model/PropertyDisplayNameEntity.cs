@@ -5,7 +5,7 @@ using VirtoCommerce.Platform.Core.Common;
 
 namespace VirtoCommerce.CatalogModule.Data.Model
 {
-    public class PropertyDisplayNameEntity : Entity, ICloneable
+    public class PropertyDisplayNameEntity : Entity
     {
         [StringLength(64)]
         public string Locale { get; set; }
@@ -45,21 +45,5 @@ namespace VirtoCommerce.CatalogModule.Data.Model
         {
 
         }
-
-        #region ICloneable members
-
-        public virtual object Clone()
-        {
-            var result = MemberwiseClone() as PropertyDisplayNameEntity;
-
-            if (Property != null)
-            {
-                result.Property = Property.Clone() as PropertyEntity;
-            }
-
-            return result;
-        }
-
-        #endregion
     }
 }

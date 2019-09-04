@@ -3,7 +3,7 @@ using System.ComponentModel.DataAnnotations;
 
 namespace VirtoCommerce.CoreModule.Data.Model
 {
-    public class SequenceEntity : ICloneable
+    public class SequenceEntity
     {
         [Key]
         [StringLength(256)]
@@ -13,15 +13,5 @@ namespace VirtoCommerce.CoreModule.Data.Model
         public int Value { get; set; }
 
         public DateTime? ModifiedDate { get; set; }
-
-        #region ICloneable members
-
-        public virtual object Clone()
-        {
-            var result = MemberwiseClone() as SequenceEntity;
-            return result;
-        }
-
-        #endregion
     }
 }

@@ -4,7 +4,7 @@ using VirtoCommerce.Platform.Core.Common;
 
 namespace VirtoCommerce.CustomerModule.Data.Model
 {
-    public class EmailEntity : Entity, ICloneable
+    public class EmailEntity : Entity
     {
         [EmailAddress]
         [StringLength(254)]
@@ -19,22 +19,6 @@ namespace VirtoCommerce.CustomerModule.Data.Model
 
         public string MemberId { get; set; }
         public virtual MemberEntity Member { get; set; }
-
-        #endregion
-
-        #region ICloneable members
-
-        public virtual object Clone()
-        {
-            var result = MemberwiseClone() as EmailEntity;
-
-            if (Member != null)
-            {
-                result.Member = Member.Clone() as MemberEntity;
-            }
-
-            return result;
-        }
 
         #endregion
     }

@@ -3,7 +3,7 @@ using VirtoCommerce.Platform.Core.Common;
 
 namespace VirtoCommerce.MarketingModule.Core.Model.Promotions
 {
-    public class Coupon : AuditableEntity
+    public class Coupon : AuditableEntity, ICloneable
     {
         /// <summary>
         /// Restriction of total coupon usages
@@ -28,5 +28,14 @@ namespace VirtoCommerce.MarketingModule.Core.Model.Promotions
         /// </summary>
         public long TotalUsesCount { get; set; }
         public string OuterId { get; set; }
+
+        #region ICloneable members
+
+        public virtual object Clone()
+        {
+            return MemberwiseClone() as Coupon;
+        }
+
+        #endregion
     }
 }

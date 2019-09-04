@@ -6,7 +6,7 @@ using Address = VirtoCommerce.CustomerModule.Core.Model.Address;
 
 namespace VirtoCommerce.CustomerModule.Data.Model
 {
-    public class AddressEntity : AuditableEntity, ICloneable
+    public class AddressEntity : AuditableEntity
     {
         [StringLength(2048)]
         public string Name { get; set; }
@@ -148,21 +148,5 @@ namespace VirtoCommerce.CustomerModule.Data.Model
             target.Line2 = Line2;
             target.Organization = Organization;
         }
-
-        #region ICloneable members
-
-        public virtual object Clone()
-        {
-            var result = MemberwiseClone() as AddressEntity;
-
-            if (Member != null)
-            {
-                result.Member = Member.Clone() as MemberEntity;
-            }
-
-            return result;
-        }
-
-        #endregion
     }
 }

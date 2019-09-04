@@ -8,7 +8,7 @@ namespace VirtoCommerce.NotificationsModule.Data.Model
     /// <summary>
     /// Entity is attachment of email
     /// </summary>
-    public class EmailAttachmentEntity : AuditableEntity, ICloneable
+    public class EmailAttachmentEntity : AuditableEntity
     {
         /// <summary>
         /// Name of Attachment
@@ -82,21 +82,5 @@ namespace VirtoCommerce.NotificationsModule.Data.Model
             attachment.Size = Size;
             attachment.Url = Url;
         }
-
-        #region ICloneable members
-
-        public virtual object Clone()
-        {
-            var result = MemberwiseClone() as EmailAttachmentEntity;
-
-            if (Notification != null)
-            {
-                result.Notification = Notification.Clone() as EmailNotificationEntity;
-            }
-
-            return result;
-        }
-
-        #endregion
     }
 }

@@ -109,30 +109,7 @@ namespace VirtoCommerce.NotificationsModule.Data.Model
             }
 
             base.Patch(notification);
-        }
-
-        #region ICloneable members
-
-        public override object Clone()
-        {
-            var result = base.Clone() as EmailNotificationEntity;
-
-            if (Recipients != null)
-            {
-                result.Recipients = new ObservableCollection<NotificationEmailRecipientEntity>(
-                    Recipients.Select(x => x.Clone() as NotificationEmailRecipientEntity));
-            }
-
-            if (Attachments != null)
-            {
-                result.Attachments = new ObservableCollection<EmailAttachmentEntity>(
-                    Attachments.Select(x => x.Clone() as EmailAttachmentEntity));
-            }
-
-            return result;
-        }
-
-        #endregion
+        }        
     }
 
     /// <summary>

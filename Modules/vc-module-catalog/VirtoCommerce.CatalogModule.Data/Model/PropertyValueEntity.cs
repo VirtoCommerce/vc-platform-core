@@ -9,7 +9,7 @@ using VirtoCommerce.Platform.Core.Common;
 
 namespace VirtoCommerce.CatalogModule.Data.Model
 {
-    public class PropertyValueEntity : AuditableEntity, IHasOuterId, ICloneable
+    public class PropertyValueEntity : AuditableEntity, IHasOuterId
     {
         [NotMapped]
         public string Alias { get; set; }
@@ -210,36 +210,5 @@ namespace VirtoCommerce.CatalogModule.Data.Model
                     throw new NotSupportedException();
             }
         }
-
-        #region ICloneable members
-
-        public virtual object Clone()
-        {
-            var result = MemberwiseClone() as PropertyValueEntity;
-
-            if (CatalogItem != null)
-            {
-                result.CatalogItem = CatalogItem.Clone() as ItemEntity;
-            }
-
-            if (Catalog != null)
-            {
-                result.Catalog = Catalog.Clone() as CatalogEntity;
-            }
-
-            if (Category != null)
-            {
-                result.Category = Category.Clone() as CategoryEntity;
-            }
-
-            if (DictionaryItem != null)
-            {
-                result.DictionaryItem = DictionaryItem.Clone() as PropertyDictionaryItemEntity;
-            }
-
-            return result;
-        }
-
-        #endregion
     }
 }

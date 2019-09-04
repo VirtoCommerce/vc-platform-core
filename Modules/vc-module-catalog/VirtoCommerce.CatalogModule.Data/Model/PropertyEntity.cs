@@ -7,7 +7,7 @@ using VirtoCommerce.Platform.Core.Common;
 
 namespace VirtoCommerce.CatalogModule.Data.Model
 {
-    public class PropertyEntity : AuditableEntity, IHasOuterId, ICloneable
+    public class PropertyEntity : AuditableEntity, IHasOuterId
     {
         [Required]
         [StringLength(128)]
@@ -187,50 +187,5 @@ namespace VirtoCommerce.CatalogModule.Data.Model
                 ValidationRules.Patch(target.ValidationRules, (sourceRule, targetRule) => sourceRule.Patch(targetRule));
             }
         }
-
-        #region ICloneable members
-
-        public virtual object Clone()
-        {
-            var result = MemberwiseClone() as PropertyEntity;
-
-            if (Catalog != null)
-            {
-                result.Catalog = Catalog.Clone() as CatalogEntity;
-            }
-
-            if (Category != null)
-            {
-                result.Category = Category.Clone() as CategoryEntity;
-            }
-
-            if (DictionaryItems != null)
-            {
-                result.DictionaryItems = new ObservableCollection<PropertyDictionaryItemEntity>(
-                    DictionaryItems.Select(x => x.Clone() as PropertyDictionaryItemEntity));
-            }
-
-            if (PropertyAttributes != null)
-            {
-                result.PropertyAttributes = new ObservableCollection<PropertyAttributeEntity>(
-                    PropertyAttributes.Select(x => x.Clone() as PropertyAttributeEntity));
-            }
-
-            if (DisplayNames != null)
-            {
-                result.DisplayNames = new ObservableCollection<PropertyDisplayNameEntity>(
-                    DisplayNames.Select(x => x.Clone() as PropertyDisplayNameEntity));
-            }
-
-            if (ValidationRules != null)
-            {
-                result.ValidationRules = new ObservableCollection<PropertyValidationRuleEntity>(
-                    ValidationRules.Select(x => x.Clone() as PropertyValidationRuleEntity));
-            }
-
-            return result;
-        }
-
-        #endregion
     }
 }

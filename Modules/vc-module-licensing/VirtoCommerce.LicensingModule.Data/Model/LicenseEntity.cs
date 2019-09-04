@@ -5,7 +5,7 @@ using VirtoCommerce.Platform.Core.Common;
 
 namespace VirtoCommerce.LicensingModule.Data.Model
 {
-    public class LicenseEntity : AuditableEntity, ICloneable
+    public class LicenseEntity : AuditableEntity
     {
         [Required]
         [StringLength(64)]
@@ -79,15 +79,5 @@ namespace VirtoCommerce.LicensingModule.Data.Model
             target.ExpirationDate = ExpirationDate;
             target.Type = Type;
         }
-
-        #region ICloneable members
-
-        public virtual object Clone()
-        {
-            var result = MemberwiseClone() as LicenseEntity;
-            return result;
-        }
-
-        #endregion
     }
 }

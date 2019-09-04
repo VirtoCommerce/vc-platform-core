@@ -10,7 +10,7 @@ using VirtoCommerce.Platform.Core.Common;
 
 namespace VirtoCommerce.MarketingModule.Data.Model
 {
-    public class DynamicContentPublishingGroupEntity : AuditableEntity, IHasOuterId, ICloneable
+    public class DynamicContentPublishingGroupEntity : AuditableEntity, IHasOuterId
     {
         [Required]
         [StringLength(128)]
@@ -157,28 +157,5 @@ namespace VirtoCommerce.MarketingModule.Data.Model
                 ContentPlaces.Patch(target.ContentPlaces, itemComparer, (sourceProperty, targetProperty) => { });
             }
         }
-
-        #region ICloneable members
-
-        public virtual object Clone()
-        {
-            var result = MemberwiseClone() as DynamicContentPublishingGroupEntity;
-
-            if (ContentItems != null)
-            {
-                result.ContentItems = new ObservableCollection<PublishingGroupContentItemEntity>(
-                    ContentItems.Select(x => x.Clone() as PublishingGroupContentItemEntity));
-            }
-
-            if (ContentPlaces != null)
-            {
-                result.ContentPlaces = new ObservableCollection<PublishingGroupContentPlaceEntity>(
-                    ContentPlaces.Select(x => x.Clone() as PublishingGroupContentPlaceEntity));
-            }
-
-            return result;
-        }
-
-        #endregion
     }
 }

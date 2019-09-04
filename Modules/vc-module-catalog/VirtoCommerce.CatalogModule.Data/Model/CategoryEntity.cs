@@ -10,7 +10,7 @@ using VirtoCommerce.Platform.Core.Common;
 
 namespace VirtoCommerce.CatalogModule.Data.Model
 {
-    public class CategoryEntity : AuditableEntity, IHasOuterId, ICloneable
+    public class CategoryEntity : AuditableEntity, IHasOuterId
     {
         [Required]
         [StringLength(64)]
@@ -261,62 +261,5 @@ namespace VirtoCommerce.CatalogModule.Data.Model
                 SeoInfos.Patch(target.SeoInfos, (sourceSeoInfo, targetSeoInfo) => sourceSeoInfo.Patch(targetSeoInfo));
             }
         }
-
-        #region ICloneable members
-
-        public virtual object Clone()
-        {
-            var result = MemberwiseClone() as CategoryEntity;
-
-            if (Catalog != null)
-            {
-                result.Catalog = Catalog.Clone() as CatalogEntity;
-            }
-
-            if (ParentCategory != null)
-            {
-                result.ParentCategory = ParentCategory.Clone() as CategoryEntity;
-            }
-
-            if (Images != null)
-            {
-                result.Images = new ObservableCollection<ImageEntity>(
-                    Images.Select(x => x.Clone() as ImageEntity));
-            }
-
-            if (CategoryPropertyValues != null)
-            {
-                result.CategoryPropertyValues = new ObservableCollection<PropertyValueEntity>(
-                    CategoryPropertyValues.Select(x => x.Clone() as PropertyValueEntity));
-            }
-
-            if (OutgoingLinks != null)
-            {
-                result.OutgoingLinks = new ObservableCollection<CategoryRelationEntity>(
-                    OutgoingLinks.Select(x => x.Clone() as CategoryRelationEntity));
-            }
-
-            if (IncomingLinks != null)
-            {
-                result.IncomingLinks = new ObservableCollection<CategoryRelationEntity>(
-                    IncomingLinks.Select(x => x.Clone() as CategoryRelationEntity));
-            }
-
-            if (Properties != null)
-            {
-                result.Properties = new ObservableCollection<PropertyEntity>(
-                    Properties.Select(x => x.Clone() as PropertyEntity));
-            }
-
-            if (SeoInfos != null)
-            {
-                result.SeoInfos = new ObservableCollection<SeoInfoEntity>(
-                    SeoInfos.Select(x => x.Clone() as SeoInfoEntity));
-            }
-
-            return result;
-        }
-
-        #endregion
     }
 }

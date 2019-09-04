@@ -1,8 +1,9 @@
+using System;
 using VirtoCommerce.Platform.Core.Common;
 
 namespace VirtoCommerce.MarketingModule.Core.Model
 {
-    public abstract class DynamicContentListEntry : AuditableEntity
+    public abstract class DynamicContentListEntry : AuditableEntity, ICloneable
     {
         /// <summary>
         /// Gets or sets the type. E.g. "folder", "content-item", "content-place"
@@ -29,5 +30,14 @@ namespace VirtoCommerce.MarketingModule.Core.Model
         public string Name { get; set; }
 
         public string Description { get; set; }
+
+        #region ICloneable members
+
+        public virtual object Clone()
+        {
+            return MemberwiseClone() as DynamicContentListEntry;
+        }
+
+        #endregion
     }
 }

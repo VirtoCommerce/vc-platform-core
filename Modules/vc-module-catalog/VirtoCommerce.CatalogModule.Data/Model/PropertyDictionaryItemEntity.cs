@@ -7,7 +7,7 @@ using VirtoCommerce.Platform.Core.Common;
 
 namespace VirtoCommerce.CatalogModule.Data.Model
 {
-    public class PropertyDictionaryItemEntity : Entity, ICloneable
+    public class PropertyDictionaryItemEntity : Entity
     {
         [StringLength(512)]
         [Required]
@@ -70,27 +70,5 @@ namespace VirtoCommerce.CatalogModule.Data.Model
                 DictionaryItemValues.Patch(target.DictionaryItemValues, comparer, (sourceDictItem, targetDictItem) => sourceDictItem.Patch(targetDictItem));
             }
         }
-
-        #region ICloneable members
-
-        public virtual object Clone()
-        {
-            var result = MemberwiseClone() as PropertyDictionaryItemEntity;
-
-            if (Property != null)
-            {
-                result.Property = Property.Clone() as PropertyEntity;
-            }
-
-            if (DictionaryItemValues != null)
-            {
-                result.DictionaryItemValues = new ObservableCollection<PropertyDictionaryValueEntity>(
-                    DictionaryItemValues.Select(x => x.Clone() as PropertyDictionaryValueEntity));
-            }
-
-            return result;
-        }
-
-        #endregion
     }
 }

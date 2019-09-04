@@ -6,7 +6,7 @@ using VirtoCommerce.Platform.Core.Common;
 
 namespace VirtoCommerce.MarketingModule.Core.Model.Promotions
 {
-    public class Promotion : AuditableEntity
+    public class Promotion : AuditableEntity, ICloneable
     {
         public Promotion()
         {
@@ -70,5 +70,14 @@ namespace VirtoCommerce.MarketingModule.Core.Model.Promotions
         {
             return Task.FromResult(Array.Empty<PromotionReward>());
         }
+
+        #region ICloneable members
+
+        public virtual object Clone()
+        {
+            return MemberwiseClone() as Promotion;
+        }
+
+        #endregion
     }
 }

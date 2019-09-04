@@ -8,7 +8,7 @@ namespace VirtoCommerce.NotificationsModule.Data.Model
     /// <summary>
     /// Entity is template of Notification
     /// </summary>
-    public abstract class NotificationTemplateEntity : AuditableEntity, ICloneable
+    public abstract class NotificationTemplateEntity : AuditableEntity
     {
         public abstract string Kind { get; }
         /// <summary>
@@ -61,22 +61,6 @@ namespace VirtoCommerce.NotificationsModule.Data.Model
         public virtual void Patch(NotificationTemplateEntity template)
         {
             template.LanguageCode = LanguageCode;
-        }
-
-        #region ICloneable members
-
-        public virtual object Clone()
-        {
-            var result = MemberwiseClone() as NotificationTemplateEntity;
-
-            if (Notification != null)
-            {
-                result.Notification = Notification.Clone() as NotificationEntity;
-            }
-
-            return result;
-        }
-
-        #endregion
+        }        
     }
 }

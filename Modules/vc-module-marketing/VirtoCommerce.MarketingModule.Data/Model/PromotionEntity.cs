@@ -12,7 +12,7 @@ using VirtoCommerce.Platform.Core.Common;
 
 namespace VirtoCommerce.MarketingModule.Data.Model
 {
-    public class PromotionEntity : AuditableEntity, IHasOuterId, ICloneable
+    public class PromotionEntity : AuditableEntity, IHasOuterId
     {
         [StringLength(128)]
         public string StoreId { get; set; }
@@ -62,7 +62,7 @@ namespace VirtoCommerce.MarketingModule.Data.Model
 
         #endregion
 
-        public virtual Promotion ToModel(DynamicPromotion promotion)
+        public virtual Promotion ToModel(Promotion promotion)
         {
             if (promotion == null)
             {
@@ -180,23 +180,6 @@ namespace VirtoCommerce.MarketingModule.Data.Model
                 var comparer = AnonymousComparer.Create((PromotionStoreEntity entity) => entity.StoreId);
                 Stores.Patch(target.Stores, comparer, (sourceEntity, targetEntity) => targetEntity.StoreId = sourceEntity.StoreId);
             }
-        }
-
-        #region ICloneable members
-
-        public virtual object Clone()
-        {
-            var result = MemberwiseClone() as PromotionEntity;
-
-            if (Stores != null)
-            {
-                result.Stores = new ObservableCollection<PromotionStoreEntity>(
-                    Stores.Select(x => x.Clone() as PromotionStoreEntity));
-            }
-
-            return result;
-        }
-
-        #endregion
+        }        
     }
 }

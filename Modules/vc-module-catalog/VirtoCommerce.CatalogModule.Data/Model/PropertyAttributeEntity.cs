@@ -5,7 +5,7 @@ using VirtoCommerce.Platform.Core.Common;
 
 namespace VirtoCommerce.CatalogModule.Data.Model
 {
-    public class PropertyAttributeEntity : AuditableEntity, ICloneable
+    public class PropertyAttributeEntity : AuditableEntity
     {
         [Required]
         [StringLength(128)]
@@ -67,21 +67,5 @@ namespace VirtoCommerce.CatalogModule.Data.Model
             target.PropertyAttributeName = PropertyAttributeName;
             target.PropertyAttributeValue = PropertyAttributeValue;
         }
-
-        #region ICloneable members
-
-        public virtual object Clone()
-        {
-            var result = MemberwiseClone() as PropertyAttributeEntity;
-
-            if (Property != null)
-            {
-                result.Property = Property.Clone() as PropertyEntity;
-            }
-
-            return result;
-        }
-
-        #endregion
     }
 }

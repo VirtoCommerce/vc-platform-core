@@ -8,7 +8,7 @@ namespace VirtoCommerce.CustomerModule.Data.Model
     /// <summary>
     /// Stores relations between contacts and organizations.
     /// </summary>
-    public class MemberRelationEntity : Entity, ICloneable
+    public class MemberRelationEntity : Entity
     {
         /// <summary>
         /// Gets or sets the ancestor sequence. A number to indicate whether the ancestor is the parent, 
@@ -48,27 +48,6 @@ namespace VirtoCommerce.CustomerModule.Data.Model
         [StringLength(128, ErrorMessage = "Only 128 characters allowed.")]
         public string DescendantId { get; set; }
         public virtual MemberEntity Descendant { get; set; }
-
-        #endregion
-
-        #region ICloneable members
-
-        public virtual object Clone()
-        {
-            var result = MemberwiseClone() as MemberRelationEntity;
-
-            if (Ancestor != null)
-            {
-                result.Ancestor = Ancestor.Clone() as MemberEntity;
-            }
-
-            if (Descendant != null)
-            {
-                result.Descendant = Descendant.Clone() as MemberEntity;
-            }
-
-            return result;
-        }
 
         #endregion
     }

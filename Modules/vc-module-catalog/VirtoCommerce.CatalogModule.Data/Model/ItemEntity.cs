@@ -9,7 +9,7 @@ using VirtoCommerce.Platform.Core.Common;
 
 namespace VirtoCommerce.CatalogModule.Data.Model
 {
-    public class ItemEntity : AuditableEntity, IHasOuterId, ICloneable
+    public class ItemEntity : AuditableEntity, IHasOuterId
     {
         [StringLength(1024)]
         [Required]
@@ -447,85 +447,5 @@ namespace VirtoCommerce.CatalogModule.Data.Model
             }
             #endregion
         }
-
-        #region ICloneable members
-
-        public virtual object Clone()
-        {
-            var result = MemberwiseClone() as ItemEntity;
-
-            if (Catalog != null)
-            {
-                result.Catalog = Catalog.Clone() as CatalogEntity;
-            }
-
-            if (Category != null)
-            {
-                result.Category = Category.Clone() as CategoryEntity;
-            }
-
-            if (Parent != null)
-            {
-                result.Parent = Parent.Clone() as ItemEntity;
-            }
-
-            if (CategoryLinks != null)
-            {
-                result.CategoryLinks = new ObservableCollection<CategoryItemRelationEntity>(
-                    CategoryLinks.Select(x => x.Clone() as CategoryItemRelationEntity));
-            }
-
-            if (Assets != null)
-            {
-                result.Assets = new ObservableCollection<AssetEntity>(
-                    Assets.Select(x => x.Clone() as AssetEntity));
-            }
-
-            if (Images != null)
-            {
-                result.Images = new ObservableCollection<ImageEntity>(
-                    Images.Select(x => x.Clone() as ImageEntity));
-            }
-
-            if (Associations != null)
-            {
-                result.Associations = new ObservableCollection<AssociationEntity>(
-                    Associations.Select(x => x.Clone() as AssociationEntity));
-            }
-
-            if (ReferencedAssociations != null)
-            {
-                result.ReferencedAssociations = new ObservableCollection<AssociationEntity>(
-                    ReferencedAssociations.Select(x => x.Clone() as AssociationEntity));
-            }
-
-            if (EditorialReviews != null)
-            {
-                result.EditorialReviews = new ObservableCollection<EditorialReviewEntity>(
-                    EditorialReviews.Select(x => x.Clone() as EditorialReviewEntity));
-            }
-
-            if (ItemPropertyValues != null)
-            {
-                result.ItemPropertyValues = new ObservableCollection<PropertyValueEntity>(
-                    ItemPropertyValues.Select(x => x.Clone() as PropertyValueEntity));
-            }
-
-            if (SeoInfos != null)
-            {
-                result.SeoInfos = new ObservableCollection<SeoInfoEntity>(
-                    SeoInfos.Select(x => x.Clone() as SeoInfoEntity));
-            }
-
-            if (Childrens != null)
-            {
-                result.Childrens = new ObservableCollection<ItemEntity>(
-                    Childrens.Select(x => x.Clone() as ItemEntity));
-            }
-
-            return result;
-        }
-
-        #endregion
     }
 }

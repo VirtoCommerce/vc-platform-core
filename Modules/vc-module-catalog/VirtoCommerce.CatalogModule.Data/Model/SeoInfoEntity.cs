@@ -5,7 +5,7 @@ using VirtoCommerce.Platform.Core.Common;
 
 namespace VirtoCommerce.CatalogModule.Data.Model
 {
-    public class SeoInfoEntity : AuditableEntity, ICloneable
+    public class SeoInfoEntity : AuditableEntity
     {
         [StringLength(255)]
         [Required]
@@ -97,26 +97,5 @@ namespace VirtoCommerce.CatalogModule.Data.Model
             target.MetaKeywords = MetaKeywords;
             target.StoreId = StoreId;
         }
-
-        #region ICloneable members
-
-        public virtual object Clone()
-        {
-            var result = MemberwiseClone() as SeoInfoEntity;
-
-            if (Item != null)
-            {
-                result.Item = Item.Clone() as ItemEntity;
-            }
-
-            if (Category != null)
-            {
-                result.Category = Category.Clone() as CategoryEntity;
-            }
-
-            return result;
-        }
-
-        #endregion
     }
 }

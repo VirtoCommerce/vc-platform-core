@@ -1,4 +1,6 @@
 using System.Collections.Generic;
+using System.Collections.ObjectModel;
+using System.Linq;
 using VirtoCommerce.NotificationsModule.Core.Extensions;
 using VirtoCommerce.NotificationsModule.Core.Services;
 
@@ -64,5 +66,22 @@ namespace VirtoCommerce.NotificationsModule.Core.Model
             From = from;
             To = to;
         }
+
+        #region ICloneable members
+
+        public override object Clone()
+        {
+            var result = base.Clone() as EmailNotification;
+
+            if (Attachments != null)
+            {
+                result.Attachments = new ObservableCollection<EmailAttachment>(
+                    Attachments.Select(x => x.Clone() as EmailAttachment));
+            }
+
+            return result;
+        }
+
+        #endregion
     }
 }

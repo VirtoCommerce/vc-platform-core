@@ -8,7 +8,7 @@ using VirtoCommerce.Platform.Core.DynamicProperties;
 
 namespace VirtoCommerce.MarketingModule.Data.Model
 {
-    public class DynamicContentItemEntity : AuditableEntity, ICloneable
+    public class DynamicContentItemEntity : AuditableEntity
     {
         [Required]
         [StringLength(128)]
@@ -117,27 +117,5 @@ namespace VirtoCommerce.MarketingModule.Data.Model
                 DynamicPropertyObjectValues.Patch(target.DynamicPropertyObjectValues, (sourceDynamicPropertyObjectValues, targetDynamicPropertyObjectValues) => sourceDynamicPropertyObjectValues.Patch(targetDynamicPropertyObjectValues));
             }
         }
-
-        #region ICloneable members
-
-        public virtual object Clone()
-        {
-            var result = MemberwiseClone() as DynamicContentItemEntity;
-
-            if (Folder != null)
-            {
-                result.Folder = Folder.Clone() as DynamicContentFolderEntity;
-            }
-
-            if (DynamicPropertyObjectValues != null)
-            {
-                result.DynamicPropertyObjectValues = new ObservableCollection<DynamicContentItemDynamicPropertyObjectValueEntity>(
-                    DynamicPropertyObjectValues.Select(x => x.Clone() as DynamicContentItemDynamicPropertyObjectValueEntity));
-            }
-
-            return result;
-        }
-
-        #endregion
     }
 }

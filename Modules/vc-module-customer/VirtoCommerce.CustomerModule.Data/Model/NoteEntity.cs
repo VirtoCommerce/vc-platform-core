@@ -5,7 +5,7 @@ using VirtoCommerce.Platform.Core.Common;
 
 namespace VirtoCommerce.CustomerModule.Data.Model
 {
-    public class NoteEntity : AuditableEntity, IHasOuterId, ICloneable
+    public class NoteEntity : AuditableEntity, IHasOuterId
     {
         [StringLength(128)]
         public string AuthorName { get; set; }
@@ -71,21 +71,5 @@ namespace VirtoCommerce.CustomerModule.Data.Model
             target.Body = Body;
             target.Title = Title;
         }
-
-        #region ICloneable members
-
-        public virtual object Clone()
-        {
-            var result = MemberwiseClone() as NoteEntity;
-
-            if (Member != null)
-            {
-                result.Member = Member.Clone() as MemberEntity;
-            }
-
-            return result;
-        }
-
-        #endregion
     }
 }

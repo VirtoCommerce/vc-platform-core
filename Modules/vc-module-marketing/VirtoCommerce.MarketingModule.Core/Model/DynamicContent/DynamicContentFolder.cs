@@ -1,5 +1,3 @@
-using VirtoCommerce.MarketingModule.Core.Model.DynamicContent;
-
 namespace VirtoCommerce.MarketingModule.Core.Model
 {
     public class DynamicContentFolder : DynamicContentListEntry
@@ -11,5 +9,21 @@ namespace VirtoCommerce.MarketingModule.Core.Model
         public DynamicContentFolder ParentFolder { get; set; }
 
         public override string ObjectType => nameof(DynamicContentFolder);
+
+        #region ICloneable members
+
+        public override object Clone()
+        {
+            var result = base.Clone() as DynamicContentFolder;
+
+            if (ParentFolder != null)
+            {
+                result.ParentFolder = ParentFolder.Clone() as DynamicContentFolder;
+            }
+
+            return result;
+        }
+
+        #endregion
     }
 }

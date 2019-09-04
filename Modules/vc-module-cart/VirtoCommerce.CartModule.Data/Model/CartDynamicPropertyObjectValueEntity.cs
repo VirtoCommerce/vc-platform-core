@@ -15,36 +15,5 @@ namespace VirtoCommerce.CartModule.Data.Model
 
         public string LineItemId { get; set; }
         public virtual LineItemEntity LineItem { get; set; }
-
-        #region ICloneable members
-
-        public override object Clone()
-        {
-            var result = base.Clone() as CartDynamicPropertyObjectValueEntity;
-
-            if (ShoppingCart != null)
-            {
-                result.ShoppingCart = ShoppingCart.Clone() as ShoppingCartEntity;
-            }
-
-            if (Shipment != null)
-            {
-                result.Shipment = Shipment.Clone() as ShipmentEntity;
-            }
-
-            if (Payment != null)
-            {
-                result.Payment = Payment.Clone() as PaymentEntity;
-            }
-
-            if (LineItem != null)
-            {
-                result.LineItem = LineItem.Clone() as LineItemEntity;
-            }
-
-            return result;
-        }
-
-        #endregion
     }
 }

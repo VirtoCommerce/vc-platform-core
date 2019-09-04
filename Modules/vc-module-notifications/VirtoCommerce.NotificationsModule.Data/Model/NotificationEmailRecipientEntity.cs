@@ -7,7 +7,7 @@ namespace VirtoCommerce.NotificationsModule.Data.Model
     /// <summary>
     /// Entity is recipient of notification
     /// </summary>
-    public class NotificationEmailRecipientEntity : Entity, ICloneable
+    public class NotificationEmailRecipientEntity : Entity
     {
         /// <summary>
         /// Recipient info (e-mail and etc.) of notification
@@ -41,22 +41,6 @@ namespace VirtoCommerce.NotificationsModule.Data.Model
         public virtual void Patch(NotificationEmailRecipientEntity emailAddress)
         {
             emailAddress.EmailAddress = EmailAddress;
-        }
-
-        #region ICloneable members
-
-        public virtual object Clone()
-        {
-            var result = MemberwiseClone() as NotificationEmailRecipientEntity;
-
-            if (Notification != null)
-            {
-                result.Notification = Notification.Clone() as EmailNotificationEntity;
-            }
-
-            return result;
-        }
-
-        #endregion
+        }       
     }
 }

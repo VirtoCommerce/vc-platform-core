@@ -4,7 +4,7 @@ using VirtoCommerce.Platform.Core.Common;
 
 namespace VirtoCommerce.CatalogModule.Data.Model
 {
-    public class CategoryRelationEntity : Entity, ICloneable
+    public class CategoryRelationEntity : Entity
     {
         #region Navigation Properties
 
@@ -45,31 +45,5 @@ namespace VirtoCommerce.CatalogModule.Data.Model
         {
             //Nothing todo. Because we not support change link
         }
-
-        #region ICloneable members
-
-        public virtual object Clone()
-        {
-            var result = MemberwiseClone() as CategoryRelationEntity;
-
-            if (SourceCategory != null)
-            {
-                result.SourceCategory = SourceCategory.Clone() as CategoryEntity;
-            }
-
-            if (TargetCatalog != null)
-            {
-                result.TargetCatalog = TargetCatalog.Clone() as CatalogEntity;
-            }
-
-            if (TargetCategory != null)
-            {
-                result.TargetCategory = TargetCategory.Clone() as CategoryEntity;
-            }
-
-            return result;
-        }
-
-        #endregion
     }
 }

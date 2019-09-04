@@ -5,7 +5,7 @@ using VirtoCommerce.Platform.Core.Common;
 
 namespace VirtoCommerce.CatalogModule.Data.Model
 {
-    public class AssociationEntity : AuditableEntity, IHasOuterId, ICloneable
+    public class AssociationEntity : AuditableEntity, IHasOuterId
     {
         /// <summary>
         /// Gets or sets the type of the association. 
@@ -128,31 +128,5 @@ namespace VirtoCommerce.CatalogModule.Data.Model
             target.AssociationType = AssociationType;
             target.Quantity = Quantity;
         }
-
-        #region ICloneable members
-
-        public virtual object Clone()
-        {
-            var result = MemberwiseClone() as AssociationEntity;
-
-            if (Item != null)
-            {
-                result.Item = Item.Clone() as ItemEntity;
-            }
-
-            if (AssociatedItem != null)
-            {
-                result.AssociatedItem = AssociatedItem.Clone() as ItemEntity;
-            }
-
-            if (AssociatedCategory != null)
-            {
-                result.AssociatedCategory = AssociatedCategory.Clone() as CategoryEntity;
-            }
-
-            return result;
-        }
-
-        #endregion
     }
 }

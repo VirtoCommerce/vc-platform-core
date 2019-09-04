@@ -12,7 +12,7 @@ using Address = VirtoCommerce.CartModule.Core.Model.Address;
 
 namespace VirtoCommerce.CartModule.Data.Model
 {
-    public class ShoppingCartEntity : AuditableEntity, ICloneable
+    public class ShoppingCartEntity : AuditableEntity
     {
         [StringLength(64)]
         public string Name { get; set; }
@@ -383,57 +383,5 @@ namespace VirtoCommerce.CartModule.Data.Model
                 DynamicPropertyObjectValues.Patch(target.DynamicPropertyObjectValues, (sourceDynamicPropertyObjectValues, targetDynamicPropertyObjectValues) => sourceDynamicPropertyObjectValues.Patch(targetDynamicPropertyObjectValues));
             }
         }
-
-        #region ICloneable members
-
-        public virtual object Clone()
-        {
-            var result = MemberwiseClone() as ShoppingCartEntity;
-
-            if (Discounts != null)
-            {
-                result.Discounts = new ObservableCollection<DiscountEntity>(Discounts.Select(x => x.Clone() as DiscountEntity));
-            }
-
-            if (Addresses != null)
-            {
-                result.Addresses = new ObservableCollection<AddressEntity>(Addresses.Select(x => x.Clone() as AddressEntity));
-            }
-
-            if (Items != null)
-            {
-                result.Items = new ObservableCollection<LineItemEntity>(Items.Select(x => x.Clone() as LineItemEntity));
-            }
-
-            if (Payments != null)
-            {
-                result.Payments = new ObservableCollection<PaymentEntity>(Payments.Select(x => x.Clone() as PaymentEntity));
-            }
-
-            if (Shipments != null)
-            {
-                result.Shipments = new ObservableCollection<ShipmentEntity>(Shipments.Select(x => x.Clone() as ShipmentEntity));
-            }
-
-            if (TaxDetails != null)
-            {
-                result.TaxDetails = new ObservableCollection<TaxDetailEntity>(TaxDetails.Select(x => x.Clone() as TaxDetailEntity));
-            }
-
-            if (Coupons != null)
-            {
-                result.Coupons = new ObservableCollection<CouponEntity>(Coupons.Select(x => x.Clone() as CouponEntity));
-            }
-
-            if (DynamicPropertyObjectValues != null)
-            {
-                result.DynamicPropertyObjectValues = new ObservableCollection<CartDynamicPropertyObjectValueEntity>(
-                    DynamicPropertyObjectValues.Select(x => x.Clone() as CartDynamicPropertyObjectValueEntity));
-            }
-
-            return result;
-        }
-
-        #endregion
     }
 }

@@ -10,7 +10,7 @@ namespace VirtoCommerce.NotificationsModule.Data.Model
     /// <summary>
     /// Entity is Notification
     /// </summary>
-    public abstract class NotificationEntity : AuditableEntity, ICloneable
+    public abstract class NotificationEntity : AuditableEntity
     {
         /// <summary>
         /// Tenant id that initiate sending
@@ -102,23 +102,6 @@ namespace VirtoCommerce.NotificationsModule.Data.Model
             {
                 Templates.Patch(notification.Templates, (sourceTemplate, templateEntity) => sourceTemplate.Patch(templateEntity));
             }
-        }
-
-        #region ICloneable members
-
-        public virtual object Clone()
-        {
-            var result = MemberwiseClone() as NotificationEntity;
-
-            if (Templates != null)
-            {
-                result.Templates = new ObservableCollection<NotificationTemplateEntity>(
-                    Templates.Select(x => x.Clone() as NotificationTemplateEntity));
-            }
-
-            return result;
-        }
-
-        #endregion
+        }        
     }
 }

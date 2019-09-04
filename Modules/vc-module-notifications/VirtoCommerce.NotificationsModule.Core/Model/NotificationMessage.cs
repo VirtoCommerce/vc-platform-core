@@ -6,7 +6,7 @@ namespace VirtoCommerce.NotificationsModule.Core.Model
     /// <summary>
     /// Base class for message of a notification with information about sending
     /// </summary>
-    public abstract class NotificationMessage : AuditableEntity, IHasLanguageCode
+    public abstract class NotificationMessage : AuditableEntity, IHasLanguageCode, ICloneable
     {
         public abstract string Kind { get; }
 
@@ -54,5 +54,18 @@ namespace VirtoCommerce.NotificationsModule.Core.Model
         /// Code of language
         /// </summary>
         public string LanguageCode { get; set; }
+
+        #region ICloneable members
+
+        public virtual object Clone()
+        {
+            var result = MemberwiseClone() as NotificationMessage;
+
+            result.TenantIdentity = TenantIdentity?.Clone() as TenantIdentity;
+
+            return result;
+        }
+
+        #endregion
     }
 }

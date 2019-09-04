@@ -5,7 +5,7 @@ using Address = VirtoCommerce.OrdersModule.Core.Model.Address;
 
 namespace VirtoCommerce.OrdersModule.Data.Model
 {
-    public class AddressEntity : Entity, ICloneable
+    public class AddressEntity : Entity
     {
         [StringLength(32)]
         public string AddressType { get; set; }
@@ -140,31 +140,5 @@ namespace VirtoCommerce.OrdersModule.Data.Model
             }
             return base.GetHashCode();
         }
-
-        #region ICloneable members
-
-        public virtual object Clone()
-        {
-            var result = MemberwiseClone() as AddressEntity;
-
-            if (CustomerOrder != null)
-            {
-                result.CustomerOrder = CustomerOrder.Clone() as CustomerOrderEntity;
-            }
-
-            if (Shipment != null)
-            {
-                result.Shipment = Shipment.Clone() as ShipmentEntity;
-            }
-
-            if (PaymentIn != null)
-            {
-                result.PaymentIn = PaymentIn.Clone() as PaymentInEntity;
-            }
-
-            return result;
-        }
-
-        #endregion
     }
 }

@@ -5,7 +5,7 @@ using VirtoCommerce.Platform.Core.Common;
 
 namespace VirtoCommerce.MarketingModule.Data.Model
 {
-    public class PromotionUsageEntity : AuditableEntity, ICloneable
+    public class PromotionUsageEntity : AuditableEntity
     {
         [StringLength(128)]
         public string ObjectId { get; set; }
@@ -80,18 +80,6 @@ namespace VirtoCommerce.MarketingModule.Data.Model
 
             target.ObjectId = ObjectId;
             target.ObjectType = ObjectType;
-        }
-
-        public virtual object Clone()
-        {
-            var result = MemberwiseClone() as PromotionUsageEntity;
-
-            if (Promotion != null)
-            {
-                result.Promotion = Promotion.Clone() as PromotionEntity;
-            }
-
-            return result;
         }
     }
 }

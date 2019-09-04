@@ -6,7 +6,7 @@ using VirtoCommerce.Platform.Core.Common;
 
 namespace VirtoCommerce.CartModule.Data.Model
 {
-    public class DiscountEntity : Entity, ICloneable
+    public class DiscountEntity : Entity
     {
         [StringLength(64)]
         public string PromotionId { get; set; }
@@ -83,36 +83,5 @@ namespace VirtoCommerce.CartModule.Data.Model
             target.DiscountAmount = DiscountAmount;
             target.DiscountAmountWithTax = DiscountAmountWithTax;
         }
-
-        #region ICloneable members
-
-        public virtual object Clone()
-        {
-            var result = MemberwiseClone() as DiscountEntity;
-
-            if (ShoppingCart != null)
-            {
-                result.ShoppingCart = ShoppingCart.Clone() as ShoppingCartEntity;
-            }
-
-            if (Shipment != null)
-            {
-                result.Shipment = Shipment.Clone() as ShipmentEntity;
-            }
-
-            if (LineItem != null)
-            {
-                result.LineItem = LineItem.Clone() as LineItemEntity;
-            }
-
-            if (Payment != null)
-            {
-                result.Payment = Payment.Clone() as PaymentEntity;
-            }
-
-            return result;
-        }
-
-        #endregion
     }
 }

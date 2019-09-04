@@ -7,7 +7,7 @@ using VirtoCommerce.Platform.Core.Common;
 
 namespace VirtoCommerce.ContentModule.Data.Model
 {
-    public class MenuLinkListEntity : AuditableEntity, IHasOuterId, ICloneable
+    public class MenuLinkListEntity : AuditableEntity, IHasOuterId
     {
         [Required]
         public string Name { get; set; }
@@ -78,22 +78,5 @@ namespace VirtoCommerce.ContentModule.Data.Model
 
             return this;
         }
-
-        #region ICloneable members
-
-        public virtual object Clone()
-        {
-            var result = MemberwiseClone() as MenuLinkListEntity;
-
-            if (MenuLinks != null)
-            {
-                result.MenuLinks = new ObservableCollection<MenuLinkEntity>(
-                    MenuLinks.Select(x => x.Clone() as MenuLinkEntity));
-            }
-
-            return result;
-        }
-
-        #endregion
     }
 }

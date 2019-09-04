@@ -5,7 +5,7 @@ using VirtoCommerce.Platform.Core.Common;
 
 namespace VirtoCommerce.CatalogModule.Data.Model
 {
-    public class EditorialReviewEntity : AuditableEntity, ICloneable
+    public class EditorialReviewEntity : AuditableEntity
     {
         public int Priority { get; set; }
 
@@ -73,21 +73,5 @@ namespace VirtoCommerce.CatalogModule.Data.Model
             target.Locale = Locale;
             target.Source = Source;
         }
-
-        #region ICloneable members
-
-        public virtual object Clone()
-        {
-            var result = MemberwiseClone() as EditorialReviewEntity;
-
-            if (CatalogItem != null)
-            {
-                result.CatalogItem = CatalogItem.Clone() as ItemEntity;
-            }
-
-            return result;
-        }
-
-        #endregion
     }
 }

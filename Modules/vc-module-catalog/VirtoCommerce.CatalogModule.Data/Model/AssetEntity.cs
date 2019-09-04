@@ -5,7 +5,7 @@ using VirtoCommerce.Platform.Core.Common;
 
 namespace VirtoCommerce.CatalogModule.Data.Model
 {
-    public class AssetEntity : AuditableEntity, IHasOuterId, ICloneable
+    public class AssetEntity : AuditableEntity, IHasOuterId
     {
         [StringLength(2083)]
         [Required]
@@ -84,21 +84,5 @@ namespace VirtoCommerce.CatalogModule.Data.Model
             target.Url = Url;
             target.Size = Size;
         }
-
-        #region ICloneable members
-
-        public virtual object Clone()
-        {
-            var result = MemberwiseClone() as AssetEntity;
-
-            if (CatalogItem != null)
-            {
-                result.CatalogItem = CatalogItem.Clone() as ItemEntity;
-            }
-
-            return result;
-        }
-
-        #endregion
     }
 }

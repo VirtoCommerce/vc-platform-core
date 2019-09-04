@@ -3,7 +3,7 @@ using VirtoCommerce.Platform.Core.Common;
 
 namespace VirtoCommerce.MarketingModule.Data.Model
 {
-    public class PublishingGroupContentPlaceEntity : AuditableEntity, ICloneable
+    public class PublishingGroupContentPlaceEntity : AuditableEntity
     {
         #region Navigation Properties
 
@@ -12,27 +12,6 @@ namespace VirtoCommerce.MarketingModule.Data.Model
 
         public string DynamicContentPlaceId { get; set; }
         public virtual DynamicContentPlaceEntity ContentPlace { get; set; }
-
-        #endregion
-
-        #region ICloneable members
-
-        public virtual object Clone()
-        {
-            var result = MemberwiseClone() as PublishingGroupContentPlaceEntity;
-
-            if (PublishingGroup != null)
-            {
-                result.PublishingGroup = PublishingGroup.Clone() as DynamicContentPublishingGroupEntity;
-            }
-
-            if (ContentPlace != null)
-            {
-                result.ContentPlace = ContentPlace.Clone() as DynamicContentPlaceEntity;
-            }
-
-            return result;
-        }
 
         #endregion
     }

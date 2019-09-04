@@ -1,13 +1,12 @@
 using System;
 using System.Collections.ObjectModel;
 using System.ComponentModel.DataAnnotations;
-using System.Linq;
 using VirtoCommerce.MarketingModule.Core.Model;
 using VirtoCommerce.Platform.Core.Common;
 
 namespace VirtoCommerce.MarketingModule.Data.Model
 {
-    public class DynamicContentFolderEntity : AuditableEntity, ICloneable
+    public class DynamicContentFolderEntity : AuditableEntity
     {
         [Required]
         [StringLength(128)]
@@ -81,34 +80,6 @@ namespace VirtoCommerce.MarketingModule.Data.Model
 
             target.Name = Name;
             target.Description = Description;
-        }
-
-        #region ICloneable members
-
-        public virtual object Clone()
-        {
-            var result = MemberwiseClone() as DynamicContentFolderEntity;
-
-            if (ParentFolder != null)
-            {
-                result.ParentFolder = ParentFolder.Clone() as DynamicContentFolderEntity;
-            }
-
-            if (ContentItems != null)
-            {
-                result.ContentItems = new ObservableCollection<DynamicContentItemEntity>(
-                    ContentItems.Select(x => x.Clone() as DynamicContentItemEntity));
-            }
-
-            if (ContentPlaces != null)
-            {
-                result.ContentPlaces = new ObservableCollection<DynamicContentPlaceEntity>(
-                    ContentPlaces.Select(x => x.Clone() as DynamicContentPlaceEntity));
-            }
-
-            return result;
-        }
-
-        #endregion
+        }        
     }
 }

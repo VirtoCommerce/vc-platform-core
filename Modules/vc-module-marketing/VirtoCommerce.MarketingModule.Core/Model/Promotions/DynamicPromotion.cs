@@ -10,7 +10,7 @@ using VirtoCommerce.Platform.Core.Common;
 
 namespace VirtoCommerce.MarketingModule.Core.Promotions
 {
-    public class DynamicPromotion : Promotion
+    public class DynamicPromotion : Promotion, ICloneable
     {
         public DynamicPromotion()
         {
@@ -125,5 +125,21 @@ namespace VirtoCommerce.MarketingModule.Core.Promotions
             }
             return result;
         }
+
+        #region ICloneable members
+
+        public override object Clone()
+        {
+            var result = base.Clone() as DynamicPromotion;
+
+            if (DynamicExpression != null)
+            {
+                result.DynamicExpression = DynamicExpression.Clone() as PromotionConditionAndRewardTree;
+            }
+            
+            return result;
+        }
+
+        #endregion
     }
 }

@@ -4,7 +4,7 @@ using VirtoCommerce.Platform.Core.Events;
 
 namespace VirtoCommerce.Platform.Core.ChangeLog
 {
-    public class OperationLog : AuditableEntity
+    public class OperationLog : AuditableEntity, ICloneable
     {
         public string ObjectType { get; set; }
 
@@ -27,5 +27,14 @@ namespace VirtoCommerce.Platform.Core.ChangeLog
 
             return this;
         }
+
+        #region ICloneable members
+
+        public virtual object Clone()
+        {
+            return MemberwiseClone() as OperationLog;
+        }
+
+        #endregion
     }
 }

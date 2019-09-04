@@ -11,7 +11,7 @@ using VirtoCommerce.Platform.Core.DynamicProperties;
 
 namespace VirtoCommerce.CartModule.Data.Model
 {
-    public class LineItemEntity : AuditableEntity, ICloneable
+    public class LineItemEntity : AuditableEntity
     {
         [Required]
         [StringLength(3)]
@@ -338,37 +338,5 @@ namespace VirtoCommerce.CartModule.Data.Model
                 DynamicPropertyObjectValues.Patch(target.DynamicPropertyObjectValues, (sourceDynamicPropertyObjectValues, targetDynamicPropertyObjectValues) => sourceDynamicPropertyObjectValues.Patch(targetDynamicPropertyObjectValues));
             }
         }
-
-        #region ICloneable members
-
-        public virtual object Clone()
-        {
-            var result = MemberwiseClone() as LineItemEntity;
-
-            if (ShoppingCart != null)
-            {
-                result.ShoppingCart = ShoppingCart.Clone() as ShoppingCartEntity;
-            }
-
-            if (TaxDetails != null)
-            {
-                result.TaxDetails = new ObservableCollection<TaxDetailEntity>(TaxDetails.Select(x => x.Clone() as TaxDetailEntity));
-            }
-
-            if (Discounts != null)
-            {
-                result.Discounts = new ObservableCollection<DiscountEntity>(Discounts.Select(x => x.Clone() as DiscountEntity));
-            }
-
-            if (DynamicPropertyObjectValues != null)
-            {
-                result.DynamicPropertyObjectValues = new ObservableCollection<CartDynamicPropertyObjectValueEntity>(
-                    DynamicPropertyObjectValues.Select(x => x.Clone() as CartDynamicPropertyObjectValueEntity));
-            }
-
-            return result;
-        }
-
-        #endregion
     }
 }

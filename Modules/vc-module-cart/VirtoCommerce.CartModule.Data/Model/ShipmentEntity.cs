@@ -12,7 +12,7 @@ using Address = VirtoCommerce.CartModule.Core.Model.Address;
 
 namespace VirtoCommerce.CartModule.Data.Model
 {
-    public class ShipmentEntity : AuditableEntity, ICloneable
+    public class ShipmentEntity : AuditableEntity
     {
         [StringLength(64)]
         public string ShipmentMethodCode { get; set; }
@@ -283,51 +283,5 @@ namespace VirtoCommerce.CartModule.Data.Model
                 DynamicPropertyObjectValues.Patch(target.DynamicPropertyObjectValues, (sourceDynamicPropertyObjectValues, targetDynamicPropertyObjectValues) => sourceDynamicPropertyObjectValues.Patch(targetDynamicPropertyObjectValues));
             }
         }
-
-        #region ICloneable members
-
-        public virtual object Clone()
-        {
-            var result = MemberwiseClone() as ShipmentEntity;
-
-            if (ShoppingCart != null)
-            {
-                result.ShoppingCart = ShoppingCart.Clone() as ShoppingCartEntity;
-            }
-
-            if (Items != null)
-            {
-                result.Items = new ObservableCollection<ShipmentItemEntity>(
-                    Items.Select(x => x.Clone() as ShipmentItemEntity));
-            }
-
-            if (Discounts != null)
-            {
-                result.Discounts = new ObservableCollection<DiscountEntity>(
-                    Discounts.Select(x => x.Clone() as DiscountEntity));
-            }
-
-            if (Addresses != null)
-            {
-                result.Addresses = new ObservableCollection<AddressEntity>(
-                    Addresses.Select(x => x.Clone() as AddressEntity));
-            }
-
-            if (TaxDetails != null)
-            {
-                result.TaxDetails = new ObservableCollection<TaxDetailEntity>(
-                    TaxDetails.Select(x => x.Clone() as TaxDetailEntity));
-            }
-
-            if (DynamicPropertyObjectValues != null)
-            {
-                result.DynamicPropertyObjectValues = new ObservableCollection<CartDynamicPropertyObjectValueEntity>(
-                    DynamicPropertyObjectValues.Select(x => x.Clone() as CartDynamicPropertyObjectValueEntity));
-            }
-
-            return result;
-        }
-
-        #endregion
     }
 }

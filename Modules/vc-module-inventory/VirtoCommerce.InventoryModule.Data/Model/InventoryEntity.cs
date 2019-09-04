@@ -5,7 +5,7 @@ using VirtoCommerce.Platform.Core.Common;
 
 namespace VirtoCommerce.InventoryModule.Data.Model
 {
-    public class InventoryEntity : AuditableEntity, IHasOuterId, ICloneable
+    public class InventoryEntity : AuditableEntity, IHasOuterId
     {
         [Required]
         public decimal InStockQuantity { get; set; }
@@ -123,21 +123,5 @@ namespace VirtoCommerce.InventoryModule.Data.Model
             target.ReservedQuantity = ReservedQuantity;
             target.Status = Status;
         }
-
-        #region ICloneable members
-
-        public virtual object Clone()
-        {
-            var result = MemberwiseClone() as InventoryEntity;
-
-            if (FulfillmentCenter != null)
-            {
-                result.FulfillmentCenter = FulfillmentCenter.Clone() as FulfillmentCenterEntity;
-            }
-
-            return result;
-        }
-
-        #endregion
     }
 }
