@@ -147,7 +147,7 @@ namespace VirtoCommerce.Platform.Web
                 options.MinimumSameSitePolicy = SameSiteMode.None;
             });
 
-            services.AddAuthentication().AddCookie();
+            var authBuilder = services.AddAuthentication().AddCookie();
             services.AddSecurityServices(options =>
             {
                 options.NonEditableUsers = new[] { "admin" };
@@ -177,8 +177,7 @@ namespace VirtoCommerce.Platform.Web
                 if (options.Enabled)
                 {
                     //TODO: Need to check how this influence to OpennIddict Reference tokens activated by this line below  AddValidation(options => options.UseReferenceTokens());
-                    var auth = services.AddAuthentication().AddOAuthValidation();
-                    auth.AddOpenIdConnect(options.AuthenticationType, options.AuthenticationCaption,
+                    authBuilder.AddOpenIdConnect(options.AuthenticationType, options.AuthenticationCaption,
                         openIdConnectOptions =>
                         {
                             openIdConnectOptions.ClientId = options.ApplicationId;
