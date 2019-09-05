@@ -13,6 +13,7 @@ using Microsoft.Extensions.Options;
 using VirtoCommerce.CatalogModule.Core;
 using VirtoCommerce.CatalogModule.Core.Events;
 using VirtoCommerce.CatalogModule.Core.Model;
+using VirtoCommerce.CatalogModule.Core.Model.Export;
 using VirtoCommerce.CatalogModule.Core.Model.OutlinePart;
 using VirtoCommerce.CatalogModule.Core.Search;
 using VirtoCommerce.CatalogModule.Core.Services;
@@ -82,8 +83,8 @@ namespace VirtoCommerce.CatalogModule.Web
 
             serviceCollection.AddTransient<IPropertyService, PropertyService>();
             serviceCollection.AddTransient<IPropertySearchService, PropertySearchService>();
-            serviceCollection.AddTransient<IProperyDictionaryItemService, PropertyDictionaryItemService>();
-            serviceCollection.AddTransient<IProperyDictionaryItemSearchService, ProperyDictionaryItemSearchService>();
+            serviceCollection.AddTransient<IPropertyDictionaryItemService, PropertyDictionaryItemService>();
+            serviceCollection.AddTransient<IPropertyDictionaryItemSearchService, PropertyDictionaryItemSearchService>();
             serviceCollection.AddTransient<IProductAssociationSearchService, ProductAssociationSearchService>();
             serviceCollection.AddTransient<IOutlineService, OutlineService>();
             serviceCollection.AddTransient<ISkuGenerator, DefaultSkuGenerator>();
@@ -142,6 +143,10 @@ namespace VirtoCommerce.CatalogModule.Web
 
             serviceCollection.AddTransient<ProductExportPagedDataSourceFactory>();
             serviceCollection.AddTransient<CatalogFullExportPagedDataSourceFactory>();
+            serviceCollection.AddTransient<CatalogExportPagedDataSourceFactory>();
+            serviceCollection.AddTransient<CategoryExportPagedDataSourceFactory>();
+            serviceCollection.AddTransient<PropertyExportPagedDataSourceFactory>();
+            serviceCollection.AddTransient<PropertyDictionaryItemExportPagedDataSourceFactory>();
 
             #region Add Authorization Policy for GenericExport
 
@@ -227,8 +232,7 @@ namespace VirtoCommerce.CatalogModule.Web
             registrar.RegisterType(
                 ExportedTypeDefinitionBuilder.Build<ExportableCatalogFull, CatalogFullExportDataQuery>()
                     .WithDataSourceFactory(appBuilder.ApplicationServices.GetService<CatalogFullExportPagedDataSourceFactory>())
-                    .WithMetadata(new ExportedTypeMetadata { PropertyInfos = new ExportedTypePropertyInfo[] { } })
-                    );
+                    .WithMetadata(new ExportedTypeMetadata { PropertyInfos = new ExportedTypePropertyInfo[] { } }));
 
             #endregion
         }

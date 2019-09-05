@@ -12,11 +12,11 @@ namespace VirtoCommerce.CatalogModule.Web.Controllers.Api
     [Route("api/catalog/dictionaryitems")]
     public class CatalogModulePropertyDictionaryItemsController : Controller
     {
-        private readonly IProperyDictionaryItemSearchService _propertyDictionarySearchService;
-        private readonly IProperyDictionaryItemService _propertyDictionaryService;
+        private readonly IPropertyDictionaryItemSearchService _propertyDictionarySearchService;
+        private readonly IPropertyDictionaryItemService _propertyDictionaryService;
 
-        public CatalogModulePropertyDictionaryItemsController(IProperyDictionaryItemSearchService propertyDictionarySearchService,
-                                                             IProperyDictionaryItemService propertyDictionaryService)
+        public CatalogModulePropertyDictionaryItemsController(IPropertyDictionaryItemSearchService propertyDictionarySearchService,
+                                                             IPropertyDictionaryItemService propertyDictionaryService)
         {
             _propertyDictionarySearchService = propertyDictionarySearchService;
             _propertyDictionaryService = propertyDictionaryService;

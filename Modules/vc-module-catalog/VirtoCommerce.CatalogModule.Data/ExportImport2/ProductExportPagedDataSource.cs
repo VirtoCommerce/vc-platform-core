@@ -2,6 +2,7 @@ using System;
 using System.Collections.Generic;
 using System.Linq;
 using VirtoCommerce.CatalogModule.Core.Model;
+using VirtoCommerce.CatalogModule.Core.Model.Export;
 using VirtoCommerce.CatalogModule.Core.Model.Search;
 using VirtoCommerce.CatalogModule.Core.Search;
 using VirtoCommerce.CatalogModule.Core.Services;
@@ -31,7 +32,7 @@ namespace VirtoCommerce.CatalogModule.Data.ExportImport
             CatalogProduct[] result;
             int totalCount;
 
-            var responseGroup = BuildResponseGroup();
+            var responseGroup = !string.IsNullOrEmpty(searchCriteria.ResponseGroup) ? searchCriteria.ResponseGroup : BuildResponseGroup();
 
             if (searchCriteria.ObjectIds.Any(x => !string.IsNullOrWhiteSpace(x)))
             {
@@ -81,6 +82,7 @@ namespace VirtoCommerce.CatalogModule.Data.ExportImport
             result.CatalogIds = exportDataQuery.CatalogIds;
             result.CategoryIds = exportDataQuery.CategoryIds;
             result.SearchInChildren = exportDataQuery.SearchInChildren;
+            result.ResponseGroup = exportDataQuery.ResponseGroup;
 
             return result;
         }
@@ -99,7 +101,7 @@ namespace VirtoCommerce.CatalogModule.Data.ExportImport
             }
         }
 
-        private ItemResponseGroup BuildResponseGroup()
+        private string BuildResponseGroup()
         {
             var result = ItemResponseGroup.ItemInfo;
 
@@ -148,7 +150,7 @@ namespace VirtoCommerce.CatalogModule.Data.ExportImport
                 result |= ItemResponseGroup.ItemEditorialReviews;
             }
 
-            return result;
+            return result.ToString();
         }
     }
 }

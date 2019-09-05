@@ -1,7 +1,7 @@
 using System;
 using VirtoCommerce.ExportModule.Core.Model;
 
-namespace VirtoCommerce.CatalogModule.Data.ExportImport
+namespace VirtoCommerce.CatalogModule.Core.Model.Export
 {
     public class TabularProduct : IExportable
     {

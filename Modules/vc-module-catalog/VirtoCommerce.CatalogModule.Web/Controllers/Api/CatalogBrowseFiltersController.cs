@@ -30,13 +30,13 @@ namespace VirtoCommerce.CatalogModule.Web.Controllers.Api
         private readonly IPropertyService _propertyService;
         private readonly IPropertySearchService _propertySearchService;
         private readonly IBrowseFilterService _browseFilterService;
-        private readonly IProperyDictionaryItemSearchService _propDictItemsSearchService;
+        private readonly IPropertyDictionaryItemSearchService _propDictItemsSearchService;
 
         public CatalogBrowseFiltersController(
             IStoreService storeService
             , IPropertyService propertyService
             , IBrowseFilterService browseFilterService
-            , IProperyDictionaryItemSearchService propDictItemsSearchService
+            , IPropertyDictionaryItemSearchService propDictItemsSearchService
             , IPropertySearchService propertySearchService)
         {
             _storeService = storeService;

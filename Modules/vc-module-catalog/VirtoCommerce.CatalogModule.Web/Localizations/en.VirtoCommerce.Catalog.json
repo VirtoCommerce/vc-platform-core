@@ -800,17 +800,17 @@
     },
     "export": {
         "types": {
-            "VirtoCommerce.CatalogModule.Data.ExportImport.ExportableProduct": {
+            "VirtoCommerce.CatalogModule.Core.Model.Export.ExportableProduct": {
                 "name": "Products",
                 "description": "Catalog products data with related objects. Supports JSON and CSV"
             },
-            "VirtoCommerce.CatalogModule.Data.ExportImport.ExportableCatalogFull": {
+            "VirtoCommerce.CatalogModule.Core.Model.Export.ExportableCatalogFull": {
                 "name": "Catalog",
                 "description": "Catalog data with related objects. Supports JSON"
             }
         },
         "groups": {
-            "VirtoCommerce.CatalogModule.Data.ExportImport": {
+            "VirtoCommerce.CatalogModule.Core.Model.Export": {
                 "name": "Catalog",
                 "description": "Catalogs, Categories, Products"
             }

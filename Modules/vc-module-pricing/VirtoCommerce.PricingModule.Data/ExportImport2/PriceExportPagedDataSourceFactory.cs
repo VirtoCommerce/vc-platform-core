@@ -19,7 +19,7 @@ namespace VirtoCommerce.PricingModule.Data.ExportImport
             _itemService = itemService;
         }
 
-        public IPagedDataSource Create(ExportDataQuery dataQuery)
+        public virtual IPagedDataSource Create(ExportDataQuery dataQuery)
         {
             var priceExportDataQuery = dataQuery as PriceExportDataQuery ?? throw new InvalidCastException($"Cannot cast dataQuery to type {typeof(PriceExportDataQuery)}");
 
