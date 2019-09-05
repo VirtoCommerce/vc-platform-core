@@ -1,5 +1,7 @@
 using System;
 using System.Collections.Generic;
+using System.Collections.ObjectModel;
+using System.Linq;
 using VirtoCommerce.CoreModule.Core.Common;
 using VirtoCommerce.CoreModule.Core.Tax;
 using VirtoCommerce.PaymentModule.Core.Model;
@@ -8,7 +10,7 @@ using VirtoCommerce.Platform.Core.Common;
 
 namespace VirtoCommerce.OrdersModule.Core.Model
 {
-    public class PaymentIn : OrderOperation, IHasTaxDetalization, ITaxable, IHasDiscounts
+    public class PaymentIn : OrderOperation, IHasTaxDetalization, ITaxable, IHasDiscounts, ICloneable
     {
         public string Purpose { get; set; }
         /// <summary>
@@ -100,5 +102,35 @@ namespace VirtoCommerce.OrdersModule.Core.Model
             }
 
         }
+
+        #region ICloneable members
+
+        public override object Clone()
+        {
+            var result = base.Clone() as PaymentIn;
+
+            result.PaymentMethod = PaymentMethod?.Clone() as PaymentMethod;
+            result.BillingAddress = BillingAddress?.Clone() as Address;
+            result.ProcessPaymentResult = ProcessPaymentResult?.Clone() as ProcessPaymentRequestResult;
+
+            if (Transactions != null)
+            {
+                result.Transactions = new ObservableCollection<PaymentGatewayTransaction>(Transactions.Select(x => x.Clone() as PaymentGatewayTransaction));
+            }
+
+            if (Discounts != null)
+            {
+                result.Discounts = new ObservableCollection<Discount>(Discounts.Select(x => x.Clone() as Discount));
+            }
+
+            if (TaxDetails != null)
+            {
+                result.TaxDetails = new ObservableCollection<TaxDetail>(TaxDetails.Select(x => x.Clone() as TaxDetail));
+            }
+
+            return result;
+        }
+
+        #endregion
     }
 }

@@ -12,7 +12,7 @@ using VirtoCommerce.Platform.Core.DynamicProperties;
 
 namespace VirtoCommerce.OrdersModule.Data.Model
 {
-    public class LineItemEntity : AuditableEntity, IHasOuterId, ICloneable
+    public class LineItemEntity : AuditableEntity, IHasOuterId
     {
         [StringLength(128)]
         public string PriceId { get; set; }
@@ -295,45 +295,5 @@ namespace VirtoCommerce.OrdersModule.Data.Model
             yield return Price;
             yield return DiscountAmount;
         }
-
-        #region ICloneable members
-
-        public virtual object Clone()
-        {
-            var result = MemberwiseClone() as LineItemEntity;
-
-            if (CustomerOrder != null)
-            {
-                result.CustomerOrder = CustomerOrder.Clone() as CustomerOrderEntity;
-            }
-
-            if (Discounts != null)
-            {
-                result.Discounts = new ObservableCollection<DiscountEntity>(
-                    Discounts.Select(x => x.Clone() as DiscountEntity));
-            }
-
-            if (TaxDetails != null)
-            {
-                result.TaxDetails = new ObservableCollection<TaxDetailEntity>(
-                    TaxDetails.Select(x => x.Clone() as TaxDetailEntity));
-            }
-
-            if (DynamicPropertyObjectValues != null)
-            {
-                result.DynamicPropertyObjectValues = new ObservableCollection<OrderDynamicPropertyObjectValueEntity>(
-                    DynamicPropertyObjectValues.Select(x => x.Clone() as OrderDynamicPropertyObjectValueEntity));
-            }
-
-            if (ShipmentItems != null)
-            {
-                result.ShipmentItems = new ObservableCollection<ShipmentItemEntity>(
-                    ShipmentItems.Select(x => x.Clone() as ShipmentItemEntity));
-            }
-
-            return result;
-        }
-
-        #endregion
     }
 }

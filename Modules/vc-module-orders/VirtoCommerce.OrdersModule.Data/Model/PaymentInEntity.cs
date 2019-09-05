@@ -302,57 +302,6 @@ namespace VirtoCommerce.OrdersModule.Data.Model
             yield return Price;
             yield return DiscountAmount;
             yield return Sum;
-        }
-
-        #region ICloneable members
-
-        public override object Clone()
-        {
-            var result = base.Clone() as PaymentInEntity;
-
-            if (CustomerOrder != null)
-            {
-                result.CustomerOrder = CustomerOrder.Clone() as CustomerOrderEntity;
-            }
-
-            if (Shipment != null)
-            {
-                result.Shipment = Shipment.Clone() as ShipmentEntity;
-            }
-
-            if (Addresses != null)
-            {
-                result.Addresses = new ObservableCollection<AddressEntity>(
-                    Addresses.Select(x => x.Clone() as AddressEntity));
-            }
-
-            if (Transactions != null)
-            {
-                result.Transactions = new ObservableCollection<PaymentGatewayTransactionEntity>(
-                    Transactions.Select(x => x.Clone() as PaymentGatewayTransactionEntity));
-            }
-
-            if (Discounts != null)
-            {
-                result.Discounts = new ObservableCollection<DiscountEntity>(
-                    Discounts.Select(x => x.Clone() as DiscountEntity));
-            }
-
-            if (TaxDetails != null)
-            {
-                result.TaxDetails = new ObservableCollection<TaxDetailEntity>(
-                    TaxDetails.Select(x => x.Clone() as TaxDetailEntity));
-            }
-
-            if (DynamicPropertyObjectValues != null)
-            {
-                result.DynamicPropertyObjectValues = new ObservableCollection<OrderDynamicPropertyObjectValueEntity>(
-                    DynamicPropertyObjectValues.Select(x => x.Clone() as OrderDynamicPropertyObjectValueEntity));
-            }
-
-            return result;
-        }
-
-        #endregion
+        }        
     }
 }

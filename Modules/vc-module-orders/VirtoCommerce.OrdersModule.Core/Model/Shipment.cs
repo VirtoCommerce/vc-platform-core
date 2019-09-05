@@ -1,4 +1,7 @@
+using System;
 using System.Collections.Generic;
+using System.Collections.ObjectModel;
+using System.Linq;
 using VirtoCommerce.CoreModule.Core.Common;
 using VirtoCommerce.CoreModule.Core.Tax;
 using VirtoCommerce.Platform.Core.Common;
@@ -8,7 +11,7 @@ using VirtoCommerce.ShippingModule.Core.Model;
 namespace VirtoCommerce.OrdersModule.Core.Model
 {
     [SwaggerSchemaId("OrderShipment")]
-    public class Shipment : OrderOperation, IHasTaxDetalization, ISupportCancellation, ITaxable, IHasDiscounts
+    public class Shipment : OrderOperation, IHasTaxDetalization, ISupportCancellation, ITaxable, IHasDiscounts, ICloneable
     {
         public string OrganizationId { get; set; }
         public string OrganizationName { get; set; }
@@ -118,5 +121,45 @@ namespace VirtoCommerce.OrdersModule.Core.Model
             }
 
         }
+
+        #region ICloneable members
+
+        public override object Clone()
+        {
+            var result = base.Clone() as Shipment;
+
+            result.DeliveryAddress = DeliveryAddress?.Clone() as Address;
+            result.ShippingMethod = ShippingMethod?.Clone() as ShippingMethod;
+            result.CustomerOrder = CustomerOrder?.Clone() as CustomerOrder;
+
+            if (Items != null)
+            {
+                result.Items = new ObservableCollection<ShipmentItem>(Items.Select(x => x.Clone() as ShipmentItem));
+            }
+
+            if (Packages != null)
+            {
+                result.Packages = new ObservableCollection<ShipmentPackage>(Packages.Select(x => x.Clone() as ShipmentPackage));
+            }
+
+            if (InPayments != null)
+            {
+                result.InPayments = new ObservableCollection<PaymentIn>(InPayments.Select(x => x.Clone() as PaymentIn));
+            }
+
+            if (Discounts != null)
+            {
+                result.Discounts = new ObservableCollection<Discount>(Discounts.Select(x => x.Clone() as Discount));
+            }
+
+            if (TaxDetails != null)
+            {
+                result.TaxDetails = new ObservableCollection<TaxDetail>(TaxDetails.Select(x => x.Clone() as TaxDetail));
+            }
+
+            return result;
+        }
+
+        #endregion
     }
 }

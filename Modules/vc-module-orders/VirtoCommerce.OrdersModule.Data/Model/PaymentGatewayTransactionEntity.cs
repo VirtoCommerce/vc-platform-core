@@ -6,7 +6,7 @@ using VirtoCommerce.Platform.Core.Common;
 
 namespace VirtoCommerce.OrdersModule.Data.Model
 {
-    public class PaymentGatewayTransactionEntity : AuditableEntity, ICloneable
+    public class PaymentGatewayTransactionEntity : AuditableEntity
     {
         [Column(TypeName = "Money")]
         public decimal Amount { get; set; }
@@ -131,21 +131,5 @@ namespace VirtoCommerce.OrdersModule.Data.Model
             target.Status = Status;
             target.Type = Type;
         }
-
-        #region ICloneable members
-
-        public virtual object Clone()
-        {
-            var result = MemberwiseClone() as PaymentGatewayTransactionEntity;
-
-            if (PaymentIn != null)
-            {
-                result.PaymentIn = PaymentIn.Clone() as PaymentInEntity;
-            }
-
-            return result;
-        }
-
-        #endregion
     }
 }

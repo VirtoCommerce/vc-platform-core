@@ -4,7 +4,7 @@ using VirtoCommerce.Platform.Core.Common;
 
 namespace VirtoCommerce.StoreModule.Data.Model
 {
-    public class StoreFulfillmentCenterEntity : Entity, ICloneable
+    public class StoreFulfillmentCenterEntity : Entity
     {
         [Required]
         [StringLength(128)]
@@ -34,21 +34,5 @@ namespace VirtoCommerce.StoreModule.Data.Model
 
             target.Name = Name;
         }
-
-        #region ICloneable members
-
-        public virtual object Clone()
-        {
-            var result = MemberwiseClone() as StoreFulfillmentCenterEntity;
-
-            if (Store != null)
-            {
-                result.Store = Store.Clone() as StoreEntity;
-            }
-
-            return result;
-        }
-
-        #endregion
     }
 }

@@ -65,6 +65,5 @@ namespace VirtoCommerce.SubscriptionModule.Data.Model
             target.ProductId = ProductId;
             target.TrialPeriodDays = TrialPeriodDays;
         }
-
     }
 }

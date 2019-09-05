@@ -55,16 +55,13 @@ namespace VirtoCommerce.OrdersModule.Core.Model
             
             if (DynamicProperties != null)
             {
-                result.DynamicProperties = new ObservableCollection<DynamicObjectProperty>(
-                    DynamicProperties.Select(x => x.Clone() as DynamicObjectProperty));
+                result.DynamicProperties = new ObservableCollection<DynamicObjectProperty>(DynamicProperties.Select(x => x.Clone() as DynamicObjectProperty));
             }
 
             if (ChildrenOperations != null)
             {
-                result.OperationsLog = new ObservableCollection<OperationLog>(
-                    OperationsLog.Select(x => x.Clone() as OperationLog));
+                result.OperationsLog = new ObservableCollection<OperationLog>(OperationsLog.Select(x => x.Clone() as OperationLog));
             }
-
 
             return result;
         }

@@ -6,7 +6,7 @@ using VirtoCommerce.Platform.Core.DynamicProperties;
 
 namespace VirtoCommerce.Platform.Data.Model
 {
-    public abstract class DynamicPropertyObjectValueEntity : AuditableEntity, ICloneable
+    public abstract class DynamicPropertyObjectValueEntity : AuditableEntity
     {
         [StringLength(256)]
         public string ObjectType { get; set; }
@@ -159,15 +159,5 @@ namespace VirtoCommerce.Platform.Data.Model
                     break;
             }
         }
-
-        #region ICloneable members
-
-        public virtual object Clone()
-        {
-            var result = MemberwiseClone() as DynamicPropertyObjectValueEntity;
-            return result;
-        }
-
-        #endregion
     }
 }

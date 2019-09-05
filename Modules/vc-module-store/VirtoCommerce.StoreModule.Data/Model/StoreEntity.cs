@@ -9,7 +9,7 @@ using VirtoCommerce.StoreModule.Core.Model;
 
 namespace VirtoCommerce.StoreModule.Data.Model
 {
-    public class StoreEntity : AuditableEntity, IHasOuterId, ICloneable
+    public class StoreEntity : AuditableEntity, IHasOuterId
     {
         [Required]
         [StringLength(128)]
@@ -301,52 +301,5 @@ namespace VirtoCommerce.StoreModule.Data.Model
                 DynamicPropertyObjectValues.Patch(target.DynamicPropertyObjectValues, (sourceDynamicPropertyObjectValues, targetDynamicPropertyObjectValues) => sourceDynamicPropertyObjectValues.Patch(targetDynamicPropertyObjectValues));
             }
         }
-
-        #region ICloneable members
-
-        public virtual object Clone()
-        {
-            var result = MemberwiseClone() as StoreEntity;
-
-            if (Languages != null)
-            {
-                result.Languages = new ObservableCollection<StoreLanguageEntity>(
-                    Languages.Select(x => x.Clone() as StoreLanguageEntity));
-            }
-
-            if (Currencies != null)
-            {
-                result.Currencies = new ObservableCollection<StoreCurrencyEntity>(
-                    Currencies.Select(x => x.Clone() as StoreCurrencyEntity));
-            }
-
-            if (TrustedGroups != null)
-            {
-                result.TrustedGroups = new ObservableCollection<StoreTrustedGroupEntity>(
-                    TrustedGroups.Select(x => x.Clone() as StoreTrustedGroupEntity));
-            }
-
-            if (FulfillmentCenters != null)
-            {
-                result.FulfillmentCenters = new ObservableCollection<StoreFulfillmentCenterEntity>(
-                    FulfillmentCenters.Select(x => x.Clone() as StoreFulfillmentCenterEntity));
-            }
-
-            if (SeoInfos != null)
-            {
-                result.SeoInfos = new ObservableCollection<SeoInfoEntity>(
-                    SeoInfos.Select(x => x.Clone() as SeoInfoEntity));
-            }
-
-            if (DynamicPropertyObjectValues != null)
-            {
-                result.DynamicPropertyObjectValues = new ObservableCollection<StoreDynamicPropertyObjectValueEntity>(
-                    DynamicPropertyObjectValues.Select(x => x.Clone() as StoreDynamicPropertyObjectValueEntity));
-            }
-
-            return result;
-        }
-
-        #endregion
     }
 }

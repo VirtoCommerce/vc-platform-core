@@ -1,5 +1,6 @@
 using System;
 using System.Collections.Generic;
+using System.Collections.ObjectModel;
 using System.Linq;
 using VirtoCommerce.Platform.Core.Common;
 
@@ -18,14 +19,17 @@ namespace VirtoCommerce.PricingModule.Core.Model
         public virtual object Clone()
         {
             var result = MemberwiseClone() as Pricelist;
+
             if (Prices != null)
             {
-                result.Prices = new List<Price>(Prices.Select(x => x.Clone() as Price));
+                result.Prices = new ObservableCollection<Price>(Prices.Select(x => x.Clone() as Price));
             }
+
             if (Assignments != null)
             {
-                result.Assignments = new List<PricelistAssignment>(Assignments.Select(x => x.Clone() as PricelistAssignment));
+                result.Assignments = new ObservableCollection<PricelistAssignment>(Assignments.Select(x => x.Clone() as PricelistAssignment));
             }
+
             return result;
         } 
         #endregion

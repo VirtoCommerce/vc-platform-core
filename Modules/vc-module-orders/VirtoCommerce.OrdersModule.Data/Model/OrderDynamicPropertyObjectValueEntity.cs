@@ -19,37 +19,6 @@ namespace VirtoCommerce.OrdersModule.Data.Model
         public string LineItemId { get; set; }
         public virtual LineItemEntity LineItem { get; set; }
 
-        #endregion
-
-        #region ICloneable members
-
-        public override object Clone()
-        {
-            var result = base.Clone() as OrderDynamicPropertyObjectValueEntity;
-
-            if (CustomerOrder != null)
-            {
-                result.CustomerOrder = CustomerOrder.Clone() as CustomerOrderEntity;
-            }
-
-            if (PaymentIn != null)
-            {
-                result.PaymentIn = PaymentIn.Clone() as PaymentInEntity;
-            }
-
-            if (Shipment != null)
-            {
-                result.Shipment = Shipment.Clone() as ShipmentEntity;
-            }
-
-            if (LineItem != null)
-            {
-                result.LineItem = LineItem.Clone() as LineItemEntity;
-            }
-
-            return result;
-        }
-
-        #endregion
+        #endregion        
     }
 }

@@ -8,7 +8,7 @@ using VirtoCommerce.PricingModule.Core.Model.Conditions;
 
 namespace VirtoCommerce.PricingModule.Data.Model
 {
-    public class PricelistAssignmentEntity : AuditableEntity, IHasOuterId, ICloneable
+    public class PricelistAssignmentEntity : AuditableEntity, IHasOuterId
     {
         [StringLength(128)]
         [Required]
@@ -123,21 +123,5 @@ namespace VirtoCommerce.PricingModule.Data.Model
             target.Priority = Priority;
             target.PredicateVisualTreeSerialized = PredicateVisualTreeSerialized;
         }
-
-        #region ICloneable members
-
-        public virtual object Clone()
-        {
-            var result = MemberwiseClone() as PricelistAssignmentEntity;
-
-            if (Pricelist != null)
-            {
-                result.Pricelist = Pricelist.Clone() as PricelistEntity;
-            }
-
-            return result;
-        }
-
-        #endregion
     }
 }

@@ -341,64 +341,6 @@ namespace VirtoCommerce.OrdersModule.Data.Model
             yield return TaxPercentRate;
             yield return Price;
             yield return DiscountAmount;
-        }
-
-        #region ICloneable members
-
-        public override object Clone()
-        {
-            var result = base.Clone() as ShipmentEntity;
-
-            if (CustomerOrder != null)
-            {
-                result.CustomerOrder = CustomerOrder.Clone() as CustomerOrderEntity;
-            }
-
-            if (Items != null)
-            {
-                result.Items = new ObservableCollection<ShipmentItemEntity>(
-                    Items.Select(x => x.Clone() as ShipmentItemEntity));
-            }
-
-            if (Packages != null)
-            {
-                result.Packages = new ObservableCollection<ShipmentPackageEntity>(
-                    Packages.Select(x => x.Clone() as ShipmentPackageEntity));
-            }
-
-            if (InPayments != null)
-            {
-                result.InPayments = new ObservableCollection<PaymentInEntity>(
-                    InPayments.Select(x => x.Clone() as PaymentInEntity));
-            }
-
-            if (Addresses != null)
-            {
-                result.Addresses = new ObservableCollection<AddressEntity>(
-                    Addresses.Select(x => x.Clone() as AddressEntity));
-            }
-
-            if (Discounts != null)
-            {
-                result.Discounts = new ObservableCollection<DiscountEntity>(
-                    Discounts.Select(x => x.Clone() as DiscountEntity));
-            }
-
-            if (TaxDetails != null)
-            {
-                result.TaxDetails = new ObservableCollection<TaxDetailEntity>(
-                    TaxDetails.Select(x => x.Clone() as TaxDetailEntity));
-            }
-
-            if (DynamicPropertyObjectValues != null)
-            {
-                result.DynamicPropertyObjectValues = new ObservableCollection<OrderDynamicPropertyObjectValueEntity>(
-                    DynamicPropertyObjectValues.Select(x => x.Clone() as OrderDynamicPropertyObjectValueEntity));
-            }
-
-            return result;
-        }
-
-        #endregion
+        }        
     }
 }

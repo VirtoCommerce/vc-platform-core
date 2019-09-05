@@ -4,7 +4,7 @@ using VirtoCommerce.Platform.Core.Common;
 
 namespace VirtoCommerce.StoreModule.Data.Model
 {
-    public class StoreLanguageEntity : Entity, IHasLanguageCode, ICloneable
+    public class StoreLanguageEntity : Entity, IHasLanguageCode
     {
         [Required]
         [StringLength(32)]
@@ -14,22 +14,6 @@ namespace VirtoCommerce.StoreModule.Data.Model
 
         public string StoreId { get; set; }
         public StoreEntity Store { get; set; }
-
-        #endregion
-
-        #region ICloneable members
-
-        public virtual object Clone()
-        {
-            var result = MemberwiseClone() as StoreLanguageEntity;
-
-            if (Store != null)
-            {
-                result.Store = Store.Clone() as StoreEntity;
-            }
-
-            return result;
-        }
 
         #endregion
     }

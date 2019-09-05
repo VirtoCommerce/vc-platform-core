@@ -158,14 +158,12 @@ namespace VirtoCommerce.OrdersModule.Core.Model
 
             if (DynamicProperties != null)
             {
-                result.DynamicProperties = new List<DynamicObjectProperty>(
-                    DynamicProperties.Select(x => x.Clone() as DynamicObjectProperty));
+                result.DynamicProperties = new List<DynamicObjectProperty>(DynamicProperties.Select(x => x.Clone() as DynamicObjectProperty));
             }
 
             if (Discounts != null)
             {
-                result.Discounts = new List<Discount>(
-                    Discounts.Select(x => x.Clone() as Discount));
+                result.Discounts = new List<Discount>(Discounts.Select(x => x.Clone() as Discount));
             }
 
             if (TaxDetails != null)

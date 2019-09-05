@@ -1,5 +1,7 @@
 using System;
 using System.Collections.Generic;
+using System.Collections.ObjectModel;
+using System.Linq;
 using VirtoCommerce.CoreModule.Core.Common;
 using VirtoCommerce.CoreModule.Core.Tax;
 using VirtoCommerce.Platform.Core.Common;
@@ -8,7 +10,7 @@ using VirtoCommerce.Platform.Core.Security;
 
 namespace VirtoCommerce.OrdersModule.Core.Model
 {
-    public class CustomerOrder : OrderOperation, IHasTaxDetalization, ISupportSecurityScopes, ITaxable, IHasLanguage, IHasDiscounts
+    public class CustomerOrder : OrderOperation, IHasTaxDetalization, ISupportSecurityScopes, ITaxable, IHasLanguage, IHasDiscounts, ICloneable
     {
         public string CustomerId { get; set; }
         public string CustomerName { get; set; }
@@ -204,5 +206,46 @@ namespace VirtoCommerce.OrdersModule.Core.Model
             }
 
         }
+
+        #region ICloneable members
+
+        public override object Clone()
+        {
+            var result = base.Clone() as CustomerOrder;
+
+            if (TaxDetails != null)
+            {
+                result.TaxDetails = new ObservableCollection<TaxDetail>(TaxDetails.Select(x => x.Clone() as TaxDetail));
+            }
+
+            if (Addresses != null)
+            {
+                result.Addresses = new ObservableCollection<Address>(Addresses.Select(x => x.Clone() as Address));
+            }
+
+            if (InPayments != null)
+            {
+                result.InPayments = new ObservableCollection<PaymentIn>(InPayments.Select(x => x.Clone() as PaymentIn));
+            }
+
+            if (Items != null)
+            {
+                result.Items = new ObservableCollection<LineItem>(Items.Select(x => x.Clone() as LineItem));
+            }
+
+            if (Shipments != null)
+            {
+                result.Shipments = new ObservableCollection<Shipment>(Shipments.Select(x => x.Clone() as Shipment));
+            }
+
+            if (Discounts != null)
+            {
+                result.Discounts = new ObservableCollection<Discount>(Discounts.Select(x => x.Clone() as Discount));
+            }
+
+            return result;
+        }
+
+        #endregion
     }
 }

@@ -4,7 +4,7 @@ using VirtoCommerce.Platform.Core.Common;
 
 namespace VirtoCommerce.StoreModule.Data.Model
 {
-    public class StoreTrustedGroupEntity : Entity, ICloneable
+    public class StoreTrustedGroupEntity : Entity
     {
         [Required]
         [StringLength(128)]
@@ -14,22 +14,6 @@ namespace VirtoCommerce.StoreModule.Data.Model
 
         public string StoreId { get; set; }
         public StoreEntity Store { get; set; }
-
-        #endregion
-
-        #region ICloneable members
-
-        public virtual object Clone()
-        {
-            var result = MemberwiseClone() as StoreTrustedGroupEntity;
-
-            if (Store != null)
-            {
-                result.Store = Store.Clone() as StoreEntity;
-            }
-
-            return result;
-        }
 
         #endregion
     }

@@ -8,7 +8,7 @@ using VirtoCommerce.PricingModule.Core.Model;
 
 namespace VirtoCommerce.PricingModule.Data.Model
 {
-    public class PricelistEntity : AuditableEntity, ICloneable
+    public class PricelistEntity : AuditableEntity
     {
         [Required]
         [StringLength(128)]
@@ -97,28 +97,5 @@ namespace VirtoCommerce.PricingModule.Data.Model
             target.Currency = Currency;
             target.Description = Description;
         }
-
-        #region ICloneable members
-
-        public virtual object Clone()
-        {
-            var result = MemberwiseClone() as PricelistEntity;
-
-            if (Prices != null)
-            {
-                result.Prices = new ObservableCollection<PriceEntity>(
-                    Prices.Select(x => x.Clone() as PriceEntity));
-            }
-
-            if (Assignments != null)
-            {
-                result.Assignments = new ObservableCollection<PricelistAssignmentEntity>(
-                    Assignments.Select(x => x.Clone() as PricelistAssignmentEntity));
-            }
-
-            return result;
-        }
-
-        #endregion
     }
 }

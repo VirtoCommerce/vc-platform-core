@@ -6,7 +6,7 @@ using VirtoCommerce.Platform.Core.Common;
 
 namespace VirtoCommerce.OrdersModule.Data.Model
 {
-    public class TaxDetailEntity : Entity, ICloneable
+    public class TaxDetailEntity : Entity
     {
         public decimal Rate { get; set; }
 
@@ -64,36 +64,5 @@ namespace VirtoCommerce.OrdersModule.Data.Model
             target.Rate = Rate;
             target.Amount = Amount;
         }
-
-        #region ICloneable members
-
-        public virtual object Clone()
-        {
-            var result = MemberwiseClone() as TaxDetailEntity;
-
-            if (CustomerOrder != null)
-            {
-                result.CustomerOrder = CustomerOrder.Clone() as CustomerOrderEntity;
-            }
-
-            if (Shipment != null)
-            {
-                result.Shipment = Shipment.Clone() as ShipmentEntity;
-            }
-
-            if (LineItem != null)
-            {
-                result.LineItem = LineItem.Clone() as LineItemEntity;
-            }
-
-            if (PaymentIn != null)
-            {
-                result.PaymentIn = PaymentIn.Clone() as PaymentInEntity;
-            }
-
-            return result;
-        }
-
-        #endregion
     }
 }

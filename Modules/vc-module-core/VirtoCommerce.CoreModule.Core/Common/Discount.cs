@@ -16,8 +16,7 @@ namespace VirtoCommerce.CoreModule.Core.Common
 
         public virtual object Clone()
         {
-            var result = MemberwiseClone() as Discount;
-            return result;
+            return MemberwiseClone() as Discount;
         }
 
         #endregion

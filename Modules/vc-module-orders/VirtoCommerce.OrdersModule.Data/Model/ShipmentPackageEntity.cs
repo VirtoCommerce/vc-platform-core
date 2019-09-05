@@ -7,7 +7,7 @@ using VirtoCommerce.Platform.Core.Common;
 
 namespace VirtoCommerce.OrdersModule.Data.Model
 {
-    public class ShipmentPackageEntity : AuditableEntity, ICloneable
+    public class ShipmentPackageEntity : AuditableEntity
     {
         [StringLength(128)]
         public string BarCode { get; set; }
@@ -108,27 +108,5 @@ namespace VirtoCommerce.OrdersModule.Data.Model
                 Items.Patch(target.Items, (sourceItem, targetItem) => sourceItem.Patch(targetItem));
             }
         }
-
-        #region ICloneable members
-
-        public virtual object Clone()
-        {
-            var result = MemberwiseClone() as ShipmentPackageEntity;
-
-            if (Shipment != null)
-            {
-                result.Shipment = Shipment.Clone() as ShipmentEntity;
-            }
-
-            if (Items != null)
-            {
-                result.Items = new ObservableCollection<ShipmentItemEntity>(
-                    Items.Select(x => x.Clone() as ShipmentItemEntity));
-            }
-
-            return result;
-        }
-
-        #endregion
     }
 }

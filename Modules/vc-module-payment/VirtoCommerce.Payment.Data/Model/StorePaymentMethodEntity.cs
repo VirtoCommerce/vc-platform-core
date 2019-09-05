@@ -5,7 +5,7 @@ using VirtoCommerce.Platform.Core.Common;
 
 namespace VirtoCommerce.PaymentModule.Data.Model
 {
-    public class StorePaymentMethodEntity : Entity, ICloneable
+    public class StorePaymentMethodEntity : Entity
     {
         [Required]
         [StringLength(128)]
@@ -71,15 +71,5 @@ namespace VirtoCommerce.PaymentModule.Data.Model
             target.Priority = Priority;
             target.StoreId = StoreId;
         }
-
-        #region ICloneable members
-
-        public virtual object Clone()
-        {
-            var result = MemberwiseClone() as StorePaymentMethodEntity;
-            return result;
-        }
-
-        #endregion
     }
 }
