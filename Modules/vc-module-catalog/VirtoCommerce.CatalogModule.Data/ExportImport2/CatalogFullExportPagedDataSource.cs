@@ -1,88 +1,85 @@
+using System.Collections.Generic;
 using VirtoCommerce.CatalogModule.Core.Model;
-using VirtoCommerce.CatalogModule.Core.Model.Search;
-using VirtoCommerce.CatalogModule.Core.Search;
-using VirtoCommerce.ExportModule.Data.Services;
+using VirtoCommerce.ExportModule.Core.Model;
+using VirtoCommerce.ExportModule.Data.Extensions;
+using VirtoCommerce.Platform.Core.Common;
 
 namespace VirtoCommerce.CatalogModule.Data.ExportImport
 {
-    public class CatalogFullExportPagedDataSource : ComplexExportPagedDataSource<CatalogFullExportDataQuery>
+    public class CatalogFullExportPagedDataSource : IPagedDataSource
     {
-        private readonly ICatalogSearchService _catalogSearchService;
-        private readonly IProductSearchService _productSearchService;
-        private readonly ICategorySearchService _categorySearchService;
-        private readonly IPropertySearchService _propertySearchService;
-        private readonly IProperyDictionaryItemSearchService _propertyDictionarySearchService;
+        private readonly CatalogExportPagedDataSourceFactory _catalogDataSourceFactory;
+        private readonly CategoryExportPagedDataSourceFactory _categoryDataSourceFactory;
+        private readonly PropertyExportPagedDataSourceFactory _propertyDataSourceFactory;
+        private readonly PropertyDictionaryItemExportPagedDataSourceFactory _propertyDictionaryItemDataSourceFactory;
+        private readonly ProductExportPagedDataSourceFactory _productDataSourceFactory;
+        private readonly CatalogFullExportDataQuery _dataQuery;
+        private readonly IEnumerable<IPagedDataSource> _dataSources;
 
-        public CatalogFullExportPagedDataSource(ICatalogSearchService catalogSearchService,
-            IProductSearchService productSearchService,
-            ICategorySearchService categorySearchService,
-            IPropertySearchService propertySearchService,
-            IProperyDictionaryItemSearchService propertyDictionarySearchService,
+
+        public int CurrentPageNumber { get; protected set; }
+        public int PageSize { get; set; } = 50;
+        public int? Skip { get => _dataQuery.Skip; set => _dataQuery.Skip = value; }
+        public int? Take { get => _dataQuery.Take; set => _dataQuery.Take = value; }
+        public IEnumerable<IExportable> Items { get; protected set; }
+
+        public CatalogFullExportPagedDataSource(CatalogExportPagedDataSourceFactory catalogDataSourceFactory,
+            CategoryExportPagedDataSourceFactory categoryDataSourceFactory,
+            PropertyExportPagedDataSourceFactory propertyDataSourceFactory,
+            PropertyDictionaryItemExportPagedDataSourceFactory propertyDictionaryItemDataSourceFactory,
+            ProductExportPagedDataSourceFactory productDataSourceFactory,
             CatalogFullExportDataQuery dataQuery)
-        : base(dataQuery)
         {
-            _productSearchService = productSearchService;
-            _categorySearchService = categorySearchService;
-            _propertySearchService = propertySearchService;
-            _propertyDictionarySearchService = propertyDictionarySearchService;
-            _catalogSearchService = catalogSearchService;
+            _catalogDataSourceFactory = catalogDataSourceFactory;
+            _categoryDataSourceFactory = categoryDataSourceFactory;
+            _propertyDataSourceFactory = propertyDataSourceFactory;
+            _propertyDictionaryItemDataSourceFactory = propertyDictionaryItemDataSourceFactory;
+            _productDataSourceFactory = productDataSourceFactory;
+            _dataQuery = dataQuery;
+
+            _dataSources = CreateDataSources();
         }
 
-        protected override void InitDataSourceStates()
+        protected virtual IEnumerable<IPagedDataSource> CreateDataSources()
         {
-            _exportDataSourceStates.AddRange(new ExportDataSourceState[]
+            var catalogExportDataQuery = AbstractTypeFactory<CatalogExportDataQuery>.TryCreateInstance();
+            catalogExportDataQuery.CatalogIds = _dataQuery.CatalogIds;
+
+            var categoryExportDataQuery = AbstractTypeFactory<CategoryExportDataQuery>.TryCreateInstance();
+            categoryExportDataQuery.CatalogIds = _dataQuery.CatalogIds;
+
+            var propertyExportDataQuery = AbstractTypeFactory<PropertyExportDataQuery>.TryCreateInstance();
+            propertyExportDataQuery.CatalogIds = _dataQuery.CatalogIds;
+
+            var propertyDictionaryItemExportDataQuery = AbstractTypeFactory<PropertyDictionaryItemExportDataQuery>.TryCreateInstance();
+            propertyDictionaryItemExportDataQuery.CatalogIds = _dataQuery.CatalogIds;
+
+            var productExportDataQuery = AbstractTypeFactory<ProductExportDataQuery>.TryCreateInstance();
+            productExportDataQuery.CatalogIds = _dataQuery.CatalogIds;
+            productExportDataQuery.SearchInVariations = true;
+            productExportDataQuery.ResponseGroup = (ItemResponseGroup.Full & ~ItemResponseGroup.Variations).ToString();
+
+            return new IPagedDataSource[]
             {
-                new ExportDataSourceState
-                {
-                    SearchCriteria = new CatalogSearchCriteria { ResponseGroup = CatalogResponseGroup.Info.ToString(), CatalogIds = DataQuery.CatalogIds },
-                    FetchFunc = async (x) =>
-                    {
-                        var searchResult = await _catalogSearchService.SearchCatalogsAsync((CatalogSearchCriteria)x.SearchCriteria);
-                        x.TotalCount = searchResult.TotalCount;
-                        x.Result = searchResult.Results;
-                    }
-                },
-                new ExportDataSourceState
-                {
-                    SearchCriteria = new CategorySearchCriteria { CatalogIds = DataQuery.CatalogIds },
-                    FetchFunc = async (x) =>
-                    {
-                        var searchResult = await _categorySearchService.SearchCategoriesAsync((CategorySearchCriteria)x.SearchCriteria);
-                        x.TotalCount = searchResult.TotalCount;
-                        x.Result = searchResult.Results;
-                    }
-                },
-                new ExportDataSourceState
-                {
-                    SearchCriteria = new PropertySearchCriteria { CatalogIds = DataQuery.CatalogIds },
-                    FetchFunc = async (x) =>
-                    {
-                        var searchResult = await _propertySearchService.SearchPropertiesAsync((PropertySearchCriteria)x.SearchCriteria);
-                        x.TotalCount = searchResult.TotalCount;
-                        x.Result = searchResult.Results;
-                    }
-                },
-                new ExportDataSourceState
-                {
-                    SearchCriteria = new PropertyDictionaryItemSearchCriteria() { CatalogIds = DataQuery.CatalogIds },
-                    FetchFunc = async (x) =>
-                    {
-                        var searchResult = await _propertyDictionarySearchService.SearchAsync((PropertyDictionaryItemSearchCriteria)x.SearchCriteria);
-                        x.TotalCount = searchResult.TotalCount;
-                        x.Result = searchResult.Results;
-                    }
-                },
-                new ExportDataSourceState
-                {
-                    SearchCriteria = new ProductSearchCriteria() { CatalogIds = DataQuery.CatalogIds, SearchInVariations = true, ResponseGroup = (ItemResponseGroup.Full & ~ItemResponseGroup.Variations).ToString() },
-                    FetchFunc = async (x) =>
-                    {
-                        var searchResult = await _productSearchService.SearchProductsAsync((ProductSearchCriteria)x.SearchCriteria);
-                        x.TotalCount = searchResult.TotalCount;
-                        x.Result = searchResult.Results;
-                    }
-                }
-            });
+                _catalogDataSourceFactory.Create(catalogExportDataQuery),
+                _categoryDataSourceFactory.Create(categoryExportDataQuery),
+                _propertyDataSourceFactory.Create(propertyExportDataQuery),
+                _propertyDictionaryItemDataSourceFactory.Create(propertyDictionaryItemExportDataQuery),
+                _productDataSourceFactory.Create(productExportDataQuery),
+            };
         }
+
+        public bool Fetch()
+        {
+            var skip = Skip ?? CurrentPageNumber * PageSize;
+            var take = Take ?? PageSize;
+
+            Items = _dataSources.GetItems(skip, take);
+            CurrentPageNumber++;
+
+            return !Items.IsNullOrEmpty();
+        }
+
+        public int GetTotalCount() => _dataSources.GetTotalCount();
     }
 }

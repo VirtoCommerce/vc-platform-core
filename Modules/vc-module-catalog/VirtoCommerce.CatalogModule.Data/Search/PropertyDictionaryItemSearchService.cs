@@ -13,12 +13,12 @@ using VirtoCommerce.Platform.Data.Infrastructure;
 
 namespace VirtoCommerce.CatalogModule.Data.Search
 {
-    public class ProperyDictionaryItemSearchService : IProperyDictionaryItemSearchService
+    public class PropertyDictionaryItemSearchService : IPropertyDictionaryItemSearchService
     {
         private readonly Func<ICatalogRepository> _repositoryFactory;
-        private readonly IProperyDictionaryItemService _properyDictionaryItemService;
+        private readonly IPropertyDictionaryItemService _properyDictionaryItemService;
 
-        public ProperyDictionaryItemSearchService(Func<ICatalogRepository> repositoryFactory, IProperyDictionaryItemService properyDictionaryItemService)
+        public PropertyDictionaryItemSearchService(Func<ICatalogRepository> repositoryFactory, IPropertyDictionaryItemService properyDictionaryItemService)
         {
             _repositoryFactory = repositoryFactory;
             _properyDictionaryItemService = properyDictionaryItemService;

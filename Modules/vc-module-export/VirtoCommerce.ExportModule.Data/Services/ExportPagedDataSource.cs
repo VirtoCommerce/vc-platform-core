@@ -17,7 +17,7 @@ namespace VirtoCommerce.ExportModule.Data.Services
         where TDataQuery : ExportDataQuery
         where TSearchCriteria : SearchCriteriaBase
     {
-        public IEnumerable<IExportable> Items { get; private set; }
+        public IEnumerable<IExportable> Items { get; protected set; }
 
         public ExportDataQuery DataQuery => _dataQuery;
 
@@ -26,14 +26,14 @@ namespace VirtoCommerce.ExportModule.Data.Services
 
         protected ExportPagedDataSource(TDataQuery dataQuery)
         {
-            _dataQuery = dataQuery;
-
-            PageSize = _dataQuery.Take - _dataQuery.Skip ?? PageSize;
+            _dataQuery = dataQuery ?? throw new ArgumentNullException(nameof(dataQuery));
         }
 
-        public int CurrentPageNumber { get; protected set; } = 0;
+        public int CurrentPageNumber { get; protected set; }
         public int PageSize { get; set; } = 50;
-        public int Skip { get; set; }
+        public int? Skip { get => _dataQuery.Skip; set => _dataQuery.Skip = value; }
+        public int? Take { get => _dataQuery.Take; set => _dataQuery.Take = value; }
+
         public virtual int GetTotalCount()
         {
             if (TotalCount < 0)
@@ -92,8 +92,8 @@ namespace VirtoCommerce.ExportModule.Data.Services
             result.Sort = exportDataQuery.Sort;
 
             // It is for proper pagination - client side for viewer (dataQuery.Skip/Take) should work together with iterating through pages when getting data for export
-            result.Skip = (exportDataQuery.Skip ?? Skip) + CurrentPageNumber * PageSize;
-            result.Take = exportDataQuery.Take ?? PageSize;
+            result.Skip = Skip ?? CurrentPageNumber * PageSize;
+            result.Take = Take ?? PageSize;
 
             return result;
         }
