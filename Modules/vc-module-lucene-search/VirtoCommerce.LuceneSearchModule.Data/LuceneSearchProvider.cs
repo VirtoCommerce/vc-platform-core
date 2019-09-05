@@ -220,11 +220,11 @@ namespace VirtoCommerce.LuceneSearchModule.Data
                 case string _:
                     foreach (var value in field.Values)
                     {
-                        result.Add(new StringField(fieldName, (string)value, store));
+                        result.Add(new TextField(fieldName, (string)value, store));
 
                         if (field.IsSearchable)
                         {
-                            result.Add(new StringField(LuceneSearchHelper.SearchableFieldName, (string)value, Field.Store.NO));
+                            result.Add(new TextField(LuceneSearchHelper.SearchableFieldName, (string)value, Field.Store.NO));
                         }
                     }
                     break;
@@ -234,7 +234,7 @@ namespace VirtoCommerce.LuceneSearchModule.Data
                     foreach (var value in field.Values)
                     {
                         var stringValue = value.ToStringInvariant();
-                        result.Add(new StringField(fieldName, stringValue, store));
+                        result.Add(new TextField(fieldName, stringValue, store));
                         result.Add(new StringField(booleanFieldName, stringValue, Field.Store.NO));
                     }
                     break;
@@ -276,7 +276,7 @@ namespace VirtoCommerce.LuceneSearchModule.Data
                     }
                     else
                     {
-                        result.AddRange(field.Values.Select(value => new StringField(fieldName, value.ToStringInvariant(), store)));
+                        result.AddRange(field.Values.Select(value => new TextField(fieldName, value.ToStringInvariant(), store)));
                     }
                     break;
             }
