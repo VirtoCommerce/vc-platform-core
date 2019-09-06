@@ -313,7 +313,7 @@ angular.module(catalogsModuleName, ['ui.grid.validate', 'ui.grid.infiniteScroll'
             //metaFormsService.registerMetaFields("categoryDetail", metafieldsDefinitions.categoryMetafields);
 
             //
-            metaFormsService.registerMetaFields('VirtoCommerce.CatalogModule.Data.ExportImport.ExportableProduct' + 'ExportFilter', [
+            metaFormsService.registerMetaFields('VirtoCommerce.CatalogModule.Core.Model.Export.ExportableProduct' + 'ExportFilter', [
                 {
                     name: 'catalogSelector',
                     title: "catalog.selectors.titles.catalogs",
@@ -337,7 +337,7 @@ angular.module(catalogsModuleName, ['ui.grid.validate', 'ui.grid.infiniteScroll'
 
             ]);
 
-            metaFormsService.registerMetaFields('VirtoCommerce.CatalogModule.Data.ExportImport.ExportableCatalogFull' + 'ExportFilter', [
+            metaFormsService.registerMetaFields('VirtoCommerce.CatalogModule.Core.Model.Export.ExportableCatalogFull' + 'ExportFilter', [
                 {
                     name: 'catalogSelector',
                     title: "catalog.selectors.titles.catalogs",
@@ -375,12 +375,13 @@ angular.module(catalogsModuleName, ['ui.grid.validate', 'ui.grid.infiniteScroll'
                 isNew: true,
                 onInitialize: function (newBlade) {
                     var exportDataRequest = {
-                        exportTypeName: 'VirtoCommerce.CatalogModule.Data.ExportImport.ExportableProduct',
+                        exportTypeName: 'VirtoCommerce.CatalogModule.Core.Model.Export.ExportableProduct',
                         dataQuery: {
                             exportTypeName: 'ProductExportDataQuery',
                             categoryIds: _.pluck(newBlade.selectedCategories, 'id'),
                             objectIds: _.pluck(newBlade.selectedProducts, 'id'),
                             catalogIds: [newBlade.catalog.id],
+                            searchInChildren: true,
                             isAllSelected: true
                         }
                     };
