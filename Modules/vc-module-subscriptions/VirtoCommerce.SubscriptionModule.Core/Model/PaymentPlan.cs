@@ -1,8 +1,9 @@
+using System;
 using VirtoCommerce.Platform.Core.Common;
 
 namespace VirtoCommerce.SubscriptionModule.Core.Model
 {
-    public class PaymentPlan : AuditableEntity 
+    public class PaymentPlan : AuditableEntity, ICloneable
     {
         public PaymentPlan()
         {
@@ -20,5 +21,14 @@ namespace VirtoCommerce.SubscriptionModule.Core.Model
         ///  subscription trial period in days 
         /// </summary>
         public int TrialPeriodDays { get; set; }
+
+        #region ICloneable members
+
+        public virtual object Clone()
+        {
+            return MemberwiseClone() as PaymentPlan;
+        }
+
+        #endregion
     }
 }

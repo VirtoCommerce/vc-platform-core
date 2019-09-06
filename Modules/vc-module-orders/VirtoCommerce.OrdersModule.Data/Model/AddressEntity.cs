@@ -40,6 +40,8 @@ namespace VirtoCommerce.OrdersModule.Data.Model
         [StringLength(254)]
         public string Email { get; set; }
 
+        #region Navigation Properties
+
         public virtual CustomerOrderEntity CustomerOrder { get; set; }
         public string CustomerOrderId { get; set; }
 
@@ -49,6 +51,7 @@ namespace VirtoCommerce.OrdersModule.Data.Model
         public virtual PaymentInEntity PaymentIn { get; set; }
         public string PaymentInId { get; set; }
 
+        #endregion
 
         public virtual Address ToModel(Address address)
         {
@@ -138,5 +141,4 @@ namespace VirtoCommerce.OrdersModule.Data.Model
             return base.GetHashCode();
         }
     }
-
 }

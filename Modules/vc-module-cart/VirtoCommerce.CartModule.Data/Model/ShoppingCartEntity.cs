@@ -106,6 +106,8 @@ namespace VirtoCommerce.CartModule.Data.Model
         [StringLength(64)]
         public string Type { get; set; }
 
+        #region NavigationProperties
+
         public virtual ObservableCollection<DiscountEntity> Discounts { get; set; } = new NullCollection<DiscountEntity>();
         public virtual ObservableCollection<AddressEntity> Addresses { get; set; } = new NullCollection<AddressEntity>();
         public virtual ObservableCollection<LineItemEntity> Items { get; set; } = new NullCollection<LineItemEntity>();
@@ -113,10 +115,10 @@ namespace VirtoCommerce.CartModule.Data.Model
         public virtual ObservableCollection<ShipmentEntity> Shipments { get; set; } = new NullCollection<ShipmentEntity>();
         public virtual ObservableCollection<TaxDetailEntity> TaxDetails { get; set; } = new NullCollection<TaxDetailEntity>();
         public virtual ObservableCollection<CouponEntity> Coupons { get; set; } = new NullCollection<CouponEntity>();
-
         public virtual ObservableCollection<CartDynamicPropertyObjectValueEntity> DynamicPropertyObjectValues { get; set; }
             = new NullCollection<CartDynamicPropertyObjectValueEntity>();
 
+        #endregion
 
         public virtual ShoppingCart ToModel(ShoppingCart cart)
         {

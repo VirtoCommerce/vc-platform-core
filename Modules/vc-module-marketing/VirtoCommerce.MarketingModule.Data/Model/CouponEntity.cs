@@ -8,10 +8,6 @@ namespace VirtoCommerce.MarketingModule.Data.Model
 {
     public class CouponEntity : AuditableEntity, IHasOuterId
     {
-        public CouponEntity()
-        {
-        }
-
         [StringLength(64)]
         public string Code { get; set; }
 
@@ -28,6 +24,7 @@ namespace VirtoCommerce.MarketingModule.Data.Model
         public string OuterId { get; set; }
 
         #region Navigation Properties
+
         public string PromotionId { get; set; }
         public virtual PromotionEntity Promotion { get; set; }
 

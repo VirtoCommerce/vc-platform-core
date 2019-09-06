@@ -38,5 +38,14 @@ namespace VirtoCommerce.NotificationsModule.Core.Model
         {
             Number = to;
         }
+
+        #region ICloneable members
+
+        public override object Clone()
+        {
+            return base.Clone() as SmsNotification;
+        }
+
+        #endregion
     }
 }

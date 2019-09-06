@@ -1,10 +1,11 @@
+using System;
 using VirtoCommerce.Platform.Core.Common;
 using VirtoCommerce.Platform.Core.Swagger;
 
 namespace VirtoCommerce.OrdersModule.Core.Model
 {
     [SwaggerSchemaId("OrderShipmentItem")]
-    public class ShipmentItem : AuditableEntity
+    public class ShipmentItem : AuditableEntity, ICloneable
     {
         public ShipmentItem()
         {
@@ -26,6 +27,19 @@ namespace VirtoCommerce.OrdersModule.Core.Model
         public int Quantity { get; set; }
 
         public string OuterId { get; set; }
+
+        #region ICloneable members
+
+        public virtual object Clone()
+        {
+            var result = MemberwiseClone() as ShipmentItem;
+
+            result.LineItem = LineItem?.Clone() as LineItem;
+
+            return result;
+        }
+
+        #endregion
 
     }
 }

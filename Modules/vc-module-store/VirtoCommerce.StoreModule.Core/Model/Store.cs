@@ -1,4 +1,7 @@
+using System;
 using System.Collections.Generic;
+using System.Collections.ObjectModel;
+using System.Linq;
 using VirtoCommerce.CoreModule.Core.Seo;
 using VirtoCommerce.Platform.Core.Common;
 using VirtoCommerce.Platform.Core.DynamicProperties;
@@ -7,7 +10,7 @@ using VirtoCommerce.Platform.Core.Settings;
 
 namespace VirtoCommerce.StoreModule.Core.Model
 {
-    public class Store : AuditableEntity, IHasDynamicProperties, IHasSettings, ISeoSupport, ISupportSecurityScopes, IHasOuterId
+    public class Store : AuditableEntity, IHasDynamicProperties, IHasSettings, ISeoSupport, ISupportSecurityScopes, IHasOuterId, ICloneable
     {
         public string Name { get; set; }
         public string Description { get; set; }
@@ -92,6 +95,20 @@ namespace VirtoCommerce.StoreModule.Core.Model
 
         #region ISupportSecurityScopes Members
         public IEnumerable<string> Scopes { get; set; }
+        #endregion
+
+        #region ICloneable members
+
+        public virtual object Clone()
+        {
+            var result = MemberwiseClone() as Store;
+
+                result.SeoInfos = SeoInfos?.Select(x => x.Clone()).OfType<SeoInfo>().ToList();
+                result.Settings = Settings?.Select(x => x.Clone()).OfType<ObjectSettingEntry>().ToList();
+
+            return result;
+        }
+
         #endregion
     }
 }

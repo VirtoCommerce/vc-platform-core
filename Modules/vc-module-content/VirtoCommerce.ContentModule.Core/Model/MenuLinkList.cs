@@ -1,9 +1,12 @@
+using System;
 using System.Collections.Generic;
+using System.Collections.ObjectModel;
+using System.Linq;
 using VirtoCommerce.Platform.Core.Common;
 
 namespace VirtoCommerce.ContentModule.Core.Model
 {
-    public class MenuLinkList : AuditableEntity
+    public class MenuLinkList : AuditableEntity, ICloneable
     {
         /// <summary>
         /// Name of menu link list, can be used as title of list in frontend
@@ -22,5 +25,18 @@ namespace VirtoCommerce.ContentModule.Core.Model
 
         public string[] SecurityScopes { get; set; }
         public string OuterId { get; set; }
+
+        #region ICloneable members
+
+        public virtual object Clone()
+        {
+            var result = MemberwiseClone() as MenuLinkList;
+
+            result.MenuLinks = MenuLinks?.Select(x => x.Clone()).OfType<MenuLink>().ToList();
+
+            return result;
+        }
+
+        #endregion
     }
 }

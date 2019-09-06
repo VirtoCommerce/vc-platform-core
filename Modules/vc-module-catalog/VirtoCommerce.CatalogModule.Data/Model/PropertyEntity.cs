@@ -9,14 +9,6 @@ namespace VirtoCommerce.CatalogModule.Data.Model
 {
     public class PropertyEntity : AuditableEntity, IHasOuterId
     {
-        public PropertyEntity()
-        {
-            DictionaryItems = new NullCollection<PropertyDictionaryItemEntity>();
-            PropertyAttributes = new NullCollection<PropertyAttributeEntity>();
-            DisplayNames = new NullCollection<PropertyDisplayNameEntity>();
-            ValidationRules = new NullCollection<PropertyValidationRuleEntity>();
-        }
-
         [Required]
         [StringLength(128)]
         public string Name { get; set; }
@@ -37,6 +29,7 @@ namespace VirtoCommerce.CatalogModule.Data.Model
         public bool IsMultiValue { get; set; }
 
         public bool IsHidden { get; set; }
+
         /// <summary>
         /// Gets or sets a value indicating whether this instance is locale dependant. If true, the locale must be specified for the values.
         /// </summary>
@@ -62,9 +55,16 @@ namespace VirtoCommerce.CatalogModule.Data.Model
         public virtual CategoryEntity Category { get; set; }
 
         public virtual ObservableCollection<PropertyDictionaryItemEntity> DictionaryItems { get; set; }
+            = new NullCollection<PropertyDictionaryItemEntity>();
+
         public virtual ObservableCollection<PropertyAttributeEntity> PropertyAttributes { get; set; }
+            = new NullCollection<PropertyAttributeEntity>();
+
         public virtual ObservableCollection<PropertyDisplayNameEntity> DisplayNames { get; set; }
+            = new NullCollection<PropertyDisplayNameEntity>();
+
         public virtual ObservableCollection<PropertyValidationRuleEntity> ValidationRules { get; set; }
+            = new NullCollection<PropertyValidationRuleEntity>();
 
         #endregion
 
@@ -93,7 +93,6 @@ namespace VirtoCommerce.CatalogModule.Data.Model
             property.Hidden = IsHidden;
             property.ValueType = (PropertyValueType)PropertyValueType;
             property.Type = EnumUtility.SafeParse(TargetType, PropertyType.Catalog);
-
 
             property.Attributes = PropertyAttributes.Select(x => x.ToModel(AbstractTypeFactory<PropertyAttribute>.TryCreateInstance())).ToList();
             property.DisplayNames = DisplayNames.Select(x => x.ToModel(AbstractTypeFactory<PropertyDisplayName>.TryCreateInstance())).ToList();
@@ -149,6 +148,7 @@ namespace VirtoCommerce.CatalogModule.Data.Model
             {
                 ValidationRules = new ObservableCollection<PropertyValidationRuleEntity>(property.ValidationRules.Select(x => AbstractTypeFactory<PropertyValidationRuleEntity>.TryCreateInstance().FromModel(x)));
             }
+
             return this;
         }
 

@@ -29,8 +29,8 @@ namespace VirtoCommerce.MarketingModule.Data.Model
         public string ImageUrl { get; set; }
 
         #region Navigation Properties
-        public string FolderId { get; set; }
 
+        public string FolderId { get; set; }
         public virtual DynamicContentFolderEntity Folder { get; set; }
 
         public ObservableCollection<DynamicContentItemDynamicPropertyObjectValueEntity> DynamicPropertyObjectValues { get; set; }

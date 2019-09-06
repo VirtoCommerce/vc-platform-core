@@ -56,7 +56,6 @@ namespace VirtoCommerce.CartModule.Data.Model
         [StringLength(254)]
         public string Email { get; set; }
 
-
         public string ShoppingCartId { get; set; }
         public virtual ShoppingCartEntity ShoppingCart { get; set; }
 
@@ -65,7 +64,6 @@ namespace VirtoCommerce.CartModule.Data.Model
 
         public string PaymentId { get; set; }
         public virtual PaymentEntity Payment { get; set; }
-
 
         public virtual Address ToModel(Address address)
         {

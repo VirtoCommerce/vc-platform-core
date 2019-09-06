@@ -1,9 +1,12 @@
+using System;
 using System.Collections.Generic;
+using System.Collections.ObjectModel;
+using System.Linq;
 using VirtoCommerce.Platform.Core.Common;
 
 namespace VirtoCommerce.SitemapsModule.Core.Models
 {
-    public class Sitemap : AuditableEntity
+    public class Sitemap : AuditableEntity, ICloneable
     {
         public Sitemap()
         {
@@ -22,5 +25,20 @@ namespace VirtoCommerce.SitemapsModule.Core.Models
         public int TotalItemsCount { get; set; }
 
         public ICollection<string> PagedLocations { get; set; }
+
+
+
+        #region ICloneable members
+
+        public virtual object Clone()
+        {
+            var result = MemberwiseClone() as Sitemap;
+
+            result.Items = Items?.Select(x => x.Clone()).OfType<SitemapItem>().ToList();
+
+            return result;
+        }
+
+        #endregion
     }
 }

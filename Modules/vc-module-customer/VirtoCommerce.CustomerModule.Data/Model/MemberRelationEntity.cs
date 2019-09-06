@@ -1,3 +1,4 @@
+using System;
 using System.ComponentModel.DataAnnotations;
 using System.ComponentModel.DataAnnotations.Schema;
 using VirtoCommerce.Platform.Core.Common;
@@ -19,9 +20,13 @@ namespace VirtoCommerce.CustomerModule.Data.Model
         /// The ancestor sequence.
         /// </value>
         [Required]
-		public int AncestorSequence { get; set; }
+        public int AncestorSequence { get; set; }
+
+        [StringLength(64)]
+        public string RelationType { get; set; }
 
         #region NavigationProperties
+
         /// <summary>
         /// Gets or sets the ancestor member id.
         /// </summary>
@@ -30,13 +35,9 @@ namespace VirtoCommerce.CustomerModule.Data.Model
         /// </value>
         [ForeignKey("Ancestor")]
         [Required]
-		[StringLength(128)]
-		public string AncestorId { get; set; }
-
+        [StringLength(128)]
+        public string AncestorId { get; set; }
         public virtual MemberEntity Ancestor { get; set; }
-
-        [StringLength(64)]
-        public string RelationType { get; set; }
 
         /// <summary>
         /// Gets or sets the descendant member id.
@@ -44,10 +45,10 @@ namespace VirtoCommerce.CustomerModule.Data.Model
         /// <value>
         /// The descendant id.
         /// </value>
- 		[StringLength(128, ErrorMessage = "Only 128 characters allowed.")]
-		public string DescendantId { get; set; }
-
+        [StringLength(128, ErrorMessage = "Only 128 characters allowed.")]
+        public string DescendantId { get; set; }
         public virtual MemberEntity Descendant { get; set; }
+
         #endregion
     }
 }

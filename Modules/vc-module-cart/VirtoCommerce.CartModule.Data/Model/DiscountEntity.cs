@@ -40,7 +40,6 @@ namespace VirtoCommerce.CartModule.Data.Model
         public string PaymentId { get; set; }
         public virtual PaymentEntity Payment { get; set; }
 
-
         public virtual Discount ToModel(Discount model)
         {
             if (model == null)

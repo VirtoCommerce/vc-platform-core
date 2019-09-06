@@ -1,5 +1,8 @@
+using System;
 using System.Collections.Generic;
+using System.Collections.ObjectModel;
 using System.Collections.Specialized;
+using System.Linq;
 using VirtoCommerce.CoreModule.Core.Tax;
 using VirtoCommerce.PaymentModule.Model.Requests;
 using VirtoCommerce.Platform.Core.Common;
@@ -7,7 +10,7 @@ using VirtoCommerce.Platform.Core.Settings;
 
 namespace VirtoCommerce.PaymentModule.Core.Model
 {
-    public abstract class PaymentMethod : Entity, IHasSettings, IHasTaxDetalization, ITaxable
+    public abstract class PaymentMethod : Entity, IHasSettings, IHasTaxDetalization, ITaxable, ICloneable
     {
         public PaymentMethod(string code)
         {
@@ -118,5 +121,19 @@ namespace VirtoCommerce.PaymentModule.Core.Model
         /// <param name="queryString">Query string of payment push request (external payment system or storefront)</param>
         /// <returns>Validation result</returns>
         public abstract ValidatePostProcessRequestResult ValidatePostProcessRequest(NameValueCollection queryString);
+
+        #region ICloneable members
+
+        public virtual object Clone()
+        {
+            var result = MemberwiseClone() as PaymentMethod;
+
+            result.Settings = Settings?.Select(x => x.Clone()).OfType<ObjectSettingEntry>().ToList();
+            result.TaxDetails = TaxDetails?.Select(x => x.Clone()).OfType<TaxDetail>().ToList();
+
+            return result;
+        }
+
+        #endregion
     }
 }

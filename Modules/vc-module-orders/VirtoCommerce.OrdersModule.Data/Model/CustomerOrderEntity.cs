@@ -79,6 +79,8 @@ namespace VirtoCommerce.OrdersModule.Data.Model
         [StringLength(128)]
         public string ShoppingCartId { get; set; }
 
+        #region Navigation Properties
+
         public virtual ObservableCollection<TaxDetailEntity> TaxDetails { get; set; } = new NullCollection<TaxDetailEntity>();
 
         public virtual ObservableCollection<AddressEntity> Addresses { get; set; } = new NullCollection<AddressEntity>();
@@ -94,6 +96,7 @@ namespace VirtoCommerce.OrdersModule.Data.Model
         public virtual ObservableCollection<OrderDynamicPropertyObjectValueEntity> DynamicPropertyObjectValues { get; set; }
             = new NullCollection<OrderDynamicPropertyObjectValueEntity>();
 
+        #endregion
 
         public override OrderOperation ToModel(OrderOperation operation)
         {
@@ -406,6 +409,6 @@ namespace VirtoCommerce.OrdersModule.Data.Model
             yield return ShippingTotalWithTax;
             yield return PaymentTotalWithTax;
             yield return DiscountAmount;
-        }
+        }        
     }
 }

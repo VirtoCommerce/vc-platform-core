@@ -1,3 +1,4 @@
+using System;
 using VirtoCommerce.Platform.Core.Common;
 
 namespace VirtoCommerce.NotificationsModule.Core.Model
@@ -5,7 +6,7 @@ namespace VirtoCommerce.NotificationsModule.Core.Model
     /// <summary>
     /// Template of Notification with a different language
     /// </summary>
-    public abstract class NotificationTemplate : AuditableEntity, IHasLanguageCode
+    public abstract class NotificationTemplate : AuditableEntity, IHasLanguageCode, ICloneable
     {
         /// <summary>
         /// Code of Language
@@ -17,5 +18,14 @@ namespace VirtoCommerce.NotificationsModule.Core.Model
         public abstract string Kind { get; }
 
         public bool IsReadonly { get; set; }
+
+        #region ICloneable members
+
+        public virtual object Clone()
+        {
+            return MemberwiseClone() as NotificationTemplate;
+        }
+
+        #endregion
     }
 }

@@ -22,11 +22,7 @@ namespace VirtoCommerce.PaymentModule.Data.Model
 
         public string TypeName { get; set; }
 
-        #region Navigation Properties
-
         public string StoreId { get; set; }
-
-        #endregion
 
         public virtual PaymentMethod ToModel(PaymentMethod paymentMethod)
         {

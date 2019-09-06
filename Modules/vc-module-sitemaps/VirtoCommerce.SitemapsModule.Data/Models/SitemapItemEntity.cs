@@ -21,12 +21,15 @@ namespace VirtoCommerce.SitemapsModule.Data.Models
         [StringLength(128)]
         public string ObjectType { get; set; }
 
-        public string SitemapId { get; set; }
-
         [StringLength(256)]
         public string UrlTemplate { get; set; }
 
+        #region Navigation Properties
+
+        public string SitemapId { get; set; }
         public virtual SitemapEntity Sitemap { get; set; }
+
+        #endregion
 
         public virtual SitemapItem ToModel(SitemapItem sitemapItem)
         {

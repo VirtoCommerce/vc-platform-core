@@ -20,7 +20,6 @@ namespace VirtoCommerce.CatalogModule.Data.Model
         #region Navigation Properties
 
         public string PropertyId { get; set; }
-
         public virtual PropertyEntity Property { get; set; }
 
         #endregion

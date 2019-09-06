@@ -13,8 +13,10 @@ namespace VirtoCommerce.CatalogModule.Data.Model
         public string Name { get; set; }
 
         #region Navigation Properties
+
         public string PropertyId { get; set; }
         public virtual PropertyEntity Property { get; set; }
+
         #endregion
 
         public virtual PropertyDisplayName ToModel(PropertyDisplayName displayName)

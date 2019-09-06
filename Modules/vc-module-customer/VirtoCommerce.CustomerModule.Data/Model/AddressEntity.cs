@@ -35,7 +35,6 @@ namespace VirtoCommerce.CustomerModule.Data.Model
         [StringLength(128)]
         public string StateProvince { get; set; }
 
-
         [Required]
         [StringLength(128)]
         public string CountryName { get; set; }
@@ -47,10 +46,8 @@ namespace VirtoCommerce.CustomerModule.Data.Model
         [StringLength(128)]
         public string RegionId { get; set; }
 
-
         [StringLength(128)]
         public string RegionName { get; set; }
-
 
         [StringLength(64)]
         public string Type { get; set; }
@@ -73,7 +70,6 @@ namespace VirtoCommerce.CustomerModule.Data.Model
         #region Navigation Properties
 
         public string MemberId { get; set; }
-
         public virtual MemberEntity Member { get; set; }
 
         #endregion
@@ -82,12 +78,10 @@ namespace VirtoCommerce.CustomerModule.Data.Model
 
         public override string ToString()
         {
-            return string.Format("{0} {1}, {2} {3}, {4}, {5} {6} {7}",
-                FirstName, LastName, Line1, Line2, City, StateProvince, PostalCode, CountryName);
-
+            return $"{FirstName} {LastName}, {Line1} {Line2}, {City}, {StateProvince} {PostalCode} {CountryName}";
         }
-        #endregion
 
+        #endregion
 
         public virtual Address ToModel(Address address)
         {
@@ -112,7 +106,7 @@ namespace VirtoCommerce.CustomerModule.Data.Model
         public virtual AddressEntity FromModel(Address address)
         {
             if (address == null)
-                throw new ArgumentNullException("address");
+                throw new ArgumentNullException(nameof(address));
 
             CountryCode = address.CountryCode;
             CountryName = address.CountryName;
@@ -129,6 +123,7 @@ namespace VirtoCommerce.CustomerModule.Data.Model
             Id = address.Key;
             DaytimePhoneNumber = address.Phone;
             Type = address.AddressType.ToString();
+
             return this;
         }
 

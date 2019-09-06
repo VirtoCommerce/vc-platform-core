@@ -1,5 +1,6 @@
 using System;
 using System.Collections.Generic;
+using System.Linq;
 using VirtoCommerce.CoreModule.Core.Common;
 using VirtoCommerce.CoreModule.Core.Tax;
 using VirtoCommerce.Platform.Core.Common;
@@ -9,7 +10,8 @@ using VirtoCommerce.Platform.Core.Swagger;
 namespace VirtoCommerce.OrdersModule.Core.Model
 {
     [SwaggerSchemaId("OrderLineItem")]
-    public class LineItem : AuditableEntity, IHasTaxDetalization, ISupportCancellation, IHasDimension, IHasDynamicProperties, ITaxable, IHasDiscounts
+    public class LineItem : AuditableEntity, IHasTaxDetalization, ISupportCancellation, IHasDimension,
+        IHasDynamicProperties, ITaxable, IHasDiscounts, ICloneable
     {
         /// <summary>
         /// Price id
@@ -29,6 +31,7 @@ namespace VirtoCommerce.OrdersModule.Core.Model
         /// Resulting price with discount for one unit
         /// </summary>
         public virtual decimal PlacedPrice { get; set; }
+
         public virtual decimal PlacedPriceWithTax { get; set; }
 
         public virtual decimal ExtendedPrice { get; set; }
@@ -91,6 +94,7 @@ namespace VirtoCommerce.OrdersModule.Core.Model
         public string OuterId { get; set; }
 
         #region IHaveDimension Members
+
         public string WeightUnit { get; set; }
         public decimal? Weight { get; set; }
 
@@ -98,6 +102,7 @@ namespace VirtoCommerce.OrdersModule.Core.Model
         public decimal? Height { get; set; }
         public decimal? Length { get; set; }
         public decimal? Width { get; set; }
+
         #endregion
 
         #region ISupportCancelation Members
@@ -111,14 +116,19 @@ namespace VirtoCommerce.OrdersModule.Core.Model
         #region IHasDynamicProperties Members
         public string ObjectType => typeof(LineItem).FullName;
         public ICollection<DynamicObjectProperty> DynamicProperties { get; set; }
+
         #endregion
 
         #region IHasDiscounts
+
         public ICollection<Discount> Discounts { get; set; }
+
         #endregion
 
         #region IHaveTaxDetalization Members
+
         public ICollection<TaxDetail> TaxDetails { get; set; }
+
         #endregion
 
         public virtual void ReduceDetails(string responseGroup)
@@ -139,5 +149,31 @@ namespace VirtoCommerce.OrdersModule.Core.Model
                 TaxPercentRate = 0m;
             }
         }
+
+        #region ICloneable members
+
+        public virtual object Clone()
+        {
+            var result = MemberwiseClone() as LineItem;
+
+            if (DynamicProperties != null)
+            {
+                result.DynamicProperties = new List<DynamicObjectProperty>(DynamicProperties.Select(x => x.Clone() as DynamicObjectProperty));
+            }
+
+            if (Discounts != null)
+            {
+                result.Discounts = new List<Discount>(Discounts.Select(x => x.Clone() as Discount));
+            }
+
+            if (TaxDetails != null)
+            {
+                result.TaxDetails = new List<TaxDetail>(TaxDetails.Select(x => x.Clone() as TaxDetail));
+            }
+
+            return result;
+        }
+
+        #endregion
     }
 }

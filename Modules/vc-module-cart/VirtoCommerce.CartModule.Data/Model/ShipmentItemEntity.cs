@@ -22,7 +22,6 @@ namespace VirtoCommerce.CartModule.Data.Model
         public string ShipmentId { get; set; }
         public virtual ShipmentEntity Shipment { get; set; }
 
-
         public virtual ShipmentItem ToModel(ShipmentItem shipmentItem)
         {
             if (shipmentItem == null)

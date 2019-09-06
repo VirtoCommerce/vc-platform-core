@@ -37,6 +37,7 @@ namespace VirtoCommerce.MarketingModule.Data.Model
         public int Priority { get; set; }
 
         public bool IsExclusive { get; set; }
+
         public bool IsAllowCombiningWithSelf { get; set; }
 
         [NotMapped]
@@ -55,7 +56,11 @@ namespace VirtoCommerce.MarketingModule.Data.Model
         [StringLength(128)]
         public string OuterId { get; set; }
 
+        #region Navigation Properties
+
         public virtual ObservableCollection<PromotionStoreEntity> Stores { get; set; } = new NullCollection<PromotionStoreEntity>();
+
+        #endregion
 
         public virtual Promotion ToModel(Promotion promotion)
         {
@@ -175,6 +180,6 @@ namespace VirtoCommerce.MarketingModule.Data.Model
                 var comparer = AnonymousComparer.Create((PromotionStoreEntity entity) => entity.StoreId);
                 Stores.Patch(target.Stores, comparer, (sourceEntity, targetEntity) => targetEntity.StoreId = sourceEntity.StoreId);
             }
-        }
+        }        
     }
 }

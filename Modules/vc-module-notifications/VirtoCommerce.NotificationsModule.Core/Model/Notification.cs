@@ -1,5 +1,7 @@
 using System;
 using System.Collections.Generic;
+using System.Collections.ObjectModel;
+using System.Linq;
 using VirtoCommerce.NotificationsModule.Core.Services;
 using VirtoCommerce.Platform.Core.Common;
 
@@ -8,7 +10,7 @@ namespace VirtoCommerce.NotificationsModule.Core.Model
     /// <summary>
     /// Base class for Notification
     /// </summary>
-    public abstract class Notification : AuditableEntity
+    public abstract class Notification : AuditableEntity, ICloneable
     {
         /// <summary>
         /// For detecting owner
@@ -53,5 +55,19 @@ namespace VirtoCommerce.NotificationsModule.Core.Model
         }
 
         public abstract void SetFromToMembers(string from, string to);
+
+        #region ICloneable members
+
+        public virtual object Clone()
+        {
+            var result = MemberwiseClone() as Notification;
+
+            result.Templates = Templates?.Select(x => x.Clone()).OfType<NotificationTemplate>().ToList();
+            result.TenantIdentity = TenantIdentity?.Clone() as TenantIdentity;
+
+            return result;
+        }
+
+        #endregion
     }
 }

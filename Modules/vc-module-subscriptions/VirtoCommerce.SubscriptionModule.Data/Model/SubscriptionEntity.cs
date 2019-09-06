@@ -171,6 +171,5 @@ namespace VirtoCommerce.SubscriptionModule.Data.Model
             target.OuterId = OuterId;
             target.Comment = Comment;
         }
-
     }
 }
