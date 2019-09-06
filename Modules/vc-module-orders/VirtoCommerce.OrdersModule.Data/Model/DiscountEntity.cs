@@ -24,6 +24,8 @@ namespace VirtoCommerce.OrdersModule.Data.Model
         [StringLength(1024)]
         public string CouponInvalidDescription { get; set; }
 
+        #region Navigation Properties
+
         public virtual CustomerOrderEntity CustomerOrder { get; set; }
         public string CustomerOrderId { get; set; }
 
@@ -36,6 +38,7 @@ namespace VirtoCommerce.OrdersModule.Data.Model
         public virtual PaymentInEntity PaymentIn { get; set; }
         public string PaymentInId { get; set; }
 
+        #endregion
 
         public virtual Discount ToModel(Discount discount)
         {

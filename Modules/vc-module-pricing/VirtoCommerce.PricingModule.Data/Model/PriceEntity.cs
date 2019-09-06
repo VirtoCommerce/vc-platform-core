@@ -29,11 +29,9 @@ namespace VirtoCommerce.PricingModule.Data.Model
         #region Navigation Properties
 
         public string PricelistId { get; set; }
-
         public virtual PricelistEntity Pricelist { get; set; }
 
         #endregion
-
 
         public virtual Price ToModel(Price price)
         {

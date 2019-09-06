@@ -1,11 +1,9 @@
 using System;
-using System.Collections.Generic;
-using System.Text;
 using VirtoCommerce.Platform.Core.Common;
 
 namespace VirtoCommerce.Platform.Core.Assets
 {
-    public class AssetEntry : AuditableEntity
+    public class AssetEntry : AuditableEntity, ICloneable
     {
         /// <summary>
         /// Asset language
@@ -19,5 +17,19 @@ namespace VirtoCommerce.Platform.Core.Assets
         /// User defined grouping (optional)
         /// </summary>
         public string Group { get; set; }
+
+        #region ICloneable members
+
+        public virtual object Clone()
+        {
+            var result = MemberwiseClone() as AssetEntry;
+
+            result.Tenant = Tenant?.Clone() as TenantIdentity;
+            result.BlobInfo = BlobInfo?.Clone() as BlobInfo;
+
+            return result;
+        }
+
+        #endregion
     }
 }

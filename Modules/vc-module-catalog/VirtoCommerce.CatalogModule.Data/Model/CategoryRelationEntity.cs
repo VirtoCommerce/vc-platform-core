@@ -1,5 +1,4 @@
 using System;
-using System.Collections.Generic;
 using VirtoCommerce.CatalogModule.Core.Model;
 using VirtoCommerce.Platform.Core.Common;
 
@@ -8,6 +7,7 @@ namespace VirtoCommerce.CatalogModule.Data.Model
     public class CategoryRelationEntity : Entity
     {
         #region Navigation Properties
+
         public string SourceCategoryId { get; set; }
         public virtual CategoryEntity SourceCategory { get; set; }
 
@@ -16,6 +16,7 @@ namespace VirtoCommerce.CatalogModule.Data.Model
 
         public string TargetCategoryId { get; set; }
         public virtual CategoryEntity TargetCategory { get; set; }
+
         #endregion
 
         public virtual CategoryLink ToModel(CategoryLink link)
@@ -42,9 +43,7 @@ namespace VirtoCommerce.CatalogModule.Data.Model
 
         public virtual void Patch(CategoryRelationEntity target)
         {
-            //Nothing todo. Because we not support change  link
+            //Nothing todo. Because we not support change link
         }
-
     }
-
 }

@@ -1,11 +1,14 @@
+using System;
 using System.Collections.Generic;
+using System.Collections.ObjectModel;
+using System.Linq;
 using VirtoCommerce.CoreModule.Core.Seo;
 using VirtoCommerce.Platform.Core.Common;
 using VirtoCommerce.Platform.Core.DynamicProperties;
 
 namespace VirtoCommerce.CustomerModule.Core.Model
 {
-    public abstract class Member : AuditableEntity, IHasDynamicProperties, ISeoSupport, IHasOuterId
+    public abstract class Member : AuditableEntity, IHasDynamicProperties, ISeoSupport, IHasOuterId, ICloneable
     {
         protected Member()
         {
@@ -71,5 +74,21 @@ namespace VirtoCommerce.CustomerModule.Core.Model
                 DynamicProperties = null;
             }
         }
+
+        #region ICloneable members
+
+        public virtual object Clone()
+        {
+            var result = MemberwiseClone() as Member;
+
+            result.Notes = Notes?.Select(x => x.Clone()).OfType<Note>().ToList();
+            result.Addresses = Addresses?.Select(x => x.Clone()).OfType<Address>().ToList();
+            result.SeoInfos = SeoInfos?.Select(x => x.Clone()).OfType<SeoInfo>().ToList();
+            result.DynamicProperties = DynamicProperties?.Select(x => x.Clone()).OfType<DynamicObjectProperty>().ToList();
+
+            return result;
+        }
+
+        #endregion
     }
 }

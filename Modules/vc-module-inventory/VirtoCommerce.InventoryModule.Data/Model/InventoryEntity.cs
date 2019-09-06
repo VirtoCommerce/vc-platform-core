@@ -24,7 +24,6 @@ namespace VirtoCommerce.InventoryModule.Data.Model
 
         public bool AllowPreorder { get; set; }
 
-
         [Required]
         public int Status { get; set; }
 
@@ -47,12 +46,12 @@ namespace VirtoCommerce.InventoryModule.Data.Model
         [StringLength(128)]
         public string OuterId { get; set; }
 
-
         #region Navigation properties
+
         public string FulfillmentCenterId { get; set; }
         public FulfillmentCenterEntity FulfillmentCenter { get; set; }
-        #endregion
 
+        #endregion
 
         public virtual InventoryInfo ToModel(InventoryInfo inventory)
         {

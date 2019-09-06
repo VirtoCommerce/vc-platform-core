@@ -13,6 +13,11 @@ namespace VirtoCommerce.OrdersModule.Data.Model
 
         public int Quantity { get; set; }
 
+        #region Navigation Properties
+
+        [NotMapped]
+        public LineItem ModelLineItem { get; set; }
+
         public virtual LineItemEntity LineItem { get; set; }
         public string LineItemId { get; set; }
 
@@ -22,8 +27,7 @@ namespace VirtoCommerce.OrdersModule.Data.Model
         public virtual ShipmentPackageEntity ShipmentPackage { get; set; }
         public string ShipmentPackageId { get; set; }
 
-        [NotMapped]
-        public LineItem ModelLineItem { get; set; }
+        #endregion
 
         [StringLength(128)]
         public string OuterId { get; set; }

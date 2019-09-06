@@ -7,7 +7,6 @@ namespace VirtoCommerce.CustomerModule.Data.Model
 {
     public class NoteEntity : AuditableEntity, IHasOuterId
     {
-
         [StringLength(128)]
         public string AuthorName { get; set; }
 
@@ -25,16 +24,16 @@ namespace VirtoCommerce.CustomerModule.Data.Model
         public string OuterId { get; set; }
 
         #region Navigation Properties
+
         public string MemberId { get; set; }
         public virtual MemberEntity Member { get; set; }
 
         #endregion
 
-
         public virtual Note ToModel(Note note)
         {
             if (note == null)
-                throw new ArgumentNullException("note");
+                throw new ArgumentNullException(nameof(note));
 
             note.Id = Id;
             note.CreatedBy = CreatedBy;
@@ -45,13 +44,14 @@ namespace VirtoCommerce.CustomerModule.Data.Model
 
             note.Body = Body;
             note.Title = Title;
+
             return note;
         }
 
         public virtual NoteEntity FromModel(Note note)
         {
             if (note == null)
-                throw new ArgumentNullException("note");
+                throw new ArgumentNullException(nameof(note));
 
             Id = note.Id;
             CreatedBy = note.CreatedBy;
@@ -62,6 +62,7 @@ namespace VirtoCommerce.CustomerModule.Data.Model
 
             AuthorName = note.CreatedBy;
             ModifierName = note.ModifiedBy;
+
             return this;
         }
 

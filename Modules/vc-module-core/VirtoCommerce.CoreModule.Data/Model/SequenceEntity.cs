@@ -3,7 +3,7 @@ using System.ComponentModel.DataAnnotations;
 
 namespace VirtoCommerce.CoreModule.Data.Model
 {
-    public class SequenceEntity 
+    public class SequenceEntity
     {
         [Key]
         [StringLength(256)]

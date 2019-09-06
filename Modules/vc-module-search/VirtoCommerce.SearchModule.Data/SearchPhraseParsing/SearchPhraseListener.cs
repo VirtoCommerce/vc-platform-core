@@ -4,57 +4,57 @@ using VirtoCommerce.Platform.Core.Common;
 using VirtoCommerce.SearchModule.Core.Model;
 using VirtoCommerce.SearchModule.Data.Search.SearchPhraseParsing.Antlr;
 
-namespace VirtoCommerce.SearchModule.Data.Search.SearchPhraseParsing
+namespace VirtoCommerce.SearchModule.Data.SearchPhraseParsing
 {
     public class SearchPhraseListener : SearchPhraseBaseListener
     {
         public IList<string> Keywords { get; } = new List<string>();
         public IList<IFilter> Filters { get; } = new List<IFilter>();
 
-        public override void ExitKeyword(Antlr.SearchPhraseParser.KeywordContext context)
+        public override void ExitKeyword(Search.SearchPhraseParsing.Antlr.SearchPhraseParser.KeywordContext context)
         {
             base.ExitKeyword(context);
-            Keywords.Add(Unescape(context.GetText()));
+            Keywords.Add(UnEscape(context.GetText()));
         }
 
-        public override void ExitAttributeFilter(Antlr.SearchPhraseParser.AttributeFilterContext context)
+        public override void ExitAttributeFilter(Search.SearchPhraseParsing.Antlr.SearchPhraseParser.AttributeFilterContext context)
         {
             base.ExitAttributeFilter(context);
 
-            var fieldNameContext = context.GetChild<Antlr.SearchPhraseParser.FieldNameContext>(0);
-            var attributeValueContext = context.GetChild<Antlr.SearchPhraseParser.AttributeFilterValueContext>(0);
+            var fieldNameContext = context.GetChild<Search.SearchPhraseParsing.Antlr.SearchPhraseParser.FieldNameContext>(0);
+            var attributeValueContext = context.GetChild<Search.SearchPhraseParsing.Antlr.SearchPhraseParser.AttributeFilterValueContext>(0);
 
             if (fieldNameContext != null && attributeValueContext != null)
             {
-                var values = attributeValueContext.children.OfType<Antlr.SearchPhraseParser.StringContext>().ToArray();
+                var values = attributeValueContext.children.OfType<Search.SearchPhraseParsing.Antlr.SearchPhraseParser.StringContext>().ToArray();
 
                 var filter = new TermFilter
                 {
-                    FieldName = Unescape(fieldNameContext.GetText()),
-                    Values = values.Select(v => Unescape(v.GetText())).ToArray(),
+                    FieldName = UnEscape(fieldNameContext.GetText()),
+                    Values = values.Select(v => UnEscape(v.GetText())).ToArray(),
                 };
 
                 Filters.Add(filter);
             }
         }
 
-        public override void ExitRangeFilter(Antlr.SearchPhraseParser.RangeFilterContext context)
+        public override void ExitRangeFilter(Search.SearchPhraseParsing.Antlr.SearchPhraseParser.RangeFilterContext context)
         {
             base.ExitRangeFilter(context);
 
-            var fieldNameContext = context.GetChild<Antlr.SearchPhraseParser.FieldNameContext>(0);
-            var rangeValueContext = context.GetChild<Antlr.SearchPhraseParser.RangeFilterValueContext>(0);
+            var fieldNameContext = context.GetChild<Search.SearchPhraseParsing.Antlr.SearchPhraseParser.FieldNameContext>(0);
+            var rangeValueContext = context.GetChild<Search.SearchPhraseParsing.Antlr.SearchPhraseParser.RangeFilterValueContext>(0);
 
             if (fieldNameContext != null && rangeValueContext != null)
             {
                 var values = rangeValueContext.children
-                    .OfType<Antlr.SearchPhraseParser.RangeContext>()
+                    .OfType<Search.SearchPhraseParsing.Antlr.SearchPhraseParser.RangeContext>()
                     .Select(GetRangeFilterValue)
                     .ToArray();
 
                 var filter = new RangeFilter
                 {
-                    FieldName = Unescape(fieldNameContext.GetText()),
+                    FieldName = UnEscape(fieldNameContext.GetText()),
                     Values = values,
                 };
 
@@ -62,23 +62,23 @@ namespace VirtoCommerce.SearchModule.Data.Search.SearchPhraseParsing
             }
         }
 
-        protected virtual RangeFilterValue GetRangeFilterValue(Antlr.SearchPhraseParser.RangeContext context)
+        protected virtual RangeFilterValue GetRangeFilterValue(Search.SearchPhraseParsing.Antlr.SearchPhraseParser.RangeContext context)
         {
-            var lower = context.GetChild<Antlr.SearchPhraseParser.LowerContext>(0)?.GetText();
-            var upper = context.GetChild<Antlr.SearchPhraseParser.UpperContext>(0)?.GetText();
-            var rangeStart = context.GetChild<Antlr.SearchPhraseParser.RangeStartContext>(0)?.GetText();
-            var rangeEnd = context.GetChild<Antlr.SearchPhraseParser.RangeEndContext>(0)?.GetText();
+            var lower = context.GetChild<Search.SearchPhraseParsing.Antlr.SearchPhraseParser.LowerContext>(0)?.GetText();
+            var upper = context.GetChild<Search.SearchPhraseParsing.Antlr.SearchPhraseParser.UpperContext>(0)?.GetText();
+            var rangeStart = context.GetChild<Search.SearchPhraseParsing.Antlr.SearchPhraseParser.RangeStartContext>(0)?.GetText();
+            var rangeEnd = context.GetChild<Search.SearchPhraseParsing.Antlr.SearchPhraseParser.RangeEndContext>(0)?.GetText();
 
             return new RangeFilterValue
             {
-                Lower = Unescape(lower),
-                Upper = Unescape(upper),
+                Lower = UnEscape(lower),
+                Upper = UnEscape(upper),
                 IncludeLower = rangeStart.EqualsInvariant("["),
                 IncludeUpper = rangeEnd.EqualsInvariant("]"),
             };
         }
 
-        protected virtual string Unescape(string value)
+        protected virtual string UnEscape(string value)
         {
             return string.IsNullOrEmpty(value) ? value : value.Trim('"').Replace("\\r", "\r").Replace("\\n", "\n").Replace("\\t", "\t").Replace("\\\\", "\\");
         }

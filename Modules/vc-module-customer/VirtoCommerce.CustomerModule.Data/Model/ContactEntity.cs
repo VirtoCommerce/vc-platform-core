@@ -15,6 +15,7 @@ namespace VirtoCommerce.CustomerModule.Data.Model
         }
 
         #region UserProfile members
+
         [StringLength(128)]
         public string FirstName { get; set; }
 

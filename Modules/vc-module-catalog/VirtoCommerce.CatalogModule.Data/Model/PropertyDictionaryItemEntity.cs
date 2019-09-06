@@ -9,11 +9,6 @@ namespace VirtoCommerce.CatalogModule.Data.Model
 {
     public class PropertyDictionaryItemEntity : Entity
     {
-        public PropertyDictionaryItemEntity()
-        {
-            DictionaryItemValues = new NullCollection<PropertyDictionaryValueEntity>();
-        }
-
         [StringLength(512)]
         [Required]
         public string Alias { get; set; }
@@ -21,11 +16,14 @@ namespace VirtoCommerce.CatalogModule.Data.Model
         public int SortOrder { get; set; }
 
         #region Navigation Properties
+
         public string PropertyId { get; set; }
         public virtual PropertyEntity Property { get; set; }
-        #endregion
 
         public ObservableCollection<PropertyDictionaryValueEntity> DictionaryItemValues { get; set; }
+            = new NullCollection<PropertyDictionaryValueEntity>();
+
+        #endregion
 
         public virtual PropertyDictionaryItem ToModel(PropertyDictionaryItem propDictItem)
         {
@@ -58,6 +56,7 @@ namespace VirtoCommerce.CatalogModule.Data.Model
             {
                 DictionaryItemValues = new ObservableCollection<PropertyDictionaryValueEntity>(propDictItem.LocalizedValues.Select(x => AbstractTypeFactory<PropertyDictionaryValueEntity>.TryCreateInstance().FromModel(x, pkMap)));
             }
+
             return this;
         }
 
@@ -71,6 +70,5 @@ namespace VirtoCommerce.CatalogModule.Data.Model
                 DictionaryItemValues.Patch(target.DictionaryItemValues, comparer, (sourceDictItem, targetDictItem) => sourceDictItem.Patch(targetDictItem));
             }
         }
-
     }
 }

@@ -1,5 +1,7 @@
 using System;
 using System.Collections.Generic;
+using System.Collections.ObjectModel;
+using System.Linq;
 using VirtoCommerce.CoreModule.Core.Common;
 using VirtoCommerce.CoreModule.Core.Tax;
 using VirtoCommerce.Platform.Core.Common;
@@ -8,7 +10,7 @@ using VirtoCommerce.Platform.Core.Security;
 
 namespace VirtoCommerce.OrdersModule.Core.Model
 {
-    public class CustomerOrder : OrderOperation, IHasTaxDetalization, ISupportSecurityScopes, ITaxable, IHasLanguage, IHasDiscounts
+    public class CustomerOrder : OrderOperation, IHasTaxDetalization, ISupportSecurityScopes, ITaxable, IHasLanguage, IHasDiscounts, ICloneable
     {
         public string CustomerId { get; set; }
         public string CustomerName { get; set; }
@@ -204,5 +206,23 @@ namespace VirtoCommerce.OrdersModule.Core.Model
             }
 
         }
+
+        #region ICloneable members
+
+        public override object Clone()
+        {
+            var result = base.Clone() as CustomerOrder;
+
+                result.TaxDetails = TaxDetails?.Select(x => x.Clone()).OfType<TaxDetail>().ToList();
+                result.Addresses = Addresses?.Select(x => x.Clone()).OfType<Address>().ToList();
+                result.InPayments = InPayments?.Select(x => x.Clone()).OfType<PaymentIn>().ToList();
+                result.Items = Items?.Select(x => x.Clone()).OfType<LineItem>().ToList();
+                result.Shipments = Shipments?.Select(x => x.Clone()).OfType<Shipment>().ToList();
+                result.Discounts = Discounts?.Select(x => x.Clone()).OfType<Discount>().ToList();
+
+            return result;
+        }
+
+        #endregion
     }
 }

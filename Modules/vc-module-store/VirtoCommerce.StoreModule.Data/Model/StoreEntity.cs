@@ -11,17 +11,6 @@ namespace VirtoCommerce.StoreModule.Data.Model
 {
     public class StoreEntity : AuditableEntity, IHasOuterId
     {
-        public StoreEntity()
-        {
-            Languages = new NullCollection<StoreLanguageEntity>();
-            Currencies = new NullCollection<StoreCurrencyEntity>();
-
-            TrustedGroups = new NullCollection<StoreTrustedGroupEntity>();
-            FulfillmentCenters = new NullCollection<StoreFulfillmentCenterEntity>();
-            SeoInfos = new NullCollection<SeoInfoEntity>();
-            DynamicPropertyObjectValues = new NullCollection<StoreDynamicPropertyObjectValueEntity>();
-        }
-
         [Required]
         [StringLength(128)]
         public string Name { get; set; }
@@ -77,14 +66,22 @@ namespace VirtoCommerce.StoreModule.Data.Model
         #region Navigation Properties
 
         public virtual ObservableCollection<StoreLanguageEntity> Languages { get; set; }
+            = new NullCollection<StoreLanguageEntity>();
 
         public virtual ObservableCollection<StoreCurrencyEntity> Currencies { get; set; }
-        public virtual ObservableCollection<StoreTrustedGroupEntity> TrustedGroups { get; set; }
+            = new NullCollection<StoreCurrencyEntity>();
 
+        public virtual ObservableCollection<StoreTrustedGroupEntity> TrustedGroups { get; set; }
+            = new NullCollection<StoreTrustedGroupEntity>();
 
         public virtual ObservableCollection<StoreFulfillmentCenterEntity> FulfillmentCenters { get; set; }
+            = new NullCollection<StoreFulfillmentCenterEntity>();
+
         public virtual ObservableCollection<SeoInfoEntity> SeoInfos { get; set; }
+            = new NullCollection<SeoInfoEntity>();
+
         public virtual ObservableCollection<StoreDynamicPropertyObjectValueEntity> DynamicPropertyObjectValues { get; set; }
+            = new NullCollection<StoreDynamicPropertyObjectValueEntity>();
 
         #endregion
 

@@ -1,4 +1,7 @@
+using System;
 using System.Collections.Generic;
+using System.Collections.ObjectModel;
+using System.Linq;
 using VirtoCommerce.CoreModule.Core.Common;
 using VirtoCommerce.CoreModule.Core.Tax;
 using VirtoCommerce.Platform.Core.Common;
@@ -6,7 +9,7 @@ using VirtoCommerce.Platform.Core.DynamicProperties;
 
 namespace VirtoCommerce.CartModule.Core.Model
 {
-    public class Payment : AuditableEntity, IHasTaxDetalization, ITaxable, IHasDiscounts, IHasDynamicProperties
+    public class Payment : AuditableEntity, IHasTaxDetalization, ITaxable, IHasDiscounts, IHasDynamicProperties, ICloneable
     {
         public string Currency { get; set; }
         public string PaymentGatewayCode { get; set; }
@@ -38,9 +41,7 @@ namespace VirtoCommerce.CartModule.Core.Model
         public decimal TaxPercentRate { get; set; }
 
         #endregion
-
-
-
+               
         #region IHasDiscounts
         public ICollection<Discount> Discounts { get; set; }
         #endregion
@@ -55,5 +56,17 @@ namespace VirtoCommerce.CartModule.Core.Model
         public string ObjectType => typeof(Payment).FullName;
         public ICollection<DynamicObjectProperty> DynamicProperties { get; set; }
         #endregion
+
+        public object Clone()
+        {
+            var result = MemberwiseClone() as Payment;
+
+            result.BillingAddress = BillingAddress?.Clone() as Address;
+            result.Discounts = Discounts?.Select(x => x.Clone()).OfType<Discount>().ToList();
+            result.TaxDetails = TaxDetails?.Select(x => x.Clone()).OfType<TaxDetail>().ToList();
+            result.DynamicProperties = DynamicProperties?.Select(x => x.Clone()).OfType<DynamicObjectProperty>().ToList();
+
+            return result;
+        }
     }
 }

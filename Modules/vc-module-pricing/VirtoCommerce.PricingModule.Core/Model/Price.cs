@@ -40,6 +40,9 @@ namespace VirtoCommerce.PricingModule.Core.Model
         public virtual object Clone()
         {
             var result = MemberwiseClone() as Price;
+
+            result.Pricelist = Pricelist?.Clone() as Pricelist;
+
             return result;
         }
 

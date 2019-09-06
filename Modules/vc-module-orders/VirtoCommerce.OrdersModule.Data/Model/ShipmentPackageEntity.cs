@@ -23,11 +23,14 @@ namespace VirtoCommerce.OrdersModule.Data.Model
         public decimal? Length { get; set; }
         public decimal? Width { get; set; }
 
-        public virtual ShipmentEntity Shipment { get; set; }
+        #region Navigation Properties
+
         public string ShipmentId { get; set; }
+        public virtual ShipmentEntity Shipment { get; set; }
 
         public virtual ObservableCollection<ShipmentItemEntity> Items { get; set; } = new NullCollection<ShipmentItemEntity>();
 
+        #endregion
 
         public virtual ShipmentPackage ToModel(ShipmentPackage package)
         {

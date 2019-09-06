@@ -18,7 +18,11 @@ namespace VirtoCommerce.ContentModule.Data.Model
         [StringLength(128)]
         public string OuterId { get; set; }
 
+        #region Navigation Properties
+
         public virtual ObservableCollection<MenuLinkEntity> MenuLinks { get; set; } = new ObservableCollection<MenuLinkEntity>();
+
+        #endregion
 
         public void Patch(MenuLinkListEntity target)
         {
@@ -43,7 +47,9 @@ namespace VirtoCommerce.ContentModule.Data.Model
 
             if (MenuLinks.Any())
             {
-                menuLinkList.MenuLinks = MenuLinks.OrderByDescending(l => l.Priority).Select(s => s.ToModel(AbstractTypeFactory<MenuLink>.TryCreateInstance())).ToArray();
+                menuLinkList.MenuLinks = MenuLinks.OrderByDescending(l => l.Priority)
+                    .Select(s => s.ToModel(AbstractTypeFactory<MenuLink>.TryCreateInstance()))
+                    .ToArray();
             }
 
             return menuLinkList;

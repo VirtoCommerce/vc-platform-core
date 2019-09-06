@@ -1,3 +1,4 @@
+using System;
 using System.ComponentModel.DataAnnotations;
 using VirtoCommerce.Platform.Core.Common;
 
@@ -19,11 +20,15 @@ namespace VirtoCommerce.NotificationsModule.Data.Model
         /// </summary>
         public NotificationRecipientType RecipientType { get; set; }
 
+        #region Navigation Properties
+
         /// <summary>
         /// Id of notification
         /// </summary>
         public string NotificationId { get; set; }
         public EmailNotificationEntity Notification { get; set; }
+
+        #endregion
 
         public virtual NotificationEmailRecipientEntity FromModel(string emailAddress, NotificationRecipientType recipientType)
         {
@@ -36,6 +41,6 @@ namespace VirtoCommerce.NotificationsModule.Data.Model
         public virtual void Patch(NotificationEmailRecipientEntity emailAddress)
         {
             emailAddress.EmailAddress = EmailAddress;
-        }
+        }       
     }
 }

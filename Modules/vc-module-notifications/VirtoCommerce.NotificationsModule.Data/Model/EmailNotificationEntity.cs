@@ -1,3 +1,4 @@
+using System;
 using System.Collections.ObjectModel;
 using System.ComponentModel.DataAnnotations;
 using System.Linq;
@@ -20,9 +21,15 @@ namespace VirtoCommerce.NotificationsModule.Data.Model
         [StringLength(128)]
         public string To { get; set; }
 
-        public virtual ObservableCollection<NotificationEmailRecipientEntity> Recipients { get; set; } = new NullCollection<NotificationEmailRecipientEntity>();
-        public virtual ObservableCollection<EmailAttachmentEntity> Attachments { get; set; } = new NullCollection<EmailAttachmentEntity>();
+        #region Navigation Properties
 
+        public virtual ObservableCollection<NotificationEmailRecipientEntity> Recipients { get; set; }
+            = new NullCollection<NotificationEmailRecipientEntity>();
+
+        public virtual ObservableCollection<EmailAttachmentEntity> Attachments { get; set; }
+            = new NullCollection<EmailAttachmentEntity>();
+
+        #endregion
 
         public override Notification ToModel(Notification notification)
         {
@@ -102,7 +109,7 @@ namespace VirtoCommerce.NotificationsModule.Data.Model
             }
 
             base.Patch(notification);
-        }
+        }        
     }
 
     /// <summary>

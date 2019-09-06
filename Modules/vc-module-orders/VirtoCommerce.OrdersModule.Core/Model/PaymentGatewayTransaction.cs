@@ -4,7 +4,7 @@ using VirtoCommerce.Platform.Core.Common;
 namespace VirtoCommerce.OrdersModule.Core.Model
 {
     //Container for the interactions associated with the payment gateway, which includes details for each action performed for the payment.
-    public class PaymentGatewayTransaction : AuditableEntity
+    public class PaymentGatewayTransaction : AuditableEntity, ICloneable
     {
         public decimal Amount { get; set; }
         public string CurrencyCode { get; set; }
@@ -49,5 +49,16 @@ namespace VirtoCommerce.OrdersModule.Core.Model
         public string Status { get; set; }
 
         public string Note { get; set; }
+
+
+
+        #region ICloneable members
+
+        public virtual object Clone()
+        {
+            return MemberwiseClone() as PaymentGatewayTransaction;
+        }
+
+        #endregion
     }
 }

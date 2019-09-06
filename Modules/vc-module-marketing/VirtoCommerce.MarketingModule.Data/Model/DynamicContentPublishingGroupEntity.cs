@@ -12,12 +12,6 @@ namespace VirtoCommerce.MarketingModule.Data.Model
 {
     public class DynamicContentPublishingGroupEntity : AuditableEntity, IHasOuterId
     {
-        public DynamicContentPublishingGroupEntity()
-        {
-            ContentItems = new NullCollection<PublishingGroupContentItemEntity>();
-            ContentPlaces = new NullCollection<PublishingGroupContentPlaceEntity>();
-        }
-
         [Required]
         [StringLength(128)]
         public string Name { get; set; }
@@ -44,11 +38,14 @@ namespace VirtoCommerce.MarketingModule.Data.Model
         public string OuterId { get; set; }
 
         #region Navigation Properties
+
         public virtual ObservableCollection<PublishingGroupContentItemEntity> ContentItems { get; set; }
+            = new NullCollection<PublishingGroupContentItemEntity>();
 
         public virtual ObservableCollection<PublishingGroupContentPlaceEntity> ContentPlaces { get; set; }
-        #endregion
+            = new NullCollection<PublishingGroupContentPlaceEntity>();
 
+        #endregion
 
         public virtual DynamicContentPublication ToModel(DynamicContentPublication publication)
         {

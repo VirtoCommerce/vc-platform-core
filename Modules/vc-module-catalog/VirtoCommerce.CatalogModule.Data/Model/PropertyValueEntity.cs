@@ -9,13 +9,10 @@ using VirtoCommerce.Platform.Core.Common;
 
 namespace VirtoCommerce.CatalogModule.Data.Model
 {
-
     public class PropertyValueEntity : AuditableEntity, IHasOuterId
     {
-
         [NotMapped]
         public string Alias { get; set; }
-
 
         [StringLength(64)]
         public string Name { get; set; }
@@ -42,8 +39,8 @@ namespace VirtoCommerce.CatalogModule.Data.Model
         [StringLength(128)]
         public string OuterId { get; set; }
 
-
         #region Navigation Properties
+
         public string ItemId { get; set; }
         public virtual ItemEntity CatalogItem { get; set; }
 
@@ -121,8 +118,8 @@ namespace VirtoCommerce.CatalogModule.Data.Model
                     result.Add(group.FirstOrDefault());
                 }
             }
-            return result;
 
+            return result;
         }
 
         public virtual PropertyValueEntity FromModel(PropertyValue propValue, PrimaryKeyResolvingMap pkMap)
@@ -164,7 +161,6 @@ namespace VirtoCommerce.CatalogModule.Data.Model
             target.ShortTextValue = ShortTextValue;
             target.ValueType = ValueType;
         }
-
 
         protected virtual object GetValue(PropertyValueType valueType)
         {

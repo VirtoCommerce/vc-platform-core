@@ -1,4 +1,3 @@
-using System;
 using System.Collections.Generic;
 using System.Threading.Tasks;
 using Moq;
@@ -12,9 +11,8 @@ using VirtoCommerce.StoreModule.Core.Model;
 using VirtoCommerce.StoreModule.Core.Services;
 using Xunit;
 
-namespace VirtoCommerce.OrderModule.Test
+namespace VirtoCommerce.OrdersModule.Tests
 {
-    [CLSCompliant(false)]
     [Trait("Category", "CI")]
     public class OrderInventoryAdjustmentTests
     {

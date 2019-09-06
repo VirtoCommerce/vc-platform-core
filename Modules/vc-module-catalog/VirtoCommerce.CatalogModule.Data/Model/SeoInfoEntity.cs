@@ -1,3 +1,4 @@
+using System;
 using System.ComponentModel.DataAnnotations;
 using VirtoCommerce.CoreModule.Core.Seo;
 using VirtoCommerce.Platform.Core.Common;
@@ -32,11 +33,13 @@ namespace VirtoCommerce.CatalogModule.Data.Model
         public string ImageAltDescription { get; set; }
 
         #region Navigation Properties
+
         public string ItemId { get; set; }
         public virtual ItemEntity Item { get; set; }
 
         public string CategoryId { get; set; }
         public virtual CategoryEntity Category { get; set; }
+
         #endregion
 
         public virtual SeoInfo ToModel(SeoInfo seoInfo)

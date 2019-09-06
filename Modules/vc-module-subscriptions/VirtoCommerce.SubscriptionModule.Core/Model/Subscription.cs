@@ -1,5 +1,7 @@
 using System;
 using System.Collections.Generic;
+using System.Collections.ObjectModel;
+using System.Linq;
 using VirtoCommerce.CoreModule.Core.Common;
 using VirtoCommerce.OrdersModule.Core.Model;
 using VirtoCommerce.Platform.Core.ChangeLog;
@@ -7,7 +9,7 @@ using VirtoCommerce.Platform.Core.Common;
 
 namespace VirtoCommerce.SubscriptionModule.Core.Model
 {
-    public class Subscription : AuditableEntity, IHasChangesHistory, ISupportCancellation, IHasOuterId
+    public class Subscription : AuditableEntity, IHasChangesHistory, ISupportCancellation, IHasOuterId, ICloneable
     {
         public string StoreId { get; set; }
 
@@ -92,6 +94,19 @@ namespace VirtoCommerce.SubscriptionModule.Core.Model
         public string CancelReason { get; set; }
         #endregion
 
+        #region ICloneable members
 
+        public virtual object Clone()
+        {
+            var result = MemberwiseClone() as Subscription;
+
+            result.CustomerOrderPrototype = CustomerOrderPrototype?.Clone() as CustomerOrder;
+            result.CustomerOrders = CustomerOrders?.Select(x => x.Clone()).OfType<CustomerOrder>().ToList();
+            result.OperationsLog = OperationsLog?.Select(x => x.Clone()).OfType<OperationLog>().ToList();
+
+            return result;
+        }
+
+        #endregion
     }
 }

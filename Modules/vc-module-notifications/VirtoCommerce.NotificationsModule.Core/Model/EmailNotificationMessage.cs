@@ -1,4 +1,6 @@
 using System.Collections.Generic;
+using System.Collections.ObjectModel;
+using System.Linq;
 
 namespace VirtoCommerce.NotificationsModule.Core.Model
 {
@@ -45,5 +47,19 @@ namespace VirtoCommerce.NotificationsModule.Core.Model
         public string Body { get; set; }
 
         public IList<EmailAttachment> Attachments { get; set; }
+
+
+        #region ICloneable members
+
+        public override object Clone()
+        {
+            var result = base.Clone() as EmailNotificationMessage;
+
+            result.Attachments = Attachments?.Select(x => x.Clone()).OfType<EmailAttachment>().ToList();
+
+            return result;
+        }
+
+        #endregion
     }
 }

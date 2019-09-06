@@ -1,4 +1,7 @@
+using System;
 using System.Collections.Generic;
+using System.Collections.ObjectModel;
+using System.Linq;
 using VirtoCommerce.CoreModule.Core.Common;
 using VirtoCommerce.CoreModule.Core.Tax;
 using VirtoCommerce.Platform.Core.Common;
@@ -8,7 +11,7 @@ using VirtoCommerce.ShippingModule.Core.Model;
 namespace VirtoCommerce.OrdersModule.Core.Model
 {
     [SwaggerSchemaId("OrderShipment")]
-    public class Shipment : OrderOperation, IHasTaxDetalization, ISupportCancellation, ITaxable, IHasDiscounts
+    public class Shipment : OrderOperation, IHasTaxDetalization, ISupportCancellation, ITaxable, IHasDiscounts, ICloneable
     {
         public string OrganizationId { get; set; }
         public string OrganizationName { get; set; }
@@ -118,5 +121,26 @@ namespace VirtoCommerce.OrdersModule.Core.Model
             }
 
         }
+
+        #region ICloneable members
+
+        public override object Clone()
+        {
+            var result = base.Clone() as Shipment;
+
+            result.DeliveryAddress = DeliveryAddress?.Clone() as Address;
+            result.ShippingMethod = ShippingMethod?.Clone() as ShippingMethod;
+            result.CustomerOrder = CustomerOrder?.Clone() as CustomerOrder;
+
+            result.Items = Items?.Select(x => x.Clone()).OfType<ShipmentItem>().ToList();
+            result.Packages = Packages?.Select(x => x.Clone()).OfType<ShipmentPackage>().ToList();
+            result.InPayments = InPayments?.Select(x => x.Clone()).OfType<PaymentIn>().ToList();
+            result.Discounts = Discounts?.Select(x => x.Clone()).OfType<Discount>().ToList();
+            result.TaxDetails = TaxDetails?.Select(x => x.Clone()).OfType<TaxDetail>().ToList();
+
+            return result;
+        }
+
+        #endregion
     }
 }

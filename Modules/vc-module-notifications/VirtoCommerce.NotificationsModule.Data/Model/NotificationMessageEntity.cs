@@ -63,6 +63,8 @@ namespace VirtoCommerce.NotificationsModule.Data.Model
         [StringLength(10)]
         public string LanguageCode { get; set; }
 
+        #region Navigation Properties
+
         /// <summary>
         /// Id of notification
         /// </summary>
@@ -71,6 +73,8 @@ namespace VirtoCommerce.NotificationsModule.Data.Model
         /// Notification property
         /// </summary>
         public NotificationEntity Notification { get; set; }
+
+        #endregion
 
         public virtual NotificationMessage ToModel(NotificationMessage message)
         {
@@ -131,6 +135,6 @@ namespace VirtoCommerce.NotificationsModule.Data.Model
             message.LastSendError = LastSendError;
             message.LastSendAttemptDate = LastSendAttemptDate;
             message.SendDate = SendDate;
-        }
+        }        
     }
 }

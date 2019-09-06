@@ -11,19 +11,6 @@ namespace VirtoCommerce.CatalogModule.Data.Model
 {
     public class ItemEntity : AuditableEntity, IHasOuterId
     {
-        public ItemEntity()
-        {
-            CategoryLinks = new NullCollection<CategoryItemRelationEntity>();
-            Images = new NullCollection<ImageEntity>();
-            Assets = new NullCollection<AssetEntity>();
-            EditorialReviews = new NullCollection<EditorialReviewEntity>();
-            ItemPropertyValues = new NullCollection<PropertyValueEntity>();
-            Childrens = new NullCollection<ItemEntity>();
-            Associations = new NullCollection<AssociationEntity>();
-            ReferencedAssociations = new NullCollection<AssociationEntity>();
-            SeoInfos = new NullCollection<SeoInfoEntity>();
-        }
-
         [StringLength(1024)]
         [Required]
         public string Name { get; set; }
@@ -43,7 +30,6 @@ namespace VirtoCommerce.CatalogModule.Data.Model
         public decimal MaxQuantity { get; set; }
 
         public bool TrackInventory { get; set; }
-
 
         [StringLength(128)]
         public string PackageType { get; set; }
@@ -90,22 +76,6 @@ namespace VirtoCommerce.CatalogModule.Data.Model
 
         #region Navigation Properties
 
-        public virtual ObservableCollection<CategoryItemRelationEntity> CategoryLinks { get; set; }
-
-        public virtual ObservableCollection<AssetEntity> Assets { get; set; }
-
-        public virtual ObservableCollection<ImageEntity> Images { get; set; }
-
-        public virtual ObservableCollection<AssociationEntity> Associations { get; set; }
-
-        public virtual ObservableCollection<AssociationEntity> ReferencedAssociations { get; set; }
-
-        public virtual ObservableCollection<EditorialReviewEntity> EditorialReviews { get; set; }
-
-        public virtual ObservableCollection<PropertyValueEntity> ItemPropertyValues { get; set; }
-
-        public virtual ObservableCollection<SeoInfoEntity> SeoInfos { get; set; }
-
         public string CatalogId { get; set; }
         public virtual CatalogEntity Catalog { get; set; }
 
@@ -115,9 +85,34 @@ namespace VirtoCommerce.CatalogModule.Data.Model
         public string ParentId { get; set; }
         public virtual ItemEntity Parent { get; set; }
 
-        public virtual ObservableCollection<ItemEntity> Childrens { get; set; }
-        #endregion
+        public virtual ObservableCollection<CategoryItemRelationEntity> CategoryLinks { get; set; }
+            = new NullCollection<CategoryItemRelationEntity>();
 
+        public virtual ObservableCollection<AssetEntity> Assets { get; set; }
+            = new NullCollection<AssetEntity>();
+
+        public virtual ObservableCollection<ImageEntity> Images { get; set; }
+            = new NullCollection<ImageEntity>();
+
+        public virtual ObservableCollection<AssociationEntity> Associations { get; set; }
+            = new NullCollection<AssociationEntity>();
+
+        public virtual ObservableCollection<AssociationEntity> ReferencedAssociations { get; set; }
+            = new NullCollection<AssociationEntity>();
+
+        public virtual ObservableCollection<EditorialReviewEntity> EditorialReviews { get; set; }
+            = new NullCollection<EditorialReviewEntity>();
+
+        public virtual ObservableCollection<PropertyValueEntity> ItemPropertyValues { get; set; }
+            = new NullCollection<PropertyValueEntity>();
+
+        public virtual ObservableCollection<SeoInfoEntity> SeoInfos { get; set; }
+            = new NullCollection<SeoInfoEntity>();
+
+        public virtual ObservableCollection<ItemEntity> Childrens { get; set; }
+            = new NullCollection<ItemEntity>();
+
+        #endregion
 
         public virtual CatalogProduct ToModel(CatalogProduct product, bool convertChildrens = true, bool convertAssociations = true)
         {
@@ -125,7 +120,6 @@ namespace VirtoCommerce.CatalogModule.Data.Model
             {
                 throw new ArgumentNullException(nameof(product));
             }
-
 
             product.Id = Id;
             product.CreatedDate = CreatedDate;

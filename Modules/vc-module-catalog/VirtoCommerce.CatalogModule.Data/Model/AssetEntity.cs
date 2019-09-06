@@ -7,7 +7,6 @@ namespace VirtoCommerce.CatalogModule.Data.Model
 {
     public class AssetEntity : AuditableEntity, IHasOuterId
     {
-
         [StringLength(2083)]
         [Required]
         public string Url { get; set; }
@@ -26,14 +25,12 @@ namespace VirtoCommerce.CatalogModule.Data.Model
         [StringLength(128)]
         public string OuterId { get; set; }
 
-
         #region Navigation Properties
 
         public string ItemId { get; set; }
         public virtual ItemEntity CatalogItem { get; set; }
 
         #endregion
-
 
         public virtual Asset ToModel(Asset asset)
         {
@@ -54,7 +51,6 @@ namespace VirtoCommerce.CatalogModule.Data.Model
             asset.Size = Size;
 
             return asset;
-
         }
 
         public virtual AssetEntity FromModel(Asset asset, PrimaryKeyResolvingMap pkMap)
@@ -88,7 +84,5 @@ namespace VirtoCommerce.CatalogModule.Data.Model
             target.Url = Url;
             target.Size = Size;
         }
-
-
     }
 }

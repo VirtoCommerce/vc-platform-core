@@ -1,3 +1,4 @@
+using System;
 using System.ComponentModel.DataAnnotations;
 using VirtoCommerce.Platform.Core.Common;
 
@@ -8,7 +9,6 @@ namespace VirtoCommerce.CartModule.Data.Model
         [StringLength(64)]
         public string Code { get; set; }
 
-        // Navigation properties
         public string ShoppingCartId { get; set; }
         public virtual ShoppingCartEntity ShoppingCart { get; set; }
     }

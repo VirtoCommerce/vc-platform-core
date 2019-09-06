@@ -1,3 +1,4 @@
+using System;
 using System.ComponentModel.DataAnnotations;
 using VirtoCommerce.ContentModule.Core.Model;
 using VirtoCommerce.Platform.Core.Common;
@@ -20,11 +21,16 @@ namespace VirtoCommerce.ContentModule.Data.Model
         public string AssociatedObjectName { get; set; }
         [StringLength(128)]
         public string AssociatedObjectId { get; set; }
-        public virtual MenuLinkListEntity MenuLinkList { get; set; }
+
+        #region Navigation Properties
+
         public string MenuLinkListId { get; set; }
+        public virtual MenuLinkListEntity MenuLinkList { get; set; }
+
+        #endregion
+
         [StringLength(128)]
         public string OuterId { get; set; }
-
 
         public void Patch(MenuLinkEntity target)
         {
@@ -53,7 +59,6 @@ namespace VirtoCommerce.ContentModule.Data.Model
             return link;
         }
 
-
         public MenuLinkEntity FromModel(MenuLink link)
         {
             Id = link.Id;
@@ -69,6 +74,5 @@ namespace VirtoCommerce.ContentModule.Data.Model
 
             return this;
         }
-
     }
 }

@@ -1,3 +1,4 @@
+using System;
 using System.ComponentModel.DataAnnotations;
 using VirtoCommerce.InventoryModule.Core.Model;
 using VirtoCommerce.Platform.Core.Common;
@@ -113,7 +114,6 @@ namespace VirtoCommerce.InventoryModule.Data.Model
             GeoLocation = center.GeoLocation;
 
             return this;
-
         }
 
         public virtual void Patch(FulfillmentCenterEntity target)

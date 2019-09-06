@@ -3,7 +3,7 @@ using VirtoCommerce.Platform.Core.Common;
 
 namespace VirtoCommerce.InventoryModule.Core.Model
 {
-    public class InventoryInfo : AuditableEntity
+    public class InventoryInfo : AuditableEntity, ICloneable
     {
         public string FulfillmentCenterId { get; set; }
         public FulfillmentCenter FulfillmentCenter { get; set; }
@@ -37,5 +37,21 @@ namespace VirtoCommerce.InventoryModule.Core.Model
             }
             return result;
         }
+
+        #region ICloneable members
+
+        public virtual object Clone()
+        {
+            var result = MemberwiseClone() as InventoryInfo;
+
+            if (FulfillmentCenter != null)
+            {
+                result.FulfillmentCenter = FulfillmentCenter.Clone() as FulfillmentCenter;
+            }
+
+            return result;
+        }
+
+        #endregion
     }
 }

@@ -38,10 +38,6 @@ namespace VirtoCommerce.OrdersModule.Data.Model
         [StringLength(128)]
         public string OuterId { get; set; }
 
-        #region NavigationProperties
-
-        #endregion
-
         public virtual OrderOperation ToModel(OrderOperation operation)
         {
             if (operation == null)
@@ -151,6 +147,6 @@ namespace VirtoCommerce.OrdersModule.Data.Model
             }
 
             return retVal;
-        }
+        }        
     }
 }

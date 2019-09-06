@@ -1,4 +1,7 @@
+using System;
 using System.Collections.Generic;
+using System.Collections.ObjectModel;
+using System.Linq;
 using VirtoCommerce.CoreModule.Core.Common;
 using VirtoCommerce.CoreModule.Core.Tax;
 using VirtoCommerce.Platform.Core.Common;
@@ -6,7 +9,7 @@ using VirtoCommerce.Platform.Core.DynamicProperties;
 
 namespace VirtoCommerce.CartModule.Core.Model
 {
-    public class ShoppingCart : AuditableEntity, IHasTaxDetalization, IHasDynamicProperties, ITaxable, IHasDiscounts
+    public class ShoppingCart : AuditableEntity, IHasTaxDetalization, IHasDynamicProperties, ITaxable, IHasDiscounts, ICloneable
     {
         public string Name { get; set; }
         public string StoreId { get; set; }
@@ -166,7 +169,25 @@ namespace VirtoCommerce.CartModule.Core.Model
             {
                 DynamicProperties = null;
             }
-
         }
+
+        #region ICloneable members
+
+        public virtual object Clone()
+        {
+            var result = MemberwiseClone() as ShoppingCart;
+
+            result.Discounts = Discounts?.Select(x => x.Clone()).OfType<Discount>().ToList();
+            result.Addresses = Addresses?.Select(x => x.Clone()).OfType<Address>().ToList();
+            result.Items = Items?.Select(x => x.Clone()).OfType<LineItem>().ToList();
+            result.Payments = Payments?.Select(x => x.Clone()).OfType<Payment>().ToList();
+            result.Shipments = Shipments?.Select(x => x.Clone()).OfType<Shipment>().ToList();
+            result.TaxDetails = TaxDetails?.Select(x => x.Clone()).OfType<TaxDetail>().ToList();
+            result.DynamicProperties = DynamicProperties?.Select(x => x.Clone()).OfType<DynamicObjectProperty>().ToList();
+
+            return result;
+        }
+
+        #endregion
     }
 }

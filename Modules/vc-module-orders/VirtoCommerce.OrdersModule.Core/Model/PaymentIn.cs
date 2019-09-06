@@ -1,5 +1,7 @@
 using System;
 using System.Collections.Generic;
+using System.Collections.ObjectModel;
+using System.Linq;
 using VirtoCommerce.CoreModule.Core.Common;
 using VirtoCommerce.CoreModule.Core.Tax;
 using VirtoCommerce.PaymentModule.Core.Model;
@@ -8,7 +10,7 @@ using VirtoCommerce.Platform.Core.Common;
 
 namespace VirtoCommerce.OrdersModule.Core.Model
 {
-    public class PaymentIn : OrderOperation, IHasTaxDetalization, ITaxable, IHasDiscounts
+    public class PaymentIn : OrderOperation, IHasTaxDetalization, ITaxable, IHasDiscounts, ICloneable
     {
         public string Purpose { get; set; }
         /// <summary>
@@ -100,5 +102,23 @@ namespace VirtoCommerce.OrdersModule.Core.Model
             }
 
         }
+
+        #region ICloneable members
+
+        public override object Clone()
+        {
+            var result = base.Clone() as PaymentIn;
+
+            result.PaymentMethod = PaymentMethod?.Clone() as PaymentMethod;
+            result.BillingAddress = BillingAddress?.Clone() as Address;
+            result.ProcessPaymentResult = ProcessPaymentResult?.Clone() as ProcessPaymentRequestResult;
+            result.Transactions = Transactions?.Select(x => x.Clone()).OfType<PaymentGatewayTransaction>().ToList();
+            result.Discounts = Discounts?.Select(x => x.Clone()).OfType<Discount>().ToList();
+            result.TaxDetails = TaxDetails?.Select(x => x.Clone()).OfType<TaxDetail>().ToList();
+
+            return result;
+        }
+
+        #endregion
     }
 }
