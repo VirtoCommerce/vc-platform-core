@@ -25,10 +25,7 @@ namespace VirtoCommerce.LicensingModule.Core.Model
         {
             var result = MemberwiseClone() as License;
 
-            if (OperationsLog != null)
-            {
-                result.OperationsLog = new ObservableCollection<OperationLog>(OperationsLog.Select(x => x.Clone() as OperationLog));
-            }
+            result.OperationsLog = OperationsLog?.Select(x => x.Clone()).OfType<OperationLog>().ToList();
 
             return result;
         }

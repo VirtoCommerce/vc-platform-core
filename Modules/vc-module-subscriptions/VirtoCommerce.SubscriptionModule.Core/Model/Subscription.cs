@@ -101,16 +101,8 @@ namespace VirtoCommerce.SubscriptionModule.Core.Model
             var result = MemberwiseClone() as Subscription;
 
             result.CustomerOrderPrototype = CustomerOrderPrototype?.Clone() as CustomerOrder;
-
-            if (CustomerOrders != null)
-            {
-                result.CustomerOrders = new ObservableCollection<CustomerOrder>(CustomerOrders.Select(x => x.Clone() as CustomerOrder));
-            }
-
-            if (OperationsLog != null)
-            {
-                result.OperationsLog = new ObservableCollection<OperationLog>(OperationsLog.Select(x => x.Clone() as OperationLog));
-            }
+            result.CustomerOrders = CustomerOrders?.Select(x => x.Clone()).OfType<CustomerOrder>().ToList();
+            result.OperationsLog = OperationsLog?.Select(x => x.Clone()).OfType<OperationLog>().ToList();
 
             return result;
         }

@@ -34,10 +34,7 @@ namespace VirtoCommerce.SitemapsModule.Core.Models
         {
             var result = MemberwiseClone() as Sitemap;
 
-            if (Items != null)
-            {
-                result.Items = new ObservableCollection<SitemapItem>(Items.Select(x => x.Clone() as SitemapItem));
-            }
+            result.Items = Items?.Select(x => x.Clone()).OfType<SitemapItem>().ToList();
 
             return result;
         }

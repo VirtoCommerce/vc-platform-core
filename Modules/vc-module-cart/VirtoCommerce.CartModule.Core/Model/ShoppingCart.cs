@@ -177,41 +177,13 @@ namespace VirtoCommerce.CartModule.Core.Model
         {
             var result = MemberwiseClone() as ShoppingCart;
 
-            if (Discounts != null)
-            {
-                result.Discounts = new ObservableCollection<Discount>(Discounts.Select(x => x.Clone() as Discount));
-            }
-
-            if (Addresses != null)
-            {
-                result.Addresses = new ObservableCollection<Address>(Addresses.Select(x => x.Clone() as Address));
-            }
-
-            if (Items != null)
-            {
-                result.Items = new ObservableCollection<LineItem>(Items.Select(x => x.Clone() as LineItem));
-            }
-
-            if (Payments != null)
-            {
-                result.Payments = new ObservableCollection<Payment>(Payments.Select(x => x.Clone() as Payment));
-            }
-
-            if (Shipments != null)
-            {
-                result.Shipments = new ObservableCollection<Shipment>(Shipments.Select(x => x.Clone() as Shipment));
-            }
-
-            if (TaxDetails != null)
-            {
-                result.TaxDetails = new ObservableCollection<TaxDetail>(TaxDetails.Select(x => x.Clone() as TaxDetail));
-            }
-            
-            if (DynamicProperties != null)
-            {
-                result.DynamicProperties = new ObservableCollection<DynamicObjectProperty>(
-                    DynamicProperties.Select(x => x.Clone() as DynamicObjectProperty));
-            }
+            result.Discounts = Discounts?.Select(x => x.Clone()).OfType<Discount>().ToList();
+            result.Addresses = Addresses?.Select(x => x.Clone()).OfType<Address>().ToList();
+            result.Items = Items?.Select(x => x.Clone()).OfType<LineItem>().ToList();
+            result.Payments = Payments?.Select(x => x.Clone()).OfType<Payment>().ToList();
+            result.Shipments = Shipments?.Select(x => x.Clone()).OfType<Shipment>().ToList();
+            result.TaxDetails = TaxDetails?.Select(x => x.Clone()).OfType<TaxDetail>().ToList();
+            result.DynamicProperties = DynamicProperties?.Select(x => x.Clone()).OfType<DynamicObjectProperty>().ToList();
 
             return result;
         }

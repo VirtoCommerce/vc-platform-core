@@ -27,11 +27,7 @@ namespace VirtoCommerce.SitemapsModule.Core.Models
         public virtual object Clone()
         {
             var result = MemberwiseClone() as SitemapItem;
-
-            if (ItemsRecords != null)
-            {
-                result.ItemsRecords = new ObservableCollection<SitemapItemRecord>(ItemsRecords.Select(x => x.Clone() as SitemapItemRecord));
-            }
+            result.ItemsRecords = ItemsRecords?.Select(x => x.Clone()).OfType<SitemapItemRecord>().ToList();
 
             return result;
         }

@@ -23,10 +23,7 @@ namespace VirtoCommerce.SitemapsModule.Core.Models
         {
             var result = MemberwiseClone() as SitemapItemRecord;
 
-            if (Alternates != null)
-            {
-                result.Alternates = new ObservableCollection<SitemapItemAlternateLinkRecord>(Alternates.Select(x => x.Clone() as SitemapItemAlternateLinkRecord));
-            }
+            result.Alternates = Alternates?.Select(x => x.Clone()).OfType<SitemapItemAlternateLinkRecord>().ToList();
 
             return result;
         }

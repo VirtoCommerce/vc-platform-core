@@ -103,15 +103,8 @@ namespace VirtoCommerce.StoreModule.Core.Model
         {
             var result = MemberwiseClone() as Store;
 
-            if (Languages != null)
-            {
-                result.SeoInfos = new ObservableCollection<SeoInfo>(SeoInfos.Select(x => x.Clone() as SeoInfo));
-            }
-
-            if (Settings != null)
-            {
-                result.Settings = new ObservableCollection<ObjectSettingEntry>(Settings.Select(x => x.Clone() as ObjectSettingEntry));
-            }
+                result.SeoInfos = SeoInfos?.Select(x => x.Clone()).OfType<SeoInfo>().ToList();
+                result.Settings = Settings?.Select(x => x.Clone()).OfType<ObjectSettingEntry>().ToList();
 
             return result;
         }

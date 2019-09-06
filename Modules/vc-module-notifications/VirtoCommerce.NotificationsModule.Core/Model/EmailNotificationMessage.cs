@@ -55,11 +55,7 @@ namespace VirtoCommerce.NotificationsModule.Core.Model
         {
             var result = base.Clone() as EmailNotificationMessage;
 
-            if (Attachments != null)
-            {
-                result.Attachments = new ObservableCollection<EmailAttachment>(
-                    Attachments.Select(x => x.Clone() as EmailAttachment));
-            }
+            result.Attachments = Attachments?.Select(x => x.Clone()).OfType<EmailAttachment>().ToList();
 
             return result;
         }

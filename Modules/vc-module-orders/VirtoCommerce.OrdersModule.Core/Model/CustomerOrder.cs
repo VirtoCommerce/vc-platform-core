@@ -213,35 +213,12 @@ namespace VirtoCommerce.OrdersModule.Core.Model
         {
             var result = base.Clone() as CustomerOrder;
 
-            if (TaxDetails != null)
-            {
-                result.TaxDetails = new ObservableCollection<TaxDetail>(TaxDetails.Select(x => x.Clone() as TaxDetail));
-            }
-
-            if (Addresses != null)
-            {
-                result.Addresses = new ObservableCollection<Address>(Addresses.Select(x => x.Clone() as Address));
-            }
-
-            if (InPayments != null)
-            {
-                result.InPayments = new ObservableCollection<PaymentIn>(InPayments.Select(x => x.Clone() as PaymentIn));
-            }
-
-            if (Items != null)
-            {
-                result.Items = new ObservableCollection<LineItem>(Items.Select(x => x.Clone() as LineItem));
-            }
-
-            if (Shipments != null)
-            {
-                result.Shipments = new ObservableCollection<Shipment>(Shipments.Select(x => x.Clone() as Shipment));
-            }
-
-            if (Discounts != null)
-            {
-                result.Discounts = new ObservableCollection<Discount>(Discounts.Select(x => x.Clone() as Discount));
-            }
+                result.TaxDetails = TaxDetails?.Select(x => x.Clone()).OfType<TaxDetail>().ToList();
+                result.Addresses = Addresses?.Select(x => x.Clone()).OfType<Address>().ToList();
+                result.InPayments = InPayments?.Select(x => x.Clone()).OfType<PaymentIn>().ToList();
+                result.Items = Items?.Select(x => x.Clone()).OfType<LineItem>().ToList();
+                result.Shipments = Shipments?.Select(x => x.Clone()).OfType<Shipment>().ToList();
+                result.Discounts = Discounts?.Select(x => x.Clone()).OfType<Discount>().ToList();
 
             return result;
         }

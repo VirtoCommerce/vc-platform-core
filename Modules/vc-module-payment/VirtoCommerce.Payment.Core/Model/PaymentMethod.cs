@@ -128,16 +128,8 @@ namespace VirtoCommerce.PaymentModule.Core.Model
         {
             var result = MemberwiseClone() as PaymentMethod;
 
-            if (Settings != null)
-            {
-                result.Settings = new ObservableCollection<ObjectSettingEntry>(Settings.Select(x => x.Clone() as ObjectSettingEntry));
-            }
-
-            if (TaxDetails != null)
-            {
-                result.TaxDetails = new ObservableCollection<TaxDetail>(TaxDetails.Select(x => x.Clone() as TaxDetail));
-            }
-
+            result.Settings = Settings?.Select(x => x.Clone()).OfType<ObjectSettingEntry>().ToList();
+            result.TaxDetails = TaxDetails?.Select(x => x.Clone()).OfType<TaxDetail>().ToList();
 
             return result;
         }

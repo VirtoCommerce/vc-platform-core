@@ -43,10 +43,7 @@ namespace VirtoCommerce.ShippingModule.Core.Model
         {
             var result = MemberwiseClone() as ShippingMethod;
 
-            if (Settings != null)
-            {
-                result.Settings = new ObservableCollection<ObjectSettingEntry>(Settings.Select(x => x.Clone() as ObjectSettingEntry));
-            }
+            result.Settings = Settings?.Select(x => x.Clone()).OfType<ObjectSettingEntry>().ToList();
 
             return result;
         }

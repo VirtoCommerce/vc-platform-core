@@ -62,12 +62,7 @@ namespace VirtoCommerce.NotificationsModule.Core.Model
         {
             var result = MemberwiseClone() as Notification;
 
-            if (Templates != null)
-            {
-                result.Templates = new ObservableCollection<NotificationTemplate>(
-                    Templates.Select(x => x.Clone() as NotificationTemplate));
-            }
-
+            result.Templates = Templates?.Select(x => x.Clone()).OfType<NotificationTemplate>().ToList();
             result.TenantIdentity = TenantIdentity?.Clone() as TenantIdentity;
 
             return result;

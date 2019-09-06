@@ -30,10 +30,7 @@ namespace VirtoCommerce.OrdersModule.Core.Model
         {
             var result = MemberwiseClone() as ShipmentPackage;
 
-            if (Items != null)
-            {
-                result.Items = new ObservableCollection<ShipmentItem>(Items.Select(x => x.Clone() as ShipmentItem));
-            }
+            result.Items = Items?.Select(x => x.Clone()).OfType<ShipmentItem>().ToList();
 
             return result;
         }

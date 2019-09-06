@@ -81,26 +81,10 @@ namespace VirtoCommerce.CustomerModule.Core.Model
         {
             var result = MemberwiseClone() as Member;
 
-            if (Notes != null)
-            {
-                result.Notes = new ObservableCollection<Note>(Notes.Select(x => x.Clone() as Note));
-            }
-
-            if (Addresses != null)
-            {
-                result.Addresses = new ObservableCollection<Address>(Addresses.Select(x => x.Clone() as Address));
-            }
-
-            if (SeoInfos != null)
-            {
-                result.SeoInfos = new ObservableCollection<SeoInfo>(SeoInfos.Select(x => x.Clone() as SeoInfo));
-            }
-
-            if (DynamicProperties != null)
-            {
-                result.DynamicProperties = new ObservableCollection<DynamicObjectProperty>(
-                    DynamicProperties.Select(x => x.Clone() as DynamicObjectProperty));
-            }
+            result.Notes = Notes?.Select(x => x.Clone()).OfType<Note>().ToList();
+            result.Addresses = Addresses?.Select(x => x.Clone()).OfType<Address>().ToList();
+            result.SeoInfos = SeoInfos?.Select(x => x.Clone()).OfType<SeoInfo>().ToList();
+            result.DynamicProperties = DynamicProperties?.Select(x => x.Clone()).OfType<DynamicObjectProperty>().ToList();
 
             return result;
         }

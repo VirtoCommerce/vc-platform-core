@@ -148,26 +148,10 @@ namespace VirtoCommerce.CartModule.Core.Model
         {
             var result = MemberwiseClone() as LineItem;
 
-            if (Price != null)
-            {
-                result.Price = Price.Clone() as Price;
-            }
-
-            if (TaxDetails != null)
-            {
-                result.TaxDetails = new ObservableCollection<TaxDetail>(TaxDetails.Select(x => x.Clone() as TaxDetail));
-            }
-
-            if (Discounts != null)
-            {
-                result.Discounts = new ObservableCollection<Discount>(Discounts.Select(x => x.Clone() as Discount));
-            }
-
-            if (DynamicProperties != null)
-            {
-                result.DynamicProperties = new ObservableCollection<DynamicObjectProperty>(
-                    DynamicProperties.Select(x => x.Clone() as DynamicObjectProperty));
-            }
+            result.Price = Price?.Clone() as Price;
+            result.TaxDetails = TaxDetails?.Select(x => x.Clone()).OfType<TaxDetail>().ToList();
+            result.Discounts = Discounts?.Select(x => x.Clone()).OfType<Discount>().ToList();
+            result.DynamicProperties = DynamicProperties?.Select(x => x.Clone()).OfType<DynamicObjectProperty>().ToList();
 
             return result;
         }

@@ -20,15 +20,8 @@ namespace VirtoCommerce.PricingModule.Core.Model
         {
             var result = MemberwiseClone() as Pricelist;
 
-            if (Prices != null)
-            {
-                result.Prices = new ObservableCollection<Price>(Prices.Select(x => x.Clone() as Price));
-            }
-
-            if (Assignments != null)
-            {
-                result.Assignments = new ObservableCollection<PricelistAssignment>(Assignments.Select(x => x.Clone() as PricelistAssignment));
-            }
+            result.Prices = Prices?.Select(x => x.Clone()).OfType<Price>().ToList();
+            result.Assignments = Assignments?.Select(x => x.Clone()).OfType<PricelistAssignment>().ToList();
 
             return result;
         } 

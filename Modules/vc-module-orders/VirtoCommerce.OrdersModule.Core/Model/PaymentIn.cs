@@ -112,21 +112,9 @@ namespace VirtoCommerce.OrdersModule.Core.Model
             result.PaymentMethod = PaymentMethod?.Clone() as PaymentMethod;
             result.BillingAddress = BillingAddress?.Clone() as Address;
             result.ProcessPaymentResult = ProcessPaymentResult?.Clone() as ProcessPaymentRequestResult;
-
-            if (Transactions != null)
-            {
-                result.Transactions = new ObservableCollection<PaymentGatewayTransaction>(Transactions.Select(x => x.Clone() as PaymentGatewayTransaction));
-            }
-
-            if (Discounts != null)
-            {
-                result.Discounts = new ObservableCollection<Discount>(Discounts.Select(x => x.Clone() as Discount));
-            }
-
-            if (TaxDetails != null)
-            {
-                result.TaxDetails = new ObservableCollection<TaxDetail>(TaxDetails.Select(x => x.Clone() as TaxDetail));
-            }
+            result.Transactions = Transactions?.Select(x => x.Clone()).OfType<PaymentGatewayTransaction>().ToList();
+            result.Discounts = Discounts?.Select(x => x.Clone()).OfType<Discount>().ToList();
+            result.TaxDetails = TaxDetails?.Select(x => x.Clone()).OfType<TaxDetail>().ToList();
 
             return result;
         }

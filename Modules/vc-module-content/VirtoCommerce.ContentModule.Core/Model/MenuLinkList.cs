@@ -32,10 +32,7 @@ namespace VirtoCommerce.ContentModule.Core.Model
         {
             var result = MemberwiseClone() as MenuLinkList;
 
-            if (MenuLinks != null)
-            {
-                result.MenuLinks = new ObservableCollection<MenuLink>(MenuLinks.Select(x => x.Clone() as MenuLink));
-            }
+            result.MenuLinks = MenuLinks?.Select(x => x.Clone()).OfType<MenuLink>().ToList();
 
             return result;
         }

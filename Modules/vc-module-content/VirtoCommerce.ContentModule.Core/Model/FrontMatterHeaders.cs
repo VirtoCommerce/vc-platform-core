@@ -203,10 +203,7 @@ namespace VirtoCommerce.ContentModule.Core.Model
         {
             var result = MemberwiseClone() as FrontMatterHeaders;
 
-            if (DynamicProperties != null)
-            {
-                result.DynamicProperties = new ObservableCollection<DynamicObjectProperty>(DynamicProperties.Select(x => x.Clone() as DynamicObjectProperty));
-            }
+            result.DynamicProperties = DynamicProperties?.Select(x => x.Clone()).OfType<DynamicObjectProperty>().ToList();
 
             return result;
         }
