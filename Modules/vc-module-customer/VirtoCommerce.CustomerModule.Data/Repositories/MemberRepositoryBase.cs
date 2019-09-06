@@ -72,6 +72,7 @@ namespace VirtoCommerce.CustomerModule.Data.Repositories
                 {
                     Remove(relation);
                 }
+
                 Remove(dbMember);
             }
         }

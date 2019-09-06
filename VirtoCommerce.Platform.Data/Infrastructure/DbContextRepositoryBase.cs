@@ -68,7 +68,14 @@ namespace VirtoCommerce.Platform.Data.Infrastructure
         /// <param name="item">The item.</param>
         public void Remove<T>(T item) where T : class
         {
-            DbContext.Remove(item);
+            if (item is ISupportSoftDeletion itemSoftDeleteon)
+            {
+                itemSoftDeleteon.IsDeleted = true;
+            }
+            else
+            {
+                DbContext.Remove(item);
+            }
         }
 
         public void Dispose()

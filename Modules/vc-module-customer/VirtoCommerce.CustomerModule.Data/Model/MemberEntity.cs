@@ -9,7 +9,7 @@ using VirtoCommerce.Platform.Core.DynamicProperties;
 
 namespace VirtoCommerce.CustomerModule.Data.Model
 {
-    public abstract class MemberEntity : AuditableEntity, IHasOuterId
+    public abstract class MemberEntity : AuditableEntity, IHasOuterId, ISupportSoftDeletion
     {
         [StringLength(64)]
         public string MemberType { get; set; }
@@ -19,6 +19,8 @@ namespace VirtoCommerce.CustomerModule.Data.Model
 
         [StringLength(128)]
         public string OuterId { get; set; }
+
+        public bool IsDeleted { get; set; }
 
         #region NavigationProperties
 
@@ -38,7 +40,7 @@ namespace VirtoCommerce.CustomerModule.Data.Model
 
         public virtual ObservableCollection<MemberDynamicPropertyObjectValueEntity> DynamicPropertyObjectValues { get; set; }
             = new NullCollection<MemberDynamicPropertyObjectValueEntity>();
-
+        
         #endregion
 
         public virtual Member ToModel(Member member)
