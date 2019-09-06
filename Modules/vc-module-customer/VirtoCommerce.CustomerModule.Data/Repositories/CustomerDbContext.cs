@@ -4,7 +4,7 @@ using VirtoCommerce.Platform.Data.Infrastructure;
 
 namespace VirtoCommerce.CustomerModule.Data.Repositories
 {
-    public class CustomerDbContext : DbContextWithTriggersAndQueryFilters
+    public class CustomerDbContext : DbContextWithTriggersAndQueryFiltersBase
     {
         public CustomerDbContext(DbContextOptions<CustomerDbContext> options)
             : base(options)

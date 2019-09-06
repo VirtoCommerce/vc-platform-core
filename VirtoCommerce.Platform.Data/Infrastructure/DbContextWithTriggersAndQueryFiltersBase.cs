@@ -5,9 +5,9 @@ using VirtoCommerce.Platform.Data.Extensions;
 
 namespace VirtoCommerce.Platform.Data.Infrastructure
 {
-    public abstract class DbContextWithTriggersAndQueryFilters : DbContextWithTriggers
+    public abstract class DbContextWithTriggersAndQueryFiltersBase : DbContextWithTriggers
     {
-        protected DbContextWithTriggersAndQueryFilters(DbContextOptions options)
+        protected DbContextWithTriggersAndQueryFiltersBase(DbContextOptions options)
             : base(options)
         {
         }
@@ -16,10 +16,10 @@ namespace VirtoCommerce.Platform.Data.Infrastructure
         {
             foreach (var type in modelBuilder.Model.GetEntityTypes())
             {
-                if (typeof(ISupportSoftDeletion).IsAssignableFrom(type.ClrType))
+                if (typeof(ISupportSoftDeletion).IsAssignableFrom(type.ClrType) && (type.BaseType == null
+                    || !typeof(ISupportSoftDeletion).IsAssignableFrom(type.BaseType.ClrType)))
                 {
-                    //modelBuilder.SetSoftDeleteFilter(type.ClrType);
-                    modelBuilder.Entity(type.ClrType).AddQueryFilter<ISupportSoftDeletion>(x => !x.IsDeleted);
+                    modelBuilder.SetSoftDeleteFilter(type.ClrType);
                 }
                     
             }
