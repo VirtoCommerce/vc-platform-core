@@ -141,12 +141,8 @@ namespace VirtoCommerce.CatalogModule.Web
 
             serviceCollection.AddTransient<IAuthorizationHandler, CatalogAuthorizationHandler>();
 
-            serviceCollection.AddTransient<ProductExportPagedDataSourceFactory>();
-            serviceCollection.AddTransient<CatalogFullExportPagedDataSourceFactory>();
-            serviceCollection.AddTransient<CatalogExportPagedDataSourceFactory>();
-            serviceCollection.AddTransient<CategoryExportPagedDataSourceFactory>();
-            serviceCollection.AddTransient<PropertyExportPagedDataSourceFactory>();
-            serviceCollection.AddTransient<PropertyDictionaryItemExportPagedDataSourceFactory>();
+            serviceCollection.AddTransient<ICatalogExportPagedDataSourceFactory, CatalogExportPagedDataSourceFactory>();
+           
 
             #region Add Authorization Policy for GenericExport
 
@@ -212,7 +208,7 @@ namespace VirtoCommerce.CatalogModule.Web
 
             registrar.RegisterType(
                 ExportedTypeDefinitionBuilder.Build<ExportableProduct, ProductExportDataQuery>()
-                    .WithDataSourceFactory(appBuilder.ApplicationServices.GetService<ProductExportPagedDataSourceFactory>())
+                    .WithDataSourceFactory(appBuilder.ApplicationServices.GetService<ICatalogExportPagedDataSourceFactory>())
                     .WithMetadata(typeof(ExportableProduct).GetPropertyNames(
                         nameof(ExportableProduct.Properties),
                         $"{nameof(ExportableProduct.Properties)}.{nameof(Property.Values)}",
@@ -231,7 +227,7 @@ namespace VirtoCommerce.CatalogModule.Web
 
             registrar.RegisterType(
                 ExportedTypeDefinitionBuilder.Build<ExportableCatalogFull, CatalogFullExportDataQuery>()
-                    .WithDataSourceFactory(appBuilder.ApplicationServices.GetService<CatalogFullExportPagedDataSourceFactory>())
+                    .WithDataSourceFactory(appBuilder.ApplicationServices.GetService<ICatalogExportPagedDataSourceFactory>())
                     .WithMetadata(new ExportedTypeMetadata { PropertyInfos = new ExportedTypePropertyInfo[] { } }));
 
             #endregion

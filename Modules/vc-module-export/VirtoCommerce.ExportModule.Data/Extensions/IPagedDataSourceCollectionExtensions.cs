@@ -1,7 +1,6 @@
 using System;
 using System.Collections.Generic;
 using System.Linq;
-using System.Text;
 using System.Threading.Tasks;
 using VirtoCommerce.ExportModule.Core.Model;
 
@@ -10,11 +9,6 @@ namespace VirtoCommerce.ExportModule.Data.Extensions
 
     public static class IPagedDataSourceCollectionExtensions
     {
-        public static int GetTotalCount(this IEnumerable<IPagedDataSource> datasources)
-        {
-            return datasources.Sum(x => x.GetTotalCount());
-        }
-
         public static IEnumerable<IExportable> GetItems(this IEnumerable<IPagedDataSource> datasources, int skip, int take)
         {
             var taskList = new List<Task<IEnumerable<IExportable>>>();

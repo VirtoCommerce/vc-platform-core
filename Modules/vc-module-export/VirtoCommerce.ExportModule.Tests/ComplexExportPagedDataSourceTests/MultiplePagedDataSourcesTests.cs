@@ -51,7 +51,7 @@ namespace VirtoCommerce.ExportModule.Tests.ComplexExportPagedDataSourceTests
             var dataSources = counts.Select(x => new TestPagedDataSource(CreatedSearchServiceMock(new string[x]).Object, new TestExportDataQuery()));
 
             // Act
-            var result = dataSources.GetTotalCount();
+            var result = dataSources.Sum(x => x.GetTotalCount());
 
             // Assert
             Assert.Equal(expectedResult, result);
