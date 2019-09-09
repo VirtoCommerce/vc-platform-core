@@ -142,7 +142,7 @@ namespace VirtoCommerce.CatalogModule.Web
             serviceCollection.AddTransient<IAuthorizationHandler, CatalogAuthorizationHandler>();
 
             serviceCollection.AddTransient<ICatalogExportPagedDataSourceFactory, CatalogExportPagedDataSourceFactory>();
-           
+
 
             #region Add Authorization Policy for GenericExport
 
@@ -228,7 +228,7 @@ namespace VirtoCommerce.CatalogModule.Web
             registrar.RegisterType(
                 ExportedTypeDefinitionBuilder.Build<ExportableCatalogFull, CatalogFullExportDataQuery>()
                     .WithDataSourceFactory(appBuilder.ApplicationServices.GetService<ICatalogExportPagedDataSourceFactory>())
-                    .WithMetadata(new ExportedTypeMetadata { PropertyInfos = new ExportedTypePropertyInfo[] { } }));
+                    .WithMetadata(new ExportedTypeMetadata { PropertyInfos = Array.Empty<ExportedTypePropertyInfo>() }));
 
             #endregion
         }

@@ -39,17 +39,18 @@ namespace VirtoCommerce.CatalogModule.Data.ExportImport
         public virtual IPagedDataSource Create(ExportDataQuery dataQuery)
         {
             IPagedDataSource result = null;
-            if(dataQuery is PropertyExportDataQuery propertyExportQuery)
+
+            if (dataQuery is PropertyExportDataQuery propertyExportQuery)
             {
                 result = new PropertyExportPagedDataSource(_propertySearchService, propertyExportQuery);
             }
-            else if(dataQuery is PropertyDictionaryItemExportDataQuery propDictExportQuery)
+            else if (dataQuery is PropertyDictionaryItemExportDataQuery propDictExportQuery)
             {
                 result = new PropertyDictionaryItemExportPagedDataSource(_propertyDictionaryItemSearchService, propDictExportQuery);
             }
-            else if (dataQuery is ProductExportDataQuery productExportQuery)
+            else if (dataQuery is ProductFullExportDataQuery productFullExportQuery)
             {
-                result = new ProductExportPagedDataSource(_blobStorageProvider, _itemService, _productSearchService, productExportQuery);
+                result = new ProductExportPagedDataSource(_blobStorageProvider, _itemService, _productSearchService, productFullExportQuery.ToProductExportDataQuery());
             }
             else if (dataQuery is CategoryExportDataQuery categoryExportQuery)
             {
@@ -57,10 +58,18 @@ namespace VirtoCommerce.CatalogModule.Data.ExportImport
             }
             else if (dataQuery is CatalogExportDataQuery catalogExportQuery)
             {
-                result = new CatalogExportPagedDataSource(_catalogSearchService, catalogExportQuery); 
+                result = new CatalogExportPagedDataSource(_catalogSearchService, catalogExportQuery);
+            }
+            else if (dataQuery is ProductExportDataQuery productExportQuery)
+            {
+                result = new ProductExportPagedDataSource(_blobStorageProvider, _itemService, _productSearchService, productExportQuery);
+            }
+            else if (dataQuery is CatalogFullExportDataQuery catalogFullExportQuery)
+            {
+                result = new CatalogFullExportPagedDataSource(this, catalogFullExportQuery);
             }
 
-            if(result == null)
+            if (result == null)
             {
                 throw new ArgumentException($"Unsupported export query type: {dataQuery.GetType().Name}");
             }
@@ -71,7 +80,7 @@ namespace VirtoCommerce.CatalogModule.Data.ExportImport
         {
             yield return Create(AbstractTypeFactory<CatalogExportDataQuery>.TryCreateInstance().FromOther(query));
             yield return Create(AbstractTypeFactory<CategoryExportDataQuery>.TryCreateInstance().FromOther(query));
-            yield return Create(AbstractTypeFactory<ProductExportDataQuery>.TryCreateInstance().FromOther(query));
+            yield return Create(AbstractTypeFactory<ProductFullExportDataQuery>.TryCreateInstance().FromOther(query));
             yield return Create(AbstractTypeFactory<PropertyExportDataQuery>.TryCreateInstance().FromOther(query));
             yield return Create(AbstractTypeFactory<PropertyDictionaryItemExportDataQuery>.TryCreateInstance().FromOther(query));
         }
