@@ -96,8 +96,8 @@ class Build : NukeBuild
     Target Publish => _ => _
         .DependsOn(Clean, Test, Pack)
         .Requires(() => ApiKey)
-        .Requires(() => GitTasks.GitHasCleanWorkingCopy())
-        .Requires(() => Configuration.Equals(Configuration.Release))      
+        // .Requires(() => GitTasks.GitHasCleanWorkingCopy())
+        // .Requires(() => Configuration.Equals(Configuration.Release))
         .Executes(() =>
         {
             var packages = ArtifactsDirectory.GlobFiles("*.nupkg");
