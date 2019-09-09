@@ -37,6 +37,7 @@ namespace VirtoCommerce.CatalogModule.Data.ExportImport
             result.Skip = Skip;
             result.Sort = Sort;
             result.Take = Take;
+            result.LoadImageBinaries = true;
 
             return result;
         }

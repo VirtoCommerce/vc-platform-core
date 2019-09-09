@@ -47,7 +47,7 @@ namespace VirtoCommerce.CatalogModule.Data.ExportImport
                 totalCount = productSearchResult.TotalCount;
             }
 
-            if (DataQuery.IncludedProperties.Any(x => x.FullName.Contains("Images.BinaryData")))
+            if (DataQuery.LoadImageBinaries == true || DataQuery.IncludedProperties.Any(x => x.FullName.Contains("Images.BinaryData")))
             {
                 LoadImages(result);
             }

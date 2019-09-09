@@ -9,5 +9,6 @@ namespace VirtoCommerce.CatalogModule.Data.ExportImport
         public string[] CatalogIds { get; set; }
         public string[] CategoryIds { get; set; }
         public string ResponseGroup { get; set; }
+        public bool? LoadImageBinaries { get; set; }
     }
 }
