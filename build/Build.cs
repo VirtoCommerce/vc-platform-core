@@ -3,6 +3,7 @@ using System.Linq;
 using Nuke.Common;
 using Nuke.Common.Execution;
 using Nuke.Common.Git;
+using Nuke.Common.IO;
 using Nuke.Common.ProjectModel;
 using Nuke.Common.Tooling;
 using Nuke.Common.Tools.DotNet;
@@ -31,22 +32,30 @@ class Build : NukeBuild
     [Parameter("Configuration to build - Default is 'Debug' (local) or 'Release' (server)")]
     readonly Configuration Configuration = IsLocalBuild ? Configuration.Debug : Configuration.Release;
 
+    private static string[] ModuleContentFolders = new[] { "dist", "Localizations", "Scripts" };
+
     [Solution] readonly Solution Solution;
     [GitRepository] readonly GitRepository GitRepository;
     [GitVersion] readonly GitVersion GitVersion;
 
     [Parameter("ApiKey for the specified source")] readonly string ApiKey;
-    [Parameter] readonly string Source = "https://api.nuget.org/v3/index.json";
+    [Parameter] readonly string Source = @"https://api.nuget.org/v3/index.json";
 
-    readonly string MasterBranch = "master";
-    readonly string DevelopBranch = "develop";
-    readonly string ReleaseBranchPrefix = "release";
-    readonly string HotfixBranchPrefix = "hotfix";
 
+    [Parameter] static string GlobalModuleIgnoreFileUrl = @"https://raw.githubusercontent.com/VirtoCommerce/vc-platform-core/release/3.0.0/module.ignore";
     AbsolutePath SourceDirectory => RootDirectory / "src";
     AbsolutePath TestsDirectory => RootDirectory / "tests";
     AbsolutePath ArtifactsDirectory => RootDirectory / "artifacts";
     Project WebProject => Solution.AllProjects.FirstOrDefault(x => x.Name.EndsWith("Web"));
+    AbsolutePath ModuleManifest => WebProject.Directory / "module.manifest";
+    AbsolutePath ModuleIgnoreFile => RootDirectory / "module.ignore";
+
+    string ModuleId => XmlTasks.XmlPeek(ModuleManifest, "module/id").FirstOrDefault();
+    string ModuleVersion => XmlTasks.XmlPeek(ModuleManifest, "module/version").FirstOrDefault();
+    string ModuleVersionTag => XmlTasks.XmlPeek(ModuleManifest, "module/version-tag").FirstOrDefault();
+    AbsolutePath ModuleOutputDirectory => ArtifactsDirectory / (ModuleId + ModuleVersion);
+
+    bool IsModule => FileExists(ModuleManifest);
 
     Target Clean => _ => _
         .Before(Restore)
@@ -75,7 +84,7 @@ class Build : NukeBuild
               .EnableIncludeSymbols()
               .SetSymbolPackageFormat(DotNetSymbolPackageFormat.snupkg)
               .SetOutputDirectory(ArtifactsDirectory)
-              .SetVersion(GitVersion.NuGetVersionV2));
+              .SetVersion(IsModule ? string.Join("-", ModuleVersion, ModuleVersionTag) : GitVersion.NuGetVersionV2));
       });
 
     Target Test => _ => _
@@ -127,10 +136,44 @@ class Build : NukeBuild
             DotNetBuild(s => s
                 .SetProjectFile(Solution)
                 .SetConfiguration(Configuration)
-                .SetAssemblyVersion(GitVersion.GetNormalizedAssemblyVersion())
-                .SetFileVersion(GitVersion.GetNormalizedFileVersion())
-                .SetInformationalVersion(GitVersion.InformationalVersion)
+                .SetAssemblyVersion(IsModule ? ModuleVersion : GitVersion.GetNormalizedAssemblyVersion())
+                .SetFileVersion(IsModule ? ModuleVersion : GitVersion.GetNormalizedFileVersion())
+                .SetInformationalVersion(IsModule ? ModuleVersion : GitVersion.InformationalVersion)
                 .EnableNoRestore());
+
+            if (IsModule)
+            {
+                DotNetPublish(s => s
+                     .SetWorkingDirectory(WebProject.Directory)
+                     .EnableNoRestore()
+                     .SetOutput(ModuleOutputDirectory / "bin")
+                     .SetConfiguration(Configuration)
+                     .SetAssemblyVersion(ModuleVersion)
+                     .SetFileVersion(ModuleVersion)
+                     .SetInformationalVersion(ModuleVersion));
+
+                //Copy module.manifest and all content directories into a module output folder
+                CopyFileToDirectory(ModuleManifest, ModuleOutputDirectory, FileExistsPolicy.Overwrite);
+                foreach (var moduleFolder in ModuleContentFolders)
+                {
+                    CopyDirectoryRecursively(WebProject.Directory / moduleFolder, ModuleOutputDirectory / moduleFolder, DirectoryExistsPolicy.Merge, FileExistsPolicy.Overwrite);
+                }
+            }
         });
 
+    Target Compress => _ => _
+     .DependsOn(Clean, Pack)
+     .Executes(() =>
+     {
+         var ignoredFiles = HttpTasks.HttpDownloadString(GlobalModuleIgnoreFileUrl).SplitLineBreaks();
+         if (FileExists(ModuleIgnoreFile))
+         {
+             ignoredFiles = ignoredFiles.Concat(TextTasks.ReadAllLines(ModuleIgnoreFile).Select(x => x.Trim())).Distinct().ToArray();
+         }
+         var zipFileName = ArtifactsDirectory / ModuleId + "_" + ModuleVersion + ".zip";
+         DeleteFile(zipFileName);
+         CompressionTasks.CompressZip(ModuleOutputDirectory, zipFileName, (x) => !ignoredFiles.Contains(x.Name));
+     });
+
+   
 }
