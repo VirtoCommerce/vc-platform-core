@@ -6,7 +6,7 @@ using VirtoCommerce.SubscriptionModule.Core.Model;
 
 namespace VirtoCommerce.SubscriptionModule.Data.Model
 {
-    public class SubscriptionEntity : AuditableEntity, IHasOuterId
+    public class SubscriptionEntity : AuditableEntity, IHasOuterId, ISupportSoftDeletion
     {
 
         [Required]
@@ -57,6 +57,8 @@ namespace VirtoCommerce.SubscriptionModule.Data.Model
 
         [StringLength(128)]
         public string OuterId { get; set; }
+
+        public bool IsDeleted { get; set; }
 
         public virtual Subscription ToModel(Subscription subscription)
         {

@@ -5,7 +5,7 @@ using VirtoCommerce.TaxModule.Core.Model;
 
 namespace VirtoCommerce.TaxModule.Data.Model
 {
-    public class StoreTaxProviderEntity : Entity
+    public class StoreTaxProviderEntity : Entity, ISupportSoftDeletion
     {
         [Required]
         [StringLength(128)]
@@ -21,6 +21,8 @@ namespace VirtoCommerce.TaxModule.Data.Model
         public string LogoUrl { get; set; }
 
         public bool IsActive { get; set; }
+
+        public bool IsDeleted { get; set; }
 
         #region Navigation Properties
 

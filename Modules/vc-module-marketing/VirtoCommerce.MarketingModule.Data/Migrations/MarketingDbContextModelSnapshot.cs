@@ -181,6 +181,8 @@ namespace VirtoCommerce.MarketingModule.Data.Migrations
                     b.Property<string>("ImageUrl")
                         .HasMaxLength(2048);
 
+                    b.Property<bool>("IsDeleted");
+
                     b.Property<bool>("IsMultilingual");
 
                     b.Property<string>("ModifiedBy")
@@ -218,6 +220,8 @@ namespace VirtoCommerce.MarketingModule.Data.Migrations
                     b.Property<string>("ImageUrl")
                         .HasMaxLength(2048);
 
+                    b.Property<bool>("IsDeleted");
+
                     b.Property<string>("ModifiedBy")
                         .HasMaxLength(64);
 
@@ -253,6 +257,8 @@ namespace VirtoCommerce.MarketingModule.Data.Migrations
                     b.Property<DateTime?>("EndDate");
 
                     b.Property<bool>("IsActive");
+
+                    b.Property<bool>("IsDeleted");
 
                     b.Property<string>("ModifiedBy")
                         .HasMaxLength(64);
@@ -302,6 +308,8 @@ namespace VirtoCommerce.MarketingModule.Data.Migrations
                     b.Property<bool>("IsActive");
 
                     b.Property<bool>("IsAllowCombiningWithSelf");
+
+                    b.Property<bool>("IsDeleted");
 
                     b.Property<bool>("IsExclusive");
 

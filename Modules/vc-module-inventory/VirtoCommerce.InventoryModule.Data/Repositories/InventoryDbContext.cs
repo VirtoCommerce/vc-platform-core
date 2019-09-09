@@ -1,10 +1,10 @@
-using EntityFrameworkCore.Triggers;
 using Microsoft.EntityFrameworkCore;
 using VirtoCommerce.InventoryModule.Data.Model;
+using VirtoCommerce.Platform.Data.Infrastructure;
 
 namespace VirtoCommerce.InventoryModule.Data.Repositories
 {
-    public class InventoryDbContext : DbContextWithTriggers
+    public class InventoryDbContext : DbContextWithTriggersAndQueryFiltersBase
     {
         public InventoryDbContext(DbContextOptions<InventoryDbContext> options)
             : base(options)

@@ -5,7 +5,7 @@ using VirtoCommerce.Platform.Core.Common;
 
 namespace VirtoCommerce.LicensingModule.Data.Model
 {
-    public class LicenseEntity : AuditableEntity
+    public class LicenseEntity : AuditableEntity, ISupportSoftDeletion
     {
         [Required]
         [StringLength(64)]
@@ -25,6 +25,8 @@ namespace VirtoCommerce.LicensingModule.Data.Model
         [Required]
         [StringLength(64)]
         public string ActivationCode { get; set; }
+
+        public bool IsDeleted { get; set; }
 
         public virtual License ToModel(License license)
         {

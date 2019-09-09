@@ -5,7 +5,7 @@ using VirtoCommerce.ShippingModule.Core.Model;
 
 namespace VirtoCommerce.ShippingModule.Data.Model
 {
-    public class StoreShippingMethodEntity : Entity
+    public class StoreShippingMethodEntity : Entity, ISupportSoftDeletion
     {
         [Required]
         [StringLength(128)]
@@ -24,6 +24,8 @@ namespace VirtoCommerce.ShippingModule.Data.Model
         public string TypeName { get; set; }
 
         public string StoreId { get; set; }
+
+        public bool IsDeleted { get; set; }
 
         public virtual ShippingMethod ToModel(ShippingMethod shippingMethod)
         {

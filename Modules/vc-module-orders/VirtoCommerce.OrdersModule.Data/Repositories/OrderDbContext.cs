@@ -1,10 +1,10 @@
-using EntityFrameworkCore.Triggers;
 using Microsoft.EntityFrameworkCore;
 using VirtoCommerce.OrdersModule.Data.Model;
+using VirtoCommerce.Platform.Data.Infrastructure;
 
 namespace VirtoCommerce.OrdersModule.Data.Repositories
 {
-    public class OrderDbContext : DbContextWithTriggers
+    public class OrderDbContext : DbContextWithTriggersAndQueryFiltersBase
     {
         public OrderDbContext(DbContextOptions<OrderDbContext> options)
             : base(options)

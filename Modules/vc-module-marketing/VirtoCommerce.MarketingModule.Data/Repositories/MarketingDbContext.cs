@@ -1,10 +1,10 @@
-using EntityFrameworkCore.Triggers;
 using Microsoft.EntityFrameworkCore;
 using VirtoCommerce.MarketingModule.Data.Model;
+using VirtoCommerce.Platform.Data.Infrastructure;
 
 namespace VirtoCommerce.MarketingModule.Data.Repositories
 {
-    public class MarketingDbContext : DbContextWithTriggers
+    public class MarketingDbContext : DbContextWithTriggersAndQueryFiltersBase
     {
         public MarketingDbContext(DbContextOptions<MarketingDbContext> options)
             : base(options)

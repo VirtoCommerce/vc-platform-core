@@ -40,9 +40,6 @@ namespace VirtoCommerce.SubscriptionModule.Data.Migrations
 
                     b.Property<DateTime?>("ModifiedDate");
 
-                    b.Property<string>("OuterId")
-                        .HasMaxLength(128);
-
                     b.Property<string>("ProductId")
                         .HasMaxLength(128);
 
@@ -95,6 +92,8 @@ namespace VirtoCommerce.SubscriptionModule.Data.Migrations
                     b.Property<int>("IntervalCount");
 
                     b.Property<bool>("IsCancelled");
+
+                    b.Property<bool>("IsDeleted");
 
                     b.Property<string>("ModifiedBy")
                         .HasMaxLength(64);

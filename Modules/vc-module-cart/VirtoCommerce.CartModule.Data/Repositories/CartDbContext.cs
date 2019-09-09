@@ -1,10 +1,10 @@
-using EntityFrameworkCore.Triggers;
 using Microsoft.EntityFrameworkCore;
 using VirtoCommerce.CartModule.Data.Model;
+using VirtoCommerce.Platform.Data.Infrastructure;
 
 namespace VirtoCommerce.CartModule.Data.Repositories
 {
-    public class CartDbContext : DbContextWithTriggers
+    public class CartDbContext : DbContextWithTriggersAndQueryFiltersBase
     {
         public CartDbContext(DbContextOptions<CartDbContext> options)
             : base(options)

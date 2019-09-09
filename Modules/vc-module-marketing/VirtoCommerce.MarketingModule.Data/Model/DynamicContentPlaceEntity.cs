@@ -5,7 +5,7 @@ using VirtoCommerce.Platform.Core.Common;
 
 namespace VirtoCommerce.MarketingModule.Data.Model
 {
-    public class DynamicContentPlaceEntity : AuditableEntity
+    public class DynamicContentPlaceEntity : AuditableEntity, ISupportSoftDeletion
     {
         [Required]
         [StringLength(128)]
@@ -16,6 +16,8 @@ namespace VirtoCommerce.MarketingModule.Data.Model
 
         [StringLength(2048)]
         public string ImageUrl { get; set; }
+
+        public bool IsDeleted { get; set; }
 
         #region Navigation Properties
 

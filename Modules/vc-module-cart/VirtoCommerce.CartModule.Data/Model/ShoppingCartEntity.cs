@@ -12,7 +12,7 @@ using Address = VirtoCommerce.CartModule.Core.Model.Address;
 
 namespace VirtoCommerce.CartModule.Data.Model
 {
-    public class ShoppingCartEntity : AuditableEntity
+    public class ShoppingCartEntity : AuditableEntity, ISupportSoftDeletion
     {
         [StringLength(64)]
         public string Name { get; set; }
@@ -105,6 +105,8 @@ namespace VirtoCommerce.CartModule.Data.Model
 
         [StringLength(64)]
         public string Type { get; set; }
+
+        public bool IsDeleted { get; set; }
 
         #region NavigationProperties
 

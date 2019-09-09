@@ -8,7 +8,7 @@ using VirtoCommerce.Platform.Core.Common;
 
 namespace VirtoCommerce.CatalogModule.Data.Model
 {
-    public class CatalogEntity : AuditableEntity, IHasOuterId
+    public class CatalogEntity : AuditableEntity, IHasOuterId, ISupportSoftDeletion
     {
         public bool Virtual { get; set; }
         [Required]
@@ -24,6 +24,8 @@ namespace VirtoCommerce.CatalogModule.Data.Model
 
         [StringLength(128)]
         public string OuterId { get; set; }
+
+        public bool IsDeleted { get; set; }
 
         #region Navigation Properties
 

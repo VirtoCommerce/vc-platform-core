@@ -8,7 +8,7 @@ using VirtoCommerce.Platform.Core.DynamicProperties;
 
 namespace VirtoCommerce.MarketingModule.Data.Model
 {
-    public class DynamicContentItemEntity : AuditableEntity
+    public class DynamicContentItemEntity : AuditableEntity, ISupportSoftDeletion
     {
         [Required]
         [StringLength(128)]
@@ -27,6 +27,8 @@ namespace VirtoCommerce.MarketingModule.Data.Model
 
         [StringLength(2048)]
         public string ImageUrl { get; set; }
+
+        public bool IsDeleted { get; set; }
 
         #region Navigation Properties
 

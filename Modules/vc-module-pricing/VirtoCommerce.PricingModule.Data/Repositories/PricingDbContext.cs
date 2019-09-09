@@ -1,10 +1,10 @@
-using EntityFrameworkCore.Triggers;
 using Microsoft.EntityFrameworkCore;
+using VirtoCommerce.Platform.Data.Infrastructure;
 using VirtoCommerce.PricingModule.Data.Model;
 
 namespace VirtoCommerce.PricingModule.Data.Repositories
 {
-    public class PricingDbContext : DbContextWithTriggers
+    public class PricingDbContext : DbContextWithTriggersAndQueryFiltersBase
     {
         public PricingDbContext(DbContextOptions<PricingDbContext> options)
             : base(options)

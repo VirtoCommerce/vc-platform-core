@@ -11,7 +11,7 @@ using VirtoCommerce.Platform.Core.Common;
 
 namespace VirtoCommerce.OrdersModule.Data.Model
 {
-    public abstract class OperationEntity : AuditableEntity, IHasOuterId
+    public abstract class OperationEntity : AuditableEntity, IHasOuterId, ISupportSoftDeletion
     {
         [Required]
         [StringLength(64)]
@@ -37,6 +37,8 @@ namespace VirtoCommerce.OrdersModule.Data.Model
 
         [StringLength(128)]
         public string OuterId { get; set; }
+
+        public bool IsDeleted { get; set; }
 
         public virtual OrderOperation ToModel(OrderOperation operation)
         {

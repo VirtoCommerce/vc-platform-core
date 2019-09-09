@@ -13,7 +13,7 @@ using Address = VirtoCommerce.OrdersModule.Core.Model.Address;
 
 namespace VirtoCommerce.OrdersModule.Data.Model
 {
-    public class ShipmentEntity : OperationEntity, ISupportPartialPriceUpdate
+    public class ShipmentEntity : OperationEntity, ISupportPartialPriceUpdate, ISupportSoftDeletion
     {
         [StringLength(64)]
         public string OrganizationId { get; set; }

@@ -39,6 +39,8 @@ namespace VirtoCommerce.ContentModule.Data.Migrations
 
                     b.Property<DateTime>("CreatedDate");
 
+                    b.Property<bool>("IsDeleted");
+
                     b.Property<string>("MenuLinkListId");
 
                     b.Property<string>("ModifiedBy")

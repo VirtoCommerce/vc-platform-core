@@ -5,7 +5,7 @@ using VirtoCommerce.Platform.Core.Common;
 
 namespace VirtoCommerce.InventoryModule.Data.Model
 {
-    public class FulfillmentCenterEntity : AuditableEntity, IHasOuterId
+    public class FulfillmentCenterEntity : AuditableEntity, IHasOuterId, ISupportSoftDeletion
     {
         [Required]
         [StringLength(128)]
@@ -54,6 +54,8 @@ namespace VirtoCommerce.InventoryModule.Data.Model
 
         [StringLength(128)]
         public string OuterId { get; set; }
+
+        public bool IsDeleted { get; set; }
 
         public virtual FulfillmentCenter ToModel(FulfillmentCenter center)
         {

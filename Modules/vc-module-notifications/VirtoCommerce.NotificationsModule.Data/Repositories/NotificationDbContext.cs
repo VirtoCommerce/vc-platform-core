@@ -1,10 +1,10 @@
-using EntityFrameworkCore.Triggers;
 using Microsoft.EntityFrameworkCore;
 using VirtoCommerce.NotificationsModule.Data.Model;
+using VirtoCommerce.Platform.Data.Infrastructure;
 
 namespace VirtoCommerce.NotificationsModule.Data.Repositories
 {
-    public class NotificationDbContext : DbContextWithTriggers
+    public class NotificationDbContext : DbContextWithTriggersAndQueryFiltersBase
     {
         //Add-Migration Initial -Context VirtoCommerce.NotificationsModule.Data.Repositories.NotificationDbContext -StartupProject VirtoCommerce.NotificationsModule.Data  -Verbose -OutputDir Migrations
         public NotificationDbContext(DbContextOptions<NotificationDbContext> options)

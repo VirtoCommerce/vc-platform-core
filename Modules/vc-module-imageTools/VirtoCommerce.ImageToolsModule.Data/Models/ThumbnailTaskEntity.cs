@@ -7,7 +7,7 @@ using VirtoCommerce.Platform.Core.Common;
 
 namespace VirtoCommerce.ImageToolsModule.Data.Models
 {
-    public class ThumbnailTaskEntity : AuditableEntity
+    public class ThumbnailTaskEntity : AuditableEntity, ISupportSoftDeletion
     {
         public ThumbnailTaskEntity()
         {
@@ -23,6 +23,8 @@ namespace VirtoCommerce.ImageToolsModule.Data.Models
         public string WorkPath { get; set; }
 
         public DateTime? LastRun { get; set; }
+
+        public bool IsDeleted { get; set; }
 
         public ObservableCollection<ThumbnailTaskOptionEntity> ThumbnailTaskOptions { get; set; }
 

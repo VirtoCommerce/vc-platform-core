@@ -9,7 +9,7 @@ using VirtoCommerce.StoreModule.Core.Model;
 
 namespace VirtoCommerce.StoreModule.Data.Model
 {
-    public class StoreEntity : AuditableEntity, IHasOuterId
+    public class StoreEntity : AuditableEntity, IHasOuterId, ISupportSoftDeletion
     {
         [Required]
         [StringLength(128)]
@@ -62,6 +62,8 @@ namespace VirtoCommerce.StoreModule.Data.Model
 
         [StringLength(128)]
         public string OuterId { get; set; }
+
+        public bool IsDeleted { get; set; }
 
         #region Navigation Properties
 
