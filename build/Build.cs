@@ -168,8 +168,10 @@ class Build : NukeBuild
          var ignoredFiles = HttpTasks.HttpDownloadString(GlobalModuleIgnoreFileUrl).SplitLineBreaks();
          if (FileExists(ModuleIgnoreFile))
          {
-             ignoredFiles = ignoredFiles.Concat(TextTasks.ReadAllLines(ModuleIgnoreFile).Select(x => x.Trim())).Distinct().ToArray();
+             ignoredFiles = ignoredFiles.Concat(TextTasks.ReadAllLines(ModuleIgnoreFile)).ToArray();
          }
+         ignoredFiles = ignoredFiles.Select(x => x.Trim()).Distinct().ToArray();
+
          var zipFileName = ArtifactsDirectory / ModuleId + "_" + ModuleVersion + ".zip";
          DeleteFile(zipFileName);
          CompressionTasks.CompressZip(ModuleOutputDirectory, zipFileName, (x) => !ignoredFiles.Contains(x.Name));
