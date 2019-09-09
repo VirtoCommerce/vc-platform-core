@@ -9,6 +9,15 @@
     </PropertyGroup>
 
     <ItemGroup>
+      <Compile Remove="dist\**" />
+      <Compile Remove="node_modules\**" />
+      <EmbeddedResource Remove="dist\**" />
+      <EmbeddedResource Remove="node_modules\**" />
+      <None Remove="dist\**" />
+      <None Remove="node_modules\**" />
+    </ItemGroup>
+
+    <ItemGroup>
         <ProjectReference Include="..\..\..\VirtoCommerce.Platform.Security\VirtoCommerce.Platform.Security.csproj" />
         <ProjectReference Include="..\VirtoCommerce.CatalogModule.Core\VirtoCommerce.CatalogModule.Core.csproj" />
         <ProjectReference Include="..\VirtoCommerce.CatalogModule.Data\VirtoCommerce.CatalogModule.Data.csproj" />

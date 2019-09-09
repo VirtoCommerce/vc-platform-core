@@ -19,7 +19,6 @@ namespace VirtoCommerce.ContentModule.Azure
             _options = options.Value;
         }
 
-
         public override Stream OpenRead(string url)
         {
             return base.OpenRead(NormalizeUrl(url));
@@ -55,7 +54,6 @@ namespace VirtoCommerce.ContentModule.Azure
             return await base.SearchAsync(folderUrl, keyword);
         }
 
-
         /// <summary>
         /// Chroot url (artificial add parent 'chroot' folder)
         /// </summary>
@@ -70,9 +68,9 @@ namespace VirtoCommerce.ContentModule.Azure
                 {
                     url = Uri.UnescapeDataString(new Uri(url).AbsolutePath);
                 }
-                retVal = "\\" + url.Replace('/', '\\').TrimStart('\\');
-                retVal = _options.RootPath + "\\" + retVal.Replace(_options.RootPath, string.Empty);
-                retVal = retVal.Replace("\\\\", "\\");
+                retVal = Path.DirectorySeparatorChar + url.Replace('/', Path.DirectorySeparatorChar).TrimStart(Path.DirectorySeparatorChar);
+                retVal = _options.RootPath + Path.DirectorySeparatorChar + retVal.Replace(_options.RootPath, string.Empty);
+                retVal = retVal.Replace($"{Path.DirectorySeparatorChar}{Path.DirectorySeparatorChar}", $"{Path.DirectorySeparatorChar}");
             }
             return retVal;
         }

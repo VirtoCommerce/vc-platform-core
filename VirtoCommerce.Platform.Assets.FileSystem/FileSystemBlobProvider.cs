@@ -20,12 +20,9 @@ namespace VirtoCommerce.Platform.Assets.FileSystem
         {
             _options = options.Value;
 
-            _storagePath = _options.RootPath.TrimEnd('\\');
+            _storagePath = _options.RootPath.TrimEnd(Path.DirectorySeparatorChar);
             _basePublicUrl = _options.PublicUrl;
-            if (_basePublicUrl != null)
-            {
-                _basePublicUrl = _basePublicUrl.TrimEnd('/');
-            }
+            _basePublicUrl = _basePublicUrl?.TrimEnd('/');
         }
 
         #region IBlobStorageProvider members
@@ -95,7 +92,6 @@ namespace VirtoCommerce.Platform.Assets.FileSystem
 
             return File.OpenWrite(filePath);
         }
-
 
         /// <summary>
         /// SearchAsync folders and blobs in folder
@@ -287,7 +283,9 @@ namespace VirtoCommerce.Platform.Assets.FileSystem
 
         protected string GetAbsoluteUrlFromPath(string path)
         {
-            var retVal = _basePublicUrl + "/" + path.Replace(_storagePath, string.Empty).TrimStart('\\').Replace('\\', '/');
+            var retVal = _basePublicUrl + "/" + path.Replace(_storagePath, string.Empty)
+                             .TrimStart(Path.DirectorySeparatorChar)
+                             .Replace(Path.DirectorySeparatorChar, '/');
             return Uri.EscapeUriString(retVal);
         }
 
@@ -296,9 +294,10 @@ namespace VirtoCommerce.Platform.Assets.FileSystem
             var retVal = _storagePath;
             if (url != null)
             {
-                retVal = _storagePath + "\\";
+                retVal = _storagePath + Path.DirectorySeparatorChar;
                 retVal += GetRelativeUrl(url);
-                retVal = retVal.Replace("/", "\\").Replace("\\\\", "\\");
+                retVal = retVal.Replace('/', Path.DirectorySeparatorChar)
+                               .Replace($"{Path.DirectorySeparatorChar}{Path.DirectorySeparatorChar}", $"{Path.DirectorySeparatorChar}");
             }
             return Uri.UnescapeDataString(retVal);
         }
