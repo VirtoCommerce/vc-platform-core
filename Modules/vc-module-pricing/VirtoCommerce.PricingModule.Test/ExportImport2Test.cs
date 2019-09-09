@@ -46,7 +46,7 @@ namespace VirtoCommerce.PricingModule.Test
             var resolver = (IKnownExportTypesResolver)registrar;
 
             registrar.RegisterType(ExportedTypeDefinitionBuilder.Build<ExportablePrice, PriceExportDataQuery>()
-                .WithDataSourceFactory(new PriceExportPagedDataSourceFactory(searchServiceMock.Object, priceServiceMock.Object, itemServiceMock.Object))
+                .WithDataSourceFactory(new PricingExportPagedDataSourceFactory(searchServiceMock.Object, priceServiceMock.Object, itemServiceMock.Object, new Mock<ICatalogService>().Object))
                 .WithMetadata(metadata));
 
             var includedPropertyNames = new string[] { "Currency", "ProductId", "Sale", "List", "MinQuantity", "StartDate", "EndDate", "EffectiveValue" };
@@ -117,7 +117,7 @@ namespace VirtoCommerce.PricingModule.Test
             var metadata = typeof(ExportablePricelist).GetPropertyNames();
             var resolver = (IKnownExportTypesResolver)registrar;
             registrar.RegisterType(ExportedTypeDefinitionBuilder.Build<ExportablePricelist, PricelistExportDataQuery>()
-                .WithDataSourceFactory(new PricelistExportPagedDataSourceFactory(searchServiceMock.Object, priceServiceMock.Object))
+                .WithDataSourceFactory(new PricingExportPagedDataSourceFactory(searchServiceMock.Object, priceServiceMock.Object, new Mock<IItemService>().Object, new Mock<ICatalogService>().Object))
                 .WithMetadata(metadata));
 
             var exportProviderFactories = new[] {
@@ -184,7 +184,7 @@ namespace VirtoCommerce.PricingModule.Test
             var metadata = typeof(ExportablePricelistAssignment).GetPropertyNames();
             var resolver = (IKnownExportTypesResolver)registrar;
             registrar.RegisterType(ExportedTypeDefinitionBuilder.Build<ExportablePricelistAssignment, PricelistAssignmentExportDataQuery>()
-                .WithDataSourceFactory(new PricelistAssignmentExportPagedDataSourceFactory(searchServiceMock.Object, priceServiceMock.Object, catalogServiceMock.Object))
+                .WithDataSourceFactory(new PricingExportPagedDataSourceFactory(searchServiceMock.Object, priceServiceMock.Object, new Mock<IItemService>().Object, catalogServiceMock.Object))
                 .WithMetadata(metadata));
 
             var exportProviderFactories = new[] {
@@ -256,7 +256,7 @@ namespace VirtoCommerce.PricingModule.Test
 
             var metadata = typeof(ExportablePrice).GetPropertyNames();
             registrar.RegisterType(ExportedTypeDefinitionBuilder.Build<ExportablePrice, PriceExportDataQuery>()
-                .WithDataSourceFactory(new PriceExportPagedDataSourceFactory(searchServiceMock.Object, priceServiceMock.Object, itemServiceMock.Object))
+                .WithDataSourceFactory(new PricingExportPagedDataSourceFactory(searchServiceMock.Object, priceServiceMock.Object, itemServiceMock.Object, new Mock<ICatalogService>().Object))
                 .WithMetadata(metadata)
                 .WithTabularMetadata(typeof(TabularPrice).GetPropertyNames()));
 

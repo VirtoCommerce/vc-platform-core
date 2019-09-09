@@ -63,9 +63,7 @@ namespace VirtoCommerce.PricingModule.Web
             serviceCollection.AddTransient<ProductPriceDocumentBuilder>();
             serviceCollection.AddTransient<LogChangesChangedEventHandler>();
 
-            serviceCollection.AddTransient<PriceExportPagedDataSourceFactory>();
-            serviceCollection.AddTransient<PricelistAssignmentExportPagedDataSourceFactory>();
-            serviceCollection.AddTransient<PricelistExportPagedDataSourceFactory>();
+            serviceCollection.AddTransient<IPricingExportPagedDataSourceFactory, PricingExportPagedDataSourceFactory>();
 
             var requirements = new IAuthorizationRequirement[]
             {
@@ -153,19 +151,19 @@ namespace VirtoCommerce.PricingModule.Web
 
             registrar.RegisterType(
                  ExportedTypeDefinitionBuilder.Build<ExportablePrice, PriceExportDataQuery>()
-                    .WithDataSourceFactory(appBuilder.ApplicationServices.GetService<PriceExportPagedDataSourceFactory>())
+                    .WithDataSourceFactory(appBuilder.ApplicationServices.GetService<IPricingExportPagedDataSourceFactory>())
                     .WithMetadata(typeof(ExportablePrice).GetPropertyNames())
                     .WithTabularMetadata(typeof(TabularPrice).GetPropertyNames()));
 
             registrar.RegisterType(
                  ExportedTypeDefinitionBuilder.Build<ExportablePricelist, PricelistExportDataQuery>()
-                    .WithDataSourceFactory(appBuilder.ApplicationServices.GetService<PricelistExportPagedDataSourceFactory>())
+                    .WithDataSourceFactory(appBuilder.ApplicationServices.GetService<IPricingExportPagedDataSourceFactory>())
                     .WithMetadata(typeof(ExportablePricelist).GetPropertyNames())
                     .WithTabularMetadata(typeof(TabularPricelist).GetPropertyNames()));
 
             registrar.RegisterType(
                  ExportedTypeDefinitionBuilder.Build<ExportablePricelistAssignment, PricelistAssignmentExportDataQuery>()
-                    .WithDataSourceFactory(appBuilder.ApplicationServices.GetService<PricelistAssignmentExportPagedDataSourceFactory>())
+                    .WithDataSourceFactory(appBuilder.ApplicationServices.GetService<IPricingExportPagedDataSourceFactory>())
                     .WithMetadata(typeof(ExportablePricelistAssignment).GetPropertyNames())
                     .WithTabularMetadata(typeof(TabularPricelistAssignment).GetPropertyNames()));
         }
