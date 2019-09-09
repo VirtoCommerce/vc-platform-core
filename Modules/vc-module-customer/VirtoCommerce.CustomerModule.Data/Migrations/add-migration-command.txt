@@ -1,3 +1,0 @@
-Add-Migration InitialCustomer -Context VirtoCommerce.CustomerModule.Data.Repositories.CustomerDbContext  -Verbose -OutputDir Migrations -Project VirtoCommerce.CustomerModule.Data -StartupProject VirtoCommerce.CustomerModule.Data  -Debug
-
-Remove-Migration -Context VirtoCommerce.CustomerModule.Data.Repositories.CustomerDbContext  -Verbose -Project VirtoCommerce.CustomerModule.Data -StartupProject VirtoCommerce.CustomerModule.Data  -Debug

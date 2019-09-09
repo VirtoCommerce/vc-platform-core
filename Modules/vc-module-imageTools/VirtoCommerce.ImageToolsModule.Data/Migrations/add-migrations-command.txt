@@ -1,2 +1,0 @@
-Add-Migration Thumbnail -Context VirtoCommerce.ImageToolsModule.Data.Repositories.ThumbnailDbContext -StartupProject VirtoCommerce.ImageToolsModule.Data  -Verbose -OutputDir Migrations
-Update-Database -Context VirtoCommerce.ImageToolsModule.Data.Repositories.ThumbnailDbContext -StartupProject VirtoCommerce.ImageToolsModule.Data

@@ -1,3 +1,0 @@
-Add-Migration Initial -Context VirtoCommerce.StoreModule.Data.Repositories.StoreDbContext  -Verbose -OutputDir Migrations -Project VirtoCommerce.StoreModule.Data -StartupProject VirtoCommerce.StoreModule.Data  -Debug
-
-Remove-Migration -Context VirtoCommerce.StoreModule.Data.Repositories.StoreDbContext  -Verbose -Project VirtoCommerce.StoreModule.Data -StartupProject VirtoCommerce.StoreModule.Data  -Debug

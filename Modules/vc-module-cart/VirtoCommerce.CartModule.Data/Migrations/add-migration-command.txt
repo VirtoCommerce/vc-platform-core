@@ -1,3 +1,0 @@
-Add-Migration MigrationName -Context VirtoCommerce.CartModule.Data.Repositories.CartDbContext  -Verbose -OutputDir Migrations -Project VirtoCommerce.CartModule.Data -StartupProject VirtoCommerce.CartModule.Data  -Debug
-
-Remove-Migration -Context VirtoCommerce.CartModule.Data.Repositories.CartDbContext  -Verbose -Project VirtoCommerce.CartModule.Data -StartupProject VirtoCommerce.CartModule.Data  -Debug

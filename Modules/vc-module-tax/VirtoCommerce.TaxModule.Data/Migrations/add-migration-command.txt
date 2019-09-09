@@ -1,1 +1,0 @@
-Add-Migration Initial -Context VirtoCommerce.TaxModule.Data.Repositories.TaxDbContext  -Verbose -OutputDir Migrations -Project VirtoCommerce.TaxModule.Data -StartupProject VirtoCommerce.TaxModule.Data  -Debug

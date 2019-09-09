@@ -1,3 +1,0 @@
-Add-Migration MigrationName -Context VirtoCommerce.MarketingModule.Data.Repositories.MarketingDbContext  -Verbose -OutputDir Migrations -Project VirtoCommerce.MarketingModule.Data -StartupProject VirtoCommerce.MarketingModule.Data  -Debug
-
-Remove-Migration -Context VirtoCommerce.MarketingModule.Data.Repositories.MarketingDbContext  -Verbose -Project VirtoCommerce.MarketingModule.Data -StartupProject VirtoCommerce.MarketingModule.Data  -Debug

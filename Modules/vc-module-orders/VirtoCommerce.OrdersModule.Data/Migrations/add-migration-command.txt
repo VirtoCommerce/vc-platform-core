@@ -1,3 +1,0 @@
-Add-Migration MigrationName -Context VirtoCommerce.OrdersModule.Data.Repositories.OrderDbContext  -Verbose -OutputDir Migrations -Project VirtoCommerce.OrdersModule.Data -StartupProject VirtoCommerce.OrdersModule.Data  -Debug
-
-Remove-Migration -Context VirtoCommerce.OrdersModule.Data.Repositories.OrderDbContext  -Verbose -Project VirtoCommerce.OrdersModule.Data -StartupProject VirtoCommerce.OrdersModule.Data  -Debug

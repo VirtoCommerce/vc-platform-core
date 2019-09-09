@@ -1,3 +1,0 @@
-Add-Migration Initial -Context VirtoCommerce.ShippingModule.Data.Repositories.ShippingDbContext  -Verbose -OutputDir Migrations -Project VirtoCommerce.ShippingModule.Data -StartupProject VirtoCommerce.ShippingModule.Data  -Debug
-
-Remove-Migration -Context VirtoCommerce.ShippingModule.Data.Repositories.ShippingDbContext  -Verbose -Project VirtoCommerce.ShippingModule.Data -StartupProject VirtoCommerce.ShippingModule.Data  -Debug
