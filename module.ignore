@@ -50,3 +50,9 @@ System.Interactive.Async.dll
 VirtoCommerce.Smidge.dll
 VirtoCommerce.Smidge.Nuglify.dll
 WindowsAzure.Storage.dll
+VirtoCommerce.Platform.Core.dll
+VirtoCommerce.Platform.Data.dll
+VirtoCommerce.Platform.Assets.AzureBlobStorage.dll
+VirtoCommerce.Platform.Core.dll
+VirtoCommerce.Platform.Modules.dll
+VirtoCommerce.Platform.Security.dll

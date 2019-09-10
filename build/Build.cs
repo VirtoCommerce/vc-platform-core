@@ -130,7 +130,7 @@ class Build : NukeBuild
 
 
     Target Compile => _ => _
-        .DependsOn(Restore)
+        .DependsOn(Restore, WebPackBuild)
         .Executes(() =>
         {
             DotNetBuild(s => s
