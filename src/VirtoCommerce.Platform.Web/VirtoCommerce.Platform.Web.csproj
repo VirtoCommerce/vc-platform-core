@@ -13,6 +13,10 @@
 
     <ItemGroup>
         <PackageReference Include="AspNet.Security.OAuth.Validation" Version="2.0.0" />
+        <PackageReference Include="GitVersionTask" Version="5.0.1">
+          <PrivateAssets>all</PrivateAssets>
+          <IncludeAssets>runtime; build; native; contentfiles; analyzers; buildtransitive</IncludeAssets>
+        </PackageReference>
         <PackageReference Include="Hangfire.AspNetCore" Version="1.6.22" />
         <PackageReference Include="Hangfire.MemoryStorage" Version="1.6.0" />
         <PackageReference Include="HangFire.SqlServer" Version="1.6.22" />
