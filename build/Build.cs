@@ -27,7 +27,7 @@ class Build : NukeBuild
     ///   - Microsoft VisualStudio     https://nuke.build/visualstudio
     ///   - Microsoft VSCode           https://nuke.build/vscode
 
-    public static int Main () => Execute<Build>(x => x.Compile);
+    public static int Main() => Execute<Build>(x => x.Compile);
 
     [Parameter("Configuration to build - Default is 'Debug' (local) or 'Release' (server)")]
     readonly Configuration Configuration = IsLocalBuild ? Configuration.Debug : Configuration.Release;
@@ -40,7 +40,6 @@ class Build : NukeBuild
 
     [Parameter("ApiKey for the specified source")] readonly string ApiKey;
     [Parameter] readonly string Source = @"https://api.nuget.org/v3/index.json";
-
 
     [Parameter] static string GlobalModuleIgnoreFileUrl = @"https://raw.githubusercontent.com/VirtoCommerce/vc-platform-core/release/3.0.0/module.ignore";
     AbsolutePath SourceDirectory => RootDirectory / "src";
@@ -58,6 +57,7 @@ class Build : NukeBuild
     bool IsModule => FileExists(ModuleManifest);
 
     Target Clean => _ => _
+        .Before(Restore)
         .Executes(() =>
         {
             SourceDirectory.GlobDirectories("**/bin", "**/obj").ForEach(DeleteDirectory);
@@ -100,12 +100,9 @@ class Build : NukeBuild
                        .SetProjectFile(v)));
        });
 
-
     Target Publish => _ => _
-        .DependsOn(Test, Pack)
+        .DependsOn(Clean, Compile, Test, Pack)
         .Requires(() => ApiKey)
-        // .Requires(() => GitTasks.GitHasCleanWorkingCopy())
-        // .Requires(() => Configuration.Equals(Configuration.Release))
         .Executes(() =>
         {
             var packages = ArtifactsDirectory.GlobFiles("*.nupkg");
@@ -127,9 +124,8 @@ class Build : NukeBuild
          NpmTasks.NpmRun(s => s.SetWorkingDirectory(WebProject.Directory).SetCommand("webpack:build"));
      });
 
-
     Target Compile => _ => _
-        .DependsOn(Clean, Restore)
+        .DependsOn(Restore)
         .Executes(() =>
         {
             DotNetBuild(s => s
@@ -165,7 +161,7 @@ class Build : NukeBuild
         });
 
     Target Compress => _ => _
-     .DependsOn(Compile, Test, WebPackBuild)
+     .DependsOn(Clean, Compile, Test, WebPackBuild)
      .Executes(() =>
      {
          var ignoredFiles = HttpTasks.HttpDownloadString(GlobalModuleIgnoreFileUrl).SplitLineBreaks();
@@ -180,5 +176,5 @@ class Build : NukeBuild
          CompressionTasks.CompressZip(ModuleOutputDirectory, zipFileName, (x) => !ignoredFiles.Contains(x.Name));
      });
 
-   
 }
+
