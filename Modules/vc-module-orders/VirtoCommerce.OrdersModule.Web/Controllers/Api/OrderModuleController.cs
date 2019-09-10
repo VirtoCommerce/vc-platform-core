@@ -479,7 +479,7 @@ namespace VirtoCommerce.OrdersModule.Web.Controllers.Api
             notification.CustomerOrder = order;
             var message = AbstractTypeFactory<NotificationMessage>.TryCreateInstance($"{notification.Kind}Message");
             message.LanguageCode = order.LanguageCode;
-            var emailNotificationMessage = (EmailNotificationMessage)notification.ToMessage(message, _notificationTemplateRenderer);
+            notification.ToMessage(message, _notificationTemplateRenderer);
 
             //need to do https://selectpdf.com/html-to-pdf/docs/html/Deployment.htm
             HtmlToPdf converter = new HtmlToPdf();
@@ -490,7 +490,7 @@ namespace VirtoCommerce.OrdersModule.Web.Controllers.Api
             converter.Options.MarginTop = 20;
             converter.Options.MarginBottom = 20;
 
-            PdfDocument doc = converter.ConvertHtmlString(emailNotificationMessage.Body);
+            var doc = converter.ConvertHtmlString(((EmailNotificationMessage)message).Body);
             var byteArray = doc.Save();
             return new FileContentResult(byteArray, "application/pdf");
         }

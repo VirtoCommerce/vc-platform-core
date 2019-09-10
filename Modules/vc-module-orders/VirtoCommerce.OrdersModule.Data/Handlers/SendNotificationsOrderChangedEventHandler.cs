@@ -111,8 +111,9 @@ namespace VirtoCommerce.OrdersModule.Data.Handlers
             foreach (var notification in notifications)
             {
                 notification.CustomerOrder = changedEntry.NewEntry;
+                notification.LanguageCode = changedEntry.NewEntry.LanguageCode;
                 await SetNotificationParametersAsync(notification, changedEntry);
-                await _notificationSender.SendNotificationAsync(notification, changedEntry.NewEntry.LanguageCode);
+                _notificationSender.ScheduleSendNotification(notification);
             }
         }
 

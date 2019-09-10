@@ -70,7 +70,7 @@ namespace VirtoCommerce.SubscriptionModule.Data.Handlers
             foreach (var notification in notifications)
             {
                 await SetNotificationParametersAsync(notification, changedEntry.NewEntry);
-                await _notificationSender.SendNotificationAsync(notification, changedEntry.NewEntry.CustomerOrderPrototype.LanguageCode);
+                await _notificationSender.SendNotificationAsync(notification);
             }
         }
 
@@ -86,6 +86,7 @@ namespace VirtoCommerce.SubscriptionModule.Data.Handlers
 
             notification.From = store.Email;
             notification.To = await GetSubscriptionRecipientEmailAsync(subscription);
+            notification.LanguageCode = subscription.CustomerOrderPrototype.LanguageCode;
 
             //Link notification to subscription to getting notification history for each subscription individually
             notification.TenantIdentity = new TenantIdentity(subscription.Id, typeof(Subscription).Name);

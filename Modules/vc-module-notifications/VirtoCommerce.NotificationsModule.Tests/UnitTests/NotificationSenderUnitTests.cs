@@ -79,7 +79,8 @@ namespace VirtoCommerce.NotificationsModule.Tests.UnitTests
                         Body = body,
                         LanguageCode = "en-US"
                     }
-                }
+                },
+                LanguageCode = language
             };
             var date = new DateTime(2018, 02, 20, 10, 00, 00);
             var message = new EmailNotificationMessage()
@@ -95,7 +96,7 @@ namespace VirtoCommerce.NotificationsModule.Tests.UnitTests
             _messageServiceMock.Setup(ms => ms.SaveNotificationMessagesAsync(new NotificationMessage[] { message }));
 
             //Act
-            var result = await _sender.SendNotificationAsync(notification, language);
+            var result = await _sender.SendNotificationAsync(notification);
 
             //Assert
             Assert.True(result.IsSuccess);
@@ -138,7 +139,8 @@ namespace VirtoCommerce.NotificationsModule.Tests.UnitTests
                         Subject = subject,
                         Body = body,
                     }
-                }
+                },
+                LanguageCode = language
             };
             var date = new DateTime(2018, 02, 20, 10, 00, 00);
             var message = new EmailNotificationMessage()
@@ -155,7 +157,7 @@ namespace VirtoCommerce.NotificationsModule.Tests.UnitTests
 
 
             //Act
-            var result = await _sender.SendNotificationAsync(notification, language);
+            var result = await _sender.SendNotificationAsync(notification);
 
             //Assert
             Assert.True(result.IsSuccess);
@@ -180,7 +182,8 @@ namespace VirtoCommerce.NotificationsModule.Tests.UnitTests
                         Subject = subject,
                         Body = body,
                     }
-                }
+                },
+                LanguageCode = language
             };
             var date = new DateTime(2018, 02, 20, 10, 00, 00);
             var message = new EmailNotificationMessage()
@@ -196,7 +199,7 @@ namespace VirtoCommerce.NotificationsModule.Tests.UnitTests
             _messageServiceMock.Setup(ms => ms.SaveNotificationMessagesAsync(new NotificationMessage[] { message }));
 
             //Act
-            var result = await _sender.SendNotificationAsync(notification, language);
+            var result = await _sender.SendNotificationAsync(notification);
 
             //Assert
             Assert.True(result.IsSuccess);
@@ -227,7 +230,8 @@ namespace VirtoCommerce.NotificationsModule.Tests.UnitTests
                         Subject = subject,
                         Body = body,
                     }
-                }
+                },
+                LanguageCode = language
             };
             var date = new DateTime(2018, 02, 20, 10, 00, 00);
             var message = new EmailNotificationMessage()
@@ -243,7 +247,7 @@ namespace VirtoCommerce.NotificationsModule.Tests.UnitTests
             _messageServiceMock.Setup(ms => ms.SaveNotificationMessagesAsync(new NotificationMessage[] { message }));
 
             //Act
-            var result = await _sender.SendNotificationAsync(notification, language);
+            var result = await _sender.SendNotificationAsync(notification);
 
             //Assert
             Assert.True(result.IsSuccess);
@@ -266,7 +270,8 @@ namespace VirtoCommerce.NotificationsModule.Tests.UnitTests
                         Body = body,
                     }
                 },
-                TenantIdentity = new TenantIdentity(null, null)
+                TenantIdentity = new TenantIdentity(null, null),
+                LanguageCode = language
             };
 
             var message = new EmailNotificationMessage()
@@ -283,7 +288,7 @@ namespace VirtoCommerce.NotificationsModule.Tests.UnitTests
             _messageServiceMock.Setup(ms => ms.SaveNotificationMessagesAsync(new NotificationMessage[] { message }));
 
             //Act
-            var result = await _sender.SendNotificationAsync(notification, language);
+            var result = await _sender.SendNotificationAsync(notification);
 
             //Assert
             Assert.True(result.IsSuccess);
@@ -305,7 +310,8 @@ namespace VirtoCommerce.NotificationsModule.Tests.UnitTests
                         Subject = subject,
                         Body = body,
                     }
-                }
+                },
+                LanguageCode = language
             };
 
             var message = new EmailNotificationMessage()
@@ -322,7 +328,7 @@ namespace VirtoCommerce.NotificationsModule.Tests.UnitTests
             _messageSenderMock.Setup(ms => ms.SendNotificationAsync(It.IsAny<NotificationMessage>())).Throws(new SmtpException());
 
             //Act
-            var result = await _sender.SendNotificationAsync(notification, language);
+            var result = await _sender.SendNotificationAsync(notification);
 
             //Assert
             Assert.False(result.IsSuccess);
@@ -337,7 +343,7 @@ namespace VirtoCommerce.NotificationsModule.Tests.UnitTests
             _messageServiceMock.Setup(ms => ms.SaveNotificationMessagesAsync(new[] { message }));
 
             //Act
-            await Assert.ThrowsAsync<ArgumentNullException>(() => _sender.SendNotificationAsync(null, language));
+            await Assert.ThrowsAsync<ArgumentNullException>(() => _sender.SendNotificationAsync(null));
         }
 
         [Fact]
@@ -356,7 +362,8 @@ namespace VirtoCommerce.NotificationsModule.Tests.UnitTests
                         Subject = subject,
                         Body = body,
                     }
-                }
+                },
+                LanguageCode = language
             };
 
             var message = new EmailNotificationMessage()
@@ -375,7 +382,7 @@ namespace VirtoCommerce.NotificationsModule.Tests.UnitTests
             var sender = new NotificationSender(_templateRender, _messageServiceMock.Object, _logNotificationSenderMock.Object, _senderFactoryMock.Object);
 
             //Act
-            var result = await sender.SendNotificationAsync(notification, language);
+            var result = await sender.SendNotificationAsync(notification);
 
             //Assert
             Assert.False(result.IsSuccess);
