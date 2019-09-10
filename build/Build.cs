@@ -62,6 +62,7 @@ class Build : NukeBuild
         {
             SourceDirectory.GlobDirectories("**/bin", "**/obj").ForEach(DeleteDirectory);
             TestsDirectory.GlobDirectories("**/bin", "**/obj").ForEach(DeleteDirectory);
+            WebProject.Directory.GlobDirectories("**/node_modules").ForEach(DeleteDirectory);
             EnsureCleanDirectory(ArtifactsDirectory);
         });
 
