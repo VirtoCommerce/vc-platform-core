@@ -58,7 +58,6 @@ class Build : NukeBuild
     bool IsModule => FileExists(ModuleManifest);
 
     Target Clean => _ => _
-        .Before(Restore)
         .Executes(() =>
         {
             SourceDirectory.GlobDirectories("**/bin", "**/obj").ForEach(DeleteDirectory);
@@ -74,7 +73,7 @@ class Build : NukeBuild
         });
 
     Target Pack => _ => _
-      .DependsOn(Compile)
+      .DependsOn(Test)
       .Executes(() =>
       {
           DotNetPack(s => s
@@ -103,7 +102,7 @@ class Build : NukeBuild
 
 
     Target Publish => _ => _
-        .DependsOn(Clean, Test, Pack)
+        .DependsOn(Test, Pack)
         .Requires(() => ApiKey)
         // .Requires(() => GitTasks.GitHasCleanWorkingCopy())
         // .Requires(() => Configuration.Equals(Configuration.Release))
@@ -130,7 +129,7 @@ class Build : NukeBuild
 
 
     Target Compile => _ => _
-        .DependsOn(Restore, WebPackBuild)
+        .DependsOn(Clean, Restore)
         .Executes(() =>
         {
             DotNetBuild(s => s
@@ -166,7 +165,7 @@ class Build : NukeBuild
         });
 
     Target Compress => _ => _
-     .DependsOn(Clean, Pack)
+     .DependsOn(Compile, Test, WebPackBuild)
      .Executes(() =>
      {
          var ignoredFiles = HttpTasks.HttpDownloadString(GlobalModuleIgnoreFileUrl).SplitLineBreaks();
