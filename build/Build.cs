@@ -156,7 +156,11 @@ class Build : NukeBuild
                 CopyFileToDirectory(ModuleManifest, ModuleOutputDirectory, FileExistsPolicy.Overwrite);
                 foreach (var moduleFolder in ModuleContentFolders)
                 {
-                    CopyDirectoryRecursively(WebProject.Directory / moduleFolder, ModuleOutputDirectory / moduleFolder, DirectoryExistsPolicy.Merge, FileExistsPolicy.Overwrite);
+                    var srcModuleFolder = WebProject.Directory / moduleFolder;
+                    if (DirectoryExists(srcModuleFolder))
+                    {
+                        CopyDirectoryRecursively(srcModuleFolder, ModuleOutputDirectory / moduleFolder, DirectoryExistsPolicy.Merge, FileExistsPolicy.Overwrite);
+                    }
                 }
             }
         });
