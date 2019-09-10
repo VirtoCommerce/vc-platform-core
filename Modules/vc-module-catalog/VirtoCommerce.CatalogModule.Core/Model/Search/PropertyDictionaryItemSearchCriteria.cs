@@ -9,5 +9,7 @@ namespace VirtoCommerce.CatalogModule.Core.Model.Search
     public class PropertyDictionaryItemSearchCriteria : SearchCriteriaBase
     {
         public IList<string> PropertyIds { get; set; }
+
+        public string[] CatalogIds { get; set; }
     }
 }

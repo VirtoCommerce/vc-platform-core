@@ -13,6 +13,7 @@ using Microsoft.Extensions.Options;
 using VirtoCommerce.CatalogModule.Core;
 using VirtoCommerce.CatalogModule.Core.Events;
 using VirtoCommerce.CatalogModule.Core.Model;
+using VirtoCommerce.CatalogModule.Core.Model.Export;
 using VirtoCommerce.CatalogModule.Core.Model.OutlinePart;
 using VirtoCommerce.CatalogModule.Core.Search;
 using VirtoCommerce.CatalogModule.Core.Services;
@@ -27,6 +28,10 @@ using VirtoCommerce.CatalogModule.Data.Validation;
 using VirtoCommerce.CatalogModule.Web.Authorization;
 using VirtoCommerce.CatalogModule.Web.JsonConverters;
 using VirtoCommerce.CoreModule.Core.Seo;
+using VirtoCommerce.ExportModule.Core.Model;
+using VirtoCommerce.ExportModule.Core.Services;
+using VirtoCommerce.ExportModule.Data.Extensions;
+using VirtoCommerce.ExportModule.Data.Services;
 using VirtoCommerce.Platform.Core.Bus;
 using VirtoCommerce.Platform.Core.Common;
 using VirtoCommerce.Platform.Core.ExportImport;
@@ -34,8 +39,10 @@ using VirtoCommerce.Platform.Core.Modularity;
 using VirtoCommerce.Platform.Core.Security;
 using VirtoCommerce.Platform.Core.Settings;
 using VirtoCommerce.Platform.Data.Extensions;
+using VirtoCommerce.Platform.Security.Authorization;
 using VirtoCommerce.SearchModule.Core.Model;
 using VirtoCommerce.SearchModule.Core.Services;
+using AuthorizationOptions = Microsoft.AspNetCore.Authorization.AuthorizationOptions;
 
 namespace VirtoCommerce.CatalogModule.Web
 {
@@ -76,8 +83,8 @@ namespace VirtoCommerce.CatalogModule.Web
 
             serviceCollection.AddTransient<IPropertyService, PropertyService>();
             serviceCollection.AddTransient<IPropertySearchService, PropertySearchService>();
-            serviceCollection.AddTransient<IProperyDictionaryItemService, PropertyDictionaryItemService>();
-            serviceCollection.AddTransient<IProperyDictionaryItemSearchService, ProperyDictionaryItemSearchService>();
+            serviceCollection.AddTransient<IPropertyDictionaryItemService, PropertyDictionaryItemService>();
+            serviceCollection.AddTransient<IPropertyDictionaryItemSearchService, PropertyDictionaryItemSearchService>();
             serviceCollection.AddTransient<IProductAssociationSearchService, ProductAssociationSearchService>();
             serviceCollection.AddTransient<IOutlineService, OutlineService>();
             serviceCollection.AddTransient<ISkuGenerator, DefaultSkuGenerator>();
@@ -133,6 +140,29 @@ namespace VirtoCommerce.CatalogModule.Web
             });
 
             serviceCollection.AddTransient<IAuthorizationHandler, CatalogAuthorizationHandler>();
+
+            serviceCollection.AddTransient<ICatalogExportPagedDataSourceFactory, CatalogExportPagedDataSourceFactory>();
+
+
+            #region Add Authorization Policy for GenericExport
+
+            var requirements = new IAuthorizationRequirement[]
+            {
+                new PermissionAuthorizationRequirement(ModuleConstants.Security.Permissions.Export),
+                new CatalogAuthorizationRequirement(ModuleConstants.Security.Permissions.Read)
+            };
+
+            var exportPolicy = new AuthorizationPolicyBuilder()
+                .AddRequirements(requirements)
+                .Build();
+
+            serviceCollection.Configure<AuthorizationOptions>(configure =>
+            {
+                configure.AddPolicy(typeof(ExportableProduct).FullName + "ExportDataPolicy", exportPolicy);
+                configure.AddPolicy(typeof(ExportableCatalogFull).FullName + "ExportDataPolicy", exportPolicy);
+            });
+
+            #endregion
         }
 
         public void PostInitialize(IApplicationBuilder appBuilder)
@@ -171,6 +201,36 @@ namespace VirtoCommerce.CatalogModule.Web
                 catalogDbContext.Database.EnsureCreated();
                 catalogDbContext.Database.Migrate();
             }
+
+            #region Register types for generic Export
+
+            var registrar = appBuilder.ApplicationServices.GetService<IKnownExportTypesRegistrar>();
+
+            registrar.RegisterType(
+                ExportedTypeDefinitionBuilder.Build<ExportableProduct, ProductExportDataQuery>()
+                    .WithDataSourceFactory(appBuilder.ApplicationServices.GetService<ICatalogExportPagedDataSourceFactory>())
+                    .WithMetadata(typeof(ExportableProduct).GetPropertyNames(
+                        nameof(ExportableProduct.Properties),
+                        $"{nameof(ExportableProduct.Properties)}.{nameof(Property.Values)}",
+                        $"{nameof(ExportableProduct.Properties)}.{nameof(Property.Attributes)}",
+                        $"{nameof(ExportableProduct.Properties)}.{nameof(Property.DisplayNames)}",
+                        $"{nameof(ExportableProduct.Properties)}.{nameof(Property.ValidationRules)}",
+                        nameof(ExportableProduct.Assets),
+                        nameof(ExportableProduct.Links),
+                        nameof(ExportableProduct.SeoInfos),
+                        nameof(ExportableProduct.Reviews),
+                        nameof(ExportableProduct.Associations),
+                        nameof(ExportableProduct.ReferencedAssociations),
+                        nameof(ExportableProduct.Outlines),
+                        nameof(ExportableProduct.Images)))
+                    .WithTabularMetadata(typeof(ExportableProduct).GetPropertyNames()));
+
+            registrar.RegisterType(
+                ExportedTypeDefinitionBuilder.Build<ExportableCatalogFull, CatalogFullExportDataQuery>()
+                    .WithDataSourceFactory(appBuilder.ApplicationServices.GetService<ICatalogExportPagedDataSourceFactory>())
+                    .WithMetadata(new ExportedTypeMetadata { PropertyInfos = Array.Empty<ExportedTypePropertyInfo>() }));
+
+            #endregion
         }
 
         public void Uninstall()

@@ -465,8 +465,15 @@
             },
             "currency-list": {
                 "labels": {
-                    "no-currencies": "No currencies" 
-                } 
+                    "no-currencies": "No currencies"
+                }
+            },
+            "exporter-list": {
+                "title": "Available export modules"
+            },
+            "exporter": {
+                "productTitle": "Export catalog products",
+                "productSubtitle": "Export catalog products to JSON or CSV"
             }
         },
         "widgets": {
@@ -705,6 +712,26 @@
             "category-scope": {
                 "title": "Only for selected categories"
             }
+        },
+        "selectors": {
+            "titles": {
+                "catalogs": "Catalogs",
+                "categories": "Categories",
+                "search-in-variations": "Search in product variations",
+                "search-in-children": "Search in children categories"
+            },
+            "labels": {
+                "select": "Select",
+                "selected": "Selected: "
+            },
+            "placeholders": {
+                "catalog-lists": "Select catalog…"
+            },
+            "blades": {
+                "titles": {
+                    "select-categories": "Select categories…"
+                }
+            }
         }
     },
     "permissions": {
@@ -769,6 +796,24 @@
     "module": {
         "VirtoCommerce.Catalog": {
             "description": "Export/Import catalogs, categories, products, properties with images binary if you check binary flag"
+        }
+    },
+    "export": {
+        "types": {
+            "VirtoCommerce.CatalogModule.Core.Model.Export.ExportableProduct": {
+                "name": "Products",
+                "description": "Catalog products data with related objects. Supports JSON and CSV"
+            },
+            "VirtoCommerce.CatalogModule.Core.Model.Export.ExportableCatalogFull": {
+                "name": "Catalog",
+                "description": "Catalog data with related objects. Supports JSON"
+            }
+        },
+        "groups": {
+            "VirtoCommerce.CatalogModule.Core.Model.Export": {
+                "name": "Catalog",
+                "description": "Catalogs, Categories, Products"
+            }
         }
     }
 }

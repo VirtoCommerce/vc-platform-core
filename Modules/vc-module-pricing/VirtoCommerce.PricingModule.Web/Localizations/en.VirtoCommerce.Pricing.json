@@ -128,6 +128,14 @@
                     "sale-price": "Sale price",
                     "min-quantity": "Min. quantity"
                 }
+            },
+            "exporter": {
+                "priceTitle": "Prices export",
+                "priceSubtitle": "Export prices to json or csv",
+                "priceListTitle": "Pricelist export",
+                "pricelistSubtitle": "Export priceslist to json or csv",
+                "priceAssignmentTitle": "Price Assignment export",
+                "priceAssignmentSubtitle": "Export price assignment to json or csv"
             }
         },
         "widgets": {
@@ -181,6 +189,28 @@
         "commands": {
             "add-selected": "Add selected",
             "delete-all-filtered": "Delete all filtered"
+        },
+        "selectors": {
+            "titles": {
+                "price-lists": "Price lists",
+                "modified-since": "Modified since",
+                "products": "Products",
+                "currencies": "Currencies"
+
+            },
+            "labels": {
+                "select": "Select",
+                "selected": "Selected: "
+            },
+            "placeholders": {
+                "price-lists": "Select price lists…",
+                "catalog-lists": "Select catalog…"
+            },
+            "blades": {
+                "titles": {
+                    "select-products": "Select Catalog products…"
+                }
+            }
         }
     },
     "permissions": {
@@ -223,6 +253,32 @@
     "module": {
         "VirtoCommerce.Pricing": {
             "description": "Export/Import price lists, assignments and prices"
+        }
+    },
+    "export": {
+        "types": {
+            "VirtoCommerce.PricingModule.Data.ExportImport.ExportablePricelistFullData": {
+                "name": "Pricelist full data",
+                "description": "Pricelist data with related objects. Supports JSON export provider only"
+            },
+            "VirtoCommerce.PricingModule.Data.ExportImport.ExportablePrice": {
+                "name": "Price",
+                "description": "Prices without related objects"
+            },
+            "VirtoCommerce.PricingModule.Data.ExportImport.ExportablePricelist": {
+                "name": "Pricelist",
+                "description": "Pricelists only"
+            },
+            "VirtoCommerce.PricingModule.Data.ExportImport.ExportablePricelistAssignment": {
+                "name": "Pricelist assignment",
+                "description": "Export pricelist assignments"
+            }
+        },
+        "groups": {
+            "VirtoCommerce.PricingModule.Data.ExportImport": {
+                "name": "Pricing",
+                "description": "Prices, pricelists & assignments"
+            }
         }
     }
 }

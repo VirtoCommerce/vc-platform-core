@@ -1,0 +1,8 @@
+.selection-group {
+    display: flex;
+    justify-content: space-between;
+}
+
+.result-group {
+    font-weight: bold;
+}

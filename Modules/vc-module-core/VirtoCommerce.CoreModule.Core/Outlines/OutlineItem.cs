@@ -1,4 +1,6 @@
+using System;
 using System.Collections.Generic;
+using System.Linq;
 using VirtoCommerce.CoreModule.Core.Seo;
 
 namespace VirtoCommerce.CoreModule.Core.Outlines
@@ -6,7 +8,7 @@ namespace VirtoCommerce.CoreModule.Core.Outlines
     /// <summary>
     /// Represents one outline element: catalog, category or product.
     /// </summary>
-    public class OutlineItem : ISeoSupport
+    public class OutlineItem : ISeoSupport, ICloneable
     {
         #region ISeoSupport Members
 
@@ -38,6 +40,13 @@ namespace VirtoCommerce.CoreModule.Core.Outlines
         public override string ToString()
         {
             return (HasVirtualParent ? "*" : "") + Id;
+        }
+
+        public object Clone()
+        {
+            var result = MemberwiseClone() as OutlineItem;
+            result.SeoInfos = SeoInfos?.Select(x => x.Clone() as SeoInfo).ToList();
+            return result;
         }
     }
 }

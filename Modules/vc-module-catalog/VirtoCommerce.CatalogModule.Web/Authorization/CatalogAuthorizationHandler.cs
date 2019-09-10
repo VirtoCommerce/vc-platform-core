@@ -7,6 +7,8 @@ using Microsoft.AspNetCore.Mvc;
 using Microsoft.Extensions.Options;
 using VirtoCommerce.CatalogModule.Core.Model;
 using VirtoCommerce.CatalogModule.Core.Model.Search;
+using VirtoCommerce.CatalogModule.Data.ExportImport;
+using VirtoCommerce.Platform.Core.Common;
 using VirtoCommerce.Platform.Core.Security;
 using VirtoCommerce.Platform.Security.Authorization;
 
@@ -58,7 +60,7 @@ namespace VirtoCommerce.CatalogModule.Web.Authorization
                         {
                             context.Succeed(requirement);
                         }
-                    }                             
+                    }
                     else if (context.Resource is IEnumerable<IHasCatalogId> hasCatalogIds)
                     {
                         var catalogIds = hasCatalogIds.Select(x => x.CatalogId).Distinct().ToList();
@@ -73,6 +75,18 @@ namespace VirtoCommerce.CatalogModule.Web.Authorization
                         {
                             context.Succeed(requirement);
                         }
+                    }
+                    else if (context.Resource is ProductExportDataQuery dataQuery)
+                    {
+                        if (dataQuery.CatalogIds.IsNullOrEmpty())
+                        {
+                            dataQuery.CatalogIds = allowedCatalogIds;
+                        }
+                        else
+                        {
+                            dataQuery.CatalogIds = dataQuery.CatalogIds.Intersect(allowedCatalogIds).ToArray();
+                        }
+                        context.Succeed(requirement);
                     }
                 }
             }

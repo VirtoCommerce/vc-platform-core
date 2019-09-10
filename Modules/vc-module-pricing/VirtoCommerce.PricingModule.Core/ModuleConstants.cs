@@ -15,8 +15,9 @@ namespace VirtoCommerce.PricingModule.Core
                 public const string Access = "pricing:access";
                 public const string Update = "pricing:update";
                 public const string Delete = "pricing:delete";
+                public const string Export = "pricing:export";
 
-                public static readonly string[] AllPermissions = { Read, Create, Access, Update, Delete };
+                public static readonly string[] AllPermissions = { Read, Create, Access, Update, Delete, Export };
             }
         }
 

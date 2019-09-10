@@ -25,8 +25,8 @@ namespace VirtoCommerce.CatalogModule.Data.ExportImport
         private readonly IItemService _itemService;
         private readonly IPropertyService _propertyService;
         private readonly IPropertySearchService _propertySearchService;
-        private readonly IProperyDictionaryItemSearchService _propertyDictionarySearchService;
-        private readonly IProperyDictionaryItemService _propertyDictionaryService;
+        private readonly IPropertyDictionaryItemSearchService _propertyDictionarySearchService;
+        private readonly IPropertyDictionaryItemService _propertyDictionaryService;
         private readonly JsonSerializer _jsonSerializer;
         private readonly IBlobStorageProvider _blobStorageProvider;
         private readonly IAssociationService _associationService;
@@ -34,8 +34,8 @@ namespace VirtoCommerce.CatalogModule.Data.ExportImport
         private int _batchSize = 50;
 
         public CatalogExportImport(ICatalogService catalogService, ICatalogSearchService catalogSearchService, IProductSearchService productSearchService, ICategorySearchService categorySearchService, ICategoryService categoryService,
-                                  IItemService itemService, IPropertyService propertyService, IPropertySearchService propertySearchService, IProperyDictionaryItemSearchService propertyDictionarySearchService,
-                                  IProperyDictionaryItemService propertyDictionaryService, JsonSerializer jsonSerializer, IBlobStorageProvider blobStorageProvider, IAssociationService associationService)
+                                  IItemService itemService, IPropertyService propertyService, IPropertySearchService propertySearchService, IPropertyDictionaryItemSearchService propertyDictionarySearchService,
+                                  IPropertyDictionaryItemService propertyDictionaryService, JsonSerializer jsonSerializer, IBlobStorageProvider blobStorageProvider, IAssociationService associationService)
         {
             _catalogService = catalogService;
             _productSearchService = productSearchService;

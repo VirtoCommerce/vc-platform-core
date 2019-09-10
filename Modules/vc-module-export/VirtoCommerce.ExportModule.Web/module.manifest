@@ -1,0 +1,26 @@
+<?xml version="1.0" encoding="utf-8" ?>
+<module>
+    <id>VirtoCommerce.Export</id>
+    <version>3.0.0</version>
+    <platformVersion>3.0.0</platformVersion>
+    <title>Export module</title>
+    <description>Generic export functionality</description>
+    <authors>
+        <author>Virto Commerce</author>
+    </authors>
+    <owners>
+        <owner>Virto Commerce</owner>
+    </owners>
+    <projectUrl>https://virtocommerce.com/apps/extensions/virto-core-module</projectUrl>
+    <iconUrl>Modules/$(VirtoCommerce.Core)/Content/logoVC.png</iconUrl>
+    <releaseNotes>Third version.</releaseNotes>
+    <copyright>Copyright © 2011-2019 Virto Commerce. All rights reserved</copyright>
+    <tags>export</tags>
+
+    <assemblyFile>VirtoCommerce.ExportModule.Web.dll</assemblyFile>
+    <moduleType>VirtoCommerce.ExportModule.Web.Module, VirtoCommerce.ExportModule.Web</moduleType>
+
+    <scripts>
+        <directory virtualPath="$/Scripts" searchPattern="*.js" searchSubdirectories="true" />
+    </scripts>    
+</module>

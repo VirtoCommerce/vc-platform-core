@@ -19,9 +19,9 @@ namespace VirtoCommerce.CatalogModule.Data.Search.Indexing
     {
         private readonly IBrowseFilterService _browseFilterService;
         private readonly IPropertyService _propertyService;
-        private readonly IProperyDictionaryItemSearchService _propDictItemsSearchService;
+        private readonly IPropertyDictionaryItemSearchService _propDictItemsSearchService;
 
-        public AggregationConverter(IBrowseFilterService browseFilterService, IPropertyService propertyService, IProperyDictionaryItemSearchService propDictItemsSearchService)
+        public AggregationConverter(IBrowseFilterService browseFilterService, IPropertyService propertyService, IPropertyDictionaryItemSearchService propDictItemsSearchService)
         {
             _browseFilterService = browseFilterService;
             _propertyService = propertyService;

@@ -155,6 +155,7 @@ namespace VirtoCommerce.PricingModule.Data.Services
             {
                 query = query.Where(x => x.ModifiedDate >= criteria.ModifiedSince);
             }
+
             return query;
         }
 
@@ -174,14 +175,20 @@ namespace VirtoCommerce.PricingModule.Data.Services
             return sortInfos;
         }
 
-
         protected virtual IQueryable<PricelistEntity> BuildQuery(IPricingRepository repository, PricelistSearchCriteria criteria)
         {
             var query = repository.Pricelists;
+
             if (!string.IsNullOrEmpty(criteria.Keyword))
             {
                 query = query.Where(x => x.Name.Contains(criteria.Keyword) || x.Description.Contains(criteria.Keyword));
             }
+
+            if (!criteria.Currencies.IsNullOrEmpty())
+            {
+                query = query.Where(x => criteria.Currencies.Contains(x.Currency));
+            }
+
             return query;
         }
 
@@ -212,8 +219,14 @@ namespace VirtoCommerce.PricingModule.Data.Services
 
             if (!string.IsNullOrEmpty(criteria.Keyword))
             {
-                query.Where(x => x.Name.Contains(criteria.Keyword) || x.Description.Contains(criteria.Keyword));
+                query = query.Where(x => x.Name.Contains(criteria.Keyword) || x.Description.Contains(criteria.Keyword));
             }
+
+            if (!criteria.CatalogIds.IsNullOrEmpty())
+            {
+                query = query.Where(x => criteria.CatalogIds.Contains(x.CatalogId));
+            }
+
             return query;
         }
 

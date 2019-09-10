@@ -75,8 +75,8 @@ angular.module(catalogsModuleName, ['ui.grid.validate', 'ui.grid.infiniteScroll'
         };
     }])
     .run(
-    ['platformWebApp.authService', 'platformWebApp.mainMenuService', 'platformWebApp.widgetService', '$state', 'platformWebApp.pushNotificationTemplateResolver', 'platformWebApp.bladeNavigationService', 'virtoCommerce.catalogModule.catalogImportService', 'virtoCommerce.catalogModule.catalogExportService', 'platformWebApp.permissionScopeResolver', 'virtoCommerce.catalogModule.catalogs', 'virtoCommerce.catalogModule.predefinedSearchFilters', 'platformWebApp.metaFormsService', 'virtoCommerce.catalogModule.itemTypesResolverService', '$http', '$compile',
-        function (authService, mainMenuService, widgetService, $state, pushNotificationTemplateResolver, bladeNavigationService, catalogImportService, catalogExportService, scopeResolver, catalogs, predefinedSearchFilters, metaFormsService, itemTypesResolverService, $http, $compile) {
+        ['platformWebApp.authService', 'platformWebApp.mainMenuService', 'platformWebApp.widgetService', '$state', 'platformWebApp.pushNotificationTemplateResolver', 'platformWebApp.bladeNavigationService', 'virtoCommerce.catalogModule.catalogImportService', 'virtoCommerce.catalogModule.catalogExportService', 'platformWebApp.permissionScopeResolver', 'virtoCommerce.catalogModule.catalogs', 'virtoCommerce.catalogModule.predefinedSearchFilters', 'platformWebApp.metaFormsService', 'virtoCommerce.catalogModule.itemTypesResolverService', '$http', '$compile', 'virtoCommerce.exportModule.genericViewerItemService', 
+            function (authService, mainMenuService, widgetService, $state, pushNotificationTemplateResolver, bladeNavigationService, catalogImportService, catalogExportService, scopeResolver, catalogs, predefinedSearchFilters, metaFormsService, itemTypesResolverService, $http, $compile, genericViewerItemService) {
 
             //Register module in main menu
             var menuItem = {
@@ -312,8 +312,81 @@ angular.module(catalogsModuleName, ['ui.grid.validate', 'ui.grid.infiniteScroll'
             //metaFormsService.registerMetaFields("productDetail", metafieldsDefinitions.productMetafields);
             //metaFormsService.registerMetaFields("categoryDetail", metafieldsDefinitions.categoryMetafields);
 
+            //
+            metaFormsService.registerMetaFields('VirtoCommerce.CatalogModule.Core.Model.Export.ExportableProduct' + 'ExportFilter', [
+                {
+                    name: 'catalogSelector',
+                    title: "catalog.selectors.titles.catalogs",
+                    templateUrl: 'Modules/$(VirtoCommerce.Catalog)/Scripts/selectors/catalog-selector.tpl.html'
+                },
+                {
+                    name: 'categorySelector',
+                    title: "catalog.selectors.titles.categories",
+                    templateUrl: 'Modules/$(VirtoCommerce.Catalog)/Scripts/selectors/category-selector.tpl.html'
+                },
+                {
+                    name: 'searchInVariations',
+                    title: "catalog.selectors.titles.search-in-variations",
+                    valueType: "Boolean"
+                },
+                {
+                    name: 'searchInChildren',
+                    title: "catalog.selectors.titles.search-in-children",
+                    valueType: "Boolean"
+                }
+
+            ]);
+
+            metaFormsService.registerMetaFields('VirtoCommerce.CatalogModule.Core.Model.Export.ExportableCatalogFull' + 'ExportFilter', [
+                {
+                    name: 'catalogSelector',
+                    title: "catalog.selectors.titles.catalogs",
+                    templateUrl: 'Modules/$(VirtoCommerce.Catalog)/Scripts/selectors/catalog-selector.tpl.html'
+                }
+            ]);
+
+            genericViewerItemService.registerViewer('CatalogProduct', function (item) {
+                var itemCopy = angular.copy(item);
+
+                return {
+                    id: "itemmDetail",
+                    itemId: itemCopy.id,
+                    productType: itemCopy.productType,
+                    title: itemCopy.name,
+                    controller: 'virtoCommerce.catalogModule.itemDetailController',
+                    template: 'Modules/$(VirtoCommerce.Catalog)/Scripts/blades/item-detail.tpl.html'
+                };
+            });
+
             $http.get('Modules/$(VirtoCommerce.Catalog)/Scripts/directives/itemSearch.tpl.html').then(function (response) {
                 // compile the response, which will put stuff into the cache
                 $compile(response.data);
+            });
+
+            catalogExportService.register({
+                name: 'Generic Export',
+                description: 'Export products filtered by catalogs or categories to JSON or CSV',
+                icon: 'fa-fw fa fa-database',
+                controller: 'virtoCommerce.exportModule.exportSettingsController',
+                template: 'Modules/$(VirtoCommerce.Export)/Scripts/blades/export-settings.tpl.html',
+                id: 'catalogGenericExport',
+                title: 'catalog.blades.exporter.productTitle',
+                subtitle: 'catalog.blades.exporter.productSubtitle',
+                isNew: true,
+                onInitialize: function (newBlade) {
+                    var exportDataRequest = {
+                        exportTypeName: 'VirtoCommerce.CatalogModule.Core.Model.Export.ExportableProduct',
+                        dataQuery: {
+                            exportTypeName: 'ProductExportDataQuery',
+                            categoryIds: _.pluck(newBlade.selectedCategories, 'id'),
+                            objectIds: _.pluck(newBlade.selectedProducts, 'id'),
+                            catalogIds: [newBlade.catalog.id],
+                            searchInChildren: true,
+                            isAllSelected: true
+                        }
+                    };
+                    newBlade.exportDataRequest = exportDataRequest;
+                    newBlade.totalItemsCount = (newBlade.selectedProducts || []).length;
+                }
             });
         }]);

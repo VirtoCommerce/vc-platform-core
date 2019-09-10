@@ -6,7 +6,7 @@ namespace VirtoCommerce.CatalogModule.Core.Services
     /// <summary>
     /// The abstraction represent the CRUD operations for property dictionary items
     /// </summary>
-    public interface IProperyDictionaryItemService
+    public interface IPropertyDictionaryItemService
     {
         Task<PropertyDictionaryItem[]> GetByIdsAsync(string[] ids);
         Task SaveChangesAsync(PropertyDictionaryItem[] dictItems);

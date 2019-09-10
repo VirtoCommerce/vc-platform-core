@@ -1,0 +1,95 @@
+{
+    "export": {
+        "main-menu-title": "Export New",
+        "commands": {
+            "pick-all": "Pick all"
+        },
+        "provider-names": {
+            "JsonExportProvider": "JSON export provider",
+            "CsvExportProvider": "CSV export provider"
+        },
+        "blades": {
+            "export-settings": {
+                "title": "Export settings",
+                "subtitle": "Specify export settings",
+                "labels": {
+                    "provider": "Select provider",
+                    "template": "Select export template",
+                    "property-selected": "Select property",
+                    "row-selected": "Select records",
+                    "total": "Total count",
+                    "processed": "Processed count",
+                    "errors-count": "Error count",
+                    "edit": "Edit",
+                    "delete": "Delete",
+                    "save": "Save",
+                    "exported-type": "Select object type",
+                    "select": "Select",
+                    "none": "None",
+                    "exported-data": "Select data for export",
+                    "exported-properties": "Select properties",
+                    "exported-properties-group": "Select properties in this group",
+                    "all": "All",
+                    "provider-description": "Tabular providers (e.g. Csv provider) are unavailable for exported types which do not support tabular export.",
+                    "exported-properties-description": "Please select properties.",
+                    "exported-data-description": "Please select data range.",
+                    "exported-type-description": "Please select data type.",
+                    "selected": "{{ count }} of {{total}} selected ",
+                    "allFiltered": "All (filter specified)"
+                },
+                "placeholders": {
+                    "provider": "Select provider for export",
+                    "template": "Select export template"
+                }
+            },
+            "export-progress": {
+                "title": "Export progress"
+            },
+            "export-type-selector": {
+                "title": "Select exported type",
+                "subtitle": "Select data type you want to export"
+            },
+            "export-generic-viewer": {
+                "title": "Select data to export",
+                "subtitle": "Select data you want to export",
+                "labels": {
+                    "picture": "Pic",
+                    "type": "Object type",
+                    "name": "Name",
+                    "code": "Code",
+                    "new-filter": "Add new filter"
+                },
+                "placeholders": {
+                    "select-filter": "Select filter…"
+                },
+                "commands": {
+                    "select": "Select"
+                }
+            },
+            "generic-filter": {
+                "new-title": "Unnamed filter",
+                "new-subtitle": "Edit filter",
+                "subtitle": "Edit filter",
+                "labels": {
+                    "criteria": "Filter criteria",
+                    "filter-name": "Filter name",
+                    "unnamed-filter": "Unnamed filter"
+                },
+                "placeholders": {
+                    "filter-name": "How will you call this filter?"
+                },
+                "commands": {
+                    "apply": "Apply"
+                }
+            }
+        }
+    },
+    "settings": {
+        "Export": {
+            "FileNameTemplate": {
+                "description": "The template (pattern) that will be used to generate exported file name. Parameters: 0 - date (the UTC time of file generation).",
+                "title": "Export file name template"
+            }
+        }
+    }
+}

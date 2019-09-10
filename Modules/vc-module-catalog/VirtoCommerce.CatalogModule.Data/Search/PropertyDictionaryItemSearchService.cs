@@ -13,12 +13,12 @@ using VirtoCommerce.Platform.Data.Infrastructure;
 
 namespace VirtoCommerce.CatalogModule.Data.Search
 {
-    public class ProperyDictionaryItemSearchService : IProperyDictionaryItemSearchService
+    public class PropertyDictionaryItemSearchService : IPropertyDictionaryItemSearchService
     {
         private readonly Func<ICatalogRepository> _repositoryFactory;
-        private readonly IProperyDictionaryItemService _properyDictionaryItemService;
+        private readonly IPropertyDictionaryItemService _properyDictionaryItemService;
 
-        public ProperyDictionaryItemSearchService(Func<ICatalogRepository> repositoryFactory, IProperyDictionaryItemService properyDictionaryItemService)
+        public PropertyDictionaryItemSearchService(Func<ICatalogRepository> repositoryFactory, IPropertyDictionaryItemService properyDictionaryItemService)
         {
             _repositoryFactory = repositoryFactory;
             _properyDictionaryItemService = properyDictionaryItemService;
@@ -59,6 +59,10 @@ namespace VirtoCommerce.CatalogModule.Data.Search
         protected virtual IQueryable<PropertyDictionaryItemEntity> BuildQuery(ICatalogRepository repository, PropertyDictionaryItemSearchCriteria criteria)
         {
             var query = repository.PropertyDictionaryItems;
+            if (!criteria.CatalogIds.IsNullOrEmpty())
+            {
+                query = query.Where(x => criteria.CatalogIds.Contains(x.Property.CatalogId));
+            }
             if (!criteria.PropertyIds.IsNullOrEmpty())
             {
                 query = query.Where(x => criteria.PropertyIds.Contains(x.PropertyId));
