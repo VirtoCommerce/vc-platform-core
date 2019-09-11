@@ -1,5 +1,5 @@
-﻿angular.module('virtoCommerce.storeModule')
-.controller('virtoCommerce.storeModule.newStoreWizardController', ['$scope', 'platformWebApp.bladeNavigationService', 'virtoCommerce.storeModule.stores', 'virtoCommerce.catalogModule.catalogs', 'platformWebApp.settings', 'platformWebApp.dialogService', 'virtoCommerce.coreModule.currency.currencyUtils',
+angular.module('virtoCommerce.storeModule')
+.controller('virtoCommerce.storeModule.newStoreWizardController', ['$scope', 'platformWebApp.bladeNavigationService', 'virtoCommerce.storeModule.stores', 'virtoCommerce.storeModule.catalogs', 'platformWebApp.settings', 'platformWebApp.dialogService', 'virtoCommerce.coreModule.currency.currencyUtils',
     function ($scope, bladeNavigationService, stores, catalogs, settings, dialogService, currencyUtils) {
         var blade = $scope.blade;
 
@@ -11,7 +11,6 @@
             blade.isLoading = false;
             blade.currentEntity.validationRuleCodePattern = "^[a-zA-Z0-9_\-]*$" ;
         };
-
         $scope.saveChanges = function () {
             blade.isLoading = true;
             blade.currentEntity.languages = [blade.currentEntity.defaultLanguage];
