@@ -1,4 +1,7 @@
+using System;
 using System.Collections.Generic;
+using System.Collections.ObjectModel;
+using System.Linq;
 using VirtoCommerce.CoreModule.Core.Common;
 using VirtoCommerce.CoreModule.Core.Tax;
 using VirtoCommerce.Platform.Core.Common;
@@ -8,7 +11,7 @@ using VirtoCommerce.Platform.Core.Swagger;
 namespace VirtoCommerce.CartModule.Core.Model
 {
     [SwaggerSchemaId("CartShipment")]
-    public class Shipment : AuditableEntity, IHasTaxDetalization, ITaxable, IHasDiscounts, IHasDynamicProperties
+    public class Shipment : AuditableEntity, IHasTaxDetalization, ITaxable, IHasDiscounts, IHasDynamicProperties, ICloneable
     {
         public string ShipmentMethodCode { get; set; }
         public string ShipmentMethodOption { get; set; }
@@ -74,6 +77,23 @@ namespace VirtoCommerce.CartModule.Core.Model
         #region IHasDynamicProperties Members
         public string ObjectType => typeof(Shipment).FullName;
         public ICollection<DynamicObjectProperty> DynamicProperties { get; set; }
+        #endregion
+
+        #region ICloneable members
+
+        public virtual object Clone()
+        {
+            var result = MemberwiseClone() as Shipment;
+
+            result.DeliveryAddress = DeliveryAddress?.Clone() as Address;
+            result.Items = Items?.Select(x => x.Clone()).OfType<ShipmentItem>().ToList();
+            result.Discounts = Discounts?.Select(x => x.Clone()).OfType<Discount>().ToList();
+            result.TaxDetails = TaxDetails?.Select(x => x.Clone()).OfType<TaxDetail>().ToList();
+            result.DynamicProperties = DynamicProperties?.Select(x => x.Clone()).OfType<DynamicObjectProperty>().ToList();
+
+            return result;
+        }
+
         #endregion
 
     }

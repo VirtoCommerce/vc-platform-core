@@ -5,6 +5,7 @@ using System.Threading.Tasks;
 using Moq;
 using VirtoCommerce.MarketingModule.Core.Model.Promotions;
 using VirtoCommerce.MarketingModule.Core.Model.Promotions.Search;
+using VirtoCommerce.MarketingModule.Core.Promotions;
 using VirtoCommerce.MarketingModule.Core.Search;
 using VirtoCommerce.MarketingModule.Data.Promotions;
 using VirtoCommerce.Platform.Core.Common;
@@ -86,16 +87,17 @@ namespace VirtoCommerce.MarketingModule.Test
             couponServiceMoq.Setup(x => x.SearchCouponsAsync(It.IsAny<CouponSearchCriteria>()))
                 .ReturnsAsync(new CouponSearchResult() { Results = coupons });
 
-            return new DynamicPromotionMoq(couponServiceMoq.Object, promotionUsageServiceMoq.Object);
+            var result = new DynamicPromotionMoq()
+            {
+                CouponSearchService = couponServiceMoq.Object,
+                PromotionUsageSearchService = promotionUsageServiceMoq.Object
+            };
+
+            return result;
         }
 
         private class DynamicPromotionMoq : DynamicPromotion
         {
-            public DynamicPromotionMoq(ICouponSearchService couponSearchService,
-                IPromotionUsageSearchService promotionUsageSearchService) : base(couponSearchService, promotionUsageSearchService)
-            {
-            }
-
             public new async Task<IEnumerable<Coupon>> FindValidCouponsAsync(ICollection<string> couponCodes, string userId)
             {
                 return await base.FindValidCouponsAsync(couponCodes, userId);

@@ -1,10 +1,13 @@
+using System;
 using System.Collections.Generic;
+using System.Collections.ObjectModel;
+using System.Linq;
 using VirtoCommerce.Platform.Core.Common;
 using VirtoCommerce.Platform.Core.DynamicProperties;
 
 namespace VirtoCommerce.ContentModule.Core.Model
 {
-    public class FrontMatterHeaders : Entity, IHasDynamicProperties
+    public class FrontMatterHeaders : Entity, IHasDynamicProperties, ICloneable
     {
         #region IHasDynamicProperties Members
 
@@ -190,6 +193,19 @@ namespace VirtoCommerce.ContentModule.Core.Model
                     yield return authorizeProperty;
                 }
             }
+        }
+
+        #endregion
+
+        #region ICloneable members
+
+        public virtual object Clone()
+        {
+            var result = MemberwiseClone() as FrontMatterHeaders;
+
+            result.DynamicProperties = DynamicProperties?.Select(x => x.Clone()).OfType<DynamicObjectProperty>().ToList();
+
+            return result;
         }
 
         #endregion

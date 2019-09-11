@@ -19,11 +19,9 @@ namespace VirtoCommerce.CatalogModule.Data.Model
         #region Navigation properties
 
         public string PropertyId { get; set; }
-
         public PropertyEntity Property { get; set; }
 
         #endregion
-
 
         public virtual PropertyValidationRule ToModel(PropertyValidationRule rule)
         {

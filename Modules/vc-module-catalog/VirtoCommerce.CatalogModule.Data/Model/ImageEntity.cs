@@ -31,8 +31,8 @@ namespace VirtoCommerce.CatalogModule.Data.Model
 
         public string CategoryId { get; set; }
         public virtual CategoryEntity Category { get; set; }
-        #endregion
 
+        #endregion
 
         public virtual Image ToModel(Image image)
         {

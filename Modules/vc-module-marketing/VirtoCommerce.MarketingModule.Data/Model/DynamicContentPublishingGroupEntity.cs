@@ -12,12 +12,6 @@ namespace VirtoCommerce.MarketingModule.Data.Model
 {
     public class DynamicContentPublishingGroupEntity : AuditableEntity, IHasOuterId
     {
-        public DynamicContentPublishingGroupEntity()
-        {
-            ContentItems = new NullCollection<PublishingGroupContentItemEntity>();
-            ContentPlaces = new NullCollection<PublishingGroupContentPlaceEntity>();
-        }
-
         [Required]
         [StringLength(128)]
         public string Name { get; set; }
@@ -44,11 +38,14 @@ namespace VirtoCommerce.MarketingModule.Data.Model
         public string OuterId { get; set; }
 
         #region Navigation Properties
+
         public virtual ObservableCollection<PublishingGroupContentItemEntity> ContentItems { get; set; }
+            = new NullCollection<PublishingGroupContentItemEntity>();
 
         public virtual ObservableCollection<PublishingGroupContentPlaceEntity> ContentPlaces { get; set; }
-        #endregion
+            = new NullCollection<PublishingGroupContentPlaceEntity>();
 
+        #endregion
 
         public virtual DynamicContentPublication ToModel(DynamicContentPublication publication)
         {
@@ -83,6 +80,7 @@ namespace VirtoCommerce.MarketingModule.Data.Model
                 publication.ContentPlaces = ContentPlaces.Where(ci => ci.ContentPlace != null).Select(x => x.ContentPlace.ToModel(AbstractTypeFactory<DynamicContentPlace>.TryCreateInstance())).ToList();
             }
 
+            publication.DynamicExpression = AbstractTypeFactory<DynamicContentConditionTree>.TryCreateInstance();
             if (PredicateVisualTreeSerialized != null)
             {
                 publication.DynamicExpression = JsonConvert.DeserializeObject<DynamicContentConditionTree>(PredicateVisualTreeSerialized, new ConditionJsonConverter());
@@ -126,7 +124,7 @@ namespace VirtoCommerce.MarketingModule.Data.Model
             }
             if (publication.DynamicExpression != null)
             {
-                PredicateVisualTreeSerialized = JsonConvert.SerializeObject(publication.DynamicExpression);
+                PredicateVisualTreeSerialized = JsonConvert.SerializeObject(publication.DynamicExpression, new ConditionJsonConverter(doNotSerializeAvailCondition: true));
             }
             return this;
         }

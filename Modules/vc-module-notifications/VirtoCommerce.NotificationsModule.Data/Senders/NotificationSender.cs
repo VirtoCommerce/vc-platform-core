@@ -29,12 +29,12 @@ namespace VirtoCommerce.NotificationsModule.Data.Senders
             _logger = logger;
         }
 
-        public void ScheduleSendNotification(Notification notification, string language)
+        public void ScheduleSendNotification(Notification notification)
         {
-            BackgroundJob.Enqueue(() => SendNotificationAsync(notification, language));
+            BackgroundJob.Enqueue(() => SendNotificationAsync(notification));
         }
 
-        public async Task<NotificationSendResult> SendNotificationAsync(Notification notification, string language)
+        public async Task<NotificationSendResult> SendNotificationAsync(Notification notification)
         {
             if (notification == null)
             {
@@ -44,7 +44,6 @@ namespace VirtoCommerce.NotificationsModule.Data.Senders
             var result = new NotificationSendResult();
 
             var message = AbstractTypeFactory<NotificationMessage>.TryCreateInstance($"{notification.Kind}Message");
-            message.LanguageCode = language;
             message.MaxSendAttemptCount = _maxRetryAttempts + 1;
             notification.ToMessage(message, _notificationTemplateRender);
 

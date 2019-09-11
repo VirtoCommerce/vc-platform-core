@@ -1,0 +1,43 @@
+<div class="blade-static __bottom">
+    <button class="btn" ng-click="startExport()" ng-disabled="!validateExportParameters()">
+        <span>{{ 'platform.blades.export-main.labels.start-export' | translate }}</span>
+    </button>
+</div>
+<div class="blade-content">
+    <div class="blade-inner">
+        <div class="inner-block">
+            <form class="form" name="exportForm">
+                <div class="form-group">
+                    <ul class="list __items">
+                        <li class="list-item" ng-click="selectExportedType()" >
+                            <i class="list-ico fa fa-cogs"></i>
+                            <span class="list-t">{{ blade.selectedType.localizedName || ('export.blades.export-settings.labels.exported-type' | translate) }}</span>
+                            <span class="list-descr">{{ 'export.blades.export-settings.labels.exported-type-description' | translate }} </span>
+                        </li>
+                        <li class="list-item">
+                            <i class="list-ico fa fa-cogs"></i>
+                            <span class="list-t">{{ 'export.blades.export-settings.labels.provider' | translate }}</span>
+                            <ui-select ng-model="blade.selectedProvider" ng-change="providerChanged()" required style="margin-left: 48px;">
+                                <ui-select-match placeholder="{{ 'export.blades.export-settings.placeholders.provider' | translate }}">{{$select.selected.name}}</ui-select-match>
+                                <ui-select-choices repeat="x in (blade.providers | filter: {name: $select.search})">
+                                    <span ng-bind-html="x.name | highlight: $select.search"></span>
+                                </ui-select-choices>
+                            </ui-select>
+                            <span class="list-descr">{{ 'export.blades.export-settings.labels.provider-description' | translate }}</span>
+                        </li>
+                        <li class="list-item" ng-click="selectExportedData()" ng-class="{'__disabled': !blade.selectedProvider || !blade.isExportedTypeSelected }">
+                            <i class="list-ico fa fa-cogs"></i>
+                            <span class="list-t">{{ 'export.blades.export-settings.labels.exported-data' | translate }}</span>
+                            <span class="list-descr">{{ 'export.blades.export-settings.labels.selected' | translate: {count: blade.dataSelected, total: blade.dataTotal} }}</span>
+                        </li>
+                        <li class="list-item" ng-click="selectExportedProperties()" ng-class="{'__disabled': !blade.selectedProvider || !blade.isExportedTypeSelected}">
+                            <i class="list-ico fa fa-cogs"></i>
+                            <span class="list-t">{{ 'export.blades.export-settings.labels.exported-properties' | translate }}</span>
+                            <span class="list-descr">{{ 'export.blades.export-settings.labels.selected' | translate: {count: blade.propertySelected, total: blade.propertyTotal} }}</span>
+                        </li>
+                    </ul>
+                </div>
+            </form>
+        </div>
+    </div>
+</div>

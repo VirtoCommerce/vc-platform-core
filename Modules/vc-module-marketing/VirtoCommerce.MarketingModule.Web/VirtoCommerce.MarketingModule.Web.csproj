@@ -13,6 +13,16 @@
     </PropertyGroup>
 
     <ItemGroup>
+      <Compile Remove="dist\**" />
+      <Compile Remove="node_modules\**" />
+      <EmbeddedResource Remove="dist\**" />
+      <EmbeddedResource Remove="node_modules\**" />
+      <None Remove="dist\**" />
+      <None Remove="node_modules\**" />
+    </ItemGroup>
+
+    <ItemGroup>
+        <PackageReference Include="AutoMapper" Version="9.0.0" />
         <PackageReference Include="Hangfire" Version="1.6.22" />
         <PackageReference Include="Microsoft.AspNetCore" Version="2.2.0" />
         <PackageReference Include="Microsoft.AspNetCore.App" />

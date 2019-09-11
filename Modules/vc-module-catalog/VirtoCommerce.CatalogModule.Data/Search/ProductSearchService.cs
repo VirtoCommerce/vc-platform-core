@@ -52,22 +52,34 @@ namespace VirtoCommerce.CatalogModule.Data.Search
         protected virtual IQueryable<ItemEntity> BuildQuery(ICatalogRepository repository, ProductSearchCriteria criteria)
         {
             var query = repository.Items;
+
             if (!string.IsNullOrEmpty(criteria.Keyword))
             {
                 query = query.Where(x => x.Name.Contains(criteria.Keyword));
             }
-            if (!string.IsNullOrEmpty(criteria.CatalogId))
+
+            if (!criteria.CategoryIds.IsNullOrEmpty())
             {
-                query = query.Where(x => x.CatalogId == criteria.CatalogId);
+                var searchCategoryIds = criteria.CategoryIds;
+
+                if (criteria.SearchInChildren)
+                {
+                    searchCategoryIds = searchCategoryIds.Concat(repository.GetAllChildrenCategoriesIdsAsync(searchCategoryIds).GetAwaiter().GetResult()).ToArray();
+                }
+
+                query = query.Where(x => searchCategoryIds.Contains(x.CategoryId) || x.CategoryLinks.Any(link => searchCategoryIds.Contains(link.CategoryId)));
             }
-            if (!string.IsNullOrEmpty(criteria.CategoryId))
+
+            if (!criteria.CatalogIds.IsNullOrEmpty())
             {
-                query = query.Where(x => x.CategoryId == criteria.CategoryId);
+                query = query.Where(x => criteria.CatalogIds.Contains(x.CatalogId));
             }
+
             if (!criteria.Skus.IsNullOrEmpty())
             {
                 query = query.Where(x => criteria.Skus.Contains(x.Code));
             }
+
             if (!criteria.SearchInVariations)
             {
                 query = query.Where(x => x.ParentId == null);

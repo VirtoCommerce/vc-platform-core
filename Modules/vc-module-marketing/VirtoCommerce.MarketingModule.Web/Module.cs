@@ -15,6 +15,8 @@ using VirtoCommerce.MarketingModule.Core.Events;
 using VirtoCommerce.MarketingModule.Core.Model;
 using VirtoCommerce.MarketingModule.Core.Model.DynamicContent;
 using VirtoCommerce.MarketingModule.Core.Model.Promotions;
+using VirtoCommerce.MarketingModule.Core.Model.Promotions.Conditions;
+using VirtoCommerce.MarketingModule.Core.Promotions;
 using VirtoCommerce.MarketingModule.Core.Search;
 using VirtoCommerce.MarketingModule.Core.Services;
 using VirtoCommerce.MarketingModule.Data.ExportImport;
@@ -92,11 +94,9 @@ namespace VirtoCommerce.MarketingModule.Web
             {
                 var dynamicPromotion = promotion as DynamicPromotion;
                 dynamicPromotion.CouponSearchService = serviceCollection.BuildServiceProvider().GetService<ICouponSearchService>();
-                dynamicPromotion.PromotionUsageSearchService = serviceCollection.BuildServiceProvider().GetService<IPromotionUsageSearchService>();
-                dynamicPromotion.DynamicExpression = AbstractTypeFactory<PromotionConditionAndRewardTree>.TryCreateInstance();
-                dynamicPromotion.DynamicExpression.Children = dynamicPromotion.DynamicExpression.AvailableChildren.ToList();                
+                dynamicPromotion.PromotionUsageSearchService = serviceCollection.BuildServiceProvider().GetService<IPromotionUsageSearchService>();            
             });
-
+          
             serviceCollection.AddTransient<LogChangesChangedEventHandler>();
             serviceCollection.AddTransient<MarketingExportImport>();
 
@@ -175,20 +175,20 @@ namespace VirtoCommerce.MarketingModule.Web
             mvcJsonOptions.Value.SerializerSettings.Converters.Add(new PolymorphicMarketingJsonConverter());
             mvcJsonOptions.Value.SerializerSettings.Converters.Add(new RewardJsonConverter());
 
-            AbstractTypeFactory<IConditionTree>.RegisterType<PromotionConditionAndRewardTree>();
-            foreach (var conditionTree in ((IConditionTree)AbstractTypeFactory<PromotionConditionAndRewardTree>.TryCreateInstance()).Traverse(x=> x.AvailableChildren))
+            //Register the resulting trees expressions into the AbstractFactory<IConditionTree> 
+            foreach (var conditionTree in AbstractTypeFactory<PromotionConditionAndRewardTreePrototype>.TryCreateInstance().Traverse<IConditionTree>(x=> x.AvailableChildren))
             {
-                AbstractTypeFactory<IConditionTree>.RegisterType(conditionTree.GetType(), noThrowIfExists: true);
+                AbstractTypeFactory<IConditionTree>.RegisterType(conditionTree.GetType());
             }
-            AbstractTypeFactory<IConditionTree>.RegisterType<DynamicContentConditionTree>();
-            foreach (var conditionTree in ((IConditionTree)AbstractTypeFactory<DynamicContentConditionTree>.TryCreateInstance()).Traverse(x => x.AvailableChildren))
+            foreach (var conditionTree in AbstractTypeFactory<DynamicContentConditionTreePrototype>.TryCreateInstance().Traverse<IConditionTree>(x => x.AvailableChildren))
             {
-                AbstractTypeFactory<IConditionTree>.RegisterType(conditionTree.GetType(), noThrowIfExists: true);
+                AbstractTypeFactory<IConditionTree>.RegisterType(conditionTree.GetType());
             }
         }
 
         public void Uninstall()
         {
+            // Method intentionally left empty.
         }
 
         public async Task ExportAsync(Stream outStream, ExportImportOptions options, Action<ExportImportProgressInfo> progressCallback,

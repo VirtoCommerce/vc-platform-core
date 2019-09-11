@@ -10,6 +10,15 @@
     <PropertyGroup>
         <NoWarn>1701;1702;1705</NoWarn>
     </PropertyGroup>
+
+    <ItemGroup>
+      <Compile Remove="dist\**" />
+      <Compile Remove="node_modules\**" />
+      <EmbeddedResource Remove="dist\**" />
+      <EmbeddedResource Remove="node_modules\**" />
+      <None Remove="dist\**" />
+      <None Remove="node_modules\**" />
+    </ItemGroup>
     <ItemGroup>
         <PackageReference Include="Microsoft.AspNetCore" Version="2.2.0" />
         <PackageReference Include="Microsoft.AspNetCore.App" />
@@ -17,7 +26,9 @@
     </ItemGroup>
 
     <ItemGroup>
+        <ProjectReference Include="..\..\..\VirtoCommerce.Platform.Security\VirtoCommerce.Platform.Security.csproj" />
         <ProjectReference Include="..\..\vc-module-catalog\VirtoCommerce.CatalogModule.Core\VirtoCommerce.CatalogModule.Core.csproj" />
+        <ProjectReference Include="..\..\vc-module-export\VirtoCommerce.ExportModule.Data\VirtoCommerce.ExportModule.Data.csproj" />
         <ProjectReference Include="..\VirtoCommerce.PricingModule.Core\VirtoCommerce.PricingModule.Core.csproj" />
         <ProjectReference Include="..\VirtoCommerce.PricingModule.Data\VirtoCommerce.PricingModule.Data.csproj" />
     </ItemGroup>

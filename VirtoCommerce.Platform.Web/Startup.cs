@@ -147,7 +147,7 @@ namespace VirtoCommerce.Platform.Web
                 options.MinimumSameSitePolicy = SameSiteMode.None;
             });
 
-            services.AddAuthentication().AddCookie();
+            var authBuilder = services.AddAuthentication().AddCookie();
             services.AddSecurityServices(options =>
             {
                 options.NonEditableUsers = new[] { "admin" };
@@ -167,6 +167,15 @@ namespace VirtoCommerce.Platform.Web
                 options.ClaimsIdentity.RoleClaimType = OpenIdConnectConstants.Claims.Role;
             });
 
+            // Support commonly used forwarded headers
+            // X-Forwarded-For - Holds Client IP (optionally port number) across proxies and ends up in HttpContext.Connection.RemoteIpAddress
+            // X-Forwarded-Proto - Holds original scheme (HTTP or HTTPS) even if call traversed proxies and changed and ends up in HttpContext.Request.Scheme
+            services.Configure<ForwardedHeadersOptions>(options =>
+            {
+                options.KnownProxies.Clear();
+                options.ForwardedHeaders = Microsoft.AspNetCore.HttpOverrides.ForwardedHeaders.XForwardedProto | Microsoft.AspNetCore.HttpOverrides.ForwardedHeaders.XForwardedFor;
+            });
+
             var azureAdSection = Configuration.GetSection("AzureAd");
 
             if (azureAdSection.GetChildren().Any())
@@ -177,8 +186,7 @@ namespace VirtoCommerce.Platform.Web
                 if (options.Enabled)
                 {
                     //TODO: Need to check how this influence to OpennIddict Reference tokens activated by this line below  AddValidation(options => options.UseReferenceTokens());
-                    var auth = services.AddAuthentication().AddOAuthValidation();
-                    auth.AddOpenIdConnect(options.AuthenticationType, options.AuthenticationCaption,
+                    authBuilder.AddOpenIdConnect(options.AuthenticationType, options.AuthenticationCaption,
                         openIdConnectOptions =>
                         {
                             openIdConnectOptions.ClientId = options.ApplicationId;
@@ -341,6 +349,9 @@ namespace VirtoCommerce.Platform.Web
 
             //Return all errors as Json response
             app.UseMiddleware<ApiErrorWrappingMiddleware>();
+
+            // Engages the forwarded header support in the pipeline  (see description above)
+            app.UseForwardedHeaders();
 
             app.UseHttpsRedirection();
 

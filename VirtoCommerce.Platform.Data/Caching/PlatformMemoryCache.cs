@@ -1,33 +1,34 @@
 using System;
 using Microsoft.Extensions.Caching.Memory;
+using Microsoft.Extensions.Options;
 using VirtoCommerce.Platform.Core;
 using VirtoCommerce.Platform.Core.Caching;
-using VirtoCommerce.Platform.Core.Settings;
 
 namespace VirtoCommerce.Platform.Data.Caching
 {
     public class PlatformMemoryCache : IPlatformMemoryCache
     {
-        private readonly ISettingsManager _settingManager;
+        private readonly PlatformOptions _platformOptions;
         private readonly IMemoryCache _memoryCache;
-        private static TimeSpan? _absoluteExpiration;
-        private static bool? _cacheEnabled;
         private bool _disposed;
-        private static object _lockObject = new object();
 
-        public PlatformMemoryCache(IMemoryCache memoryCache, ISettingsManager settingManager)
+        public PlatformMemoryCache(IMemoryCache memoryCache, IOptions<PlatformOptions> options)
         {
             _memoryCache = memoryCache;
-            _settingManager = settingManager;
+            _platformOptions = options.Value;
         }
+
+        protected bool CacheEnabled => _platformOptions.CacheEnabled;
+        protected TimeSpan? AbsoluteExpiration => _platformOptions.CacheAbsoluteExpiration;
+        protected TimeSpan? SlidingExpiration => _platformOptions.CacheSlidingExpiration;
 
         public ICacheEntry CreateEntry(object key)
         {
             var result = _memoryCache.CreateEntry(key);
             if (result != null)
             {
-                var absoluteExpiration = CacheEnabled ? AbsoluteExpiration : TimeSpan.FromTicks(1);
-                result.SetAbsoluteExpiration(absoluteExpiration);
+                var options = GetDefaultCacheEntryOptions();
+                result.SetOptions(options);
             }
             return result;
         }
@@ -42,42 +43,27 @@ namespace VirtoCommerce.Platform.Data.Caching
             return _memoryCache.TryGetValue(key, out value);
         }
 
-        protected TimeSpan AbsoluteExpiration
+        private MemoryCacheEntryOptions GetDefaultCacheEntryOptions()
         {
-            get
-            {
-                if (_absoluteExpiration == null)
-                {
-                    lock (_lockObject)
-                    {
-                        if (_absoluteExpiration == null)
-                        {
-                            _absoluteExpiration = TimeSpan.Parse(_settingManager.GetValue(PlatformConstants.Settings.Cache.AbsoluteExpiration.Name, (string)PlatformConstants.Settings.Cache.AbsoluteExpiration.DefaultValue));
-                        }
-                    }
-                }
-                return _absoluteExpiration.Value;
-            }
-        }
+            var result = new MemoryCacheEntryOptions();
 
-        protected bool CacheEnabled
-        {
-            get
+            if (!CacheEnabled)
             {
-                if (_cacheEnabled == null)
-                {
-                    lock (_lockObject)
-                    {
-                        if (_cacheEnabled == null)
-                        {
-                            _cacheEnabled = Convert.ToBoolean(_settingManager.GetValue(PlatformConstants.Settings.Cache.CacheEnabled.Name, true));
-                        }
-                    }
-                }
-                return _cacheEnabled.Value;
+                result.AbsoluteExpirationRelativeToNow = TimeSpan.FromTicks(1);
             }
+            else
+            {
+                if (AbsoluteExpiration != null)
+                {
+                    result.AbsoluteExpirationRelativeToNow = AbsoluteExpiration;
+                }
+                else if (SlidingExpiration != null)
+                {
+                    result.SlidingExpiration = SlidingExpiration;
+                }
+            }
+            return result;
         }
-
 
         /// <summary>
         /// Cleans up the background collection events.
@@ -90,6 +76,12 @@ namespace VirtoCommerce.Platform.Data.Caching
         public void Dispose()
         {
             Dispose(true);
+            // This object will be cleaned up by the Dispose method.
+            // Therefore, you should call GC.SupressFinalize to
+            // take this object off the finalization queue
+            // and prevent finalization code for this object
+            // from executing a second time.
+            GC.SuppressFinalize(this);
         }
 
         protected virtual void Dispose(bool disposing)
@@ -98,9 +90,8 @@ namespace VirtoCommerce.Platform.Data.Caching
             {
                 if (disposing)
                 {
-                    GC.SuppressFinalize(this);
+                    _memoryCache.Dispose();
                 }
-
                 _disposed = true;
             }
         }

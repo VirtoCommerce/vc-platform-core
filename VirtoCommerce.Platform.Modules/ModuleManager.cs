@@ -17,7 +17,7 @@ namespace VirtoCommerce.Platform.Modules
         private readonly ILogger<ModuleManager> _loggerFacade;
         private IEnumerable<IModuleTypeLoader> _typeLoaders;
         private readonly IAssemblyResolver _assemblyResolver;
-        private HashSet<IModuleTypeLoader> subscribedToModuleTypeLoaders = new HashSet<IModuleTypeLoader>();
+        private readonly HashSet<IModuleTypeLoader> subscribedToModuleTypeLoaders = new HashSet<IModuleTypeLoader>();
 
         /// <summary>
         /// Initializes an instance of the <see cref="ModuleManager"/> class.

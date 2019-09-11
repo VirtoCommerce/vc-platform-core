@@ -23,9 +23,10 @@ namespace VirtoCommerce.CatalogModule.Data.Model
         public string Locale { get; set; }
 
         #region Navigation Properties
-        public string ItemId { get; set; }
 
+        public string ItemId { get; set; }
         public ItemEntity CatalogItem { get; set; }
+
         #endregion
 
         public virtual EditorialReview ToModel(EditorialReview review)

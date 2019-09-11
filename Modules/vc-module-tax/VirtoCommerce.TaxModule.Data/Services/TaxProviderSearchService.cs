@@ -38,14 +38,14 @@ namespace VirtoCommerce.TaxModule.Data.Services
             {
                 cacheEntry.AddExpirationToken(TaxCacheRegion.CreateChangeToken());
                 var result = AbstractTypeFactory<TaxProviderSearchResult>.TryCreateInstance();
-                
+
                 var tmpSkip = 0;
                 var tmpTake = 0;
 
                 var sortInfos = BuildSortExpression(criteria);
                 using (var repository = _repositoryFactory())
                 {
-                    var query = BuildQuery(repository, criteria);               
+                    var query = BuildQuery(repository, criteria);
 
                     result.TotalCount = await query.CountAsync();
                     if (criteria.Take > 0)
@@ -100,6 +100,10 @@ namespace VirtoCommerce.TaxModule.Data.Services
             if (!criteria.StoreId.IsNullOrEmpty())
             {
                 query = query.Where(x => x.StoreId == criteria.StoreId);
+            }
+            if (!criteria.StoreIds.IsNullOrEmpty())
+            {
+                query = query.Where(x => criteria.StoreIds.Contains(x.StoreId));
             }
             return query;
         }

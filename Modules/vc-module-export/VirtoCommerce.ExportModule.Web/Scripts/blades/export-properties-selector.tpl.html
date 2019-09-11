@@ -1,0 +1,24 @@
+<div class="blade-static __bottom" ng-include="'$(Platform)/Scripts/common/templates/ok-cancel.tpl.html'"></div>
+<div class="blade-content">
+    <div class="blade-inner">
+        <div class="inner-block">
+            <div ng-repeat-start="(key,values) in blade.allEntities">
+                <div class="form-group">
+                    <label class="form-label">
+                        {{key}}
+                    </label>
+                    <a class="btn-ico fa fa-check-circle" ng-click="selectAllInGroup(key)"></a>
+                    <a class="btn-ico fa fa-times-circle" ng-click="clearAllInGroup(key)"></a>
+                    <ui-select multiple ng-model="blade.selectedEntities[key]" on-select="sortSelected(key)">
+                        <ui-select-match placeholder="{{'export.blades.export-settings.labels.exported-properties-group' | translate}}">{{$item.displayName}}</ui-select-match>
+                        <ui-select-choices repeat="x as x in values | orderBy: 'displayName' | filter: { displayName: $select.search }">
+                            <span ng-bind-html="x.displayName | highlight: $select.search"></span>
+                        </ui-select-choices>
+                    </ui-select>
+                </div>
+            </div>
+            <div class="list __sub" ng-repeat-end>
+            </div>
+        </div>
+    </div>
+</div>

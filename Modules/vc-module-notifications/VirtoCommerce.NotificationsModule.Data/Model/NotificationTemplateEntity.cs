@@ -17,14 +17,16 @@ namespace VirtoCommerce.NotificationsModule.Data.Model
         [StringLength(10)]
         public string LanguageCode { get; set; }
 
+        #region Navigation Properties
 
         /// <summary>
         /// Id of notification
         /// </summary>
         [StringLength(128)]
         public string NotificationId { get; set; }
-
         public NotificationEntity Notification { get; set; }
+
+        #endregion
 
         public virtual NotificationTemplate ToModel(NotificationTemplate template)
         {
@@ -46,7 +48,6 @@ namespace VirtoCommerce.NotificationsModule.Data.Model
 
             pkMap.AddPair(template, this);
 
-
             Id = template.Id;
             LanguageCode = template.LanguageCode;
             CreatedBy = template.CreatedBy;
@@ -60,6 +61,6 @@ namespace VirtoCommerce.NotificationsModule.Data.Model
         public virtual void Patch(NotificationTemplateEntity template)
         {
             template.LanguageCode = LanguageCode;
-        }
+        }        
     }
 }

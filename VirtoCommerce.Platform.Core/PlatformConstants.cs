@@ -65,36 +65,6 @@ namespace VirtoCommerce.Platform.Core
 
         public static class Settings
         {
-            public static class Cache
-            {
-                public static SettingDescriptor CacheEnabled = new SettingDescriptor
-                {
-                    Name = "VirtoCommerce.Platform.Cache.Enabled",
-                    ValueType = SettingValueType.Boolean,
-                    GroupName = "Platform|Cache",
-                    DefaultValue = true,
-                    RestartRequired = true
-
-                };
-                public static SettingDescriptor AbsoluteExpiration = new SettingDescriptor
-                {
-                    Name = "VirtoCommerce.Platform.Cache.AbsoulteExpiration",
-                    GroupName = "Platform|Cache",
-                    ValueType = SettingValueType.ShortText,
-                    DefaultValue = TimeSpan.FromDays(1).ToString(),
-                    RestartRequired = true
-                };
-
-                public static IEnumerable<SettingDescriptor> AllSettings
-                {
-                    get
-                    {
-                        yield return CacheEnabled;
-                        yield return AbsoluteExpiration;
-                    }
-                }
-            }
-
             public static class Security
             {
                 public static SettingDescriptor SecurityAccountTypes = new SettingDescriptor
@@ -267,8 +237,7 @@ namespace VirtoCommerce.Platform.Core
                 }
             }
 
-            public static IEnumerable<SettingDescriptor> AllSettings => Cache.AllSettings
-                .Concat(Security.AllSettings)
+            public static IEnumerable<SettingDescriptor> AllSettings => Security.AllSettings
                 .Concat(Setup.AllSettings)
                 .Concat(UserProfile.AllSettings)
                 .Concat(UserInterface.AllSettings);

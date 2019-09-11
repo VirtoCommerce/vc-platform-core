@@ -1,3 +1,4 @@
+using System;
 using VirtoCommerce.Platform.Core.Common;
 
 namespace VirtoCommerce.TaxModule.Core.Model
@@ -5,7 +6,7 @@ namespace VirtoCommerce.TaxModule.Core.Model
     /// <summary>
     /// Represent one abstract position for tax calculation
     /// </summary>
-    public class TaxLine : Entity
+    public class TaxLine : Entity, ICloneable
     {
         public string Code { get; set; }
         public string Name { get; set; }
@@ -30,5 +31,14 @@ namespace VirtoCommerce.TaxModule.Core.Model
         /// Tax category/type
         /// </summary>
         public string TaxType { get; set; }
+
+        #region ICloneable members
+
+        public virtual object Clone()
+        {
+            return MemberwiseClone() as TaxLine;
+        }
+
+        #endregion
     }
 }

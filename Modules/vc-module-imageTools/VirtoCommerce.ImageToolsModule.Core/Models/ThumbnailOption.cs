@@ -1,8 +1,9 @@
+using System;
 using VirtoCommerce.Platform.Core.Common;
 
 namespace VirtoCommerce.ImageToolsModule.Core.Models
 {
-    public class ThumbnailOption : AuditableEntity
+    public class ThumbnailOption : AuditableEntity, ICloneable
     {
         public string Name { get; set; }
 
@@ -19,5 +20,14 @@ namespace VirtoCommerce.ImageToolsModule.Core.Models
         public AnchorPosition AnchorPosition { get; set; }
 
         public JpegQuality JpegQuality { get; set; }
+
+        #region ICloneable members
+
+        public virtual object Clone()
+        {
+            return MemberwiseClone() as ThumbnailOption;
+        }
+
+        #endregion
     }
 }

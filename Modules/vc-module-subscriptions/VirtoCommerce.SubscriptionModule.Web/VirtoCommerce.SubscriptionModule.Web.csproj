@@ -13,9 +13,12 @@
         <NoWarn>1701;1702;1705;1591</NoWarn>
     </PropertyGroup>
     <ItemGroup>
-        <Compile Remove="node_modules\**" />
-        <EmbeddedResource Remove="node_modules\**" />
-        <None Remove="node_modules\**" />
+      <Compile Remove="dist\**" />
+      <Compile Remove="node_modules\**" />
+      <EmbeddedResource Remove="dist\**" />
+      <EmbeddedResource Remove="node_modules\**" />
+      <None Remove="dist\**" />
+      <None Remove="node_modules\**" />
     </ItemGroup>
 
     <ItemGroup>

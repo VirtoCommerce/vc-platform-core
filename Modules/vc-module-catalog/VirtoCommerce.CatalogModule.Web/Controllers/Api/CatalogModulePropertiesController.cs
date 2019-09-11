@@ -19,14 +19,14 @@ namespace VirtoCommerce.CatalogModule.Web.Controllers.Api
         private readonly IPropertyService _propertyService;
         private readonly ICategoryService _categoryService;
         private readonly ICatalogService _catalogService;
-        private readonly IProperyDictionaryItemSearchService _propertyDictionarySearchService;
+        private readonly IPropertyDictionaryItemSearchService _propertyDictionarySearchService;
         private readonly IAuthorizationService _authorizationService;
         //Workaround: Bad design to use repository in the controller layer, need to extend in the future IPropertyService.Delete with new parameter DeleteAllValues
         public CatalogModulePropertiesController(
             IPropertyService propertyService
             , ICategoryService categoryService
             , ICatalogService catalogService
-            , IProperyDictionaryItemSearchService propertyDictionarySearchService
+            , IPropertyDictionaryItemSearchService propertyDictionarySearchService
             , IAuthorizationService authorizationService)
         {
             _propertyService = propertyService;

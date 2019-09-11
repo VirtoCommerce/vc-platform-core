@@ -22,8 +22,10 @@ namespace VirtoCommerce.NotificationsModule.Core.Model
         /// </summary>
         public string Number { get; set; }
 
-        public override NotificationMessage ToMessage(NotificationMessage message, INotificationTemplateRenderer render)
+        public override void ToMessage(NotificationMessage message, INotificationTemplateRenderer render)
         {
+            base.ToMessage(message, render);
+
             var smsNotificationMessage = (SmsNotificationMessage)message;
             var template = (SmsNotificationTemplate)Templates.FindWithLanguage(message.LanguageCode);
             if (template != null)
@@ -31,12 +33,20 @@ namespace VirtoCommerce.NotificationsModule.Core.Model
                 smsNotificationMessage.Message = render.RenderAsync(template.Message, this, template.LanguageCode).GetAwaiter().GetResult();
             }
             smsNotificationMessage.Number = Number;
-            return base.ToMessage(message, render);
         }
 
         public override void SetFromToMembers(string from, string to)
         {
             Number = to;
         }
+
+        #region ICloneable members
+
+        public override object Clone()
+        {
+            return base.Clone() as SmsNotification;
+        }
+
+        #endregion
     }
 }

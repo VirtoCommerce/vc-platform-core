@@ -25,7 +25,7 @@ namespace VirtoCommerce.CustomerModule.Data.Caching
 
         public static void ExpireMemberById(string memberId)
         {
-            if (_memberRegionTokenLookup.TryRemove(memberId, out var token))
+            if (!string.IsNullOrEmpty(memberId) && _memberRegionTokenLookup.TryRemove(memberId, out var token))
             {
                 token.Cancel();
             }

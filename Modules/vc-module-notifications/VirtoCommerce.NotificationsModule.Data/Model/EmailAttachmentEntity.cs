@@ -40,11 +40,15 @@ namespace VirtoCommerce.NotificationsModule.Data.Model
         [StringLength(10)]
         public string LanguageCode { get; set; }
 
+        #region Navigation Properties
+
         /// <summary>
         /// Id of notification
         /// </summary>
         public string NotificationId { get; set; }
         public EmailNotificationEntity Notification { get; set; }
+
+        #endregion
 
         public virtual EmailAttachment ToModel(EmailAttachment emailAttachment)
         {

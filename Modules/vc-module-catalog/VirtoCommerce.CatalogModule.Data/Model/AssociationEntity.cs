@@ -37,6 +37,7 @@ namespace VirtoCommerce.CatalogModule.Data.Model
 
         public string AssociatedCategoryId { get; set; }
         public CategoryEntity AssociatedCategory { get; set; }
+
         #endregion
 
         public virtual ProductAssociation ToReferencedAssociationModel(ProductAssociation association)

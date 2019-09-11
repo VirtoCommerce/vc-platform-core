@@ -34,12 +34,17 @@ namespace VirtoCommerce.MarketingModule.Data.Services
         {
             var cacheKey = CacheKey.With(GetType(), "GetByIdsAsync", string.Join("-", ids));
             return await _platformMemoryCache.GetOrCreateExclusiveAsync(cacheKey, async (cacheEntry) =>
-            {
-                cacheEntry.AddExpirationToken(PromotionUsageCacheRegion.CreateChangeToken());
+            {            
                 using (var repository = _repositoryFactory())
                 {
-                    var promotionUsage = await repository.GetMarketingUsagesByIdsAsync(ids);
-                    return promotionUsage.Select(x => x.ToModel(AbstractTypeFactory<PromotionUsage>.TryCreateInstance())).ToArray();
+                    var promotionUsages = await repository.GetMarketingUsagesByIdsAsync(ids);                  
+                    cacheEntry.AddExpirationToken(PromotionUsageCacheRegion.CreateChangeToken());
+                    var usages = promotionUsages.Select(x => x.ToModel(AbstractTypeFactory<PromotionUsage>.TryCreateInstance())).ToArray();
+                    foreach (var usage in usages)
+                    {
+                        cacheEntry.AddExpirationToken(PromotionUsageCacheRegion.CreateChangeToken(usage));
+                    }
+                    return usages;
                 }
             });
         }
@@ -74,19 +79,18 @@ namespace VirtoCommerce.MarketingModule.Data.Services
                 pkMap.ResolvePrimaryKeys();
                 await _eventPublisher.Publish(new PromotionUsageChangedEvent(changedEntries));
             }
-
-            PromotionUsageCacheRegion.ExpireRegion();
+            PromotionUsageCacheRegion.ExpireUsages(usages);
         }
 
         public virtual async Task DeleteUsagesAsync(string[] ids)
         {
+            var usages = await GetByIdsAsync(ids);
             using (var repository = _repositoryFactory())
             {
                 await repository.RemoveMarketingUsagesAsync(ids);
                 await repository.UnitOfWork.CommitAsync();
             }
-
-            PromotionUsageCacheRegion.ExpireRegion();
+            PromotionUsageCacheRegion.ExpireUsages(usages);
         }
 
         #endregion

@@ -16,7 +16,7 @@
         <owner>Virto Commerce</owner>
     </owners>
     <projectUrl>https://virtocommerce.com/apps/extensions/virto-inventory-module</projectUrl>
-    <iconUrl>Modules/$(VirtoCommerce.InventoryModule)/Content/logoVC.png</iconUrl>
+    <iconUrl>https://github.com/VirtoCommerce/vc-module-inventory/raw/master/VirtoCommerce.InventoryModule.Web/Content/logo.png</iconUrl>
     <releaseNotes>First version.</releaseNotes>
     <copyright>Copyright © 2011-2019 Virto Commerce. All rights reserved</copyright>
     <tags>order system</tags>

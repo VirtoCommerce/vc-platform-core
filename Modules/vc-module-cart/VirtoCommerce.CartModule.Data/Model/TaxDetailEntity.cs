@@ -16,7 +16,6 @@ namespace VirtoCommerce.CartModule.Data.Model
         [Column(TypeName = "Money")]
         public decimal Amount { get; set; }
 
-
         public string ShoppingCartId { get; set; }
         public virtual ShoppingCartEntity ShoppingCart { get; set; }
 
@@ -28,7 +27,6 @@ namespace VirtoCommerce.CartModule.Data.Model
 
         public string PaymentId { get; set; }
         public virtual PaymentEntity Payment { get; set; }
-
 
         public virtual TaxDetail ToModel(TaxDetail taxDetail)
         {

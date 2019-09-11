@@ -1,4 +1,6 @@
 using System.Collections.Generic;
+using System.Collections.ObjectModel;
+using System.Linq;
 using VirtoCommerce.Platform.Core.DynamicProperties;
 
 namespace VirtoCommerce.MarketingModule.Core.Model
@@ -19,6 +21,28 @@ namespace VirtoCommerce.MarketingModule.Core.Model
         public override string ObjectType => GetType().FullName;
 
         public ICollection<DynamicObjectProperty> DynamicProperties { get; set; }
+
+        #endregion
+
+        #region ICloneable members
+
+        public override object Clone()
+        {
+            var result = base.Clone() as DynamicContentItem;
+
+            if (Folder != null)
+            {
+                result.Folder = Folder.Clone() as DynamicContentFolder;
+            }
+
+            if (DynamicProperties != null)
+            {
+                result.DynamicProperties = new ObservableCollection<DynamicObjectProperty>(
+                    DynamicProperties.Select(x => x.Clone() as DynamicObjectProperty));
+            }
+
+            return result;
+        }
 
         #endregion
     }

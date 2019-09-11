@@ -3,10 +3,10 @@ using System.Collections.Specialized;
 using System.IO;
 using System.Linq;
 using System.Threading.Tasks;
-using DinkToPdf;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.Extensions.Caching.Memory;
+using SelectPdf;
 using VirtoCommerce.CartModule.Core.Services;
 using VirtoCommerce.CoreModule.Core.Common;
 using VirtoCommerce.NotificationsModule.Core.Extensions;
@@ -476,20 +476,23 @@ namespace VirtoCommerce.OrdersModule.Web.Controllers.Api
             }
 
             var notification = await _notificationSearchService.GetNotificationAsync<InvoiceEmailNotification>(new TenantIdentity(order.StoreId, nameof(StoreModule.Core.Model.Store)));
+            notification.CustomerOrder = order;
             var message = AbstractTypeFactory<NotificationMessage>.TryCreateInstance($"{notification.Kind}Message");
             message.LanguageCode = order.LanguageCode;
-            var emailNotificationMessage = (EmailNotificationMessage)notification.ToMessage(message, _notificationTemplateRenderer);
+            notification.ToMessage(message, _notificationTemplateRenderer);
 
-            var pdf = new HtmlToPdfDocument()
-            {
-                GlobalSettings = { ColorMode = ColorMode.Color, Orientation = Orientation.Landscape, PaperSize = PaperKind.A4Plus },
-                Objects = { new ObjectSettings { PagesCount = true, HtmlContent = emailNotificationMessage.Body } }
-            };
-            var converter = new SynchronizedConverter(new PdfTools());
-            var byteArray = converter.Convert(pdf);
-            Stream stream = new MemoryStream(byteArray);
+            //need to do https://selectpdf.com/html-to-pdf/docs/html/Deployment.htm
+            HtmlToPdf converter = new HtmlToPdf();
+            converter.Options.PdfPageSize = PdfPageSize.A4;
+            converter.Options.PdfPageOrientation = PdfPageOrientation.Portrait;
+            converter.Options.MarginLeft = 10;
+            converter.Options.MarginRight = 10;
+            converter.Options.MarginTop = 20;
+            converter.Options.MarginBottom = 20;
 
-            return new FileStreamResult(stream, "application/pdf");
+            var doc = converter.ConvertHtmlString(((EmailNotificationMessage)message).Body);
+            var byteArray = doc.Save();
+            return new FileContentResult(byteArray, "application/pdf");
         }
 
         [HttpGet]

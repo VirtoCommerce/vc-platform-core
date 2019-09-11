@@ -10,6 +10,11 @@ namespace VirtoCommerce.PaymentModule.Data.Repositories
         {
         }
 
+        protected PaymentDbContext(DbContextOptions options)
+            : base(options)
+        {
+        }
+
         protected override void OnModelCreating(ModelBuilder modelBuilder)
         {
             modelBuilder.Entity<StorePaymentMethodEntity>().ToTable("StorePaymentMethod").HasKey(x => x.Id);

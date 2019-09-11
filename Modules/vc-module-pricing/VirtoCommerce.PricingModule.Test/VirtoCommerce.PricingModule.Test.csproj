@@ -16,6 +16,7 @@
   </ItemGroup>
 
   <ItemGroup>
+    <PackageReference Include="Microsoft.AspNetCore.Identity" Version="2.2.0" />
     <PackageReference Include="Microsoft.NET.Test.Sdk" Version="16.0.1" />
     <PackageReference Include="Moq" Version="4.10.0" />
     <PackageReference Include="xunit" Version="2.4.1" />
@@ -23,6 +24,9 @@
   </ItemGroup>
 
   <ItemGroup>
+    <ProjectReference Include="..\..\vc-module-export\VirtoCommerce.ExportModule.CsvProvider\VirtoCommerce.ExportModule.CsvProvider.csproj" />
+    <ProjectReference Include="..\..\vc-module-export\VirtoCommerce.ExportModule.Data\VirtoCommerce.ExportModule.Data.csproj" />
+    <ProjectReference Include="..\..\vc-module-export\VirtoCommerce.ExportModule.JsonProvider\VirtoCommerce.ExportModule.JsonProvider.csproj" />
     <ProjectReference Include="..\VirtoCommerce.PricingModule.Core\VirtoCommerce.PricingModule.Core.csproj" />
     <ProjectReference Include="..\VirtoCommerce.PricingModule.Data\VirtoCommerce.PricingModule.Data.csproj" />
     <ProjectReference Include="..\VirtoCommerce.PricingModule.Web\VirtoCommerce.PricingModule.Web.csproj" />

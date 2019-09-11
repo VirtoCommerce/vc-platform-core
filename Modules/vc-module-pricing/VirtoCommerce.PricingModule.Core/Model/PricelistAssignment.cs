@@ -39,11 +39,10 @@ namespace VirtoCommerce.PricingModule.Core.Model
         public virtual object Clone()
         {
             var result = MemberwiseClone() as PricelistAssignment;
-            if (Pricelist != null)
-            {
-                result.Pricelist = result.Pricelist.Clone() as Pricelist;
-            }
-            //TODO: Clone Conditions, DynamicExpression
+
+            result.Pricelist = result.Pricelist?.Clone() as Pricelist;
+            result.DynamicExpression = result.DynamicExpression?.Clone() as PriceConditionTree;
+
             return result;
         }
         #endregion

@@ -8,5 +8,10 @@ namespace VirtoCommerce.NotificationsModule.Core.Exceptions
         public SentNotificationException(Exception ex) : base(ex.ToString(), ex.InnerException)
         {
         }
+
+        public SentNotificationException(string message) : base(message)
+        {
+
+        }
     }
 }

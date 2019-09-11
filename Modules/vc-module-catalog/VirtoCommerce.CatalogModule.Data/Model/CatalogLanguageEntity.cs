@@ -7,13 +7,14 @@ namespace VirtoCommerce.CatalogModule.Data.Model
 {
     public class CatalogLanguageEntity : Entity
     {
-
         [StringLength(64)]
         public string Language { get; set; }
 
         #region Navigation Properties
+
         public string CatalogId { get; set; }
         public virtual CatalogEntity Catalog { get; set; }
+
         #endregion
 
         public virtual CatalogLanguage ToModel(CatalogLanguage lang)
@@ -26,7 +27,6 @@ namespace VirtoCommerce.CatalogModule.Data.Model
             lang.LanguageCode = Language;
 
             return lang;
-
         }
 
         public virtual CatalogLanguageEntity FromModel(CatalogLanguage lang, PrimaryKeyResolvingMap pkMap)
@@ -39,7 +39,6 @@ namespace VirtoCommerce.CatalogModule.Data.Model
             Id = lang.Id;
             CatalogId = lang.Id;
             Language = lang.LanguageCode;
-
 
             return this;
         }

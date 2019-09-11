@@ -6,6 +6,7 @@ using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.Caching.Memory;
 using VirtoCommerce.Platform.Core.Caching;
 using VirtoCommerce.Platform.Core.Common;
+using VirtoCommerce.StoreModule.Core.Model;
 using VirtoCommerce.StoreModule.Core.Model.Search;
 using VirtoCommerce.StoreModule.Core.Services;
 using VirtoCommerce.StoreModule.Data.Caching;
@@ -69,6 +70,16 @@ namespace VirtoCommerce.StoreModule.Data.Services
             if (!criteria.StoreIds.IsNullOrEmpty())
             {
                 query = query.Where(x => criteria.StoreIds.Contains(x.Id));
+            }
+            if (criteria.StoreStates?.Any() == true)
+            {
+                query = query.Where(x => criteria.StoreStates.Contains((StoreState)x.StoreState));
+            }
+
+            if (criteria.FulfillmentCenterIds?.Any() == true)
+            {
+                query = query.Where(x => criteria.FulfillmentCenterIds.Contains(x.FulfillmentCenterId) ||
+                                         x.FulfillmentCenters.Any(y => criteria.FulfillmentCenterIds.Contains(y.Id)));
             }
             return query;
         }

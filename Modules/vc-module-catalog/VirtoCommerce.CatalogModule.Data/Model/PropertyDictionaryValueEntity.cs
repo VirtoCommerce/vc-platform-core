@@ -14,8 +14,10 @@ namespace VirtoCommerce.CatalogModule.Data.Model
         public string Locale { get; set; }
 
         #region Navigation Properties
+
         public string DictionaryItemId { get; set; }
         public virtual PropertyDictionaryItemEntity DictionaryItem { get; set; }
+
         #endregion
 
         public virtual PropertyDictionaryItemLocalizedValue ToModel(PropertyDictionaryItemLocalizedValue localizedValue)

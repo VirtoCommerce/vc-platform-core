@@ -41,7 +41,12 @@ namespace VirtoCommerce.NotificationsModule.Data.Model
         [StringLength(128)]
         public string Kind { get; set; }
 
-        public virtual ObservableCollection<NotificationTemplateEntity> Templates { get; set; } = new NullCollection<NotificationTemplateEntity>();
+        #region Navigation Properties
+
+        public virtual ObservableCollection<NotificationTemplateEntity> Templates { get; set; }
+            = new NullCollection<NotificationTemplateEntity>();
+
+        #endregion
 
         public virtual Notification ToModel(Notification notification)
         {
@@ -97,6 +102,6 @@ namespace VirtoCommerce.NotificationsModule.Data.Model
             {
                 Templates.Patch(notification.Templates, (sourceTemplate, templateEntity) => sourceTemplate.Patch(templateEntity));
             }
-        }
+        }        
     }
 }

@@ -280,14 +280,12 @@ namespace VirtoCommerce.MarketingModule.Web.Controllers.Api
         [Authorize(ModuleConstants.Security.Permissions.Create)]
         public ActionResult<coreModel.DynamicContentPublication> GetNewDynamicPublication()
         {
-            var result = new coreModel.DynamicContentPublication
-            {
-                ContentItems = new coreModel.DynamicContentItem[] { },
-                ContentPlaces = new coreModel.DynamicContentPlace[] { },
-                DynamicExpression = AbstractTypeFactory<DynamicContentConditionTree>.TryCreateInstance(),
-                IsActive = true
-            };
-            result.DynamicExpression.EnableAvailableChildrenSerialization();
+            var result = AbstractTypeFactory<coreModel.DynamicContentPublication>.TryCreateInstance();
+            result.IsActive = true;
+            result.ContentItems = new List<coreModel.DynamicContentItem>();
+            result.ContentPlaces = new List<coreModel.DynamicContentPlace>();
+            result.DynamicExpression = AbstractTypeFactory<DynamicContentConditionTree>.TryCreateInstance();
+            result.DynamicExpression.MergeFromPrototype(AbstractTypeFactory<DynamicContentConditionTreePrototype>.TryCreateInstance());
             return Ok(result);
         }
 
@@ -302,11 +300,11 @@ namespace VirtoCommerce.MarketingModule.Web.Controllers.Api
         public async Task<ActionResult<coreModel.DynamicContentPublication>> GetDynamicContentPublicationById(string id)
         {
             var publications = await _dynamicContentService.GetPublicationsByIdsAsync(new[] { id });
-            var retVal = publications.FirstOrDefault();
-            if (retVal != null)
+            var result = publications.FirstOrDefault();
+            if (result != null)
             {
-                retVal.DynamicExpression?.EnableAvailableChildrenSerialization();
-                return Ok(retVal);
+                result.DynamicExpression?.MergeFromPrototype(AbstractTypeFactory<DynamicContentConditionTreePrototype>.TryCreateInstance());
+                return Ok(result);
             }
             return NotFound();
         }

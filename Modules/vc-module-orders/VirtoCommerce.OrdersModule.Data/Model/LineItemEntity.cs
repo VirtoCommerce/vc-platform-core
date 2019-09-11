@@ -88,6 +88,9 @@ namespace VirtoCommerce.OrdersModule.Data.Model
 
         #region NavigationProperties
 
+        public string CustomerOrderId { get; set; }
+        public virtual CustomerOrderEntity CustomerOrder { get; set; }
+
         public virtual ObservableCollection<DiscountEntity> Discounts { get; set; } = new NullCollection<DiscountEntity>();
 
         public virtual ObservableCollection<TaxDetailEntity> TaxDetails { get; set; } = new NullCollection<TaxDetailEntity>();
@@ -95,12 +98,9 @@ namespace VirtoCommerce.OrdersModule.Data.Model
         public virtual ObservableCollection<OrderDynamicPropertyObjectValueEntity> DynamicPropertyObjectValues { get; set; }
             = new NullCollection<OrderDynamicPropertyObjectValueEntity>();
 
-        #endregion
-
-        public virtual CustomerOrderEntity CustomerOrder { get; set; }
-        public string CustomerOrderId { get; set; }
-
         public virtual ObservableCollection<ShipmentItemEntity> ShipmentItems { get; set; } = new NullCollection<ShipmentItemEntity>();
+
+        #endregion
 
         public virtual LineItem ToModel(LineItem lineItem)
         {
@@ -278,6 +278,7 @@ namespace VirtoCommerce.OrdersModule.Data.Model
                 DynamicPropertyObjectValues.Patch(target.DynamicPropertyObjectValues, (sourceDynamicPropertyObjectValues, targetDynamicPropertyObjectValues) => sourceDynamicPropertyObjectValues.Patch(targetDynamicPropertyObjectValues));
             }
         }
+
         public virtual void ResetPrices()
         {
             Price = 0m;

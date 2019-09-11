@@ -1,5 +1,7 @@
 using System;
 using System.Collections.Generic;
+using System.Collections.ObjectModel;
+using System.Linq;
 using VirtoCommerce.NotificationsModule.Core.Services;
 using VirtoCommerce.Platform.Core.Common;
 
@@ -8,13 +10,14 @@ namespace VirtoCommerce.NotificationsModule.Core.Model
     /// <summary>
     /// Base class for Notification
     /// </summary>
-    public abstract class Notification : AuditableEntity
+    public abstract class Notification : AuditableEntity, ICloneable
     {
         /// <summary>
         /// For detecting owner
         /// </summary>
         public TenantIdentity TenantIdentity { get; set; } = TenantIdentity.Empty;
         public bool IsActive { get; set; }
+        public string LanguageCode { get; set; }
 
         /// <summary>
         /// Type of notifications, like Identifier
@@ -32,13 +35,12 @@ namespace VirtoCommerce.NotificationsModule.Core.Model
         public abstract string Kind { get; }
         public IList<NotificationTemplate> Templates { get; set; }
 
-        public virtual NotificationMessage ToMessage(NotificationMessage message, INotificationTemplateRenderer render)
+        public virtual void ToMessage(NotificationMessage message, INotificationTemplateRenderer render)
         {
             message.TenantIdentity = new TenantIdentity(TenantIdentity?.Id, TenantIdentity?.Type);
             message.NotificationType = Type;
             message.NotificationId = Id;
-
-            return message;
+            message.LanguageCode = LanguageCode;
         }
 
         public virtual void ReduceDetails(string responseGroup)
@@ -53,5 +55,19 @@ namespace VirtoCommerce.NotificationsModule.Core.Model
         }
 
         public abstract void SetFromToMembers(string from, string to);
+
+        #region ICloneable members
+
+        public virtual object Clone()
+        {
+            var result = MemberwiseClone() as Notification;
+
+            result.Templates = Templates?.Select(x => x.Clone()).OfType<NotificationTemplate>().ToList();
+            result.TenantIdentity = TenantIdentity?.Clone() as TenantIdentity;
+
+            return result;
+        }
+
+        #endregion
     }
 }

@@ -10,7 +10,7 @@
                 <div class="brand-image">
                     <img class="brand-logo" ng-src="{{blade.currentEntity.shippingMethod.logoUrl}}" alt="" ng-if="blade.currentEntity.shippingMethod.logoUrl">
                 </div>
-                <div class="brand-t" title="{{blade.currentEntity.shippingMethod.description}}">{{blade.currentEntity.shippingMethod.name}}</div>
+                <div class="brand-t" title="{{blade.currentEntity.shippingMethod.description}}">{{blade.currentEntity.shippingMethod.typeName}}</div>
                 <div class="brand-descr" title="{{blade.currentEntity.shippingMethod.optionDescription}}" ng-if="blade.currentEntity.shippingMethod.optionName">{{blade.currentEntity.shippingMethod.optionName}}</div>
             </div>
 
@@ -20,9 +20,9 @@
                         <label class="form-label">{{ 'orders.blades.shipment-detail.labels.shipment-method' | translate }}</label>
                         <div class="form-input">
                             <ui-select ng-model="blade.currentEntity.shippingMethod" required ng-disabled="blade.isLocked">
-                                <ui-select-match placeholder="{{ 'orders.blades.shipment-detail.placeholders.shipment-method' | translate }}">{{$select.selected.name}}</ui-select-match>
-                                <ui-select-choices repeat="x in blade.currentStore.shippingMethods | filter: { name: $select.search }">
-                                    <span ng-bind-html="x.name | highlight: $select.search"></span>
+                                <ui-select-match placeholder="{{ 'orders.blades.shipment-detail.placeholders.shipment-method' | translate }}">{{$select.selected.typeName}}</ui-select-match>
+                                <ui-select-choices repeat="x in blade.shippingMethods | filter: { typeName: $select.search }">
+                                    <span ng-bind-html="x.typeName | highlight: $select.search"></span>
                                 </ui-select-choices>
                             </ui-select>
                         </div>

@@ -1,11 +1,10 @@
+using Microsoft.AspNetCore.Authorization;
+using Microsoft.AspNetCore.Mvc;
 using System.Collections.Generic;
 using System.Linq;
 using System.Threading.Tasks;
-using Microsoft.AspNetCore.Authorization;
-using Microsoft.AspNetCore.Mvc;
 using VirtoCommerce.CatalogModule.Core.Model;
 using VirtoCommerce.CatalogModule.Core.Services;
-using VirtoCommerce.CoreModule.Core.Conditions;
 using VirtoCommerce.Platform.Core.Assets;
 using VirtoCommerce.Platform.Core.Common;
 using VirtoCommerce.PricingModule.Core;
@@ -76,7 +75,7 @@ namespace VirtoCommerce.PricingModule.Web.Controllers.Api
             var assignment = (await _pricingService.GetPricelistAssignmentsByIdAsync(new[] { id })).FirstOrDefault();        
             if(assignment != null)
             {
-                assignment.DynamicExpression?.EnableAvailableChildrenSerialization();
+                assignment.DynamicExpression?.MergeFromPrototype(AbstractTypeFactory<PriceConditionTreePrototype>.TryCreateInstance());
             }
             return Ok(assignment);
         }
@@ -91,10 +90,9 @@ namespace VirtoCommerce.PricingModule.Web.Controllers.Api
         {
             var result = AbstractTypeFactory<PricelistAssignment>.TryCreateInstance();
             result.Priority = 1;
-            result.DynamicExpression = AbstractTypeFactory<PriceConditionTree>.TryCreateInstance();
             //Required for UI
-            result.DynamicExpression.Children = result.DynamicExpression.AvailableChildren.ToList();
-            result.DynamicExpression?.EnableAvailableChildrenSerialization();
+            result.DynamicExpression = AbstractTypeFactory<PriceConditionTree>.TryCreateInstance();
+            result.DynamicExpression.MergeFromPrototype(AbstractTypeFactory<PriceConditionTreePrototype>.TryCreateInstance());
             return Ok(result);
         }
 
@@ -374,12 +372,14 @@ namespace VirtoCommerce.PricingModule.Web.Controllers.Api
             const int BATCH_SIZE = 20;
             var skip = 0;
             IEnumerable<string> batch;
-            while ((batch = pricelistAssignmentsIds.Skip(skip).Take(BATCH_SIZE)).Count() > 0)
+            do
             {
+                batch = pricelistAssignmentsIds.Skip(skip).Take(BATCH_SIZE);
                 await _pricingService.DeletePricelistsAssignmentsAsync(batch.ToArray());
-
                 skip += BATCH_SIZE;
             }
+            while (batch.Any());
+
 
             return NoContent();
         }

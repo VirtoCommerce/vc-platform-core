@@ -9,6 +9,7 @@ namespace VirtoCommerce.MarketingModule.Data.Model
     {
         [StringLength(128)]
         public string ObjectId { get; set; }
+
         [StringLength(128)]
         public string ObjectType { get; set; }
 
@@ -17,12 +18,15 @@ namespace VirtoCommerce.MarketingModule.Data.Model
 
         [StringLength(128)]
         public string UserId { get; set; }
+
         [StringLength(128)]
         public string UserName { get; set; }
 
         #region Navigation Properties
+
         public string PromotionId { get; set; }
         public virtual PromotionEntity Promotion { get; set; }
+
         #endregion
 
         public virtual PromotionUsage ToModel(PromotionUsage usage)
@@ -77,6 +81,5 @@ namespace VirtoCommerce.MarketingModule.Data.Model
             target.ObjectId = ObjectId;
             target.ObjectType = ObjectType;
         }
-
     }
 }

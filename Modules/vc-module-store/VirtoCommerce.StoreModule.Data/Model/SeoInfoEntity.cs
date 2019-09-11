@@ -1,3 +1,4 @@
+using System;
 using System.ComponentModel.DataAnnotations;
 using VirtoCommerce.CoreModule.Core.Seo;
 using VirtoCommerce.Platform.Core.Common;
@@ -9,9 +10,6 @@ namespace VirtoCommerce.StoreModule.Data.Model
         [StringLength(255)]
         [Required]
         public string Keyword { get; set; }
-
-        [StringLength(128)]
-        public string StoreId { get; set; }
 
         [Required]
         public bool IsActive { get; set; }
@@ -32,7 +30,11 @@ namespace VirtoCommerce.StoreModule.Data.Model
         public string ImageAltDescription { get; set; }
 
         #region Navigation Properties
+
+        [StringLength(128)]
+        public string StoreId { get; set; }
         public virtual StoreEntity Store { get; set; }
+
         #endregion
 
         public virtual SeoInfo ToModel(SeoInfo seoInfo)

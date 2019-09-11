@@ -15,12 +15,12 @@
     </PropertyGroup>
 
     <ItemGroup>
-        <Compile Remove="Infrastructure\**" />
-        <Compile Remove="node_modules\**" />
-        <EmbeddedResource Remove="Infrastructure\**" />
-        <EmbeddedResource Remove="node_modules\**" />
-        <None Remove="Infrastructure\**" />
-        <None Remove="node_modules\**" />
+      <Compile Remove="dist\**" />
+      <Compile Remove="node_modules\**" />
+      <EmbeddedResource Remove="dist\**" />
+      <EmbeddedResource Remove="node_modules\**" />
+      <None Remove="dist\**" />
+      <None Remove="node_modules\**" />
     </ItemGroup>
 
     <ItemGroup>

@@ -59,8 +59,7 @@ namespace VirtoCommerce.OrdersModule.Data.Model
         public decimal TaxTotal { get; set; }
         public decimal TaxPercentRate { get; set; }
 
-        public virtual ObservableCollection<AddressEntity> Addresses { get; set; } = new NullCollection<AddressEntity>();
-        public virtual ObservableCollection<PaymentGatewayTransactionEntity> Transactions { get; set; } = new NullCollection<PaymentGatewayTransactionEntity>();
+        #region Navigation Properties
 
         public string CustomerOrderId { get; set; }
         public virtual CustomerOrderEntity CustomerOrder { get; set; }
@@ -68,9 +67,19 @@ namespace VirtoCommerce.OrdersModule.Data.Model
         public string ShipmentId { get; set; }
         public virtual ShipmentEntity Shipment { get; set; }
 
+        public virtual ObservableCollection<AddressEntity> Addresses { get; set; } = new NullCollection<AddressEntity>();
+
+        public virtual ObservableCollection<PaymentGatewayTransactionEntity> Transactions { get; set; }
+            = new NullCollection<PaymentGatewayTransactionEntity>();
+
         public virtual ObservableCollection<DiscountEntity> Discounts { get; set; } = new NullCollection<DiscountEntity>();
+
         public virtual ObservableCollection<TaxDetailEntity> TaxDetails { get; set; } = new NullCollection<TaxDetailEntity>();
-        public virtual ObservableCollection<OrderDynamicPropertyObjectValueEntity> DynamicPropertyObjectValues { get; set; } = new NullCollection<OrderDynamicPropertyObjectValueEntity>();
+
+        public virtual ObservableCollection<OrderDynamicPropertyObjectValueEntity> DynamicPropertyObjectValues { get; set; }
+            = new NullCollection<OrderDynamicPropertyObjectValueEntity>();
+
+        #endregion
 
         public override OrderOperation ToModel(OrderOperation operation)
         {
@@ -273,6 +282,7 @@ namespace VirtoCommerce.OrdersModule.Data.Model
                 DynamicPropertyObjectValues.Patch(target.DynamicPropertyObjectValues, (sourceDynamicPropertyObjectValues, targetDynamicPropertyObjectValues) => sourceDynamicPropertyObjectValues.Patch(targetDynamicPropertyObjectValues));
             }
         }
+
         public virtual void ResetPrices()
         {
             Price = 0m;
@@ -292,6 +302,6 @@ namespace VirtoCommerce.OrdersModule.Data.Model
             yield return Price;
             yield return DiscountAmount;
             yield return Sum;
-        }
+        }        
     }
 }

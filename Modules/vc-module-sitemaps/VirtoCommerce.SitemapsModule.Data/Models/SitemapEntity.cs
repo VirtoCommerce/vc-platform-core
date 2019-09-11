@@ -2,6 +2,7 @@ using System;
 using System.Collections.ObjectModel;
 using System.ComponentModel.DataAnnotations;
 using System.ComponentModel.DataAnnotations.Schema;
+using System.Linq;
 using VirtoCommerce.Platform.Core.Common;
 using VirtoCommerce.SitemapsModule.Core.Models;
 
@@ -9,11 +10,6 @@ namespace VirtoCommerce.SitemapsModule.Data.Models
 {
     public class SitemapEntity : AuditableEntity
     {
-        public SitemapEntity()
-        {
-            Items = new NullCollection<SitemapItemEntity>();
-        }
-
         [Required]
         [StringLength(256)]
         public string Filename { get; set; }
@@ -28,7 +24,12 @@ namespace VirtoCommerce.SitemapsModule.Data.Models
         [NotMapped]
         public int TotalItemsCount { get; set; }
 
+        #region Navigation Properties
+
         public virtual ObservableCollection<SitemapItemEntity> Items { get; set; }
+            = new NullCollection<SitemapItemEntity>();
+
+        #endregion
 
         public virtual Sitemap ToModel(Sitemap sitemap)
         {
