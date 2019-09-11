@@ -174,7 +174,7 @@ class Build : NukeBuild
 
          var zipFileName = ArtifactsDirectory / ModuleId + "_" + ModuleVersion + ".zip";
          DeleteFile(zipFileName);
-         CompressionTasks.CompressZip(ModuleOutputDirectory, zipFileName, (x) => !ignoredFiles.Contains(x.Name));
+         CompressionTasks.CompressZip(ModuleOutputDirectory, zipFileName, (x) => !ignoredFiles.Contains(x.Name, StringComparer.OrdinalIgnoreCase));
      });
 
 }
