@@ -48,6 +48,7 @@ Swashbuckle.AspNetCore.dll
 System.Security.Cryptography.Algorithms.dll
 System.Interactive.Async.dll
 VirtoCommerce.Smidge.dll
+System.ServiceModel.dll
 VirtoCommerce.Smidge.Nuglify.dll
 WindowsAzure.Storage.dll
 VirtoCommerce.Platform.Core.dll

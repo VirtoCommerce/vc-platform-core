@@ -45,7 +45,7 @@ class Build : NukeBuild
     AbsolutePath SourceDirectory => RootDirectory / "src";
     AbsolutePath TestsDirectory => RootDirectory / "tests";
     AbsolutePath ArtifactsDirectory => RootDirectory / "artifacts";
-    Project WebProject => Solution.AllProjects.FirstOrDefault(x => x.Name.EndsWith("Web"));
+    Project WebProject => Solution.AllProjects.FirstOrDefault(x => x.SolutionFolder.Name == "src" && x.Name.EndsWith("Web"));
     AbsolutePath ModuleManifest => WebProject.Directory / "module.manifest";
     AbsolutePath ModuleIgnoreFile => RootDirectory / "module.ignore";
 
