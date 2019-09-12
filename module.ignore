@@ -43,6 +43,7 @@ Newtonsoft.Json.dll
 OpenIddict.dll
 OpenIddict.EntityFrameworkCore.dll
 OpenIddict.Mvc.dll
+Remotion.Linq.dll
 Serialize.Linq.dll 
 Swashbuckle.AspNetCore.dll
 System.Security.Cryptography.Algorithms.dll
