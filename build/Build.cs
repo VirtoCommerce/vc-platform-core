@@ -42,6 +42,7 @@ class Build : NukeBuild
     [Parameter] readonly string Source = @"https://api.nuget.org/v3/index.json";
 
     [Parameter] static string GlobalModuleIgnoreFileUrl = @"https://raw.githubusercontent.com/VirtoCommerce/vc-platform-core/release/3.0.0/module.ignore";
+  
     AbsolutePath SourceDirectory => RootDirectory / "src";
     AbsolutePath TestsDirectory => RootDirectory / "tests";
     AbsolutePath ArtifactsDirectory => RootDirectory / "artifacts";
@@ -61,8 +62,14 @@ class Build : NukeBuild
         .Executes(() =>
         {
             SourceDirectory.GlobDirectories("**/bin", "**/obj").ForEach(DeleteDirectory);
-            TestsDirectory.GlobDirectories("**/bin", "**/obj").ForEach(DeleteDirectory);
-            WebProject.Directory.GlobDirectories("**/node_modules").ForEach(DeleteDirectory);
+            if (DirectoryExists(TestsDirectory))
+            {
+                TestsDirectory.GlobDirectories("**/bin", "**/obj").ForEach(DeleteDirectory);
+            }
+            if (DirectoryExists(TestsDirectory))
+            {
+                WebProject.Directory.GlobDirectories("**/node_modules").ForEach(DeleteDirectory);
+            }
             EnsureCleanDirectory(ArtifactsDirectory);
         });
 
@@ -121,8 +128,15 @@ class Build : NukeBuild
     Target WebPackBuild => _ => _
      .Executes(() =>
      {
-         NpmTasks.NpmInstall(s => s.SetWorkingDirectory(WebProject.Directory));
-         NpmTasks.NpmRun(s => s.SetWorkingDirectory(WebProject.Directory).SetCommand("webpack:build"));
+         if (FileExists(WebProject.Directory / "packages.json"))
+         {
+             NpmTasks.NpmInstall(s => s.SetWorkingDirectory(WebProject.Directory));
+             NpmTasks.NpmRun(s => s.SetWorkingDirectory(WebProject.Directory).SetCommand("webpack:build"));
+         }
+         else
+         {
+             Logger.Info("Nothing to build.");
+         }
      });
 
     Target Compile => _ => _
@@ -177,5 +191,6 @@ class Build : NukeBuild
          CompressionTasks.CompressZip(ModuleOutputDirectory, zipFileName, (x) => !ignoredFiles.Contains(x.Name, StringComparer.OrdinalIgnoreCase));
      });
 
+   
 }
 
