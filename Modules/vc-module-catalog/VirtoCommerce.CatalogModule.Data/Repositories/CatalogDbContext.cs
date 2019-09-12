@@ -127,7 +127,7 @@ namespace VirtoCommerce.CatalogModule.Data.Repositories
             modelBuilder.Entity<AssociationEntity>().ToTable("Association").HasKey(x => x.Id);
             modelBuilder.Entity<AssociationEntity>().Property(x => x.Id).HasMaxLength(128);
             modelBuilder.Entity<AssociationEntity>().HasOne(m => m.Item).WithMany(x => x.Associations)
-                .HasForeignKey(x => x.ItemId).IsRequired().OnDelete(DeleteBehavior.Restrict);
+                .HasForeignKey(x => x.ItemId).IsRequired().OnDelete(DeleteBehavior.Cascade);
             modelBuilder.Entity<AssociationEntity>().HasOne(a => a.AssociatedItem).WithMany(i => i.ReferencedAssociations)
                 .HasForeignKey(a => a.AssociatedItemId).OnDelete(DeleteBehavior.Restrict);
             modelBuilder.Entity<AssociationEntity>().HasOne(a => a.AssociatedCategory).WithMany()
