@@ -17,6 +17,65 @@ namespace VirtoCommerce.Platform.Tests.Modularity
     public class ExternalModuleCatalogTests
     {
         [Theory]
+        [InlineData("2.2.0", "", "2.12.0", 5)]
+        [InlineData("3.2.0", "beta.1", "3.0.0", 5)]
+        [InlineData("4.0.0", "", "3.0.0", 6)]
+        public void PublishNewVersionTest(string version, string versionTag, string platformVersion, int expectedCount)
+        {
+            //Arrange
+            var moduleManifest = new ModuleManifest
+            {
+                 Version = version,
+                 VersionTag = versionTag,
+                 PlatformVersion = platformVersion
+            };
+
+            var extModuleManifest = new ExternalModuleManifest
+            {
+                Id = "A",
+                Versions = new List<ExternalModuleManifestVersion>
+                 {
+                     //2.x
+                     new ExternalModuleManifestVersion
+                        {
+                             Version = "2.1.0",
+                             VersionTag = "alpha.1",
+                             PlatformVersion = "2.12.0"
+                        },
+                        new ExternalModuleManifestVersion
+                        {
+                             Version = "2.0.0",
+                             PlatformVersion = "2.12.0"
+                        },
+                        //3.x
+                        new ExternalModuleManifestVersion
+                        {
+                             Version = "3.2.0",
+                             VersionTag = "alpha.1",
+                             PlatformVersion = "3.0.0"
+                        },
+                        new ExternalModuleManifestVersion
+                        {
+                             Version = "3.1.0",
+                             PlatformVersion = "3.0.0"
+                        },
+                        new ExternalModuleManifestVersion
+                        {
+                             Version = "3.0.0",
+                             PlatformVersion = "3.0.0"
+                        },
+                    }
+            };           
+
+            //Act
+            extModuleManifest.PublishNewVersion(moduleManifest);
+
+            //Assert
+            Assert.True(extModuleManifest.Versions.Count() == expectedCount);
+            Assert.Contains(ExternalModuleManifestVersion.FromManifest(moduleManifest), extModuleManifest.Versions);
+        }
+
+        [Theory]
         [InlineData("2.12.0", "1.4.0")]
         [InlineData("3.1.0", "2.0.0")]      
         public void CreateDirectory_CreateTestDirectory(string platformVersion, string effectiveModuleVersion)

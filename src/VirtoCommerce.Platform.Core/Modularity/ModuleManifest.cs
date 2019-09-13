@@ -14,6 +14,9 @@ namespace VirtoCommerce.Platform.Core.Modularity
         [XmlElement("version")]
         public string Version { get; set; }
 
+        [XmlElement("version-tag")]
+        public string VersionTag { get; set; }
+
         [XmlElement("platformVersion")]
         public string PlatformVersion { get; set; }
 

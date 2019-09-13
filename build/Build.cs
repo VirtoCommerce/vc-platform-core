@@ -1,5 +1,7 @@
 using System;
+using System.Collections.Generic;
 using System.Linq;
+using Newtonsoft.Json;
 using Nuke.Common;
 using Nuke.Common.Execution;
 using Nuke.Common.Git;
@@ -8,14 +10,17 @@ using Nuke.Common.ProjectModel;
 using Nuke.Common.Tooling;
 using Nuke.Common.Tools.DotNet;
 using Nuke.Common.Tools.Git;
+using Nuke.Common.Tools.GitReleaseManager;
 using Nuke.Common.Tools.GitVersion;
 using Nuke.Common.Tools.Npm;
 using Nuke.Common.Utilities;
 using Nuke.Common.Utilities.Collections;
+using VirtoCommerce.Platform.Core.Modularity;
 using static Nuke.Common.EnvironmentInfo;
 using static Nuke.Common.IO.FileSystemTasks;
 using static Nuke.Common.IO.PathConstruction;
 using static Nuke.Common.Tools.DotNet.DotNetTasks;
+using static Nuke.Common.Tools.Git.GitTasks;
 
 [CheckBuildProjectConfigurations]
 [UnsetVisualStudioEnvironmentVariables]
@@ -38,11 +43,16 @@ class Build : NukeBuild
     [GitRepository] readonly GitRepository GitRepository;
     [GitVersion] readonly GitVersion GitVersion;
 
+    readonly string MasterBranch = "master";
+    readonly string DevelopBranch = "develop";
+    readonly string ReleaseBranchPrefix = "release";
+    readonly string HotfixBranchPrefix = "hotfix";
+
     [Parameter("ApiKey for the specified source")] readonly string ApiKey;
     [Parameter] readonly string Source = @"https://api.nuget.org/v3/index.json";
 
     [Parameter] static string GlobalModuleIgnoreFileUrl = @"https://raw.githubusercontent.com/VirtoCommerce/vc-platform-core/release/3.0.0/module.ignore";
-  
+
     AbsolutePath SourceDirectory => RootDirectory / "src";
     AbsolutePath TestsDirectory => RootDirectory / "tests";
     AbsolutePath ArtifactsDirectory => RootDirectory / "artifacts";
@@ -54,6 +64,10 @@ class Build : NukeBuild
     string ModuleVersion => XmlTasks.XmlPeek(ModuleManifest, "module/version").FirstOrDefault();
     string ModuleVersionTag => XmlTasks.XmlPeek(ModuleManifest, "module/version-tag").FirstOrDefault();
     AbsolutePath ModuleOutputDirectory => ArtifactsDirectory / (ModuleId + ModuleVersion);
+
+    string ModulePackageUrl => $"https://virtocommerce.blob.core.windows.net/modules3/{ModuleId + "_" + string.Join("-", ModuleVersion, ModuleVersionTag) + ".zip"}";
+    AbsolutePath ModulesJsonFile => (AbsolutePath)ModulesRepository.LocalDirectory / "modules_v3.json";
+    GitRepository ModulesRepository => new GitRepository("https://github.com/VirtoCommerce/vc-modules", "vc-modules", ArtifactsDirectory / "vc-modules");
 
     bool IsModule => FileExists(ModuleManifest);
 
@@ -191,6 +205,37 @@ class Build : NukeBuild
          CompressionTasks.CompressZip(ModuleOutputDirectory, zipFileName, (x) => !ignoredFiles.Contains(x.Name, StringComparer.OrdinalIgnoreCase));
      });
 
-   
+    Target PublishModuleManifest => _ => _
+        .Executes(() =>
+        {
+            if (!DirectoryExists((AbsolutePath)ModulesRepository.LocalDirectory))
+            {
+                GitTasks.Git($"clone {ModulesRepository.HttpsUrl} {ModulesRepository.LocalDirectory}");
+            }
+            else
+            {
+                GitTasks.Git($"pull", ModulesRepository.LocalDirectory);
+            }
+            var modulesExternalManifests = JsonConvert.DeserializeObject<List<ExternalModuleManifest>>(TextTasks.ReadAllText(ModulesJsonFile));
+            var manifest = ManifestReader.Read(ModuleManifest);
+            manifest.PackageUrl = ModulePackageUrl;
+            var existExternalManifest = modulesExternalManifests.FirstOrDefault(x => x.Id == manifest.Id);
+            if (existExternalManifest != null)
+            {
+                existExternalManifest.PublishNewVersion(manifest);
+            }
+            else
+            {
+                modulesExternalManifests.Add(ExternalModuleManifest.FromManifest(manifest));
+            }
+            TextTasks.WriteAllText(ModulesJsonFile, JsonConvert.SerializeObject(modulesExternalManifests, Formatting.Indented));
+            GitTasks.Git($"commit -am \"{manifest.Id} {manifest.Version}{manifest.VersionTag}\"", ModulesRepository.LocalDirectory);
+
+            GitTasks.Git($"config user.email \"ci@virtocommerce.com\"", ModulesRepository.LocalDirectory);
+            GitTasks.Git($"config user.name \"Virto CI\"", ModulesRepository.LocalDirectory);
+
+            GitTasks.Git($"push origin HEAD:master -f", ModulesRepository.LocalDirectory);
+        });
+
 }
 

@@ -17,6 +17,7 @@ namespace VirtoCommerce.Platform.Core.Modularity
         public ModuleIdentity Identity { get; private set; }
         public string Id { get; private set; }
         public SemanticVersion Version { get; private set; }
+        public string VersionTag { get; set; }
         public SemanticVersion PlatformVersion { get; private set; }
         public string Title { get; private set; }
         public string Description { get; set; }
@@ -110,6 +111,7 @@ namespace VirtoCommerce.Platform.Core.Modularity
 
             Id = manifest.Id;
             Version = version.SemanticVersion;
+            VersionTag = version.VersionTag;
             PlatformVersion = version.PlatformSemanticVersion;
             ReleaseNotes = version.ReleaseNotes;
             Ref = version.PackageUrl;

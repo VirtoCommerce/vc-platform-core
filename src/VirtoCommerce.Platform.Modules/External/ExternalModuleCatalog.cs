@@ -129,8 +129,8 @@ namespace VirtoCommerce.Platform.Modules
                             {
                                 //Select from all versions of module the latest compatible by semVer with the current platform version.
                                 var latestPlatformCompatibleVersion = manifest.Versions.OrderByDescending(x => x.SemanticVersion)
-                                                                               .Where(x => x.PlatformSemanticVersion.IsCompatibleWithBySemVer(PlatformVersion.CurrentVersion))
-                                                                               .FirstOrDefault();
+                                                                               .FirstOrDefault(x => x.PlatformSemanticVersion.IsCompatibleWithBySemVer(PlatformVersion.CurrentVersion)
+                                                                                                    && (string.IsNullOrEmpty(x.VersionTag) || _options.IncludePrerelease));
                                 if (latestPlatformCompatibleVersion != null)
                                 {
                                     var moduleInfo = AbstractTypeFactory<ManifestModuleInfo>.TryCreateInstance();
