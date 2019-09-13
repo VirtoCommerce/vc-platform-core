@@ -128,7 +128,7 @@ class Build : NukeBuild
     Target WebPackBuild => _ => _
      .Executes(() =>
      {
-         if (FileExists(WebProject.Directory / "packages.json"))
+         if (FileExists(WebProject.Directory / "package.json"))
          {
              NpmTasks.NpmInstall(s => s.SetWorkingDirectory(WebProject.Directory));
              NpmTasks.NpmRun(s => s.SetWorkingDirectory(WebProject.Directory).SetCommand("webpack:build"));
