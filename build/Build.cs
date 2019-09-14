@@ -232,9 +232,6 @@ class Build : NukeBuild
             TextTasks.WriteAllText(modulesJsonFile, JsonConvert.SerializeObject(modulesExternalManifests, Formatting.Indented));
             GitTasks.Git($"commit -am \"{manifest.Id} {manifest.Version}-{manifest.VersionTag}\"", modulesLocalDirectory);
 
-            GitTasks.Git($"config user.email \"ci@virtocommerce.com\"", modulesLocalDirectory);
-            GitTasks.Git($"config user.name \"Virto CI\"", modulesLocalDirectory);
-
             GitTasks.Git($"push origin HEAD:master -f", modulesLocalDirectory);
         });
 
