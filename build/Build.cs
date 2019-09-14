@@ -66,8 +66,7 @@ class Build : NukeBuild
     AbsolutePath ModuleOutputDirectory => ArtifactsDirectory / (ModuleId + ModuleVersion);
 
     string ModulePackageUrl => $"https://virtocommerce.blob.core.windows.net/modules3/{ModuleId + "_" + string.Join("-", ModuleVersion, ModuleVersionTag) + ".zip"}";
-    AbsolutePath ModulesJsonFile => (AbsolutePath)ModulesRepository.LocalDirectory / "modules_v3.json";
-    GitRepository ModulesRepository => new GitRepository("https://github.com/VirtoCommerce/vc-modules", "vc-modules", ArtifactsDirectory / "vc-modules");
+    GitRepository ModulesRepository => GitRepository.FromUrl("https://github.com/VirtoCommerce/vc-modules.git");
 
     bool IsModule => FileExists(ModuleManifest);
 
@@ -208,15 +207,17 @@ class Build : NukeBuild
     Target PublishModuleManifest => _ => _
         .Executes(() =>
         {
-            if (!DirectoryExists((AbsolutePath)ModulesRepository.LocalDirectory))
+            var modulesLocalDirectory = ArtifactsDirectory / "vc-modules";
+            var modulesJsonFile = modulesLocalDirectory / "modules_v3.json";
+            if (!DirectoryExists(modulesLocalDirectory))
             {
-                GitTasks.Git($"clone {ModulesRepository.HttpsUrl} {ModulesRepository.LocalDirectory}");
+                GitTasks.Git($"clone {ModulesRepository.HttpsUrl} {modulesLocalDirectory}");
             }
             else
             {
-                GitTasks.Git($"pull", ModulesRepository.LocalDirectory);
+                GitTasks.Git($"pull", modulesLocalDirectory);
             }
-            var modulesExternalManifests = JsonConvert.DeserializeObject<List<ExternalModuleManifest>>(TextTasks.ReadAllText(ModulesJsonFile));
+            var modulesExternalManifests = JsonConvert.DeserializeObject<List<ExternalModuleManifest>>(TextTasks.ReadAllText(modulesJsonFile));
             var manifest = ManifestReader.Read(ModuleManifest);
             manifest.PackageUrl = ModulePackageUrl;
             var existExternalManifest = modulesExternalManifests.FirstOrDefault(x => x.Id == manifest.Id);
@@ -228,13 +229,13 @@ class Build : NukeBuild
             {
                 modulesExternalManifests.Add(ExternalModuleManifest.FromManifest(manifest));
             }
-            TextTasks.WriteAllText(ModulesJsonFile, JsonConvert.SerializeObject(modulesExternalManifests, Formatting.Indented));
-            GitTasks.Git($"commit -am \"{manifest.Id} {manifest.Version}{manifest.VersionTag}\"", ModulesRepository.LocalDirectory);
+            TextTasks.WriteAllText(modulesJsonFile, JsonConvert.SerializeObject(modulesExternalManifests, Formatting.Indented));
+            GitTasks.Git($"commit -am \"{manifest.Id} {manifest.Version}-{manifest.VersionTag}\"", modulesLocalDirectory);
 
-            GitTasks.Git($"config user.email \"ci@virtocommerce.com\"", ModulesRepository.LocalDirectory);
-            GitTasks.Git($"config user.name \"Virto CI\"", ModulesRepository.LocalDirectory);
+            GitTasks.Git($"config user.email \"ci@virtocommerce.com\"", modulesLocalDirectory);
+            GitTasks.Git($"config user.name \"Virto CI\"", modulesLocalDirectory);
 
-            GitTasks.Git($"push origin HEAD:master -f", ModulesRepository.LocalDirectory);
+            GitTasks.Git($"push origin HEAD:master -f", modulesLocalDirectory);
         });
 
 }

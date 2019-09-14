@@ -54,22 +54,29 @@ namespace VirtoCommerce.Platform.Core.Modularity
         public void PublishNewVersion(ModuleManifest manifest)
         {
             var version = ExternalModuleManifestVersion.FromManifest(manifest);
-            var existsCompatibleVer = Versions.OrderByDescending(x => x.SemanticVersion)
-                                                  .FirstOrDefault(x => x.PlatformSemanticVersion.IsCompatibleWithBySemVer(version.PlatformSemanticVersion)
-                                                                        && x.SemanticVersion.IsCompatibleWithBySemVer(version.SemanticVersion));
+            Versions.Add(version);
+            var byPlatformMajorGroups = Versions.GroupBy(x => x.PlatformSemanticVersion.Major).OrderByDescending(x=>x.Key).ToList();
+            Versions.Clear();
+            foreach (var byPlatformGroup in byPlatformMajorGroups)
+            {
+                var latestReleaseVersion = byPlatformGroup.Where(x => string.IsNullOrEmpty(x.VersionTag))
+                                                          .OrderByDescending(x => x.SemanticVersion).FirstOrDefault();
+                if (latestReleaseVersion != null)
+                {
+                    Versions.Add(latestReleaseVersion);
+                }
 
-            if (!string.IsNullOrEmpty(version.VersionTag) && string.IsNullOrEmpty(existsCompatibleVer?.VersionTag))
-            {
-                existsCompatibleVer = null;
-            }
-            if (existsCompatibleVer != null)
-            {
-                existsCompatibleVer.FromOther(version);
-            }
-            else
-            {
-                Versions.Add(version);
-            }
+                if (!string.IsNullOrEmpty(manifest.VersionTag))
+                {
+                    var latestPreReleaseVersion = byPlatformGroup.Where(x => !string.IsNullOrEmpty(x.VersionTag))
+                                                                 .OrderByDescending(x => x.SemanticVersion)
+                                                                 .ThenByDescending(x => x.VersionTag).FirstOrDefault();
+                    if (latestPreReleaseVersion != null)
+                    {
+                        Versions.Add(latestPreReleaseVersion);
+                    }
+                }
+            }          
         }
 
         protected override IEnumerable<object> GetEqualityComponents()

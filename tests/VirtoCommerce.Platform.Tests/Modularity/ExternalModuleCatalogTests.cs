@@ -16,63 +16,75 @@ namespace VirtoCommerce.Platform.Tests.Modularity
 {
     public class ExternalModuleCatalogTests
     {
-        [Theory]
-        [InlineData("2.2.0", "", "2.12.0", 5)]
-        [InlineData("3.2.0", "beta.1", "3.0.0", 5)]
-        [InlineData("4.0.0", "", "3.0.0", 6)]
-        public void PublishNewVersionTest(string version, string versionTag, string platformVersion, int expectedCount)
+        [Fact]
+        public void PublishNewVersionTest()
         {
             //Arrange
-            var moduleManifest = new ModuleManifest
+            var v3_0_0_beta1 = new ModuleManifest
             {
-                 Version = version,
-                 VersionTag = versionTag,
-                 PlatformVersion = platformVersion
+                 Version = "3.0.0",
+                 VersionTag = "beta1",
+                 PlatformVersion = "3.0.0"
+            };
+            var v3_0_0 = new ModuleManifest
+            {
+                Version = "3.0.0",
+                PlatformVersion = "3.0.0"
+            };
+            var v3_1_0_beta1 = new ModuleManifest
+            {
+                Version = "3.1.0",
+                VersionTag = "beta1",
+                PlatformVersion = "3.0.0"
+            };
+            var v3_1_0_beta2 = new ModuleManifest
+            {
+                Version = "3.1.0",
+                VersionTag = "beta2",
+                PlatformVersion = "3.0.0"
+            };
+            var v3_1_0 = new ModuleManifest
+            {
+                Version = "3.0.0",
+                PlatformVersion = "3.0.0"
             };
 
             var extModuleManifest = new ExternalModuleManifest
             {
-                Id = "A",
-                Versions = new List<ExternalModuleManifestVersion>
-                 {
-                     //2.x
-                     new ExternalModuleManifestVersion
-                        {
-                             Version = "2.1.0",
-                             VersionTag = "alpha.1",
-                             PlatformVersion = "2.12.0"
-                        },
-                        new ExternalModuleManifestVersion
-                        {
-                             Version = "2.0.0",
-                             PlatformVersion = "2.12.0"
-                        },
-                        //3.x
-                        new ExternalModuleManifestVersion
-                        {
-                             Version = "3.2.0",
-                             VersionTag = "alpha.1",
-                             PlatformVersion = "3.0.0"
-                        },
-                        new ExternalModuleManifestVersion
-                        {
-                             Version = "3.1.0",
-                             PlatformVersion = "3.0.0"
-                        },
-                        new ExternalModuleManifestVersion
-                        {
-                             Version = "3.0.0",
-                             PlatformVersion = "3.0.0"
-                        },
-                    }
+                Id = "A"           
             };           
 
             //Act
-            extModuleManifest.PublishNewVersion(moduleManifest);
-
+            extModuleManifest.PublishNewVersion(v3_0_0_beta1);
             //Assert
-            Assert.True(extModuleManifest.Versions.Count() == expectedCount);
-            Assert.Contains(ExternalModuleManifestVersion.FromManifest(moduleManifest), extModuleManifest.Versions);
+            Assert.True(extModuleManifest.Versions.Count() == 1);
+            Assert.True(extModuleManifest.Versions.Contains(ExternalModuleManifestVersion.FromManifest(v3_0_0_beta1)));
+
+            //Act
+            extModuleManifest.PublishNewVersion(v3_0_0);
+            //Assert
+            Assert.True(extModuleManifest.Versions.Count() == 1);
+            Assert.True(extModuleManifest.Versions.Contains(ExternalModuleManifestVersion.FromManifest(v3_0_0)));
+
+            //Act
+            extModuleManifest.PublishNewVersion(v3_1_0_beta1);
+            //Assert
+            Assert.True(extModuleManifest.Versions.Count() == 2);
+            Assert.True(extModuleManifest.Versions.Contains(ExternalModuleManifestVersion.FromManifest(v3_0_0)));
+            Assert.True(extModuleManifest.Versions.Contains(ExternalModuleManifestVersion.FromManifest(v3_1_0_beta1)));
+
+            //Act
+            extModuleManifest.PublishNewVersion(v3_1_0_beta2);
+            //Assert
+            Assert.True(extModuleManifest.Versions.Count() == 2);
+            Assert.True(extModuleManifest.Versions.Contains(ExternalModuleManifestVersion.FromManifest(v3_0_0)));
+            Assert.True(extModuleManifest.Versions.Contains(ExternalModuleManifestVersion.FromManifest(v3_1_0_beta2)));
+
+            //Act
+            extModuleManifest.PublishNewVersion(v3_1_0);
+            //Assert
+            Assert.True(extModuleManifest.Versions.Count() == 1);
+            Assert.True(extModuleManifest.Versions.Contains(ExternalModuleManifestVersion.FromManifest(v3_1_0)));
         }
 
         [Theory]

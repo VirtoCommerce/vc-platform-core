@@ -1,4 +1,5 @@
 using System.Collections.Generic;
+using Newtonsoft.Json;
 using VirtoCommerce.Platform.Core.Common;
 
 namespace VirtoCommerce.Platform.Core.Modularity
@@ -7,9 +8,11 @@ namespace VirtoCommerce.Platform.Core.Modularity
     {
         public string Version { get; set; }
         public string VersionTag { get; set; }
+        [JsonIgnore]
         public SemanticVersion SemanticVersion => SemanticVersion.Parse(Version);
 
         public string PlatformVersion { get; set; }
+        [JsonIgnore]
         public SemanticVersion PlatformSemanticVersion => SemanticVersion.Parse(PlatformVersion);
 
         public string PackageUrl { get; set; }
@@ -18,18 +21,7 @@ namespace VirtoCommerce.Platform.Core.Modularity
         public ManifestDependency[] Dependencies { get; set; }
 
         public string ReleaseNotes { get; set; }
-
-        public ExternalModuleManifestVersion FromOther(ExternalModuleManifestVersion other)
-        {
-            Dependencies = other.Dependencies;
-            Incompatibilities = other.Incompatibilities;
-            PackageUrl = other.PackageUrl;
-            PlatformVersion = other.PlatformVersion;
-            ReleaseNotes = other.ReleaseNotes;
-            Version = other.Version;
-            VersionTag = other.VersionTag;
-            return this;
-        }
+               
 
         public static ExternalModuleManifestVersion FromManifest(ModuleManifest manifest)
         {
@@ -51,6 +43,6 @@ namespace VirtoCommerce.Platform.Core.Modularity
         {
             yield return Version;
             yield return VersionTag;
-    }
+        }
     }
 }
