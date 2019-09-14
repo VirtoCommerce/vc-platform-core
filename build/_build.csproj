@@ -12,6 +12,7 @@
   <ItemGroup>
     <PackageReference Include="Nuke.Common" Version="0.21.2" />
     <PackageReference Include="GitVersion.CommandLine.DotNetCore" Version="4.0.1-beta1-49" />
+    <PackageReference Include="VirtoCommerce.Platform.Core" Version="3.0.0-beta0002" />
   </ItemGroup>
 
   <ItemGroup>
@@ -30,10 +31,6 @@
     <None Include="..\appveyor.yml" Condition="Exists('..\appveyor.yml')" />
     <None Include="..\.travis.yml" Condition="Exists('..\.travis.yml')" />
     <None Include="..\GitVersion.yml" Condition="Exists('..\GitVersion.yml')" />
-  </ItemGroup>
-
-  <ItemGroup>
-    <ProjectReference Include="..\src\VirtoCommerce.Platform.Core\VirtoCommerce.Platform.Core.csproj" />
   </ItemGroup>
 
 </Project>
