@@ -45,7 +45,7 @@ namespace VirtoCommerce.Platform.Tests.Modularity
             };
             var v3_1_0 = new ModuleManifest
             {
-                Version = "3.0.0",
+                Version = "3.1.0",
                 PlatformVersion = "3.0.0"
             };
 

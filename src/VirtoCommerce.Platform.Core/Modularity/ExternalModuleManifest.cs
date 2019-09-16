@@ -55,7 +55,7 @@ namespace VirtoCommerce.Platform.Core.Modularity
         {
             var version = ExternalModuleManifestVersion.FromManifest(manifest);
             Versions.Add(version);
-            var byPlatformMajorGroups = Versions.GroupBy(x => x.PlatformSemanticVersion.Major).OrderByDescending(x=>x.Key).ToList();
+            var byPlatformMajorGroups = Versions.GroupBy(x => x.PlatformSemanticVersion.Major).OrderByDescending(x => x.Key).ToList();
             Versions.Clear();
             foreach (var byPlatformGroup in byPlatformMajorGroups)
             {
@@ -66,17 +66,21 @@ namespace VirtoCommerce.Platform.Core.Modularity
                     Versions.Add(latestReleaseVersion);
                 }
 
-                if (!string.IsNullOrEmpty(manifest.VersionTag))
+                var latestPreReleaseVersion = byPlatformGroup.Where(x => !string.IsNullOrEmpty(x.VersionTag))
+                                                             .OrderByDescending(x => x.SemanticVersion)
+                                                             .ThenByDescending(x => x.VersionTag).FirstOrDefault();
+
+                var addPreRelease = latestPreReleaseVersion != null;
+                if(addPreRelease)
                 {
-                    var latestPreReleaseVersion = byPlatformGroup.Where(x => !string.IsNullOrEmpty(x.VersionTag))
-                                                                 .OrderByDescending(x => x.SemanticVersion)
-                                                                 .ThenByDescending(x => x.VersionTag).FirstOrDefault();
-                    if (latestPreReleaseVersion != null)
-                    {
-                        Versions.Add(latestPreReleaseVersion);
-                    }
+                    addPreRelease = latestReleaseVersion == null || (!latestPreReleaseVersion.SemanticVersion.Equals(latestReleaseVersion.SemanticVersion)
+                                                                     && latestReleaseVersion.SemanticVersion.IsCompatibleWithBySemVer(latestPreReleaseVersion.SemanticVersion));
                 }
-            }          
+                if (addPreRelease)
+                {
+                    Versions.Add(latestPreReleaseVersion);
+                }
+            }
         }
 
         protected override IEnumerable<object> GetEqualityComponents()
