@@ -79,10 +79,6 @@ class Build : NukeBuild
             {
                 TestsDirectory.GlobDirectories("**/bin", "**/obj").ForEach(DeleteDirectory);
             }
-            if (DirectoryExists(TestsDirectory))
-            {
-                WebProject.Directory.GlobDirectories("**/node_modules").ForEach(DeleteDirectory);
-            }
             EnsureCleanDirectory(ArtifactsDirectory);
         });
 
@@ -139,6 +135,7 @@ class Build : NukeBuild
         });
 
     Target WebPackBuild => _ => _
+     .Before(Compile)
      .Executes(() =>
      {
          if (FileExists(WebProject.Directory / "package.json"))
