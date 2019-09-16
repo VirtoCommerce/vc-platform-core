@@ -77,7 +77,7 @@ namespace VirtoCommerce.Platform.Web.Swagger
                     Type = "oauth2",
                     Description = "OAuth2 Resource Owner Password Grant flow",
                     Flow = "password",
-                    TokenUrl = $"{httpContextAccessor.HttpContext.Request?.Scheme}://{httpContextAccessor.HttpContext.Request?.Host}/connect/token"
+                    TokenUrl = $"{httpContextAccessor.HttpContext?.Request?.Scheme}://{httpContextAccessor.HttpContext?.Request?.Host}/connect/token"
                 });
 
                 c.DocInclusionPredicate((docName, apiDesc) =>
