@@ -3,6 +3,7 @@ using System.Linq;
 using Microsoft.AspNetCore.Authorization;
 using Swashbuckle.AspNetCore.Swagger;
 using Swashbuckle.AspNetCore.SwaggerGen;
+using VirtoCommerce.Platform.Core.Common;
 
 namespace VirtoCommerce.Platform.Web.Swagger
 {
@@ -14,19 +15,22 @@ namespace VirtoCommerce.Platform.Web.Swagger
             var requiredScopes = context.MethodInfo
                 .GetCustomAttributes(true)
                 .OfType<AuthorizeAttribute>()
+                .Where(a => !string.IsNullOrEmpty(a.Policy))
                 .Select(attr => attr.Policy)
                 .Distinct().ToArray();
 
-            if (requiredScopes.Any())
+            if (!requiredScopes.IsNullOrEmpty())
             {
                 operation.Responses.Add("401", new Response { Description = "Unauthorized" });
                 operation.Responses.Add("403", new Response { Description = "Forbidden" });
 
-                operation.Security = new List<IDictionary<string, IEnumerable<string>>>();
-                operation.Security.Add(new Dictionary<string, IEnumerable<string>>
+                operation.Security = new List<IDictionary<string, IEnumerable<string>>>
                 {
-                    { "OAuth2", requiredScopes }
-                });
+                    new Dictionary<string, IEnumerable<string>>
+                    {
+                        {"oauth2", requiredScopes}
+                    }
+                };
             }
         }
     }

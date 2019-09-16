@@ -297,9 +297,6 @@ namespace VirtoCommerce.Platform.Web
             // Add memory cache services
             services.AddMemoryCache();
 
-            // Register the Swagger generator
-            services.AddSwagger();
-
             //Add SignalR for push notifications
             services.AddSignalR();
 
@@ -329,7 +326,8 @@ namespace VirtoCommerce.Platform.Web
                 services.AddHangfire(config => config.UseMemoryStorage());
             }
 
-            
+            // Register the Swagger generator
+            services.AddSwagger();
         }
 
         // This method gets called by the runtime. Use this method to configure the HTTP request pipeline.
@@ -398,9 +396,6 @@ namespace VirtoCommerce.Platform.Web
                 securityDbContext.Database.Migrate();
             }
 
-            // Enable middleware to serve generated Swagger as a JSON endpoint.
-            app.UseSwagger();
-
             app.UseHangfireDashboard("/hangfire", new DashboardOptions { Authorization = new[] { new HangfireAuthorizationHandler() } });
             app.UseHangfireServer(new BackgroundJobServerOptions
             {
@@ -424,6 +419,9 @@ namespace VirtoCommerce.Platform.Web
 
             //Seed default users
             app.UseDefaultUsersAsync().GetAwaiter().GetResult();
+
+            // Enable middleware to serve generated Swagger as a JSON endpoint.
+            app.UseSwagger();
 
             var mvcJsonOptions = app.ApplicationServices.GetService<IOptions<MvcJsonOptions>>();
             JobHelper.SetSerializerSettings(mvcJsonOptions.Value.SerializerSettings);
