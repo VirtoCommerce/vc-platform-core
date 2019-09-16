@@ -224,8 +224,8 @@ namespace VirtoCommerce.Platform.Web
                     options.AllowPasswordFlow()
                         .AllowRefreshTokenFlow();
 
-                    options.SetRefreshTokenLifetime(authorizationOptions.RefreshTokenLifeTime);
-                    options.SetAccessTokenLifetime(authorizationOptions.AccessTokenLifeTime);
+                    options.SetRefreshTokenLifetime(authorizationOptions?.RefreshTokenLifeTime);
+                    options.SetAccessTokenLifetime(authorizationOptions?.AccessTokenLifeTime);
 
                     options.AcceptAnonymousClients();
 

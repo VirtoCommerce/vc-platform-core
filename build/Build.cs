@@ -235,5 +235,14 @@ class Build : NukeBuild
             GitTasks.Git($"push origin HEAD:master -f", modulesLocalDirectory);
         });
 
+    Target SwaggerValidation => _ => _
+     //.DependsOn(Clean, Compile, Test, WebPackBuild)
+     .Executes(() =>
+     {
+         //dotnet %userprofile%\.nuget\packages\swashbuckle.aspnetcore.cli\4.0.1\lib\netcoreapp2.0\dotnet-swagger.dll tofile --output swagger.json bin/Debug/netcoreapp2.2/VirtoCommerce.Platform.Web.dll VirtoCommerce.Platform
+         DotNet($"{ArtifactsDirectory}/bin/dotnet-swagger.dll _tofile --output {ArtifactsDirectory}/swagger.json  {ArtifactsDirectory}/bin/{WebProject.Name}.dll VirtoCommerce.Platform");
+         //TODO
+         NpmTasks.NpmRun(x => x.SetCommand($"swagger-cli validate {ArtifactsDirectory}/swagger.json"));
+     });
 }
 
