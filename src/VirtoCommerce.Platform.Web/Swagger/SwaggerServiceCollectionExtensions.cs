@@ -72,7 +72,6 @@ namespace VirtoCommerce.Platform.Web.Swagger
                 c.DocumentFilter<TagsFilter>();
                 c.MapType<object>(() => new Schema { Type = "object" });
                 c.AddModulesXmlComments(services);
-                //TODO for working swagger use FriendlyId(true) / for working autorest use FriendlyId()
                 c.CustomSchemaIds(type => (Attribute.GetCustomAttribute(type, typeof(SwaggerSchemaIdAttribute)) as SwaggerSchemaIdAttribute)?.Id ?? type.FriendlyId());
                 c.AddSecurityDefinition(oauth2SchemeName, new OAuth2Scheme
                 {
