@@ -43,6 +43,11 @@ class Build : NukeBuild
     [GitRepository] readonly GitRepository GitRepository;
     [GitVersion] readonly GitVersion GitVersion;
 
+    [PackageExecutable(packageId: "Swashbuckle.AspNetCore.Cli", packageExecutable: "swagger-cli.exe|dotnet-swagger.dll")]
+    Tool SwaggerCli;
+
+    readonly Tool Git;
+
     readonly string MasterBranch = "master";
     readonly string DevelopBranch = "develop";
     readonly string ReleaseBranchPrefix = "release";
@@ -121,7 +126,7 @@ class Build : NukeBuild
                        .SetProjectFile(v)));
        });
 
-    Target Publish => _ => _
+    Target PublishPackages => _ => _
         .DependsOn(Clean, Compile, Test, Pack)
         .Requires(() => ApiKey)
         .Executes(() =>
@@ -137,6 +142,21 @@ class Build : NukeBuild
                 degreeOfParallelism: 5,
                 completeOnFailure: true);
         });
+
+    Target Publish => _ => _
+       .DependsOn(Compile)
+       .Executes(() =>
+       {
+           DotNetPublish(s => s
+               .SetWorkingDirectory(WebProject.Directory)
+               .EnableNoRestore()
+               .SetOutput(IsModule ? ModuleOutputDirectory / "bin" : ArtifactsDirectory / "publish")
+               .SetConfiguration(Configuration)
+               .SetAssemblyVersion(IsModule ? ModuleVersion : GitVersion.GetNormalizedAssemblyVersion())
+               .SetFileVersion(IsModule ? ModuleVersion : GitVersion.GetNormalizedFileVersion())
+               .SetInformationalVersion(IsModule ? ModuleVersion : GitVersion.InformationalVersion));
+
+       });
 
     Target WebPackBuild => _ => _
      .Executes(() =>
@@ -167,18 +187,10 @@ class Build : NukeBuild
         });
 
     Target Compress => _ => _
-     .DependsOn(Clean, Compile, Test, WebPackBuild)
+     .DependsOn(Clean, WebPackBuild, Test, Publish)
      .Executes(() =>
      {
-         DotNetPublish(s => s
-              .SetWorkingDirectory(WebProject.Directory)
-              .EnableNoRestore()
-              .SetOutput(IsModule ? ModuleOutputDirectory / "bin" : ArtifactsDirectory / "publish")
-              .SetConfiguration(Configuration)
-              .SetAssemblyVersion(IsModule ? ModuleVersion : GitVersion.GetNormalizedAssemblyVersion())
-              .SetFileVersion(IsModule ? ModuleVersion : GitVersion.GetNormalizedFileVersion())
-              .SetInformationalVersion(IsModule ? ModuleVersion : GitVersion.InformationalVersion));
-
+       
          if (IsModule)
          {
              //Copy module.manifest and all content directories into a module output folder
@@ -244,14 +256,14 @@ class Build : NukeBuild
 
 
     Target SwaggerValidation => _ => _
-     //.DependsOn(Clean, Compile, Test, WebPackBuild)
+     .DependsOn(Publish)
+     .Requires(() => !IsModule)
      .Executes(() =>
      {
          //dotnet %userprofile%\.nuget\packages\swashbuckle.aspnetcore.cli\4.0.1\lib\netcoreapp2.0\dotnet-swagger.dll tofile --output swagger.json bin/Debug/netcoreapp2.2/VirtoCommerce.Platform.Web.dll VirtoCommerce.Platform
          DotNet($"{ArtifactsDirectory}/bin/dotnet-swagger.dll _tofile --output {ArtifactsDirectory}/swagger.json  {ArtifactsDirectory}/bin/{WebProject.Name}.dll VirtoCommerce.Platform");
 
-         var process = ProcessTasks.StartProcess("swagger-cli", $"validate {(IsLocalBuild ? "-d" : "")}  {ArtifactsDirectory}\\swagger.json", ArtifactsDirectory, null, null, true);
-         process.AssertZeroExitCode();
+         NpmTasks.NpmRun(s => s.SetWorkingDirectory(ArtifactsDirectory).SetCommand("swagger-cli").SetArguments($"validate { (IsLocalBuild ? "-d" : "")} { ArtifactsDirectory}\\swagger.json")); 
      });
 
 }
