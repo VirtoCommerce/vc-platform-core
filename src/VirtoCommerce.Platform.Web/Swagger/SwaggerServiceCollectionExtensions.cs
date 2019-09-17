@@ -15,12 +15,14 @@ using Swashbuckle.AspNetCore.SwaggerUI;
 using VirtoCommerce.Platform.Core.Common;
 using VirtoCommerce.Platform.Core.Modularity;
 using VirtoCommerce.Platform.Core.Swagger;
+using VirtoCommerce.Platform.Core.Extensions;
 
 namespace VirtoCommerce.Platform.Web.Swagger
 {
     public static class SwaggerServiceCollectionExtensions
     {
         private static string platformDocName = "VirtoCommerce.Platform";
+        private static string oauth2SchemeName = "oauth2";
         /// <summary>
         /// 
         /// </summary>
@@ -70,14 +72,13 @@ namespace VirtoCommerce.Platform.Web.Swagger
                 c.DocumentFilter<TagsFilter>();
                 c.MapType<object>(() => new Schema { Type = "object" });
                 c.AddModulesXmlComments(services);
-                // To avoid errors with repeating type names
                 c.CustomSchemaIds(type => (Attribute.GetCustomAttribute(type, typeof(SwaggerSchemaIdAttribute)) as SwaggerSchemaIdAttribute)?.Id ?? type.FriendlyId());
-                c.AddSecurityDefinition("OAuth2", new OAuth2Scheme
+                c.AddSecurityDefinition(oauth2SchemeName, new OAuth2Scheme
                 {
-                    Type = "oauth2",
+                    Type = oauth2SchemeName,
                     Description = "OAuth2 Resource Owner Password Grant flow",
                     Flow = "password",
-                    TokenUrl = $"{httpContextAccessor.HttpContext.Request?.Scheme}://{httpContextAccessor.HttpContext.Request?.Host}/connect/token"
+                    TokenUrl = $"{httpContextAccessor.HttpContext?.Request?.Scheme}://{httpContextAccessor.HttpContext?.Request?.Host}/connect/token",
                 });
 
                 c.DocInclusionPredicate((docName, apiDesc) =>

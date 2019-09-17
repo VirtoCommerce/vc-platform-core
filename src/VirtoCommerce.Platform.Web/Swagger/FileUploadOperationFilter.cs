@@ -18,13 +18,13 @@ namespace VirtoCommerce.Platform.Web.Swagger
 
                 foreach (var attr in requestAttributes)
                 {
-                    operation.Parameters.Add(new BodyParameter
+                    operation.Parameters.Add(new NonBodyParameter
                     {
                         Name = attr.Name,
                         Description = attr.Description,
                         In = "formData",
                         Required = attr.Required,
-                        Schema = new Schema { Type = attr.Type }
+                        Type = attr.Type
                     });
                 }
 
