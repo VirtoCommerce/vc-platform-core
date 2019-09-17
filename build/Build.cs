@@ -258,10 +258,9 @@ class Build : NukeBuild
      .Executes(() =>
      {
          //dotnet %userprofile%\.nuget\packages\swashbuckle.aspnetcore.cli\4.0.1\lib\netcoreapp2.0\dotnet-swagger.dll tofile --output swagger.json bin/Debug/netcoreapp2.2/VirtoCommerce.Platform.Web.dll VirtoCommerce.Platform
-         //need for runtime, but better use in the fututre a .Net Global Tool https://github.com/domaindrivendev/Swashbuckle.AspNetCore/blob/master/README-v5.md#retrieve-swagger-directly-from-a-startup-assembly
+         //better use in the future a .Net Global Tool https://github.com/domaindrivendev/Swashbuckle.AspNetCore/blob/master/README-v5.md#retrieve-swagger-directly-from-a-startup-assembly
          var swashbucklePackage = NuGetPackageResolver.GetGlobalInstalledPackage("swashbuckle.aspnetcore.cli", "4.0.1", "dotnet-swagger.dll");
-         CopyFileToDirectory($"{swashbucklePackage.Directory}\\lib\\netcoreapp2.0\\dotnet-swagger.runtimeconfig.json", $"{ArtifactsDirectory}\\publish", FileExistsPolicy.Overwrite);
-         DotNet($"{ArtifactsDirectory}\\publish\\dotnet-swagger.dll tofile --output {ArtifactsDirectory}\\swagger.json  {ArtifactsDirectory}\\publish\\{WebProject.Name}.dll VirtoCommerce.Platform");
+         DotNet($"{swashbucklePackage.Directory}/lib/netcoreapp2.0/dotnet-swagger.dll tofile --output {ArtifactsDirectory}/swagger.json  {ArtifactsDirectory}/publish/{WebProject.Name}.dll VirtoCommerce.Platform");
 
          NpmTasks.NpmRun(s => s
             .SetWorkingDirectory(WebProject.Directory)
