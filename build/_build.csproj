@@ -21,7 +21,6 @@
     <NukeSpecificationFiles Include="**\*.json" Exclude="bin\**;obj\**" />
     <NukeExternalFiles Include="**\*.*.ext" Exclude="bin\**;obj\**" />
     <None Remove="*.csproj.DotSettings;*.ref.*.txt" />
-    <NukeExternalFiles Remove="Build.cs.ext" />
 
     <!-- Common build related files -->
     <None Include="..\build.ps1" />
