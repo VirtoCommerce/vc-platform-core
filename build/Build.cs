@@ -16,16 +16,28 @@ using Nuke.Common.Tools.Npm;
 using Nuke.Common.Utilities;
 using Nuke.Common.Utilities.Collections;
 using VirtoCommerce.Platform.Core.Modularity;
-using static Nuke.Common.EnvironmentInfo;
 using static Nuke.Common.IO.FileSystemTasks;
 using static Nuke.Common.IO.PathConstruction;
 using static Nuke.Common.Tools.DotNet.DotNetTasks;
-using static Nuke.Common.Tools.Git.GitTasks;
 
 [CheckBuildProjectConfigurations]
 [UnsetVisualStudioEnvironmentVariables]
 class Build : NukeBuild
 {
+
+    private class ModuleManifestInfo
+    {
+        public string ModuleId { get; set; }
+        public string ModuleVersion { get; set; }
+        public string ModuleVersionTag { get; set; }
+        public string Authors { get; set; }
+        public string Description { get; set; }
+        public string Copyright { get; set; }
+        public string LicenseURL { get; set; }
+        public string ProjectURL { get; set; }
+        public string IconURL { get; set; }
+    }
+
     /// Support plugins are available for:
     ///   - JetBrains ReSharper        https://nuke.build/resharper
     ///   - JetBrains Rider            https://nuke.build/rider
@@ -61,19 +73,32 @@ class Build : NukeBuild
     AbsolutePath SourceDirectory => RootDirectory / "src";
     AbsolutePath TestsDirectory => RootDirectory / "tests";
     AbsolutePath ArtifactsDirectory => RootDirectory / "artifacts";
+    AbsolutePath NupkgDirectory => ArtifactsDirectory / "nupkg";
     Project WebProject => Solution.AllProjects.FirstOrDefault(x => x.SolutionFolder?.Name == "src" && x.Name.EndsWith("Web"));
-    AbsolutePath ModuleManifest => WebProject.Directory / "module.manifest";
+    AbsolutePath ModuleManifestFile => WebProject.Directory / "module.manifest";
     AbsolutePath ModuleIgnoreFile => RootDirectory / "module.ignore";
 
-    string ModuleId => XmlTasks.XmlPeek(ModuleManifest, "module/id").FirstOrDefault();
-    string ModuleVersion => XmlTasks.XmlPeek(ModuleManifest, "module/version").FirstOrDefault();
-    string ModuleVersionTag => XmlTasks.XmlPeek(ModuleManifest, "module/version-tag").FirstOrDefault();
-    AbsolutePath ModuleOutputDirectory => ArtifactsDirectory / (ModuleId + ModuleVersion);
+    ModuleManifestInfo ModuleManifest => new ModuleManifestInfo
+    {
+        ModuleId = XmlTasks.XmlPeek(ModuleManifestFile, "module/id").FirstOrDefault(),
+        ModuleVersion = XmlTasks.XmlPeek(ModuleManifestFile, "module/version").FirstOrDefault(),
+        ModuleVersionTag = XmlTasks.XmlPeek(ModuleManifestFile, "module/version-tag").FirstOrDefault(),
+        Authors = string.Join(Environment.NewLine, XmlTasks.XmlPeek(ModuleManifestFile, "module/authors/author")),
+        Description = XmlTasks.XmlPeek(ModuleManifestFile, "module/description").FirstOrDefault() ?? string.Empty,
+        Copyright = XmlTasks.XmlPeek(ModuleManifestFile, "module/copyright").FirstOrDefault() ?? string.Empty,
+        LicenseURL = XmlTasks.XmlPeek(ModuleManifestFile, "module/licenseUrl").FirstOrDefault() ?? string.Empty,
+        ProjectURL = XmlTasks.XmlPeek(ModuleManifestFile, "module/projectUrl").FirstOrDefault() ?? string.Empty,
+        IconURL = XmlTasks.XmlPeek(ModuleManifestFile, "module/iconUrl").FirstOrDefault() ?? string.Empty,
+    };
 
-    string ModulePackageUrl => $"https://virtocommerce.blob.core.windows.net/modules3/{ModuleId + "_" + string.Join("-", ModuleVersion, ModuleVersionTag) + ".zip"}";
+    AbsolutePath ModuleOutputDirectory => ArtifactsDirectory / (ModuleManifest.ModuleId + ModuleManifest.ModuleVersion);
+
+    string ModulePackageUrl => $"https://virtocommerce.blob.core.windows.net/modules3/{ModuleManifest.ModuleId + "_" + string.Join("-", ModuleManifest.ModuleVersion, ModuleManifest.ModuleVersionTag) + ".zip"}";
     GitRepository ModulesRepository => GitRepository.FromUrl("https://github.com/VirtoCommerce/vc-modules.git");
 
-    bool IsModule => FileExists(ModuleManifest);
+    bool IsModule => FileExists(ModuleManifestFile);
+
+    string ZipFileName => IsModule ? ArtifactsDirectory / ModuleManifest.ModuleId + "_" + string.Join("-", ModuleManifest.ModuleVersion, ModuleManifest.ModuleVersionTag) + ".zip" : ArtifactsDirectory / "VirtoCommerce.Platform." + GitVersion.SemVer + ".zip";
 
     Target Clean => _ => _
         .Before(Restore)
@@ -102,14 +127,27 @@ class Build : NukeBuild
       .DependsOn(Test)
       .Executes(() =>
       {
-          DotNetPack(s => s
-              .SetProject(Solution)
-              .EnableNoBuild()
-              .SetConfiguration(Configuration)
-              .EnableIncludeSymbols()
-              .SetSymbolPackageFormat(DotNetSymbolPackageFormat.snupkg)
-              .SetOutputDirectory(ArtifactsDirectory)
-              .SetVersion(IsModule ? string.Join("-", ModuleVersion, ModuleVersionTag) : GitVersion.NuGetVersionV2));
+          foreach (var project in Solution.AllProjects)
+          {
+              DotNetPack(s => s
+                  .SetProject(project)
+                  .EnableNoBuild()
+                  .SetConfiguration(Configuration)
+                  .EnableIncludeSymbols()
+                  .SetSymbolPackageFormat(DotNetSymbolPackageFormat.snupkg)
+                  .SetOutputDirectory(NupkgDirectory)
+                  .SetVersion(IsModule ? string.Join("-", ModuleManifest.ModuleVersion, ModuleManifest.ModuleVersionTag) : GitVersion.NuGetVersionV2)
+                  .SetPackageId(project.Name)
+                  .SetTitle(project.Name)
+                  .SetAuthors(ModuleManifest.Authors)
+                  .SetPackageLicenseUrl(ModuleManifest.LicenseURL)
+                  .SetPackageProjectUrl(ModuleManifest.ProjectURL)
+                  .SetPackageIconUrl(ModuleManifest.IconURL)
+                  .SetPackageRequireLicenseAcceptance(false)
+                  .SetDescription(ModuleManifest.Description)
+                  .SetCopyright(ModuleManifest.Description)
+                  );
+          }
       });
 
     Target Test => _ => _
@@ -152,9 +190,9 @@ class Build : NukeBuild
                .EnableNoRestore()
                .SetOutput(IsModule ? ModuleOutputDirectory / "bin" : ArtifactsDirectory / "publish")
                .SetConfiguration(Configuration)
-               .SetAssemblyVersion(IsModule ? ModuleVersion : GitVersion.GetNormalizedAssemblyVersion())
-               .SetFileVersion(IsModule ? ModuleVersion : GitVersion.GetNormalizedFileVersion())
-               .SetInformationalVersion(IsModule ? ModuleVersion : GitVersion.InformationalVersion));
+               .SetAssemblyVersion(IsModule ? ModuleManifest.ModuleVersion : GitVersion.GetNormalizedAssemblyVersion())
+               .SetFileVersion(IsModule ? ModuleManifest.ModuleVersion : GitVersion.GetNormalizedFileVersion())
+               .SetInformationalVersion(IsModule ? ModuleManifest.ModuleVersion : GitVersion.InformationalVersion));
 
        });
 
@@ -179,9 +217,9 @@ class Build : NukeBuild
             DotNetBuild(s => s
                 .SetProjectFile(Solution)
                 .SetConfiguration(Configuration)
-                .SetAssemblyVersion(IsModule ? ModuleVersion : GitVersion.GetNormalizedAssemblyVersion())
-                .SetFileVersion(IsModule ? ModuleVersion : GitVersion.GetNormalizedFileVersion())
-                .SetInformationalVersion(IsModule ? ModuleVersion : GitVersion.InformationalVersion)
+                .SetAssemblyVersion(IsModule ? ModuleManifest.ModuleVersion : GitVersion.GetNormalizedAssemblyVersion())
+                .SetFileVersion(IsModule ? ModuleManifest.ModuleVersion : GitVersion.GetNormalizedFileVersion())
+                .SetInformationalVersion(IsModule ? ModuleManifest.ModuleVersion : GitVersion.InformationalVersion)
                 .EnableNoRestore());
 
         });
@@ -190,11 +228,11 @@ class Build : NukeBuild
      .DependsOn(Clean, WebPackBuild, Test, Publish)
      .Executes(() =>
      {
-       
+
          if (IsModule)
          {
              //Copy module.manifest and all content directories into a module output folder
-             CopyFileToDirectory(ModuleManifest, ModuleOutputDirectory, FileExistsPolicy.Overwrite);
+             CopyFileToDirectory(ModuleManifestFile, ModuleOutputDirectory, FileExistsPolicy.Overwrite);
              foreach (var moduleFolder in ModuleContentFolders)
              {
                  var srcModuleFolder = WebProject.Directory / moduleFolder;
@@ -211,15 +249,13 @@ class Build : NukeBuild
              }
              ignoredFiles = ignoredFiles.Select(x => x.Trim()).Distinct().ToArray();
 
-             var zipFileName = ArtifactsDirectory / ModuleId + "_" + ModuleVersion + ".zip";
-             DeleteFile(zipFileName);
-             CompressionTasks.CompressZip(ModuleOutputDirectory, zipFileName, (x) => !ignoredFiles.Contains(x.Name, StringComparer.OrdinalIgnoreCase));
+             DeleteFile(ZipFileName);
+             CompressionTasks.CompressZip(ModuleOutputDirectory, ZipFileName, (x) => !ignoredFiles.Contains(x.Name, StringComparer.OrdinalIgnoreCase));
          }
          else
          {
-             var zipFileName = ArtifactsDirectory / "VirtoCommerce.Platform." + GitVersion.SemVer + ".zip";
-             DeleteFile(zipFileName);
-             CompressionTasks.CompressZip(ArtifactsDirectory / "publish", zipFileName);
+             DeleteFile(ZipFileName);
+             CompressionTasks.CompressZip(ArtifactsDirectory / "publish", ZipFileName);
          }
      });
 
@@ -237,7 +273,7 @@ class Build : NukeBuild
                 GitTasks.Git($"pull", modulesLocalDirectory);
             }
             var modulesExternalManifests = JsonConvert.DeserializeObject<List<ExternalModuleManifest>>(TextTasks.ReadAllText(modulesJsonFile));
-            var manifest = ManifestReader.Read(ModuleManifest);
+            var manifest = ManifestReader.Read(ModuleManifestFile);
             manifest.PackageUrl = ModulePackageUrl;
             var existExternalManifest = modulesExternalManifests.FirstOrDefault(x => x.Id == manifest.Id);
             if (existExternalManifest != null)
@@ -263,8 +299,39 @@ class Build : NukeBuild
          //dotnet %userprofile%\.nuget\packages\swashbuckle.aspnetcore.cli\4.0.1\lib\netcoreapp2.0\dotnet-swagger.dll tofile --output swagger.json bin/Debug/netcoreapp2.2/VirtoCommerce.Platform.Web.dll VirtoCommerce.Platform
          DotNet($"{ArtifactsDirectory}/bin/dotnet-swagger.dll _tofile --output {ArtifactsDirectory}/swagger.json  {ArtifactsDirectory}/bin/{WebProject.Name}.dll VirtoCommerce.Platform");
 
-         NpmTasks.NpmRun(s => s.SetWorkingDirectory(ArtifactsDirectory).SetCommand("swagger-cli").SetArguments($"validate { (IsLocalBuild ? "-d" : "")} { ArtifactsDirectory}\\swagger.json")); 
+         NpmTasks.NpmRun(s => s.SetWorkingDirectory(ArtifactsDirectory).SetCommand("swagger-cli").SetArguments($"validate { (IsLocalBuild ? "-d" : "")} { ArtifactsDirectory}\\swagger.json"));
      });
 
+    Target Release => _ => _
+     .DependsOn(Clean, Compress)
+     .Executes(() =>
+     {
+         var name = "v" + (IsModule ? string.Join("-", ModuleManifest.ModuleVersion, ModuleManifest.ModuleVersionTag) : GitVersion.SemVer);
+         var repositoryIdentifier = GitRepository.Identifier.Split('/');
+         var repositoryOwner = repositoryIdentifier[0];
+         var repositoryName = repositoryIdentifier[1];
+         var userName = "username";
+         var password = "password";
+
+         GitReleaseManagerTasks.GitReleaseManagerCreate(s => s
+           .SetUserName(userName)
+           .SetPassword(password)
+           .SetRepositoryOwner(repositoryOwner)
+           .SetRepositoryName(repositoryName)
+           //.EnablePrerelease() //
+           //.SetTargetCommitish(MasterBranch) // Select release branch (master by default)
+           .SetName(name)
+           .SetInputFilePath("releasenotes.md")
+           .SetAssetPaths(ZipFileName)
+        );
+
+         GitReleaseManagerTasks.GitReleaseManagerPublish(s => s
+            .SetUserName(userName)
+            .SetPassword(password)
+            .SetRepositoryOwner(repositoryOwner)
+            .SetRepositoryName(repositoryName)
+            .SetTagName(name)
+            );
+     });
 }
 

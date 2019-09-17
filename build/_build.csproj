@@ -10,15 +10,18 @@
   </PropertyGroup>
 
   <ItemGroup>
+    <PackageReference Include="gitreleasemanager" Version="0.8.0" />
     <PackageReference Include="Nuke.Common" Version="0.21.2" />
     <PackageReference Include="GitVersion.CommandLine.DotNetCore" Version="4.0.1-beta1-49" />
-    <PackageReference Include="VirtoCommerce.Platform.Core" Version="3.0.0-beta0002" />
+    <PackageReference Include="Swashbuckle.AspNetCore.Cli" Version="4.0.1" />
+    <PackageReference Include="VirtoCommerce.Platform.Core" Version="3.0.0-beta0003" />
   </ItemGroup>
 
   <ItemGroup>
     <NukeSpecificationFiles Include="**\*.json" Exclude="bin\**;obj\**" />
     <NukeExternalFiles Include="**\*.*.ext" Exclude="bin\**;obj\**" />
     <None Remove="*.csproj.DotSettings;*.ref.*.txt" />
+    <NukeExternalFiles Remove="Build.cs.ext" />
 
     <!-- Common build related files -->
     <None Include="..\build.ps1" />
