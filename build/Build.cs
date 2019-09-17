@@ -143,7 +143,7 @@ class Build : NukeBuild
      {
          if (FileExists(WebProject.Directory / "package.json"))
          {
-             NpmTasks.NpmInstall(s => s.SetWorkingDirectory(WebProject.Directory));
+             NpmTasks.Npm("ci", WebProject.Directory);
              NpmTasks.NpmRun(s => s.SetWorkingDirectory(WebProject.Directory).SetCommand("webpack:build"));
          }
          else
@@ -164,44 +164,51 @@ class Build : NukeBuild
                 .SetInformationalVersion(IsModule ? ModuleVersion : GitVersion.InformationalVersion)
                 .EnableNoRestore());
 
-            if (IsModule)
-            {
-                DotNetPublish(s => s
-                     .SetWorkingDirectory(WebProject.Directory)
-                     .EnableNoRestore()
-                     .SetOutput(ModuleOutputDirectory / "bin")
-                     .SetConfiguration(Configuration)
-                     .SetAssemblyVersion(ModuleVersion)
-                     .SetFileVersion(ModuleVersion)
-                     .SetInformationalVersion(ModuleVersion));
-
-                //Copy module.manifest and all content directories into a module output folder
-                CopyFileToDirectory(ModuleManifest, ModuleOutputDirectory, FileExistsPolicy.Overwrite);
-                foreach (var moduleFolder in ModuleContentFolders)
-                {
-                    var srcModuleFolder = WebProject.Directory / moduleFolder;
-                    if (DirectoryExists(srcModuleFolder))
-                    {
-                        CopyDirectoryRecursively(srcModuleFolder, ModuleOutputDirectory / moduleFolder, DirectoryExistsPolicy.Merge, FileExistsPolicy.Overwrite);
-                    }
-                }
-            }
         });
 
     Target Compress => _ => _
      .DependsOn(Clean, Compile, Test, WebPackBuild)
      .Executes(() =>
      {
-         var ignoredFiles = HttpTasks.HttpDownloadString(GlobalModuleIgnoreFileUrl).SplitLineBreaks();
-         if (FileExists(ModuleIgnoreFile))
-         {
-             ignoredFiles = ignoredFiles.Concat(TextTasks.ReadAllLines(ModuleIgnoreFile)).ToArray();
-         }
-         ignoredFiles = ignoredFiles.Select(x => x.Trim()).Distinct().ToArray();
+         DotNetPublish(s => s
+              .SetWorkingDirectory(WebProject.Directory)
+              .EnableNoRestore()
+              .SetOutput(IsModule ? ModuleOutputDirectory / "bin" : ArtifactsDirectory / "publish")
+              .SetConfiguration(Configuration)
+              .SetAssemblyVersion(IsModule ? ModuleVersion : GitVersion.GetNormalizedAssemblyVersion())
+              .SetFileVersion(IsModule ? ModuleVersion : GitVersion.GetNormalizedFileVersion())
+              .SetInformationalVersion(IsModule ? ModuleVersion : GitVersion.InformationalVersion));
 
-         var zipFileName = ArtifactsDirectory / ModuleId + "_" + ModuleVersion + ".zip";
-         DeleteFile(zipFileName);
-         CompressionTasks.CompressZip(ModuleOutputDirectory, zipFileName, (x) => !ignoredFiles.Contains(x.Name, StringComparer.OrdinalIgnoreCase));
+         if (IsModule)
+         {
+             //Copy module.manifest and all content directories into a module output folder
+             CopyFileToDirectory(ModuleManifest, ModuleOutputDirectory, FileExistsPolicy.Overwrite);
+             foreach (var moduleFolder in ModuleContentFolders)
+             {
+                 var srcModuleFolder = WebProject.Directory / moduleFolder;
+                 if (DirectoryExists(srcModuleFolder))
+                 {
+                     CopyDirectoryRecursively(srcModuleFolder, ModuleOutputDirectory / moduleFolder, DirectoryExistsPolicy.Merge, FileExistsPolicy.Overwrite);
+                 }
+             }
+
+             var ignoredFiles = HttpTasks.HttpDownloadString(GlobalModuleIgnoreFileUrl).SplitLineBreaks();
+             if (FileExists(ModuleIgnoreFile))
+             {
+                 ignoredFiles = ignoredFiles.Concat(TextTasks.ReadAllLines(ModuleIgnoreFile)).ToArray();
+             }
+             ignoredFiles = ignoredFiles.Select(x => x.Trim()).Distinct().ToArray();
+
+             var zipFileName = ArtifactsDirectory / ModuleId + "_" + ModuleVersion + ".zip";
+             DeleteFile(zipFileName);
+             CompressionTasks.CompressZip(ModuleOutputDirectory, zipFileName, (x) => !ignoredFiles.Contains(x.Name, StringComparer.OrdinalIgnoreCase));
+         }
+         else
+         {
+             var zipFileName = ArtifactsDirectory / "VirtoCommerce.Platform." + GitVersion.SemVer + ".zip";
+             DeleteFile(zipFileName);
+             CompressionTasks.CompressZip(ArtifactsDirectory / "publish", zipFileName);
+         }
      });
 
     Target PublishModuleManifest => _ => _
@@ -234,6 +241,5 @@ class Build : NukeBuild
 
             GitTasks.Git($"push origin HEAD:master -f", modulesLocalDirectory);
         });
-
 }
 
