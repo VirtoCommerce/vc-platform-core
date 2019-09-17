@@ -5,7 +5,8 @@
     "scripts": {
         "webpack:dev": "webpack --display-error-details",
         "webpack:build": "webpack --env.prod",
-        "webpack:watch": "webpack --watch --progress --display-error-details"
+        "webpack:watch": "webpack --watch --progress --display-error-details",
+        "swagger-cli": "swagger-cli"
     },
     "devDependencies": {
         "@babel/core": "^7.1.6",
@@ -84,6 +85,7 @@
         "webpack-jquery-ui": "^2.0.1",
         "webpack-modernizr-loader": "^4.0.1",
         "yamljs": "0.3.0",
+        "js-yaml": "3.13.1",
         "swagger-cli": "2.3.1"
     }
 }
