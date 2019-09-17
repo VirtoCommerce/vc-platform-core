@@ -55,6 +55,9 @@ class Build : NukeBuild
 
     [Parameter] static string GlobalModuleIgnoreFileUrl = @"https://raw.githubusercontent.com/VirtoCommerce/vc-platform-core/release/3.0.0/module.ignore";
 
+    [Parameter] readonly string SONAR_AUTH_TOKEN = "";
+    [Parameter] readonly string SONAR_HOST_URL = "https://sonar.virtocommerce.com";
+
     AbsolutePath SourceDirectory => RootDirectory / "src";
     AbsolutePath TestsDirectory => RootDirectory / "tests";
     AbsolutePath ArtifactsDirectory => RootDirectory / "artifacts";
@@ -187,7 +190,6 @@ class Build : NukeBuild
      .DependsOn(Clean, WebPackBuild, Test, Publish)
      .Executes(() =>
      {
-       
          if (IsModule)
          {
              //Copy module.manifest and all content directories into a module output folder
@@ -251,7 +253,6 @@ class Build : NukeBuild
             GitTasks.Git($"push origin HEAD:master -f", modulesLocalDirectory);
         });
 
-
     Target SwaggerValidation => _ => _
      //.DependsOn(Publish)
      .Requires(() => !IsModule)
@@ -266,8 +267,38 @@ class Build : NukeBuild
             .SetWorkingDirectory(WebProject.Directory)
             .SetCommand($"swagger-cli")
             .SetArguments("validate", IsLocalBuild ? "-d" : "", $"{ArtifactsDirectory}/swagger.json")
-            .SetLogOutput(true)); 
+            .SetLogOutput(true));
      });
 
+    Target SonarQubeValidation => _ => _
+        .Executes(() =>
+        {
+            var dotNetPath = ToolPathResolver.TryGetEnvironmentExecutable("DOTNET_EXE") ?? ToolPathResolver.GetPathExecutable("dotnet");
+            var branchName = GitRepository.Branch;
+            var projectName = Solution.Name;
+
+            var branchParam = $"/d:\"sonar.branch={branchName}\"";
+            var projectNameParam = $"/n:\"{projectName}\"";
+            var projectKeyParam = $"/k:\"{projectName}\"";
+            var hostParam = $"/d:sonar.host.url={SONAR_HOST_URL}";
+            var tokenParam = $"/d:sonar.login={SONAR_AUTH_TOKEN}";
+
+            var startCmd = $"sonarscanner begin {branchParam} {projectNameParam} {projectKeyParam} {hostParam} {tokenParam}";
+            var endCmd = $"sonarscanner end {tokenParam}";
+
+            var processStart = ProcessTasks.StartProcess(dotNetPath, startCmd).AssertWaitForExit().AssertZeroExitCode();
+            processStart.Output.EnsureOnlyStd();
+
+            DotNetBuild(s => s
+                .SetProjectFile(Solution)
+                .SetConfiguration(Configuration)
+                .SetAssemblyVersion(IsModule ? ModuleVersion : GitVersion.GetNormalizedAssemblyVersion())
+                .SetFileVersion(IsModule ? ModuleVersion : GitVersion.GetNormalizedFileVersion())
+                .SetInformationalVersion(IsModule ? ModuleVersion : GitVersion.InformationalVersion)
+                .EnableNoRestore());
+
+            var processEnd = ProcessTasks.StartProcess(dotNetPath, endCmd).AssertWaitForExit().AssertZeroExitCode();
+            processEnd.Output.EnsureOnlyStd();
+        });
 }
 
