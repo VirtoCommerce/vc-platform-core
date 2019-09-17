@@ -44,6 +44,8 @@ namespace VirtoCommerce.LicensingModule.Data.Migrations
 
                     b.Property<DateTime>("ExpirationDate");
 
+                    b.Property<bool>("IsDeleted");
+
                     b.Property<string>("ModifiedBy")
                         .HasMaxLength(64);
 

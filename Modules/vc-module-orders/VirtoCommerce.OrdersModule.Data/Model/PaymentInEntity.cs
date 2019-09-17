@@ -14,7 +14,7 @@ using Address = VirtoCommerce.OrdersModule.Core.Model.Address;
 
 namespace VirtoCommerce.OrdersModule.Data.Model
 {
-    public class PaymentInEntity : OperationEntity, ISupportPartialPriceUpdate
+    public class PaymentInEntity : OperationEntity, ISupportPartialPriceUpdate, ISupportSoftDeletion
     {
         [StringLength(64)]
         public string OrganizationId { get; set; }
@@ -58,6 +58,8 @@ namespace VirtoCommerce.OrdersModule.Data.Model
         [Column(TypeName = "Money")]
         public decimal TaxTotal { get; set; }
         public decimal TaxPercentRate { get; set; }
+
+        public bool IsDeleted { get; set; }
 
         #region Navigation Properties
 

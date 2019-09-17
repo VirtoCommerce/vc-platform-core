@@ -1,10 +1,10 @@
-using EntityFrameworkCore.Triggers;
 using Microsoft.EntityFrameworkCore;
 using VirtoCommerce.CustomerModule.Data.Model;
+using VirtoCommerce.Platform.Data.Infrastructure;
 
 namespace VirtoCommerce.CustomerModule.Data.Repositories
 {
-    public class CustomerDbContext : DbContextWithTriggers
+    public class CustomerDbContext : DbContextWithTriggersAndQueryFiltersBase
     {
         public CustomerDbContext(DbContextOptions<CustomerDbContext> options)
             : base(options)
@@ -27,6 +27,7 @@ namespace VirtoCommerce.CustomerModule.Data.Repositories
             modelBuilder.Entity<MemberEntity>().HasIndex(i => i.Name).IsUnique(false).HasName("IX_Member_Name");
             modelBuilder.Entity<MemberEntity>().HasDiscriminator<string>("Discriminator");
             modelBuilder.Entity<MemberEntity>().Property("Discriminator").HasMaxLength(128);
+            //modelBuilder.Entity<MemberEntity>().HasQueryFilter(p => !p.IsDeleted);
 
             #endregion
 

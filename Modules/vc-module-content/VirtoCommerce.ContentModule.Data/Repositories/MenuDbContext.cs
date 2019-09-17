@@ -1,10 +1,10 @@
-using EntityFrameworkCore.Triggers;
 using Microsoft.EntityFrameworkCore;
 using VirtoCommerce.ContentModule.Data.Model;
+using VirtoCommerce.Platform.Data.Infrastructure;
 
 namespace VirtoCommerce.ContentModule.Data.Repositories
 {
-    public class MenuDbContext : DbContextWithTriggers
+    public class MenuDbContext : DbContextWithTriggersAndQueryFiltersBase
     {
         public MenuDbContext(DbContextOptions<MenuDbContext> options)
             : base(options)

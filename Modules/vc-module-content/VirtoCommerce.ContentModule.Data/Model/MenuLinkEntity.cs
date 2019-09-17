@@ -5,7 +5,7 @@ using VirtoCommerce.Platform.Core.Common;
 
 namespace VirtoCommerce.ContentModule.Data.Model
 {
-    public class MenuLinkEntity : AuditableEntity, IHasOuterId
+    public class MenuLinkEntity : AuditableEntity, IHasOuterId, ISupportSoftDeletion
     {
         [Required]
         [StringLength(1024)]
@@ -22,16 +22,18 @@ namespace VirtoCommerce.ContentModule.Data.Model
         [StringLength(128)]
         public string AssociatedObjectId { get; set; }
 
+        [StringLength(128)]
+        public string OuterId { get; set; }
+
+        public bool IsDeleted { get; set; }
+
         #region Navigation Properties
 
         public string MenuLinkListId { get; set; }
         public virtual MenuLinkListEntity MenuLinkList { get; set; }
 
         #endregion
-
-        [StringLength(128)]
-        public string OuterId { get; set; }
-
+        
         public void Patch(MenuLinkEntity target)
         {
             target.Title = Title;

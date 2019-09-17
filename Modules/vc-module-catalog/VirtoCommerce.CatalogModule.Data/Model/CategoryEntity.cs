@@ -10,7 +10,7 @@ using VirtoCommerce.Platform.Core.Common;
 
 namespace VirtoCommerce.CatalogModule.Data.Model
 {
-    public class CategoryEntity : AuditableEntity, IHasOuterId
+    public class CategoryEntity : AuditableEntity, IHasOuterId, ISupportSoftDeletion
     {
         [Required]
         [StringLength(64)]
@@ -33,6 +33,8 @@ namespace VirtoCommerce.CatalogModule.Data.Model
 
         [StringLength(128)]
         public string OuterId { get; set; }
+
+        public bool IsDeleted { get; set; }
 
         [NotMapped]
         public CategoryEntity[] AllParents

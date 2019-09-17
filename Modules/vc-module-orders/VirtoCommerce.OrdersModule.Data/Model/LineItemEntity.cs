@@ -12,7 +12,7 @@ using VirtoCommerce.Platform.Core.DynamicProperties;
 
 namespace VirtoCommerce.OrdersModule.Data.Model
 {
-    public class LineItemEntity : AuditableEntity, IHasOuterId
+    public class LineItemEntity : AuditableEntity, IHasOuterId, ISupportSoftDeletion
     {
         [StringLength(128)]
         public string PriceId { get; set; }
@@ -85,6 +85,8 @@ namespace VirtoCommerce.OrdersModule.Data.Model
 
         [StringLength(128)]
         public string OuterId { get; set; }
+
+        public bool IsDeleted { get; set; }
 
         #region NavigationProperties
 

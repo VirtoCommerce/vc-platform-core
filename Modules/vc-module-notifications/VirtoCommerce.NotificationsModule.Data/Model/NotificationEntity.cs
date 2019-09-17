@@ -10,7 +10,7 @@ namespace VirtoCommerce.NotificationsModule.Data.Model
     /// <summary>
     /// Entity is Notification
     /// </summary>
-    public abstract class NotificationEntity : AuditableEntity
+    public abstract class NotificationEntity : AuditableEntity, IHasOuterId, ISupportSoftDeletion
     {
         /// <summary>
         /// Tenant id that initiate sending
@@ -40,6 +40,11 @@ namespace VirtoCommerce.NotificationsModule.Data.Model
         /// </summary>
         [StringLength(128)]
         public string Kind { get; set; }
+
+        [StringLength(128)]
+        public string OuterId { get; set; }
+
+        public bool IsDeleted { get; set; }
 
         #region Navigation Properties
 

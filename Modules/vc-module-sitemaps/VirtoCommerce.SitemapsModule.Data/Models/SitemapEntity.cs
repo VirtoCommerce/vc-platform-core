@@ -8,7 +8,7 @@ using VirtoCommerce.SitemapsModule.Core.Models;
 
 namespace VirtoCommerce.SitemapsModule.Data.Models
 {
-    public class SitemapEntity : AuditableEntity
+    public class SitemapEntity : AuditableEntity, ISupportSoftDeletion
     {
         [Required]
         [StringLength(256)]
@@ -23,6 +23,8 @@ namespace VirtoCommerce.SitemapsModule.Data.Models
 
         [NotMapped]
         public int TotalItemsCount { get; set; }
+
+        public bool IsDeleted { get; set; }
 
         #region Navigation Properties
 

@@ -1,10 +1,10 @@
-using EntityFrameworkCore.Triggers;
 using Microsoft.EntityFrameworkCore;
 using VirtoCommerce.CatalogModule.Data.Model;
+using VirtoCommerce.Platform.Data.Infrastructure;
 
 namespace VirtoCommerce.CatalogModule.Data.Repositories
 {
-    public class CatalogDbContext : DbContextWithTriggers
+    public class CatalogDbContext : DbContextWithTriggersAndQueryFiltersBase
     {
         public CatalogDbContext(DbContextOptions<CatalogDbContext> options)
             : base(options)

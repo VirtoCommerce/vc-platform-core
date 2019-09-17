@@ -5,7 +5,7 @@ using VirtoCommerce.Platform.Core.Common;
 
 namespace VirtoCommerce.InventoryModule.Data.Model
 {
-    public class InventoryEntity : AuditableEntity, IHasOuterId
+    public class InventoryEntity : AuditableEntity, IHasOuterId, ISupportSoftDeletion
     {
         [Required]
         public decimal InStockQuantity { get; set; }
@@ -45,6 +45,8 @@ namespace VirtoCommerce.InventoryModule.Data.Model
 
         [StringLength(128)]
         public string OuterId { get; set; }
+
+        public bool IsDeleted { get; set; }
 
         #region Navigation properties
 

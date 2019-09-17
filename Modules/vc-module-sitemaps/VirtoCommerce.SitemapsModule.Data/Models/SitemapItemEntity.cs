@@ -5,7 +5,7 @@ using VirtoCommerce.SitemapsModule.Core.Models;
 
 namespace VirtoCommerce.SitemapsModule.Data.Models
 {
-    public class SitemapItemEntity : AuditableEntity
+    public class SitemapItemEntity : AuditableEntity, ISupportSoftDeletion
     {
         [Required]
         [StringLength(256)]
@@ -23,6 +23,8 @@ namespace VirtoCommerce.SitemapsModule.Data.Models
 
         [StringLength(256)]
         public string UrlTemplate { get; set; }
+
+        public bool IsDeleted { get; set; }
 
         #region Navigation Properties
 

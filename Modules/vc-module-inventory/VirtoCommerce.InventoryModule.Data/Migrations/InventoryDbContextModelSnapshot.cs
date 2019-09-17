@@ -50,6 +50,8 @@ namespace VirtoCommerce.InventoryModule.Data.Migrations
                     b.Property<string>("GeoLocation")
                         .HasMaxLength(64);
 
+                    b.Property<bool>("IsDeleted");
+
                     b.Property<string>("Line1")
                         .HasMaxLength(1024);
 
@@ -111,6 +113,8 @@ namespace VirtoCommerce.InventoryModule.Data.Migrations
                         .IsRequired();
 
                     b.Property<decimal>("InStockQuantity");
+
+                    b.Property<bool>("IsDeleted");
 
                     b.Property<string>("ModifiedBy")
                         .HasMaxLength(64);

@@ -5,7 +5,7 @@ using VirtoCommerce.Platform.Core.Common;
 
 namespace VirtoCommerce.PaymentModule.Data.Model
 {
-    public class StorePaymentMethodEntity : Entity
+    public class StorePaymentMethodEntity : Entity, ISupportSoftDeletion
     {
         [Required]
         [StringLength(128)]
@@ -23,6 +23,8 @@ namespace VirtoCommerce.PaymentModule.Data.Model
         public string TypeName { get; set; }
 
         public string StoreId { get; set; }
+
+        public bool IsDeleted { get; set; }
 
         public virtual PaymentMethod ToModel(PaymentMethod paymentMethod)
         {

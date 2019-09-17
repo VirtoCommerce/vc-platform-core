@@ -8,7 +8,7 @@ namespace VirtoCommerce.NotificationsModule.Data.Model
     /// <summary>
     /// Entity is attachment of email
     /// </summary>
-    public class EmailAttachmentEntity : AuditableEntity
+    public class EmailAttachmentEntity : AuditableEntity, IHasOuterId
     {
         /// <summary>
         /// Name of Attachment
@@ -39,6 +39,9 @@ namespace VirtoCommerce.NotificationsModule.Data.Model
         /// </summary>
         [StringLength(10)]
         public string LanguageCode { get; set; }
+
+        [StringLength(128)]
+        public string OuterId { get; set; }
 
         #region Navigation Properties
 

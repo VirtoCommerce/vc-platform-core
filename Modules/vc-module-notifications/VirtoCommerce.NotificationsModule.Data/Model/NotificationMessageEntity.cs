@@ -9,7 +9,7 @@ namespace VirtoCommerce.NotificationsModule.Data.Model
     /// <summary>
     /// Entity is message of notification
     /// </summary>
-    public abstract class NotificationMessageEntity : AuditableEntity
+    public abstract class NotificationMessageEntity : AuditableEntity, IHasOuterId
     {
         [NotMapped]
         public abstract string Kind { get; }
@@ -62,6 +62,9 @@ namespace VirtoCommerce.NotificationsModule.Data.Model
         /// </summary>
         [StringLength(10)]
         public string LanguageCode { get; set; }
+
+        [StringLength(128)]
+        public string OuterId { get; set; }
 
         #region Navigation Properties
 

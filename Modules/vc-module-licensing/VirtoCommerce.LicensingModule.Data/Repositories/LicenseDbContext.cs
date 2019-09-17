@@ -1,10 +1,10 @@
-using EntityFrameworkCore.Triggers;
 using Microsoft.EntityFrameworkCore;
 using VirtoCommerce.LicensingModule.Data.Model;
+using VirtoCommerce.Platform.Data.Infrastructure;
 
 namespace VirtoCommerce.LicensingModule.Data.Repositories
 {
-    public class LicenseDbContext : DbContextWithTriggers
+    public class LicenseDbContext : DbContextWithTriggersAndQueryFiltersBase
     {
         public LicenseDbContext(DbContextOptions<LicenseDbContext> options)
             : base(options)

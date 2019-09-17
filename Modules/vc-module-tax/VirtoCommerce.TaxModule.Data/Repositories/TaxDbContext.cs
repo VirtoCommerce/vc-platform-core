@@ -1,10 +1,10 @@
-using EntityFrameworkCore.Triggers;
 using Microsoft.EntityFrameworkCore;
+using VirtoCommerce.Platform.Data.Infrastructure;
 using VirtoCommerce.TaxModule.Data.Model;
 
 namespace VirtoCommerce.TaxModule.Data.Repositories
 {
-    public class TaxDbContext : DbContextWithTriggers
+    public class TaxDbContext : DbContextWithTriggersAndQueryFiltersBase
     {
         public TaxDbContext(DbContextOptions<TaxDbContext> options) : base(options)
         {

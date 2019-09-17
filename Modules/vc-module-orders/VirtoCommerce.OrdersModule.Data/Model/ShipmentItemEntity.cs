@@ -6,12 +6,14 @@ using VirtoCommerce.Platform.Core.Common;
 
 namespace VirtoCommerce.OrdersModule.Data.Model
 {
-    public class ShipmentItemEntity : AuditableEntity
+    public class ShipmentItemEntity : AuditableEntity, ISupportSoftDeletion
     {
         [StringLength(128)]
         public string BarCode { get; set; }
 
         public int Quantity { get; set; }
+
+        public bool IsDeleted { get; set; }
 
         #region Navigation Properties
 

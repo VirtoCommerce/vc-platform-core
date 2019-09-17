@@ -208,6 +208,8 @@ namespace VirtoCommerce.CustomerModule.Data.Migrations
                         .IsRequired()
                         .HasMaxLength(128);
 
+                    b.Property<bool>("IsDeleted");
+
                     b.Property<string>("MemberType")
                         .HasMaxLength(64);
 

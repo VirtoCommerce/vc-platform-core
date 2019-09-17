@@ -8,7 +8,7 @@ namespace VirtoCommerce.NotificationsModule.Data.Model
     /// <summary>
     /// Entity is template of Notification
     /// </summary>
-    public abstract class NotificationTemplateEntity : AuditableEntity
+    public abstract class NotificationTemplateEntity : AuditableEntity, IHasOuterId
     {
         public abstract string Kind { get; }
         /// <summary>
@@ -16,6 +16,9 @@ namespace VirtoCommerce.NotificationsModule.Data.Model
         /// </summary>
         [StringLength(10)]
         public string LanguageCode { get; set; }
+
+        [StringLength(128)]
+        public string OuterId { get; set; }
 
         #region Navigation Properties
 

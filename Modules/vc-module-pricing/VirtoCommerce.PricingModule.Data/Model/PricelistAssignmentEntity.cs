@@ -8,7 +8,7 @@ using VirtoCommerce.PricingModule.Core.Model.Conditions;
 
 namespace VirtoCommerce.PricingModule.Data.Model
 {
-    public class PricelistAssignmentEntity : AuditableEntity, IHasOuterId
+    public class PricelistAssignmentEntity : AuditableEntity, IHasOuterId, ISupportSoftDeletion
     {
         [StringLength(128)]
         [Required]
@@ -33,6 +33,8 @@ namespace VirtoCommerce.PricingModule.Data.Model
 
         [StringLength(128)]
         public string OuterId { get; set; }
+
+        public bool IsDeleted { get; set; }
 
         #region Navigation Properties
 

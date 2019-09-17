@@ -30,6 +30,8 @@ namespace VirtoCommerce.TaxModule.Data.Migrations
 
                     b.Property<bool>("IsActive");
 
+                    b.Property<bool>("IsDeleted");
+
                     b.Property<string>("LogoUrl")
                         .HasMaxLength(2048);
 

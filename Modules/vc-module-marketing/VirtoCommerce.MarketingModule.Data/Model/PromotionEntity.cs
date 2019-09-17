@@ -12,7 +12,7 @@ using VirtoCommerce.Platform.Core.Common;
 
 namespace VirtoCommerce.MarketingModule.Data.Model
 {
-    public class PromotionEntity : AuditableEntity, IHasOuterId
+    public class PromotionEntity : AuditableEntity, IHasOuterId, ISupportSoftDeletion
     {
         [StringLength(128)]
         public string StoreId { get; set; }
@@ -55,6 +55,8 @@ namespace VirtoCommerce.MarketingModule.Data.Model
 
         [StringLength(128)]
         public string OuterId { get; set; }
+
+        public bool IsDeleted { get; set; }
 
         #region Navigation Properties
 

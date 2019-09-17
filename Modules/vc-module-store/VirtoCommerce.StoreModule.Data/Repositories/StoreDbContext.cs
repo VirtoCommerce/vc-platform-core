@@ -1,10 +1,10 @@
-using EntityFrameworkCore.Triggers;
 using Microsoft.EntityFrameworkCore;
+using VirtoCommerce.Platform.Data.Infrastructure;
 using VirtoCommerce.StoreModule.Data.Model;
 
 namespace VirtoCommerce.StoreModule.Data.Repositories
 {
-    public class StoreDbContext : DbContextWithTriggers
+    public class StoreDbContext : DbContextWithTriggersAndQueryFiltersBase
     {
         public StoreDbContext(DbContextOptions<StoreDbContext> options)
             : base(options)

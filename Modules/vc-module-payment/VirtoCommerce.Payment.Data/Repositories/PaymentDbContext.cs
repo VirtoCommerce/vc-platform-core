@@ -1,10 +1,10 @@
-using EntityFrameworkCore.Triggers;
 using Microsoft.EntityFrameworkCore;
 using VirtoCommerce.PaymentModule.Data.Model;
+using VirtoCommerce.Platform.Data.Infrastructure;
 
 namespace VirtoCommerce.PaymentModule.Data.Repositories
 {
-    public class PaymentDbContext : DbContextWithTriggers
+    public class PaymentDbContext : DbContextWithTriggersAndQueryFiltersBase
     {
         public PaymentDbContext(DbContextOptions<PaymentDbContext> options) : base(options)
         {
