@@ -43,9 +43,6 @@ class Build : NukeBuild
     [GitRepository] readonly GitRepository GitRepository;
     [GitVersion] readonly GitVersion GitVersion;
 
-    [PackageExecutable(packageId: "Swashbuckle.AspNetCore.Cli", packageExecutable: "swagger-cli.exe|dotnet-swagger.dll")]
-    Tool SwaggerCli;
-
     readonly Tool Git;
 
     readonly string MasterBranch = "master";
