@@ -22,10 +22,5 @@ namespace VirtoCommerce.Platform.Core.Common
             var version = fvi.FileBuildPart.ToString();
             return version;
         }
-
-        public static IEnumerable<Assembly> GetDependentAssemblies(this Assembly analyzedAssembly)
-        {
-            return analyzedAssembly.GetReferencedAssemblies().Select(Assembly.Load);
-        }
     }
 }
