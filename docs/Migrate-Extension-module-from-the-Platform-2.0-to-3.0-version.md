@@ -173,7 +173,7 @@ using (var serviceScope = appBuilder.ApplicationServices.CreateScope())
     dbContext.Database.Migrate();
 }
 ```
-> look at https://github.com/VirtoCommerce/vc-module-core/tree/v3/dev/src/VirtoCommerce.CoreModule.Web/Module.cs#L87 
+> look at https://github.com/VirtoCommerce/vc-module-core/tree/v3/dev/src/VirtoCommerce.CoreModule.Web/Module.cs#L70 
 
 > NOTE: Extension MigrateIfNotApplied need for backward compatibility v.2.0. The extension allows don't generate initial migration, because there are already tables in the DataBase.
 
@@ -192,4 +192,4 @@ npm run webpack:dev
 * Check what all your extensions works with the new platform without exceptions and as expected with initial empty data
 
 
-## If you find some errors, you can make a issue in https://github.com/VirtoCommerce/vc-platform-core/issues. Enjoy! :)
+## If you find some errors, you can make a issue in https://github.com/VirtoCommerce/vc-platform/issues. Enjoy! :)
