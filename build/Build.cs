@@ -312,7 +312,7 @@ class Build : NukeBuild
             processEnd.Output.EnsureOnlyStd();
         });
 
-    Target SonarQubeValidation => _ => _
+    Target StartAnalyzer => _ => _
         .DependsOn(SonarQubeStart, SonarQubeEnd)
         .Executes(() =>
         {
