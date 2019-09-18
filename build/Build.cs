@@ -75,6 +75,11 @@ class Build : NukeBuild
 
     bool IsModule => FileExists(ModuleManifest);
 
+    void ErrorLogger(OutputType type, string text)
+    {
+        if (type == OutputType.Err) Logger.Error(text);
+    }
+
     Target Clean => _ => _
         .Before(Restore)
         .Executes(() =>
@@ -183,7 +188,6 @@ class Build : NukeBuild
                 .SetFileVersion(IsModule ? ModuleVersion : GitVersion.GetNormalizedFileVersion())
                 .SetInformationalVersion(IsModule ? ModuleVersion : GitVersion.InformationalVersion)
                 .EnableNoRestore());
-
         });
 
     Target Compress => _ => _
@@ -270,7 +274,7 @@ class Build : NukeBuild
             .SetLogOutput(true));
      });
 
-    Target SonarQubeValidation => _ => _
+    Target SonarQubeStart => _ => _
         .Executes(() =>
         {
             var dotNetPath = ToolPathResolver.TryGetEnvironmentExecutable("DOTNET_EXE") ?? ToolPathResolver.GetPathExecutable("dotnet");
@@ -284,21 +288,35 @@ class Build : NukeBuild
             var tokenParam = $"/d:sonar.login={SONAR_AUTH_TOKEN}";
 
             var startCmd = $"sonarscanner begin {branchParam} {projectNameParam} {projectKeyParam} {hostParam} {tokenParam}";
+
+            Logger.Normal($"Execute: {startCmd.Replace(SONAR_AUTH_TOKEN, "{IS HIDDEN}")}");
+
+            var processStart = ProcessTasks.StartProcess(dotNetPath, startCmd, customLogger: ErrorLogger, logInvocation: false)
+                .AssertWaitForExit().AssertZeroExitCode();
+            processStart.Output.EnsureOnlyStd();
+        });
+
+    Target SonarQubeEnd => _ => _
+        .After(SonarQubeStart)
+        .DependsOn(Compile)
+        .Executes(() =>
+        {
+            var dotNetPath = ToolPathResolver.TryGetEnvironmentExecutable("DOTNET_EXE") ?? ToolPathResolver.GetPathExecutable("dotnet");
+            var tokenParam = $"/d:sonar.login={SONAR_AUTH_TOKEN}";
             var endCmd = $"sonarscanner end {tokenParam}";
 
-            var processStart = ProcessTasks.StartProcess(dotNetPath, startCmd).AssertWaitForExit().AssertZeroExitCode();
-            processStart.Output.EnsureOnlyStd();
+            Logger.Normal($"Execute: {endCmd.Replace(SONAR_AUTH_TOKEN, "{IS HIDDEN}")}");
 
-            DotNetBuild(s => s
-                .SetProjectFile(Solution)
-                .SetConfiguration(Configuration)
-                .SetAssemblyVersion(IsModule ? ModuleVersion : GitVersion.GetNormalizedAssemblyVersion())
-                .SetFileVersion(IsModule ? ModuleVersion : GitVersion.GetNormalizedFileVersion())
-                .SetInformationalVersion(IsModule ? ModuleVersion : GitVersion.InformationalVersion)
-                .EnableNoRestore());
-
-            var processEnd = ProcessTasks.StartProcess(dotNetPath, endCmd).AssertWaitForExit().AssertZeroExitCode();
+            var processEnd = ProcessTasks.StartProcess(dotNetPath, endCmd, customLogger: ErrorLogger, logInvocation: false)
+                .AssertWaitForExit().AssertZeroExitCode();
             processEnd.Output.EnsureOnlyStd();
+        });
+
+    Target SonarQubeValidation => _ => _
+        .DependsOn(SonarQubeStart, SonarQubeEnd)
+        .Executes(() =>
+        {
+            Logger.Normal("Sonar validation done.");
         });
 }
 
