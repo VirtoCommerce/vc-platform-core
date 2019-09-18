@@ -4,6 +4,7 @@ using Xunit;
 
 namespace VirtoCommerce.Platform.Tests.IntegrationTests
 {
+    [Trait("Category", "IntegrationTest")]
     public class FileManagerIntegrationTests
     {
         private readonly TransactionFileManager _fileManager;

@@ -118,6 +118,7 @@ class Build : NukeBuild
                .EnableNoBuild()
                .SetLogger("trx")
                .SetResultsDirectory(ArtifactsDirectory)
+               .SetFilter("Category!=IntegrationTest")
                .CombineWith(
                    Solution.GetProjects("*.Tests"), (cs, v) => cs
                        .SetProjectFile(v)));
