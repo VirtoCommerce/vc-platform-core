@@ -253,7 +253,7 @@ class Build : NukeBuild
 
 
     Target SwaggerValidation => _ => _
-     //.DependsOn(Publish)
+     .DependsOn(Publish)
      .Requires(() => !IsModule)
      .Executes(() =>
      {
