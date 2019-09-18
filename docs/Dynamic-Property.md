@@ -3,7 +3,7 @@ Made changes in working with the Dynamic Properties, namely, have divided values
 It means, each model(which has dynamic properties) collect dynamic property values in separate table from meta-info.
 This allowed to improved performance and to separate the logic on working with the properties. Allowed to reduce the size of models/data-transfer-objects.
 
-> look at https://github.com/VirtoCommerce/vc-platform-core/blob/dev/Modules/vc-module-customer/VirtoCommerce.CustomerModule.Data/Model/MemberDynamicPropertyObjectValueEntity.cs
+> look at https://github.com/VirtoCommerce/vc-module-customer/tree/v3/dev/src/VirtoCommerce.CustomerModule.Data/Model/MemberDynamicPropertyObjectValueEntity.cs
 
 # How to make changes for extension models
 E.g. There is a extension class ShoppingCart2.cs and ShoppingCart2Entity.cs
@@ -92,7 +92,7 @@ use the command in the Package Manage Console
 Add-Migration AddCart2DynamicPropertyObjectValue -Context VirtoCommerce.CartModule.Data.Repositories.CartDbContext -StartupProject VirtoCommerce.CartModule.Data  -Verbose -OutputDir Migrations
 ```
 
-> look at https://github.com/VirtoCommerce/vc-platform-core/blob/dev/Modules/vc-module-customer/VirtoCommerce.CustomerModule.Data/Migrations/20190628091513_AddCustomerDynamicPropertyObjectValue.cs
+> look at https://github.com/VirtoCommerce/vc-module-customer/tree/v3/dev/src/VirtoCommerce.CustomerModule.Data/Migrations/20190628091513_AddCustomerDynamicPropertyObjectValue.cs
 
 
 
