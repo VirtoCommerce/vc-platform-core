@@ -59,7 +59,7 @@ public IQueryable<Cart2Entity> Cart2 => DbContext.Set<Cart2Entity>();
 ```
 * Remove OnModelCreating method
 * Add overriding methods, if need to add some logic
-> look at example: https://github.com/VirtoCommerce/vc-module-orders/tree/v3/dev/samples/VirtoCommerce.OrdersModule2.Web/Repositories/OrderRepository2.cs
+> look at example: https://github.com/VirtoCommerce/vc-module-order/tree/v3/dev/samples/VirtoCommerce.OrdersModule2.Web/Repositories/OrderRepository2.cs
 
 ### Create Migration
 * Remove old migrations in the folder Migrations which generated for v. 2.0
@@ -77,7 +77,7 @@ and add line:
 migrationBuilder.AddColumn<string>(name: "Discriminator", table: "Cart", nullable: false, maxLength: 128, defaultValue: "Cart2Entity");
 ```
 > look at https://docs.microsoft.com/en-us/ef/core/modeling/relational/inheritance
-> example https://github.com/VirtoCommerce/vc-module-orders/tree/v3/dev/samples/VirtoCommerce.OrdersModule2.Web/Migrations/20180724064542_InitialOrders2.cs
+> example https://github.com/VirtoCommerce/vc-module-order/tree/v3/dev/samples/VirtoCommerce.OrdersModule2.Web/Migrations/20180724064542_InitialOrders2.cs
 
 
 ### Create Migration for backward compatibility v.2.0
