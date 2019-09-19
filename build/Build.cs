@@ -128,29 +128,59 @@ class Build : NukeBuild
         });
 
     Target Pack => _ => _
-      .DependsOn(Test)
+      //.DependsOn(Test)
       .Executes(() =>
       {
           foreach (var project in Solution.AllProjects)
           {
+              string[] authors = new string[] { };
+              string licenseUrl;
+              string projectUrl;
+              string iconUrl;
+              string description;
+              string copyright;
+              string version;
+
+              if (IsModule)
+              {
+                  authors = ModuleManifest.Authors;
+                  licenseUrl = ModuleManifest.LicenseUrl;
+                  projectUrl = ModuleManifest.ProjectUrl;
+                  iconUrl = ModuleManifest.IconUrl;
+                  description = ModuleManifest.Description;
+                  copyright = ModuleManifest.Copyright;
+                  version = string.Join("-", ModuleManifest.Version, ModuleManifest.VersionTag);
+              }
+              else
+              {
+                  var msBuildProject = project.GetMSBuildProject();
+                  authors = new string[] { "VirtoCommerce" };
+                  licenseUrl = msBuildProject.Properties.FirstOrDefault(x => x.Name == "PackageLicenseUrl").EvaluatedValue;
+                  projectUrl = msBuildProject.Properties.FirstOrDefault(x => x.Name == "PackageProjectUrl").EvaluatedValue;
+                  iconUrl = msBuildProject.Properties.FirstOrDefault(x => x.Name == "PackageIconUrl").EvaluatedValue;
+                  description = msBuildProject.Properties.FirstOrDefault(x => x.Name == "Description").EvaluatedValue;
+                  copyright = msBuildProject.Properties.FirstOrDefault(x => x.Name == "Copyright").EvaluatedValue;
+                  version = string.Join("-", GitVersion.NuGetVersionV2);
+              }
+
               DotNetPack(s => s
-                  .SetProject(project)
-                  .EnableNoBuild()
-                  .SetConfiguration(Configuration)
-                  .EnableIncludeSymbols()
-                  .SetSymbolPackageFormat(DotNetSymbolPackageFormat.snupkg)
-                  .SetOutputDirectory(NupkgDirectory)
-                  .SetVersion(IsModule ? string.Join("-", ModuleManifest.Version, ModuleManifest.VersionTag) : GitVersion.NuGetVersionV2)
-                  .SetPackageId(project.Name)
-                  .SetTitle(project.Name)
-                  .SetAuthors(ModuleManifest.Authors)
-                  .SetPackageLicenseUrl(ModuleManifest.LicenseUrl)
-                  .SetPackageProjectUrl(ModuleManifest.ProjectUrl)
-                  .SetPackageIconUrl(ModuleManifest.IconUrl)
-                  .SetPackageRequireLicenseAcceptance(false)
-                  .SetDescription(ModuleManifest.Description)
-                  .SetCopyright(ModuleManifest.Description)
-                  );
+                .SetProject(project)
+                .EnableNoBuild()
+                .SetConfiguration(Configuration)
+                .EnableIncludeSymbols()
+                .SetSymbolPackageFormat(DotNetSymbolPackageFormat.snupkg)
+                .SetOutputDirectory(NupkgDirectory)
+                .SetVersion(version)
+                .SetPackageId(project.Name)
+                .SetTitle(project.Name)
+                .SetAuthors(authors)
+                .SetPackageLicenseUrl(licenseUrl)
+                .SetPackageProjectUrl(projectUrl)
+                .SetPackageIconUrl(iconUrl)
+                .SetPackageRequireLicenseAcceptance(false)
+                .SetDescription(description)
+                .SetCopyright(copyright)
+                );
           }
       });
 
