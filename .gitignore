@@ -269,7 +269,7 @@ __pycache__/
 # tools/
 Modules/
 App_Data/
-/src/VirtoCommerce.Platform.Web/wwwroot/modules
+/src/VirtoCommerce.Platform.Web/wwwroot/Modules
 /src/VirtoCommerce.Platform.Web/wwwroot/lib
 /src/VirtoCommerce.Platform.Web/wwwroot/App_Data
 /src/VirtoCommerce.Platform.Web/wwwroot/maps
@@ -279,3 +279,4 @@ App_Data/
 
 .vscode
 
+/src/VirtoCommerce.Platform.Web/Modules
