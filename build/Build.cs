@@ -1,5 +1,6 @@
 using System;
 using System.Collections.Generic;
+using System.Diagnostics;
 using System.Linq;
 using Newtonsoft.Json;
 using Nuke.Common;
@@ -10,7 +11,6 @@ using Nuke.Common.ProjectModel;
 using Nuke.Common.Tooling;
 using Nuke.Common.Tools.DotNet;
 using Nuke.Common.Tools.Git;
-using Nuke.Common.Tools.GitReleaseManager;
 using Nuke.Common.Tools.GitVersion;
 using Nuke.Common.Tools.Npm;
 using Nuke.Common.Utilities;
@@ -25,17 +25,11 @@ using static Nuke.Common.Tools.DotNet.DotNetTasks;
 class Build : NukeBuild
 {
 
-    private class ModuleManifestInfo
+    public class GitHubStartException : ApplicationException
     {
-        public string ModuleId { get; set; }
-        public string ModuleVersion { get; set; }
-        public string ModuleVersionTag { get; set; }
-        public string Authors { get; set; }
-        public string Description { get; set; }
-        public string Copyright { get; set; }
-        public string LicenseURL { get; set; }
-        public string ProjectURL { get; set; }
-        public string IconURL { get; set; }
+        public GitHubStartException(string message) : base(message)
+        {
+        }
     }
 
     /// Support plugins are available for:
@@ -66,6 +60,10 @@ class Build : NukeBuild
     readonly string HotfixBranchPrefix = "hotfix";
 
     [Parameter("ApiKey for the specified source")] readonly string ApiKey;
+
+    [Parameter("GitHub user for release creation")] readonly string github_user;
+    [Parameter("GitHub user security token for release creation")] readonly string github_token;
+
     [Parameter] readonly string Source = @"https://api.nuget.org/v3/index.json";
 
     [Parameter] static string GlobalModuleIgnoreFileUrl = @"https://raw.githubusercontent.com/VirtoCommerce/vc-platform-core/release/3.0.0/module.ignore";
@@ -78,27 +76,33 @@ class Build : NukeBuild
     AbsolutePath ModuleManifestFile => WebProject.Directory / "module.manifest";
     AbsolutePath ModuleIgnoreFile => RootDirectory / "module.ignore";
 
-    ModuleManifestInfo ModuleManifest => new ModuleManifestInfo
-    {
-        ModuleId = XmlTasks.XmlPeek(ModuleManifestFile, "module/id").FirstOrDefault(),
-        ModuleVersion = XmlTasks.XmlPeek(ModuleManifestFile, "module/version").FirstOrDefault(),
-        ModuleVersionTag = XmlTasks.XmlPeek(ModuleManifestFile, "module/version-tag").FirstOrDefault(),
-        Authors = string.Join(Environment.NewLine, XmlTasks.XmlPeek(ModuleManifestFile, "module/authors/author")),
-        Description = XmlTasks.XmlPeek(ModuleManifestFile, "module/description").FirstOrDefault() ?? string.Empty,
-        Copyright = XmlTasks.XmlPeek(ModuleManifestFile, "module/copyright").FirstOrDefault() ?? string.Empty,
-        LicenseURL = XmlTasks.XmlPeek(ModuleManifestFile, "module/licenseUrl").FirstOrDefault() ?? string.Empty,
-        ProjectURL = XmlTasks.XmlPeek(ModuleManifestFile, "module/projectUrl").FirstOrDefault() ?? string.Empty,
-        IconURL = XmlTasks.XmlPeek(ModuleManifestFile, "module/iconUrl").FirstOrDefault() ?? string.Empty,
-    };
+    ModuleManifest ModuleManifest => ManifestReader.Read(ModuleManifestFile);
 
-    AbsolutePath ModuleOutputDirectory => ArtifactsDirectory / (ModuleManifest.ModuleId + ModuleManifest.ModuleVersion);
+    AbsolutePath ModuleOutputDirectory => ArtifactsDirectory / (ModuleManifest.Id + ModuleManifest.Version);
 
-    string ModulePackageUrl => $"https://virtocommerce.blob.core.windows.net/modules3/{ModuleManifest.ModuleId + "_" + string.Join("-", ModuleManifest.ModuleVersion, ModuleManifest.ModuleVersionTag) + ".zip"}";
+    string ModulePackageUrl => $"https://virtocommerce.blob.core.windows.net/modules3/{ModuleManifest.Id + "_" + string.Join("-", ModuleManifest.Version, ModuleManifest.VersionTag) + ".zip"}";
     GitRepository ModulesRepository => GitRepository.FromUrl("https://github.com/VirtoCommerce/vc-modules.git");
 
     bool IsModule => FileExists(ModuleManifestFile);
 
-    string ZipFileName => IsModule ? ArtifactsDirectory / ModuleManifest.ModuleId + "_" + string.Join("-", ModuleManifest.ModuleVersion, ModuleManifest.ModuleVersionTag) + ".zip" : ArtifactsDirectory / "VirtoCommerce.Platform." + GitVersion.SemVer + ".zip";
+    string ZipFileName => IsModule ? ModuleManifest.Id + "_" + string.Join("-", ModuleManifest.Version, ModuleManifest.VersionTag) + ".zip" : "VirtoCommerce.Platform." + GitVersion.SemVer + ".zip";
+    string ZipFileFullName => ArtifactsDirectory / ZipFileName;
+
+
+    private void RunGitHubRelease(string args)
+    {
+        var githubRelease = new Process
+        {
+            StartInfo = new ProcessStartInfo("github-release", args) { RedirectStandardError = true }
+        };
+        githubRelease.Start();
+        var error = githubRelease.StandardError.ReadToEnd();
+        if (!string.IsNullOrEmpty(error))
+        {
+            throw new GitHubStartException(error);
+        }
+        githubRelease.WaitForExit();
+    }
 
     Target Clean => _ => _
         .Before(Restore)
@@ -136,13 +140,13 @@ class Build : NukeBuild
                   .EnableIncludeSymbols()
                   .SetSymbolPackageFormat(DotNetSymbolPackageFormat.snupkg)
                   .SetOutputDirectory(NupkgDirectory)
-                  .SetVersion(IsModule ? string.Join("-", ModuleManifest.ModuleVersion, ModuleManifest.ModuleVersionTag) : GitVersion.NuGetVersionV2)
+                  .SetVersion(IsModule ? string.Join("-", ModuleManifest.Version, ModuleManifest.VersionTag) : GitVersion.NuGetVersionV2)
                   .SetPackageId(project.Name)
                   .SetTitle(project.Name)
                   .SetAuthors(ModuleManifest.Authors)
-                  .SetPackageLicenseUrl(ModuleManifest.LicenseURL)
-                  .SetPackageProjectUrl(ModuleManifest.ProjectURL)
-                  .SetPackageIconUrl(ModuleManifest.IconURL)
+                  .SetPackageLicenseUrl(ModuleManifest.LicenseUrl)
+                  .SetPackageProjectUrl(ModuleManifest.ProjectUrl)
+                  .SetPackageIconUrl(ModuleManifest.IconUrl)
                   .SetPackageRequireLicenseAcceptance(false)
                   .SetDescription(ModuleManifest.Description)
                   .SetCopyright(ModuleManifest.Description)
@@ -190,9 +194,9 @@ class Build : NukeBuild
                .EnableNoRestore()
                .SetOutput(IsModule ? ModuleOutputDirectory / "bin" : ArtifactsDirectory / "publish")
                .SetConfiguration(Configuration)
-               .SetAssemblyVersion(IsModule ? ModuleManifest.ModuleVersion : GitVersion.GetNormalizedAssemblyVersion())
-               .SetFileVersion(IsModule ? ModuleManifest.ModuleVersion : GitVersion.GetNormalizedFileVersion())
-               .SetInformationalVersion(IsModule ? ModuleManifest.ModuleVersion : GitVersion.InformationalVersion));
+               .SetAssemblyVersion(IsModule ? ModuleManifest.Version : GitVersion.GetNormalizedAssemblyVersion())
+               .SetFileVersion(IsModule ? ModuleManifest.Version : GitVersion.GetNormalizedFileVersion())
+               .SetInformationalVersion(IsModule ? ModuleManifest.Version : GitVersion.InformationalVersion));
 
        });
 
@@ -217,9 +221,9 @@ class Build : NukeBuild
             DotNetBuild(s => s
                 .SetProjectFile(Solution)
                 .SetConfiguration(Configuration)
-                .SetAssemblyVersion(IsModule ? ModuleManifest.ModuleVersion : GitVersion.GetNormalizedAssemblyVersion())
-                .SetFileVersion(IsModule ? ModuleManifest.ModuleVersion : GitVersion.GetNormalizedFileVersion())
-                .SetInformationalVersion(IsModule ? ModuleManifest.ModuleVersion : GitVersion.InformationalVersion)
+                .SetAssemblyVersion(IsModule ? ModuleManifest.Version : GitVersion.GetNormalizedAssemblyVersion())
+                .SetFileVersion(IsModule ? ModuleManifest.Version : GitVersion.GetNormalizedFileVersion())
+                .SetInformationalVersion(IsModule ? ModuleManifest.Version : GitVersion.InformationalVersion)
                 .EnableNoRestore());
 
         });
@@ -249,13 +253,13 @@ class Build : NukeBuild
              }
              ignoredFiles = ignoredFiles.Select(x => x.Trim()).Distinct().ToArray();
 
-             DeleteFile(ZipFileName);
-             CompressionTasks.CompressZip(ModuleOutputDirectory, ZipFileName, (x) => !ignoredFiles.Contains(x.Name, StringComparer.OrdinalIgnoreCase));
+             DeleteFile(ZipFileFullName);
+             CompressionTasks.CompressZip(ModuleOutputDirectory, ZipFileFullName, (x) => !ignoredFiles.Contains(x.Name, StringComparer.OrdinalIgnoreCase));
          }
          else
          {
-             DeleteFile(ZipFileName);
-             CompressionTasks.CompressZip(ArtifactsDirectory / "publish", ZipFileName);
+             DeleteFile(ZipFileFullName);
+             CompressionTasks.CompressZip(ArtifactsDirectory / "publish", ZipFileFullName);
          }
      });
 
@@ -304,34 +308,13 @@ class Build : NukeBuild
 
     Target Release => _ => _
      .DependsOn(Clean, Compress)
+     .Requires(() => github_user, () => github_token)
      .Executes(() =>
      {
-         var name = "v" + (IsModule ? string.Join("-", ModuleManifest.ModuleVersion, ModuleManifest.ModuleVersionTag) : GitVersion.SemVer);
-         var repositoryIdentifier = GitRepository.Identifier.Split('/');
-         var repositoryOwner = repositoryIdentifier[0];
-         var repositoryName = repositoryIdentifier[1];
-         var userName = "username";
-         var password = "password";
-
-         GitReleaseManagerTasks.GitReleaseManagerCreate(s => s
-           .SetUserName(userName)
-           .SetPassword(password)
-           .SetRepositoryOwner(repositoryOwner)
-           .SetRepositoryName(repositoryName)
-           //.EnablePrerelease() //
-           //.SetTargetCommitish(MasterBranch) // Select release branch (master by default)
-           .SetName(name)
-           .SetInputFilePath("releasenotes.md")
-           .SetAssetPaths(ZipFileName)
-        );
-
-         GitReleaseManagerTasks.GitReleaseManagerPublish(s => s
-            .SetUserName(userName)
-            .SetPassword(password)
-            .SetRepositoryOwner(repositoryOwner)
-            .SetRepositoryName(repositoryName)
-            .SetTagName(name)
-            );
+         var tag = "v" + (IsModule ? string.Join("-", ModuleManifest.Version, ModuleManifest.Version) : GitVersion.SemVer);
+         var repositoryName = GitRepository.Identifier.Split('/')[1];
+         RunGitHubRelease($@"release --user {github_user} -s {github_token} --repo {repositoryName} --tag {tag} "); //-c branch -d description
+         RunGitHubRelease($@"upload --user {github_user} -s {github_token} --repo {repositoryName} --tag {tag} --name {ZipFileName} --file ""{ZipFileFullName}""");
      });
 }
 
