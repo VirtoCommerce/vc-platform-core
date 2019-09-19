@@ -72,6 +72,8 @@ namespace VirtoCommerce.Platform.Core.Modularity
         [XmlArrayItem("module")]
         public ManifestDependency[] Incompatibilities { get; set; }
 
+        [XmlArray("groups")]
+        [XmlArrayItem("group")]
         public string[] Groups { get; set; }
 
         [XmlElement("useFullTypeNameInSwagger")]
