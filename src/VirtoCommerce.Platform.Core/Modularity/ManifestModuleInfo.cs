@@ -163,7 +163,7 @@ namespace VirtoCommerce.Platform.Core.Modularity
                 return false;
             }
             // Return true if the fields match:
-            return (Id == other.Id) && (Version == other.Version);
+            return (Id == other.Id) && (Version == other.Version) && (VersionTag == other.VersionTag);
         }
 
         public override int GetHashCode()
