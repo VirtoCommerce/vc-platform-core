@@ -190,7 +190,6 @@ class Build : NukeBuild
      .DependsOn(Clean, WebPackBuild, Test, Publish)
      .Executes(() =>
      {
-
          if (IsModule)
          {
              //Copy module.manifest and all content directories into a module output folder
@@ -210,10 +209,13 @@ class Build : NukeBuild
                  ignoredFiles = ignoredFiles.Concat(TextTasks.ReadAllLines(ModuleIgnoreFile)).ToArray();
              }
              ignoredFiles = ignoredFiles.Select(x => x.Trim()).Distinct().ToArray();
+             var moduleDependecies = XmlTasks.XmlPeek(ModuleManifest, "//dependency/@id").ToArray();
 
              var zipFileName = ArtifactsDirectory / ModuleId + "_" + ModuleSemVersion + ".zip";
              DeleteFile(zipFileName);
-             CompressionTasks.CompressZip(ModuleOutputDirectory, zipFileName, (x) => !ignoredFiles.Contains(x.Name, StringComparer.OrdinalIgnoreCase));
+             //TODO: Exclude all dependencies of dependent modules
+             CompressionTasks.CompressZip(ModuleOutputDirectory, zipFileName, (x) => !ignoredFiles.Contains(x.Name, StringComparer.OrdinalIgnoreCase)
+                                                                                     && !moduleDependecies.Any(md => x.Name.StartsWith(md, StringComparison.OrdinalIgnoreCase)));
          }
          else
          {
