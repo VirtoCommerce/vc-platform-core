@@ -41,8 +41,6 @@
         <PackageReference Include="Swashbuckle.AspNetCore" Version="4.0.1" />
         <PackageReference Include="Swashbuckle.AspNetCore.Cli" Version="4.0.1" />
         <PackageReference Include="System.Security.Cryptography.Algorithms" Version="4.3.1" />
-        <PackageReference Include="VirtoCommerce.Smidge" Version="3.0.0-beta002" />
-        <PackageReference Include="VirtoCommerce.Smidge.Nuglify" Version="2.0.0-beta002" />
     </ItemGroup>
     <ItemGroup>
         <ProjectReference Include="..\VirtoCommerce.Platform.Assets.AzureBlobStorage\VirtoCommerce.Platform.Assets.AzureBlobStorage.csproj" />
@@ -53,9 +51,22 @@
     </ItemGroup>
     <ItemGroup>
         <Compile Remove="Modules\**" />
-        <Content Update="Modules\**" CopyToPublishDirectory="Never" />
+        <Compile Remove="wwwroot\assets\**" />
+        <Compile Remove="wwwroot\cms-content\**" />
+        <Content Remove="wwwroot\assets\**" />
+        <Content Remove="App_Data\Modules\** "/> 
+        <Content Remove="App_Data\Modules\**" /> 
+        <Content Remove="wwwroot\cms-content\**" />
+        <Content Remove="Modules\**" />
+          
         <EmbeddedResource Remove="Modules\**" />
+        <EmbeddedResource Remove="wwwroot\assets\**" />
+        <EmbeddedResource Remove="wwwroot\cms-content\**" />
+        <EmbeddedResource Remove="App_Data\Modules\**" />
         <None Remove="Modules\**" />
+        <None Remove="wwwroot\assets\**" />
+        <None Remove="wwwroot\cms-content\**" />
+        <None Remove="App_Data\Modules\**" />
     </ItemGroup>
 
     <ItemGroup>
