@@ -144,7 +144,7 @@ class Build : NukeBuild
 
     Target Publish => _ => _
        .DependsOn(Compile)
-       .After(WebPackBuild)
+       .After(WebPackBuild, Test)
        .Executes(() =>
        {
            DotNetPublish(s => s

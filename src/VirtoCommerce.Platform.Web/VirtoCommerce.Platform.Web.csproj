@@ -53,9 +53,9 @@
         <Compile Remove="Modules\**" />
         <Compile Remove="wwwroot\assets\**" />
         <Compile Remove="wwwroot\cms-content\**" />
+        
         <Content Remove="wwwroot\assets\**" />
-        <Content Remove="App_Data\Modules\** "/> 
-        <Content Remove="App_Data\Modules\**" /> 
+        <Content Remove="App_Data\Modules\** " /> 
         <Content Remove="wwwroot\cms-content\**" />
         <Content Remove="Modules\**" />
           
@@ -73,6 +73,12 @@
         <EmbeddedResource Include="wwwroot\swagger\index.html" />
         <None Include="wwwroot\swagger\logo_small.png" />
         <None Include="wwwroot\swagger\vc.css" />
+    </ItemGroup>
+
+    <ItemGroup>
+      <None Update="App_Data\public.key">
+        <CopyToOutputDirectory>Always</CopyToOutputDirectory>
+      </None>
     </ItemGroup>
     <!--<Target Name="BuildFront" BeforeTargets="Build">
     <Message Importance="High" Text="######### Restoring NPM packages ##########" />
