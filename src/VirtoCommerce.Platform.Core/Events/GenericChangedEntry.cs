@@ -1,3 +1,4 @@
+using Newtonsoft.Json;
 using VirtoCommerce.Platform.Core.Common;
 
 namespace VirtoCommerce.Platform.Core.Events
@@ -9,11 +10,12 @@ namespace VirtoCommerce.Platform.Core.Events
         {
         }
 
-        public GenericChangedEntry(T newEntry, T oldEntry, EntryState state)
+        [JsonConstructor]
+        public GenericChangedEntry(T newEntry, T oldEntry, EntryState entryState)
         {
             NewEntry = newEntry;
             OldEntry = oldEntry;
-            EntryState = state;
+            EntryState = entryState;
         }
 
         public EntryState EntryState { get; set; }
