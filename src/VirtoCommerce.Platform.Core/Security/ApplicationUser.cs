@@ -1,3 +1,4 @@
+using System;
 using System.Collections.Generic;
 using Microsoft.AspNetCore.Identity;
 using VirtoCommerce.Platform.Core.Common;
@@ -15,6 +16,8 @@ namespace VirtoCommerce.Platform.Core.Security
         public virtual string PhotoUrl { get; set; }
         public virtual string UserType { get; set; }
         public virtual string Password { get; set; }
+        public virtual DateTime CreatedDate { get; set; }
+        public virtual DateTime? ModifiedDate { get; set; }
         public virtual IList<Role> Roles { get; set; }
 
         /// <summary>
@@ -44,6 +47,9 @@ namespace VirtoCommerce.Platform.Core.Security
             target.UserType = UserType;
             target.Password = Password;
             target.PasswordExpired = PasswordExpired;
+
+            target.CreatedDate = CreatedDate;
+            target.ModifiedDate = ModifiedDate;
 
             if (!Roles.IsNullOrEmpty())
             {

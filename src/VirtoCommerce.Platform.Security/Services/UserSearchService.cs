@@ -2,10 +2,10 @@ using System;
 using System.Linq;
 using System.Threading.Tasks;
 using Microsoft.AspNetCore.Identity;
+using Microsoft.EntityFrameworkCore;
 using VirtoCommerce.Platform.Core.Common;
 using VirtoCommerce.Platform.Core.Security;
 using VirtoCommerce.Platform.Core.Security.Search;
-using Microsoft.EntityFrameworkCore;
 
 namespace VirtoCommerce.Platform.Security.Services
 {
@@ -47,6 +47,12 @@ namespace VirtoCommerce.Platform.Security.Services
                 {
                     query = query.Where(x => criteria.MemberIds.Contains(x.MemberId));
                 }
+
+                if (criteria.ModifiedSinceDate != null && criteria.ModifiedSinceDate != default(DateTime))
+                {
+                    query = query.Where(x => x.ModifiedDate > criteria.ModifiedSinceDate);
+                }
+
                 result.TotalCount = await query.CountAsync();
 
                 var sortInfos = criteria.SortInfos;
