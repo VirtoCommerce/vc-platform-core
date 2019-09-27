@@ -55,6 +55,9 @@ class Build : NukeBuild
 
     [Parameter] static string GlobalModuleIgnoreFileUrl = @"https://raw.githubusercontent.com/VirtoCommerce/vc-platform-core/release/3.0.0/module.ignore";
 
+    [Parameter] readonly string SONAR_AUTH_TOKEN = "";
+    [Parameter] readonly string SONAR_HOST_URL = "https://sonar.virtocommerce.com";
+
     AbsolutePath SourceDirectory => RootDirectory / "src";
     AbsolutePath TestsDirectory => RootDirectory / "tests";
     AbsolutePath ArtifactsDirectory => RootDirectory / "artifacts";
@@ -72,6 +75,11 @@ class Build : NukeBuild
     GitRepository ModulesRepository => GitRepository.FromUrl("https://github.com/VirtoCommerce/vc-modules.git");
 
     bool IsModule => FileExists(ModuleManifest);
+
+    void ErrorLogger(OutputType type, string text)
+    {
+        if (type == OutputType.Err) Logger.Error(text);
+    }
 
     Target Clean => _ => _
         .Before(Restore)
@@ -183,7 +191,6 @@ class Build : NukeBuild
                 .SetFileVersion(IsModule ? ModuleVersion : GitVersion.GetNormalizedFileVersion())
                 .SetInformationalVersion(IsModule ? ModuleSemVersion : GitVersion.InformationalVersion)
                 .EnableNoRestore());
-
         });
 
     Target Compress => _ => _
@@ -256,7 +263,7 @@ class Build : NukeBuild
             GitTasks.Git($"push origin HEAD:master -f", modulesLocalDirectory);
         });
 
-    Target SwaggerValidation => _ => _
+   Target SwaggerValidation => _ => _
          .DependsOn(Publish)
          .Requires(() => !IsModule)
          .Executes(() =>
@@ -275,4 +282,50 @@ class Build : NukeBuild
                 .SetArguments("validate", IsLocalBuild ? "-d" : "", swaggerJson)
                 .SetLogOutput(true));
          });
+
+    Target SonarQubeStart => _ => _
+        .Executes(() =>
+        {
+            var dotNetPath = ToolPathResolver.TryGetEnvironmentExecutable("DOTNET_EXE") ?? ToolPathResolver.GetPathExecutable("dotnet");
+            var branchName = GitRepository.Branch;
+            var projectName = Solution.Name;
+
+            var branchParam = $"/d:\"sonar.branch={branchName}\"";
+            var projectNameParam = $"/n:\"{projectName}\"";
+            var projectKeyParam = $"/k:\"{projectName}\"";
+            var hostParam = $"/d:sonar.host.url={SONAR_HOST_URL}";
+            var tokenParam = $"/d:sonar.login={SONAR_AUTH_TOKEN}";
+
+            var startCmd = $"sonarscanner begin {branchParam} {projectNameParam} {projectKeyParam} {hostParam} {tokenParam}";
+
+            Logger.Normal($"Execute: {startCmd.Replace(SONAR_AUTH_TOKEN, "{IS HIDDEN}")}");
+
+            var processStart = ProcessTasks.StartProcess(dotNetPath, startCmd, customLogger: ErrorLogger, logInvocation: false)
+                .AssertWaitForExit().AssertZeroExitCode();
+            processStart.Output.EnsureOnlyStd();
+        });
+
+    Target SonarQubeEnd => _ => _
+        .After(SonarQubeStart)
+        .DependsOn(Compile)
+        .Executes(() =>
+        {
+            var dotNetPath = ToolPathResolver.TryGetEnvironmentExecutable("DOTNET_EXE") ?? ToolPathResolver.GetPathExecutable("dotnet");
+            var tokenParam = $"/d:sonar.login={SONAR_AUTH_TOKEN}";
+            var endCmd = $"sonarscanner end {tokenParam}";
+
+            Logger.Normal($"Execute: {endCmd.Replace(SONAR_AUTH_TOKEN, "{IS HIDDEN}")}");
+
+            var processEnd = ProcessTasks.StartProcess(dotNetPath, endCmd, customLogger: ErrorLogger, logInvocation: false)
+                .AssertWaitForExit().AssertZeroExitCode();
+            processEnd.Output.EnsureOnlyStd();
+        });
+
+    Target StartAnalyzer => _ => _
+        .DependsOn(SonarQubeStart, SonarQubeEnd)
+        .Executes(() =>
+        {
+            Logger.Normal("Sonar validation done.");
+        });
+
 }
