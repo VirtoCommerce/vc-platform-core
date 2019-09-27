@@ -82,6 +82,9 @@ namespace VirtoCommerce.Platform.Web
             services.AddPlatformServices(Configuration);
             services.AddSecurityServices();
 
+            // The following line enables Application Insights telemetry collection.
+            services.AddApplicationInsightsTelemetry();
+
             var mvcBuilder = services.AddMvc(mvcOptions =>
                 {
                     // NOTE: combining multiple Authorize attributes when using a custom IAuthorizationPolicyProvider

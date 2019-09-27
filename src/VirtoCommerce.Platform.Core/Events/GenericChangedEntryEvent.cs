@@ -1,10 +1,11 @@
 using System.Collections.Generic;
-using VirtoCommerce.Platform.Core.Domain;
+using Newtonsoft.Json;
 
 namespace VirtoCommerce.Platform.Core.Events
 {
     public class GenericChangedEntryEvent<T> : DomainEvent
     {
+        [JsonConstructor]
         public GenericChangedEntryEvent(IEnumerable<GenericChangedEntry<T>> changedEntries)
         {
             ChangedEntries = changedEntries;

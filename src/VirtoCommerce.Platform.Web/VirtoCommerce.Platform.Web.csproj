@@ -20,7 +20,8 @@
         <PackageReference Include="Hangfire.AspNetCore" Version="1.6.22" />
         <PackageReference Include="Hangfire.MemoryStorage" Version="1.6.0" />
         <PackageReference Include="HangFire.SqlServer" Version="1.6.22" />
-        <PackageReference Include="Microsoft.ApplicationInsights.AspNetCore" Version="2.6.1" />
+        <PackageReference Include="Microsoft.ApplicationInsights.AspNetCore" Version="2.8.0-beta3" />
+        <PackageReference Include="Microsoft.ApplicationInsights.PerfCounterCollector" Version="2.11.0-beta2" />
         <PackageReference Include="Microsoft.AspNetCore" Version="2.2.0" />
         <PackageReference Include="Microsoft.AspNetCore.App" />
         <PackageReference Include="Microsoft.AspNetCore.Diagnostics" Version="2.2.0" />
@@ -40,8 +41,6 @@
         <PackageReference Include="Swashbuckle.AspNetCore" Version="4.0.1" />
         <PackageReference Include="Swashbuckle.AspNetCore.Cli" Version="4.0.1" />
         <PackageReference Include="System.Security.Cryptography.Algorithms" Version="4.3.1" />
-        <PackageReference Include="VirtoCommerce.Smidge" Version="3.0.0-beta002" />
-        <PackageReference Include="VirtoCommerce.Smidge.Nuglify" Version="2.0.0-beta002" />
     </ItemGroup>
     <ItemGroup>
         <ProjectReference Include="..\VirtoCommerce.Platform.Assets.AzureBlobStorage\VirtoCommerce.Platform.Assets.AzureBlobStorage.csproj" />
@@ -52,15 +51,34 @@
     </ItemGroup>
     <ItemGroup>
         <Compile Remove="Modules\**" />
-        <Content Update="Modules\**" CopyToPublishDirectory="Never" />
+        <Compile Remove="wwwroot\assets\**" />
+        <Compile Remove="wwwroot\cms-content\**" />
+        
+        <Content Remove="wwwroot\assets\**" />
+        <Content Remove="App_Data\Modules\** " /> 
+        <Content Remove="wwwroot\cms-content\**" />
+        <Content Remove="Modules\**" />
+          
         <EmbeddedResource Remove="Modules\**" />
+        <EmbeddedResource Remove="wwwroot\assets\**" />
+        <EmbeddedResource Remove="wwwroot\cms-content\**" />
+        <EmbeddedResource Remove="App_Data\Modules\**" />
         <None Remove="Modules\**" />
+        <None Remove="wwwroot\assets\**" />
+        <None Remove="wwwroot\cms-content\**" />
+        <None Remove="App_Data\Modules\**" />
     </ItemGroup>
 
     <ItemGroup>
         <EmbeddedResource Include="wwwroot\swagger\index.html" />
         <None Include="wwwroot\swagger\logo_small.png" />
         <None Include="wwwroot\swagger\vc.css" />
+    </ItemGroup>
+
+    <ItemGroup>
+      <None Update="App_Data\public.key">
+        <CopyToOutputDirectory>Always</CopyToOutputDirectory>
+      </None>
     </ItemGroup>
     <!--<Target Name="BuildFront" BeforeTargets="Build">
     <Message Importance="High" Text="######### Restoring NPM packages ##########" />

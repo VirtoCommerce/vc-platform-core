@@ -160,8 +160,11 @@ namespace VirtoCommerce.Platform.Modules
             {
                 foreach (var manifestFile in Directory.EnumerateFiles(_options.DiscoveryPath, "module.manifest", SearchOption.AllDirectories))
                 {
-                    var manifest = ManifestReader.Read(manifestFile);
-                    result.Add(manifestFile, manifest);
+                    if (!manifestFile.Contains("artifacts"))
+                    {
+                        var manifest = ManifestReader.Read(manifestFile);
+                        result.Add(manifestFile, manifest);
+                    }
                 }
             }
             return result;
