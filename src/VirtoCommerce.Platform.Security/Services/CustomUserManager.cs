@@ -114,6 +114,8 @@ namespace VirtoCommerce.Platform.Security.Services
         }
         public override async Task<IdentityResult> UpdateAsync(ApplicationUser user)
         {
+            user.ModifiedDate = DateTime.UtcNow;
+
             var existUser = await FindByIdAsync(user.Id);
 
             var changedEntries = new List<GenericChangedEntry<ApplicationUser>>
@@ -149,6 +151,9 @@ namespace VirtoCommerce.Platform.Security.Services
 
         public override async Task<IdentityResult> CreateAsync(ApplicationUser user)
         {
+            user.CreatedDate = DateTime.UtcNow;
+            user.ModifiedDate = DateTime.UtcNow;
+
             var changedEntries = new List<GenericChangedEntry<ApplicationUser>>
             {
                 new GenericChangedEntry<ApplicationUser>(user, EntryState.Added)
