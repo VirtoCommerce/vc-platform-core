@@ -97,6 +97,17 @@ namespace VirtoCommerce.Platform.Security.Services
             return result;
         }
 
+        public override async Task<IdentityResult> ResetPasswordAsync(ApplicationUser user, string token, string newPassword)
+        {
+            var result = await base.ResetPasswordAsync(user, token, newPassword);
+            if (result == IdentityResult.Success)
+            {
+                SecurityCacheRegion.ExpireUser(user);
+            }
+
+            return result;
+        }
+
         public override async Task<IdentityResult> DeleteAsync(ApplicationUser user)
         {
             var changedEntries = new List<GenericChangedEntry<ApplicationUser>>
@@ -112,6 +123,7 @@ namespace VirtoCommerce.Platform.Security.Services
             }
             return result;
         }
+
         public override async Task<IdentityResult> UpdateAsync(ApplicationUser user)
         {
             var existUser = await FindByIdAsync(user.Id);
