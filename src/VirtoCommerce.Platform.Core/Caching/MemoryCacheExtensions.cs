@@ -9,7 +9,7 @@ namespace VirtoCommerce.Platform.Core.Caching
     public static class MemoryCacheExtensions
     {
         private static ConcurrentDictionary<string, object> _lockLookup = new ConcurrentDictionary<string, object>();
-        public static async Task<TItem> GetOrCreateExclusiveAsync<TItem>(this IMemoryCache cache, string key, Func<MemoryCacheEntryOptions, Task<TItem>> factory, bool cacheNullValue = true)
+        public static async Task<TItem> GetOrCreateExclusiveAsync<TItem>(this IPlatformMemoryCache cache, string key, Func<MemoryCacheEntryOptions, Task<TItem>> factory, bool cacheNullValue = true)
         {
             if (!cache.TryGetValue(key, out var result))
             {
@@ -29,7 +29,7 @@ namespace VirtoCommerce.Platform.Core.Caching
             return (TItem)result;
         }
 
-        public static TItem GetOrCreateExclusive<TItem>(this IMemoryCache cache, string key, Func<MemoryCacheEntryOptions, TItem> factory, bool cacheNullValue = true)
+        public static TItem GetOrCreateExclusive<TItem>(this IPlatformMemoryCache cache, string key, Func<MemoryCacheEntryOptions, TItem> factory, bool cacheNullValue = true)
         {
             if (!cache.TryGetValue(key, out var result))
             {

@@ -5,16 +5,17 @@ using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Options;
 using Newtonsoft.Json;
+using VirtoCommerce.Platform.Core;
 using VirtoCommerce.Platform.Core.Bus;
 using VirtoCommerce.Platform.Core.Caching;
 using VirtoCommerce.Platform.Core.ChangeLog;
+using VirtoCommerce.Platform.Core.Common;
 using VirtoCommerce.Platform.Core.Events;
 using VirtoCommerce.Platform.Core.ExportImport;
 using VirtoCommerce.Platform.Core.Localizations;
 using VirtoCommerce.Platform.Core.Notifications;
 using VirtoCommerce.Platform.Core.PushNotifications;
 using VirtoCommerce.Platform.Core.TransactionFileManager;
-using VirtoCommerce.Platform.Data.Caching;
 using VirtoCommerce.Platform.Data.ChangeLog;
 using VirtoCommerce.Platform.Data.DynamicProperties;
 using VirtoCommerce.Platform.Data.ExportImport;
@@ -22,6 +23,7 @@ using VirtoCommerce.Platform.Data.Localizations;
 using VirtoCommerce.Platform.Data.PushNotifications;
 using VirtoCommerce.Platform.Data.Repositories;
 using VirtoCommerce.Platform.Data.Settings;
+using VirtoCommerce.Platform.Caching;
 
 namespace VirtoCommerce.Platform.Data.Extensions
 {
@@ -45,8 +47,9 @@ namespace VirtoCommerce.Platform.Data.Extensions
             services.AddSingleton<IEventPublisher>(inProcessBus);
             services.AddTransient<IChangeLogService, ChangeLogService>();
             services.AddTransient<IChangeLogSearchService, ChangeLogSearchService>();
-            //Use MemoryCache decorator to use global platform cache settings
-            services.AddSingleton<IPlatformMemoryCache, PlatformMemoryCache>();
+
+            services.AddCaching(configuration);
+
             services.AddScoped<IPlatformExportImportManager, PlatformExportImportManager>();
             services.AddSingleton<ITransactionFileManager, TransactionFileManager.TransactionFileManager>();
 

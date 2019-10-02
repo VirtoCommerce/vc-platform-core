@@ -1,0 +1,25 @@
+<Project Sdk="Microsoft.NET.Sdk">
+
+  <PropertyGroup>
+    <TargetFramework>netcoreapp2.2</TargetFramework>
+    <noWarn>1591</noWarn>  
+  </PropertyGroup>
+
+  <ItemGroup>
+    <PackageReference Include="StackExchange.Redis" Version="2.0.601" />
+  </ItemGroup>
+
+    <ItemGroup>
+        <PackageReference Include="Microsoft.AspNetCore" Version="2.2.0" />
+        <PackageReference Include="Microsoft.AspNetCore.App" />
+        <PackageReference Include="Microsoft.AspNetCore.Mvc.ViewFeatures" Version="2.2.0" />
+        <PackageReference Include="StackExchange.Redis.Extensions.Core" Version="5.2.0" />
+        <PackageReference Include="StackExchange.Redis.Extensions.Newtonsoft" Version="5.2.0" />
+    </ItemGroup>
+
+  <ItemGroup>
+    <ProjectReference Include="..\VirtoCommerce.Platform.Core\VirtoCommerce.Platform.Core.csproj" />
+    <ProjectReference Include="E:\_CODE\GitHub\Extensions\src\Caching\Memory\src\Microsoft.Extensions.Caching.Memory.csproj" />
+  </ItemGroup>
+
+</Project>

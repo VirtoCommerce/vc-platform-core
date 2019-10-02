@@ -1,4 +1,5 @@
-﻿Microsoft Visual Studio Solution File, Format Version 12.00
+﻿
+Microsoft Visual Studio Solution File, Format Version 12.00
 # Visual Studio Version 16
 VisualStudioVersion = 16.0.29025.244
 MinimumVisualStudioVersion = 10.0.40219.1
@@ -24,14 +25,14 @@ Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "VirtoCommerce.Platform.Test
 EndProject
 Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "_build", "build\_build.csproj", "{757E86F6-D70C-4EBC-9872-BC6A41B583B6}"
 EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "VirtoCommerce.Platform.Caching", "src\VirtoCommerce.Platform.Caching\VirtoCommerce.Platform.Caching.csproj", "{E6585ACB-09CE-438D-9812-0F4B047FEC62}"
+EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
 		Debug|Any CPU = Debug|Any CPU
 		Release|Any CPU = Release|Any CPU
 	EndGlobalSection
 	GlobalSection(ProjectConfigurationPlatforms) = postSolution
-		{757E86F6-D70C-4EBC-9872-BC6A41B583B6}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
-		{757E86F6-D70C-4EBC-9872-BC6A41B583B6}.Release|Any CPU.ActiveCfg = Release|Any CPU
 		{6984B1F0-8005-4A50-8567-212273005472}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
 		{6984B1F0-8005-4A50-8567-212273005472}.Debug|Any CPU.Build.0 = Debug|Any CPU
 		{6984B1F0-8005-4A50-8567-212273005472}.Release|Any CPU.ActiveCfg = Release|Any CPU
@@ -64,6 +65,12 @@ Global
 		{057A8AA3-3526-4252-A04E-AB638E9F8EA5}.Debug|Any CPU.Build.0 = Debug|Any CPU
 		{057A8AA3-3526-4252-A04E-AB638E9F8EA5}.Release|Any CPU.ActiveCfg = Release|Any CPU
 		{057A8AA3-3526-4252-A04E-AB638E9F8EA5}.Release|Any CPU.Build.0 = Release|Any CPU
+		{757E86F6-D70C-4EBC-9872-BC6A41B583B6}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{757E86F6-D70C-4EBC-9872-BC6A41B583B6}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{E6585ACB-09CE-438D-9812-0F4B047FEC62}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{E6585ACB-09CE-438D-9812-0F4B047FEC62}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{E6585ACB-09CE-438D-9812-0F4B047FEC62}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{E6585ACB-09CE-438D-9812-0F4B047FEC62}.Release|Any CPU.Build.0 = Release|Any CPU
 	EndGlobalSection
 	GlobalSection(SolutionProperties) = preSolution
 		HideSolutionNode = FALSE
@@ -77,6 +84,7 @@ Global
 		{9B5C103B-95A3-49F2-AE33-7628810CD482} = {90F6E3EE-475A-4844-A4C4-078613591F81}
 		{D0CE7988-FBC0-498A-86C8-4E14C5C7FA23} = {90F6E3EE-475A-4844-A4C4-078613591F81}
 		{057A8AA3-3526-4252-A04E-AB638E9F8EA5} = {E70533FE-7220-4D52-9131-4EBBD10B7759}
+		{E6585ACB-09CE-438D-9812-0F4B047FEC62} = {90F6E3EE-475A-4844-A4C4-078613591F81}
 	EndGlobalSection
 	GlobalSection(ExtensibilityGlobals) = postSolution
 		SolutionGuid = {01A94F38-27D1-412F-A4F4-F00991D1157C}

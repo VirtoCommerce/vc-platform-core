@@ -7,5 +7,6 @@ namespace VirtoCommerce.Platform.Core.Caching
 {
     public interface IPlatformMemoryCache : IMemoryCache
     {
+        void RemoveByPattern(string pattern);
     }
 }

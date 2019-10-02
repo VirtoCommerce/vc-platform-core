@@ -8,12 +8,6 @@ namespace VirtoCommerce.Platform.Core
         public string DemoCredentials { get; set; }
         public string DemoResetTime { get; set; }
 
-
-        public bool CacheEnabled { get; set; } = true;
-
-        public TimeSpan? CacheAbsoluteExpiration { get; set; }
-        public TimeSpan? CacheSlidingExpiration { get; set; }
-
         [Required]
         public string LocalUploadFolderPath { get; set; } = "App_Data/Uploads";
         //The public url for license activation

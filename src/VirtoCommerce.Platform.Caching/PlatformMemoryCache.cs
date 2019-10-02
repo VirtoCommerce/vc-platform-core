@@ -1,30 +1,35 @@
 using System;
+using System.Collections.Concurrent;
+using System.Linq;
+using System.Text.RegularExpressions;
+using System.Threading;
 using Microsoft.Extensions.Caching.Memory;
 using Microsoft.Extensions.Options;
 using VirtoCommerce.Platform.Core;
 using VirtoCommerce.Platform.Core.Caching;
 
-namespace VirtoCommerce.Platform.Data.Caching
+namespace VirtoCommerce.Platform.Caching
 {
     public class PlatformMemoryCache : IPlatformMemoryCache
     {
-        private readonly PlatformOptions _platformOptions;
+        private readonly CachingOptions _cachingOptions;
         private readonly IMemoryCache _memoryCache;
         private bool _disposed;
+        protected readonly ConcurrentDictionary<object, bool> _allKeys = new ConcurrentDictionary<object, bool>();
 
-        public PlatformMemoryCache(IMemoryCache memoryCache, IOptions<PlatformOptions> options)
+        public PlatformMemoryCache(IMemoryCache memoryCache, IOptions<CachingOptions> options)
         {
             _memoryCache = memoryCache;
-            _platformOptions = options.Value;
+            _cachingOptions = options.Value;
         }
 
-        protected bool CacheEnabled => _platformOptions.CacheEnabled;
-        protected TimeSpan? AbsoluteExpiration => _platformOptions.CacheAbsoluteExpiration;
-        protected TimeSpan? SlidingExpiration => _platformOptions.CacheSlidingExpiration;
+        protected bool CacheEnabled => _cachingOptions.CacheEnabled;
+        protected TimeSpan? AbsoluteExpiration => _cachingOptions.CacheAbsoluteExpiration;
+        protected TimeSpan? SlidingExpiration => _cachingOptions.CacheSlidingExpiration;
 
-        public ICacheEntry CreateEntry(object key)
+        public virtual ICacheEntry CreateEntry(object key)
         {
-            var result = _memoryCache.CreateEntry(key);
+            var result = _memoryCache.CreateEntry(AddKey(key));
             if (result != null)
             {
                 var options = GetDefaultCacheEntryOptions();
@@ -33,12 +38,24 @@ namespace VirtoCommerce.Platform.Data.Caching
             return result;
         }
 
-        public void Remove(object key)
+        public virtual void Remove(object key)
         {
+            RemoveKey(key);
             _memoryCache.Remove(key);
         }
 
-        public bool TryGetValue(object key, out object value)
+        public virtual void RemoveByPattern(string pattern)
+        {
+            var regex = new Regex(pattern, RegexOptions.Singleline | RegexOptions.Compiled | RegexOptions.IgnoreCase);
+            var matchesKeys = _allKeys.Where(p => p.Value).Select(p => p.Key).Where(key => regex.IsMatch(key.ToString())).ToList();
+
+            foreach (var key in matchesKeys)
+            {
+                Remove(key);
+            }
+        }
+
+        public virtual bool TryGetValue(object key, out object value)
         {
             return _memoryCache.TryGetValue(key, out value);
         }
@@ -73,7 +90,7 @@ namespace VirtoCommerce.Platform.Data.Caching
             Dispose(false);
         }
 
-        public void Dispose()
+        public virtual void Dispose()
         {
             Dispose(true);
             // This object will be cleaned up by the Dispose method.
@@ -93,6 +110,26 @@ namespace VirtoCommerce.Platform.Data.Caching
                     _memoryCache.Dispose();
                 }
                 _disposed = true;
+            }
+        }
+
+
+        protected object AddKey(object key)
+        {
+            _allKeys.TryAdd(key, true);
+            return key;
+        }
+
+        protected void RemoveKey(object key)
+        {
+            TryRemoveKey(key.ToString());
+        }
+
+        protected void TryRemoveKey(string key)
+        {
+            if (!_allKeys.TryRemove(key, out _))
+            {
+                _allKeys.TryUpdate(key, false, true);
             }
         }
     }
