@@ -137,10 +137,10 @@ namespace VirtoCommerce.Platform.Security.Services
 
         public override async Task<IdentityResult> UpdateAsync(ApplicationUser user)
         {
-            //we must expire user before update, becouse if we get user from cache,
+            //do not use cached user, because if we get user from cache,
             //then we get EF exception (can't trak entity with same id)
-            SecurityCacheRegion.ExpireUser(user);
-            var existUser = await FindByIdAsync(user.Id);
+            var existUser = await base.FindByIdAsync(user.Id);
+            if (existUser != null) await LoadUserRolesAsync(existUser);
 
             var changedEntries = new List<GenericChangedEntry<ApplicationUser>>
             {
@@ -155,7 +155,7 @@ namespace VirtoCommerce.Platform.Security.Services
                 await _eventPublisher.Publish(new UserChangedEvent(changedEntries));
                 if (!user.Roles.IsNullOrEmpty())
                 {
-                    var targetRoles = (await GetRolesAsync(existUser));
+                    var targetRoles = await GetRolesAsync(existUser);
                     var sourceRoles = user.Roles.Select(x => x.Name);
                     //Add
                     foreach (var newRole in sourceRoles.Except(targetRoles))
