@@ -140,7 +140,7 @@ namespace VirtoCommerce.Platform.Security.Services
             //do not use cached user, because if we get user from cache,
             //then we get EF exception (can't trak entity with same id)
             var existUser = await base.FindByIdAsync(user.Id);
-            if (existUser != null) await LoadUserRolesAsync(existUser);
+            await LoadUserRolesAsync(existUser);
 
             var changedEntries = new List<GenericChangedEntry<ApplicationUser>>
             {
