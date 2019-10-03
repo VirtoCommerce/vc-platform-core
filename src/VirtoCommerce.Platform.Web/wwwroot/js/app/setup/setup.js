@@ -67,6 +67,8 @@ angular.module('platformWebApp')
                         function(wizard) {
                              if (!wizard.isCompleted) {
                                  wizard.showStep(wizard.currentStep);
+                             } else {
+                                $state.go('workspace');
                              }
                         });
                 }, 500);
