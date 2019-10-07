@@ -97,6 +97,28 @@ namespace VirtoCommerce.Platform.Security.Services
             return result;
         }
 
+        public override async Task<IdentityResult> ResetPasswordAsync(ApplicationUser user, string token, string newPassword)
+        {
+            var result = await base.ResetPasswordAsync(user, token, newPassword);
+            if (result == IdentityResult.Success)
+            {
+                SecurityCacheRegion.ExpireUser(user);
+            }
+
+            return result;
+        }
+
+        public override async Task<IdentityResult> ChangePasswordAsync(ApplicationUser user, string currentPassword, string newPassword)
+        {
+            var result = await base.ChangePasswordAsync(user, currentPassword, newPassword);
+            if (result == IdentityResult.Success)
+            {
+                SecurityCacheRegion.ExpireUser(user);
+            }
+
+            return result;
+        }
+
         public override async Task<IdentityResult> DeleteAsync(ApplicationUser user)
         {
             var changedEntries = new List<GenericChangedEntry<ApplicationUser>>
@@ -112,8 +134,12 @@ namespace VirtoCommerce.Platform.Security.Services
             }
             return result;
         }
+
         public override async Task<IdentityResult> UpdateAsync(ApplicationUser user)
         {
+            //we must expire user before update, becouse if we get user from cache,
+            //then we get EF exception (can't trak entity with same id)
+            SecurityCacheRegion.ExpireUser(user);
             var existUser = await FindByIdAsync(user.Id);
 
             var changedEntries = new List<GenericChangedEntry<ApplicationUser>>

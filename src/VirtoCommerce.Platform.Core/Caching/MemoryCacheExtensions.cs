@@ -48,5 +48,7 @@ namespace VirtoCommerce.Platform.Core.Caching
             }
             return (TItem)result;
         }
+
+
     }
 }

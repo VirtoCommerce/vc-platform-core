@@ -78,7 +78,6 @@ namespace VirtoCommerce.Platform.Web.Controllers.Api
             return Ok(loginResult);
         }
 
-
         /// <summary>
         /// Sign out
         /// </summary>
@@ -285,7 +284,6 @@ namespace VirtoCommerce.Platform.Web.Controllers.Api
             return Ok(retVal);
         }
 
-
         /// <summary>
         /// Get user details by user ID
         /// </summary>
@@ -422,11 +420,10 @@ namespace VirtoCommerce.Platform.Web.Controllers.Api
             }
 
             var token = await _userManager.GeneratePasswordResetTokenAsync(user);
-            var result = await _signInManager.UserManager.ResetPasswordAsync(user, token, resetPasswordConfirm.NewPassword);
+            var result = await _userManager.ResetPasswordAsync(user, token, resetPasswordConfirm.NewPassword);
             if (result.Succeeded)
             {
                 await _eventPublisher.Publish(new UserResetPasswordEvent(user.Id));
-
                 if (user.PasswordExpired != resetPasswordConfirm.ForcePasswordChangeOnNextSignIn)
                 {
                     user.PasswordExpired = resetPasswordConfirm.ForcePasswordChangeOnNextSignIn;
@@ -490,7 +487,6 @@ namespace VirtoCommerce.Platform.Web.Controllers.Api
                 resetPasswordToken.Token);
             return Ok(result);
         }
-
 
         /// <summary>
         /// Send email with instructions on how to reset user password.

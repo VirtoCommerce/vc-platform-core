@@ -296,10 +296,7 @@ namespace VirtoCommerce.Platform.Web
 
             services.Configure<ExternalModuleCatalogOptions>(Configuration.GetSection("ExternalModules"));
             services.AddExternalModules();
-
-            // Add memory cache services
-            services.AddMemoryCache();
-
+                        
             //Add SignalR for push notifications
             services.AddSignalR();
 
