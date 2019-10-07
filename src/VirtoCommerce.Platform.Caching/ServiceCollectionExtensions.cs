@@ -1,13 +1,7 @@
-using Microsoft.Extensions.Caching.Memory;
 using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.DependencyInjection;
-using Microsoft.Extensions.Options;
 using StackExchange.Redis;
-using StackExchange.Redis.Extensions.Core;
-using StackExchange.Redis.Extensions.Newtonsoft;
-using VirtoCommerce.Platform.Core;
 using VirtoCommerce.Platform.Core.Caching;
-using VirtoCommerce.Platform.Core.Common;
 using VirtoCommerce.Platform.Redis;
 
 namespace VirtoCommerce.Platform.Caching
@@ -27,7 +21,6 @@ namespace VirtoCommerce.Platform.Caching
                 var redis = ConnectionMultiplexer.Connect(redisConnectionString);
                 services.AddSingleton(redis.GetSubscriber());
                 services.AddSingleton<IPlatformMemoryCache, RedisPlatformMemoryCache>();
-                services.AddSingleton<ISerializer, NewtonsoftSerializer>();
             }
             else
             {

@@ -1,8 +1,5 @@
-using System;
-
 namespace VirtoCommerce.Platform.Redis
 {
-    [Serializable]
     public class RedisCachingMessage
     {
         public string Id { get; set; }
