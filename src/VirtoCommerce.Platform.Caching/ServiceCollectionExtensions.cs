@@ -35,8 +35,6 @@ namespace VirtoCommerce.Platform.Caching
                 services.AddSingleton<IPlatformMemoryCache, PlatformMemoryCache>();
             }
 
-
-
             return services;
         }
     }
