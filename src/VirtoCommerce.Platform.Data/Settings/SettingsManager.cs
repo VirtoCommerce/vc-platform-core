@@ -110,8 +110,11 @@ namespace VirtoCommerce.Platform.Data.Settings
                     {
                         throw new PlatformException($"Setting with name {name} is not registered");
                     }
-                    var objectSetting = new ObjectSettingEntry(settingDescriptor);
-
+                    var objectSetting = new ObjectSettingEntry(settingDescriptor)
+                    {
+                        ObjectType = objectType,
+                        ObjectId = objectId
+                    };
                     var dbSetting = dbStoredSettings.FirstOrDefault(x => x.Name.EqualsInvariant(name));
                     if (dbSetting != null)
                     {
