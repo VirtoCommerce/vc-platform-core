@@ -7,12 +7,11 @@ using Polly;
 using Polly.Retry;
 using StackExchange.Redis;
 using VirtoCommerce.Platform.Caching;
-using VirtoCommerce.Platform.Core.Caching;
 using VirtoCommerce.Platform.Core.Common;
 
 namespace VirtoCommerce.Platform.Redis
 {
-    public class RedisPlatformMemoryCache : PlatformMemoryCache, IPlatformMemoryCache
+    public class RedisPlatformMemoryCache : PlatformMemoryCache
     {
         private readonly ISubscriber _bus;
         private readonly RedisCachingOptions _redisCachingOptions;

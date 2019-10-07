@@ -1,12 +1,7 @@
 using System;
-using System.Collections.Concurrent;
-using System.Linq;
-using System.Text.RegularExpressions;
-using System.Threading;
 using Microsoft.Extensions.Caching.Memory;
 using Microsoft.Extensions.Logging;
 using Microsoft.Extensions.Options;
-using VirtoCommerce.Platform.Core;
 using VirtoCommerce.Platform.Core.Caching;
 
 namespace VirtoCommerce.Platform.Caching
@@ -75,15 +70,12 @@ namespace VirtoCommerce.Platform.Caching
             return result;
         }
 
-        /// <summary>
-        /// Cleans up the background collection events.
-        /// </summary>
         ~PlatformMemoryCache()
         {
             Dispose(false);
         }
 
-        public virtual void Dispose()
+        public void Dispose()
         {
             Dispose(true);
             // This object will be cleaned up by the Dispose method.
