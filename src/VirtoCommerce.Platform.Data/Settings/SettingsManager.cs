@@ -25,11 +25,11 @@ namespace VirtoCommerce.Platform.Data.Settings
     public class SettingsManager : ISettingsManager, ISettingsRegistrar
     {
         private readonly Func<IPlatformRepository> _repositoryFactory;
-        private readonly IMemoryCache _memoryCache;
+        private readonly IPlatformMemoryCache _memoryCache;
         private readonly IDictionary<string, SettingDescriptor> _registeredSettingsByNameDict = new Dictionary<string, SettingDescriptor>(StringComparer.OrdinalIgnoreCase).WithDefaultValue(null);
         private readonly IDictionary<string, IEnumerable<SettingDescriptor>> _registeredTypeSettingsByNameDict = new Dictionary<string, IEnumerable<SettingDescriptor>>(StringComparer.OrdinalIgnoreCase).WithDefaultValue(null);
 
-        public SettingsManager(Func<IPlatformRepository> repositoryFactory, IMemoryCache memoryCache)
+        public SettingsManager(Func<IPlatformRepository> repositoryFactory, IPlatformMemoryCache memoryCache)
         {
             _repositoryFactory = repositoryFactory;
             _memoryCache = memoryCache;

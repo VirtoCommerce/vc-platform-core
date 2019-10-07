@@ -1,47 +1,56 @@
 using System;
+using System.Collections.Concurrent;
+using System.Linq;
+using System.Text.RegularExpressions;
+using System.Threading;
 using Microsoft.Extensions.Caching.Memory;
+using Microsoft.Extensions.Logging;
 using Microsoft.Extensions.Options;
 using VirtoCommerce.Platform.Core;
 using VirtoCommerce.Platform.Core.Caching;
 
-namespace VirtoCommerce.Platform.Data.Caching
+namespace VirtoCommerce.Platform.Caching
 {
     public class PlatformMemoryCache : IPlatformMemoryCache
     {
-        private readonly PlatformOptions _platformOptions;
+        private readonly CachingOptions _cachingOptions;
         private readonly IMemoryCache _memoryCache;
         private bool _disposed;
+        private readonly ILogger _log;
 
-        public PlatformMemoryCache(IMemoryCache memoryCache, IOptions<PlatformOptions> options)
+        public PlatformMemoryCache(IMemoryCache memoryCache, IOptions<CachingOptions> options, ILogger<PlatformMemoryCache> log)
         {
             _memoryCache = memoryCache;
-            _platformOptions = options.Value;
+            _cachingOptions = options.Value;
+            _log = log;
         }
 
-        protected bool CacheEnabled => _platformOptions.CacheEnabled;
-        protected TimeSpan? AbsoluteExpiration => _platformOptions.CacheAbsoluteExpiration;
-        protected TimeSpan? SlidingExpiration => _platformOptions.CacheSlidingExpiration;
+        protected bool CacheEnabled => _cachingOptions.CacheEnabled;
+        protected TimeSpan? AbsoluteExpiration => _cachingOptions.CacheAbsoluteExpiration;
+        protected TimeSpan? SlidingExpiration => _cachingOptions.CacheSlidingExpiration;
 
-        public ICacheEntry CreateEntry(object key)
+        public virtual ICacheEntry CreateEntry(object key)
         {
             var result = _memoryCache.CreateEntry(key);
             if (result != null)
             {
+                result.RegisterPostEvictionCallback(callback: EvictionCallback);
                 var options = GetDefaultCacheEntryOptions();
                 result.SetOptions(options);
             }
             return result;
         }
 
-        public void Remove(object key)
-        {
-            _memoryCache.Remove(key);
-        }
-
-        public bool TryGetValue(object key, out object value)
+        public virtual bool TryGetValue(object key, out object value)
         {
             return _memoryCache.TryGetValue(key, out value);
         }
+
+        public virtual void Remove(object key)
+        {
+            _memoryCache.Remove(key);
+        }
+        
 
         private MemoryCacheEntryOptions GetDefaultCacheEntryOptions()
         {
@@ -62,6 +71,7 @@ namespace VirtoCommerce.Platform.Data.Caching
                     result.SlidingExpiration = SlidingExpiration;
                 }
             }
+
             return result;
         }
 
@@ -73,7 +83,7 @@ namespace VirtoCommerce.Platform.Data.Caching
             Dispose(false);
         }
 
-        public void Dispose()
+        public virtual void Dispose()
         {
             Dispose(true);
             // This object will be cleaned up by the Dispose method.
@@ -95,5 +105,11 @@ namespace VirtoCommerce.Platform.Data.Caching
                 _disposed = true;
             }
         }
+
+        
+        protected virtual void EvictionCallback(object key, object value, EvictionReason reason, object state)
+        {
+            _log.LogInformation($"EvictionCallback: Cache with key {key} has expired.");
+        }        
     }
 }
