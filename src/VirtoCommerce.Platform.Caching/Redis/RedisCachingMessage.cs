@@ -3,11 +3,11 @@ using System;
 namespace VirtoCommerce.Platform.Redis
 {
     [Serializable]
-    public class CachingMessage
+    public class RedisCachingMessage
     {
         public string Id { get; set; }
 
-        public string[] CacheKeys { get; set; }
+        public object[] CacheKeys { get; set; }
 
         public bool IsPrefix { get; set; }
     }

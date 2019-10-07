@@ -4,6 +4,7 @@ using System.Linq;
 using System.Text.RegularExpressions;
 using System.Threading;
 using Microsoft.Extensions.Caching.Memory;
+using Microsoft.Extensions.Logging;
 using Microsoft.Extensions.Options;
 using VirtoCommerce.Platform.Core;
 using VirtoCommerce.Platform.Core.Caching;
@@ -15,12 +16,13 @@ namespace VirtoCommerce.Platform.Caching
         private readonly CachingOptions _cachingOptions;
         private readonly IMemoryCache _memoryCache;
         private bool _disposed;
-        protected readonly ConcurrentDictionary<object, bool> _allKeys = new ConcurrentDictionary<object, bool>();
+        private readonly ILogger _log;
 
-        public PlatformMemoryCache(IMemoryCache memoryCache, IOptions<CachingOptions> options)
+        public PlatformMemoryCache(IMemoryCache memoryCache, IOptions<CachingOptions> options, ILogger<PlatformMemoryCache> log)
         {
             _memoryCache = memoryCache;
             _cachingOptions = options.Value;
+            _log = log;
         }
 
         protected bool CacheEnabled => _cachingOptions.CacheEnabled;
@@ -29,36 +31,26 @@ namespace VirtoCommerce.Platform.Caching
 
         public virtual ICacheEntry CreateEntry(object key)
         {
-            var result = _memoryCache.CreateEntry(AddKey(key));
+            var result = _memoryCache.CreateEntry(key);
             if (result != null)
             {
+                result.RegisterPostEvictionCallback(callback: EvictionCallback);
                 var options = GetDefaultCacheEntryOptions();
                 result.SetOptions(options);
             }
             return result;
         }
 
-        public virtual void Remove(object key)
-        {
-            RemoveKey(key);
-            _memoryCache.Remove(key);
-        }
-
-        public virtual void RemoveByPattern(string pattern)
-        {
-            var regex = new Regex(pattern, RegexOptions.Singleline | RegexOptions.Compiled | RegexOptions.IgnoreCase);
-            var matchesKeys = _allKeys.Where(p => p.Value).Select(p => p.Key).Where(key => regex.IsMatch(key.ToString())).ToList();
-
-            foreach (var key in matchesKeys)
-            {
-                Remove(key);
-            }
-        }
-
         public virtual bool TryGetValue(object key, out object value)
         {
             return _memoryCache.TryGetValue(key, out value);
         }
+
+        public virtual void Remove(object key)
+        {
+            _memoryCache.Remove(key);
+        }
+        
 
         private MemoryCacheEntryOptions GetDefaultCacheEntryOptions()
         {
@@ -79,6 +71,7 @@ namespace VirtoCommerce.Platform.Caching
                     result.SlidingExpiration = SlidingExpiration;
                 }
             }
+
             return result;
         }
 
@@ -113,24 +106,10 @@ namespace VirtoCommerce.Platform.Caching
             }
         }
 
-
-        protected object AddKey(object key)
+        
+        protected virtual void EvictionCallback(object key, object value, EvictionReason reason, object state)
         {
-            _allKeys.TryAdd(key, true);
-            return key;
-        }
-
-        protected void RemoveKey(object key)
-        {
-            TryRemoveKey(key.ToString());
-        }
-
-        protected void TryRemoveKey(string key)
-        {
-            if (!_allKeys.TryRemove(key, out _))
-            {
-                _allKeys.TryUpdate(key, false, true);
-            }
-        }
+            _log.LogInformation($"EvictionCallback: Cache with key {key} has expired.");
+        }        
     }
 }

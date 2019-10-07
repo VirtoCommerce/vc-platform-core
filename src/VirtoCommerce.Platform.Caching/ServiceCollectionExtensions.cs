@@ -16,15 +16,15 @@ namespace VirtoCommerce.Platform.Caching
     {
         public static IServiceCollection AddCaching(this IServiceCollection services, IConfiguration configuration)
         {
-            services.AddOptions<CachingOptions>().Bind(configuration.GetSection("Caching")).ValidateDataAnnotations();
-            var cachingOptions = services.BuildServiceProvider().GetService<IOptions<CachingOptions>>().Value;
+            services.AddMemoryCache();
 
-            if (cachingOptions.Provider.EqualsInvariant("Redis"))
+            var redisConnectionString = configuration.GetConnectionString("RedisConnectionString");
+
+            if (!string.IsNullOrEmpty(redisConnectionString))
             {
                 services.AddOptions<RedisCachingOptions>().Bind(configuration.GetSection("Caching:Redis")).ValidateDataAnnotations();
-                var redisServiceOptions = services.BuildServiceProvider().GetService<IOptions<RedisCachingOptions>>();
 
-                var redis = ConnectionMultiplexer.Connect(redisServiceOptions.Value.ConnectionString);
+                var redis = ConnectionMultiplexer.Connect(redisConnectionString);
                 services.AddSingleton(redis.GetSubscriber());
                 services.AddSingleton<IPlatformMemoryCache, RedisPlatformMemoryCache>();
                 services.AddSingleton<ISerializer, NewtonsoftSerializer>();
@@ -34,6 +34,8 @@ namespace VirtoCommerce.Platform.Caching
                 //Use MemoryCache decorator to use global platform cache settings
                 services.AddSingleton<IPlatformMemoryCache, PlatformMemoryCache>();
             }
+
+
 
             return services;
         }
