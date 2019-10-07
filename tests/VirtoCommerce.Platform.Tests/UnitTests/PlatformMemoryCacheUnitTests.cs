@@ -3,6 +3,7 @@ using System.Threading;
 using System.Threading.Tasks;
 using Microsoft.Extensions.Caching.Memory;
 using Microsoft.Extensions.Internal;
+using Microsoft.Extensions.Logging;
 using Microsoft.Extensions.Options;
 using Microsoft.Extensions.Primitives;
 using Moq;
@@ -16,12 +17,14 @@ namespace VirtoCommerce.Platform.Tests.UnitTests
 {
     public class PlatformMemoryCacheUnitTests
     {
-        private readonly Mock<IOptions<PlatformOptions>> _platformOptionsMock;
+        private readonly Mock<IOptions<CachingOptions>> _cachingOptionsMock;
+        private readonly Mock<ILogger<PlatformMemoryCache>> _log; 
 
         public PlatformMemoryCacheUnitTests()
         {
-            _platformOptionsMock = new Mock<IOptions<PlatformOptions>>();
-            _platformOptionsMock.Setup(x => x.Value).Returns(new PlatformOptions { CacheEnabled = true });
+            _cachingOptionsMock = new Mock<IOptions<CachingOptions>>();
+            _cachingOptionsMock.Setup(x => x.Value).Returns(new CachingOptions { CacheEnabled = true });
+            _log = new Mock<ILogger<PlatformMemoryCache>>();
         }
 
 
@@ -106,7 +109,7 @@ namespace VirtoCommerce.Platform.Tests.UnitTests
 
         private IPlatformMemoryCache GetPlatformMemoryCache()
         {
-            return new PlatformMemoryCache(CreateCache(), _platformOptionsMock.Object);
+            return new PlatformMemoryCache(CreateCache(), _cachingOptionsMock.Object, _log.Object);
         }
 
 
