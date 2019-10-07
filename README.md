@@ -152,17 +152,34 @@ Our development efforts were focused on moving to ASP.NET Core, performance, arc
 "Password": "store"
 ```
 
+## Run platform with Http in development mode
+
+### Using CLI in development mode
+- Make shure that you have installed latest version of dot.net core SDK 2.2
+- To run platform navigate to `VirtoCommerce.Platform.Web` folder via CLI and run `dotnet run -c Development --no-launch-profile`. You can add `--no-build` flag to speed up start if you already compile solution.
+- Browse to `https://localhost:5001`
+
 ## Run platform with Https support
 
 ### Using VisualStudio
 Open `VirtoCommerce.Platform.Web` project properties and in `Debug` section set checkbox - `Enable SSL`. VisualStudio can ask you to install Certificate, just accept and platform will be running with Https support.
 
-### Using CLI
+### Using CLI with Https
 - Make shure that you have installed latest version of dot.net core SDK 2.2
 - Install SSL certificate with CLI command `dotnet dev-certs https --trust`
 - Restart your machine
 - To run platform navigate to `VirtoCommerce.Platform.Web` folder via CLI and run `dotnet run -c Release --no-launch-profile`. You can add `--no-build` flag to speed up start if you already compile solution.
 - Browse to `https://localhost:5001`
+
+
+# How to debug module
+- Install and run platform as described in steps above.
+- Navigate into platform app directory and find `Modules` folder
+- Clone a module from GitHub into `Modules` folder, if module already installed as binary just replace it folder
+- Open and build  a module solution in Visual Studio
+- Run platform by using CLI `dotnet run -c Development --no-build --no-restore` as described in steps above
+- Attach debugger into `dotnet` process
+
 
 # How to migrate your solution from 2.x to 3.0 platform version
 - If your solution doesn't have any custom modules and extensions you just need to use the connection string to the old database for the new 3.0 platfrom version and after first run the update scripts will transfer all your data to the new scheme otherwise, you need to convert your models according to this instruction https://github.com/VirtoCommerce/vc-platform-core/wiki/Migrate-Extension-module-from-the-Platform-2.0-to-3.0-version.
