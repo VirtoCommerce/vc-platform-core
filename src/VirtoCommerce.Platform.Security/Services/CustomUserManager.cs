@@ -20,16 +20,19 @@ namespace VirtoCommerce.Platform.Security.Services
         private readonly IPlatformMemoryCache _memoryCache;
         private readonly RoleManager<Role> _roleManager;
         private readonly IEventPublisher _eventPublisher;
+        private readonly IUserNameResolver _userNameResolver;
 
         public CustomUserManager(IUserStore<ApplicationUser> store, IOptions<IdentityOptions> optionsAccessor, IPasswordHasher<ApplicationUser> passwordHasher,
                                  IEnumerable<IUserValidator<ApplicationUser>> userValidators, IEnumerable<IPasswordValidator<ApplicationUser>> passwordValidators,
                                  ILookupNormalizer keyNormalizer, IdentityErrorDescriber errors, IServiceProvider services,
-                                 ILogger<UserManager<ApplicationUser>> logger, RoleManager<Role> roleManager, IPlatformMemoryCache memoryCache, IEventPublisher eventPublisher)
+                                 ILogger<UserManager<ApplicationUser>> logger, RoleManager<Role> roleManager, IPlatformMemoryCache memoryCache, IEventPublisher eventPublisher,
+                                 IUserNameResolver userNameResolver)
             : base(store, optionsAccessor, passwordHasher, userValidators, passwordValidators, keyNormalizer, errors, services, logger)
         {
             _memoryCache = memoryCache;
             _roleManager = roleManager;
             _eventPublisher = eventPublisher;
+            _userNameResolver = userNameResolver;
         }
 
         public override async Task<ApplicationUser> FindByLoginAsync(string loginProvider, string providerKey)
@@ -140,6 +143,13 @@ namespace VirtoCommerce.Platform.Security.Services
             //we must expire user before update, becouse if we get user from cache,
             //then we get EF exception (can't trak entity with same id)
             SecurityCacheRegion.ExpireUser(user);
+
+            var currentTime = DateTime.UtcNow;
+            var userName = _userNameResolver.GetCurrentUserName();
+
+            user.ModifiedDate = currentTime;
+            user.ModifiedBy = userName;
+
             var existUser = await FindByIdAsync(user.Id);
 
             var changedEntries = new List<GenericChangedEntry<ApplicationUser>>
@@ -175,6 +185,14 @@ namespace VirtoCommerce.Platform.Security.Services
 
         public override async Task<IdentityResult> CreateAsync(ApplicationUser user)
         {
+            var currentTime = DateTime.UtcNow;
+            var userName = _userNameResolver.GetCurrentUserName();
+
+            user.CreatedDate = user.CreatedDate == default(DateTime) ? currentTime : user.CreatedDate;
+            user.ModifiedDate = user.CreatedDate;
+            user.CreatedBy = user.CreatedBy ?? userName;
+            user.ModifiedBy = user.CreatedBy;
+
             var changedEntries = new List<GenericChangedEntry<ApplicationUser>>
             {
                 new GenericChangedEntry<ApplicationUser>(user, EntryState.Added)
