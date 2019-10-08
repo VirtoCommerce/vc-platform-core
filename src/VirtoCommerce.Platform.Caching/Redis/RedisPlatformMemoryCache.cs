@@ -16,10 +16,10 @@ namespace VirtoCommerce.Platform.Redis
         private readonly ISubscriber _bus;
         private readonly RedisCachingOptions _redisCachingOptions;
         private readonly ILogger _log;
-
-        private readonly string _cacheId;
-
         private readonly RetryPolicy _retryPolicy;
+
+        private static readonly string _cacheId = Guid.NewGuid().ToString("N");
+        
 
         public RedisPlatformMemoryCache(IMemoryCache memoryCache, IOptions<CachingOptions> options
             , ISubscriber bus
@@ -29,9 +29,9 @@ namespace VirtoCommerce.Platform.Redis
        {
             _log = log;
             _bus = bus;
-            _cacheId = Guid.NewGuid().ToString("N");
 
             _redisCachingOptions = redisCachingOptions.Value;
+            _bus.Unsubscribe(_redisCachingOptions.ChannelName);
             _bus.Subscribe(_redisCachingOptions.ChannelName, OnMessage);
 
             _retryPolicy = Policy.Handle<Exception>().WaitAndRetry(
@@ -47,7 +47,10 @@ namespace VirtoCommerce.Platform.Redis
             {
                 foreach (var item in message.CacheKeys)
                 {
-                    base.Remove(item);
+                    if (TryGetValue(item, out var value))
+                    {
+                        base.Remove(item);
+                    }
 
                     _log.LogInformation($"remove local cache that cache key is {item}");
                 }
