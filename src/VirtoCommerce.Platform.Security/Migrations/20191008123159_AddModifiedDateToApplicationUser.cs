@@ -1,4 +1,4 @@
-﻿using System;
+using System;
 using Microsoft.EntityFrameworkCore.Migrations;
 
 namespace VirtoCommerce.Platform.Security.Migrations
@@ -10,6 +10,7 @@ namespace VirtoCommerce.Platform.Security.Migrations
             migrationBuilder.AddColumn<string>(
                 name: "CreatedBy",
                 table: "AspNetUsers",
+                maxLength: 64,
                 nullable: true);
 
             migrationBuilder.AddColumn<DateTime>(
@@ -21,6 +22,7 @@ namespace VirtoCommerce.Platform.Security.Migrations
             migrationBuilder.AddColumn<string>(
                 name: "ModifiedBy",
                 table: "AspNetUsers",
+                maxLength: 64,
                 nullable: true);
 
             migrationBuilder.AddColumn<DateTime>(
