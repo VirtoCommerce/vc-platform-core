@@ -16,10 +16,10 @@ namespace VirtoCommerce.Platform.Redis
         private readonly ISubscriber _bus;
         private readonly RedisCachingOptions _redisCachingOptions;
         private readonly ILogger _log;
-
-        private readonly string _cacheId;
-
         private readonly RetryPolicy _retryPolicy;
+
+        private static readonly string _cacheId = Guid.NewGuid().ToString("N");
+        
 
         public RedisPlatformMemoryCache(IMemoryCache memoryCache, IOptions<CachingOptions> options
             , ISubscriber bus
@@ -29,10 +29,12 @@ namespace VirtoCommerce.Platform.Redis
        {
             _log = log;
             _bus = bus;
-            _cacheId = Guid.NewGuid().ToString("N");
 
             _redisCachingOptions = redisCachingOptions.Value;
+            _bus.Unsubscribe(_redisCachingOptions.ChannelName);
             _bus.Subscribe(_redisCachingOptions.ChannelName, OnMessage);
+
+            _log.LogInformation($"{nameof(RedisPlatformMemoryCache)}: subscribe to channel {_redisCachingOptions.ChannelName } current instance:{ _cacheId }");
 
             _retryPolicy = Policy.Handle<Exception>().WaitAndRetry(
                 _redisCachingOptions.BusRetryCount, retryAttempt => TimeSpan.FromSeconds(Math.Pow(2, retryAttempt - 1)));
@@ -49,14 +51,14 @@ namespace VirtoCommerce.Platform.Redis
                 {
                     base.Remove(item);
 
-                    _log.LogInformation($"remove local cache that cache key is {item}");
+                    _log.LogInformation($"{nameof(RedisPlatformMemoryCache)}: channel[{_redisCachingOptions.ChannelName }] remove local cache that cache key is {item} from instance:{ _cacheId }");
                 }
             }
         }
 
         protected override void EvictionCallback(object key, object value, EvictionReason reason, object state)
         {
-            _log.LogInformation($"channel[{_redisCachingOptions.ChannelName }]: sending a message with key:{key} from instance:{ _cacheId } to all subscribers");
+            _log.LogInformation($"{nameof(RedisPlatformMemoryCache)}: channel[{_redisCachingOptions.ChannelName }] sending a message with key:{key} from instance:{ _cacheId } to all subscribers");
 
             var message = new RedisCachingMessage { Id = _cacheId, CacheKeys = new[] { key } };
             _retryPolicy.Execute(() => _bus.Publish(_redisCachingOptions.ChannelName, JsonConvert.SerializeObject(message)));

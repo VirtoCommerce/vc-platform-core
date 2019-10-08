@@ -19,11 +19,7 @@ namespace VirtoCommerce.Platform.Caching
             _cachingOptions = options.Value;
             _log = log;
         }
-
-        protected bool CacheEnabled => _cachingOptions.CacheEnabled;
-        protected TimeSpan? AbsoluteExpiration => _cachingOptions.CacheAbsoluteExpiration;
-        protected TimeSpan? SlidingExpiration => _cachingOptions.CacheSlidingExpiration;
-
+        
         public virtual ICacheEntry CreateEntry(object key)
         {
             var result = _memoryCache.CreateEntry(key);
@@ -45,7 +41,12 @@ namespace VirtoCommerce.Platform.Caching
         {
             _memoryCache.Remove(key);
         }
-        
+
+
+        protected bool CacheEnabled => _cachingOptions.CacheEnabled;
+        protected TimeSpan? AbsoluteExpiration => _cachingOptions.CacheAbsoluteExpiration;
+        protected TimeSpan? SlidingExpiration => _cachingOptions.CacheSlidingExpiration;
+
 
         private MemoryCacheEntryOptions GetDefaultCacheEntryOptions()
         {
