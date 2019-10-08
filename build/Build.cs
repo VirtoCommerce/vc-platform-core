@@ -1,5 +1,6 @@
 using System;
 using System.Collections.Generic;
+using System.IO;
 using System.Linq;
 using Newtonsoft.Json;
 using Nuke.Common;
@@ -57,6 +58,8 @@ class Build : NukeBuild
 
     [Parameter] readonly string SONAR_AUTH_TOKEN = "";
     [Parameter] readonly string SONAR_HOST_URL = "https://sonar.virtocommerce.com";
+
+    [Parameter("Path to folder with  git clones of modules repositories")] readonly AbsolutePath ModulesFolderPath;
 
     AbsolutePath SourceDirectory => RootDirectory / "src";
     AbsolutePath TestsDirectory => RootDirectory / "tests";
@@ -326,6 +329,26 @@ class Build : NukeBuild
         .Executes(() =>
         {
             Logger.Normal("Sonar validation done.");
+        });
+
+
+    Target MassPullAndBuild => _ => _
+        .Requires(() => ModulesFolderPath)
+        .Executes(() =>
+        {
+            if (DirectoryExists(ModulesFolderPath))
+            {
+                foreach (var moduleDirectory in Directory.GetDirectories(ModulesFolderPath))
+                {
+                    var isGitRepository = FileSystemTasks.FindParentDirectory(moduleDirectory, x => x.GetDirectories(".git").Any()) != null;
+                    if (isGitRepository)
+                    {
+                        GitTasks.Git($"pull", moduleDirectory);
+                        ProcessTasks.StartProcess("nuke", "Compile", moduleDirectory).AssertWaitForExit();
+                        ProcessTasks.StartProcess("nuke", "WebPackBuild", moduleDirectory).AssertWaitForExit();
+                    }
+                }
+            }
         });
 
 }
