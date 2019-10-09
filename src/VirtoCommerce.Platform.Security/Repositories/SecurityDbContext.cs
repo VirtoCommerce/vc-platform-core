@@ -52,7 +52,7 @@ namespace VirtoCommerce.Platform.Security.Repositories
         }
         public override Task<int> SaveChangesAsync(CancellationToken cancellationToken = default(CancellationToken))
         {
-            return this.SaveChangesWithTriggersAsync(base.SaveChangesAsync, acceptAllChangesOnSuccess: true, cancellationToken: cancellationToken);
+            return this.SaveChangesWithTriggersAsync(base.SaveChangesAsync, true, cancellationToken);
         }
         public override Task<int> SaveChangesAsync(bool acceptAllChangesOnSuccess, CancellationToken cancellationToken = default(CancellationToken))
         {
