@@ -11,7 +11,7 @@ namespace VirtoCommerce.Platform.Data.Extensions
     {
         public static IApplicationBuilder UseDbTriggers(this IApplicationBuilder appBuilder)
         {
-            Triggers<AuditableEntity>.Inserting += entry =>
+            Triggers<IAuditable>.Inserting += entry =>
             {
                 var currentUserNameResolver = appBuilder.ApplicationServices.CreateScope().ServiceProvider.GetService<IUserNameResolver>();
                 var currentTime = DateTime.UtcNow;
@@ -22,7 +22,7 @@ namespace VirtoCommerce.Platform.Data.Extensions
                 entry.Entity.CreatedBy = entry.Entity.CreatedBy ?? userName;
                 entry.Entity.ModifiedBy = entry.Entity.CreatedBy;
             };
-            Triggers<AuditableEntity>.Updating += entry =>
+            Triggers<IAuditable>.Updating += entry =>
             {
                 var currentUserNameResolver = appBuilder.ApplicationServices.CreateScope().ServiceProvider.GetService<IUserNameResolver>();
                 var currentTime = DateTime.UtcNow;
