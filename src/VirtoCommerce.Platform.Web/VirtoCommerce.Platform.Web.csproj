@@ -52,7 +52,7 @@
     </ItemGroup>
     <ItemGroup>
         <Compile Remove="Modules\**" />
-        <Content Update="Modules\**" CopyToPublishDirectory="Never" />
+        <Content Remove="Modules\**" />
         <EmbeddedResource Remove="Modules\**" />
         <None Remove="Modules\**" />
     </ItemGroup>

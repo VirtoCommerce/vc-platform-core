@@ -24,14 +24,6 @@ using static Nuke.Common.Tools.DotNet.DotNetTasks;
 [UnsetVisualStudioEnvironmentVariables]
 class Build : NukeBuild
 {
-
-    public class GitHubStartException : ApplicationException
-    {
-        public GitHubStartException(string message) : base(message)
-        {
-        }
-    }
-
     /// Support plugins are available for:
     ///   - JetBrains ReSharper        https://nuke.build/resharper
     ///   - JetBrains Rider            https://nuke.build/rider
@@ -61,8 +53,8 @@ class Build : NukeBuild
 
     [Parameter("ApiKey for the specified source")] readonly string ApiKey;
 
-    [Parameter("GitHub user for release creation")] readonly string github_user;
-    [Parameter("GitHub user security token for release creation")] readonly string github_token;
+    [Parameter("GitHub user for release creation")] readonly string GitHubUser;
+    [Parameter("GitHub user security token for release creation")] readonly string GitHubToken;
 
     [Parameter] readonly string Source = @"https://api.nuget.org/v3/index.json";
 
@@ -86,24 +78,8 @@ class Build : NukeBuild
     bool IsModule => FileExists(ModuleManifestFile);
 
     string ZipFileName => IsModule ? ModuleManifest.Id + "_" + string.Join("-", ModuleManifest.Version, ModuleManifest.VersionTag) + ".zip" : "VirtoCommerce.Platform." + GitVersion.SemVer + ".zip";
-    string ZipFileFullName => ArtifactsDirectory / ZipFileName;
-
-
-    private void RunGitHubRelease(string args)
-    {
-        var githubRelease = new Process
-        {
-            StartInfo = new ProcessStartInfo("github-release", args) { RedirectStandardError = true }
-        };
-        githubRelease.Start();
-        var error = githubRelease.StandardError.ReadToEnd();
-        if (!string.IsNullOrEmpty(error))
-        {
-            throw new GitHubStartException(error);
-        }
-        githubRelease.WaitForExit();
-    }
-
+    string ZipFilePath => ArtifactsDirectory / ZipFileName;
+    
     Target Clean => _ => _
         .Before(Restore)
         .Executes(() =>
@@ -135,6 +111,7 @@ class Build : NukeBuild
           {
               if (IsModule)
               {
+                  //For module get all  descriptions from manifest
                   DotNetPack(s => s
                   .SetProject(project)
                   .EnableNoBuild()
@@ -165,7 +142,6 @@ class Build : NukeBuild
                   .SetOutputDirectory(NupkgDirectory)
                   .SetVersion(string.Join("-", GitVersion.NuGetVersionV2))
                   .SetPackageId(project.Name)
-                  .SetTitle(project.Name)
                   .SetPackageRequireLicenseAcceptance(false)
                   );
               }
@@ -271,13 +247,13 @@ class Build : NukeBuild
              }
              ignoredFiles = ignoredFiles.Select(x => x.Trim()).Distinct().ToArray();
 
-             DeleteFile(ZipFileFullName);
-             CompressionTasks.CompressZip(ModuleOutputDirectory, ZipFileFullName, (x) => !ignoredFiles.Contains(x.Name, StringComparer.OrdinalIgnoreCase));
+             DeleteFile(ZipFilePath);
+             CompressionTasks.CompressZip(ModuleOutputDirectory, ZipFilePath, (x) => !ignoredFiles.Contains(x.Name, StringComparer.OrdinalIgnoreCase));
          }
          else
          {
-             DeleteFile(ZipFileFullName);
-             CompressionTasks.CompressZip(ArtifactsDirectory / "publish", ZipFileFullName);
+             DeleteFile(ZipFilePath);
+             CompressionTasks.CompressZip(ArtifactsDirectory / "publish", ZipFilePath);
          }
      });
 
@@ -326,13 +302,35 @@ class Build : NukeBuild
 
     Target Release => _ => _
      .DependsOn(Clean, Compress)
-     .Requires(() => github_user, () => github_token)
+     .Requires(() => GitHubUser, () => GitHubToken)
+     .Requires(() => GitRepository.IsOnReleaseBranch() && GitTasks.GitHasCleanWorkingCopy())
      .Executes(() =>
-     {
+     {       
          var tag = "v" + (IsModule ? string.Join("-", ModuleManifest.Version, ModuleManifest.Version) : GitVersion.SemVer);
+         FinishReleaseOrHotfix(tag);
+
          var repositoryName = GitRepository.Identifier.Split('/')[1];
-         RunGitHubRelease($@"release --user {github_user} -s {github_token} --repo {repositoryName} --tag {tag} "); //-c branch -d description
-         RunGitHubRelease($@"upload --user {github_user} -s {github_token} --repo {repositoryName} --tag {tag} --name {ZipFileName} --file ""{ZipFileFullName}""");
+         void RunGitHubRelease(string args)
+         {
+             ProcessTasks.StartProcess("github-release", args, RootDirectory).AssertZeroExitCode();           
+         }
+         RunGitHubRelease($@"release --user {GitHubUser} -s {GitHubToken} --repo {repositoryName} --tag {tag} "); //-c branch -d description
+         RunGitHubRelease($@"upload --user {GitHubUser} -s {GitHubToken} --repo {repositoryName} --tag {tag} --name {ZipFileName} --file ""{ZipFilePath}""");
      });
+
+    void FinishReleaseOrHotfix(string tag)
+    {
+        Git($"checkout {MasterBranch}");
+        Git($"merge --no-ff --no-edit {GitRepository.Branch}");
+        Git($"tag {tag}");
+
+        Git($"checkout {DevelopBranch}");
+        Git($"merge --no-ff --no-edit {GitRepository.Branch}");
+
+       //Git($"branch -D {GitRepository.Branch}");
+
+       Git($"push origin {MasterBranch} {DevelopBranch} {tag}");
+    }
+
 }
 
