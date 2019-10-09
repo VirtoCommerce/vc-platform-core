@@ -140,6 +140,7 @@ namespace VirtoCommerce.Platform.Security.Services
             //we must expire user before update, becouse if we get user from cache,
             //then we get EF exception (can't trak entity with same id)
             SecurityCacheRegion.ExpireUser(user);
+
             var existUser = await FindByIdAsync(user.Id);
 
             var changedEntries = new List<GenericChangedEntry<ApplicationUser>>
