@@ -177,6 +177,21 @@ using (var serviceScope = appBuilder.ApplicationServices.CreateScope())
 
 > NOTE: Extension MigrateIfNotApplied need for backward compatibility v.2.0. The extension allows don't generate initial migration, because there are already tables in the DataBase.
 
+### Authorization Requirement
+If need to use authorization requirement then 
+* create a class Cart2AuthorizationRequirement in VirtoCommerce.Cart2Module.Data.Authorization and derived from PermissionAuthorizationRequirement
+> look at https://github.com/VirtoCommerce/vc-module-store/blob/release/3.0.0/src/VirtoCommerce.StoreModule.Data/Authorization/StoreAuthorizationRequirement.cs
+* Add IAuthorizationService to Cart2ModuleController 
+* Call method AuthorizeAsync in an action where to need
+> look at https://github.com/VirtoCommerce/vc-module-store/blob/a7f39ce2fa41762f9c658bfa2453263932a67c17/src/VirtoCommerce.StoreModule.Web/Controllers/Api/StoreModuleController.cs#L51
+* Then add condition for result 
+```
+if (!authorizationResult.Succeeded)
+{
+    return Unauthorized();
+}
+```
+
 ### Build js-scripts
 If have extension scripts, then need to do:  
 * add webpack packages (package.json, webpack.config.js)  to VirtoCommerce.Cart2Module.Web
@@ -192,4 +207,4 @@ npm run webpack:dev
 * Check what all your extensions works with the new platform without exceptions and as expected with initial empty data
 
 
-## If you find some errors, you can make a issue in https://github.com/VirtoCommerce/vc-platform/issues. Enjoy! :)
+## If you find some errors, you can make a issue in https://github.com/VirtoCommerce/vc-platform-core/issues. Enjoy! :)
