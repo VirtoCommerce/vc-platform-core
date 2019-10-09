@@ -1,3 +1,6 @@
+using System.Threading;
+using System.Threading.Tasks;
+using EntityFrameworkCore.Triggers;
 using Microsoft.AspNetCore.Identity;
 using Microsoft.AspNetCore.Identity.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore;
@@ -37,5 +40,24 @@ namespace VirtoCommerce.Platform.Security.Repositories
             builder.Entity<IdentityRoleClaim<string>>().Property(x => x.RoleId).HasMaxLength(128);
             builder.Entity<IdentityUserToken<string>>().Property(x => x.UserId).HasMaxLength(128);
         }
+
+        #region override Save*** methods to catch save events in Triggers, otherwise ApplicationUser not be catched because SecurityDbContext can't inherit DbContextWithTriggers
+        public override int SaveChanges()
+        {
+            return this.SaveChangesWithTriggers(base.SaveChanges, acceptAllChangesOnSuccess: true);
+        }
+        public override int SaveChanges(bool acceptAllChangesOnSuccess)
+        {
+            return this.SaveChangesWithTriggers(base.SaveChanges, acceptAllChangesOnSuccess);
+        }
+        public override Task<int> SaveChangesAsync(CancellationToken cancellationToken = default(CancellationToken))
+        {
+            return this.SaveChangesWithTriggersAsync(base.SaveChangesAsync, acceptAllChangesOnSuccess: true, cancellationToken: cancellationToken);
+        }
+        public override Task<int> SaveChangesAsync(bool acceptAllChangesOnSuccess, CancellationToken cancellationToken = default(CancellationToken))
+        {
+            return this.SaveChangesWithTriggersAsync(base.SaveChangesAsync, acceptAllChangesOnSuccess, cancellationToken);
+        }
+        #endregion
     }
 }
