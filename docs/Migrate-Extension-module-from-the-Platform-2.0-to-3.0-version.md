@@ -1,7 +1,7 @@
 ### Introduction
 This article describes how to migrate existing extension module from 2.0 to 3.0 version.
 
-> NOTE: A sample module source code can be found here: https://github.com/VirtoCommerce/vc-module-customer/tree/v3/dev/samples/VirtoCommerce.CustomerSampleModule.Web
+> NOTE: A sample module source code can be found here: https://github.com/VirtoCommerce/vc-module-customer/tree/release/3.0.0/samples/VirtoCommerce.CustomerSampleModule.Web
 
 ### Migrating extension module to ASP.NET Core
 For example, have project with name _Cart2Module.Web.csproj_ for _CartModule_.
@@ -24,7 +24,7 @@ Need to make changes in the Core/Data/Web extension projects _Cart2Module.XXX.cs
 <ProjectReference Include="..\..\VirtoCommerce.CartModule.Core\VirtoCommerce.CartModule.Core.csproj" />
 <ProjectReference Include="..\..\VirtoCommerce.CartModule.Data\VirtoCommerce.CartModule.Data.csproj" />
 ``` 
-> look at example https://github.com/VirtoCommerce/vc-module-customer/tree/v3/dev/samples/VirtoCommerce.CustomerSampleModule.Web/VirtoCommerce.CustomerSampleModule.Web.csproj
+> look at example https://github.com/VirtoCommerce/vc-module-customer/tree/release/3.0.0/samples/VirtoCommerce.CustomerSampleModule.Web/VirtoCommerce.CustomerSampleModule.Web.csproj
 
 ### Create _Cart2DbContext.cs_
 * Need to add _Cart2DbContext_ inheritance from _CartDbContext_
@@ -41,15 +41,15 @@ Then need to add mapping to modelBuilder
 ```
 modelBuilder.Entity<Cart2Entity>();
 ```
-> look at example https://github.com/VirtoCommerce/vc-module-customer/tree/v3/dev/samples/VirtoCommerce.CustomerSampleModule.Web/Repositories/CustomerSampleDbContext.cs
+> look at example https://github.com/VirtoCommerce/vc-module-customer/tree/release/3.0.0/samples/VirtoCommerce.CustomerSampleModule.Web/Repositories/CustomerSampleDbContext.cs
 
 ### Create _DesignTimeDbContextFactory.cs_
 > NOTE: A factory for creating derived Microsoft.EntityFrameworkCore.DbContext instances.
 * Create a class _DesignTimeDbContextFactory.cs_
 * Inherite from _IDesignTimeDbContextFactory<Cart2DbContext>_
-* Add CreateDbContext method with Cart2DbContext, example code can copy from https://github.com/VirtoCommerce/vc-module-customer/tree/v3/dev/samples/VirtoCommerce.CustomerSampleModule.Web/Repositories/DesignTimeDbContextFactory.cs#L8
+* Add CreateDbContext method with Cart2DbContext, example code can copy from https://github.com/VirtoCommerce/vc-module-customer/tree/release/3.0.0/samples/VirtoCommerce.CustomerSampleModule.Web/Repositories/DesignTimeDbContextFactory.cs#L8
 * Change connection string for database in _UseSqlServer_ method. It need for migration.
-> look at example: https://github.com/VirtoCommerce/vc-module-customer/tree/v3/dev/samples/VirtoCommerce.CustomerSampleModule.Web/Repositories/DesignTimeDbContextFactory.cs
+> look at example: https://github.com/VirtoCommerce/vc-module-customer/tree/release/3.0.0/samples/VirtoCommerce.CustomerSampleModule.Web/Repositories/DesignTimeDbContextFactory.cs
 
 ### Change Cart2Repository
 * The class have to derive from CartRepository and have constructor with the new Core2DbContext dependency
@@ -59,7 +59,7 @@ public IQueryable<Cart2Entity> Cart2 => DbContext.Set<Cart2Entity>();
 ```
 * Remove OnModelCreating method
 * Add overriding methods, if need to add some logic
-> look at example: https://github.com/VirtoCommerce/vc-module-order/tree/v3/dev/samples/VirtoCommerce.OrdersModule2.Web/Repositories/OrderRepository2.cs
+> look at example: https://github.com/VirtoCommerce/vc-module-order/tree/release/3.0.0/samples/VirtoCommerce.OrdersModule2.Web/Repositories/OrderRepository2.cs
 
 ### Create Migration
 * Remove old migrations in the folder Migrations which generated for v. 2.0
@@ -77,18 +77,18 @@ and add line:
 migrationBuilder.AddColumn<string>(name: "Discriminator", table: "Cart", nullable: false, maxLength: 128, defaultValue: "Cart2Entity");
 ```
 > look at https://docs.microsoft.com/en-us/ef/core/modeling/relational/inheritance
-> example https://github.com/VirtoCommerce/vc-module-order/tree/v3/dev/samples/VirtoCommerce.OrdersModule2.Web/Migrations/20180724064542_InitialOrders2.cs
+> example https://github.com/VirtoCommerce/vc-module-order/tree/release/3.0.0/samples/VirtoCommerce.OrdersModule2.Web/Migrations/20180724064542_InitialOrders2.cs
 
 
 ### Create Migration for backward compatibility v.2.0
 * Need to create migration with name UpdateCart2V2 and rename the migration file name to 20000000000000_UpdateCart2V2 
-> look at link https://github.com/VirtoCommerce/vc-module-core/tree/v3/dev/src/VirtoCommerce.CoreModule.Data/Migrations/20000000000000_UpdateCoreV2.cs
+> look at link https://github.com/VirtoCommerce/vc-module-core/tree/release/3.0.0/src/VirtoCommerce.CoreModule.Data/Migrations/20000000000000_UpdateCoreV2.cs
 * Add SQL Insert command to 20000000000000_UpdateCart2V2 
-> look at https://github.com/VirtoCommerce/vc-module-core/tree/v3/dev/src/VirtoCommerce.CoreModule.Data/Migrations/20000000000000_UpdateCoreV2.cs#L13 
+> look at https://github.com/VirtoCommerce/vc-module-core/tree/release/3.0.0/src/VirtoCommerce.CoreModule.Data/Migrations/20000000000000_UpdateCoreV2.cs#L13 
 
 and rename migration name to _InitialCart2_ in sql-script. 
 * Also need to rename UpdateCart2V2.Designer to 20000000000000_ UpdateCart2V2.Designer and rename MigrationAttribute 
-> look at example https://github.com/VirtoCommerce/vc-module-core/tree/v3/dev/src/VirtoCommerce.CoreModule.Data/Migrations/20000000000000_UpdateCoreV2.Designer.cs#L12
+> look at example https://github.com/VirtoCommerce/vc-module-core/tree/release/3.0.0/src/VirtoCommerce.CoreModule.Data/Migrations/20000000000000_UpdateCoreV2.Designer.cs#L12
 
 ### Change _modules.manifest_
 If there are extension settings/permission/localizations in module.manifest, need to do:
@@ -127,7 +127,7 @@ public static class Settings
 }
 ```
 and localization of name and description need to add localization file (read down)
-> look at https://github.com/VirtoCommerce/vc-module-customer/tree/v3/dev/src/VirtoCommerce.CustomerModule.Core/ModuleConstants.cs
+> look at https://github.com/VirtoCommerce/vc-module-customer/tree/release/3.0.0/src/VirtoCommerce.CustomerModule.Core/ModuleConstants.cs
 * Permissions also move to _ModuleConstants_, have permission for searching in Cart, then the code will be:
 ```
 public static class Security
@@ -140,14 +140,14 @@ public static class Security
 	}
 }
 ```
-> look at https://github.com/VirtoCommerce/vc-module-customer/tree/v3/dev/src/VirtoCommerce.CustomerModule.Core/ModuleConstants.cs
+> look at https://github.com/VirtoCommerce/vc-module-customer/tree/release/3.0.0/src/VirtoCommerce.CustomerModule.Core/ModuleConstants.cs
 * Localization of settings and permissions move to VirtoCommerce.Cart2Module.Web/Localizations/en.VirtoCommerce.Cart2.json
-> example: https://github.com/VirtoCommerce/vc-module-customer/tree/v3/dev/src/VirtoCommerce.CustomerModule.Web/Localizations/en.VirtoCommerce.Customer.json
+> example: https://github.com/VirtoCommerce/vc-module-customer/tree/release/3.0.0/src/VirtoCommerce.CustomerModule.Web/Localizations/en.VirtoCommerce.Customer.json
 
 ### Change signature in _Module.cs_
 * Need to change inheritance to interface _IModule_ , then add implementation methods: _Initialize, PostInitialize, Uninstall_ and property _ModuleInfo_
 * Add all dependency injections to _Initialize_ method, like as _Cart2DbContext, Cart2RepositoryImpl_
-> look at https://github.com/VirtoCommerce/vc-module-customer/tree/v3/dev/samples/VirtoCommerce.CustomerSampleModule.Web/Module.cs
+> look at https://github.com/VirtoCommerce/vc-module-customer/tree/release/3.0.0/samples/VirtoCommerce.CustomerSampleModule.Web/Module.cs
 * Register settings using interface _ISettingsRegistrar_ in PostInitialize method
 ```
 var settingsRegistrar = appBuilder.ApplicationServices.GetRequiredService<ISettingsRegistrar>();
@@ -173,15 +173,15 @@ using (var serviceScope = appBuilder.ApplicationServices.CreateScope())
     dbContext.Database.Migrate();
 }
 ```
-> look at https://github.com/VirtoCommerce/vc-module-core/tree/v3/dev/src/VirtoCommerce.CoreModule.Web/Module.cs#L70 
+> look at https://github.com/VirtoCommerce/vc-module-core/tree/release/3.0.0/src/VirtoCommerce.CoreModule.Web/Module.cs#L70 
 
 > NOTE: Extension MigrateIfNotApplied need for backward compatibility v.2.0. The extension allows don't generate initial migration, because there are already tables in the DataBase.
 
 ### Build js-scripts
 If have extension scripts, then need to do:  
 * add webpack packages (package.json, webpack.config.js)  to VirtoCommerce.Cart2Module.Web
-> these files: https://github.com/VirtoCommerce/vc-module-customer/tree/v3/dev/src/VirtoCommerce.CustomerModule.Web/package.json
-https://github.com/VirtoCommerce/vc-module-customer/tree/v3/dev/src/VirtoCommerce.CustomerModule.Web/webpack.config.js
+> these files: https://github.com/VirtoCommerce/vc-module-customer/tree/release/3.0.0/src/VirtoCommerce.CustomerModule.Web/package.json
+https://github.com/VirtoCommerce/vc-module-customer/tree/release/3.0.0/src/VirtoCommerce.CustomerModule.Web/webpack.config.js
 * change namespace in webpack.config.js (line 15) 
 * build and pack js scripts and css for Cart2Module 
 ```
