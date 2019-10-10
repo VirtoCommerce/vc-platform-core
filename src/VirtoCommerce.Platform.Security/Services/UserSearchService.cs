@@ -48,7 +48,7 @@ namespace VirtoCommerce.Platform.Security.Services
                     query = query.Where(x => criteria.MemberIds.Contains(x.MemberId));
                 }
 
-                if (criteria.ModifiedSinceDate != null && criteria.ModifiedSinceDate != default(DateTime))
+                if (criteria.ModifiedSinceDate.HasValue && criteria.ModifiedSinceDate != default(DateTime))
                 {
                     query = query.Where(x => x.ModifiedDate > criteria.ModifiedSinceDate);
                 }
